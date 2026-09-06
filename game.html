@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Abyss</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #04070d; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+// ---------- setup ----------
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---------- input ----------
+// Remember which keys are held down right now.
+const keys = new Set();
+window.addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
+window.addEventListener('keyup',   e => keys.delete(e.key.toLowerCase()));
+
+// ---------- the player ----------
+const player = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  r: 10,        // radius, in pixels
+  speed: 260,   // pixels per second
+};
+
+// ---------- update: move everything ----------
+function update(dt) {
+  let dx = 0, dy = 0;
+  if (keys.has('a') || keys.has('arrowleft'))  dx -= 1;
+  if (keys.has('d') || keys.has('arrowright')) dx += 1;
+  if (keys.has('w') || keys.has('arrowup'))    dy -= 1;
+  if (keys.has('s') || keys.has('arrowdown'))  dy += 1;
+
+  // Holding two keys would otherwise move you 1.41x faster diagonally.
+  // Shrink the direction back down to length 1.
+  const len = Math.hypot(dx, dy);
+  if (len > 0) { dx /= len; dy /= len; }
+
+  player.x += dx * player.speed * dt;
+  player.y += dy * player.speed * dt;
+
+  // Keep the player on screen.
+  player.x = Math.max(player.r, Math.min(canvas.width  - player.r, player.x));
+  player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
+}
+
+// ---------- draw: paint one frame ----------
+function draw() {
+  ctx.fillStyle = '#04070d';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.shadowBlur = 25;
+  ctx.shadowColor = '#4ff0ff';
+  ctx.fillStyle = '#bffcff';
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+// ---------- the loop ----------
+let last = performance.now();
+function frame(now) {
+  // How many seconds since the previous frame. Capped, so that switching
+  // tabs for a minute doesn't teleport everything across the screen.
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
