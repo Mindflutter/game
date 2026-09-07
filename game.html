@@ -28,22 +28,29 @@ const keys = new Set();
 window.addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 window.addEventListener('keyup',   e => keys.delete(e.key.toLowerCase()));
 
+const BULLET_SPEED = 430;   // pixels per second
+
 // ---------- game state ----------
-// Everything that a new run resets lives here, so restarting is one call.
-let player, enemies, elapsed, spawnTimer, dead;
+// Everything a run owns lives here, so restarting is one call.
+let player, enemies, bullets, elapsed, spawnTimer, kills, dead;
 
 function reset() {
   player = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    r: 10,           // radius, in pixels
-    speed: 260,      // pixels per second
+    r: 10,            // radius, in pixels
+    speed: 260,       // pixels per second
     hp: 3,
-    hurt: 0,         // seconds of invulnerability left
+    hurt: 0,          // seconds of invulnerability left
+    fireRate: 2,      // shots per second
+    fireTimer: 0,     // seconds until the next shot
+    damage: 1,
   };
   enemies = [];
-  elapsed = 0;       // seconds survived — this is the score
+  bullets = [];
+  elapsed = 0;        // seconds survived
   spawnTimer = 0;
+  kills = 0;
   dead = false;
 }
 
@@ -57,7 +64,16 @@ function spawnEnemy() {
   else if (edge === 2) { x = Math.random() * canvas.width;  y = canvas.height + m; }
   else                 { x = -m;                            y = Math.random() * canvas.height; }
 
-  enemies.push({ x, y, r: 9, speed: 70 + Math.random() * 50 });
+  enemies.push({ x, y, r: 9, speed: 70 + Math.random() * 50, hp: 1 });
+}
+
+function nearestEnemy() {
+  let best = null, bestDist = Infinity;
+  for (const e of enemies) {
+    const d = Math.hypot(e.x - player.x, e.y - player.y);
+    if (d < bestDist) { bestDist = d; best = e; }
+  }
+  return best;
 }
 
 // ---------- update: move everything ----------
@@ -93,6 +109,23 @@ function update(dt) {
     spawnTimer = Math.max(0.15, 1.2 - elapsed * 0.02);
   }
 
+  // --- the weapon fires itself at whoever is closest ---
+  player.fireTimer -= dt;
+  if (player.fireTimer <= 0) {
+    const target = nearestEnemy();
+    if (target) {                      // nothing to shoot at? hold the shot
+      const tx = target.x - player.x;
+      const ty = target.y - player.y;
+      const d = Math.hypot(tx, ty) || 1;
+      bullets.push({
+        x: player.x, y: player.y, r: 4,
+        vx: (tx / d) * BULLET_SPEED,
+        vy: (ty / d) * BULLET_SPEED,
+      });
+      player.fireTimer = 1 / player.fireRate;
+    }
+  }
+
   // --- move enemies toward the player, and hurt him on contact ---
   for (const e of enemies) {
     const ex = player.x - e.x;
@@ -108,6 +141,36 @@ function update(dt) {
       if (player.hp <= 0) dead = true;
     }
   }
+
+  // --- move bullets, and retire the ones that flew off screen ---
+  for (const b of bullets) {
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    if (b.x < -50 || b.x > canvas.width + 50 || b.y < -50 || b.y > canvas.height + 50) {
+      b.gone = true;
+    }
+  }
+
+  // --- bullets vs enemies ---
+  // ponytail: every bullet against every enemy. Fine to a few hundred of each;
+  // if it ever chugs, bucket entities into a grid and only compare neighbours.
+  for (const b of bullets) {
+    if (b.gone) continue;
+    for (const e of enemies) {
+      if (e.gone) continue;
+      if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + b.r) {
+        e.hp -= player.damage;
+        b.gone = true;                       // the bullet is spent
+        if (e.hp <= 0) { e.gone = true; kills += 1; }
+        break;                               // this bullet is done looking
+      }
+    }
+  }
+
+  // Sweep up everything marked during this frame. Never remove things from
+  // an array while you are still looping over it.
+  enemies = enemies.filter(e => !e.gone);
+  bullets = bullets.filter(b => !b.gone);
 }
 
 // ---------- draw: paint one frame ----------
@@ -126,6 +189,7 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   for (const e of enemies) circle(e.x, e.y, e.r, '#e8446e', '#ff1e5a', 18);
+  for (const b of bullets) circle(b.x, b.y, b.r, '#eaffff', '#9ef7ff', 14);
 
   // Blink while invulnerable, so getting hit is visible.
   const blinking = player.hurt > 0 && Math.floor(player.hurt * 10) % 2 === 0;
@@ -135,7 +199,7 @@ function draw() {
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '14px system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('HP ' + player.hp + '   ' + elapsed.toFixed(1) + 's', 16, 26);
+  ctx.fillText('HP ' + player.hp + '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed', 16, 26);
 
   if (dead) {
     ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
@@ -148,7 +212,8 @@ function draw() {
 
     ctx.fillStyle = '#7fb0c0';
     ctx.font = '16px system-ui, sans-serif';
-    ctx.fillText('survived ' + elapsed.toFixed(1) + 's  —  press R', canvas.width / 2, canvas.height / 2 + 26);
+    ctx.fillText('survived ' + elapsed.toFixed(1) + 's, killed ' + kills + '  —  press R',
+                 canvas.width / 2, canvas.height / 2 + 26);
   }
 }
 
@@ -179,9 +244,22 @@ if (location.search === '?test') {
 
   // Walking an enemy into a standing player must cost exactly one hp.
   reset();
-  enemies.push({ x: player.x + 200, y: player.y, r: 9, speed: 100 });
-  for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: enough to touch once, not twice
+  enemies.push({ x: player.x + 200, y: player.y, r: 9, speed: 100, hp: 99 });
+  for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: touches once, not twice
   console.assert(player.hp === 2, 'one touch = one hp, got ' + player.hp);
+
+  // The weapon targets the closest enemy, not just any enemy.
+  reset();
+  enemies.push({ x: player.x + 300, y: player.y, r: 9, speed: 0, hp: 1 });
+  const close = { x: player.x + 50, y: player.y, r: 9, speed: 0, hp: 1 };
+  enemies.push(close);
+  console.assert(nearestEnemy() === close, 'must target the closest enemy');
+
+  // ...and shooting one kills it.
+  reset();
+  enemies.push({ x: player.x + 120, y: player.y, r: 9, speed: 0, hp: 1 });
+  for (let i = 0; i < 60; i++) update(0.016);    // ~1s
+  console.assert(kills > 0, 'bullets must kill enemies, kills=' + kills);
 
   reset();
   console.log('checks done');
