@@ -11,13 +11,24 @@
 <body>
 <canvas id="c"></canvas>
 <script>
-// ---------- setup ----------
+// ---------- the arena ----------
+// The game always plays out in a 1280x800 world, whatever the window size,
+// so difficulty doesn't depend on your monitor. We scale that world up to
+// fill the window. Any leftover margin is the same near-black as the
+// background, so the letterboxing is invisible.
+const ARENA_W = 1280;
+const ARENA_H = 800;
+
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
+let scale = 1, offX = 0, offY = 0;
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  scale = Math.min(canvas.width / ARENA_W, canvas.height / ARENA_H);
+  offX = (canvas.width  - ARENA_W * scale) / 2;
+  offY = (canvas.height - ARENA_H * scale) / 2;
 }
 window.addEventListener('resize', resize);
 resize();
@@ -30,6 +41,11 @@ window.addEventListener('keyup',   e => keys.delete(e.key.toLowerCase()));
 
 const BULLET_SPEED = 430;   // pixels per second
 const GEM_PULL     = 300;   // how fast gems fly to you once in range
+const GEM_LIFE     = 8;     // seconds before an uncollected gem fades out
+const XP_GROWTH    = 1.45;  // each level costs this much more than the last
+const ENEMY_RAMP   = 0.006; // enemies spawn this much faster-moving per second
+
+let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
 // ---------- upgrades ----------
 // Just data. Adding one is a new line here and nothing else.
@@ -52,6 +68,26 @@ function rollUpgrades() {
   return out;
 }
 
+// ---------- enemy types ----------
+// Also just data. Each one unlocks partway into a run and is picked by weight,
+// so the swarm gets more varied the longer you last.
+const ENEMY_TYPES = [
+  { name: 'drifter', r: 9,  hp: 1, speed: 85,  xp: 1, weight: 6, from: 0,
+    color: '#e8446e', glow: '#ff1e5a' },
+  { name: 'darter',  r: 6,  hp: 1, speed: 190, xp: 1, weight: 3, from: 25,
+    color: '#ffb648', glow: '#ff8a00' },
+  { name: 'bulwark', r: 17, hp: 6, speed: 52,  xp: 3, weight: 2, from: 50,
+    color: '#a05cff', glow: '#7b2fff' },
+];
+
+function pickEnemyType() {
+  const open = ENEMY_TYPES.filter(t => elapsed >= t.from);
+  const total = open.reduce((sum, t) => sum + t.weight, 0);
+  let r = Math.random() * total;
+  for (const t of open) { r -= t.weight; if (r <= 0) return t; }
+  return open[0];
+}
+
 // ---------- game state ----------
 // Everything a run owns lives here, so restarting is one call.
 let player, enemies, bullets, gems;
@@ -60,8 +96,8 @@ let xp, xpNext, level, paused, choices;
 
 function reset() {
   player = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
+    x: ARENA_W / 2,
+    y: ARENA_H / 2,
     r: 10,             // radius, in pixels
     speed: 260,        // pixels per second
     hp: 3,
@@ -70,7 +106,7 @@ function reset() {
     fireRate: 2.5,     // shots per second
     fireTimer: 0,      // seconds until the next shot
     damage: 1,
-    range: 250,        // won't shoot at anything further away than this
+    range: 250,        // how far a shot travels before it dies
     pierce: 0,         // extra enemies a shot passes through
     pickupRange: 75,
   };
@@ -91,15 +127,19 @@ function reset() {
 
 // ---------- spawning ----------
 function spawnEnemy() {
-  const m = 40;                                  // how far outside the screen
+  const m = 40;                                  // how far outside the arena
   const edge = Math.floor(Math.random() * 4);    // 0 top, 1 right, 2 bottom, 3 left
   let x, y;
-  if      (edge === 0) { x = Math.random() * canvas.width;  y = -m; }
-  else if (edge === 1) { x = canvas.width + m;              y = Math.random() * canvas.height; }
-  else if (edge === 2) { x = Math.random() * canvas.width;  y = canvas.height + m; }
-  else                 { x = -m;                            y = Math.random() * canvas.height; }
+  if      (edge === 0) { x = Math.random() * ARENA_W;  y = -m; }
+  else if (edge === 1) { x = ARENA_W + m;              y = Math.random() * ARENA_H; }
+  else if (edge === 2) { x = Math.random() * ARENA_W;  y = ARENA_H + m; }
+  else                 { x = -m;                       y = Math.random() * ARENA_H; }
 
-  enemies.push({ x, y, r: 9, speed: 70 + Math.random() * 50, hp: 1 });
+  // Later arrivals swim faster, so kiting stops working on its own.
+  const t = pickEnemyType();
+  const speed = t.speed * (0.85 + Math.random() * 0.3) * (1 + elapsed * ENEMY_RAMP);
+  enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, xp: t.xp,
+                 color: t.color, glow: t.glow, lastHitBy: 0 });
 }
 
 // Closest enemy inside firing range, or null if nothing is close enough.
@@ -118,7 +158,8 @@ function gainXp() {
   if (xp < xpNext) return;
   xp -= xpNext;
   level += 1;
-  xpNext = 5 + level * 3;
+  // Geometric, not linear: XP income compounds as you level, so its cost has to.
+  xpNext = Math.round(5 * Math.pow(XP_GROWTH, level - 1));
   choices = rollUpgrades();
   paused = true;
 }
@@ -160,8 +201,8 @@ function update(dt) {
 
   player.x += dx * player.speed * dt;
   player.y += dy * player.speed * dt;
-  player.x = Math.max(player.r, Math.min(canvas.width  - player.r, player.x));
-  player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
+  player.x = Math.max(player.r, Math.min(ARENA_W - player.r, player.x));
+  player.y = Math.max(player.r, Math.min(ARENA_H - player.r, player.y));
 
   // --- spawn new enemies, faster as time goes on ---
   spawnTimer -= dt;
@@ -179,10 +220,13 @@ function update(dt) {
       const ty = target.y - player.y;
       const d = Math.hypot(tx, ty) || 1;
       bullets.push({
+        id: ++bulletId,
         x: player.x, y: player.y, r: 4,
         vx: (tx / d) * BULLET_SPEED,
         vy: (ty / d) * BULLET_SPEED,
         pierce: player.pierce,
+        travelled: 0,
+        maxTravel: player.range,       // the ring means what it says
       });
       player.fireTimer = 1 / player.fireRate;
     }
@@ -204,13 +248,12 @@ function update(dt) {
     }
   }
 
-  // --- move bullets, and retire the ones that flew off screen ---
+  // --- move bullets; they die at the edge of your range ---
   for (const b of bullets) {
     b.x += b.vx * dt;
     b.y += b.vy * dt;
-    if (b.x < -50 || b.x > canvas.width + 50 || b.y < -50 || b.y > canvas.height + 50) {
-      b.gone = true;
-    }
+    b.travelled += BULLET_SPEED * dt;
+    if (b.travelled >= b.maxTravel) b.gone = true;
   }
 
   // --- bullets vs enemies ---
@@ -221,23 +264,28 @@ function update(dt) {
     for (const e of enemies) {
       if (e.gone) continue;
       if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + b.r) {
+        if (e.lastHitBy === b.id) continue;   // a shot hits each enemy at most once
+        e.lastHitBy = b.id;
         e.hp -= player.damage;
         if (e.hp <= 0) {
           e.gone = true;
           kills += 1;
-          gems.push({ x: e.x, y: e.y, r: 4 });
+          for (let n = 0; n < e.xp; n++) {
+            gems.push({ x: e.x + (Math.random() - 0.5) * 18,
+                        y: e.y + (Math.random() - 0.5) * 18, r: 4, life: GEM_LIFE });
+          }
         }
-        // ponytail: a piercing shot can re-hit a survivor on the next frame.
-        // Harmless while every enemy dies in one hit; give bullets a hit-list
-        // when tougher enemies arrive in step 5.
         if (b.pierce > 0) { b.pierce -= 1; }
         else { b.gone = true; break; }
       }
     }
   }
 
-  // --- gems drift to you when close, and are collected on touch ---
+  // --- gems drift to you when close, fade out if you never come ---
   for (const g of gems) {
+    g.life -= dt;
+    if (g.life <= 0) { g.gone = true; continue; }
+
     const gx = player.x - g.x;
     const gy = player.y - g.y;
     const d = Math.hypot(gx, gy) || 1;
@@ -272,17 +320,17 @@ function circle(x, y, r, fill, glow, blur = 20) {
 
 function drawUpgradeCards() {
   ctx.fillStyle = 'rgba(4, 7, 13, 0.82)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#9ef7ff';
   ctx.font = '30px system-ui, sans-serif';
-  ctx.fillText('LEVEL ' + level, canvas.width / 2, canvas.height / 2 - 130);
+  ctx.fillText('LEVEL ' + level, ARENA_W / 2, ARENA_H / 2 - 130);
 
   const w = 220, h = 140, gap = 24;
   const totalW = choices.length * w + (choices.length - 1) * gap;
-  const left = canvas.width / 2 - totalW / 2;
-  const top  = canvas.height / 2 - h / 2;
+  const left = ARENA_W / 2 - totalW / 2;
+  const top  = ARENA_H / 2 - h / 2;
 
   choices.forEach((u, i) => {
     const x = left + i * (w + gap);
@@ -307,19 +355,50 @@ function drawUpgradeCards() {
 }
 
 function draw() {
+  // Paint the whole window, including the letterbox margin, then switch
+  // into arena coordinates and clip so nothing spills into the margin.
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = '#04070d';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // How far the weapon reaches — the player needs to see this.
+  ctx.save();
+  ctx.setTransform(scale, 0, 0, scale, offX, offY);
+  ctx.beginPath();
+  ctx.rect(0, 0, ARENA_W, ARENA_H);
+  ctx.clip();
+
+  // How far your shots reach — the player needs to see this.
   ctx.strokeStyle = 'rgba(79, 240, 255, 0.10)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.arc(player.x, player.y, player.range, 0, Math.PI * 2);
   ctx.stroke();
 
-  for (const g of gems)    circle(g.x, g.y, g.r, '#a8ffd8', '#2affb0', 14);
-  for (const e of enemies) circle(e.x, e.y, e.r, '#e8446e', '#ff1e5a', 18);
-  for (const b of bullets) circle(b.x, b.y, b.r, '#eaffff', '#9ef7ff', 14);
+  // Gems blink for their last two seconds, then they're gone.
+  for (const g of gems) {
+    if (g.life < 2 && Math.floor(g.life * 8) % 2 === 0) continue;
+    circle(g.x, g.y, g.r, '#a8ffd8', '#2affb0', 14);
+  }
+
+  // A wounded enemy shrinks, so you can see a big one is nearly finished.
+  for (const e of enemies) {
+    circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp), e.color, e.glow, 18);
+  }
+
+  // Bullets are streaks, not dots — so they don't read as gems, and so you
+  // can see which way they're going.
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = '#9ef7ff';
+  ctx.strokeStyle = '#eaffff';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  for (const b of bullets) {
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(b.x - b.vx * 0.035, b.y - b.vy * 0.035);
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
 
   // Blink while invulnerable, so getting hit is visible.
   const blinking = player.hurt > 0 && Math.floor(player.hurt * 10) % 2 === 0;
@@ -327,9 +406,9 @@ function draw() {
 
   // --- XP bar across the very top ---
   ctx.fillStyle = '#12303a';
-  ctx.fillRect(0, 0, canvas.width, 5);
+  ctx.fillRect(0, 0, ARENA_W, 5);
   ctx.fillStyle = '#4ff0ff';
-  ctx.fillRect(0, 0, canvas.width * (xp / xpNext), 5);
+  ctx.fillRect(0, 0, ARENA_W * (xp / xpNext), 5);
 
   // --- HUD ---
   ctx.fillStyle = '#7fb0c0';
@@ -342,18 +421,20 @@ function draw() {
 
   if (dead) {
     ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, ARENA_W, ARENA_H);
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ff5c85';
     ctx.font = '44px system-ui, sans-serif';
-    ctx.fillText('CONSUMED', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillText('CONSUMED', ARENA_W / 2, ARENA_H / 2 - 10);
 
     ctx.fillStyle = '#7fb0c0';
     ctx.font = '16px system-ui, sans-serif';
     ctx.fillText('level ' + level + ', survived ' + elapsed.toFixed(1) + 's, killed ' +
-                 kills + '  —  press R', canvas.width / 2, canvas.height / 2 + 26);
+                 kills + '  —  press R', ARENA_W / 2, ARENA_H / 2 + 26);
   }
+
+  ctx.restore();
 }
 
 // ---------- the loop ----------
@@ -373,39 +454,96 @@ reset();
 
 // ---------- checks: open game.html?test and look at the console ----------
 if (location.search === '?test') {
+  const mob = (x, y, over) => Object.assign(
+    { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, xp: 1, lastHitBy: 0 }, over);
+
   for (let i = 0; i < 300; i++) spawnEnemy();
   console.assert(
-    enemies.every(e => e.x < 0 || e.x > canvas.width || e.y < 0 || e.y > canvas.height),
-    'enemies must spawn outside the screen');
+    enemies.every(e => e.x < 0 || e.x > ARENA_W || e.y < 0 || e.y > ARENA_H),
+    'enemies must spawn outside the arena');
   console.assert(
     new Set(enemies.map(e => e.speed)).size > 1,
     'enemies should not all move at the same speed');
 
+  // Enemy types unlock as the run goes on.
+  reset();
+  elapsed = 0;
+  console.assert(
+    new Set(Array.from({ length: 50 }, () => pickEnemyType().name)).size === 1,
+    'only drifters at the start of a run');
+  elapsed = 60;
+  const seen = new Set(Array.from({ length: 400 }, () => pickEnemyType().name));
+  console.assert(seen.size === ENEMY_TYPES.length,
+    'every type should appear later, saw: ' + [...seen].join(','));
+
   // Walking an enemy into a standing player must cost exactly one hp.
   reset();
-  enemies.push({ x: player.x + 200, y: player.y, r: 9, speed: 100, hp: 999 });
+  enemies.push(mob(player.x + 200, player.y, { speed: 100, hp: 999, maxHp: 999 }));
   for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: touches once, not twice
   console.assert(player.hp === 2, 'one touch = one hp, got ' + player.hp);
 
   // The weapon ignores anything beyond its range, and targets the closest.
   reset();
-  enemies.push({ x: player.x + player.range + 60, y: player.y, r: 9, speed: 0, hp: 1 });
+  enemies.push(mob(player.x + player.range + 60, player.y));
   console.assert(nearestEnemy() === null, 'must not target beyond range');
-  const close = { x: player.x + 40, y: player.y, r: 9, speed: 0, hp: 1 };
+  const close = mob(player.x + 40, player.y);
   enemies.push(close);
   console.assert(nearestEnemy() === close, 'must target the closest enemy in range');
 
-  // Shooting one kills it and drops a gem.
+  // A shot dies once it has flown its range, rather than crossing the arena.
   reset();
-  enemies.push({ x: player.x + 150, y: player.y, r: 9, speed: 0, hp: 1 });
+  bullets.push({ id: ++bulletId, x: 100, y: 400, r: 4, vx: BULLET_SPEED, vy: 0,
+                 pierce: 0, travelled: 0, maxTravel: 200 });
+  for (let i = 0; i < 40; i++) update(1 / 60);   // long enough to fly 280px
+  console.assert(bullets.length === 0, 'shots must expire at the edge of their range');
+
+  // A piercing shot passes through, but only damages each enemy once.
+  reset();
+  const tank = mob(player.x + 100, player.y, { hp: 3, maxHp: 3 });
+  enemies.push(tank);
+  player.fireTimer = 999;                        // silence the auto-weapon
+  bullets.push({ id: ++bulletId, x: player.x, y: player.y, r: 4,
+                 vx: BULLET_SPEED, vy: 0, pierce: 2, travelled: 0, maxTravel: 300 });
+  for (let i = 0; i < 30; i++) update(1 / 60);
+  console.assert(tank.hp === 2, 'a piercing shot must hit once, hp=' + tank.hp);
+
+  // A tough enemy survives a hit that would kill a drifter.
+  reset();
+  const big = mob(player.x + 120, player.y, { hp: 6, maxHp: 6, xp: 3 });
+  enemies.push(big);
+  for (let i = 0; i < 45; i++) update(1 / 60);
+  console.assert(big.hp < 6 && kills === 0, 'a bulwark must not die to one shot');
+
+  // Shooting a drifter kills it and drops a gem.
+  reset();
+  enemies.push(mob(player.x + 150, player.y));
   for (let i = 0; i < 60; i++) update(0.016);    // ~1s
   console.assert(kills === 1, 'expected one kill, got ' + kills);
   console.assert(gems.length === 1, 'a kill must drop a gem');
 
+  // A tougher enemy is worth more gems. Keep it outside pickupRange, or the
+  // gems get vacuumed up the moment they drop and there is nothing to count.
+  reset();
+  enemies.push(mob(player.x + 150, player.y, { hp: 1, maxHp: 6, xp: 3 }));
+  for (let i = 0; i < 60; i++) update(0.016);
+  console.assert(gems.length === 3, 'xp 3 must drop 3 gems, got ' + gems.length);
+
+  // An ignored gem fades out instead of littering the floor forever.
+  reset();
+  gems.push({ x: 40, y: 40, r: 4, life: 0.5 });
+  for (let i = 0; i < 60; i++) update(1 / 60);
+  console.assert(gems.length === 0, 'uncollected gems must expire');
+
+  // Levelling costs more each time, rather than less.
+  const costs = [];
+  for (let lv = 1; lv <= 6; lv++) costs.push(Math.round(5 * Math.pow(XP_GROWTH, lv - 1)));
+  console.assert(costs.every((c, i) => i === 0 || c > costs[i - 1]),
+    'xp cost must rise every level: ' + costs.join(','));
+
   // Collecting the last gem you need levels you up and pauses the game.
   reset();
   xp = xpNext - 1;
-  gems.push({ x: player.x, y: player.y, r: 4 });
+  gems.push({ x: player.x, y: player.y, r: 4, life: GEM_LIFE });
   update(0.016);
   console.assert(level === 2 && paused, 'last gem must level you up and pause');
   console.assert(choices.length === 3, 'a level-up offers 3 choices');
