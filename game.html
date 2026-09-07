@@ -28,16 +28,49 @@ const keys = new Set();
 window.addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 window.addEventListener('keyup',   e => keys.delete(e.key.toLowerCase()));
 
-// ---------- the player ----------
-const player = {
-  x: canvas.width / 2,
-  y: canvas.height / 2,
-  r: 10,        // radius, in pixels
-  speed: 260,   // pixels per second
-};
+// ---------- game state ----------
+// Everything that a new run resets lives here, so restarting is one call.
+let player, enemies, elapsed, spawnTimer, dead;
+
+function reset() {
+  player = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    r: 10,           // radius, in pixels
+    speed: 260,      // pixels per second
+    hp: 3,
+    hurt: 0,         // seconds of invulnerability left
+  };
+  enemies = [];
+  elapsed = 0;       // seconds survived — this is the score
+  spawnTimer = 0;
+  dead = false;
+}
+
+// ---------- spawning ----------
+function spawnEnemy() {
+  const m = 40;                                  // how far outside the screen
+  const edge = Math.floor(Math.random() * 4);    // 0 top, 1 right, 2 bottom, 3 left
+  let x, y;
+  if      (edge === 0) { x = Math.random() * canvas.width;  y = -m; }
+  else if (edge === 1) { x = canvas.width + m;              y = Math.random() * canvas.height; }
+  else if (edge === 2) { x = Math.random() * canvas.width;  y = canvas.height + m; }
+  else                 { x = -m;                            y = Math.random() * canvas.height; }
+
+  enemies.push({ x, y, r: 9, speed: 70 + Math.random() * 50 });
+}
 
 // ---------- update: move everything ----------
 function update(dt) {
+  if (dead) {
+    if (keys.has('r')) reset();
+    return;
+  }
+
+  elapsed += dt;
+  if (player.hurt > 0) player.hurt -= dt;
+
+  // --- move the player ---
   let dx = 0, dy = 0;
   if (keys.has('a') || keys.has('arrowleft'))  dx -= 1;
   if (keys.has('d') || keys.has('arrowright')) dx += 1;
@@ -45,37 +78,85 @@ function update(dt) {
   if (keys.has('s') || keys.has('arrowdown'))  dy += 1;
 
   // Holding two keys would otherwise move you 1.41x faster diagonally.
-  // Shrink the direction back down to length 1.
   const len = Math.hypot(dx, dy);
   if (len > 0) { dx /= len; dy /= len; }
 
   player.x += dx * player.speed * dt;
   player.y += dy * player.speed * dt;
-
-  // Keep the player on screen.
   player.x = Math.max(player.r, Math.min(canvas.width  - player.r, player.x));
   player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
+
+  // --- spawn new enemies, faster as time goes on ---
+  spawnTimer -= dt;
+  if (spawnTimer <= 0) {
+    spawnEnemy();
+    spawnTimer = Math.max(0.15, 1.2 - elapsed * 0.02);
+  }
+
+  // --- move enemies toward the player, and hurt him on contact ---
+  for (const e of enemies) {
+    const ex = player.x - e.x;
+    const ey = player.y - e.y;
+    const d = Math.hypot(ex, ey) || 1;      // || 1 avoids dividing by zero
+
+    e.x += (ex / d) * e.speed * dt;
+    e.y += (ey / d) * e.speed * dt;
+
+    if (d < e.r + player.r && player.hurt <= 0) {
+      player.hp -= 1;
+      player.hurt = 1;                       // one second of invulnerability
+      if (player.hp <= 0) dead = true;
+    }
+  }
 }
 
 // ---------- draw: paint one frame ----------
+function circle(x, y, r, fill, glow, blur = 20) {
+  ctx.shadowBlur = blur;
+  ctx.shadowColor = glow;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
 function draw() {
   ctx.fillStyle = '#04070d';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.shadowBlur = 25;
-  ctx.shadowColor = '#4ff0ff';
-  ctx.fillStyle = '#bffcff';
-  ctx.beginPath();
-  ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
+  for (const e of enemies) circle(e.x, e.y, e.r, '#e8446e', '#ff1e5a', 18);
+
+  // Blink while invulnerable, so getting hit is visible.
+  const blinking = player.hurt > 0 && Math.floor(player.hurt * 10) % 2 === 0;
+  if (!blinking) circle(player.x, player.y, player.r, '#bffcff', '#4ff0ff', 25);
+
+  // --- HUD ---
+  ctx.fillStyle = '#7fb0c0';
+  ctx.font = '14px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('HP ' + player.hp + '   ' + elapsed.toFixed(1) + 's', 16, 26);
+
+  if (dead) {
+    ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ff5c85';
+    ctx.font = '44px system-ui, sans-serif';
+    ctx.fillText('CONSUMED', canvas.width / 2, canvas.height / 2 - 10);
+
+    ctx.fillStyle = '#7fb0c0';
+    ctx.font = '16px system-ui, sans-serif';
+    ctx.fillText('survived ' + elapsed.toFixed(1) + 's  —  press R', canvas.width / 2, canvas.height / 2 + 26);
+  }
 }
 
 // ---------- the loop ----------
 let last = performance.now();
 function frame(now) {
-  // How many seconds since the previous frame. Capped, so that switching
-  // tabs for a minute doesn't teleport everything across the screen.
+  // Seconds since the previous frame. Capped, so that switching tabs
+  // for a minute doesn't teleport everything across the screen.
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
 
@@ -83,6 +164,29 @@ function frame(now) {
   draw();
   requestAnimationFrame(frame);
 }
+
+reset();
+
+// ---------- checks: open game.html?test and look at the console ----------
+if (location.search === '?test') {
+  for (let i = 0; i < 300; i++) spawnEnemy();
+  console.assert(
+    enemies.every(e => e.x < 0 || e.x > canvas.width || e.y < 0 || e.y > canvas.height),
+    'enemies must spawn outside the screen');
+  console.assert(
+    new Set(enemies.map(e => e.speed)).size > 1,
+    'enemies should not all move at the same speed');
+
+  // Walking an enemy into a standing player must cost exactly one hp.
+  reset();
+  enemies.push({ x: player.x + 200, y: player.y, r: 9, speed: 100 });
+  for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: enough to touch once, not twice
+  console.assert(player.hp === 2, 'one touch = one hp, got ' + player.hp);
+
+  reset();
+  console.log('checks done');
+}
+
 requestAnimationFrame(frame);
 </script>
 </body>
