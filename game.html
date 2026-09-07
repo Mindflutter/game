@@ -29,29 +29,64 @@ window.addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 window.addEventListener('keyup',   e => keys.delete(e.key.toLowerCase()));
 
 const BULLET_SPEED = 430;   // pixels per second
+const GEM_PULL     = 300;   // how fast gems fly to you once in range
+
+// ---------- upgrades ----------
+// Just data. Adding one is a new line here and nothing else.
+const UPGRADES = [
+  { name: 'Rapid Fire', desc: '+35% fire rate',        apply: p => p.fireRate *= 1.35 },
+  { name: 'Power',      desc: '+1 damage',             apply: p => p.damage += 1 },
+  { name: 'Reach',      desc: '+70 firing range',      apply: p => p.range += 70 },
+  { name: 'Fins',       desc: '+45 move speed',        apply: p => p.speed += 45 },
+  { name: 'Pierce',     desc: 'shots pass through +1', apply: p => p.pierce += 1 },
+  { name: 'Lure',       desc: '+45 pickup range',      apply: p => p.pickupRange += 45 },
+  { name: 'Vitality',   desc: '+1 max HP, heal 1',     apply: p => { p.maxHp += 1; p.hp += 1; } },
+];
+
+function rollUpgrades() {
+  const pool = UPGRADES.slice();       // a copy, so we don't wreck the original
+  const out = [];
+  while (out.length < 3 && pool.length) {
+    out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return out;
+}
 
 // ---------- game state ----------
 // Everything a run owns lives here, so restarting is one call.
-let player, enemies, bullets, elapsed, spawnTimer, kills, dead;
+let player, enemies, bullets, gems;
+let elapsed, spawnTimer, kills, dead;
+let xp, xpNext, level, paused, choices;
 
 function reset() {
   player = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    r: 10,            // radius, in pixels
-    speed: 260,       // pixels per second
+    r: 10,             // radius, in pixels
+    speed: 260,        // pixels per second
     hp: 3,
-    hurt: 0,          // seconds of invulnerability left
-    fireRate: 2,      // shots per second
-    fireTimer: 0,     // seconds until the next shot
+    maxHp: 3,
+    hurt: 0,           // seconds of invulnerability left
+    fireRate: 2.5,     // shots per second
+    fireTimer: 0,      // seconds until the next shot
     damage: 1,
+    range: 250,        // won't shoot at anything further away than this
+    pierce: 0,         // extra enemies a shot passes through
+    pickupRange: 75,
   };
   enemies = [];
   bullets = [];
-  elapsed = 0;        // seconds survived
+  gems = [];
+  elapsed = 0;         // seconds survived
   spawnTimer = 0;
   kills = 0;
   dead = false;
+
+  xp = 0;
+  xpNext = 5;
+  level = 1;
+  paused = false;      // true while you're picking an upgrade
+  choices = [];
 }
 
 // ---------- spawning ----------
@@ -67,8 +102,10 @@ function spawnEnemy() {
   enemies.push({ x, y, r: 9, speed: 70 + Math.random() * 50, hp: 1 });
 }
 
+// Closest enemy inside firing range, or null if nothing is close enough.
+// Starting the search at player.range does both jobs at once.
 function nearestEnemy() {
-  let best = null, bestDist = Infinity;
+  let best = null, bestDist = player.range;
   for (const e of enemies) {
     const d = Math.hypot(e.x - player.x, e.y - player.y);
     if (d < bestDist) { bestDist = d; best = e; }
@@ -76,10 +113,34 @@ function nearestEnemy() {
   return best;
 }
 
+function gainXp() {
+  xp += 1;
+  if (xp < xpNext) return;
+  xp -= xpNext;
+  level += 1;
+  xpNext = 5 + level * 3;
+  choices = rollUpgrades();
+  paused = true;
+}
+
 // ---------- update: move everything ----------
 function update(dt) {
   if (dead) {
     if (keys.has('r')) reset();
+    return;
+  }
+
+  // Picking an upgrade. The whole game is frozen until you choose.
+  if (paused) {
+    for (let i = 0; i < choices.length; i++) {
+      if (keys.has(String(i + 1))) {
+        choices[i].apply(player);
+        keys.delete(String(i + 1));   // force a fresh press next time
+        choices = [];
+        paused = false;
+        break;
+      }
+    }
     return;
   }
 
@@ -109,11 +170,11 @@ function update(dt) {
     spawnTimer = Math.max(0.15, 1.2 - elapsed * 0.02);
   }
 
-  // --- the weapon fires itself at whoever is closest ---
+  // --- the weapon fires itself at whoever is closest, if anyone is in range ---
   player.fireTimer -= dt;
   if (player.fireTimer <= 0) {
     const target = nearestEnemy();
-    if (target) {                      // nothing to shoot at? hold the shot
+    if (target) {                      // nothing in range? hold the shot
       const tx = target.x - player.x;
       const ty = target.y - player.y;
       const d = Math.hypot(tx, ty) || 1;
@@ -121,6 +182,7 @@ function update(dt) {
         x: player.x, y: player.y, r: 4,
         vx: (tx / d) * BULLET_SPEED,
         vy: (ty / d) * BULLET_SPEED,
+        pierce: player.pierce,
       });
       player.fireTimer = 1 / player.fireRate;
     }
@@ -160,10 +222,33 @@ function update(dt) {
       if (e.gone) continue;
       if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + b.r) {
         e.hp -= player.damage;
-        b.gone = true;                       // the bullet is spent
-        if (e.hp <= 0) { e.gone = true; kills += 1; }
-        break;                               // this bullet is done looking
+        if (e.hp <= 0) {
+          e.gone = true;
+          kills += 1;
+          gems.push({ x: e.x, y: e.y, r: 4 });
+        }
+        // ponytail: a piercing shot can re-hit a survivor on the next frame.
+        // Harmless while every enemy dies in one hit; give bullets a hit-list
+        // when tougher enemies arrive in step 5.
+        if (b.pierce > 0) { b.pierce -= 1; }
+        else { b.gone = true; break; }
       }
+    }
+  }
+
+  // --- gems drift to you when close, and are collected on touch ---
+  for (const g of gems) {
+    const gx = player.x - g.x;
+    const gy = player.y - g.y;
+    const d = Math.hypot(gx, gy) || 1;
+
+    if (d < player.pickupRange) {
+      g.x += (gx / d) * GEM_PULL * dt;
+      g.y += (gy / d) * GEM_PULL * dt;
+    }
+    if (d < player.r + g.r + 4) {
+      g.gone = true;
+      gainXp();
     }
   }
 
@@ -171,6 +256,7 @@ function update(dt) {
   // an array while you are still looping over it.
   enemies = enemies.filter(e => !e.gone);
   bullets = bullets.filter(b => !b.gone);
+  gems    = gems.filter(g => !g.gone);
 }
 
 // ---------- draw: paint one frame ----------
@@ -184,10 +270,54 @@ function circle(x, y, r, fill, glow, blur = 20) {
   ctx.shadowBlur = 0;
 }
 
+function drawUpgradeCards() {
+  ctx.fillStyle = 'rgba(4, 7, 13, 0.82)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9ef7ff';
+  ctx.font = '30px system-ui, sans-serif';
+  ctx.fillText('LEVEL ' + level, canvas.width / 2, canvas.height / 2 - 130);
+
+  const w = 220, h = 140, gap = 24;
+  const totalW = choices.length * w + (choices.length - 1) * gap;
+  const left = canvas.width / 2 - totalW / 2;
+  const top  = canvas.height / 2 - h / 2;
+
+  choices.forEach((u, i) => {
+    const x = left + i * (w + gap);
+    ctx.fillStyle = 'rgba(16, 44, 58, 0.92)';
+    ctx.fillRect(x, top, w, h);
+    ctx.strokeStyle = '#2b6b7d';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, top + 0.5, w - 1, h - 1);
+
+    ctx.fillStyle = '#bffcff';
+    ctx.font = '19px system-ui, sans-serif';
+    ctx.fillText(u.name, x + w / 2, top + 48);
+
+    ctx.fillStyle = '#7fb0c0';
+    ctx.font = '13px system-ui, sans-serif';
+    ctx.fillText(u.desc, x + w / 2, top + 78);
+
+    ctx.fillStyle = '#4ff0ff';
+    ctx.font = '16px system-ui, sans-serif';
+    ctx.fillText('[ ' + (i + 1) + ' ]', x + w / 2, top + 114);
+  });
+}
+
 function draw() {
   ctx.fillStyle = '#04070d';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // How far the weapon reaches — the player needs to see this.
+  ctx.strokeStyle = 'rgba(79, 240, 255, 0.10)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.range, 0, Math.PI * 2);
+  ctx.stroke();
+
+  for (const g of gems)    circle(g.x, g.y, g.r, '#a8ffd8', '#2affb0', 14);
   for (const e of enemies) circle(e.x, e.y, e.r, '#e8446e', '#ff1e5a', 18);
   for (const b of bullets) circle(b.x, b.y, b.r, '#eaffff', '#9ef7ff', 14);
 
@@ -195,11 +325,20 @@ function draw() {
   const blinking = player.hurt > 0 && Math.floor(player.hurt * 10) % 2 === 0;
   if (!blinking) circle(player.x, player.y, player.r, '#bffcff', '#4ff0ff', 25);
 
+  // --- XP bar across the very top ---
+  ctx.fillStyle = '#12303a';
+  ctx.fillRect(0, 0, canvas.width, 5);
+  ctx.fillStyle = '#4ff0ff';
+  ctx.fillRect(0, 0, canvas.width * (xp / xpNext), 5);
+
   // --- HUD ---
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '14px system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('HP ' + player.hp + '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed', 16, 26);
+  ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '   LV ' + level +
+               '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed', 16, 30);
+
+  if (paused) drawUpgradeCards();
 
   if (dead) {
     ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
@@ -212,8 +351,8 @@ function draw() {
 
     ctx.fillStyle = '#7fb0c0';
     ctx.font = '16px system-ui, sans-serif';
-    ctx.fillText('survived ' + elapsed.toFixed(1) + 's, killed ' + kills + '  —  press R',
-                 canvas.width / 2, canvas.height / 2 + 26);
+    ctx.fillText('level ' + level + ', survived ' + elapsed.toFixed(1) + 's, killed ' +
+                 kills + '  —  press R', canvas.width / 2, canvas.height / 2 + 26);
   }
 }
 
@@ -244,22 +383,41 @@ if (location.search === '?test') {
 
   // Walking an enemy into a standing player must cost exactly one hp.
   reset();
-  enemies.push({ x: player.x + 200, y: player.y, r: 9, speed: 100, hp: 99 });
+  enemies.push({ x: player.x + 200, y: player.y, r: 9, speed: 100, hp: 999 });
   for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: touches once, not twice
   console.assert(player.hp === 2, 'one touch = one hp, got ' + player.hp);
 
-  // The weapon targets the closest enemy, not just any enemy.
+  // The weapon ignores anything beyond its range, and targets the closest.
   reset();
-  enemies.push({ x: player.x + 300, y: player.y, r: 9, speed: 0, hp: 1 });
-  const close = { x: player.x + 50, y: player.y, r: 9, speed: 0, hp: 1 };
+  enemies.push({ x: player.x + player.range + 60, y: player.y, r: 9, speed: 0, hp: 1 });
+  console.assert(nearestEnemy() === null, 'must not target beyond range');
+  const close = { x: player.x + 40, y: player.y, r: 9, speed: 0, hp: 1 };
   enemies.push(close);
-  console.assert(nearestEnemy() === close, 'must target the closest enemy');
+  console.assert(nearestEnemy() === close, 'must target the closest enemy in range');
 
-  // ...and shooting one kills it.
+  // Shooting one kills it and drops a gem.
   reset();
-  enemies.push({ x: player.x + 120, y: player.y, r: 9, speed: 0, hp: 1 });
+  enemies.push({ x: player.x + 150, y: player.y, r: 9, speed: 0, hp: 1 });
   for (let i = 0; i < 60; i++) update(0.016);    // ~1s
-  console.assert(kills > 0, 'bullets must kill enemies, kills=' + kills);
+  console.assert(kills === 1, 'expected one kill, got ' + kills);
+  console.assert(gems.length === 1, 'a kill must drop a gem');
+
+  // Collecting the last gem you need levels you up and pauses the game.
+  reset();
+  xp = xpNext - 1;
+  gems.push({ x: player.x, y: player.y, r: 4 });
+  update(0.016);
+  console.assert(level === 2 && paused, 'last gem must level you up and pause');
+  console.assert(choices.length === 3, 'a level-up offers 3 choices');
+  console.assert(new Set(choices).size === 3, 'the 3 choices must be different');
+
+  // Pressing its number applies the upgrade and resumes play.
+  const before = player.speed;
+  choices = [UPGRADES.find(u => u.name === 'Fins')];
+  keys.add('1');
+  update(0.016);
+  keys.delete('1');
+  console.assert(!paused && player.speed > before, 'picking must apply the upgrade and resume');
 
   reset();
   console.log('checks done');
