@@ -51,7 +51,7 @@ Each step is playable on its own.
 3. Weapon auto-fires at nearest enemy; enemies die.                 <- DONE
 4. Firing range, XP gems, level bar, level-up with 3 upgrades.      <- DONE
 5. Enemy types, fixed arena, real bullet range, expiring gems, XP curve. <- DONE
-6. Juice: screen shake, hit flash, particles, WebAudio beeps.
+6. Juice: screen shake, hit flash, particles, WebAudio beeps.        <- DONE
 
 ## Balance, as measured
 
@@ -70,7 +70,20 @@ Fixed since step 4:
 Current state: five bot runs died at 51.6-59.3s, level 5-6. Tight enough that
 tuning changes are measurable.
 
+## After the six steps
+
+Owner's plan, in order:
+
+1. Finish this standalone at small scope.
+2. Experiment with sprites and more complex rendering.
+3. Roguelite meta-progression -- persistent unlocks between runs, upgrade
+   synergies. Deliberately deferred: the endless escalation that makes a
+   standalone arcade build feel unfinished is exactly what a run-based
+   roguelite wants.
+
+Playtest at step 5: ~70s survival over three tries. Read as too punishing for
+a standalone with no ending, promising as a roguelite run length.
+
 ## Deferred
 
-Sprites, menus, save data, mobile input, multiple levels. Step 6's juice will
-do more for how the game feels than step 5's content will.
+Sprites, menus, save data, mobile input, multiple levels.
