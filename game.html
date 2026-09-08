@@ -49,34 +49,61 @@ let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
 // ---------- sound ----------
 // Every sound is an oscillator and a fading volume envelope. No audio files.
-// Browsers refuse to make noise until the user has interacted, so the audio
-// context is created on the first key press.
+// `vol` is peak amplitude, 0..1. Anything under about 0.15 is inaudible on
+// laptop speakers for a short blip -- the ?test checks hold us to that.
+const SOUNDS = {
+  shoot:  { freq: 680,  dur: 0.05, type: 'square',   vol: 0.20, slide: 0.55 },
+  kill:   { freq: 200,  dur: 0.11, type: 'sawtooth', vol: 0.32, slide: 0.45 },
+  gem:    { freq: 1150, dur: 0.05, type: 'sine',     vol: 0.22, slide: 1.3  },
+  hurt:   { freq: 110,  dur: 0.28, type: 'sawtooth', vol: 0.55, slide: 0.4  },
+  death:  { freq: 70,   dur: 0.90, type: 'sawtooth', vol: 0.60, slide: 0.3  },
+  levelA: { freq: 520,  dur: 0.09, type: 'triangle', vol: 0.40, slide: 1    },
+  levelB: { freq: 780,  dur: 0.16, type: 'triangle', vol: 0.35, slide: 1.25 },
+};
+
 let audio = null;
+let master = null;
 let muted = false;
 
-window.addEventListener('keydown', () => {
-  if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
-}, { once: true });
+// One voice: an oscillator through its own volume envelope. Takes the context
+// as an argument so the checks can render it offline and measure how loud it is.
+function voice(ac, dest, s, t, pitch = 1) {
+  const freq = s.freq * pitch;
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.type = s.type;
+  osc.frequency.setValueAtTime(freq, t);
+  if (s.slide !== 1) {
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq * s.slide), t + s.dur);
+  }
+  gain.gain.setValueAtTime(s.vol, t);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + s.dur);   // never ramp to 0
+  osc.connect(gain).connect(dest);
+  osc.start(t);
+  osc.stop(t + s.dur);
+}
 
+// Browsers refuse to make noise before the user interacts, so the context is
+// built on the first key press -- and resumed on later ones, because some
+// browsers hand back a suspended context anyway.
 window.addEventListener('keydown', e => {
+  if (!audio) {
+    audio = new (window.AudioContext || window.webkitAudioContext)();
+    // A dozen enemies dying at once would sum past 1.0 and clip; the
+    // compressor rides that down instead of letting it crackle.
+    const comp = audio.createDynamicsCompressor();
+    master = audio.createGain();
+    master.gain.value = 0.6;
+    master.connect(comp).connect(audio.destination);
+  } else if (audio.state === 'suspended') {
+    audio.resume();
+  }
   if (e.key.toLowerCase() === 'm') muted = !muted;
 });
 
-function sound(freq, dur, type = 'square', vol = 0.05, slide = 1) {
+function sound(name, pitch = 1) {
   if (!audio || muted) return;
-  const t = audio.currentTime;
-  const osc = audio.createOscillator();
-  const gain = audio.createGain();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, t);
-  if (slide !== 1) {
-    osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq * slide), t + dur);
-  }
-  gain.gain.setValueAtTime(vol, t);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);   // never ramp to 0
-  osc.connect(gain).connect(audio.destination);
-  osc.start(t);
-  osc.stop(t + dur);
+  voice(audio, master, SOUNDS[name], audio.currentTime, pitch);
 }
 
 // ---------- upgrades ----------
@@ -207,8 +234,8 @@ function gainXp() {
   xpNext = Math.round(5 * Math.pow(XP_GROWTH, level - 1));
   choices = rollUpgrades();
   paused = true;
-  sound(520, 0.09, 'triangle', 0.07);
-  sound(780, 0.16, 'triangle', 0.06, 1.25);
+  sound('levelA');
+  sound('levelB');
 }
 
 // ---------- update: move everything ----------
@@ -276,7 +303,7 @@ function update(dt) {
         maxTravel: player.range,       // the ring means what it says
       });
       player.fireTimer = 1 / player.fireRate;
-      sound(680, 0.05, 'square', 0.025, 0.55);
+      sound('shoot');
     }
   }
 
@@ -294,11 +321,11 @@ function update(dt) {
       player.hurt = 1;                       // one second of invulnerability
       shake = 14;
       burst(player.x, player.y, '#bffcff', '#4ff0ff', 14, 200, 0.5);
-      sound(110, 0.28, 'sawtooth', 0.13, 0.4);
+      sound('hurt');
       if (player.hp <= 0) {
         dead = true;
         shake = 26;
-        sound(70, 0.9, 'sawtooth', 0.16, 0.3);
+        sound('death');
       }
     }
   }
@@ -331,7 +358,7 @@ function update(dt) {
                         y: e.y + (Math.random() - 0.5) * 18, r: 4, life: GEM_LIFE });
           }
           burst(e.x, e.y, e.color, e.glow, 6 + e.maxHp, 130 + e.maxHp * 12);
-          sound(200 - e.maxHp * 8, 0.11, 'sawtooth', 0.05, 0.45);
+          sound('kill', 1 - Math.min(0.4, e.maxHp * 0.04));  // bigger things pop lower
         }
         if (b.pierce > 0) { b.pierce -= 1; }
         else { b.gone = true; break; }
@@ -354,7 +381,7 @@ function update(dt) {
     }
     if (d < player.r + g.r + 4) {
       g.gone = true;
-      sound(1150, 0.05, 'sine', 0.03, 1.3);
+      sound('gem');
       gainXp();
     }
   }
@@ -427,6 +454,14 @@ function drawUpgradeCards() {
     ctx.font = '16px system-ui, sans-serif';
     ctx.fillText('[ ' + (i + 1) + ' ]', x + w / 2, top + 114);
   });
+}
+
+// So a silent game can tell you why it is silent.
+function audioStatus() {
+  if (muted) return '   [M] muted';
+  if (!audio) return '   sound: press a key';
+  if (audio.state !== 'running') return '   sound: ' + audio.state;
+  return '';
 }
 
 function draw() {
@@ -504,7 +539,7 @@ function draw() {
   ctx.textAlign = 'left';
   ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '   LV ' + level +
                '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed' +
-               (muted ? '   [M] muted' : ''), 16, 30);
+               audioStatus(), 16, 30);
 
   if (paused) drawUpgradeCards();
 
@@ -679,7 +714,24 @@ if (location.search === '?test') {
 
   // Sound is a no-op before the player has pressed anything, not a crash.
   console.assert(audio === null, 'no audio context before a key press');
-  sound(440, 0.05);
+  sound('shoot');
+
+  // Every sound must actually be loud enough to hear. Render each one offline
+  // through the real voice() and measure its peak. This is the check that was
+  // missing when every sound shipped 20-30dB too quiet to notice.
+  (async () => {
+    for (const [name, spec] of Object.entries(SOUNDS)) {
+      const off = new OfflineAudioContext(1, 44100, Math.ceil(44100 * (spec.dur + 0.05)));
+      voice(off, off.destination, spec, 0);
+      const d = (await off.startRendering()).getChannelData(0);
+      let peak = 0;
+      for (let i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+      console.assert(peak >= 0.15,
+        'sound "' + name + '" is too quiet to hear: peak ' + peak.toFixed(3) +
+        ' (' + (20 * Math.log10(peak)).toFixed(1) + ' dBFS)');
+    }
+    console.log('sound level checks done');
+  })();
 
   reset();
   console.log('checks done');
