@@ -34,10 +34,14 @@ window.addEventListener('resize', resize);
 resize();
 
 // ---------- input ----------
-// Remember which keys are held down right now.
+// Remember which keys are held down right now, BY PHYSICAL POSITION.
+// e.code is the key itself ('KeyW'); e.key is the character that key types,
+// which depends on the keyboard layout -- on a Russian layout WASD type
+// ц/ф/ы/в, so matching on the character ignored them entirely. Position also
+// does the right thing on AZERTY, where those four keys are labelled ZQSD.
 const keys = new Set();
-window.addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
-window.addEventListener('keyup',   e => keys.delete(e.key.toLowerCase()));
+window.addEventListener('keydown', e => keys.add(e.code));
+window.addEventListener('keyup',   e => keys.delete(e.code));
 
 const BULLET_SPEED = 430;   // pixels per second
 const GEM_PULL     = 300;   // how fast gems fly to you once in range
@@ -98,7 +102,7 @@ window.addEventListener('keydown', e => {
   } else if (audio.state === 'suspended') {
     audio.resume();
   }
-  if (e.key.toLowerCase() === 'm') muted = !muted;
+  if (e.code === 'KeyM') muted = !muted;
 });
 
 function sound(name, pitch = 1) {
@@ -241,16 +245,18 @@ function gainXp() {
 // ---------- update: move everything ----------
 function update(dt) {
   if (dead) {
-    if (keys.has('r')) reset();
+    if (keys.has('KeyR')) reset();
     return;
   }
 
   // Picking an upgrade. The whole game is frozen until you choose.
   if (paused) {
     for (let i = 0; i < choices.length; i++) {
-      if (keys.has(String(i + 1))) {
+      const n = String(i + 1);
+      if (keys.has('Digit' + n) || keys.has('Numpad' + n)) {
         choices[i].apply(player);
-        keys.delete(String(i + 1));   // force a fresh press next time
+        keys.delete('Digit' + n);     // force a fresh press next time
+        keys.delete('Numpad' + n);
         choices = [];
         paused = false;
         break;
@@ -264,10 +270,10 @@ function update(dt) {
 
   // --- move the player ---
   let dx = 0, dy = 0;
-  if (keys.has('a') || keys.has('arrowleft'))  dx -= 1;
-  if (keys.has('d') || keys.has('arrowright')) dx += 1;
-  if (keys.has('w') || keys.has('arrowup'))    dy -= 1;
-  if (keys.has('s') || keys.has('arrowdown'))  dy += 1;
+  if (keys.has('KeyA') || keys.has('ArrowLeft'))  dx -= 1;
+  if (keys.has('KeyD') || keys.has('ArrowRight')) dx += 1;
+  if (keys.has('KeyW') || keys.has('ArrowUp'))    dy -= 1;
+  if (keys.has('KeyS') || keys.has('ArrowDown'))  dy += 1;
 
   // Holding two keys would otherwise move you 1.41x faster diagonally.
   const len = Math.hypot(dx, dy);
@@ -689,9 +695,9 @@ if (location.search === '?test') {
   // Pressing its number applies the upgrade and resumes play.
   const before = player.speed;
   choices = [UPGRADES.find(u => u.name === 'Fins')];
-  keys.add('1');
+  keys.add('Digit1');
   update(0.016);
-  keys.delete('1');
+  keys.delete('Digit1');
   console.assert(!paused && player.speed > before, 'picking must apply the upgrade and resume');
 
   // Sparks appear on a kill, then clean themselves up.
@@ -737,6 +743,38 @@ if (location.search === '?test') {
   // Sound is a no-op before the player has pressed anything, not a crash.
   console.assert(audio === null, 'no audio context before a key press');
   sound('shoot');
+
+  // Every binding must work on a non-Latin keyboard. These dispatch real
+  // events with the character a Russian (or AZERTY) layout actually produces,
+  // while the physical key stays the same.
+  reset();
+  keys.clear();
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ц', code: 'KeyW' }));
+  console.assert(keys.has('KeyW'), 'a Russian-layout W must register');
+  const yBefore = player.y;
+  update(0.1);
+  console.assert(player.y < yBefore, 'a Russian-layout W must move the player up');
+  window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ц', code: 'KeyW' }));
+  console.assert(!keys.has('KeyW'), 'releasing it must stop the player');
+
+  reset();
+  dead = true;
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'к', code: 'KeyR' }));
+  update(1 / 60);
+  console.assert(!dead, 'a Russian-layout R must restart the game');
+  window.dispatchEvent(new KeyboardEvent('keyup', { key: 'к', code: 'KeyR' }));
+
+  reset();
+  paused = true;
+  choices = [UPGRADES.find(u => u.name === 'Fins')];
+  const speedBefore = player.speed;
+  // '&' is what an unshifted 1 types on a French AZERTY keyboard.
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: '&', code: 'Digit1' }));
+  update(1 / 60);
+  console.assert(!paused && player.speed > speedBefore,
+    'an AZERTY-layout 1 must pick the first upgrade');
+  window.dispatchEvent(new KeyboardEvent('keyup', { key: '&', code: 'Digit1' }));
+  keys.clear();
 
   // Every sound must actually be loud enough to hear. Render each one offline
   // through the real voice() and measure its peak. This is the check that was
