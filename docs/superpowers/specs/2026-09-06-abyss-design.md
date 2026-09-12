@@ -24,7 +24,15 @@ step must be independently playable and explained as it lands.
   `gems[]`, `particles[]`. No classes, no ECS.
 - **Upgrades are data**, an array of `{name, desc, apply(state)}`, so adding
   one is an appended list entry rather than a change to the weapon system.
-  This is the only deliberate architecture decision in the project.
+  This is the only deliberate architecture decision in the project. Enemy
+  types, sounds, menu entries and options all follow the same shape.
+- **Input is matched on `e.code`**, the physical key, never `e.key`, which is
+  the character the layout produces -- on a Russian layout WASD type ц/ф/ы/в.
+  Gameplay reads a held-key set; menus read a `justPressed` set cleared at the
+  end of every update, so holding a key does not scroll a menu.
+- **One `screen` variable** drives title / playing / levelup / paused / help /
+  options / dead. It replaced the `paused` and `dead` booleans, which could
+  contradict each other.
 - **The weapon has a firing range** (`player.range`), drawn as a faint ring.
   Unlimited range made the game a screen-clearing sniper exercise with no
   tension; a bounded radius forces enemies to enter the player's space and is
@@ -52,6 +60,7 @@ Each step is playable on its own.
 4. Firing range, XP gems, level bar, level-up with 3 upgrades.      <- DONE
 5. Enemy types, fixed arena, real bullet range, expiring gems, XP curve. <- DONE
 6. Juice: screen shake, hit flash, particles, WebAudio beeps.        <- DONE
+7. Title screen, pause menu, help page, options.                     <- DONE
 
 ## Balance, as measured
 
@@ -86,4 +95,7 @@ a standalone with no ending, promising as a roguelite run length.
 
 ## Deferred
 
-Sprites, menus, save data, mobile input, multiple levels.
+Sprites, save data, mobile input, multiple levels. Settings are deliberately
+not persisted yet -- localStorage was considered and declined for now, so
+volume and shake reset on reload. The file is past 1000 lines and due a split
+into modules; that is its own step, not a rider on a feature.

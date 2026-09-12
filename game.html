@@ -40,8 +40,14 @@ resize();
 // ц/ф/ы/в, so matching on the character ignored them entirely. Position also
 // does the right thing on AZERTY, where those four keys are labelled ZQSD.
 const keys = new Set();
-window.addEventListener('keydown', e => keys.add(e.code));
-window.addEventListener('keyup',   e => keys.delete(e.code));
+// Menus need to know a key *went down this frame*, not that it is held --
+// otherwise holding Down flies through the list. Cleared at the end of update().
+const justPressed = new Set();
+window.addEventListener('keydown', e => {
+  keys.add(e.code);
+  if (!e.repeat) justPressed.add(e.code);     // ignore the OS key-repeat
+});
+window.addEventListener('keyup', e => keys.delete(e.code));
 
 const BULLET_SPEED = 430;   // pixels per second
 const GEM_PULL     = 300;   // how fast gems fly to you once in range
@@ -50,6 +56,16 @@ const XP_GROWTH    = 1.45;  // each level costs this much more than the last
 const ENEMY_RAMP   = 0.006; // enemies spawn this much faster-moving per second
 
 let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
+
+// ---------- settings ----------
+const SHAKE_LEVELS = [
+  { name: 'off',    mul: 0 },
+  { name: 'low',    mul: 0.5 },
+  { name: 'normal', mul: 1 },
+];
+let volume = 0.6;           // master gain, 0..1
+let shakeLevel = 2;         // index into SHAKE_LEVELS
+let showFps = false;
 
 // ---------- sound ----------
 // Every sound is an oscillator and a fading volume envelope. No audio files.
@@ -97,7 +113,7 @@ window.addEventListener('keydown', e => {
     // compressor rides that down instead of letting it crackle.
     const comp = audio.createDynamicsCompressor();
     master = audio.createGain();
-    master.gain.value = 0.6;
+    master.gain.value = volume;
     master.connect(comp).connect(audio.destination);
   } else if (audio.state === 'suspended') {
     audio.resume();
@@ -154,8 +170,16 @@ function pickEnemyType() {
 // ---------- game state ----------
 // Everything a run owns lives here, so restarting is one call.
 let player, enemies, bullets, gems, particles;
-let elapsed, spawnTimer, kills, dead, shake;
-let xp, xpNext, level, paused, choices;
+let elapsed, spawnTimer, kills, shake;
+let xp, xpNext, level, choices;
+
+// Which screen we're on. Replaces the old `paused` and `dead` flags, which
+// could contradict each other; now there is exactly one answer at a time.
+// 'title' | 'playing' | 'levelup' | 'paused' | 'help' | 'options' | 'dead'
+let screen = 'title';
+let menuIndex = 0;          // cursor in the title / pause menu
+let optionIndex = 0;        // cursor in the options list
+let returnTo = 'title';     // where Esc goes back to from help / options
 
 function reset() {
   player = {
@@ -180,14 +204,77 @@ function reset() {
   elapsed = 0;         // seconds survived
   spawnTimer = 0;
   kills = 0;
-  dead = false;
   shake = 0;           // pixels of screen shake left
+  screen = 'playing';  // a reset run is a running run
 
   xp = 0;
   xpNext = 5;
   level = 1;
-  paused = false;      // true while you're picking an upgrade
   choices = [];
+}
+
+// ---------- menus ----------
+// Same trick as upgrades and enemy types: a list of entries, so adding one
+// is a line and nothing else changes.
+const MENUS = {
+  title: {
+    heading: 'ABYSS',
+    sub: 'something small, in very deep water',
+    items: [
+      { label: 'Start',   run: () => reset() },          // reset() starts the run
+      { label: 'Help',    run: () => openScreen('help') },
+      { label: 'Options', run: () => openScreen('options') },
+    ],
+  },
+  paused: {
+    heading: 'PAUSED',
+    sub: '',
+    items: [
+      { label: 'Resume',        run: () => { screen = 'playing'; } },
+      { label: 'Help',          run: () => openScreen('help') },
+      { label: 'Options',       run: () => openScreen('options') },
+      { label: 'Quit to title', run: () => { screen = 'title'; menuIndex = 0; } },
+    ],
+  },
+};
+
+const OPTIONS = [
+  { label: 'Volume',
+    show: () => Math.round(volume * 100) + '%',
+    change: d => {
+      volume = Math.max(0, Math.min(1, Math.round((volume + d * 0.1) * 10) / 10));
+      if (master) master.gain.value = volume;
+      sound('gem');                       // so you hear what you just set
+    } },
+  { label: 'Screen shake',
+    show: () => SHAKE_LEVELS[shakeLevel].name,
+    change: d => {
+      shakeLevel = Math.max(0, Math.min(SHAKE_LEVELS.length - 1, shakeLevel + d));
+    } },
+  { label: 'Show FPS',
+    show: () => (showFps ? 'on' : 'off'),
+    change: () => { showFps = !showFps; } },
+];
+
+const HELP_KEYS = [
+  ['Move',           'W A S D   or   arrow keys'],
+  ['Choose upgrade', '1   2   3'],
+  ['Restart a run',  'R'],
+  ['Mute sound',     'M'],
+  ['Menu / back',    'Esc'],
+];
+
+const HELP_BLURB = [
+  'Your weapon fires by itself at whatever comes inside the ring.',
+  'Things you kill drop green motes. Walk over them to gain XP.',
+  'Motes fade after eight seconds, so the reward sits where the danger was.',
+  'Fill the bar, take one of three upgrades, and see how long you last.',
+];
+
+function openScreen(name) {
+  returnTo = screen;
+  screen = name;
+  optionIndex = 0;
 }
 
 // ---------- spawning ----------
@@ -237,33 +324,75 @@ function gainXp() {
   // Geometric, not linear: XP income compounds as you level, so its cost has to.
   xpNext = Math.round(5 * Math.pow(XP_GROWTH, level - 1));
   choices = rollUpgrades();
-  paused = true;
+  screen = 'levelup';
   sound('levelA');
   sound('levelB');
 }
 
-// ---------- update: move everything ----------
+// ---------- update ----------
+// One wrapper so this-frame's key presses are forgotten afterwards, whichever
+// way step() returned.
 function update(dt) {
-  if (dead) {
-    if (keys.has('KeyR')) reset();
+  step(dt);
+  justPressed.clear();
+}
+
+const UP    = ['ArrowUp', 'KeyW'];
+const DOWN  = ['ArrowDown', 'KeyS'];
+const LEFT  = ['ArrowLeft', 'KeyA'];
+const RIGHT = ['ArrowRight', 'KeyD'];
+const GO    = ['Enter', 'NumpadEnter', 'Space'];
+const tapped = codes => codes.some(c => justPressed.has(c));
+
+function moveCursor(index, length) {
+  if (tapped(UP))   return (index + length - 1) % length;
+  if (tapped(DOWN)) return (index + 1) % length;
+  return index;
+}
+
+function step(dt) {
+  if (screen === 'title' || screen === 'paused') {
+    const items = MENUS[screen].items;
+    menuIndex = moveCursor(menuIndex, items.length);
+    if (tapped(GO)) items[menuIndex].run();
+    else if (justPressed.has('Escape') && screen === 'paused') screen = 'playing';
+    return;
+  }
+
+  if (screen === 'help') {
+    if (justPressed.has('Escape') || tapped(GO)) screen = returnTo;
+    return;
+  }
+
+  if (screen === 'options') {
+    optionIndex = moveCursor(optionIndex, OPTIONS.length);
+    if (tapped(LEFT))  OPTIONS[optionIndex].change(-1);
+    if (tapped(RIGHT) || tapped(GO)) OPTIONS[optionIndex].change(1);
+    if (justPressed.has('Escape')) screen = returnTo;
+    return;
+  }
+
+  if (screen === 'dead') {
+    if (justPressed.has('KeyR')) reset();
+    if (justPressed.has('Escape')) { screen = 'title'; menuIndex = 0; }
     return;
   }
 
   // Picking an upgrade. The whole game is frozen until you choose.
-  if (paused) {
+  if (screen === 'levelup') {
     for (let i = 0; i < choices.length; i++) {
       const n = String(i + 1);
-      if (keys.has('Digit' + n) || keys.has('Numpad' + n)) {
+      if (justPressed.has('Digit' + n) || justPressed.has('Numpad' + n)) {
         choices[i].apply(player);
-        keys.delete('Digit' + n);     // force a fresh press next time
-        keys.delete('Numpad' + n);
         choices = [];
-        paused = false;
+        screen = 'playing';
         break;
       }
     }
     return;
   }
+
+  if (justPressed.has('Escape')) { screen = 'paused'; menuIndex = 0; return; }
 
   elapsed += dt;
   if (player.hurt > 0) player.hurt -= dt;
@@ -325,12 +454,12 @@ function update(dt) {
     if (d < e.r + player.r && player.hurt <= 0) {
       player.hp -= 1;
       player.hurt = 1;                       // one second of invulnerability
-      shake = 6;
+      shake = 6 * SHAKE_LEVELS[shakeLevel].mul;
       burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
       sound('hurt');
       if (player.hp <= 0) {
-        dead = true;
-        shake = 11;
+        screen = 'dead';
+        shake = 11 * SHAKE_LEVELS[shakeLevel].mul;
         sound('death');
       }
     }
@@ -483,24 +612,13 @@ function audioStatus() {
   return '';
 }
 
-function draw() {
-  // Paint the whole window, including the letterbox margin, then switch
-  // into arena coordinates and clip so nothing spills into the margin.
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = '#04070d';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+function dimArena() {
+  ctx.fillStyle = 'rgba(4, 7, 13, 0.82)';
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+}
 
-  ctx.save();
-  ctx.setTransform(scale, 0, 0, scale, offX, offY);
-  ctx.beginPath();
-  ctx.rect(0, 0, ARENA_W, ARENA_H);
-  ctx.clip();
-
-  // Shake the contents, not the clip window, so the arena edge stays put.
-  if (shake > 0) {
-    ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-  }
-
+// The play field. draw() has already set up arena coordinates and the shake.
+function drawField() {
   // How far your shots reach — the player needs to see this.
   ctx.strokeStyle = 'rgba(79, 240, 255, 0.10)';
   ctx.lineWidth = 1;
@@ -560,21 +678,140 @@ function draw() {
                '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed' +
                audioStatus(), 16, 30);
 
-  if (paused) drawUpgradeCards();
+  if (showFps) {
+    ctx.fillStyle = '#3d6270';
+    ctx.fillText('fps ' + Math.round(fps) + '    enemies ' + enemies.length +
+                 '   shots ' + bullets.length + '   motes ' + gems.length +
+                 '   sparks ' + particles.length, 16, 50);
+  }
 
-  if (dead) {
-    ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
-    ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+}
 
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ff5c85';
-    ctx.font = '44px system-ui, sans-serif';
-    ctx.fillText('CONSUMED', ARENA_W / 2, ARENA_H / 2 - 10);
+function drawDeath() {
+  ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
 
-    ctx.fillStyle = '#7fb0c0';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ff5c85';
+  ctx.font = '44px system-ui, sans-serif';
+  ctx.fillText('CONSUMED', ARENA_W / 2, ARENA_H / 2 - 10);
+
+  ctx.fillStyle = '#7fb0c0';
+  ctx.font = '16px system-ui, sans-serif';
+  ctx.fillText('level ' + level + ', survived ' + elapsed.toFixed(1) + 's, killed ' +
+               kills, ARENA_W / 2, ARENA_H / 2 + 26);
+
+  ctx.fillStyle = '#2f5563';
+  ctx.font = '13px system-ui, sans-serif';
+  ctx.fillText('R to go again,  Esc for the menu', ARENA_W / 2, ARENA_H / 2 + 60);
+}
+
+function drawHint(text) {
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#2f5563';
+  ctx.font = '13px system-ui, sans-serif';
+  ctx.fillText(text, ARENA_W / 2, ARENA_H - 64);
+}
+
+function drawMenu(menu) {
+  ctx.textAlign = 'center';
+  ctx.shadowBlur = 28;
+  ctx.shadowColor = '#4ff0ff';
+  ctx.fillStyle = '#bffcff';
+  ctx.font = '58px system-ui, sans-serif';
+  ctx.fillText(menu.heading, ARENA_W / 2, 240);
+  ctx.shadowBlur = 0;
+
+  if (menu.sub) {
+    ctx.fillStyle = '#456b78';
+    ctx.font = '15px system-ui, sans-serif';
+    ctx.fillText(menu.sub, ARENA_W / 2, 276);
+  }
+
+  menu.items.forEach((item, i) => {
+    const on = i === menuIndex;
+    ctx.fillStyle = on ? '#bffcff' : '#547f8d';
+    ctx.font = (on ? '23px' : '20px') + ' system-ui, sans-serif';
+    ctx.fillText(on ? '\u203a  ' + item.label + '  \u2039' : item.label,
+                 ARENA_W / 2, 380 + i * 46);
+  });
+
+  drawHint('\u2191 \u2193 to choose,  Enter to pick');
+}
+
+function drawHelp() {
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9ef7ff';
+  ctx.font = '34px system-ui, sans-serif';
+  ctx.fillText('HELP', ARENA_W / 2, 150);
+
+  HELP_KEYS.forEach(([what, key], i) => {
+    const y = 232 + i * 34;
     ctx.font = '16px system-ui, sans-serif';
-    ctx.fillText('level ' + level + ', survived ' + elapsed.toFixed(1) + 's, killed ' +
-                 kills + '  —  press R', ARENA_W / 2, ARENA_H / 2 + 26);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#547f8d';
+    ctx.fillText(what, ARENA_W / 2 - 24, y);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#bffcff';
+    ctx.fillText(key, ARENA_W / 2 + 24, y);
+  });
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#6f97a5';
+  ctx.font = '15px system-ui, sans-serif';
+  HELP_BLURB.forEach((line, i) => ctx.fillText(line, ARENA_W / 2, 470 + i * 27));
+
+  drawHint('Esc to go back');
+}
+
+function drawOptions() {
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9ef7ff';
+  ctx.font = '34px system-ui, sans-serif';
+  ctx.fillText('OPTIONS', ARENA_W / 2, 190);
+
+  OPTIONS.forEach((opt, i) => {
+    const on = i === optionIndex;
+    const y = 300 + i * 46;
+    ctx.font = (on ? '20px' : '18px') + ' system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = on ? '#bffcff' : '#547f8d';
+    ctx.fillText(opt.label, ARENA_W / 2 - 24, y);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = on ? '#4ff0ff' : '#3d6270';
+    ctx.fillText(on ? '\u2039 ' + opt.show() + ' \u203a' : opt.show(),
+                 ARENA_W / 2 + 24, y);
+  });
+
+  drawHint('\u2191 \u2193 to choose,  \u2190 \u2192 to change,  Esc to go back');
+}
+
+function draw() {
+  // Paint the whole window, including the letterbox margin, then switch
+  // into arena coordinates and clip so nothing spills into the margin.
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#04070d';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.setTransform(scale, 0, 0, scale, offX, offY);
+  ctx.beginPath();
+  ctx.rect(0, 0, ARENA_W, ARENA_H);
+  ctx.clip();
+
+  // Shake the contents, not the clip window, so the arena edge stays put.
+  if (shake > 0) {
+    ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  }
+
+  if (screen === 'title')        drawMenu(MENUS.title);
+  else if (screen === 'help')    drawHelp();
+  else if (screen === 'options') drawOptions();
+  else {
+    drawField();
+    if (screen === 'levelup')     drawUpgradeCards();
+    else if (screen === 'paused') { dimArena(); drawMenu(MENUS.paused); }
+    else if (screen === 'dead')   drawDeath();
   }
 
   ctx.restore();
@@ -582,11 +819,13 @@ function draw() {
 
 // ---------- the loop ----------
 let last = performance.now();
+let fps = 60;
 function frame(now) {
   // Seconds since the previous frame. Capped, so that switching tabs
   // for a minute doesn't teleport everything across the screen.
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
+  if (dt > 0) fps += (1 / dt - fps) * 0.1;    // smoothed, or it's unreadable
 
   update(dt);
   draw();
@@ -594,6 +833,7 @@ function frame(now) {
 }
 
 reset();
+screen = 'title';       // reset() leaves us playing; the game opens on the menu
 
 // ---------- checks: open game.html?test and look at the console ----------
 if (location.search === '?test') {
@@ -688,17 +928,17 @@ if (location.search === '?test') {
   xp = xpNext - 1;
   gems.push({ x: player.x, y: player.y, r: 4, life: GEM_LIFE });
   update(0.016);
-  console.assert(level === 2 && paused, 'last gem must level you up and pause');
+  console.assert(level === 2 && screen === 'levelup', 'last gem must level you up and pause');
   console.assert(choices.length === 3, 'a level-up offers 3 choices');
   console.assert(new Set(choices).size === 3, 'the 3 choices must be different');
 
   // Pressing its number applies the upgrade and resumes play.
   const before = player.speed;
   choices = [UPGRADES.find(u => u.name === 'Fins')];
-  keys.add('Digit1');
+  justPressed.add('Digit1');
   update(0.016);
-  keys.delete('Digit1');
-  console.assert(!paused && player.speed > before, 'picking must apply the upgrade and resume');
+  console.assert(screen === 'playing' && player.speed > before,
+    'picking must apply the upgrade and resume');
 
   // Sparks appear on a kill, then clean themselves up.
   reset();
@@ -758,23 +998,90 @@ if (location.search === '?test') {
   console.assert(!keys.has('KeyW'), 'releasing it must stop the player');
 
   reset();
-  dead = true;
+  screen = 'dead';
   window.dispatchEvent(new KeyboardEvent('keydown', { key: 'к', code: 'KeyR' }));
   update(1 / 60);
-  console.assert(!dead, 'a Russian-layout R must restart the game');
+  console.assert(screen === 'playing', 'a Russian-layout R must restart the game');
   window.dispatchEvent(new KeyboardEvent('keyup', { key: 'к', code: 'KeyR' }));
 
   reset();
-  paused = true;
+  screen = 'levelup';
   choices = [UPGRADES.find(u => u.name === 'Fins')];
   const speedBefore = player.speed;
   // '&' is what an unshifted 1 types on a French AZERTY keyboard.
   window.dispatchEvent(new KeyboardEvent('keydown', { key: '&', code: 'Digit1' }));
   update(1 / 60);
-  console.assert(!paused && player.speed > speedBefore,
+  console.assert(screen === 'playing' && player.speed > speedBefore,
     'an AZERTY-layout 1 must pick the first upgrade');
   window.dispatchEvent(new KeyboardEvent('keyup', { key: '&', code: 'Digit1' }));
   keys.clear();
+
+  // --- screens, menus and options ---
+  // tap() presses a key for exactly one frame, the way a real press arrives.
+  const tap = code => { justPressed.add(code); update(1 / 60); };
+
+  reset();
+  screen = 'title'; menuIndex = 0;
+  console.assert(MENUS.title.items[0].label === 'Start', 'first title entry is Start');
+  tap('Enter');
+  console.assert(screen === 'playing', 'Start must begin a run, got ' + screen);
+
+  tap('Escape');
+  console.assert(screen === 'paused', 'Esc in play must open the menu, got ' + screen);
+  tap('Escape');
+  console.assert(screen === 'playing', 'Esc again must resume, got ' + screen);
+
+  // Help must come back to wherever it was opened from, not always the title.
+  screen = 'title'; menuIndex = 1;
+  tap('Enter');
+  console.assert(screen === 'help', 'title -> help, got ' + screen);
+  tap('Escape');
+  console.assert(screen === 'title', 'help must return to the title, got ' + screen);
+
+  screen = 'paused'; menuIndex = 1;
+  tap('Enter');
+  console.assert(screen === 'help', 'pause -> help, got ' + screen);
+  tap('Escape');
+  console.assert(screen === 'paused', 'help must return to the pause menu, got ' + screen);
+
+  // The cursor wraps at both ends.
+  screen = 'title'; menuIndex = 0;
+  tap('ArrowUp');
+  console.assert(menuIndex === MENUS.title.items.length - 1, 'cursor wraps upward');
+  tap('ArrowDown');
+  console.assert(menuIndex === 0, 'cursor wraps back down');
+
+  // Holding a key must not scroll the menu: a repeat is not a fresh press.
+  screen = 'title'; menuIndex = 0;
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowDown', repeat: true }));
+  update(1 / 60);
+  console.assert(menuIndex === 0, 'key auto-repeat must not move the cursor');
+
+  // Each option changes the thing it claims to.
+  screen = 'options'; optionIndex = 0; volume = 0.6;
+  tap('ArrowLeft');
+  console.assert(Math.abs(volume - 0.5) < 1e-9, 'volume must go down, got ' + volume);
+  tap('ArrowRight'); tap('ArrowRight');
+  console.assert(Math.abs(volume - 0.7) < 1e-9, 'volume must go up, got ' + volume);
+  volume = 0.6;
+
+  screen = 'options'; optionIndex = 1; shakeLevel = 2;
+  tap('ArrowLeft');
+  console.assert(SHAKE_LEVELS[shakeLevel].name === 'low', 'shake must step down');
+
+  screen = 'options'; optionIndex = 2; showFps = false;
+  tap('Enter');
+  console.assert(showFps === true, 'fps readout must toggle on');
+  tap('Enter');
+  console.assert(showFps === false, 'fps readout must toggle off');
+
+  // "off" has to actually mean off, not merely smaller.
+  shakeLevel = 0;
+  reset();
+  enemies.push(mob(player.x + 15, player.y, { speed: 0, hp: 999, maxHp: 999 }));
+  update(1 / 60);
+  console.assert(shake === 0, 'shake "off" must not shake at all, got ' + shake);
+  shakeLevel = 2;
 
   // Every sound must actually be loud enough to hear. Render each one offline
   // through the real voice() and measure its peak. This is the check that was
