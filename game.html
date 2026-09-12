@@ -334,6 +334,10 @@ function gainXp() {
 // way step() returned.
 function update(dt) {
   step(dt);
+  // Outside step(), because step() returns early on every non-playing screen.
+  // Dying sets screen = 'dead' in the same frame it sets shake, so decaying
+  // inside the gameplay path left the menus rattling forever.
+  if (shake > 0) shake = Math.max(0, shake - dt * 55);
   justPressed.clear();
 }
 
@@ -547,7 +551,6 @@ function step(dt) {
   }
 
   for (const e of enemies) if (e.flash > 0) e.flash -= dt;
-  if (shake > 0) shake = Math.max(0, shake - dt * 55);
 
   // Sweep up everything marked during this frame. Never remove things from
   // an array while you are still looping over it.
@@ -1074,6 +1077,28 @@ if (location.search === '?test') {
   console.assert(showFps === true, 'fps readout must toggle on');
   tap('Enter');
   console.assert(showFps === false, 'fps readout must toggle off');
+
+  // Dying shakes the screen, and that shake must settle even though the game
+  // has stopped updating. The check above never died, so it missed this.
+  reset();
+  player.hp = 1;
+  enemies.push(mob(player.x + 15, player.y, { speed: 0, hp: 999, maxHp: 999 }));
+  update(1 / 60);
+  console.assert(screen === 'dead', 'setup: that should have killed the player');
+  console.assert(shake > 0, 'dying must shake the screen');
+  for (let i = 0; i < 60; i++) update(1 / 60);
+  console.assert(shake === 0, 'shake must settle on the death screen, got ' + shake);
+
+  // ...and it must not follow you out to the menus either.
+  reset();
+  player.hp = 1;
+  enemies.push(mob(player.x + 15, player.y, { speed: 0, hp: 999, maxHp: 999 }));
+  update(1 / 60);
+  justPressed.add('Escape');
+  update(1 / 60);
+  console.assert(screen === 'title', 'setup: Esc should leave to the title');
+  for (let i = 0; i < 60; i++) update(1 / 60);
+  console.assert(shake === 0, 'the title must not inherit a shake, got ' + shake);
 
   // "off" has to actually mean off, not merely smaller.
   shakeLevel = 0;
