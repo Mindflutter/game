@@ -49,11 +49,33 @@ window.addEventListener('keydown', e => {
 });
 window.addEventListener('keyup', e => keys.delete(e.code));
 
-const BULLET_SPEED = 430;   // pixels per second
-const GEM_PULL     = 300;   // how fast gems fly to you once in range
-const GEM_LIFE     = 8;     // seconds before an uncollected gem fades out
-const XP_GROWTH    = 1.45;  // each level costs this much more than the last
-const ENEMY_RAMP   = 0.006; // enemies spawn this much faster-moving per second
+// ---------- balance ----------
+// Every number that decides how the game plays, in one place. These are the
+// real product of this prototype: the rendering gets rewritten on any port,
+// these transfer as-is.
+const PLAYER_START = {
+  r: 10,             // radius, in pixels
+  speed: 260,        // pixels per second
+  hp: 3,
+  maxHp: 3,
+  fireRate: 2.5,     // shots per second
+  damage: 1,
+  range: 250,        // how far a shot travels before it dies
+  pierce: 0,         // extra enemies a shot passes through
+  pickupRange: 75,
+};
+
+const IFRAMES        = 1;     // seconds of invulnerability after a hit
+const BULLET_SPEED   = 430;   // pixels per second
+const GEM_PULL       = 300;   // how fast gems fly to you once in range
+const GEM_LIFE       = 8;     // seconds before an uncollected gem fades out
+const XP_BASE        = 5;     // motes needed for level 2
+const XP_GROWTH      = 1.45;  // each level costs this much more than the last
+const SPAWN_FIRST    = 1.2;   // seconds between spawns at the start of a run
+const SPAWN_QUICKEN  = 0.02;  // ...shortening by this much per second survived
+const SPAWN_FASTEST  = 0.15;  // ...but never below this
+const ENEMY_RAMP     = 0.006; // enemies spawn this much faster-moving per second
+const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
 
 let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
@@ -190,19 +212,11 @@ let returnTo = 'title';     // where Esc goes back to from help / options
 
 function reset() {
   player = {
+    ...PLAYER_START,
     x: ARENA_W / 2,
     y: ARENA_H / 2,
-    r: 10,             // radius, in pixels
-    speed: 260,        // pixels per second
-    hp: 3,
-    maxHp: 3,
     hurt: 0,           // seconds of invulnerability left
-    fireRate: 2.5,     // shots per second
     fireTimer: 0,      // seconds until the next shot
-    damage: 1,
-    range: 250,        // how far a shot travels before it dies
-    pierce: 0,         // extra enemies a shot passes through
-    pickupRange: 75,
   };
   enemies = [];
   bullets = [];
@@ -215,7 +229,7 @@ function reset() {
   screen = 'playing';  // a reset run is a running run
 
   xp = 0;
-  xpNext = 5;
+  xpNext = XP_BASE;
   level = 1;
   choices = [];
 }
@@ -296,29 +310,49 @@ function spawnEnemy() {
 
   // Later arrivals swim faster, so kiting stops working on its own.
   const t = pickEnemyType();
-  const speed = t.speed * (0.85 + Math.random() * 0.3) * (1 + elapsed * ENEMY_RAMP);
+  const speed = t.speed * (1 - ENEMY_JITTER / 2 + Math.random() * ENEMY_JITTER) *
+                (1 + elapsed * ENEMY_RAMP);
   enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, xp: t.xp,
                  color: t.color, glow: t.glow, lastHitBy: 0 });
 }
 
-// A puff of shrinking sparks. Purely decorative, but it's what makes a kill
-// feel like an event rather than an object disappearing.
+function spark(x, y, vx, vy, life, r, color, glow) {
+  particles.push({ x, y, vx, vy, life, maxLife: life, r, color, glow });
+}
+
+// A puff of shrinking sparks thrown in every direction. Purely decorative,
+// but it's what makes a kill feel like an event rather than a disappearance.
 function burst(x, y, color, glow, count, speed, life = 0.45) {
   for (let i = 0; i < count; i++) {
     const a = Math.random() * Math.PI * 2;
     const s = speed * (0.3 + Math.random() * 0.7);
-    particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
-                     life, maxLife: life, r: 3, color, glow });
+    spark(x, y, Math.cos(a) * s, Math.sin(a) * s, life, 3, color, glow);
+  }
+}
+
+// Sparks kicked back along the shot, so a hit that doesn't kill still looks
+// like it landed.
+function hitSparks(e, b) {
+  const bs = Math.sqrt(b.vx * b.vx + b.vy * b.vy) || 1;
+  for (let n = 0; n < 5; n++) {
+    const spread = (Math.random() - 0.5) * 1.6;
+    const sp = 70 + Math.random() * 90;
+    spark(e.x, e.y,
+          (-b.vx / bs) * sp + Math.cos(spread) * sp * 0.5,
+          (-b.vy / bs) * sp + Math.sin(spread) * sp * 0.5,
+          0.22, 2.5, '#ffffff', e.glow);
   }
 }
 
 // Closest enemy inside firing range, or null if nothing is close enough.
-// Starting the search at player.range does both jobs at once.
+// Seeding the search with the range does both jobs at once. Compared in
+// squared space -- we only need the ordering, never the distance itself.
 function nearestEnemy() {
-  let best = null, bestDist = player.range;
+  let best = null, bestSq = player.range * player.range;
   for (const e of enemies) {
-    const d = Math.hypot(e.x - player.x, e.y - player.y);
-    if (d < bestDist) { bestDist = d; best = e; }
+    const dx = e.x - player.x, dy = e.y - player.y;
+    const sq = dx * dx + dy * dy;
+    if (sq < bestSq) { bestSq = sq; best = e; }
   }
   return best;
 }
@@ -329,7 +363,7 @@ function gainXp() {
   xp -= xpNext;
   level += 1;
   // Geometric, not linear: XP income compounds as you level, so its cost has to.
-  xpNext = Math.round(5 * Math.pow(XP_GROWTH, level - 1));
+  xpNext = Math.round(XP_BASE * Math.pow(XP_GROWTH, level - 1));
   choices = rollUpgrades();
   screen = 'levelup';
   sound('levelA');
@@ -433,7 +467,7 @@ function step(dt) {
   spawnTimer -= dt;
   if (spawnTimer <= 0) {
     spawnEnemy();
-    spawnTimer = Math.max(0.15, 1.2 - elapsed * 0.02);
+    spawnTimer = Math.max(SPAWN_FASTEST, SPAWN_FIRST - elapsed * SPAWN_QUICKEN);
   }
 
   // --- the weapon fires itself at whoever is closest, if anyone is in range ---
@@ -462,14 +496,14 @@ function step(dt) {
   for (const e of enemies) {
     const ex = player.x - e.x;
     const ey = player.y - e.y;
-    const d = Math.hypot(ex, ey) || 1;      // || 1 avoids dividing by zero
+    const d = Math.sqrt(ex * ex + ey * ey) || 1;   // || 1 avoids dividing by zero
 
     e.x += (ex / d) * e.speed * dt;
     e.y += (ey / d) * e.speed * dt;
 
     if (d < e.r + player.r && player.hurt <= 0) {
       player.hp -= 1;
-      player.hurt = 1;                       // one second of invulnerability
+      player.hurt = IFRAMES;
       shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;
       burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
       sound('hurt');
@@ -496,24 +530,16 @@ function step(dt) {
     if (b.gone) continue;
     for (const e of enemies) {
       if (e.gone) continue;
-      if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + b.r) {
+      // Squared compare: a < b is the same question as a*a < b*b for lengths,
+      // and skipping the square root here is 8x faster in the one loop that
+      // runs bullets x enemies times every frame.
+      const dx = e.x - b.x, dy = e.y - b.y, reach = e.r + b.r;
+      if (dx * dx + dy * dy < reach * reach) {
         if (e.lastHitBy === b.id) continue;   // a shot hits each enemy at most once
         e.lastHitBy = b.id;
         e.hp -= player.damage;
         e.flash = 0.07;                       // a white frame or two on impact
-        // Sparks kick back along the shot, so a hit that doesn't kill still
-        // looks like it landed.
-        const bs = Math.hypot(b.vx, b.vy) || 1;
-        for (let n = 0; n < 5; n++) {
-          const spread = (Math.random() - 0.5) * 1.6;
-          const sp = 70 + Math.random() * 90;
-          particles.push({
-            x: e.x, y: e.y,
-            vx: (-b.vx / bs) * sp + Math.cos(spread) * sp * 0.5,
-            vy: (-b.vy / bs) * sp + Math.sin(spread) * sp * 0.5,
-            life: 0.22, maxLife: 0.22, r: 2.5, color: '#ffffff', glow: e.glow,
-          });
-        }
+        hitSparks(e, b);
         if (e.hp <= 0) {
           e.gone = true;
           kills += 1;
@@ -537,7 +563,7 @@ function step(dt) {
 
     const gx = player.x - g.x;
     const gy = player.y - g.y;
-    const d = Math.hypot(gx, gy) || 1;
+    const d = Math.sqrt(gx * gx + gy * gy) || 1;
 
     if (d < player.pickupRange) {
       g.x += (gx / d) * GEM_PULL * dt;
@@ -584,8 +610,7 @@ function circle(x, y, r, fill, glow, blur = 20) {
 }
 
 function drawUpgradeCards() {
-  ctx.fillStyle = 'rgba(4, 7, 13, 0.82)';
-  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  dimArena();
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#9ef7ff';
@@ -627,8 +652,8 @@ function audioStatus() {
   return '';
 }
 
-function dimArena() {
-  ctx.fillStyle = 'rgba(4, 7, 13, 0.82)';
+function dimArena(alpha = 0.82) {
+  ctx.fillStyle = 'rgba(4, 7, 13, ' + alpha + ')';
   ctx.fillRect(0, 0, ARENA_W, ARENA_H);
 }
 
@@ -699,12 +724,10 @@ function drawField() {
                  '   shots ' + bullets.length + '   motes ' + gems.length +
                  '   sparks ' + particles.length, 16, 50);
   }
-
 }
 
 function drawDeath() {
-  ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
-  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  dimArena(0.75);
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#ff5c85';
@@ -760,9 +783,9 @@ function drawHelp() {
   ctx.font = '34px system-ui, sans-serif';
   ctx.fillText('HELP', ARENA_W / 2, 150);
 
+  ctx.font = '16px system-ui, sans-serif';
   HELP_KEYS.forEach(([what, key], i) => {
     const y = 232 + i * 34;
-    ctx.font = '16px system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillStyle = '#547f8d';
     ctx.fillText(what, ARENA_W / 2 - 24, y);
