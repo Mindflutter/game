@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Abyss</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #04070d; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- Plain scripts, not modules: ES modules are blocked over file://, and
+     double-clicking this file has to keep working. Load order matters.
+     game/ is the part that survives a port to Rust or C++.
+     platform/ is the part that gets rewritten. -->
+<script src="game/content.js"></script>
+<script src="game/state.js"></script>
+<script src="platform/input.js"></script>
+<script src="platform/audio.js"></script>
+<script src="platform/render.js"></script>
+<script src="game/logic.js"></script>
+<script src="main.js"></script>
+<script src="checks.js"></script>
+</body>
+</html>

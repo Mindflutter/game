@@ -10,9 +10,15 @@ step must be independently playable and explained as it lands.
 
 ## Decisions
 
-- **One file, `game.html`.** Inline HTML/CSS/JS, opened via `file://`. No
-  server, no build step, no dependencies. Split into ES modules only when the
-  file passes ~500 lines and becomes annoying to navigate.
+- **Split into plain scripts, not ES modules.** `index.html` loads eight
+  `.js` files in order. ES modules are blocked over `file://`, and double-click
+  to play is worth more than an explicit import graph in a prototype that gets
+  deleted after the port. No server, no build step, no dependencies.
+- **`game/` vs `platform/` is the port seam**, made physical. `game/` (content,
+  state, logic) contains zero browser API and translates almost literally.
+  `platform/` (input, audio, render) plus `main.js` is ~370 lines that get
+  rewritten. `game/` reaches across for exactly five names: `sound`, `keys`,
+  `justPressed`, `tapped`, `moveCursor`.
 - **Plain JavaScript, not TypeScript.** TS needs a compile step, which would
   cost the `file://` double-click workflow. Revisit at the same time as the
   module split; `// @ts-check` plus JSDoc is the no-build middle ground.
@@ -61,6 +67,7 @@ Each step is playable on its own.
 5. Enemy types, fixed arena, real bullet range, expiring gems, XP curve. <- DONE
 6. Juice: screen shake, hit flash, particles, WebAudio beeps.        <- DONE
 7. Title screen, pause menu, help page, options.                     <- DONE
+8. Simplify pass, then split along the port seam.                    <- DONE
 
 ## Balance, as measured
 
@@ -97,5 +104,4 @@ a standalone with no ending, promising as a roguelite run length.
 
 Sprites, save data, mobile input, multiple levels. Settings are deliberately
 not persisted yet -- localStorage was considered and declined for now, so
-volume and shake reset on reload. The file is past 1000 lines and due a split
-into modules; that is its own step, not a rider on a feature.
+volume and shake reset on reload.
