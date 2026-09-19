@@ -4,7 +4,13 @@
 // ---------- checks: open index.html?test and look at the console ----------
 if (location.search === '?test') {
   const mob = (x, y, over) => Object.assign(
-    { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, xp: 1, lastHitBy: 0 }, over);
+    { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, xp: 1, lastHitBy: 0,
+      pushX: 0, pushY: 0 }, over);
+
+  // The weapon fires along the cursor now, so every check that expects a shot
+  // to land has to say where the cursor is. Inheriting whatever the previous
+  // check left behind is how a few of these used to pass by luck.
+  const aimAt = e => { aim.x = e.x; aim.y = e.y; };
 
   for (let i = 0; i < 300; i++) spawnEnemy();
   console.assert(
@@ -31,13 +37,80 @@ if (location.search === '?test') {
   for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: touches once, not twice
   console.assert(player.hp === 2, 'one touch = one hp, got ' + player.hp);
 
-  // The weapon ignores anything beyond its range, and targets the closest.
+  // The weapon still ignores anything beyond its range -- it just no longer
+  // picks the target (D20).
   reset();
   enemies.push(mob(player.x + player.range + 60, player.y));
-  console.assert(nearestEnemy() === null, 'must not target beyond range');
-  const close = mob(player.x + 40, player.y);
-  enemies.push(close);
-  console.assert(nearestEnemy() === close, 'must target the closest enemy in range');
+  console.assert(!enemyInRange(), 'must not fire at anything beyond range');
+  enemies.push(mob(player.x + 40, player.y));
+  console.assert(enemyInRange(), 'must fire once something is inside the ring');
+
+  // Shots go where the mouse points, NOT at the nearest enemy. The enemy is
+  // planted to the left and the cursor put to the right, so the old
+  // nearest-enemy weapon fails this with vx < 0.
+  reset();
+  enemies.push(mob(player.x - 60, player.y));
+  aim.x = player.x + 500;
+  aim.y = player.y;
+  player.fireTimer = 0;
+  update(1 / 60);
+  console.assert(bullets.length === 1 && bullets[0].vx > 0,
+    'a shot must fly toward the cursor, vx=' + (bullets[0] && bullets[0].vx));
+
+  // A dash passes through an enemy, hurts it exactly once, and costs no hp.
+  reset();
+  const dashed = mob(player.x + 60, player.y, { hp: 5, maxHp: 5 });
+  enemies.push(dashed);
+  player.fireTimer = 999;                        // silence the weapon
+  keys.add('KeyD');
+  justPressed.add('Space');
+  for (let i = 0; i < 20; i++) update(1 / 60);   // longer than DASH_TIME
+  console.assert(dashed.hp === 4,
+    'a dash must hit each enemy exactly once, hp=' + dashed.hp);
+  console.assert(player.hp === 3,
+    'a dash must pass through unharmed, hp=' + player.hp);
+
+  // The wave reaches past the player's body. This one sits 30px beyond the far
+  // end of the dash -- never touched, but well inside the wave.
+  reset();
+  player.fireTimer = 999;
+  const ahead = mob(player.x + 171, player.y, { hp: 5, maxHp: 5 });
+  enemies.push(ahead);
+  const aheadX = ahead.x;
+  keys.add('KeyD');
+  justPressed.add('Space');
+  for (let i = 0; i < 20; i++) update(1 / 60);
+  console.assert(ahead.hp === 4, 'the wave must reach past the body, hp=' + ahead.hp);
+  console.assert(ahead.x > aheadX + 10,
+    'the wave must shove what it hits, moved ' + (ahead.x - aheadX).toFixed(1));
+  keys.delete('KeyD');
+
+  // ...but only forwards. This one is the same 30px away, behind the dash, so
+  // a wave that ignored direction would catch it.
+  reset();
+  player.fireTimer = 999;
+  const behind = mob(player.x - 30, player.y, { hp: 5, maxHp: 5 });
+  enemies.push(behind);
+  keys.add('KeyD');
+  justPressed.add('Space');
+  for (let i = 0; i < 20; i++) update(1 / 60);
+  console.assert(behind.hp === 5, 'the wave must not hit backwards, hp=' + behind.hp);
+  keys.delete('KeyD');
+
+  // The dash closes with a ring, rather than just stopping.
+  console.assert(player.dashEnd > 0, 'a finished dash must leave its closing ring');
+
+  // A dash leaves an afterimage trail, so it reads as travel, not a teleport.
+  // Only the trail is stationary -- every burst spark is thrown outwards, so
+  // this can't pass on the sparks from the enemy it just hit.
+  console.assert(particles.some(p => p.vx === 0 && p.vy === 0),
+    'a dash must leave an afterimage trail');
+
+  // ...and it cannot be spent again until the cooldown has run.
+  justPressed.add('Space');
+  update(1 / 60);
+  console.assert(player.dashTime <= 0, 'no second dash inside the cooldown');
+  keys.delete('KeyD');
 
   // A shot dies once it has flown its range, rather than crossing the arena.
   reset();
@@ -60,12 +133,15 @@ if (location.search === '?test') {
   reset();
   const big = mob(player.x + 120, player.y, { hp: 6, maxHp: 6, xp: 3 });
   enemies.push(big);
+  aimAt(big);
   for (let i = 0; i < 45; i++) update(1 / 60);
   console.assert(big.hp < 6 && kills === 0, 'a bulwark must not die to one shot');
 
   // Shooting a drifter kills it and drops a gem.
   reset();
-  enemies.push(mob(player.x + 150, player.y));
+  const drifter = mob(player.x + 150, player.y);
+  enemies.push(drifter);
+  aimAt(drifter);
   for (let i = 0; i < 60; i++) update(0.016);    // ~1s
   console.assert(kills === 1, 'expected one kill, got ' + kills);
   console.assert(gems.length === 1, 'a kill must drop a gem');
@@ -73,7 +149,9 @@ if (location.search === '?test') {
   // A tougher enemy is worth more gems. Keep it outside pickupRange, or the
   // gems get vacuumed up the moment they drop and there is nothing to count.
   reset();
-  enemies.push(mob(player.x + 150, player.y, { hp: 1, maxHp: 6, xp: 3 }));
+  const rich = mob(player.x + 150, player.y, { hp: 1, maxHp: 6, xp: 3 });
+  enemies.push(rich);
+  aimAt(rich);
   for (let i = 0; i < 60; i++) update(0.016);
   console.assert(gems.length === 3, 'xp 3 must drop 3 gems, got ' + gems.length);
 
@@ -97,6 +175,57 @@ if (location.search === '?test') {
   console.assert(level === 2 && screen === 'levelup', 'last gem must level you up and pause');
   console.assert(choices.length === 3, 'a level-up offers 3 choices');
   console.assert(new Set(choices).size === 3, 'the 3 choices must be different');
+  console.assert(choiceIndex === 1, 'a level-up opens on the middle card');
+
+  // Arrows move the highlight and wrap; Enter takes the highlighted card.
+  // The stubs record which one was applied, so taking the wrong card fails.
+  let picked = -1;
+  const stubs = () => [0, 1, 2].map(i =>
+    ({ name: 'c' + i, desc: '', apply: () => { picked = i; } }));
+  choices = stubs();
+  choiceIndex = 1;
+  aim.x = 0;                 // cursor parked off the cards, so that hover
+  aim.y = 0;                 // cannot steer what the keys are being tested on
+  justPressed.add('ArrowRight');
+  update(0.016);
+  console.assert(choiceIndex === 2, 'right arrow must move the highlight');
+  // D and A steer the cards as well as the arrows do -- the hand is already on
+  // WASD, and reaching for the arrows to pick an upgrade is the whole
+  // complaint that put the mouse and Enter here.
+  justPressed.add('KeyD');
+  update(0.016);
+  console.assert(choiceIndex === 0, 'D must move the highlight, and wrap');
+  justPressed.add('KeyA');
+  update(0.016);
+  console.assert(choiceIndex === 2, 'A must wrap back the other way');
+  // Ending on card 2 -- neither the card it opened on nor the first one, so
+  // an Enter that ignored the highlight could not pass this by accident.
+  justPressed.add('Enter');
+  update(0.016);
+  console.assert(picked === 2 && screen === 'playing',
+    'Enter must take the highlighted card, took ' + picked);
+
+  // Clicking a card takes that card, whatever the arrows had highlighted.
+  screen = 'levelup';
+  picked = -1;
+  choices = stubs();
+  choiceIndex = 1;
+  const c2 = cardRect(2, 3);
+  aim.x = c2.x + c2.w / 2;
+  aim.y = c2.y + c2.h / 2;
+  justPressed.add('Mouse0');
+  update(0.016);
+  console.assert(picked === 2 && screen === 'playing',
+    'a click must take the card under the cursor, took ' + picked);
+
+  // A still mouse must not overrule the arrows -- the cursor is left sitting
+  // on card 2 from the click above.
+  screen = 'levelup';
+  choices = stubs();
+  choiceIndex = 0;
+  update(0.016);
+  console.assert(choiceIndex === 0, 'a still cursor must not move the highlight');
+  // ...and the level-up is left open, for the number-key check below.
 
   // Pressing its number applies the upgrade and resumes play.
   const before = player.speed;
@@ -105,6 +234,50 @@ if (location.search === '?test') {
   update(0.016);
   console.assert(screen === 'playing' && player.speed > before,
     'picking must apply the upgrade and resume');
+
+  // --- menus take the mouse as well as the keys ---
+  // Hovering a row moves the cursor to it, and a click runs that row. The
+  // title's third item is Options, so a click there must land on that screen.
+  reset();
+  screen = 'title';
+  menuIndex = 0;
+  const optRow = rowRect(2, MENU_TOP);
+  aim.x = optRow.x + optRow.w / 2;
+  aim.y = optRow.y + optRow.h / 2;
+  update(0.016);
+  console.assert(menuIndex === 2, 'hovering a menu row must highlight it');
+  justPressed.add('Mouse0');
+  update(0.016);
+  console.assert(screen === 'options', 'clicking a menu row must run it');
+
+  // A cursor left sitting on a row must not fight the keys.
+  screen = 'title';
+  menuIndex = 0;
+  update(0.016);
+  console.assert(menuIndex === 0, 'a still cursor must not move the menu cursor');
+
+  // Clicking an options row cycles it, exactly as Enter does.
+  screen = 'options';
+  const fpsRow = rowRect(OPTIONS.length - 1, OPTION_TOP);
+  aim.x = fpsRow.x + fpsRow.w / 2;
+  aim.y = fpsRow.y + fpsRow.h / 2;
+  const fpsWas = showFps;
+  justPressed.add('Mouse0');
+  update(0.016);
+  console.assert(showFps !== fpsWas, 'clicking an options row must change it');
+  showFps = fpsWas;
+
+  // Click dismisses the help screen, and restarts from the death screen.
+  screen = 'help';
+  returnTo = 'title';
+  justPressed.add('Mouse0');
+  update(0.016);
+  console.assert(screen === 'title', 'a click must leave the help screen');
+
+  screen = 'dead';
+  justPressed.add('Mouse0');
+  update(0.016);
+  console.assert(screen === 'playing', 'a click must restart from the death screen');
 
   // Sparks appear on a kill, then clean themselves up.
   reset();
@@ -131,6 +304,7 @@ if (location.search === '?test') {
   reset();
   const tough = mob(player.x + 90, player.y, { hp: 9, maxHp: 9, xp: 1 });
   enemies.push(tough);
+  aimAt(tough);
   for (let i = 0; i < 40; i++) update(1 / 60);
   console.assert(tough.hp < 9 && kills === 0, 'setup: it should be hurt but alive');
   console.assert(particles.length > 0, 'a non-lethal hit must throw sparks');

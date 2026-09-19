@@ -16,7 +16,8 @@ function spawnEnemy() {
   const speed = t.speed * (1 - ENEMY_JITTER / 2 + Math.random() * ENEMY_JITTER) *
                 (1 + elapsed * ENEMY_RAMP);
   enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, xp: t.xp,
-                 color: t.color, glow: t.glow, lastHitBy: 0 });
+                 color: t.color, glow: t.glow, lastHitBy: 0,
+                 pushX: 0, pushY: 0 });
 }
 
 function spark(x, y, vx, vy, life, r, color, glow) {
@@ -47,17 +48,56 @@ function hitSparks(e, b) {
   }
 }
 
-// Closest enemy inside firing range, or null if nothing is close enough.
-// Seeding the search with the range does both jobs at once. Compared in
-// squared space -- we only need the ordering, never the distance itself.
-function nearestEnemy() {
-  let best = null, bestSq = player.range * player.range;
-  for (const e of enemies) {
+// Is there anything inside the ring worth shooting at? The weapon points where
+// the mouse points now, so the only question left is whether to fire at all --
+// the range is still a real range (D8), it just no longer picks the target.
+// Squared compare: we never need the distance itself, only the comparison.
+function enemyInRange() {
+  const rr = player.range * player.range;
+  return enemies.some(e => {
     const dx = e.x - player.x, dy = e.y - player.y;
-    const sq = dx * dx + dy * dy;
-    if (sq < bestSq) { bestSq = sq; best = e; }
+    return dx * dx + dy * dy < rr;
+  });
+}
+
+// One enemy's death, from whatever killed it -- a shot or a dash. Two callers,
+// and duplicating the gem drop is how the two paths quietly drift apart.
+function killEnemy(e) {
+  e.gone = true;
+  kills += 1;
+  for (let n = 0; n < e.xp; n++) {
+    gems.push({ x: e.x + (Math.random() - 0.5) * 18,
+                y: e.y + (Math.random() - 0.5) * 18, r: 4, life: GEM_LIFE });
   }
-  return best;
+  burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
+  sound('kill', 1 - Math.min(0.4, e.maxHp * 0.04));  // bigger things pop lower
+}
+
+// Mouse hit-testing. The rectangles come from content.js, so the renderer and
+// this agree on where things are without either owning the other's layout.
+const inRect = (r, x, y) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+
+function cardUnder(x, y) {
+  for (let i = 0; i < choices.length; i++) {
+    if (inRect(cardRect(i, choices.length), x, y)) return i;
+  }
+  return -1;
+}
+
+// Which row of a menu or the options list is under a point, or -1.
+function rowUnder(x, y, n, top) {
+  for (let i = 0; i < n; i++) if (inRect(rowRect(i, top), x, y)) return i;
+  return -1;
+}
+
+// Has the mouse actually moved since the last frame? A cursor left resting on
+// a row must not overrule the keys every frame. Called once per frame -- every
+// screen below returns early, so exactly one caller runs.
+function mouseMoved() {
+  const moved = aim.x !== lastAimX || aim.y !== lastAimY;
+  lastAimX = aim.x;
+  lastAimY = aim.y;
+  return moved;
 }
 
 function gainXp() {
@@ -68,6 +108,7 @@ function gainXp() {
   // Geometric, not linear: XP income compounds as you level, so its cost has to.
   xpNext = Math.round(XP_BASE * Math.pow(XP_GROWTH, level - 1));
   choices = rollUpgrades();
+  choiceIndex = Math.floor(choices.length / 2);   // start on the middle card
   screen = 'levelup';
   sound('levelA');
   sound('levelB');
@@ -101,41 +142,60 @@ function update(dt) {
 function step(dt) {
   if (screen === 'title' || screen === 'paused') {
     const items = MENUS[screen].items;
+    const hovered = rowUnder(aim.x, aim.y, items.length, MENU_TOP);
+    if (mouseMoved() && hovered >= 0) menuIndex = hovered;
     menuIndex = moveCursor(menuIndex, items.length);
+
     if (tapped(GO)) items[menuIndex].run();
+    else if (tapped(CLICK) && hovered >= 0) items[hovered].run();
     else if (justPressed.has('Escape') && screen === 'paused') screen = 'playing';
     return;
   }
 
   if (screen === 'help') {
-    if (justPressed.has('Escape') || tapped(GO)) screen = returnTo;
+    if (justPressed.has('Escape') || tapped(GO) || tapped(CLICK)) screen = returnTo;
     return;
   }
 
   if (screen === 'options') {
+    const hovered = rowUnder(aim.x, aim.y, OPTIONS.length, OPTION_TOP);
+    if (mouseMoved() && hovered >= 0) optionIndex = hovered;
     optionIndex = moveCursor(optionIndex, OPTIONS.length);
+
     if (tapped(LEFT))  OPTIONS[optionIndex].change(-1);
     if (tapped(RIGHT) || tapped(GO)) OPTIONS[optionIndex].change(1);
+    if (tapped(CLICK) && hovered >= 0) OPTIONS[hovered].change(1);   // same as Enter
     if (justPressed.has('Escape')) screen = returnTo;
     return;
   }
 
   if (screen === 'dead') {
-    if (justPressed.has('KeyR')) reset();
+    if (justPressed.has('KeyR') || tapped(CLICK)) reset();
     if (justPressed.has('Escape')) { screen = 'title'; menuIndex = 0; }
     return;
   }
 
   // Picking an upgrade. The whole game is frozen until you choose.
   if (screen === 'levelup') {
+    const hovered = cardUnder(aim.x, aim.y);
+    if (mouseMoved() && hovered >= 0) choiceIndex = hovered;
+
+    if (tapped(LEFT))  choiceIndex = (choiceIndex + choices.length - 1) % choices.length;
+    if (tapped(RIGHT)) choiceIndex = (choiceIndex + 1) % choices.length;
+
+    // Confirm: Enter takes the highlighted card, a click takes the one under
+    // the cursor, and the number keys still take theirs outright.
+    let taken = -1;
+    if (tapped(GO)) taken = choiceIndex;
+    if (tapped(CLICK) && hovered >= 0) taken = hovered;
     for (let i = 0; i < choices.length; i++) {
-      const n = String(i + 1);
-      if (justPressed.has('Digit' + n) || justPressed.has('Numpad' + n)) {
-        choices[i].apply(player);
-        choices = [];
-        screen = 'playing';
-        break;
-      }
+      if (justPressed.has('Digit' + (i + 1)) || justPressed.has('Numpad' + (i + 1))) taken = i;
+    }
+
+    if (taken >= 0) {
+      choices[taken].apply(player);
+      choices = [];
+      screen = 'playing';
     }
     return;
   }
@@ -156,10 +216,38 @@ function step(dt) {
   const len = Math.hypot(dx, dy);
   if (len > 0) { dx /= len; dy /= len; }
 
-  player.x += dx * player.speed * dt;
-  player.y += dy * player.speed * dt;
+  // --- the dash ---
+  // Only along the keys you are holding: the mouse is where you shoot, which
+  // is usually the direction you least want to travel in.
+  if (player.dashCd > 0)  player.dashCd -= dt;
+  if (player.dashEnd > 0) player.dashEnd -= dt;
+  if (player.dashTime > 0) {
+    player.dashTime -= dt;
+    if (player.dashTime <= 0) player.dashEnd = DASH_END;   // the wave closing
+  }
+  if (tapped(DASH) && player.dashCd <= 0 && len > 0) {
+    player.dashTime = DASH_TIME;
+    player.dashCd = DASH_COOLDOWN;
+    player.dashId = ++bulletId;          // one dash hits each enemy once
+    player.dashDx = dx;                  // dx/dy are already normalised
+    player.dashDy = dy;
+    // Invulnerable for the dash plus a moment after, so finishing it inside
+    // something you flew through doesn't cost an hp.
+    player.hurt = Math.max(player.hurt, DASH_TIME + DASH_GRACE);
+    sound('dash');
+  }
+  const speed = player.speed * (player.dashTime > 0 ? DASH_SPEED_MUL : 1);
+
+  player.x += dx * speed * dt;
+  player.y += dy * speed * dt;
   player.x = Math.max(player.r, Math.min(ARENA_W - player.r, player.x));
   player.y = Math.max(player.r, Math.min(ARENA_H - player.r, player.y));
+
+  // An afterimage every frame of the dash. Without it the eye sees the player
+  // at one end and then the other, and reads a teleport instead of a move.
+  if (player.dashTime > 0) {
+    spark(player.x, player.y, 0, 0, 0.22, player.r * 0.85, '#bffcff', '#4ff0ff');
+  }
 
   // --- spawn new enemies, faster as time goes on ---
   spawnTimer -= dt;
@@ -168,14 +256,13 @@ function step(dt) {
     spawnTimer = Math.max(SPAWN_FASTEST, SPAWN_FIRST - elapsed * SPAWN_QUICKEN);
   }
 
-  // --- the weapon fires itself at whoever is closest, if anyone is in range ---
+  // --- the weapon fires itself, along the cursor, if anything is in range ---
   player.fireTimer -= dt;
   if (player.fireTimer <= 0) {
-    const target = nearestEnemy();
-    if (target) {                      // nothing in range? hold the shot
-      const tx = target.x - player.x;
-      const ty = target.y - player.y;
-      const d = Math.hypot(tx, ty) || 1;
+    if (enemyInRange()) {              // nothing in range? hold the shot
+      const tx = aim.x - player.x;
+      const ty = aim.y - player.y;
+      const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
       bullets.push({
         id: ++bulletId,
         x: player.x, y: player.y, r: 4,
@@ -196,8 +283,28 @@ function step(dt) {
     const ey = player.y - e.y;
     const d = Math.sqrt(ex * ex + ey * ey) || 1;   // || 1 avoids dividing by zero
 
-    e.x += (ex / d) * e.speed * dt;
-    e.y += (ey / d) * e.speed * dt;
+    e.x += (ex / d) * e.speed * dt + e.pushX * dt;
+    e.y += (ey / d) * e.speed * dt + e.pushY * dt;
+
+    // Per second, not per frame: a flat factor would shove 2.4x further on a
+    // 144Hz screen, the same trap the particle drag fell into.
+    const pd = Math.pow(PUSH_DRAG, dt);
+    e.pushX *= pd;
+    e.pushY *= pd;
+
+    // The dash's wave: anything within reach that the dash is facing. The dot
+    // product is the "facing" test -- ex/ey point from the enemy back to the
+    // player, so negating them gives the direction the wave has to agree with.
+    if (player.dashTime > 0 && e.lastHitBy !== player.dashId && d < e.r + DASH_REACH &&
+        (-ex * player.dashDx - ey * player.dashDy) / d > DASH_ARC) {
+      e.lastHitBy = player.dashId;
+      e.hp -= player.damage;
+      e.flash = 0.07;
+      e.pushX = (-ex / d) * DASH_PUSH;     // shoved away from the player
+      e.pushY = (-ey / d) * DASH_PUSH;
+      burst(e.x, e.y, '#bffcff', '#4ff0ff', 6, 130, 0.3);
+      if (e.hp <= 0) killEnemy(e);
+    }
 
     if (d < e.r + player.r && player.hurt <= 0) {
       player.hp -= 1;
@@ -238,16 +345,7 @@ function step(dt) {
         e.hp -= player.damage;
         e.flash = 0.07;                       // a white frame or two on impact
         hitSparks(e, b);
-        if (e.hp <= 0) {
-          e.gone = true;
-          kills += 1;
-          for (let n = 0; n < e.xp; n++) {
-            gems.push({ x: e.x + (Math.random() - 0.5) * 18,
-                        y: e.y + (Math.random() - 0.5) * 18, r: 4, life: GEM_LIFE });
-          }
-          burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
-          sound('kill', 1 - Math.min(0.4, e.maxHp * 0.04));  // bigger things pop lower
-        }
+        if (e.hp <= 0) killEnemy(e);
         if (b.pierce > 0) { b.pierce -= 1; }
         else { b.gone = true; break; }
       }

@@ -25,6 +25,22 @@ const PLAYER_START = {
   pickupRange: 75,
 };
 
+// The dash. Short, offensive, and on a long enough leash that spending it is a
+// decision: you pass through the swarm unharmed and hurt everything you touch,
+// so diving into a crowd is a play rather than a mistake.
+const DASH_SPEED_MUL = 3.4;   // times normal speed while dashing
+const DASH_TIME      = 0.16;  // seconds of dash -- about 140px of travel
+const DASH_COOLDOWN  = 2.2;   // seconds before you can dash again
+const DASH_GRACE     = 0.15;  // extra invulnerability after it, so you don't
+                              // land inside the enemy you just flew through
+// The dash pushes a wave ahead of it rather than only hitting what it bumps
+// into: everything within reach AND in front of the direction of travel.
+const DASH_REACH     = 40;    // px past an enemy's own radius -- vs 10 for the body
+const DASH_ARC       = 0.2;   // cos of the half-angle: 0.2 is a 156-degree front
+const DASH_END       = 0.18;  // seconds of the ring that closes the dash
+const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
+const PUSH_DRAG      = 0.02;  // ...bleeding to 2% per second, so about 80px
+
 const IFRAMES        = 1;     // seconds of invulnerability after a hit
 const BULLET_SPEED   = 430;   // pixels per second
 const GEM_PULL       = 300;   // how fast gems fly to you once in range
@@ -58,6 +74,7 @@ const SHAKE_DEATH = 38;     // px, dying -- a real slam, it only happens once
 // laptop speakers for a short blip -- the ?test checks hold us to that.
 const SOUNDS = {
   shoot:  { freq: 680,  dur: 0.05, type: 'square',   vol: 0.20, slide: 0.55 },
+  dash:   { freq: 520,  dur: 0.18, type: 'triangle', vol: 0.30, slide: 0.32 },
   kill:   { freq: 200,  dur: 0.11, type: 'sawtooth', vol: 0.32, slide: 0.45 },
   gem:    { freq: 1150, dur: 0.05, type: 'sine',     vol: 0.22, slide: 1.3  },
   hurt:   { freq: 110,  dur: 0.28, type: 'sawtooth', vol: 0.55, slide: 0.4  },
@@ -77,6 +94,25 @@ const UPGRADES = [
   { name: 'Lure',       desc: '+45 pickup range',      apply: p => p.pickupRange += 45 },
   { name: 'Vitality',   desc: '+1 max HP, heal 1',     apply: p => { p.maxHp += 1; p.hp += 1; } },
 ];
+
+// Menu and options rows: one full-width band per entry, anchored on the text
+// baseline the renderer draws at, so the mouse can hit a row anywhere along it
+// rather than only on the glyphs.
+const ROW_W = 420, ROW_H = 38, ROW_STEP = 46;
+const MENU_TOP = 380, OPTION_TOP = 300;
+function rowRect(i, top) {
+  return { x: ARENA_W / 2 - ROW_W / 2, y: top + i * ROW_STEP - 26, w: ROW_W, h: ROW_H };
+}
+
+// Where the three upgrade cards sit, in arena coordinates. The renderer draws
+// these and the logic hit-tests the mouse against them, so the numbers belong
+// to neither of them.
+const CARD_W = 220, CARD_H = 140, CARD_GAP = 24;
+function cardRect(i, n) {
+  const totalW = n * CARD_W + (n - 1) * CARD_GAP;
+  return { x: ARENA_W / 2 - totalW / 2 + i * (CARD_W + CARD_GAP),
+           y: ARENA_H / 2 - CARD_H / 2, w: CARD_W, h: CARD_H };
+}
 
 function rollUpgrades() {
   const pool = UPGRADES.slice();       // a copy, so we don't wreck the original
@@ -144,14 +180,19 @@ const OPTIONS = [
 
 const HELP_KEYS = [
   ['Move',           'W A S D   or   arrow keys'],
-  ['Choose upgrade', '1   2   3'],
+  ['Aim',            'mouse'],
+  ['Dash',           'Space'],
+  ['Choose upgrade', 'arrows + Enter,  click,  or 1 2 3'],
   ['Restart a run',  'R'],
   ['Mute sound',     'M'],
   ['Menu / back',    'Esc'],
+  ['Menus',          'mouse, or arrows + Enter'],
 ];
 
 const HELP_BLURB = [
-  'Your weapon fires by itself at whatever comes inside the ring.',
+  'Your weapon fires by itself, along whatever your mouse points at,',
+  'whenever anything is inside the ring.',
+  'Space dashes: you pass through the swarm unharmed, and hurt it.',
   'Things you kill drop green motes. Walk over them to gain XP.',
   'Motes fade after eight seconds, so the reward sits where the danger was.',
   'Fill the bar, take one of three upgrades, and see how long you last.',

@@ -26,6 +26,44 @@ function circle(x, y, r, fill, glow, blur = 20) {
   ctx.shadowBlur = 0;
 }
 
+// Where your shots will go: a dashed line out to the edge of the ring, fading
+// as it goes so it guides the eye without competing with the enemies, and a
+// crosshair sitting exactly where the shots will die.
+function drawAimLine() {
+  const dx = aim.x - player.x, dy = aim.y - player.y;
+  const d = Math.hypot(dx, dy) || 1;
+  const ex = player.x + (dx / d) * player.range;
+  const ey = player.y + (dy / d) * player.range;
+
+  const fade = ctx.createLinearGradient(player.x, player.y, ex, ey);
+  fade.addColorStop(0, 'rgba(159, 247, 255, 0.30)');
+  fade.addColorStop(1, 'rgba(159, 247, 255, 0.04)');
+
+  ctx.save();
+  ctx.setLineDash([7, 9]);
+  ctx.strokeStyle = fade;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(player.x + (dx / d) * (player.r + 6), player.y + (dy / d) * (player.r + 6));
+  ctx.lineTo(ex, ey);
+  ctx.stroke();
+  ctx.restore();
+
+  // A small ring with four ticks, brighter than the line so the end reads
+  // clearly without drawing the eye off the enemies.
+  ctx.strokeStyle = 'rgba(159, 247, 255, 0.55)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(ex, ey, 3.5, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  for (const [tx, ty] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    ctx.moveTo(ex + tx * 6, ey + ty * 6);
+    ctx.lineTo(ex + tx * 10, ey + ty * 10);
+  }
+  ctx.stroke();
+}
+
 function drawUpgradeCards() {
   dimArena();
 
@@ -34,31 +72,33 @@ function drawUpgradeCards() {
   ctx.font = '30px system-ui, sans-serif';
   ctx.fillText('LEVEL UP', ARENA_W / 2, ARENA_H / 2 - 130);
 
-  const w = 220, h = 140, gap = 24;
-  const totalW = choices.length * w + (choices.length - 1) * gap;
-  const left = ARENA_W / 2 - totalW / 2;
-  const top  = ARENA_H / 2 - h / 2;
-
   choices.forEach((u, i) => {
-    const x = left + i * (w + gap);
-    ctx.fillStyle = 'rgba(16, 44, 58, 0.92)';
-    ctx.fillRect(x, top, w, h);
-    ctx.strokeStyle = '#2b6b7d';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, top + 0.5, w - 1, h - 1);
+    const { x, y, w, h } = cardRect(i, choices.length);
+    const on = i === choiceIndex;
+
+    ctx.fillStyle = on ? 'rgba(28, 74, 92, 0.96)' : 'rgba(16, 44, 58, 0.92)';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = on ? '#4ff0ff' : '#2b6b7d';
+    ctx.lineWidth = on ? 2 : 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 
     ctx.fillStyle = '#bffcff';
     ctx.font = '19px system-ui, sans-serif';
-    ctx.fillText(u.name, x + w / 2, top + 48);
+    ctx.fillText(u.name, x + w / 2, y + 48);
 
-    ctx.fillStyle = '#7fb0c0';
+    ctx.fillStyle = on ? '#9ef7ff' : '#7fb0c0';
     ctx.font = '13px system-ui, sans-serif';
-    ctx.fillText(u.desc, x + w / 2, top + 78);
+    ctx.fillText(u.desc, x + w / 2, y + 78);
 
-    ctx.fillStyle = '#4ff0ff';
+    ctx.fillStyle = on ? '#4ff0ff' : '#2b6b7d';
     ctx.font = '16px system-ui, sans-serif';
-    ctx.fillText('[ ' + (i + 1) + ' ]', x + w / 2, top + 114);
+    ctx.fillText(on ? '[ ENTER ]' : '[ ' + (i + 1) + ' ]', x + w / 2, y + 114);
   });
+
+  ctx.fillStyle = '#5d8b99';
+  ctx.font = '14px system-ui, sans-serif';
+  ctx.fillText('arrows or mouse to choose, Enter or click to take it',
+               ARENA_W / 2, ARENA_H / 2 + 120);
 }
 
 // So a silent game can tell you why it is silent.
@@ -82,6 +122,8 @@ function drawField() {
   ctx.beginPath();
   ctx.arc(player.x, player.y, player.range, 0, Math.PI * 2);
   ctx.stroke();
+
+  if (screen === 'playing') drawAimLine();
 
   // Gems blink for their last two seconds, then they're gone.
   for (const g of gems) {
@@ -117,9 +159,49 @@ function drawField() {
   }
   ctx.shadowBlur = 0;
 
-  // Blink while invulnerable, so getting hit is visible.
-  const blinking = player.hurt > 0 && Math.floor(player.hurt * 10) % 2 === 0;
+  // Blink while invulnerable, so getting hit is visible — but never during a
+  // dash: blinking out mid-flight is exactly what made the dash read as a
+  // teleport, since the eye saw the player at one end and then the other.
+  const blinking = player.hurt > 0 && player.dashTime <= 0 &&
+                   Math.floor(player.hurt * 10) % 2 === 0;
   if (!blinking) circle(player.x, player.y, player.r, '#bffcff', '#4ff0ff', 25);
+
+  // The wave the dash pushes ahead of it: an arc at the edge of its reach,
+  // facing the way the dash is going, brightest at the start of the lunge.
+  if (player.dashTime > 0) {
+    const face = Math.atan2(player.dashDy, player.dashDx);
+    const half = Math.acos(DASH_ARC);
+    const t = player.dashTime / DASH_TIME;
+    ctx.strokeStyle = 'rgba(191, 252, 255, ' + (0.15 + 0.5 * t).toFixed(3) + ')';
+    ctx.lineWidth = 3 + 3 * t;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r + DASH_REACH * 0.7,
+            face - half, face + half);
+    ctx.stroke();
+  }
+
+  // ...and the ring it leaves when it lands: expands and fades, about a sixth
+  // of a second. Just enough to say the lunge finished rather than stopped.
+  if (player.dashEnd > 0) {
+    const t = player.dashEnd / DASH_END;            // 1 -> 0
+    ctx.strokeStyle = 'rgba(159, 247, 255, ' + (0.5 * t).toFixed(3) + ')';
+    ctx.lineWidth = 2 + 2 * t;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r + (1 - t) * DASH_REACH, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // The dash recharging: an arc that sweeps closed as it comes back. Nothing
+  // is drawn once it's ready, so a clean ring means you have it.
+  if (player.dashCd > 0) {
+    const left = player.dashCd / DASH_COOLDOWN;
+    ctx.strokeStyle = 'rgba(79, 240, 255, 0.45)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r + 6, -Math.PI / 2,
+            -Math.PI / 2 + (1 - left) * Math.PI * 2);
+    ctx.stroke();
+  }
 
   // --- XP bar across the very top ---
   ctx.fillStyle = '#12303a';
@@ -158,7 +240,8 @@ function drawDeath() {
 
   ctx.fillStyle = '#2f5563';
   ctx.font = '13px system-ui, sans-serif';
-  ctx.fillText('R to go again,  Esc for the menu', ARENA_W / 2, ARENA_H / 2 + 60);
+  ctx.fillText('R or click to go again,  Esc for the menu',
+               ARENA_W / 2, ARENA_H / 2 + 60);
 }
 
 function drawHint(text) {
@@ -188,10 +271,10 @@ function drawMenu(menu) {
     ctx.fillStyle = on ? '#bffcff' : '#547f8d';
     ctx.font = (on ? '23px' : '20px') + ' system-ui, sans-serif';
     ctx.fillText(on ? '\u203a  ' + item.label + '  \u2039' : item.label,
-                 ARENA_W / 2, 380 + i * 46);
+                 ARENA_W / 2, MENU_TOP + i * ROW_STEP);
   });
 
-  drawHint('\u2191 \u2193 to choose,  Enter to pick');
+  drawHint('\u2191 \u2193 or mouse,  Enter or click to pick');
 }
 
 function drawHelp() {
@@ -216,7 +299,7 @@ function drawHelp() {
   ctx.font = '15px system-ui, sans-serif';
   HELP_BLURB.forEach((line, i) => ctx.fillText(line, ARENA_W / 2, 470 + i * 27));
 
-  drawHint('Esc to go back');
+  drawHint('Esc or click to go back');
 }
 
 function drawOptions() {
@@ -227,7 +310,7 @@ function drawOptions() {
 
   OPTIONS.forEach((opt, i) => {
     const on = i === optionIndex;
-    const y = 300 + i * 46;
+    const y = OPTION_TOP + i * ROW_STEP;
     ctx.font = (on ? '20px' : '18px') + ' system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillStyle = on ? '#bffcff' : '#547f8d';
@@ -238,7 +321,7 @@ function drawOptions() {
                  ARENA_W / 2 + 24, y);
   });
 
-  drawHint('\u2191 \u2193 to choose,  \u2190 \u2192 to change,  Esc to go back');
+  drawHint('\u2191 \u2193 or mouse,  \u2190 \u2192 or click to change,  Esc to go back');
 }
 
 function draw() {

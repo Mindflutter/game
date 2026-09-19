@@ -22,7 +22,29 @@ const DOWN  = ['ArrowDown', 'KeyS'];
 const LEFT  = ['ArrowLeft', 'KeyA'];
 const RIGHT = ['ArrowRight', 'KeyD'];
 const GO    = ['Enter', 'NumpadEnter', 'Space'];
+const DASH  = ['Space'];
+const CLICK = ['Mouse0'];
 const tapped = codes => codes.some(c => justPressed.has(c));
+
+// Mouse buttons ride in the same two sets as the keys, under codes a keyboard
+// can never produce ('Mouse0'), so menus can use tapped() without caring which
+// device the player reached for.
+window.addEventListener('mousedown', e => {
+  keys.add('Mouse' + e.button);
+  justPressed.add('Mouse' + e.button);
+});
+window.addEventListener('mouseup', e => keys.delete('Mouse' + e.button));
+
+// Where you are aiming, in ARENA coordinates. The canvas is a scaled,
+// letterboxed view of a fixed 1280x800 world, so a screen pixel is not a world
+// pixel -- undo the scale and the letterbox offset the renderer applied.
+// Starts pointing straight up, so the first shot has a direction even if the
+// mouse has never moved.
+const aim = { x: ARENA_W / 2, y: 0 };
+window.addEventListener('mousemove', e => {
+  aim.x = (e.clientX - offX) / scale;
+  aim.y = (e.clientY - offY) / scale;
+});
 
 function moveCursor(index, length) {
   if (tapped(UP))   return (index + length - 1) % length;
