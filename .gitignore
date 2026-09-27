@@ -1,4 +1,3 @@
 .idea/
 *.png
-docs/
-CLAUDE.md
+node_modules/
