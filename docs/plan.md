@@ -15,8 +15,9 @@ must stay true while doing it.
 Done: docs (`foundations.md`, `plan.md`, D27–D42), the check harness (D39 —
 Test stack), `docs/` tracked in git (D40), seeded RNG + `serve.py` (D41),
 scenarios + stepped mode (D42). 104 checks passing.
-Next: the offscreen glow cache, then the entity-budget spike, then Vitest +
-fast-check with the first property-based invariants.
+Done also: the entity-budget spike, which **cancelled** the glow cache (D43).
+Next: Vitest + fast-check with the first property-based invariants — the last
+item before S0 exits.
 Dropped: a Playwright real-keypress check. `checks.js` already dispatches
 `KeyboardEvent`s through `platform/input.js` with Cyrillic and AZERTY character
 values against correct physical codes — a stronger test of D12 than a real
@@ -66,10 +67,10 @@ fast-check land as dev dependencies.
 
 **Exit (DoD):**
 - The entity budget is a measured fact, not the guess in `foundations.md`:
-  N entities at 60fps, stated in `design.md`.
+  done 2026-09-27, D43 — under 1ms per frame at 500 entities, ~4000 of headroom.
 - The same seed replays the same dive, proven by a check.
 - Glow via cached blit is measured against `shadowBlur` per frame; the number
-  is recorded.
+  is recorded. **Done, and the answer was to cancel the cache** (D43).
 - At least two scenarios load and play in isolation, and the bot selects one by
   name — same mechanism, not a parallel harness (D37).
 - The suite **reports pass/fail** and a deliberately broken check makes it say

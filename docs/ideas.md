@@ -171,9 +171,11 @@ middle ground is `// @ts-check` plus JSDoc, which the IDE type-checks with the
 real TypeScript compiler.
 
 ### Spatial grid for collision
-Current collision is brute-force O(n²), fine to a few hundred entities per
-array. When it chugs, bucket entities into a grid and only compare neighbours.
-Marked with a `ponytail:` comment at the site.
+Current collision is brute-force O(n²). **Measured trigger, D43 (2026-09-27):**
+500 enemies x 200 bullets (100k pair checks) costs 0.55ms of a 16.7ms frame;
+2000 x 800 (1.6M pairs) costs 3.67ms. Revisit above roughly **1500 enemies with
+600 bullets live** — far past anything the design calls for. Until then, bucket
+nothing. Marked with a `ponytail:` comment at the site.
 
 ---
 

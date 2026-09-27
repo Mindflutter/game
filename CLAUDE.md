@@ -56,9 +56,10 @@ draft, which is why they are banned (D32).
   `tapped`, `moveCursor`, `aim`. That seam is the port; keep it clean. It will
   grow past six (camera, save, mouse buttons); every addition is deliberate and
   listed in `design.md`, never incidental.
-- Do not invest in the canvas layer. The one sanctioned exception is the
-  offscreen glow cache, which is a performance fix that keeps the D3 look,
-  not a rendering investment.
+- Do not invest in the canvas layer. The offscreen glow cache that used to be
+  the sanctioned exception was **cancelled** by D43 — measurement showed glow
+  costs 0.05ms of a 16.7ms frame, so there was nothing to fix. The rule now
+  stands unqualified.
 
 ## Conventions
 

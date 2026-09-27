@@ -98,20 +98,23 @@ Igor's call and gets no check.
 
 ## The technical contract
 
-- **Canvas 2D, zero *runtime* dependencies** (D30). Glow is pre-rendered once to
-  offscreen canvases and blitted, never `shadowBlur` per frame. `index.html`
-  loads no libraries and stays double-clickable. Dev-only test tooling
-  (Vitest, fast-check — D39) is exempt: it never ships and never loads at
-  runtime.
+- **Canvas 2D, zero *runtime* dependencies** (D30, D43). `shadowBlur` is used
+  directly, per frame — the offscreen glow cache was cancelled once measurement
+  showed glow costs 0.05ms of a 16.7ms frame at the entity budget. `index.html`
+  loads no libraries and stays double-clickable. Dev-only test tooling (Vitest,
+  fast-check — D39) is exempt: it never ships and never loads at runtime.
 - **A check that cannot fail is not a check** (D39). The suite counts, groups
   and reports `N passed / M failed`. `console.assert` is banned — it logs and
   continues, which let the old suite print "checks done" over real failures.
 - **Every recorded decision gets an invariant guarding it** (D39). A decision
   without a check erodes silently. This is what makes the suite covering; a
   coverage percentage is not.
-- **Entity budget: 500 simultaneous entities at 60fps.** Stated so performance
-  work has a trigger instead of a feeling. Dependencies are revisited only on a
-  measured failure against this number.
+- **Entity budget: 500 simultaneous entities — a *design* limit, not a
+  technical one** (D43). Measured 2026-09-27: at 500 entities a whole frame
+  costs under 1ms of a 16.7ms budget, and the headroom is roughly 4000. The
+  number says how much should be on screen at once, not what the machine can
+  bear. Dependencies are revisited only on a measured failure, and there is
+  currently no failure to revisit.
 - **The `game/` ⁄ `platform/` seam is maintained** (D18, D30). `game/` contains
   zero browser API. The seam grows past six names; every addition is
   deliberate and listed in `design.md`.

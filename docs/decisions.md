@@ -900,3 +900,50 @@ normal play is untouched — S0's "zero gameplay change" holds.
 15 checks added (104 total, was 89). The load-bearing one is that a paused
 scenario never gains an enemy; without it a scenario is just a normal dive with
 a head start.
+
+## D43 — The glow cache is cancelled; the entity budget is measured · 2026-09-27
+S0's performance item. The work was **not done**, because measuring first showed
+it was unnecessary. This supersedes the technical premise of D30 (Browser stays
+throwaway) while leaving its conclusion intact.
+
+**What D30 claimed, unmeasured:** that `ctx.shadowBlur` is "a per-draw gaussian
+blur, roughly two orders of magnitude costlier than a plain fill", that it is
+"the real bottleneck", and that an offscreen sprite cache was "the single
+highest-leverage technical change available". That was asserted from memory, not
+measured. It is wrong.
+
+**Measured**, Chrome via Playwright, 3440x1440 (scale 1.8), 60fps budget 16.7ms:
+
+| Load | `draw()` | glow's share | `update()` |
+|---|---|---|---|
+| 250 entities | 0.10ms | 0.02ms | — |
+| **500 entities** (the stated budget) | **0.20ms** | **0.05ms** | **0.55ms** (500 enemies x 200 bullets, 100k pair checks) |
+| 1000 entities | 0.58ms | 0.33ms | 1.22ms (400k pairs) |
+| 2000 entities | 2.72ms | 2.18ms | 3.67ms (1.6M pairs) |
+
+At the stated budget the whole frame costs **under 1ms, about 5% of 16.7ms**.
+Glow specifically costs 0.05ms — not two orders of magnitude, not a bottleneck,
+not worth caching. An offscreen cache would have added a quantisation scheme for
+continuously-shrinking particle radii and a resize-invalidation path, to save
+0.3% of a frame.
+
+**Consequences.**
+- **The glow cache is cancelled.** CLAUDE.md's "sanctioned exception" for it is
+  removed; the plain "do not invest in the canvas layer" rule now stands
+  unqualified.
+- **D30's conclusion is strengthened, not weakened.** Dependencies stay out with
+  a better argument than before: Canvas 2D is not merely adequate, it is idle.
+  PixiJS would buy headroom over headroom.
+- **The 500-entity budget is not a binding constraint.** Measured headroom is
+  roughly 4000 entities before a frame approaches 16.7ms. The budget stays as a
+  *design* limit — how many things should be on screen at once — rather than a
+  technical one. `foundations.md` says so now.
+- **The spatial grid stays parked** (`ideas.md`), now with a measured trigger
+  instead of a feeling: revisit above ~1500 enemies with ~600 bullets live.
+
+**Two false readings caught on the way**, both from not checking that the
+measurement measured anything: the first `update()` run showed cost *falling*
+as entities rose, because the player died instantly in a crowd of 500 and
+`step()` early-returns on the death screen; the second showed a flat 0.2ms
+because bullets expire on contact, so the quadratic loop had no pairs. Numbers
+that improve as load increases are a bug in the measurement, not a result.

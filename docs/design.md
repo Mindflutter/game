@@ -208,6 +208,25 @@ logs the known ones and does not throw.
 This is what the bot drives, and the same entries it selects by name, so there
 is no separate test harness. Adding a scenario is a line.
 
+## Performance, measured
+
+Chrome, 3440x1440 (scale 1.8), 60fps budget 16.7ms, 2026-09-27 (D43):
+
+| Load | `draw()` | of which glow | `update()` |
+|---|---|---|---|
+| 250 entities | 0.10ms | 0.02ms | — |
+| 500 entities | 0.20ms | 0.05ms | 0.55ms @ 100k pair checks |
+| 1000 entities | 0.58ms | 0.33ms | 1.22ms @ 400k pairs |
+| 2000 entities | 2.72ms | 2.18ms | 3.67ms @ 1.6M pairs |
+
+At the design budget of 500 a whole frame is under 1ms — about 5% of 16.7ms.
+`shadowBlur` is used directly per frame; the offscreen cache was cancelled
+because it would have saved 0.3% of a frame at the cost of a radius
+quantisation scheme and resize invalidation.
+
+Re-measure with a stepped scenario before trusting these; they are a snapshot of
+one machine.
+
 ## Local server
 
 `python3 serve.py 8222`. Needed only for Playwright, which refuses `file://`.

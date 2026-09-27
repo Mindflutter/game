@@ -33,6 +33,19 @@ stays browser-free, and `currentSeed` records what was used. Fixed a latent hole
 Three determinism checks added (89 total, was 86), **verified by putting one
 `Math.random()` back** → `1 of 89 checks FAILED`.
 
+**S0 — Foundations & spike: performance measured, glow cache cancelled**
+D43. No code written — the measurement said not to. At the 500-entity budget on
+a 3440x1440 screen a whole frame costs under 1ms of 16.7ms, and `shadowBlur`
+specifically costs 0.05ms. D30 had claimed, unmeasured, that glow was "two
+orders of magnitude costlier than a plain fill" and the real bottleneck; it is
+neither. The offscreen cache is cancelled and CLAUDE.md's sanctioned exception
+for it removed. D30's *conclusion* (no dependencies) is strengthened: Canvas 2D
+is not merely adequate here, it is idle.
+
+Entity budget reclassified as a design limit rather than a technical one —
+measured headroom is ~4000 entities. The spatial grid in `ideas.md` gains a
+measured trigger (~1500 enemies with 600 bullets) instead of a hunch.
+
 **S0 — Foundations & spike: scenarios and stepped mode**
 D42, implementing D37. `?dev=<name>` loads a named setup from `SCENARIOS` and
 holds it frozen; `&play` runs it live; `advance(n)` steps exactly n ticks. Three
