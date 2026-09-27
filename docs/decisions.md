@@ -863,3 +863,40 @@ designed out rather than diagnosed.
 through still calls `report()`. Previously a mid-suite throw skipped reporting
 entirely — loud in the console, but silent about whether the suite passed. It
 caught a real case within minutes of being written.
+
+## D42 — Scenarios implemented: stepped by default, `&play` to watch · 2026-09-27
+Implements D37 (Scenarios). Four choices worth recording.
+
+**Stepped is the default; `&play` opts into live.** `?dev=<name>` loads a
+scenario and **does not start the frame loop** — nothing advances until
+`advance(n)` asks it to. That is what makes a scenario inspectable: read the
+state and it is still the state you set up. It is also how the bot will drive
+the game faster than wall-clock time, so this is one mechanism serving both,
+not debug-only scaffolding. `?dev=<name>&play` runs it live, which is the mode
+Igor wants for eyeballing.
+
+**A placed enemy gets its nominal speed — no jitter, no ramp.** `spawnEnemy()`
+applies `ENEMY_JITTER` and `ENEMY_RAMP` because a random arrival should vary;
+`placeEnemy()` deliberately does not, because a scenario exists to watch one
+thing behave and must not vary. Verified: the drifter moves exactly 85px per
+simulated second, its table speed.
+
+**`advance()`, not `step()`.** `game/logic.js` already owns `step(dt)` as the
+simulation's per-frame function. Naming the stepper `step(n)` in `main.js`
+shadowed it — `main.js` loads later — so `update()` called the stepper, which
+called `update()`, and the suite died with a stack overflow after four checks.
+Renamed. The glossary (D32) governs game vocabulary; this is the same hazard in
+code, and `design.md` documented `step()` all along.
+
+**A stepped scenario draws its opening frame.** Without the loop nothing ever
+paints, so `?dev=three-types` loaded as a black screen and read as broken. One
+`advance(0)` at boot. **Only a screenshot caught this** — every state assertion
+passed while the page showed nothing, which is a fair warning about what
+state-only checking cannot see.
+
+`spawnPaused` gates the spawn timer and is `false` after every `reset()`, so
+normal play is untouched — S0's "zero gameplay change" holds.
+
+15 checks added (104 total, was 89). The load-bearing one is that a paused
+scenario never gains an enemy; without it a scenario is just a normal dive with
+a head start.

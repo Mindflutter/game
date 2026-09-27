@@ -2,6 +2,14 @@
 // The simulation. Knows nothing about canvas, audio or the DOM.
 
 // ---------- spawning ----------
+// Builds the record. Speed is passed in rather than derived, because a random
+// arrival wants jitter and ramp while a scenario wants one predictable enemy.
+function makeEnemy(t, x, y, speed) {
+  enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, xp: t.xp,
+                 color: t.color, glow: t.glow, lastHitBy: 0,
+                 pushX: 0, pushY: 0 });
+}
+
 function spawnEnemy() {
   const m = 40;                                  // how far outside the arena
   const edge = Math.floor(rng() * 4);    // 0 top, 1 right, 2 bottom, 3 left
@@ -13,11 +21,16 @@ function spawnEnemy() {
 
   // Later arrivals swim faster, so kiting stops working on its own.
   const t = pickEnemyType();
-  const speed = t.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER) *
-                (1 + elapsed * ENEMY_RAMP);
-  enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, xp: t.xp,
-                 color: t.color, glow: t.glow, lastHitBy: 0,
-                 pushX: 0, pushY: 0 });
+  makeEnemy(t, x, y, t.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER) *
+                     (1 + elapsed * ENEMY_RAMP));
+}
+
+// Places one named enemy at a known spot, at its nominal speed -- no jitter, no
+// ramp. A scenario is for watching one thing behave, so it must not vary.
+function placeEnemy(name, x, y) {
+  const t = ENEMY_TYPES.find(e => e.name === name);
+  if (!t) { console.error('no such enemy type: ' + name); return; }
+  makeEnemy(t, x, y, t.speed);
 }
 
 function spark(x, y, vx, vy, life, r, color, glow) {
@@ -251,7 +264,7 @@ function step(dt) {
 
   // --- spawn new enemies, faster as time goes on ---
   spawnTimer -= dt;
-  if (spawnTimer <= 0) {
+  if (spawnTimer <= 0 && !spawnPaused) {
     spawnEnemy();
     spawnTimer = Math.max(SPAWN_FASTEST, SPAWN_FIRST - elapsed * SPAWN_QUICKEN);
   }

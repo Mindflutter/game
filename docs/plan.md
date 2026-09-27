@@ -12,12 +12,15 @@ must stay true while doing it.
 
 **S0 — Foundations & spike.** Started 2026-09-26.
 
-Done: docs (`foundations.md`, `plan.md`, D27–D41), the check harness (D39 —
-Test stack), `docs/` tracked in git (D40), seeded RNG + `serve.py` (D41).
-Next: `SCENARIOS` + `?dev=` loader and a **stepped mode** that does not start the
-frame loop (D37 — Scenarios), a check that a real keypress reaches `keys`, then
-the offscreen glow cache, then the entity-budget spike. Vitest and fast-check are
-not installed yet.
+Done: docs (`foundations.md`, `plan.md`, D27–D42), the check harness (D39 —
+Test stack), `docs/` tracked in git (D40), seeded RNG + `serve.py` (D41),
+scenarios + stepped mode (D42). 104 checks passing.
+Next: the offscreen glow cache, then the entity-budget spike, then Vitest +
+fast-check with the first property-based invariants.
+Dropped: a Playwright real-keypress check. `checks.js` already dispatches
+`KeyboardEvent`s through `platform/input.js` with Cyrillic and AZERTY character
+values against correct physical codes — a stronger test of D12 than a real
+keypress on a US layout could be.
 
 ## The loop between every stage
 

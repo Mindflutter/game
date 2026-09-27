@@ -121,6 +121,10 @@ draft, which is why they are banned (D32).
 - Small steps: one playable change, then stop and explain what changed.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
+- **Stop before every commit and say so.** Stage nothing, commit nothing, until
+  Igor has had the chance to run `/simplify` on the working tree. Say what is
+  about to be committed and wait. This applies even when the work is verified
+  and the message is written — being finished is not permission to commit.
 - Commit messages: short subject line only. No body, no attribution trailers.
 - **Docs update with development, in the same step — never as a cleanup pass
   at the end.** Shipping something updates `docs/changelog.md`,

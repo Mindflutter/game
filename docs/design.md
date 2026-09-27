@@ -189,6 +189,25 @@ Why it matters: two balance measurements can now be of the *same* dive instead o
 two different ones, so a difference under a second is visible without averaging
 21 runs. And "it broke sometimes" becomes "it broke on seed 4471".
 
+## Scenarios
+
+Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42):
+
+| URL | Does |
+|---|---|
+| `?dev=one-drifter` | Loads it **frozen**. Nothing advances until `advance(n)`. |
+| `?dev=three-types&play` | Loads it **running**, for watching. |
+| `?dev=late-swarm&seed=4471` | Any scenario, on a fixed seed. |
+
+`applyScenario(name, seed)` resets, then applies the record: `elapsed` to start
+part-way in, `spawn: false` to stop new arrivals (`spawnPaused`), and a list of
+`[type, x, y]` placed at nominal speed with no jitter or ramp. An unknown name
+logs the known ones and does not throw.
+
+`advance(n)` runs exactly n fixed ticks and draws once — no wall clock involved.
+This is what the bot drives, and the same entries it selects by name, so there
+is no separate test harness. Adding a scenario is a line.
+
 ## Local server
 
 `python3 serve.py 8222`. Needed only for Playwright, which refuses `file://`.
@@ -258,7 +277,7 @@ one gun — and coverage is the thing this game has no upgrade for.
 ## Verification
 
 **`index.html?test`** runs the `console.assert` suite in the console
-(currently **89** checks — this doc owns that count; `roadmap.md` cites it).
+(currently **104** checks — this doc owns that count; `roadmap.md` cites it).
 The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
 suite now reports what actually **executed**, which is higher because some call
 sites sit inside loops. Covering: spawning,

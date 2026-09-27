@@ -123,6 +123,22 @@ function rollUpgrades() {
   return out;
 }
 
+// ---------- scenarios ----------
+// Named dev setups (D37). `?dev=<name>` loads one in isolation so a single
+// thing can be watched; add `&play` to run it live instead of frozen. The bot
+// selects the same entries by name, so there is no separate test harness.
+// Adding one is a line.
+const SCENARIOS = {
+  // One enemy, nothing else arriving. For watching a single behaviour.
+  'one-drifter': { spawn: false, enemies: [['drifter', 900, 400]] },
+  // All three types at once, at known spots, for telling them apart at a glance.
+  'three-types': { spawn: false, enemies: [['drifter', 300, 260],
+                                          ['darter',  980, 260],
+                                          ['bulwark', 640, 660]] },
+  // The swarm as it looks a minute in, for eyeballing density and pressure.
+  'late-swarm':  { spawn: true, elapsed: 60 },
+};
+
 // ---------- enemy types ----------
 // Also just data. Each one unlocks partway into a run and is picked by weight,
 // so the swarm gets more varied the longer you last.

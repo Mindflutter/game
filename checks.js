@@ -495,6 +495,40 @@ if (location.search === '?test') {
   check(shake === 0, 'shake "off" must not shake at all, got ' + shake);
   shakeLevel = 2;
 
+  // ---------- scenarios ----------
+  // A scenario must set up exactly what it names and nothing else, or it is not
+  // isolation. The load-bearing one is "no new arrivals": without it a scenario
+  // is just a normal dive with a head start.
+  check(applyScenario('one-drifter'), 'a known scenario must load');
+  check(enemies.length === 1, 'one-drifter must place exactly one enemy, got ' + enemies.length);
+  check(enemies[0].hp === 1 && enemies[0].r === 9, 'one-drifter must place a drifter');
+  check(spawnPaused === true, 'a scenario with spawn:false must pause spawning');
+  let mostSeen = enemies.length;
+  for (let i = 0; i < 900; i++) { update(1 / 60); mostSeen = Math.max(mostSeen, enemies.length); }
+  check(mostSeen === 1, 'a paused scenario must never gain an enemy, peaked at ' + mostSeen);
+
+  check(applyScenario('three-types'), 'three-types must load');
+  check(enemies.length === 3, 'three-types must place three enemies, got ' + enemies.length);
+  check(new Set(enemies.map(e => e.r)).size === 3, 'three-types must place three different types');
+
+  check(applyScenario('late-swarm'), 'late-swarm must load');
+  check(Math.round(elapsed) === 60, 'late-swarm must start 60s in, got ' + elapsed);
+  check(spawnPaused === false, 'a scenario without spawn:false must keep spawning');
+  for (let i = 0; i < 300; i++) update(1 / 60);
+  check(enemies.length > 0, 'late-swarm must still spawn enemies');
+
+  check(applyScenario('no-such-scenario') === false, 'an unknown scenario must report failure');
+
+  // advance() is the stepped-mode driver: exactly n ticks, no wall clock at all.
+  applyScenario('one-drifter');
+  const steppedFrom = elapsed;
+  advance(30);
+  check(Math.abs(elapsed - steppedFrom - 30 / 60) < 1e-9,
+    'advance(30) must move exactly 30 ticks, moved ' + (elapsed - steppedFrom));
+
+  // ?test is not a scenario, so the frame loop must still run normally here.
+  check(stepped === false, '?test must not be stepped');
+
   // ---------- determinism ----------
   // The same seed must replay the same dive. Every balance number from here on
   // rests on this: without it, comparing two builds compares two different
@@ -543,4 +577,6 @@ if (location.search === '?test') {
   })();
 }
 
-requestAnimationFrame(frame);
+// A stepped scenario never starts the loop (D37 -- Scenarios): the whole point
+// is that nothing advances until step() asks it to.
+if (!stepped) requestAnimationFrame(frame);

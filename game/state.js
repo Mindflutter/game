@@ -5,6 +5,7 @@
 // Everything a run owns lives here, so restarting is one call.
 let player, enemies, bullets, gems, particles;
 let elapsed, spawnTimer, kills, shake;
+let spawnPaused = false;    // a scenario can stop new arrivals (D37)
 let xp, xpNext, level, choices;
 
 // Which screen we're on. Replaces the old `paused` and `dead` flags, which
@@ -67,6 +68,7 @@ function reset(seed) {
   elapsed = 0;         // seconds survived
   spawnTimer = 0;
   kills = 0;
+  spawnPaused = false;   // scenarios switch this on; normal play never does
   bulletId = 0;        // or two dives with the same seed hand out different ids
   shake = 0;           // pixels of screen shake left
   screen = 'playing';  // a reset run is a running run
@@ -76,6 +78,19 @@ function reset(seed) {
   level = 1;
   choices = [];
   choiceIndex = 0;
+}
+
+// Loads a named scenario from SCENARIOS (D37). Starts from a clean reset, so a
+// scenario is a dive like any other -- just one that was set up rather than
+// spawned into. Returns false for an unknown name so the caller can complain.
+function applyScenario(name, seed) {
+  const s = SCENARIOS[name];
+  if (!s) return false;
+  reset(seed);
+  if (s.elapsed) elapsed = s.elapsed;
+  if (s.spawn === false) spawnPaused = true;
+  for (const [type, x, y] of s.enemies || []) placeEnemy(type, x, y);
+  return true;
 }
 
 let volume = 0.6;           // master gain, 0..1

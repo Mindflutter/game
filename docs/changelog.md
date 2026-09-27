@@ -33,6 +33,18 @@ stays browser-free, and `currentSeed` records what was used. Fixed a latent hole
 Three determinism checks added (89 total, was 86), **verified by putting one
 `Math.random()` back** → `1 of 89 checks FAILED`.
 
+**S0 — Foundations & spike: scenarios and stepped mode**
+D42, implementing D37. `?dev=<name>` loads a named setup from `SCENARIOS` and
+holds it frozen; `&play` runs it live; `advance(n)` steps exactly n ticks. Three
+scenarios to start: `one-drifter`, `three-types`, `late-swarm`. `spawnEnemy()`
+split into `makeEnemy()` + `placeEnemy()` so a scenario can put a named type at
+a known spot at nominal speed. 15 checks added (104 total, was 89).
+
+Two bugs caught while building it: naming the stepper `step()` shadowed
+`logic.js`'s own `step(dt)` and recursed infinitely, and a stepped scenario
+never painted because the frame loop is what calls `draw()` — it loaded as a
+black screen with every state check passing.
+
 Added `serve.py`: the stock `http.server` caches (so the browser ran a mix of old
 and new files for most of an hour) and is single-threaded (so a keep-alive
 connection blocked the `curl` checking on it). Also added an `error` listener to
