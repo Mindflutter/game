@@ -131,12 +131,36 @@ draft, which is why they are banned (D32).
   about to be committed and wait. This applies even when the work is verified
   and the message is written — being finished is not permission to commit.
 - Commit messages: short subject line only. No body, no attribution trailers.
-- **Docs update with development, in the same step — never as a cleanup pass
-  at the end.** Shipping something updates `docs/changelog.md`,
-  `docs/decisions.md` for anything decided or reopened, and `docs/design.md`
-  if it changed how something works. Updating means grepping for what the
-  change made **false** and fixing that first, before appending anything new.
-  Docs that contradict themselves are worse than no docs.
+- **Every change ends with the consistency sweep. It is part of the change,
+  never a separate request.** Igor should never have to ask "did you update the
+  docs?" — if he does, the change was not finished. Grep for what the change
+  made **false** and fix that *before* appending anything new; docs that
+  contradict themselves are worse than no docs.
+
+  The sweep covers all six surfaces, in this order. Three of them have been
+  missed for real, which is why they are listed rather than implied:
+  1. **`docs/`** — `changelog.md` always; `decisions.md` for anything decided,
+     reopened or superseded; `design.md` for anything whose behaviour changed;
+     `plan.md` if a stage moved; `ideas.md` if an open question closed.
+  2. **`foundations.md`** — if a rule changed, it is a decision: edit here and
+     record it in `decisions.md` in the same step, never quietly.
+  3. **`CLAUDE.md`** — it makes factual claims (the seam is six names, the
+     suites, the constraints) and they go stale. *Missed: it claimed six seam
+     names while the code used eleven.*
+  4. **In-game text** — `HELP_KEYS`, `HELP_BLURB`, menu labels, option names,
+     upgrade descriptions. Prose inside `game/content.js` describes behaviour
+     and no check can read it. *Missed: the help still said the weapon fires
+     itself, a full change after it stopped doing so.*
+  5. **Layout coupled to data** — adding a row to any table can push a fixed
+     `y` through the text below it. Positions must be derived from
+     `.length`, never hardcoded. *Missed: the help list ran straight through
+     its own blurb while all 107 checks passed.*
+  6. **Memory** (`~/.claude/projects/.../memory/`) — it is auto-loaded before
+     any file is read, so a stale line there misleads the next session first.
+
+  **Then look at it.** State checks are blind to a blank screen and to
+  overlapping text — both have happened. If a change touches anything drawn,
+  screenshot it before claiming done.
 - **Every measured number lives in exactly one doc.** Check counts, line
   counts, bot survival times, the port share. A number copied into a second
   file is a number that will disagree with itself — every stale figure found

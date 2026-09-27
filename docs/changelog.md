@@ -33,6 +33,13 @@ stays browser-free, and `currentSeed` records what was used. Fixed a latent hole
 Three determinism checks added (89 total, was 86), **verified by putting one
 `Math.random()` back** → `1 of 89 checks FAILED`.
 
+**The consistency sweep, made concrete**
+D46. CLAUDE.md now names the six surfaces a change can leave stale instead of
+saying "update the docs", with the three that have actually been missed marked
+as such. The layout-vs-data one is now a check: `render.js` exposes `HINT_Y` and
+`helpBottom`, and the suite asserts the help screen ends above the hint —
+verified by padding `HELP_KEYS` until it overflows. 108 checks (was 107).
+
 **S1 — Combat core: the weapon is manual**
 D45, implementing D28. Shots leave while `Mouse0` is held, along the cursor.
 `enemyInRange()` and the "hold fire unless something is in range" rule are

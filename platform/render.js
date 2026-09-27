@@ -244,11 +244,20 @@ function drawDeath() {
                ARENA_W / 2, ARENA_H / 2 + 60);
 }
 
+// The y the hint sits on. Screens that stack rows from a data table must end
+// above it, and a check asserts they do -- adding a row used to push text
+// straight through whatever was below, invisibly to every state assertion.
+const HINT_Y = ARENA_H - 64;
+
+// Where the last line of the help screen ends. Set by drawHelp(), read by the
+// checks; there is no other way to notice a screen has outgrown itself.
+let helpBottom = 0;
+
 function drawHint(text) {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#2f5563';
   ctx.font = '13px system-ui, sans-serif';
-  ctx.fillText(text, ARENA_W / 2, ARENA_H - 64);
+  ctx.fillText(text, ARENA_W / 2, HINT_Y);
 }
 
 function drawMenu(menu) {
@@ -304,6 +313,7 @@ function drawHelp() {
   ctx.fillStyle = '#6f97a5';
   ctx.font = '15px system-ui, sans-serif';
   HELP_BLURB.forEach((line, i) => ctx.fillText(line, ARENA_W / 2, blurbTop + i * 27));
+  helpBottom = blurbTop + (HELP_BLURB.length - 1) * 27;
 
   drawHint('Esc or click to go back');
 }

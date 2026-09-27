@@ -293,6 +293,12 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
 
 ## Suggested but not yet discussed
 
+- **Guard the other screens against overflow.** D46 gave the help screen a check
+  that its content ends above the hint. Options and the menus stack rows from
+  tables the same way and have no such guard. Generalising means every screen
+  reporting its own extent, which is more machinery than one bug justifies —
+  worth doing when a second screen actually overflows, not before.
+
 - **Shake when enemies take damage** (currently only when *you* take damage).
   Offered 2026-09-12 when Igor asked for "slight shake on damage received";
   he meant the player. Never confirmed either way.

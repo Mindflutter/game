@@ -548,6 +548,17 @@ if (location.search === '?test') {
   check(shake === 0, 'shake "off" must not shake at all, got ' + shake);
   shakeLevel = 2;
 
+  // ---------- screens fit ----------
+  // Adding a row to HELP_KEYS once pushed the list straight through the blurb
+  // below it, and all 107 checks passed while the screen was unreadable. Layout
+  // is derived from the data now; this is the guard that keeps it that way.
+  openScreen('help');
+  draw();
+  check(helpBottom < HINT_Y - 10,
+    'the help screen must end above the hint: content ends at ' + helpBottom +
+    ', hint sits at ' + HINT_Y + ' -- add a row and it overflows');
+  screen = 'title';
+
   // ---------- scenarios ----------
   // A scenario must set up exactly what it names and nothing else, or it is not
   // isolation. The load-bearing one is "no new arrivals": without it a scenario

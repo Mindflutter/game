@@ -205,6 +205,17 @@ Why it matters: two balance measurements can now be of the *same* dive instead o
 two different ones, so a difference under a second is visible without averaging
 21 runs. And "it broke sometimes" becomes "it broke on seed 4471".
 
+## Screens must fit
+
+Any screen that stacks rows from a data table derives its positions from
+`.length`, never a hardcoded `y`. `render.js` exposes `HINT_Y` (where the
+bottom hint sits) and `helpBottom` (where the help screen's last line ends), and
+a check asserts one is above the other — adding a row to `HELP_KEYS` once pushed
+the list straight through the blurb below while every check passed (D46).
+
+Only the help screen is guarded. Options and the menus stack rows the same way
+and are not.
+
 ## Scenarios
 
 Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42):
@@ -330,7 +341,7 @@ one gun — and coverage is the thing this game has no upgrade for.
 ## Verification
 
 **`index.html?test`** runs the `console.assert` suite in the console
-(currently **107** checks — this doc owns that count; `roadmap.md` cites it).
+(currently **108** checks — this doc owns that count; `roadmap.md` cites it).
 The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
 suite now reports what actually **executed**, which is higher because some call
 sites sit inside loops. Covering: spawning,

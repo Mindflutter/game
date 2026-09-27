@@ -1055,3 +1055,30 @@ was the stepped scenario rendering nothing (D42).
 107 browser checks pass (was 104: +5 new, −2 deleted). The six Node invariants
 are unaffected.
 
+## D46 — The consistency sweep is part of every change · 2026-09-27
+Igor: "check and update everything every time a change is made -- i dont want a
+separate prompt for double checking code and docs consistency."
+
+The rule already existed in CLAUDE.md and kept failing, so restating it a fifth
+time was not the answer. What failed was always the *scope*: `docs/` got swept
+and the other surfaces did not. CLAUDE.md now names all six, with the three that
+have actually been missed called out as such — `CLAUDE.md`'s own factual claims
+(it said six seam names while the code used eleven), **in-game text** (the help
+still said the weapon fires itself long after D45), and **layout coupled to data
+length** (adding one help row pushed the list through the blurb beneath it).
+
+**Surface 5 is now executable.** `HINT_Y` and `helpBottom` are exposed from
+`render.js`, and a check asserts the help screen ends above the hint. Verified
+by padding `HELP_KEYS` with eight rows: `helpBottom` 975 against a limit of 726,
+guard fires. 108 checks (was 107).
+
+**Surfaces 4 and 6 stay human.** No check can read prose and decide it still
+describes the behaviour, and memory lives outside the repo. Those are caught by
+the discipline or not at all — which is why the rule ends with "then look at
+it": a screenshot, because a state pass is blind to a blank screen and to
+overlapping text, and both have now happened.
+
+**Other screens carry the same hazard** — options and the menus stack rows from
+tables too, and only the help screen is guarded. Filed in `ideas.md`; not worth
+generalising until a second screen actually overflows.
+
