@@ -29,6 +29,14 @@ if (location.search === '?test') {
     }
   };
 
+  // A throw partway through used to mean no report at all: loud in the console,
+  // but silent about whether the suite passed. Caught here so report() always
+  // runs and the throw is counted as the failure it is.
+  window.addEventListener('error', e => {
+    failures.push('SUITE THREW: ' + (e.message || e));
+    report();
+  });
+
   const mob = (x, y, over) => Object.assign(
     { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, xp: 1, lastHitBy: 0,
       pushX: 0, pushY: 0 }, over);
@@ -486,6 +494,30 @@ if (location.search === '?test') {
   update(1 / 60);
   check(shake === 0, 'shake "off" must not shake at all, got ' + shake);
   shakeLevel = 2;
+
+  // ---------- determinism ----------
+  // The same seed must replay the same dive. Every balance number from here on
+  // rests on this: without it, comparing two builds compares two different
+  // games, which is why the old measurements needed 21 runs per configuration
+  // to see through the spawn noise. This fails the moment a Math.random()
+  // survives anywhere in game/.
+  const trace = seed => {
+    reset(seed);
+    const out = [];
+    for (let i = 0; i < 600; i++) {
+      update(1 / 60);
+      out.push(enemies.length, kills, gems.length, bullets.length,
+               Math.round(player.hp), Math.round(elapsed * 100));
+    }
+    return out.join(',');
+  };
+  const runA = trace(4471);
+  const runB = trace(4471);
+  const runC = trace(9999);
+  check(runA === runB, 'the same seed must replay the same dive exactly');
+  check(runA !== runC, 'different seeds must produce different dives');
+  check(currentSeed === 9999,
+    'reset(seed) must record the seed it used, got ' + currentSeed);
 
   // Leave the game in a known state before the frame loop gets it. This has to
   // stay synchronous: the loop starts as soon as this block returns, and the

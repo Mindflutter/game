@@ -63,7 +63,9 @@ behind a constant in the balance block so the choice can be played rather than
 argued. Feel is Igor's call (D16).
 
 ### Seeded RNG for the bot, so balance comparisons are paired
-**Status: open. Non-blocking.** Raised 2026-09-20 while evaluating the
+**Status: DONE 2026-09-27, D41.** Landed in S0. The cost estimate below was
+right about the scattered call sites — 14 of them — and wrong to call it "not
+free": the whole change took one pass. Raised 2026-09-20 while evaluating the
 `procedural-gen` skill, which is where the gap surfaced.
 
 Today every bot run draws its own spawn sequence, so comparing two builds

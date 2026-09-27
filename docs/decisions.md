@@ -817,3 +817,49 @@ dev dependencies.
 
 **Not reversed:** `high level design.md` stays as it is — Igor's frozen source
 description, tracked now but still an input, not a working doc.
+
+## D41 — Seeded RNG, and a dev server that cannot cache · 2026-09-27
+First code of S0 (Foundations & spike). Closes the `ideas.md` item raised on
+2026-09-20.
+
+**mulberry32 in `game/state.js`.** 32 bits of state, one multiply-xor-shift
+round; tiny, fast, statistically fine for gameplay. All 14 `Math.random()` call
+sites in `game/` now go through `rng()`. A dive's seed is run state, which is why
+it lives in `state.js` rather than in a file of its own, and `reset()` reseeds.
+
+**The seam did not grow.** Reading a URL is a browser API, so `game/` never does
+it: `main.js` parses `?seed=<n>` and passes it as an argument to `reset(seed)`.
+Platform calling into `game/` is the existing direction, so this adds nothing to
+the six names.
+
+**One deliberate `Math.random()` survives**, in `reset()`, to *choose* a seed
+when none is given. Choosing a seed is not part of the deterministic sequence; a
+port does the same with whatever its language offers.
+
+**Fixed a latent determinism hole found on the way:** `reset()` never cleared
+`bulletId`, so two dives on the same seed handed out different bullet ids. Now
+reset with everything else.
+
+**Verified by breaking it** — a single `Math.random()` put back at the spawn-edge
+pick made the suite report `1 of 89 checks FAILED`. Restored: 89 pass. Also
+confirmed independently outside the suite that seed 777 replays identically and
+differs from 778.
+
+**`serve.py`** replaces `python3 -m http.server` for local testing. Two things
+the stock server gets wrong here, both of which cost real time today:
+- **It caches.** Across eight script tags the browser then runs a mix of old and
+  new files — exactly the "baffling bugs" CLAUDE.md warns about. A human presses
+  Cmd+Shift+R; Claude cannot, so the server sends `no-store` instead.
+- **It is single-threaded**, so a browser holding a keep-alive connection blocks
+  every other request, including the `curl` used to check on it. `serve.py` is
+  threaded and speaks HTTP/1.0 so nothing hogs a worker.
+
+Honest note: the stale content on the original port was never fully explained —
+`http.server` reads from disk per request, so it should not have served an old
+file. A fresh port with the new server resolved it, and the failure mode is
+designed out rather than diagnosed.
+
+**Also added, unplanned:** an `error` listener in `checks.js` so a throw partway
+through still calls `report()`. Previously a mid-suite throw skipped reporting
+entirely — loud in the console, but silent about whether the suite passed. It
+caught a real case within minutes of being written.

@@ -25,6 +25,19 @@ after the awaits.
 with the failure listed; reverted → `86 checks passed`. Also confirmed `?test`
 still matches exactly — `?test&cachebust=1` correctly ran nothing.
 
+**S0 — Foundations & spike: seeded RNG**
+D41. mulberry32 in `game/state.js`; all 14 `Math.random()` sites in `game/` now
+call `rng()`. `reset(seed)` reseeds, `main.js` passes `?seed=<n>` in so `game/`
+stays browser-free, and `currentSeed` records what was used. Fixed a latent hole:
+`reset()` never cleared `bulletId`, so same-seed dives handed out different ids.
+Three determinism checks added (89 total, was 86), **verified by putting one
+`Math.random()` back** → `1 of 89 checks FAILED`.
+
+Added `serve.py`: the stock `http.server` caches (so the browser ran a mix of old
+and new files for most of an hour) and is single-threaded (so a keep-alive
+connection blocked the `curl` checking on it). Also added an `error` listener to
+`checks.js` so a mid-suite throw still reports instead of ending ambiguously.
+
 The count moved 79 → 86 with no checks added: 79 was `grep -c` counting *lines*,
 86 is what actually executes. `design.md` owns the figure.
 

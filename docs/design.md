@@ -175,6 +175,26 @@ gain and a compressor so a dozen simultaneous kills don't clip. The context is
 built on the first real key press and resumed on later ones; the HUD reports
 its state so a silent game can say why it's silent.
 
+## Randomness
+
+Every random number in a dive comes from `rng()` in `game/state.js` — mulberry32,
+seeded, so the same seed replays the same dive exactly (D41). `reset(seed)`
+reseeds; `currentSeed` records what was used. `main.js` reads `?seed=<n>` off the
+URL and passes it in, because `game/` never touches a browser API.
+
+The one `Math.random()` left in `game/` is in `reset()`, choosing a seed when
+none is given — that choice is outside the deterministic sequence.
+
+Why it matters: two balance measurements can now be of the *same* dive instead of
+two different ones, so a difference under a second is visible without averaging
+21 runs. And "it broke sometimes" becomes "it broke on seed 4471".
+
+## Local server
+
+`python3 serve.py 8222`. Needed only for Playwright, which refuses `file://`.
+It forbids caching and is threaded — see D41 for why the stock `http.server`
+is not usable here. Double-clicking `index.html` still needs no server at all.
+
 ## Balance constants
 
 All in `game/content.js` under `// balance`. These are the real product of the
@@ -238,7 +258,7 @@ one gun — and coverage is the thing this game has no upgrade for.
 ## Verification
 
 **`index.html?test`** runs the `console.assert` suite in the console
-(currently **86** checks — this doc owns that count; `roadmap.md` cites it).
+(currently **89** checks — this doc owns that count; `roadmap.md` cites it).
 The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
 suite now reports what actually **executed**, which is higher because some call
 sites sit inside loops. Covering: spawning,

@@ -16,5 +16,12 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-reset();
+// ---------- boot ----------
+// Query params are platform business: game/ never reads a URL, so the seed is
+// passed in as an argument. ?seed=<n> replays an exact dive; without it, a
+// fresh random seed is chosen and recorded in currentSeed.
+const params = new URLSearchParams(location.search);
+const seedParam = params.get('seed');
+
+reset(seedParam === null ? undefined : Number(seedParam) >>> 0);
 screen = 'title';       // reset() leaves us playing; the game opens on the menu

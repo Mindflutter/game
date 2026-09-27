@@ -118,7 +118,7 @@ function rollUpgrades() {
   const pool = UPGRADES.slice();       // a copy, so we don't wreck the original
   const out = [];
   while (out.length < 3 && pool.length) {
-    out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    out.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
   }
   return out;
 }

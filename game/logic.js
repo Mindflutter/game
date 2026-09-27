@@ -4,16 +4,16 @@
 // ---------- spawning ----------
 function spawnEnemy() {
   const m = 40;                                  // how far outside the arena
-  const edge = Math.floor(Math.random() * 4);    // 0 top, 1 right, 2 bottom, 3 left
+  const edge = Math.floor(rng() * 4);    // 0 top, 1 right, 2 bottom, 3 left
   let x, y;
-  if      (edge === 0) { x = Math.random() * ARENA_W;  y = -m; }
-  else if (edge === 1) { x = ARENA_W + m;              y = Math.random() * ARENA_H; }
-  else if (edge === 2) { x = Math.random() * ARENA_W;  y = ARENA_H + m; }
-  else                 { x = -m;                       y = Math.random() * ARENA_H; }
+  if      (edge === 0) { x = rng() * ARENA_W;  y = -m; }
+  else if (edge === 1) { x = ARENA_W + m;              y = rng() * ARENA_H; }
+  else if (edge === 2) { x = rng() * ARENA_W;  y = ARENA_H + m; }
+  else                 { x = -m;                       y = rng() * ARENA_H; }
 
   // Later arrivals swim faster, so kiting stops working on its own.
   const t = pickEnemyType();
-  const speed = t.speed * (1 - ENEMY_JITTER / 2 + Math.random() * ENEMY_JITTER) *
+  const speed = t.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER) *
                 (1 + elapsed * ENEMY_RAMP);
   enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, xp: t.xp,
                  color: t.color, glow: t.glow, lastHitBy: 0,
@@ -28,8 +28,8 @@ function spark(x, y, vx, vy, life, r, color, glow) {
 // but it's what makes a kill feel like an event rather than a disappearance.
 function burst(x, y, color, glow, count, speed, life = 0.45) {
   for (let i = 0; i < count; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const s = speed * (0.3 + Math.random() * 0.7);
+    const a = rng() * Math.PI * 2;
+    const s = speed * (0.3 + rng() * 0.7);
     spark(x, y, Math.cos(a) * s, Math.sin(a) * s, life, 3, color, glow);
   }
 }
@@ -39,8 +39,8 @@ function burst(x, y, color, glow, count, speed, life = 0.45) {
 function hitSparks(e, b) {
   const bs = Math.sqrt(b.vx * b.vx + b.vy * b.vy) || 1;
   for (let n = 0; n < 5; n++) {
-    const spread = (Math.random() - 0.5) * 1.6;
-    const sp = 70 + Math.random() * 90;
+    const spread = (rng() - 0.5) * 1.6;
+    const sp = 70 + rng() * 90;
     spark(e.x, e.y,
           (-b.vx / bs) * sp + Math.cos(spread) * sp * 0.5,
           (-b.vy / bs) * sp + Math.sin(spread) * sp * 0.5,
@@ -66,8 +66,8 @@ function killEnemy(e) {
   e.gone = true;
   kills += 1;
   for (let n = 0; n < e.xp; n++) {
-    gems.push({ x: e.x + (Math.random() - 0.5) * 18,
-                y: e.y + (Math.random() - 0.5) * 18, r: 4, life: GEM_LIFE });
+    gems.push({ x: e.x + (rng() - 0.5) * 18,
+                y: e.y + (rng() - 0.5) * 18, r: 4, life: GEM_LIFE });
   }
   burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
   sound('kill', 1 - Math.min(0.4, e.maxHp * 0.04));  // bigger things pop lower
@@ -117,7 +117,7 @@ function gainXp() {
 function pickEnemyType() {
   const open = ENEMY_TYPES.filter(t => elapsed >= t.from);
   const total = open.reduce((sum, t) => sum + t.weight, 0);
-  let r = Math.random() * total;
+  let r = rng() * total;
   for (const t of open) { r -= t.weight; if (r <= 0) return t; }
   return open[0];
 }
