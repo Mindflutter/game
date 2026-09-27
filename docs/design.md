@@ -238,7 +238,10 @@ one gun — and coverage is the thing this game has no upgrade for.
 ## Verification
 
 **`index.html?test`** runs the `console.assert` suite in the console
-(currently 79 checks — this doc owns that count; `roadmap.md` cites it): spawning,
+(currently **86** checks — this doc owns that count; `roadmap.md` cites it).
+The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
+suite now reports what actually **executed**, which is higher because some call
+sites sit inside loops. Covering: spawning,
 collision, i-frames, bullet range, piercing, gem expiry, XP curve, every screen
 transition, cursor wrapping, each option, non-Latin keyboard layouts, shake
 settling, frame-rate independence, that every sound is loud enough to hear,

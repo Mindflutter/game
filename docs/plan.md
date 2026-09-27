@@ -12,6 +12,11 @@ must stay true while doing it.
 
 **S0 — Foundations & spike.** Started 2026-09-26.
 
+Done: docs (`foundations.md`, `plan.md`, D27–D40), the check harness (D39 —
+Test stack), `docs/` tracked in git (D40).
+Next: seeded RNG, then the offscreen glow cache, then `SCENARIOS`, then the
+entity-budget spike. Vitest and fast-check are not installed yet.
+
 ## The loop between every stage
 
 Not optional, and not a habit — an explicit step:

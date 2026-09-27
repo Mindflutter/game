@@ -4,6 +4,32 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-09-27
+
+**`073a3ef` Track docs and CLAUDE.md in git**
+D40. Reverses `10b3b96` and `002a562`. The docs now hold 40 decisions, the
+glossary, the genre contract and the S0–S7 plan — the part that survives the
+port, which D17 calls the real deliverable — so keeping them untracked while
+versioning the throwaway `index.html` was backwards. `node_modules/` added to
+`.gitignore` ahead of D39's dev dependencies.
+
+**S0 — Foundations & spike: the check harness**
+D39's first item. `console.assert` is gone from `checks.js`; a `check()` that
+counts feeds a single `report()` printing `N passed / M failed`. Two defects
+fixed: the suite could not fail (a failed `console.assert` logs and continues),
+and its final `console.log('checks done')` ran *before* the async sound checks
+had even started, so it never described them. `report()` now runs once, last,
+after the awaits.
+
+**Verified by breaking it**: one check inverted → `1 of 86 checks FAILED` in red
+with the failure listed; reverted → `86 checks passed`. Also confirmed `?test`
+still matches exactly — `?test&cachebust=1` correctly ran nothing.
+
+The count moved 79 → 86 with no checks added: 79 was `grep -c` counting *lines*,
+86 is what actually executes. `design.md` owns the figure.
+
+---
+
 ## 2026-09-19
 
 **`bff155c` Mouse aim, force dash, mouse on every screen**

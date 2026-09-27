@@ -97,9 +97,10 @@ draft, which is why they are banned (D32).
 - **Game feel is Igor's call and is never asserted.**
 - Hard-refresh (Cmd+Shift+R) after edits. Several script files mean a partial
   cache serves a mix of old and new, which produces baffling bugs.
-- Every number the docs quote about the code is regenerable. Before claiming a
-  count is current, run it:
-  `wc -l game/*.js platform/*.js main.js && grep -c 'check(' checks.js`
+- Every number the docs quote about the code is regenerable. Line counts:
+  `wc -l game/*.js platform/*.js main.js`. **The check count is whatever the
+  suite reports**, not a grep — `grep -c` counts lines containing an assertion,
+  which undercounts because some call sites sit inside loops.
 
 ## Working agreement
 
