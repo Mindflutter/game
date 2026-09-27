@@ -33,6 +33,21 @@ stays browser-free, and `currentSeed` records what was used. Fixed a latent hole
 Three determinism checks added (89 total, was 86), **verified by putting one
 `Math.random()` back** → `1 of 89 checks FAILED`.
 
+**S0 — Foundations & spike: Node test stack, and a seam that was wrong**
+D44. Vitest + fast-check as dev-only dependencies; `npm test` runs six
+property-based invariants over generated seeds. `tests/harness.js` loads `game/`
+in a Node `vm` with only the six seam names stubbed — D18's grep made executable.
+
+It found the seam had been **eleven names, not six**, since 2026-09-12: `LEFT`,
+`RIGHT`, `GO`, `DASH` and `CLICK` were read from `platform/input.js`. Fixed by
+moving all seven binding constants into `game/content.js` — which key means which
+action is content (D6) — rather than by correcting the docs. Pure move; 104
+browser checks unchanged.
+
+Each invariant verified by breaking it. One was a fraud: deleting a `|| 1`
+divide-by-zero guard passed all six, because the generator never aimed exactly
+at the player. Generator fixed, break now caught.
+
 **S0 — Foundations & spike: performance measured, glow cache cancelled**
 D43. No code written — the measurement said not to. At the 500-entity budget on
 a 3440x1440 screen a whole frame costs under 1ms of 16.7ms, and `shadowBlur`

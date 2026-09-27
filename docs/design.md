@@ -60,6 +60,12 @@ for exactly six names:
 | `moveCursor(i, len)` | `platform/input.js` | trivial helper |
 | `aim` | `platform/input.js` | cursor position in world coords |
 
+Exactly six, and **enforced rather than claimed**: `npm test` loads `game/` into
+a Node `vm` with only these six stubbed, so reaching for a seventh fails the
+build. That check found the seam had quietly grown to eleven — `LEFT`, `RIGHT`,
+`GO`, `DASH` and `CLICK` were being read from `platform/input.js`. They now live
+in `game/content.js`, because which key means which action is content (D44).
+
 ## The frame
 
 ```
@@ -226,6 +232,24 @@ quantisation scheme and resize invalidation.
 
 Re-measure with a stepped scenario before trusting these; they are a snapshot of
 one machine.
+
+## Tests
+
+Two suites (D39, D44).
+
+| | Command | Covers |
+|---|---|---|
+| **Node** | `npm test` (`npm run test:watch`) | The seam, and six property-based invariants over generated seeds — no NaN ever, hp bounds, arena bounds, seeded replay, time-based decay. Vitest + fast-check, dev-only. |
+| **Browser** | `index.html?test` | The 104 scripted checks, plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`. |
+
+`tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
+classic script are lexical bindings rather than properties of the global object,
+so the harness generates accessors to expose state and constants.
+
+**A property test is only as good as its generator.** The no-NaN invariant
+initially passed even with a divide-by-zero guard deleted, because the generator
+never put the cursor exactly on the player. It now does so 8% of the time. Treat
+an invariant as unproven until a deliberate break makes it fail.
 
 ## Local server
 

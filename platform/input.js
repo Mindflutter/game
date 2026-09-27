@@ -17,13 +17,10 @@ window.addEventListener('keydown', e => {
 });
 window.addEventListener('keyup', e => keys.delete(e.code));
 
-const UP    = ['ArrowUp', 'KeyW'];
-const DOWN  = ['ArrowDown', 'KeyS'];
-const LEFT  = ['ArrowLeft', 'KeyA'];
-const RIGHT = ['ArrowRight', 'KeyD'];
-const GO    = ['Enter', 'NumpadEnter', 'Space'];
-const DASH  = ['Space'];
-const CLICK = ['Mouse0'];
+// UP / DOWN / LEFT / RIGHT / GO / DASH / CLICK live in game/content.js: which
+// key means which action is content, not platform, and keeping them there is
+// what holds the port seam at six names. content.js loads first, so they are
+// available here.
 const tapped = codes => codes.some(c => justPressed.has(c));
 
 // Mouse buttons ride in the same two sets as the keys, under codes a keyboard

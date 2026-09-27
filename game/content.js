@@ -123,6 +123,22 @@ function rollUpgrades() {
   return out;
 }
 
+// ---------- key bindings ----------
+// Which physical key means which action. Content, not platform: the game decides
+// that dashing is Space, while reading the keyboard is platform's job. Keeping
+// them here is what holds the port seam at exactly six names -- `game/` used to
+// reach across for these as well, which a headless load in Node caught.
+//
+// Always `e.code` (the physical key), never `e.key` (the character it types) --
+// see D12. On a Russian layout WASD type ц/ф/ы/в; on AZERTY they are ZQSD.
+const UP    = ['ArrowUp', 'KeyW'];
+const DOWN  = ['ArrowDown', 'KeyS'];
+const LEFT  = ['ArrowLeft', 'KeyA'];
+const RIGHT = ['ArrowRight', 'KeyD'];
+const GO    = ['Enter', 'NumpadEnter', 'Space'];
+const DASH  = ['Space'];
+const CLICK = ['Mouse0'];
+
 // ---------- scenarios ----------
 // Named dev setups (D37). `?dev=<name>` loads one in isolation so a single
 // thing can be watched; add `&play` to run it live instead of frozen. The bot

@@ -947,3 +947,46 @@ as entities rose, because the player died instantly in a crowd of 500 and
 `step()` early-returns on the death screen; the second showed a flat 0.2ms
 because bullets expire on contact, so the quadratic loop had no pairs. Numbers
 that improve as load increases are a bug in the measurement, not a result.
+
+## D44 — Node test stack landed; the port seam was 11 names, not 6 · 2026-09-27
+Last item of S0 (Foundations & spike). Implements D39 (Test stack).
+
+**Vitest 5 + fast-check 4, dev-only.** `package.json` is `type: module` and
+`private`, with `npm test` and `npm run test:watch`. The game is untouched:
+`index.html` still loads plain `<script>` tags and no libraries, and nothing in
+`node_modules` ever reaches a browser. `type: module` affects only how Node
+treats `.js`, and the game never goes through Node.
+
+**`tests/harness.js` loads `game/` into a Node `vm` with the six seam names
+stubbed and nothing else.** This is not a convenience — it is D18's seam check
+made executable, and stronger than the grep `design.md` relied on.
+
+**It immediately proved the documented seam false.** `game/` reached across for
+**eleven** names, not six: the six, plus `LEFT`, `RIGHT`, `GO`, `DASH` and
+`CLICK` from `platform/input.js`. CLAUDE.md, `design.md`, `foundations.md` and
+D18 had all said six since 2026-09-12.
+
+**Fixed by moving, not by re-documenting.** All seven binding constants (`UP`,
+`DOWN`, `LEFT`, `RIGHT`, `GO`, `DASH`, `CLICK`) moved to `game/content.js`.
+Which key means which action is *content* — the game decides dashing is Space,
+while reading a keyboard is platform's job — so this is D6 applied, and it makes
+the seam genuinely six. `content.js` loads first, so `input.js` and `render.js`
+still see them. Pure move, no behaviour change: 104 browser checks still pass.
+
+**Six invariants, each guarding a decision**: the seam loads (D18); no NaN or
+Infinity ever (D39); hp within `[0, maxHp]` and no dead enemy survives a sweep
+(D7); the player stays inside the arena; a dive replays from its seed (D41); and
+decay is time-based, not frame-based (D15).
+
+**Verified by breaking each, and one of them was a fraud.** Replacing
+`Math.pow(SHAKE_FADE, dt)` with a per-frame `0.94` failed the D15 property and
+shrank to a two-step counterexample. But removing a `|| 1` divide-by-zero guard
+— the exact bug the guard exists for — **passed all six**, because the input
+generator picked random aim points and never put the cursor exactly on the
+player. A property test is only as good as its generator, and an unexercised
+edge case makes an invariant a check that can only pass. The generator now aims
+at the player 8% of the time; the same break is then caught, with the failing
+seed named.
+
+`aim` starts at the arena centre, which is where the player starts, so that
+degenerate case is not exotic — it is the state at boot.

@@ -54,8 +54,12 @@ draft, which is why they are banned (D32).
 - `game/` contains **zero** browser API. It reaches into `platform/` for a
   deliberately short list of names — currently `sound`, `keys`, `justPressed`,
   `tapped`, `moveCursor`, `aim`. That seam is the port; keep it clean. It will
-  grow past six (camera, save, mouse buttons); every addition is deliberate and
-  listed in `design.md`, never incidental.
+  grow (camera, save); every addition is deliberate and listed in `design.md`,
+  never incidental. **`npm test` enforces this**: `tests/harness.js` loads
+  `game/` with only those six stubbed, so a seventh name breaks the build. That
+  is how D44 found the seam had quietly become eleven.
+- **Key bindings live in `game/content.js`, not `platform/`.** Which key means
+  which action is content (D6); reading the keyboard is platform's job.
 - Do not invest in the canvas layer. The offscreen glow cache that used to be
   the sanctioned exception was **cancelled** by D43 — measurement showed glow
   costs 0.05ms of a 16.7ms frame, so there was nothing to fix. The rule now

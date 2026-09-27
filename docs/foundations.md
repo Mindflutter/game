@@ -115,9 +115,10 @@ Igor's call and gets no check.
   number says how much should be on screen at once, not what the machine can
   bear. Dependencies are revisited only on a measured failure, and there is
   currently no failure to revisit.
-- **The `game/` ⁄ `platform/` seam is maintained** (D18, D30). `game/` contains
-  zero browser API. The seam grows past six names; every addition is
-  deliberate and listed in `design.md`.
+- **The `game/` ⁄ `platform/` seam is maintained** (D18, D30, D44). `game/`
+  contains zero browser API and reaches across for exactly six names. This is
+  **enforced, not asserted**: `npm test` loads `game/` in Node with only those
+  six stubbed. Every addition is deliberate and listed in `design.md`.
 - **Fixed timestep for the simulation**, with render interpolation, from S1.
   Variable `dt` tunnels fast projectiles and melee hitboxes through thin
   enemies. Time-based decay still uses `Math.pow(x, dt)`.

@@ -15,9 +15,11 @@ must stay true while doing it.
 Done: docs (`foundations.md`, `plan.md`, D27–D42), the check harness (D39 —
 Test stack), `docs/` tracked in git (D40), seeded RNG + `serve.py` (D41),
 scenarios + stepped mode (D42). 104 checks passing.
-Done also: the entity-budget spike, which **cancelled** the glow cache (D43).
-Next: Vitest + fast-check with the first property-based invariants — the last
-item before S0 exits.
+Done also: the entity-budget spike, which **cancelled** the glow cache (D43),
+and the Node test stack with six property-based invariants (D44).
+**Every S0 exit condition is met.** Next session opens S1 — Combat core, which
+is where the genre actually changes: manual LMB fire, the batch queue and gate,
+and the `// balance` block re-derived from scratch.
 Dropped: a Playwright real-keypress check. `checks.js` already dispatches
 `KeyboardEvent`s through `platform/input.js` with Cyrillic and AZERTY character
 values against correct physical codes — a stronger test of D12 than a real
@@ -76,7 +78,8 @@ fast-check land as dev dependencies.
 - The suite **reports pass/fail** and a deliberately broken check makes it say
   so — verified by breaking one (D39).
 - The existing 79 checks pass under the new harness, in any order.
-- At least one invariant runs as a property test over generated seeds.
+- At least one invariant runs as a property test over generated seeds. **Done:
+  six** (D44), each verified by breaking it.
 - **Zero gameplay change.** The game plays exactly as it did.
 
 **Why first:** the seeded RNG is what makes every later balance claim mean
