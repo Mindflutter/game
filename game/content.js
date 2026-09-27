@@ -47,11 +47,10 @@ const GEM_PULL       = 300;   // how fast gems fly to you once in range
 const GEM_LIFE       = 8;     // seconds before an uncollected gem fades out
 const XP_BASE        = 5;     // motes needed for level 2
 const XP_GROWTH      = 1.45;  // each level costs this much more than the last
-const SPAWN_FIRST    = 1.2;   // seconds between spawns at the start of a run
-const SPAWN_QUICKEN  = 0.02;  // ...shortening by this much per second survived
-const SPAWN_FASTEST  = 0.15;  // ...but never below this
-const ENEMY_RAMP     = 0.006; // enemies spawn this much faster-moving per second
 const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
+const GATE_PAUSE     = 1.2;   // seconds of quiet between batches -- the beat a
+                              // mod offer will land in (D33, D34). Long enough
+                              // to read as a breath, short enough not to stall.
 
 let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
@@ -139,6 +138,24 @@ const GO    = ['Enter', 'NumpadEnter', 'Space'];
 const DASH  = ['Space'];
 const CLICK = ['Mouse0'];
 
+// ---------- batches ----------
+// A batch is the gated unit (D27): it arrives, you clear it, and only then does
+// the next one come. Counts per enemy type; where they enter is the arena edge,
+// picked from the dive's seed. Adding a batch is a line.
+//
+// These sizes are NOT tuned. D28 invalidated every balance constant when the
+// weapon became manual, and there is no point deriving new ones until the queue
+// they feed exists -- which is what this is. Tuning is the next step.
+const BATCHES = [
+  { enemies: [['drifter', 3]] },
+  { enemies: [['drifter', 5]] },
+  { enemies: [['drifter', 4], ['darter', 2]] },
+  { enemies: [['darter', 4]] },
+  { enemies: [['bulwark', 1], ['drifter', 4]] },
+  { enemies: [['drifter', 6], ['darter', 3]] },
+  { enemies: [['bulwark', 2], ['darter', 3]] },
+];
+
 // ---------- scenarios ----------
 // Named dev setups (D37). `?dev=<name>` loads one in isolation so a single
 // thing can be watched; add `&play` to run it live instead of frozen. The bot
@@ -151,19 +168,23 @@ const SCENARIOS = {
   'three-types': { spawn: false, enemies: [['drifter', 300, 260],
                                           ['darter',  980, 260],
                                           ['bulwark', 640, 660]] },
-  // The swarm as it looks a minute in, for eyeballing density and pressure.
-  'late-swarm':  { spawn: true, elapsed: 60 },
+  // The queue several batches in, for eyeballing density and pressure. It used
+  // to mean "a minute into the run", which stopped meaning anything when the
+  // time-based spawn director was deleted (D48) -- density is authored per
+  // batch now, so a later batch is the only way to be deeper in.
+  'late-swarm':  { batch: 5 },
 };
 
 // ---------- enemy types ----------
-// Also just data. Each one unlocks partway into a run and is picked by weight,
-// so the swarm gets more varied the longer you last.
+// Also just data. Which types appear, and how many, is now named per batch
+// (D48) -- the `weight` and `from` fields that let the deleted spawn director
+// roll a type by unlock time went with it.
 const ENEMY_TYPES = [
-  { name: 'drifter', r: 9,  hp: 1, speed: 85,  xp: 1, weight: 6, from: 0,
+  { name: 'drifter', r: 9,  hp: 1, speed: 85,  xp: 1,
     color: '#e8446e', glow: '#ff1e5a' },
-  { name: 'darter',  r: 6,  hp: 1, speed: 190, xp: 1, weight: 3, from: 25,
+  { name: 'darter',  r: 6,  hp: 1, speed: 190, xp: 1,
     color: '#ffb648', glow: '#ff8a00' },
-  { name: 'bulwark', r: 17, hp: 6, speed: 52,  xp: 3, weight: 2, from: 50,
+  { name: 'bulwark', r: 17, hp: 6, speed: 52,  xp: 3,
     color: '#a05cff', glow: '#7b2fff' },
 ];
 

@@ -137,25 +137,29 @@ draft, which is why they are banned (D32).
   made **false** and fix that *before* appending anything new; docs that
   contradict themselves are worse than no docs.
 
-  The sweep covers all six surfaces, in this order. Three of them have been
+  The sweep covers all seven surfaces, in this order. Four of them have been
   missed for real, which is why they are listed rather than implied:
-  1. **`docs/`** — `changelog.md` always; `decisions.md` for anything decided,
+  1. **The checks themselves** — `checks.js` and `tests/`. A check asserting
+     the old behaviour is not a failing test, it is a *wrong* test, and deleting
+     one needs the same justification as writing one. *Missed: a check still
+     asserted a scenario's old definition a full change after it was redefined.*
+  2. **`docs/`** — `changelog.md` always; `decisions.md` for anything decided,
      reopened or superseded; `design.md` for anything whose behaviour changed;
      `plan.md` if a stage moved; `ideas.md` if an open question closed.
-  2. **`foundations.md`** — if a rule changed, it is a decision: edit here and
+  3. **`foundations.md`** — if a rule changed, it is a decision: edit here and
      record it in `decisions.md` in the same step, never quietly.
-  3. **`CLAUDE.md`** — it makes factual claims (the seam is six names, the
+  4. **`CLAUDE.md`** — it makes factual claims (the seam is six names, the
      suites, the constraints) and they go stale. *Missed: it claimed six seam
      names while the code used eleven.*
-  4. **In-game text** — `HELP_KEYS`, `HELP_BLURB`, menu labels, option names,
+  5. **In-game text** — `HELP_KEYS`, `HELP_BLURB`, menu labels, option names,
      upgrade descriptions. Prose inside `game/content.js` describes behaviour
      and no check can read it. *Missed: the help still said the weapon fires
      itself, a full change after it stopped doing so.*
-  5. **Layout coupled to data** — adding a row to any table can push a fixed
+  6. **Layout coupled to data** — adding a row to any table can push a fixed
      `y` through the text below it. Positions must be derived from
      `.length`, never hardcoded. *Missed: the help list ran straight through
      its own blurb while all 107 checks passed.*
-  6. **Memory** (`~/.claude/projects/.../memory/`) — it is auto-loaded before
+  7. **Memory** (`~/.claude/projects/.../memory/`) — it is auto-loaded before
      any file is read, so a stale line there misleads the next session first.
 
   **Then look at it.** State checks are blind to a blank screen and to

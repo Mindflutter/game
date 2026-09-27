@@ -291,6 +291,19 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   layers do not go obsolete. In `foundations.md` as a pillar, unimplemented.
 - **A second currency** — a fancy shell worth a lot. After alpha.
 
+## Open — from the batch work
+
+- **Every dive draws the same batches.** `BATCHES` is a fixed list, so two dives
+  of the same layer are identical — which contradicts the `foundations.md`
+  pillar "two dives of the same layer draw different batches". The deleted
+  `weight`/`from` fields solved this for *types*; the batch-level version is a
+  different mechanism (pick from a pool of batches of comparable threat, per the
+  draft's Hades reference). Needed before S6 (Balance) means anything, since
+  measuring one fixed sequence is not measuring the game.
+- **Nothing ends a dive.** The batch list cycles, so a dive is endless, just
+  gated. Layer completion is S3 — noting it so the cycling is not mistaken for
+  a decision.
+
 ## Suggested but not yet discussed
 
 - **Guard the other screens against overflow.** D46 gave the help screen a check

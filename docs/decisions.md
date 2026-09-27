@@ -389,8 +389,16 @@ gating only at bosses (fewer stops, but then regular batches carry no stakes).
 **This deletes the spawn director**, and that is the point. The prototype's
 balance failure was mathematical: arrivals grew as `1/(1.2 − 0.02t)` —
 hyperbolic — while power grew logarithmically in kills, so the queue diverged
-and death was certain (see `design.md` → What those constants add up to). A
-batch is a **bounded** queue. The divergence cannot occur. The whole class of
+and death was certain. The numbers, computed 2026-09-27 before any of it was
+deleted: arrivals ran at `1/(1.2 − 0.02t)` spawns/sec — 0.83 at the start,
+6.67 by t=52.5s where `SPAWN_FASTEST` clamped, so **eight times the rate in 52
+seconds, doubling in the last 7.5**. Weighted mean enemy HP was `21/11 ≈ 1.91`,
+so holding the line at the clamp needed ~12.7 DPS against a starting 2.5 — a
+**5.1× growth in 52 seconds** — while the geometric XP curve bought about seven
+ranks, of which maybe four offered a damage pick. Clearing that bar was
+possible on a good draw, having spent every pick on damage. Most runs lost.
+
+A batch is a **bounded** queue. The divergence cannot occur. The whole class of
 problem is retired rather than tuned around.
 
 ## D28 — Manual fire via LMB; supersedes D2's auto-shooter · 2026-09-26
@@ -1117,3 +1125,99 @@ fires nothing, then a release and a fresh press fires exactly one shot.
 
 **Test written before the fix**, and it failed for the right reason
 (`got 1 shots`). 111 checks (was 108).
+
+## D48 — The batch queue and the gate · 2026-09-27
+S1 (Combat core), implementing D27. **The spawn director is deleted.** Enemies
+arrive one batch at a time, and nothing new comes until the batch is dead.
+
+**What replaced what.** `BATCHES` in `content.js` is a list of records naming
+counts per enemy type; `GATE_PAUSE` (1.2s) is the quiet beat between them.
+State carries `batchIndex` (batches begun, never reset within a dive) and
+`gateTimer` (>0 means we are between batches). A dive opens on a gate, so it
+starts calm rather than mid-fight.
+
+**Why this is the whole point of the genre change.** The director grew arrivals
+as `1/(1.2 - 0.02t)` — hyperbolic — against power that grew logarithmically in
+kills, so the queue diverged and death was arithmetically certain (see
+`design.md`). A batch is a **bounded** queue. The divergence is impossible,
+which retires the entire class of problem rather than tuning around it.
+
+**Husks removed, since the director they served is gone:** `spawnEnemy()`,
+`pickEnemyType()`, `spawnTimer`, `SPAWN_FIRST`, `SPAWN_QUICKEN`,
+`SPAWN_FASTEST`, `ENEMY_RAMP`, and the `weight` / `from` fields on
+`ENEMY_TYPES`. `pickEnemyType` was alive only because its own two checks called
+it — a closed loop — and those checks tested time-based type unlocks, a rule
+that no longer exists. Difficulty is authored per batch now, not ramped by the
+clock.
+
+**A check was passing vacuously and the gate work exposed it.** "Nothing may
+arrive while a batch lives" held because the unattended player died at ~10s and
+`step()` returns early on the death screen — the arena was frozen, not gated.
+Checks that let time pass now use `runAlive()`, which keeps the player
+invulnerable so the simulation actually runs, and assert `screen === 'playing'`
+so the same trap cannot recur silently.
+
+**Verified by breaking it**: dropping the `enemies.length === 0` condition —
+the gate's one job — fails four checks, reporting "45 enemies, batchIndex 9",
+which is the endless director returning. 119 checks (was 111).
+
+**Measured**, bot, 5 seeds, clears truncated at the first level-up: mean 14.1s
+per batch, range 4.5–35.9s. `foundations.md` wants 10–45s, so this is roughly
+in range already — but it is not tuned, and the sample is short for the reason
+below.
+
+**Known intermediate state.** The prototype's XP bar and level-up screen still
+run, so a dive is still interrupted mid-batch — exactly what D33 forbids and
+D34 replaces with one rank per batch and mods offered at the gate. That is the
+next step, and it is why the bot stalls at `screen = levelup` after two or three
+batches. Deliberate: batches and mods are two systems, and verifying them
+together would verify neither.
+
+**Cleanup pass** (`/simplify`, all four angles; two needed a second run after a
+session limit). The two findings worth naming:
+
+- **`gateTimer` was named the inverse of the binding glossary.** `foundations.md`
+  defines a **gate** as "the point where the descent stops until the batch is
+  cleared" — the whole locked stretch, fight included. `gateTimer > 0` meant the
+  opposite: arena quiet, batch dead. S2's camera would have read
+  `if (gateTimer > 0) stopDescent()`, which is natural and exactly backwards.
+  Renamed `breathTimer`, for the quiet beat it actually counts, and "at a gate"
+  is simply `enemies.length > 0`. D32 made the glossary binding in *code
+  identifiers* to prevent precisely this, and it still happened.
+- **The gate had a flag that the arena already answered.** `gateTimer > 0` was
+  equivalent to `enemies.length === 0` during unpaused play, so the countdown
+  now just runs while nothing is alive. Twelve lines and three nesting levels
+  became five and one, and the `gateTimer = 0` clamp and the `= 0.01` "fire next
+  tick" sentinel both vanished with it. `late-swarm` gets the real 1.2s beat it
+  exists to show, instead of skipping it.
+
+Also: `spawnPaused` → `queuePaused` (it gates the queue, and "spawn" named the
+deleted director); `runAlive`'s `screen === 'playing'` oracle moved *inside* the
+runner, since it sat at 2 of 6 call sites and forgetting one silently reopens
+the vacuous-pass trap this entry records; `BATCHES` gained a validity check,
+having been asserted nowhere — a typo there just makes the game quietly easier;
+`if (s.batch !== undefined)`, so `batch: 0` is reachable; the "three in a row"
+check continues the sequence instead of re-walking it; and the bot lost a flag
+derivable from `batchIndex > times.length`.
+
+Rejected: inlining `edgeSpawnPoint` (arrival *position* and arrival *policy* are
+separate concerns — that separation is what let the policy be deleted wholesale)
+and flattening `BATCHES` records to bare arrays (D33/D34 fields are coming).
+A phase enum was considered and deferred to S3, when a boss makes
+`enemies.length === 0` an unsound clear-signal.
+
+Earlier in the same pass: one `enemyType(name)` helper replaces the lookup-and-complain that
+`spawnBatch` and `placeEnemy` had each written out; `GATE_PAUSE` moved into the
+single `// balance` block where CLAUDE.md says every tuning number lives; the
+dead `s.elapsed` scenario branch removed; `TICK` exported from the harness
+instead of declared twice; the harness's `run()` deleted, since both consumers
+hand-roll their loop and it had no callers; the bot hoists its vm-bridged reads
+out of the per-enemy loop and uses the bridged key bindings rather than
+hardcoded codes; `pastGate()` derives its wait from `GATE_PAUSE` instead of a
+hardcoded 120 frames. The bot also gained a test — it is the instrument every
+balance number comes from and had no caller, so nothing would have noticed it
+rotting.
+
+**Also:** `late-swarm` was redefined. It meant "a minute into the run", which
+stopped meaning anything once time no longer drove density; it now starts at
+batch 5. Scenarios gained a `batch` field.

@@ -6,9 +6,8 @@
 // silently, and that is what this file is for.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { loadGame, SEAM } from './harness.js';
-
-const TICK = 1 / 60;
+import { loadGame, SEAM, TICK } from './harness.js';
+import { diveReport } from './bot.js';
 
 // Drives a dive with pseudo-random but seed-derived input, so a failing case
 // replays exactly. Returns the game context for inspection.
@@ -60,6 +59,19 @@ describe('the port seam', () => {
     const g = loadGame();
     expect(typeof g.update).toBe('function');
     expect(typeof g.reset).toBe('function');
+  });
+});
+
+describe('the bot', () => {
+  it('plays a dive and reproduces it exactly from the seed', () => {
+    // The bot is the instrument every balance number comes from (D16), so it
+    // needs a caller: without one it can rot silently and nothing would say so.
+    const a = diveReport(4471, 3);
+    // Not '=== 3': the prototype's level-up screen still interrupts a dive, so
+    // how many batches a seed reaches is not fixed until D34 removes it. What
+    // must hold is that the bot clears *something* and does so deterministically.
+    expect(a.clearTimes.length).toBeGreaterThan(0);
+    expect(diveReport(4471, 3)).toEqual(a);
   });
 });
 

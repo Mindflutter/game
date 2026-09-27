@@ -10,6 +10,9 @@ import vm from 'node:vm';
 // The six names, and only the six.
 export const SEAM = ['sound', 'keys', 'justPressed', 'tapped', 'moveCursor', 'aim'];
 
+// The fixed timestep, in one place. Everything that drives update() uses it.
+export const TICK = 1 / 60;
+
 export function loadGame() {
   const src = ['game/content.js', 'game/state.js', 'game/logic.js']
     .map(f => readFileSync(new URL('../' + f, import.meta.url), 'utf8'))
@@ -37,12 +40,12 @@ export function loadGame() {
   // of the global object, so `enemies` and friends are invisible from outside.
   // Bridge them with accessors generated from the names, rather than eval.
   const STATE = ['player', 'enemies', 'bullets', 'gems', 'particles',
-                 'elapsed', 'spawnTimer', 'kills', 'shake', 'spawnPaused',
+                 'elapsed', 'kills', 'shake', 'queuePaused', 'batchIndex', 'breathTimer',
                  'xp', 'xpNext', 'level', 'choices', 'choiceIndex',
                  'screen', 'currentSeed', 'bulletId', 'shakeLevel'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'UPGRADES',
-                  'SCENARIOS', 'XP_BASE', 'XP_GROWTH', 'SPAWN_FIRST', 'SPAWN_FASTEST',
+                  'SCENARIOS', 'BATCHES', 'GATE_PAUSE', 'XP_BASE', 'XP_GROWTH',
                   'GEM_LIFE', 'IFRAMES', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [
@@ -52,14 +55,4 @@ export function loadGame() {
 
   vm.runInContext(src + '\n;\n' + bridge, ctx, { filename: 'game-bundle.js' });
   return ctx;
-}
-
-// Drives a dive without a frame loop: n fixed ticks, optionally steering the
-// player each tick. This is the Node twin of advance() in main.js.
-export function run(g, ticks, perTick) {
-  for (let i = 0; i < ticks; i++) {
-    if (perTick) perTick(i, g);
-    g.update(1 / 60);
-  }
-  return g;
 }

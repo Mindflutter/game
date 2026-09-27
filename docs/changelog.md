@@ -33,6 +33,26 @@ stays browser-free, and `currentSeed` records what was used. Fixed a latent hole
 Three determinism checks added (89 total, was 86), **verified by putting one
 `Math.random()` back** → `1 of 89 checks FAILED`.
 
+**S1 — Combat core: the batch queue and the gate**
+D48, implementing D27. The spawn director is deleted. Enemies arrive one batch
+at a time from `BATCHES`, and nothing new comes until the batch is dead;
+`GATE_PAUSE` is the quiet beat between them. This is the point of the genre
+change: the old director grew arrivals hyperbolically against logarithmic power,
+so death was arithmetically certain — a bounded queue makes that impossible.
+
+Removed as husks: `spawnEnemy`, `pickEnemyType`, `spawnTimer`, `SPAWN_FIRST`,
+`SPAWN_QUICKEN`, `SPAWN_FASTEST`, `ENEMY_RAMP`, and `weight`/`from` on
+`ENEMY_TYPES`. `pickEnemyType` was kept alive only by its own checks.
+
+Exposed a check that passed vacuously: "nothing arrives while a batch lives"
+held because the unattended player died and the simulation stopped. Gate checks
+now run with the player kept alive and assert the screen is still `playing`.
+Verified by breaking the gate — four failures, "45 enemies, batchIndex 9".
+
+Bot: mean 14.1s per batch over 5 seeds (range 4.5–35.9s), truncated because the
+prototype's level-up screen still interrupts. 119 checks (was 111).
+`late-swarm` redefined to start at batch 5; scenarios gained a `batch` field.
+
 **Fix: clicking Start fired the weapon**
 D47. A menu reads a click as an edge, the weapon reads it as a held state, so
 one physical click was read twice — the click that began a run also fired into

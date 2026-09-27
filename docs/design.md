@@ -3,17 +3,19 @@
 Describes the **present**, not the plan. Update it when reality changes.
 
 **The present is partway to the design.** S1 — Combat core has started: the
-weapon is manual (D45). Still to come in S1: the batch queue and gate, which
-replace endless spawning, and the re-derived `// balance` block. The arena is
-still fixed (the camera is S2). Nothing here is a statement of intent.
+weapon is manual (D45) and the batch queue and gate are in (D48). Still to come
+in S1: one rank per batch with mods at the gate (D34), which removes the
+prototype's XP bar and its mid-batch interruption, and the re-derived
+`// balance` block. The arena is still fixed — the camera is S2. Nothing here
+is a statement of intent.
 
 ## What it is
 
 A twin-stick action game in a fixed arena. You move with WASD, aim with the
 mouse and **fire by holding the left button** (D45); kills drop motes that are
-XP; filling the bar pauses the game and offers three random upgrades. Enemies
-still arrive on the prototype's endless spawn timer — batches are the next step
-in S1. Every run ends in death; the current measured survival times live in
+XP; filling the bar pauses the game and offers three random upgrades — that
+interruption is the prototype's, and D34 replaces it. Enemies arrive one gated
+**batch** at a time. Every dive ends in death; the current measured times live in
 `roadmap.md` → Health, and only there, and **they are void** — they measured an
 auto-firing weapon.
 
@@ -134,19 +136,26 @@ instant. There is no longer any "hold the shot unless something is in range"
 rule — that existed only to stop an automatic weapon emptying itself into open
 water, and `enemyInRange()` was deleted with it.
 
-**Spawning.** A countdown timer; interval shrinks from 1.2s toward a 0.15s
-floor as the run goes on. Enemies appear 40px outside the arena so they fade in
-from the dark rather than popping into view. Type is a weighted random pick
-among those unlocked by elapsed time; speed carries ±15% jitter and ramps with
-run time so kiting stops working on its own.
+**Arrivals: the batch queue and the gate** (D27, D48). Enemies come one
+**batch** at a time — a record in `BATCHES` naming counts per type — and nothing
+new arrives until the batch is dead. Between batches sits a **gate**:
+`GATE_PAUSE` (1.2s) of quiet, which is where a mod offer will land (D34). A dive
+opens on a gate. `batchIndex` counts batches begun; `gateTimer > 0` means we are
+between them. The list cycles when it runs out — finishing a layer is S3.
 
-**Enemy types** (`ENEMY_TYPES`, unlocks at 0s / 25s / 50s):
+Enemies still enter 40px outside the arena so they fade in from the dark, with
+±15% speed jitter. What is gone: the time-based spawn director, and with it the
+speed ramp and the weighted type-unlock roll. **Difficulty is authored per
+batch now, not ramped by the clock.**
 
-| | radius | hp | speed | xp | weight | role |
-|---|---|---|---|---|---|---|
-| drifter | 9 | 1 | 85 | 1 | 6 | the baseline swarm |
-| darter | 6 | 1 | 190 | 1 | 3 | fast enough to punish lazy kiting |
-| bulwark | 17 | 6 | 52 | 3 | 2 | soaks shots, blocks escape routes |
+**Enemy types** (`ENEMY_TYPES`). No unlock times any more — which types appear
+is named per batch (D48):
+
+| | radius | hp | speed | xp | role |
+|---|---|---|---|---|---|
+| drifter | 9 | 1 | 85 | 1 | the baseline swarm |
+| darter | 6 | 1 | 190 | 1 | fast enough to punish lazy kiting |
+| bulwark | 17 | 6 | 52 | 3 | soaks shots, blocks escape routes |
 
 **The weapon.** A cooldown timer; on expiry it fires along the cursor, but
 only if something is inside the ring (`enemyInRange()`). The range is still a
@@ -289,63 +298,16 @@ prototype — they transfer to any port verbatim.
 
 `PLAYER_START` (r 10, speed 260, hp 3, fireRate 2.5, damage 1, range 250,
 pierce 0, pickupRange 75) · `IFRAMES 1` · `BULLET_SPEED 430` · `GEM_PULL 300` ·
-`GEM_LIFE 8` · `XP_BASE 5` · `XP_GROWTH 1.45` · `SPAWN_FIRST 1.2` ·
-`SPAWN_QUICKEN 0.02` · `SPAWN_FASTEST 0.15` · `ENEMY_RAMP 0.006` ·
-`ENEMY_JITTER 0.3` · `DASH_SPEED_MUL 3.4` · `DASH_TIME 0.16` ·
+`GEM_LIFE 8` · `XP_BASE 5` · `XP_GROWTH 1.45` · `ENEMY_JITTER 0.3` ·
+`GATE_PAUSE 1.2` · `DASH_SPEED_MUL 3.4` · `DASH_TIME 0.16` ·
 `DASH_COOLDOWN 2.2` · `DASH_GRACE 0.15` · `DASH_REACH 40` · `DASH_ARC 0.2` ·
 `DASH_END 0.18` · `DASH_PUSH 320` · `PUSH_DRAG 0.02` · `SHAKE_FADE 0.02` ·
 `SHAKE_FLOOR 0.15` · `SHAKE_HURT 7` · `SHAKE_DEATH 38`
 
-### What those constants add up to
-
-Computed from the constants above on 2026-09-20, not measured with the bot.
-Recorded because it was worked out in a chat session and would otherwise be
-lost; recompute rather than trust it after any balance change.
-
-**Arrivals are hyperbolic, not linear.** `spawnTimer = max(0.15, 1.2 − 0.02t)`
-means the spawn *rate* is `1/(1.2 − 0.02t)`:
-
-| t | 0s | 30s | 45s | 52.5s |
-|---|---|---|---|---|
-| spawns/sec | 0.83 | 1.67 | 3.33 | 6.67 ← `SPAWN_FASTEST` clamps |
-
-Eight times the arrival rate in 52 seconds, and it *doubles in the last 7.5*.
-That shape is why death arrives suddenly rather than gradually.
-
-**The arena is a queue** — Little's Law, `L = λW`: enemies on screen equals
-arrival rate times time-to-kill. Weighted mean enemy HP once all three types
-have unlocked is `21/11 ≈ 1.91`, so holding the line at the clamp needs
-`6.67 × 1.91 ≈ 12.7 DPS` against a starting `fireRate × damage = 2.5`. **A
-5.1× growth in damage output inside 52 seconds.** Integrating the arrival
-curve gives ~104 kills by then, ≈135 XP, which against `5 × 1.45^n` buys about
-7 levels — and at the measured death time, about 5. Two of the seven upgrades
-touch DPS and three of seven are offered, so ~71% of level-ups offer one. Best
-realistic case lands near 13.7 DPS: **clearing the bar is possible, on a good
-draw, having spent every pick on damage.** Most runs therefore lose.
-
-Three structural consequences:
-
-1. **Geometric XP against hyperbolic spawns is a losing race by
-   construction.** `XP_GROWTH 1.45` makes power grow logarithmically in kills
-   while arrivals grow hyperbolically. Log never catches hyperbolic. This is
-   the root cause; the short runs are the symptom.
-2. **There is a plateau nobody reaches.** `SPAWN_FASTEST` stops arrival growth
-   at t≈52.5s. A survivable shelf already exists in the game, sitting just
-   past the wall players die at.
-3. **`ENEMY_RAMP` hides a hard wall.** Enemy speed is `×(1 + 0.006t)`,
-   unclamped, so darters (190 base) pass the player's 260 at **t ≈ 61s**. Past
-   that they cannot be outrun without `Fins`. One constant, silently capping
-   maximum run length just past the plateau.
-
-**Coverage, not numbers, is the genre's lever.** All seven upgrades are scalar
-buffs to a single-target weapon firing in one direction (D20). Vampire
-Survivors' power curve comes from covering more screen, not bigger numbers on
-one gun — and coverage is the thing this game has no upgrade for.
-
 ## Verification
 
 **`index.html?test`** runs the `console.assert` suite in the console
-(currently **111** checks — this doc owns that count; `roadmap.md` cites it).
+(currently **119** checks — this doc owns that count; `roadmap.md` cites it).
 The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
 suite now reports what actually **executed**, which is higher because some call
 sites sit inside loops. Covering: spawning,

@@ -55,24 +55,71 @@ if (location.search === '?test') {
   const fireAt = e => { aim.x = e.x; aim.y = e.y; holdFire(); };
   const ceaseFire = () => keys.delete('Mouse0');
 
-  for (let i = 0; i < 300; i++) spawnEnemy();
-  check(
-    enemies.every(e => e.x < 0 || e.x > ARENA_W || e.y < 0 || e.y > ARENA_H),
-    'enemies must spawn outside the arena');
-  check(
-    new Set(enemies.map(e => e.speed)).size > 1,
-    'enemies should not all move at the same speed');
+  // Runs the simulation with the player kept invulnerable. An unattended player
+  // dies in seconds, and step() returns early on the death screen -- so any
+  // check that lets time pass is otherwise liable to measure a *stopped* game
+  // and pass for the wrong reason. That happened to the gate checks below.
+  const runAlive = n => {
+    for (let i = 0; i < n; i++) { player.hurt = IFRAMES; update(1 / 60); }
+    // The oracle lives here, not at the call sites. A check that lets time pass
+    // while the sim has quietly stopped passes for the wrong reason -- that
+    // happened once already (D48), and relying on each caller to remember the
+    // assertion is the same discipline that failed then.
+    check(screen === 'playing',
+      'runAlive: the simulation stopped (screen ' + screen + ') -- anything measured after this is meaningless');
+  };
+  // Long enough to clear the gate whatever GATE_PAUSE is tuned to, and no
+  // longer -- a hardcoded frame count both wastes ticks and goes quietly wrong
+  // the first time that constant moves.
+  const pastGate = () => runAlive(Math.ceil(GATE_PAUSE * 60) + 3);
 
-  // Enemy types unlock as the run goes on.
-  reset();
-  elapsed = 0;
-  check(
-    new Set(Array.from({ length: 50 }, () => pickEnemyType().name)).size === 1,
-    'only drifters at the start of a run');
-  elapsed = 60;
-  const seen = new Set(Array.from({ length: 400 }, () => pickEnemyType().name));
-  check(seen.size === ENEMY_TYPES.length,
-    'every type should appear later, saw: ' + [...seen].join(','));
+  // --- arrivals ---
+  reset(1);
+  spawnBatch({ enemies: [['drifter', 6], ['darter', 6], ['bulwark', 6]] });
+  check(enemies.length === 18, 'a batch must bring exactly what it names, got ' + enemies.length);
+  check(enemies.every(e => e.x < 0 || e.x > ARENA_W || e.y < 0 || e.y > ARENA_H),
+    'enemies must arrive outside the arena');
+  check(new Set(enemies.map(e => e.speed)).size > 1,
+    'arrivals must not all move at the same speed');
+
+  // Every batch must name types that exist, in counts that mean something. This
+  // is the check the "content is data" convention implies for any data table:
+  // a typo here would just make the game quietly easier.
+  const named = BATCHES.flatMap(b => b.enemies);
+  check(named.every(([name]) => ENEMY_TYPES.some(t => t.name === name)),
+    'every batch must name a real enemy type, unknown: ' +
+    named.filter(([n]) => !ENEMY_TYPES.some(t => t.name === n)).map(([n]) => n).join(','));
+  check(named.every(([, count]) => Number.isInteger(count) && count >= 1),
+    'every batch count must be a positive integer');
+
+  // --- the gate (D27) ---
+  // The whole point: nothing new arrives until the current batch is dead. An
+  // endless spawn director passes none of this.
+  reset(1);
+  check(enemies.length === 0 && breathTimer > 0, 'a dive must open on the beat, not mid-fight');
+  pastGate();                                      // wait out the opening gate
+  check(enemies.length > 0 && batchIndex === 1, 'the first batch must arrive, batchIndex ' + batchIndex);
+
+  const firstBatchSize = enemies.length;
+  runAlive(600);                                   // ten seconds of not killing
+  check(enemies.length === firstBatchSize && batchIndex === 1,
+    'nothing may arrive while a batch lives: ' + enemies.length + ' enemies, batchIndex ' + batchIndex);
+
+  // Clear it by hand and the gate opens, then the next batch comes.
+  enemies = [];
+  runAlive(1);
+  check(breathTimer > 0, 'clearing a batch must start the beat before the next');
+  check(batchIndex === 1, 'the next batch must not arrive during the gate');
+  pastGate();
+  check(batchIndex === 2 && enemies.length > 0, 'the gate must release the next batch');
+
+  // A third in a row, which is S1's definition of done. Continues the sequence
+  // above rather than restarting it -- the only new information is one more
+  // clear, and re-walking the whole path costs ~250 sim ticks to learn nothing.
+  enemies = [];
+  runAlive(1);
+  pastGate();
+  check(batchIndex === 3, 'three batches must clear in sequence, got ' + batchIndex);
 
   // Walking an enemy into a standing player must cost exactly one hp.
   reset();
@@ -102,7 +149,7 @@ if (location.search === '?test') {
   // The whole genre change in four checks. An auto-firing weapon passes none
   // of them.
   reset(1);
-  spawnPaused = true;            // nothing must arrive and muddy the result
+  queuePaused = true;            // nothing must arrive and muddy the result
   ceaseFire();
   enemies.push(mob(player.x + 60, player.y, { speed: 0 }));   // inside the ring
   aim.x = player.x + 200; aim.y = player.y;
@@ -113,7 +160,7 @@ if (location.search === '?test') {
   // Firing into open water is allowed now: the old "hold the shot unless
   // something is in range" rule was a crutch for a weapon that fired itself.
   reset(1);
-  spawnPaused = true;
+  queuePaused = true;
   enemies.length = 0;
   aim.x = player.x + 300; aim.y = player.y;
   holdFire();
@@ -125,7 +172,7 @@ if (location.search === '?test') {
   // allowed to run negative while the trigger is up, so a long wait does not
   // bank shots, and a fresh click never feels sticky.
   reset(1);
-  spawnPaused = true;            // or the idle player dies mid-wait and step()
+  queuePaused = true;            // or the idle player dies mid-wait and step()
                                  // returns early -- which made this check flaky
   for (let i = 0; i < 300; i++) update(1 / 60);   // five seconds, trigger up
   check(player.fireTimer === 0, 'fireTimer must not run negative while idle, got ' + player.fireTimer);
@@ -136,7 +183,7 @@ if (location.search === '?test') {
   // Held, the rate is the rate: ~fireRate shots per second, not one per frame.
   // reset() zeroes bulletId, so it counts this run's shots directly.
   reset(1);
-  spawnPaused = true;
+  queuePaused = true;
   holdFire();
   aim.x = player.x + 300; aim.y = player.y;
   for (let i = 0; i < 60; i++) update(1 / 60);
@@ -557,7 +604,7 @@ if (location.search === '?test') {
   // physical click was being read twice: clicking Start fired a shot into the
   // run it had just begun.
   reset(1);
-  spawnPaused = true;
+  queuePaused = true;
   screen = 'title';
   menuIndex = 0;
   aim.x = ARENA_W / 2; aim.y = MENU_TOP;      // over the Start row
@@ -594,7 +641,7 @@ if (location.search === '?test') {
   check(applyScenario('one-drifter'), 'a known scenario must load');
   check(enemies.length === 1, 'one-drifter must place exactly one enemy, got ' + enemies.length);
   check(enemies[0].hp === 1 && enemies[0].r === 9, 'one-drifter must place a drifter');
-  check(spawnPaused === true, 'a scenario with spawn:false must pause spawning');
+  check(queuePaused === true, 'a scenario with spawn:false must pause the queue');
   let mostSeen = enemies.length;
   for (let i = 0; i < 900; i++) { update(1 / 60); mostSeen = Math.max(mostSeen, enemies.length); }
   check(mostSeen === 1, 'a paused scenario must never gain an enemy, peaked at ' + mostSeen);
@@ -604,10 +651,10 @@ if (location.search === '?test') {
   check(new Set(enemies.map(e => e.r)).size === 3, 'three-types must place three different types');
 
   check(applyScenario('late-swarm'), 'late-swarm must load');
-  check(Math.round(elapsed) === 60, 'late-swarm must start 60s in, got ' + elapsed);
-  check(spawnPaused === false, 'a scenario without spawn:false must keep spawning');
-  for (let i = 0; i < 300; i++) update(1 / 60);
-  check(enemies.length > 0, 'late-swarm must still spawn enemies');
+  check(batchIndex === 5, 'late-swarm must start deep in the queue, got batch ' + batchIndex);
+  check(queuePaused === false, 'a scenario without spawn:false must keep the queue running');
+  runAlive(300);
+  check(enemies.length > 0 && batchIndex === 6, 'late-swarm must bring a batch');
 
   check(applyScenario('no-such-scenario') === false, 'an unknown scenario must report failure');
 

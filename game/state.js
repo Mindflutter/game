@@ -4,8 +4,19 @@
 // ---------- game state ----------
 // Everything a run owns lives here, so restarting is one call.
 let player, enemies, bullets, gems, particles;
-let elapsed, spawnTimer, kills, shake;
-let spawnPaused = false;    // a scenario can stop new arrivals (D37)
+let elapsed, kills, shake;
+let queuePaused = false;    // a scenario can stop the batch queue (D37)
+
+// Where the batch queue stands (D27). `batchIndex` counts batches *begun* and
+// never resets within a dive, so it is also how many have been cleared.
+//
+// `breathTimer` is NOT a gate flag: a **gate** is the whole stretch where the
+// descent is stopped, fight included, so "at a gate" is `enemies.length > 0`.
+// This only counts the quiet beat after a batch dies and before the next
+// arrives -- the beat a mod offer lands in (D33, D34). Naming it `gateTimer`
+// inverted the glossary and would have had S2's camera moving while locked.
+let batchIndex = 0;
+let breathTimer = 0;
 
 // The trigger is armed only once the button has been seen released. A menu
 // reads a click as an edge (justPressed) while the weapon reads it as a held
@@ -72,9 +83,10 @@ function reset(seed) {
   gems = [];
   particles = [];
   elapsed = 0;         // seconds survived
-  spawnTimer = 0;
   kills = 0;
-  spawnPaused = false;   // scenarios switch this on; normal play never does
+  queuePaused = false;   // scenarios switch this on; normal play never does
+  batchIndex = 0;
+  breathTimer = GATE_PAUSE;   // a dive opens on the beat, so it starts calm
   fireArmed = false;     // a click that started the run is not a shot
   bulletId = 0;        // or two dives with the same seed hand out different ids
   shake = 0;           // pixels of screen shake left
@@ -94,8 +106,9 @@ function applyScenario(name, seed) {
   const s = SCENARIOS[name];
   if (!s) return false;
   reset(seed);
-  if (s.elapsed) elapsed = s.elapsed;
-  if (s.spawn === false) spawnPaused = true;
+  // `!== undefined`, or `batch: 0` would be unreachable.
+  if (s.batch !== undefined) batchIndex = s.batch;
+  if (s.spawn === false) queuePaused = true;
   for (const [type, x, y] of s.enemies || []) placeEnemy(type, x, y);
   return true;
 }

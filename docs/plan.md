@@ -13,10 +13,11 @@ must stay true while doing it.
 **S1 — Combat core.** Started 2026-09-27. S0 — Foundations & spike closed the
 same day, all exit conditions met.
 
-Done in S1: the weapon is manual (D45).
-Next in S1: the batch queue and the gate, which delete the spawn director; then
-a fixed timestep; then the `// balance` block re-derived from scratch, which is
-only meaningful once batches exist.
+Done in S1: the weapon is manual (D45), the batch queue and gate (D48).
+Next in S1: **one rank per batch and mods at the gate** (D34) — the prototype's
+XP bar still interrupts mid-batch, which D33 forbids; then a fixed timestep;
+then the `// balance` block re-derived from scratch, now that batches exist to
+derive it against.
 
 ### S0 — Foundations & spike · closed 2026-09-27
 

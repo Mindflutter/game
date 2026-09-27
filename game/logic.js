@@ -2,35 +2,49 @@
 // The simulation. Knows nothing about canvas, audio or the DOM.
 
 // ---------- spawning ----------
-// Builds the record. Speed is passed in rather than derived, because a random
-// arrival wants jitter and ramp while a scenario wants one predictable enemy.
+function enemyType(name) {
+  const t = ENEMY_TYPES.find(e => e.name === name);
+  if (!t) console.error('no such enemy type: ' + name);
+  return t;
+}
+
+// Builds the record. Speed is passed in rather than derived, because a batch
+// arrival wants jitter while a scenario wants one predictable enemy.
 function makeEnemy(t, x, y, speed) {
   enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, xp: t.xp,
                  color: t.color, glow: t.glow, lastHitBy: 0,
                  pushX: 0, pushY: 0 });
 }
 
-function spawnEnemy() {
-  const m = 40;                                  // how far outside the arena
+// Somewhere just outside the arena, so arrivals fade in from the dark rather
+// than popping into view.
+function edgeSpawnPoint() {
+  const m = 40;
   const edge = Math.floor(rng() * 4);    // 0 top, 1 right, 2 bottom, 3 left
-  let x, y;
-  if      (edge === 0) { x = rng() * ARENA_W;  y = -m; }
-  else if (edge === 1) { x = ARENA_W + m;              y = rng() * ARENA_H; }
-  else if (edge === 2) { x = rng() * ARENA_W;  y = ARENA_H + m; }
-  else                 { x = -m;                       y = rng() * ARENA_H; }
-
-  // Later arrivals swim faster, so kiting stops working on its own.
-  const t = pickEnemyType();
-  makeEnemy(t, x, y, t.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER) *
-                     (1 + elapsed * ENEMY_RAMP));
+  if (edge === 0) return { x: rng() * ARENA_W, y: -m };
+  if (edge === 1) return { x: ARENA_W + m,     y: rng() * ARENA_H };
+  if (edge === 2) return { x: rng() * ARENA_W, y: ARENA_H + m };
+  return              { x: -m,                 y: rng() * ARENA_H };
 }
 
-// Places one named enemy at a known spot, at its nominal speed -- no jitter, no
-// ramp. A scenario is for watching one thing behave, so it must not vary.
+// Brings in one batch: every enemy it names, at the edge, with the usual speed
+// jitter so a batch does not arrive as a drill squad.
+function spawnBatch(batch) {
+  for (const [name, count] of batch.enemies) {
+    const type = enemyType(name);
+    if (!type) continue;
+    for (let i = 0; i < count; i++) {
+      const { x, y } = edgeSpawnPoint();
+      makeEnemy(type, x, y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
+    }
+  }
+}
+
+// Places one named enemy at a known spot, at its nominal speed and no jitter.
+// A scenario is for watching one thing behave, so it must not vary.
 function placeEnemy(name, x, y) {
-  const t = ENEMY_TYPES.find(e => e.name === name);
-  if (!t) { console.error('no such enemy type: ' + name); return; }
-  makeEnemy(t, x, y, t.speed);
+  const t = enemyType(name);
+  if (t) makeEnemy(t, x, y, t.speed);
 }
 
 function spark(x, y, vx, vy, life, r, color, glow) {
@@ -113,14 +127,6 @@ function gainXp() {
   screen = 'levelup';
   sound('levelA');
   sound('levelB');
-}
-
-function pickEnemyType() {
-  const open = ENEMY_TYPES.filter(t => elapsed >= t.from);
-  const total = open.reduce((sum, t) => sum + t.weight, 0);
-  let r = rng() * total;
-  for (const t of open) { r -= t.weight; if (r <= 0) return t; }
-  return open[0];
 }
 
 // ---------- update ----------
@@ -257,11 +263,24 @@ function step(dt) {
     spark(player.x, player.y, 0, 0, 0.22, player.r * 0.85, '#bffcff', '#4ff0ff');
   }
 
-  // --- spawn new enemies, faster as time goes on ---
-  spawnTimer -= dt;
-  if (spawnTimer <= 0 && !spawnPaused) {
-    spawnEnemy();
-    spawnTimer = Math.max(SPAWN_FASTEST, SPAWN_FIRST - elapsed * SPAWN_QUICKEN);
+  // --- the gate: one batch at a time, and nothing arrives until it is clear ---
+  // This replaces the prototype's spawn director (D27). That director grew
+  // arrivals as 1/(1.2 - 0.02t) -- hyperbolic -- against power that grew
+  // logarithmically, so the queue diverged and death was arithmetically
+  // certain. A batch is a *bounded* queue, so that cannot happen.
+  // An empty arena *is* the cleared state, so the beat needs no separate flag:
+  // the timer simply runs while nothing is alive.
+  if (!queuePaused && enemies.length === 0) {
+    breathTimer -= dt;
+    if (breathTimer <= 0) {
+      // ponytail: the list cycles when it runs out. Finishing a layer is S3.
+      // What S3 must undo is not the modulo but the *flatness* -- a layer owns
+      // its own batch list. So do not grow BATCHES into a tuned 12-entry list
+      // on the assumption those 12 are one layer; that shape will not exist.
+      spawnBatch(BATCHES[batchIndex % BATCHES.length]);
+      batchIndex += 1;
+      breathTimer = GATE_PAUSE;
+    }
   }
 
   // --- the weapon fires while you hold the button, along the cursor ---
