@@ -61,18 +61,6 @@ function hitSparks(e, b) {
   }
 }
 
-// Is there anything inside the ring worth shooting at? The weapon points where
-// the mouse points now, so the only question left is whether to fire at all --
-// the range is still a real range (D8), it just no longer picks the target.
-// Squared compare: we never need the distance itself, only the comparison.
-function enemyInRange() {
-  const rr = player.range * player.range;
-  return enemies.some(e => {
-    const dx = e.x - player.x, dy = e.y - player.y;
-    return dx * dx + dy * dy < rr;
-  });
-}
-
 // One enemy's death, from whatever killed it -- a shot or a dash. Two callers,
 // and duplicating the gem drop is how the two paths quietly drift apart.
 function killEnemy(e) {
@@ -269,25 +257,32 @@ function step(dt) {
     spawnTimer = Math.max(SPAWN_FASTEST, SPAWN_FIRST - elapsed * SPAWN_QUICKEN);
   }
 
-  // --- the weapon fires itself, along the cursor, if anything is in range ---
-  player.fireTimer -= dt;
-  if (player.fireTimer <= 0) {
-    if (enemyInRange()) {              // nothing in range? hold the shot
-      const tx = aim.x - player.x;
-      const ty = aim.y - player.y;
-      const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
-      bullets.push({
-        id: ++bulletId,
-        x: player.x, y: player.y, r: 4,
-        vx: (tx / d) * BULLET_SPEED,
-        vy: (ty / d) * BULLET_SPEED,
-        pierce: player.pierce,
-        travelled: 0,
-        maxTravel: player.range,       // the ring means what it says
-      });
-      player.fireTimer = 1 / player.fireRate;
-      sound('shoot');
-    }
+  // --- the weapon fires while you hold the button, along the cursor ---
+  // Manual now (D28): the weapon no longer fires itself. The old "hold the shot
+  // unless something is inside the ring" rule went with it -- it existed because
+  // an automatic weapon would otherwise empty itself into open water, and with a
+  // trigger that is the player's call. The ring is still a real range (D8): a
+  // shot still dies at `maxTravel`, so firing at nothing still costs you nothing
+  // but the cooldown.
+  //
+  // Clamped at zero rather than run negative, so holding the button gives an
+  // honest rate while the *first* click is always instant.
+  player.fireTimer = Math.max(player.fireTimer - dt, 0);
+  if (player.fireTimer <= 0 && CLICK.some(c => keys.has(c))) {
+    const tx = aim.x - player.x;
+    const ty = aim.y - player.y;
+    const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
+    bullets.push({
+      id: ++bulletId,
+      x: player.x, y: player.y, r: 4,
+      vx: (tx / d) * BULLET_SPEED,
+      vy: (ty / d) * BULLET_SPEED,
+      pierce: player.pierce,
+      travelled: 0,
+      maxTravel: player.range,       // the ring means what it says
+    });
+    player.fireTimer = 1 / player.fireRate;
+    sound('shoot');
   }
 
   // --- move enemies toward the player, and hurt him on contact ---

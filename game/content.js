@@ -213,6 +213,7 @@ const OPTIONS = [
 const HELP_KEYS = [
   ['Move',           'W A S D   or   arrow keys'],
   ['Aim',            'mouse'],
+  ['Shoot',          'hold left mouse button'],
   ['Dash',           'Space'],
   ['Choose upgrade', 'arrows + Enter,  click,  or 1 2 3'],
   ['Restart a run',  'R'],
@@ -222,8 +223,8 @@ const HELP_KEYS = [
 ];
 
 const HELP_BLURB = [
-  'Your weapon fires by itself, along whatever your mouse points at,',
-  'whenever anything is inside the ring.',
+  'Hold the left mouse button to shoot, along whatever you point at.',
+  'Shots die at the edge of the ring, so range is a real range.',
   'Space dashes: you pass through the swarm unharmed, and hurt it.',
   'Things you kill drop green motes. Walk over them to gain XP.',
   'Motes fade after eight seconds, so the reward sits where the danger was.',

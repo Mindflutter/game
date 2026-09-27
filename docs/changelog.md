@@ -33,6 +33,29 @@ stays browser-free, and `currentSeed` records what was used. Fixed a latent hole
 Three determinism checks added (89 total, was 86), **verified by putting one
 `Math.random()` back** → `1 of 89 checks FAILED`.
 
+**S1 — Combat core: the weapon is manual**
+D45, implementing D28. Shots leave while `Mouse0` is held, along the cursor.
+`enemyInRange()` and the "hold fire unless something is in range" rule are
+deleted — that rule only ever existed to stop an automatic weapon shooting at
+open water. The cooldown is clamped at zero so the first click after a pause is
+instant rather than banking shots.
+
+Seven existing checks turned out to depend on auto-fire; they now pull the
+trigger. Holding `Mouse0` then leaked into a later check and broke the
+bullet-range assertion — held input is shared mutable state like any other.
+Five new checks; auto-fire fails four of them, verified by putting it back.
+107 checks (was 104: +5, −2 deleted).
+
+Balance untouched on purpose: no point tuning `fireRate` against a spawn
+director that batches will delete.
+
+Also: the in-game help still claimed the weapon fires itself and listed no
+shoot key — caught while writing the README, not by any check. Fixing it added
+a row, which pushed the key list through the blurb below it because that text
+started at a hardcoded y; `drawHelp()` now derives its position from
+`HELP_KEYS.length`. Added a root `README.md`: how to run the game, both test
+suites, and the scenarios.
+
 **S0 — Foundations & spike: Node test stack, and a seam that was wrong**
 D44. Vitest + fast-check as dev-only dependencies; `npm test` runs six
 property-based invariants over generated seeds. `tests/harness.js` loads `game/`

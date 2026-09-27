@@ -283,9 +283,15 @@ function drawHelp() {
   ctx.font = '34px system-ui, sans-serif';
   ctx.fillText('HELP', ARENA_W / 2, 150);
 
+  // The blurb starts below the key list rather than at a fixed y: adding a row
+  // to HELP_KEYS used to push the list straight through the text underneath,
+  // which every state check happily passed.
+  const keyTop = 232, keyStep = 34;
+  const blurbTop = keyTop + HELP_KEYS.length * keyStep + 30;
+
   ctx.font = '16px system-ui, sans-serif';
   HELP_KEYS.forEach(([what, key], i) => {
-    const y = 232 + i * 34;
+    const y = keyTop + i * keyStep;
     ctx.textAlign = 'right';
     ctx.fillStyle = '#547f8d';
     ctx.fillText(what, ARENA_W / 2 - 24, y);
@@ -297,7 +303,7 @@ function drawHelp() {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#6f97a5';
   ctx.font = '15px system-ui, sans-serif';
-  HELP_BLURB.forEach((line, i) => ctx.fillText(line, ARENA_W / 2, 470 + i * 27));
+  HELP_BLURB.forEach((line, i) => ctx.fillText(line, ARENA_W / 2, blurbTop + i * 27));
 
   drawHint('Esc or click to go back');
 }

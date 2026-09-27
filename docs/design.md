@@ -2,18 +2,20 @@
 
 Describes the **present**, not the plan. Update it when reality changes.
 
-**The present is behind the design.** What follows accurately describes the
-code as it stands: a survivors-like auto-shooter in a fixed arena. That is no
-longer what the game is meant to be — D27–D32 changed the genre, and `plan.md`
-S1–S2 is where the code catches up. Nothing here is a statement of intent.
+**The present is partway to the design.** S1 — Combat core has started: the
+weapon is manual (D45). Still to come in S1: the batch queue and gate, which
+replace endless spawning, and the re-derived `// balance` block. The arena is
+still fixed (the camera is S2). Nothing here is a statement of intent.
 
 ## What it is
 
-A survivors-like auto-shooter. You move; your weapon fires itself at whatever
-enters its ring; kills drop motes that are XP; filling the bar pauses the game
-and offers three random upgrades. Every run ends in death; the current
-measured survival times live in `roadmap.md` → Health, and only there. Two
-copies of a measured number is how one of them goes stale.
+A twin-stick action game in a fixed arena. You move with WASD, aim with the
+mouse and **fire by holding the left button** (D45); kills drop motes that are
+XP; filling the bar pauses the game and offers three random upgrades. Enemies
+still arrive on the prototype's endless spawn timer — batches are the next step
+in S1. Every run ends in death; the current measured survival times live in
+`roadmap.md` → Health, and only there, and **they are void** — they measured an
+auto-firing weapon.
 
 ## Files
 
@@ -119,6 +121,14 @@ did not grow a name for clicks. Card rectangles live in `content.js`
 
 **Movement.** Direction from held keys, normalised so diagonals aren't 1.41×
 faster, times speed times `dt`. Player clamped to the arena.
+
+**Firing.** Manual since D45. While `Mouse0` is held and the cooldown has
+elapsed, a shot leaves along the cursor and dies at `player.range` (D8). The
+cooldown is clamped at zero rather than allowed to run negative, so holding the
+button gives an honest `fireRate` while the first click after a pause is always
+instant. There is no longer any "hold the shot unless something is in range"
+rule — that existed only to stop an automatic weapon emptying itself into open
+water, and `enemyInRange()` was deleted with it.
 
 **Spawning.** A countdown timer; interval shrinks from 1.2s toward a 0.15s
 floor as the run goes on. Enemies appear 40px outside the arena so they fade in
@@ -320,7 +330,7 @@ one gun — and coverage is the thing this game has no upgrade for.
 ## Verification
 
 **`index.html?test`** runs the `console.assert` suite in the console
-(currently **104** checks — this doc owns that count; `roadmap.md` cites it).
+(currently **107** checks — this doc owns that count; `roadmap.md` cites it).
 The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
 suite now reports what actually **executed**, which is higher because some call
 sites sit inside loops. Covering: spawning,

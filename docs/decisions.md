@@ -990,3 +990,68 @@ seed named.
 
 `aim` starts at the arena centre, which is where the player starts, so that
 degenerate case is not exotic — it is the state at boot.
+
+## D45 — The weapon is manual · 2026-09-27
+First code of S1 (Combat core), implementing D28 (Manual fire). The weapon no
+longer fires itself: a shot leaves while `Mouse0` is held and the cooldown has
+elapsed, along the cursor, dying at `player.range` as before.
+
+**`enemyInRange()` is deleted, and with it the hold-fire rule.** "Do not shoot
+unless something is inside the ring" existed because an automatic weapon would
+otherwise empty itself into open water; with a trigger, that is the player's
+call. Firing at nothing now costs a cooldown, which is the honest price. The two
+checks that asserted the old rule were deleted rather than adapted — they
+guarded behaviour deliberately removed, not a bug that might return.
+
+**The cooldown is clamped at zero, not left to run negative.** Otherwise a long
+pause banks shots and the first click empties several at once. Clamped, the
+first click after any wait is instant and the held rate is honest — which is
+the difference between a responsive trigger and a sticky one.
+
+**Seven existing checks silently depended on auto-fire** — a fair measure of how
+deep it was baked in. They now pull the trigger through `fireAt()`. And holding
+`Mouse0` promptly leaked into a later, unrelated check, breaking the
+bullet-range assertion: held input is shared mutable state exactly like any
+other, which is the order-dependence D39 named, met in the wild. Each firing
+block now releases the trigger.
+
+**Five new checks**, and an auto-firing weapon fails four of them: no trigger
+means no shot; firing with nothing in range is allowed; the cooldown never runs
+negative while idle; the first shot after a wait is immediate; one second held
+fires about `fireRate` shots. Verified by putting auto-fire back.
+
+**Balance is deliberately untouched.** D28 says every constant is invalidated,
+and they are — but there is no point tuning `fireRate` against a spawn director
+that the batch queue is about to delete. The `// balance` block is re-derived
+once batches exist, later in S1.
+
+**Four of the five new checks were flaky, and I wrote them that way.** They let
+time pass after a bare `reset()` — which since D41 draws a *random* seed — so
+the unattended player sometimes died mid-wait, `step()` returned early, and the
+result turned on the roll. One run passed, the next failed the same check. They
+now use `reset(1)` with `spawnPaused = true`, and the suite was run five times
+in a row clean to confirm. The lesson is the obvious one arriving late: a check
+that lets the simulation run needs a seed and a quiet arena, or it is measuring
+the weather.
+
+**Verified by playing it**, not only by assertion: real mouse and keys through
+`platform/input.js` gave 0 shots idle, 2 shots in 700ms held (`fireRate` 2.5, so
+correct), movement and aim tracking, and 0 shots after release.
+
+**The in-game help was left false, and only writing the README caught it.**
+`HELP_BLURB` still said "Your weapon fires by itself", and `HELP_KEYS` had no
+entry for shooting at all. Both fixed. This is the rule about fixing what a
+change made *false* failing on in-game text rather than on docs — the same
+failure mode, a file I did not think to grep.
+
+**Adding that row then broke the help screen's layout**, because `HELP_BLURB`
+started at a hardcoded `y` that assumed eight key rows. The list ran straight
+through the paragraph beneath it. Every one of the 107 checks passed while the
+screen was unreadable; a screenshot caught it. `drawHelp()` now derives the
+blurb's top from `HELP_KEYS.length`, so the data can grow without the layout
+lying. Second time today that a state-only pass hid a visual break -- the first
+was the stepped scenario rendering nothing (D42).
+
+107 browser checks pass (was 104: +5 new, −2 deleted). The six Node invariants
+are unaffected.
+

@@ -44,7 +44,12 @@ if (location.search === '?test') {
   // The weapon fires along the cursor now, so every check that expects a shot
   // to land has to say where the cursor is. Inheriting whatever the previous
   // check left behind is how a few of these used to pass by luck.
-  const aimAt = e => { aim.x = e.x; aim.y = e.y; };
+  // Point at something and pull the trigger. Since D28 the weapon is manual, so
+  // aiming alone fires nothing -- every check that wants a shot must hold
+  // 'Mouse0', which is how a mouse button reaches the game (D22).
+  const fireAt = e => { aim.x = e.x; aim.y = e.y; keys.add('Mouse0'); };
+  const holdFire = () => keys.add('Mouse0');
+  const ceaseFire = () => keys.delete('Mouse0');
 
   for (let i = 0; i < 300; i++) spawnEnemy();
   check(
@@ -71,13 +76,9 @@ if (location.search === '?test') {
   for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: touches once, not twice
   check(player.hp === 2, 'one touch = one hp, got ' + player.hp);
 
-  // The weapon still ignores anything beyond its range -- it just no longer
-  // picks the target (D20).
-  reset();
-  enemies.push(mob(player.x + player.range + 60, player.y));
-  check(!enemyInRange(), 'must not fire at anything beyond range');
-  enemies.push(mob(player.x + 40, player.y));
-  check(enemyInRange(), 'must fire once something is inside the ring');
+  // The two "hold fire unless something is in range" checks were deleted with
+  // D28: that rule existed only because the weapon fired itself. Firing at open
+  // water is now allowed and costs the player a cooldown, which is the point.
 
   // Shots go where the mouse points, NOT at the nearest enemy. The enemy is
   // planted to the left and the cursor put to the right, so the old
@@ -87,9 +88,57 @@ if (location.search === '?test') {
   aim.x = player.x + 500;
   aim.y = player.y;
   player.fireTimer = 0;
+  holdFire();
   update(1 / 60);
   check(bullets.length === 1 && bullets[0].vx > 0,
     'a shot must fly toward the cursor, vx=' + (bullets[0] && bullets[0].vx));
+  ceaseFire();
+
+  // --- the weapon is manual (D28) ---
+  // The whole genre change in four checks. An auto-firing weapon passes none
+  // of them.
+  reset(1);
+  spawnPaused = true;            // nothing must arrive and muddy the result
+  ceaseFire();
+  enemies.push(mob(player.x + 60, player.y, { speed: 0 }));   // inside the ring
+  aim.x = player.x + 200; aim.y = player.y;
+  for (let i = 0; i < 120; i++) update(1 / 60);  // two seconds of not shooting
+  check(bullets.length === 0 && kills === 0,
+    'no trigger, no shot -- got ' + bullets.length + ' bullets, ' + kills + ' kills');
+
+  // Firing into open water is allowed now: the old "hold the shot unless
+  // something is in range" rule was a crutch for a weapon that fired itself.
+  reset(1);
+  spawnPaused = true;
+  enemies.length = 0;
+  aim.x = player.x + 300; aim.y = player.y;
+  holdFire();
+  update(1 / 60);
+  check(bullets.length === 1, 'must fire with nothing in range');
+  ceaseFire();
+
+  // The first click is instant -- fireTimer is clamped at zero rather than
+  // allowed to run negative while the trigger is up, so a long wait does not
+  // bank shots, and a fresh click never feels sticky.
+  reset(1);
+  spawnPaused = true;            // or the idle player dies mid-wait and step()
+                                 // returns early -- which made this check flaky
+  for (let i = 0; i < 300; i++) update(1 / 60);   // five seconds, trigger up
+  check(player.fireTimer === 0, 'fireTimer must not run negative while idle, got ' + player.fireTimer);
+  holdFire();
+  update(1 / 60);
+  check(bullets.length === 1, 'the first shot after a wait must be immediate');
+
+  // Held, the rate is the rate: ~fireRate shots per second, not one per frame.
+  // reset() zeroes bulletId, so it counts this run's shots directly.
+  reset(1);
+  spawnPaused = true;
+  holdFire();
+  aim.x = player.x + 300; aim.y = player.y;
+  for (let i = 0; i < 60; i++) update(1 / 60);
+  check(Math.abs(bulletId - PLAYER_START.fireRate) <= 1,
+    'one second held must fire about ' + PLAYER_START.fireRate + ' shots, got ' + bulletId);
+  ceaseFire();
 
   // A dash passes through an enemy, hurts it exactly once, and costs no hp.
   reset();
@@ -167,27 +216,30 @@ if (location.search === '?test') {
   reset();
   const big = mob(player.x + 120, player.y, { hp: 6, maxHp: 6, xp: 3 });
   enemies.push(big);
-  aimAt(big);
+  fireAt(big);
   for (let i = 0; i < 45; i++) update(1 / 60);
   check(big.hp < 6 && kills === 0, 'a bulwark must not die to one shot');
+  ceaseFire();
 
   // Shooting a drifter kills it and drops a gem.
   reset();
   const drifter = mob(player.x + 150, player.y);
   enemies.push(drifter);
-  aimAt(drifter);
+  fireAt(drifter);
   for (let i = 0; i < 60; i++) update(0.016);    // ~1s
   check(kills === 1, 'expected one kill, got ' + kills);
   check(gems.length === 1, 'a kill must drop a gem');
+  ceaseFire();
 
   // A tougher enemy is worth more gems. Keep it outside pickupRange, or the
   // gems get vacuumed up the moment they drop and there is nothing to count.
   reset();
   const rich = mob(player.x + 150, player.y, { hp: 1, maxHp: 6, xp: 3 });
   enemies.push(rich);
-  aimAt(rich);
+  fireAt(rich);
   for (let i = 0; i < 60; i++) update(0.016);
   check(gems.length === 3, 'xp 3 must drop 3 gems, got ' + gems.length);
+  ceaseFire();
 
   // An ignored gem fades out instead of littering the floor forever.
   reset();
@@ -338,10 +390,11 @@ if (location.search === '?test') {
   reset();
   const tough = mob(player.x + 90, player.y, { hp: 9, maxHp: 9, xp: 1 });
   enemies.push(tough);
-  aimAt(tough);
+  fireAt(tough);
   for (let i = 0; i < 40; i++) update(1 / 60);
   check(tough.hp < 9 && kills === 0, 'setup: it should be hurt but alive');
   check(particles.length > 0, 'a non-lethal hit must throw sparks');
+  ceaseFire();
 
   // Getting hit shakes the screen, and the shake settles back to nothing.
   reset();

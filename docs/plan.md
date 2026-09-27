@@ -10,11 +10,20 @@ must stay true while doing it.
 
 ## Active stage
 
-**S0 — Foundations & spike.** Started 2026-09-26.
+**S1 — Combat core.** Started 2026-09-27. S0 — Foundations & spike closed the
+same day, all exit conditions met.
 
-Done: docs (`foundations.md`, `plan.md`, D27–D42), the check harness (D39 —
-Test stack), `docs/` tracked in git (D40), seeded RNG + `serve.py` (D41),
-scenarios + stepped mode (D42). 104 checks passing.
+Done in S1: the weapon is manual (D45).
+Next in S1: the batch queue and the gate, which delete the spawn director; then
+a fixed timestep; then the `// balance` block re-derived from scratch, which is
+only meaningful once batches exist.
+
+### S0 — Foundations & spike · closed 2026-09-27
+
+Delivered: docs (`foundations.md`, `plan.md`, D27–D44), the check harness
+(D39), `docs/` tracked in git (D40), seeded RNG + `serve.py` (D41), scenarios +
+stepped mode (D42), measured performance which cancelled the glow cache (D43),
+and the Node test stack with six property-based invariants (D44).
 Done also: the entity-budget spike, which **cancelled** the glow cache (D43),
 and the Node test stack with six property-based invariants (D44).
 **Every S0 exit condition is met.** Next session opens S1 — Combat core, which
