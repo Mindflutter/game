@@ -127,6 +127,13 @@ function pickEnemyType() {
 // One wrapper so this-frame's key presses are forgotten afterwards, whichever
 // way step() returned.
 function update(dt) {
+  // Arm the trigger only on a button the player has actually released since
+  // gameplay began. Every menu screen disarms it, which covers every route into
+  // 'playing' -- the title menu, resuming from pause, backing out of options,
+  // taking a level-up card -- rather than only the ones we remember to patch.
+  if (screen !== 'playing') fireArmed = false;
+  else if (!CLICK.some(c => keys.has(c))) fireArmed = true;
+
   step(dt);
   // Outside step(), because step() returns early on every non-playing screen.
   // Dying sets screen = 'dead' in the same frame it sets shake, so decaying
@@ -268,7 +275,7 @@ function step(dt) {
   // Clamped at zero rather than run negative, so holding the button gives an
   // honest rate while the *first* click is always instant.
   player.fireTimer = Math.max(player.fireTimer - dt, 0);
-  if (player.fireTimer <= 0 && CLICK.some(c => keys.has(c))) {
+  if (player.fireTimer <= 0 && fireArmed && CLICK.some(c => keys.has(c))) {
     const tx = aim.x - player.x;
     const ty = aim.y - player.y;
     const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player

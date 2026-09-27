@@ -47,8 +47,12 @@ if (location.search === '?test') {
   // Point at something and pull the trigger. Since D28 the weapon is manual, so
   // aiming alone fires nothing -- every check that wants a shot must hold
   // 'Mouse0', which is how a mouse button reaches the game (D22).
-  const fireAt = e => { aim.x = e.x; aim.y = e.y; keys.add('Mouse0'); };
-  const holdFire = () => keys.add('Mouse0');
+  // A real press is always preceded by a frame with the button up, which is
+  // what arms the trigger (D47). These helpers start mid-press, so they assert
+  // that precondition instead of simulating it. The arming logic itself is
+  // exercised by its own check, further down.
+  const holdFire = () => { fireArmed = true; keys.add('Mouse0'); };
+  const fireAt = e => { aim.x = e.x; aim.y = e.y; holdFire(); };
   const ceaseFire = () => keys.delete('Mouse0');
 
   for (let i = 0; i < 300; i++) spawnEnemy();
@@ -547,6 +551,30 @@ if (location.search === '?test') {
   update(1 / 60);
   check(shake === 0, 'shake "off" must not shake at all, got ' + shake);
   shakeLevel = 2;
+
+  // A click the menu consumed must not also reach the weapon. The menu reads
+  // the edge (justPressed) while the weapon reads the held state (keys), so one
+  // physical click was being read twice: clicking Start fired a shot into the
+  // run it had just begun.
+  reset(1);
+  spawnPaused = true;
+  screen = 'title';
+  menuIndex = 0;
+  aim.x = ARENA_W / 2; aim.y = MENU_TOP;      // over the Start row
+  keys.add('Mouse0'); justPressed.add('Mouse0');
+  update(1 / 60);                              // the menu takes the click
+  check(screen === 'playing', 'setup: clicking Start must begin a run, got ' + screen);
+  for (let i = 0; i < 10; i++) update(1 / 60); // ...and the button is still down
+  check(bullets.length === 0 && bulletId === 0,
+    'a click the menu ate must not fire the weapon, got ' + bulletId + ' shots');
+
+  // Releasing and pressing again is a fresh click, and that one does fire.
+  keys.delete('Mouse0');
+  update(1 / 60);
+  keys.add('Mouse0');
+  update(1 / 60);
+  check(bulletId === 1, 'a fresh press after release must fire, got ' + bulletId);
+  ceaseFire();
 
   // ---------- screens fit ----------
   // Adding a row to HELP_KEYS once pushed the list straight through the blurb

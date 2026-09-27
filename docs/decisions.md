@@ -1082,3 +1082,38 @@ overlapping text, and both have now happened.
 tables too, and only the help screen is guarded. Filed in `ideas.md`; not worth
 generalising until a second screen actually overflows.
 
+## D47 — A click a menu consumed is not a shot · 2026-09-27
+Bug, reported by Igor: clicking **Start** fired the weapon into the run it had
+just begun. Introduced by D45 (The weapon is manual) — before it, a held button
+meant nothing during play.
+
+**Root cause: one physical click read twice.** A menu acts on the *edge*
+(`justPressed`), the weapon acts on the *held state* (`keys`), and nothing
+marked the click as spent. Holding the button across the transition — which any
+click longer than one frame does — left it held on the first gameplay frame, and
+the weapon obliged.
+
+**Fixed at the funnel, not the symptom.** `update()` runs every frame whatever
+the screen, so the rule lives there: any non-playing screen disarms the trigger,
+and it re-arms only on a frame where the button is seen *released*. The weapon
+requires `fireArmed`.
+
+That covers **every** click-driven route into gameplay rather than the one that
+was reported. Verified on three: the title Start row, taking a level-up card,
+and clicking the death screen to restart. Two of those were broken too and
+nobody had noticed; patching the title menu would have left them.
+
+**Severity was higher than the report suggested.** Igor judged the 120ms hold in
+the first reproduction "too long", but real clicks fall in roughly 80–150ms and
+anything over one frame (~17ms) triggered it. Verified fixed at 10, 60, 150 and
+400ms.
+
+**Nine existing checks broke, correctly.** They called `holdFire()` and went
+straight to a held button with no released frame first — which no real press
+does, since a press is always preceded by not-pressed. The helpers now assert
+that precondition (`fireArmed = true`) rather than pretend to simulate it, and
+the arming logic gets its own check that exercises the real path: a menu click
+fires nothing, then a release and a fresh press fires exactly one shot.
+
+**Test written before the fix**, and it failed for the right reason
+(`got 1 shots`). 111 checks (was 108).

@@ -122,7 +122,11 @@ did not grow a name for clicks. Card rectangles live in `content.js`
 **Movement.** Direction from held keys, normalised so diagonals aren't 1.41×
 faster, times speed times `dt`. Player clamped to the arena.
 
-**Firing.** Manual since D45. While `Mouse0` is held and the cooldown has
+**Firing.** Manual since D45, and **armed** since D47: the trigger only counts
+once the button has been seen released while playing, and every non-playing
+screen disarms it. Without that, the click that picks *Start* is still held on
+the first gameplay frame and fires a shot — a menu reads a click as an edge,
+the weapon reads it as a held state, so one click was being read twice. While `Mouse0` is held and the cooldown has
 elapsed, a shot leaves along the cursor and dies at `player.range` (D8). The
 cooldown is clamped at zero rather than allowed to run negative, so holding the
 button gives an honest `fireRate` while the first click after a pause is always
@@ -341,7 +345,7 @@ one gun — and coverage is the thing this game has no upgrade for.
 ## Verification
 
 **`index.html?test`** runs the `console.assert` suite in the console
-(currently **108** checks — this doc owns that count; `roadmap.md` cites it).
+(currently **111** checks — this doc owns that count; `roadmap.md` cites it).
 The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
 suite now reports what actually **executed**, which is higher because some call
 sites sit inside loops. Covering: spawning,

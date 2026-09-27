@@ -6,6 +6,12 @@
 let player, enemies, bullets, gems, particles;
 let elapsed, spawnTimer, kills, shake;
 let spawnPaused = false;    // a scenario can stop new arrivals (D37)
+
+// The trigger is armed only once the button has been seen released. A menu
+// reads a click as an edge (justPressed) while the weapon reads it as a held
+// state (keys), so without this one physical click is read twice -- clicking
+// Start fired a shot into the run it had just begun.
+let fireArmed = false;
 let xp, xpNext, level, choices;
 
 // Which screen we're on. Replaces the old `paused` and `dead` flags, which
@@ -69,6 +75,7 @@ function reset(seed) {
   spawnTimer = 0;
   kills = 0;
   spawnPaused = false;   // scenarios switch this on; normal play never does
+  fireArmed = false;     // a click that started the run is not a shot
   bulletId = 0;        // or two dives with the same seed hand out different ids
   shake = 0;           // pixels of screen shake left
   screen = 'playing';  // a reset run is a running run

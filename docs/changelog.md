@@ -33,6 +33,15 @@ stays browser-free, and `currentSeed` records what was used. Fixed a latent hole
 Three determinism checks added (89 total, was 86), **verified by putting one
 `Math.random()` back** → `1 of 89 checks FAILED`.
 
+**Fix: clicking Start fired the weapon**
+D47. A menu reads a click as an edge, the weapon reads it as a held state, so
+one physical click was read twice — the click that began a run also fired into
+it. Regression from D45. Fixed in `update()`, which every screen passes through:
+menus disarm the trigger and it re-arms only on a frame with the button
+released. That covered two more routes nobody had reported — taking a level-up
+card and restarting from the death screen. Verified at 10/60/150/400ms holds.
+Test written first and failed for the right reason. 111 checks (was 108).
+
 **The consistency sweep, made concrete**
 D46. CLAUDE.md now names the six surfaces a change can leave stale instead of
 saying "update the docs", with the three that have actually been missed marked
