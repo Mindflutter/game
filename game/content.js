@@ -1,11 +1,12 @@
 // ===== content =====
 // Every tuning number and every content table. No behaviour, no browser.
 
-// ---------- the arena ----------
-// The game always plays out in a 1280x800 world, whatever the window size,
-// so difficulty doesn't depend on your monitor. We scale that world up to
-// fill the window. Any leftover margin is the same near-black as the
-// background, so the letterboxing is invisible.
+// ---------- the view ----------
+// The game always sees a 1280x800 window onto the world, whatever the window
+// size, so difficulty doesn't depend on your monitor (D29). Since S2 the world
+// is a tall strip and this is the camera's view of it, `cameraY` from the top.
+// We scale the view up to fill the window. Any leftover margin is painted the
+// same colour as the water, so the letterboxing is invisible.
 const ARENA_W = 1280;
 const ARENA_H = 800;
 
@@ -55,10 +56,22 @@ const BULLET_SPEED   = 430;   // pixels per second
 const GEM_PULL       = 300;   // how fast gems fly to you once in range
 const GEM_LIFE       = 8;     // seconds before an uncollected coin fades out
 const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
-const GATE_PAUSE     = 1.2;   // seconds of quiet between batches (D33, D34),
-                              // counted from when the mod offer is taken. Long
-                              // enough to read as a breath, short enough not to
-                              // stall. The full beat is MOD_OFFER_DELAY + this.
+const GATE_PAUSE     = 1.2;   // seconds of quiet before a dive's FIRST batch, so
+                              // a dive opens calm. Every later batch waits on the
+                              // descent instead (S2), which is its own beat.
+// The descent (S2, D58). The world is a tall strip; each batch waits at its own
+// depth and a current carries the view from one to the next. The current never
+// stops -- it only slows while a batch is fought, when the camera holds and
+// only the water moves. All four are Claude's picks, not derived -- the bot
+// measures them, Igor's feel judges them.
+const GATE_SPACING   = 400;   // world px between gate depths: ~2s of travel.
+                              // Igor, 2026-09-28: "only a couple of seconds
+                              // between batches" (was 1600, ~12s)
+const CURRENT_SPEED  = 200;   // px/s between batches
+const CURRENT_CRAWL  = 30;    // px/s during a fight: the water still flows
+const CURRENT_EASE   = 0.05;  // fraction of the speed change still left after
+                              // one second -- eases up after a clear, down on
+                              // an arrival, never a jolt
 // The simulation's one and only step size (D53). Everything that drives
 // `update()` uses it: the frame loop's accumulator, `advance()`, and the bot.
 // 1/120 rather than 1/60 because there is no render interpolation — the picture
@@ -106,7 +119,7 @@ const SOUNDS = {
 };
 
 // ---------- mods ----------
-// A run-scoped pick, offered as one of three at a gate and gone at the end of
+// A dive-scoped pick, offered as one of three at a gate and gone at the end of
 // the dive (D34). Just data: adding one is a line here and nothing else.
 //
 // `scope` is **body** or **comfort**, and nothing else until S5 — Content.
@@ -287,10 +300,13 @@ const SCENARIOS = {
                                           ['darter',  980, 260],
                                           ['bulwark', 640, 660]] },
   // The queue several batches in, for eyeballing density and pressure. It used
-  // to mean "a minute into the run", which stopped meaning anything when the
+  // to mean "a minute into the dive", which stopped meaning anything when the
   // time-based spawn director was deleted (D48) -- density is authored per
   // batch now, so a later batch is the only way to be deeper in.
   'late-swarm':  { batch: 5 },
+  // The last batch, then the bottom of the layer -- for seeing how a layer
+  // ends without playing all of it. Derived, so it follows BATCHES' length.
+  'last-batch':  { batch: BATCHES.length - 1 },
 };
 
 // ---------- enemy types ----------
@@ -318,7 +334,7 @@ const MENUS = {
     heading: 'ABYSS',
     sub: 'something small, in very deep water',
     items: [
-      { label: 'Start',   run: () => reset() },          // reset() starts the run
+      { label: 'Start',   run: () => reset() },          // reset() starts the dive
       { label: 'Help',    run: () => openScreen('help') },
       { label: 'Options', run: () => openScreen('options') },
     ],
@@ -359,7 +375,7 @@ const HELP_KEYS = [
   ['Shoot',          'hold left mouse button'],
   ['Dash',           'Space'],
   ['Choose a mod',   'arrows + Enter,  click,  or 1 2 3'],
-  ['Restart a run',  'R'],
+  ['Restart a dive', 'R'],
   ['Mute sound',     'M'],
   ['Menu / back',    'Esc'],
   ['Menus',          'mouse, or arrows + Enter'],
@@ -368,8 +384,8 @@ const HELP_KEYS = [
 const HELP_BLURB = [
   'Hold the left mouse button to shoot, along whatever you point at.',
   'Shots die at the edge of the ring, so range is a real range.',
-  'Space dashes: you pass through the swarm unharmed, and hurt it.',
-  'Enemies come one batch at a time. Nothing new arrives until it is dead.',
+  'Space dashes: you pass through the swarm unharmed, and shove it aside.',
+  'One batch at a time; clear it and the current takes you down to the next.',
   'Things you kill drop gems. They are money, and they fade in eight seconds.',
-  'Every batch cleared is a rank: take one of three mods, and carry on.',
+  'Every batch cleared is a rank and a pick of three mods, until the layer ends.',
 ];

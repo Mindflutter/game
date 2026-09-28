@@ -6,6 +6,90 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-09-28
 
+**S2 — The dive: camera and descent closed.** Igor: "commit and finalize s2".
+Four decisions, D58 (the descent) through D61 ("dive", not "run"). The checks
+closed three exit conditions; the fourth, playable, was Igor's call. S3 — One
+boss, one complete layer is next, and the layer-to-layer design pass (D60)
+sits between S3 and S4.
+
+**Cleanup after `/simplify`**
+Four review passes (reuse, simplification, efficiency, altitude) over the S2
+(camera and descent) code. No behaviour change: five whole-layer bot dives and
+a scripted descent replay byte-identical before and after, and every rule the
+descent tests guard was broken once more to confirm they still fail. The water
+now moves once, in `update()`, instead of in three screen branches; its dead
+camera argument is gone; `descend()` is inlined; `gateDepth()` replaces the
+depth formula repeated in three files; `edgeSpawnPoint` is back in view
+coordinates. Tests share the bot's own input step, measure in seconds rather
+than a hardcoded 120 ticks, and assert once instead of on every tick. The hook
+no longer stops at system messages it mistook for the prompt. Two waits in
+`?test` now pass through `runAlive`'s stopped-simulation check: 174 checks.
+
+**"Dive", not "run"** (D61)
+Igor: "run -> dive". The help screen says "Restart a dive"; `foundations.md`
+calls a mod dive-scoped and the pillar **Dives differ**; two lines of
+`design.md` and nine code comments follow, then — Igor: "all runs to dives,
+consistency" — seventeen more across `checks.js`, `design.md`, `ideas.md` and
+`plan.md`. History (`decisions.md`, this file) keeps its wording. Wording only
+— no behaviour change. It surfaced one stale fact, fixed: `design.md` said
+balance is measured over 21 runs per configuration; it has been the same five
+seeds, paired, since D41 (seeded RNG).
+
+**Layer-to-layer logic gets its own design pass** (D60)
+Igor: "a design pass of its own after S3". `plan.md` has it as an unnumbered
+section between S3 (one boss, one complete layer) and S4 (meta loop
+skeleton); the open questions stay in `ideas.md` until then. S4 now waits for
+it — its entry is S3 exits and the pass done — and Claude reminds Igor to open
+the conversation when S3 closes. Its outcome, in Igor's words: "decision,
+checks against foundations, ready plan".
+
+**The water never stops outside pause**
+Igor: "The water freezes under the mod cards - it should not", then "flow under
+death and the layer end, and freeze under pause, confirmed". Play still waits
+on the pick and stops on the end screens; the water drifts on behind all three,
+at the fight-time speed. Pause alone freezes it, and `update()` moves the
+water once, outside `step()`. D58 (the descent) says so; each screen has a test that fails
+if the water stops there, and the end-screen test also fails if the water
+rushes on at travel speed. Node 30 tests.
+
+**No mods at the layer end** (D59)
+The last batch of a layer pays no rank and offers no mods — Igor: "let it stay
+on 11" — and the current goes straight on to "LAYER CLEARED". The layer end is not a gate, and the glossary
+now says so — the gate row is reworded to describe what happens at a gate.
+The help screen says it too, in Igor's approved wording: "Every batch cleared
+is a rank and a pick of three mods, until the layer ends."
+Also closed, from the S2 review: a test that pausing mid-descent freezes the
+camera and the water from the first tick (fails with Escape handled after the
+gate block), and the D29 window-size check now plays the whole layer rather
+than four gates, in 100ms (figures in `roadmap.md` → Health). Node 28 tests.
+
+**S2 — The descent** (D58)
+One layer now scrolls. A current carries the camera and the player between
+gate depths about two seconds apart, and never stops: during a fight the camera
+and the batch hold while the water keeps flowing, slower. The current is
+independent of the player. After the twelfth batch the dive ends on a "LAYER
+CLEARED" screen (Igor's wording) — a stop, not a win. Specks carried by the water and a depth
+tint are the only canvas work, and both are placeholder graphics.
+`?dev=last-batch&play` starts at the last batch, for seeing the layer's end.
+Reworked the same day on Igor's play: the first build braked to a dead stop,
+took ~12s between batches, ran "way too fast", and let swimming down hurry the
+current; its dim screens also left bright bands down the letterbox margins.
+Node 26 tests (was 13: +10 in `tests/descent.test.js`, +3 in
+`tests/docs.test.js` that regenerate the line counts, platform share and
+balance constants `design.md` quotes, and fail on a doc naming a constant the
+code no longer has); `?test` 173 checks,
+including the margin dim and the D29 check, which plays seed 4471 to gate 4 at
+1280×800, 1920×1080 and 3440×1440 through real mouse events and needs them to
+agree (figures in `roadmap.md` → Health). Verified by breaking each rule: no
+clamp at the depth, aim or arrivals ignoring the camera, the camera moving
+mid-batch, a flow that fades to nothing, the bottom one batch late, and the
+input scaling dropped. Measuring the traverse time found that the mortal bot
+dies before the bottom on every seed — and did on the pre-S2 commit too, so
+`roadmap.md`'s "it no longer dies" was already stale. The help screen's dash
+line said it "hurts" the swarm, false since D51 (the dash is bought); it says
+"shove" now. A project Stop hook now refuses any reply that cites a decision or
+stage without its name.
+
 **Driven runs are muted**
 Igor: "mute the game when testing with bot / playwright". `?test` and `?dev=`
 now boot at `volume = 0`. The audio checks are untouched — they measure peaks

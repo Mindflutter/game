@@ -30,13 +30,12 @@ function dive(seed, ticks, inputSeed = seed) {
       // generator that only ever picks random points never reaches it, and then
       // the NaN invariant is a check that can only pass.
       g.aim.x = g.player.x;
-      g.aim.y = g.player.y;
+      g.aim.y = g.player.y - g.cameraY;      // aim is in the view (D58)
     } else {
       g.aim.x = next() * 1280;
       g.aim.y = next() * 800;
     }
-    g.update(g.FIXED_DT);
-    g.justPressed.clear();
+    g.update(g.FIXED_DT);                  // update() clears justPressed itself
   }
   return g;
 }
@@ -108,13 +107,13 @@ describe('invariants that must hold for every dive', () => {
     }), { numRuns: 40 });
   });
 
-  it('keeps the player inside the arena', () => {
+  it('keeps the player inside the view', () => {
     fc.assert(fc.property(fc.integer({ min: 0, max: 2 ** 31 }), seed => {
       const g = dive(seed, 600);
       expect(g.player.x).toBeGreaterThanOrEqual(0);
       expect(g.player.x).toBeLessThanOrEqual(g.ARENA_W);
-      expect(g.player.y).toBeGreaterThanOrEqual(0);
-      expect(g.player.y).toBeLessThanOrEqual(g.ARENA_H);
+      expect(g.player.y).toBeGreaterThanOrEqual(g.cameraY);
+      expect(g.player.y).toBeLessThanOrEqual(g.cameraY + g.ARENA_H);
     }), { numRuns: 30 });
   });
 

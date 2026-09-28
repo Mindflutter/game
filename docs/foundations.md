@@ -24,11 +24,12 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 |---|---|---|
 | **layer** | One section of the abyss you dive into. 3–5 of them at alpha. Unlocked by completing the previous one. | never "level" |
 | **dive** | One attempt at a layer, start to death or completion. | "run" is its synonym; prefer **dive** |
-| **rank** | In-dive progress, reset every dive. **One rank per batch cleared** — there is no XP bar and no curve (D34 — Mods). | never "level" |
-| **mod** | A run-scoped pick, offered as one of three at a gate, gone at the end of the dive. Momentum, not strategy. | never "upgrade" |
+| **rank** | In-dive progress, reset every dive. **One rank per batch cleared** — there is no XP bar and no curve (D34 — Mods) — except a layer's last batch, whose clear is the **layer end** and pays none (D59): a layer of N batches pays N − 1 ranks. | never "level" |
+| **mod** | A dive-scoped pick, offered as one of three at a gate, gone at the end of the dive. Momentum, not strategy. | never "upgrade" |
 | **gear** | A persistent item bought with currency on the home screen. Weapons, suit, mask, flippers, trinkets. | never "upgrade" |
 | **tier** | One of the 3–4 purchasable steps a piece of gear advances through. | never "level", never "upgrade" |
-| **gate** | The point where the descent stops until the batch is cleared, and the only moment mods are offered (D33, D34). The dive's one non-combat beat. | not a "wave", not a "batch" |
+| **gate** | The depth where a batch waits. The descent stops there — no further in enemies until the batch is cleared, though the water keeps flowing (D27, D58). Clearing it pays one rank and offers three mods (D33, D34): the dive's one pause, since play waits on the pick. The layer's last batch is the exception — its clear is the layer end. Then the current carries you on to the next gate. | not a "wave", not a "batch", not the **layer end** |
+| **layer end** | The clear of a layer's last batch, and the bottom the current then carries you to. **Not a gate**: it pays no rank and offers no mods — mods only if the player goes on to the next layer (D59). What else happens there is not designed yet — `ideas.md`. The name is Igor's working one: "or just call it layer end". | not a "gate" |
 | **batch** | The gated unit. Cleared before the descent resumes. Contains 1–N enemies of comparable threat. | not a "wave" |
 | **wave** | A spawn group *inside* a batch. **Default: one batch is one wave.** Multi-wave batches are permitted but are a UX risk — Igor's concern, 2026-09-26: a batch that keeps refilling reads as "the gate is broken" rather than as a second wave. Any multi-wave batch must telegraph that more is coming. | not a "batch" |
 | **prototype** | The survivors-like auto-shooter this grew out of. A closed phase, not a version of the current game. | not "the game" |
@@ -57,8 +58,8 @@ What this game *is*, stated so a branching session cannot drift off it.
    Attribute points are non-fungible: money cannot buy them and they cannot buy
    gear. That non-fungibility is the entire reason the tier exists.
 5. **Nothing interrupts combat** (D33 — Mod offers do not interrupt, D34 —
-   Mods). One rank per batch cleared; three mods offered at the gate; chosen in
-   about a second. Mods differ in **kind, not degree** — comparing numbers is
+   Mods). One rank per batch cleared and three mods offered at the gate —
+   neither at the layer end (D59); chosen in about a second. Mods differ in **kind, not degree** — comparing numbers is
    the heavy thinking the dive must not contain. No modal pop-up mid-fight, and
    no XP bar.
 6. **Combat is the dive's only dynamic system** (D35 — Currency is
@@ -90,7 +91,7 @@ has an answer.
 | Responsive control | Input to on-screen response | ≤ 2 frames |
 | Addictive, not grindy | Dives needed before the first meaningful purchase | ≤ 3 |
 | Easy layers stay relevant | A completed layer still rewards a skilled fast clear | must hold |
-| Runs differ | Two dives of the same layer draw different batches | must hold |
+| Dives differ | Two dives of the same layer draw different batches | must hold |
 | Funny, childish, straightforward | No mechanic needs explaining in more than one sentence | judgement, Igor's |
 
 **Feel is never asserted** (D16). Anything on this list marked "judgement" is
@@ -128,7 +129,7 @@ Igor's call and gets no check.
   segment they crossed (D50, D53), so tunneling is impossible at any speed
   rather than merely unlikely at a bounded one.
 - **Seeded RNG for every dive**, from S0. Required twice over: for paired
-  balance comparisons, and because "runs must differ" is a claim about
+  balance comparisons, and because "dives must differ" is a claim about
   controlled variation, which needs control.
 - **Saves carry a `version` field from the first write.** Retrofitting schema
   migration is near-impossible once saves exist, including your own.
@@ -163,8 +164,9 @@ Named so they stop being re-proposed.
 ## What is deliberately still open
 
 Tracked in `ideas.md`, not here. The draft's own `(?)` markers plus what this
-contract does not decide: the lost item, whether a layer's end returns you home
-or offers a choice, what currency is called, what mini-bosses are, whether
+contract does not decide: the lost item, what happens at the **layer end** —
+whether it returns you home or offers a choice, and what it looks like (D59
+settles only that it offers no mods unless you go on), what currency is called, what mini-bosses are, whether
 collectibles feed stats or story or both, **which** attributes exist and what
 each micro-task is (the tier itself is settled by D36; its content is S5 work),
 terrain complexity beyond a vertical shaft.

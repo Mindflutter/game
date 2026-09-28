@@ -27,7 +27,7 @@ npm run test:watch
 ```
 
 Property-based invariants over generated seeds: no `NaN` ever, hp stays in
-bounds, the player stays in the arena, a dive replays exactly from its seed, and
+bounds, the player stays in the view, a dive replays exactly from its seed, and
 decay is time-based rather than frame-based. It also loads `game/` with only the
 six port-seam names stubbed, so reaching for a seventh fails the build.
 

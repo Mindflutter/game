@@ -13,13 +13,14 @@ the code it describes.
 | File | Holds | Rule |
 |---|---|---|
 | `foundations.md` | The layer that does not change before alpha: the binding glossary, the genre contract, the pillars as checkable statements, the technical contract, the non-goals | **Read first.** Changing it is a decision — it gets a `decisions.md` entry in the same step, never a quiet edit. |
-| `plan.md` | Stages S0–S7, their entry conditions and definitions of done | **The only file that says "we are here."** A stage does not start with an unmet entry condition. |
+| `plan.md` | Stages S0–S7 and the layer-to-layer design pass after S3, their entry conditions and definitions of done | **The only file that says "we are here."** A stage does not start with an unmet entry condition. |
 | `high level design.md` | Igor's source description of the whole game | Frozen input, not a working doc. Its `(?)` markers are tracked in `ideas.md`. |
 | `roadmap.md` | Near-term work *inside* the active stage, plus build health | Owns the measured bot figures, and nothing else quotes them. |
 | `decisions.md` | What we decided and **why**, including what we rejected | Append-only. Never silently reverse an entry — add one that supersedes it. **D1–D26 describe the closed prototype; see the warning at the top.** |
 | `ideas.md` | Wishes, proposals, parked questions, declined items | The inbox. Anything undecided goes here. Nothing here is committed to. |
-| `design.md` | How the code works **today** | Describes the present, never the plan. It currently lags the design — the code is still the prototype. |
+| `design.md` | How the code works **today** | Describes the present, never the plan. |
 | `changelog.md` | Dated record of what actually shipped | Newest first. It cites commits, so re-check it after a squash or rebase. |
+| `superpowers/` | Design specs and implementation plans from brainstorming sessions | History, not a working doc. Where one disagrees with `decisions.md`, the decision wins. |
 
 ## How an item moves
 

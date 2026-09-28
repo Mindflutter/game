@@ -1,0 +1,242 @@
+// The descent (S2): the camera, the current, the gate depths and the bottom.
+// Each test guards a line of docs/superpowers/specs/2026-09-28-s2-descent-design.md.
+import { describe, it, expect } from 'vitest';
+import fc from 'fast-check';
+import { loadGame } from './harness.js';
+import { botInput } from './bot.js';
+
+// Ticks for `seconds` of game time, in the game's own step: a hardcoded 120
+// is exactly the budget D53 once halved without anyone noticing.
+const ticks = (g, seconds) => Math.round(seconds / g.FIXED_DT);
+
+// A fresh game standing at the start of gate `k`'s descent: batch k-1 is
+// cleared, the camera is still at its depth, the dive's opening beat is spent.
+function atGate(k) {
+  const g = loadGame();
+  g.reset(1);
+  g.batchIndex = k;
+  g.cameraY = g.gateDepth(k - 1);
+  g.player.y = g.cameraY + g.ARENA_H / 2;
+  g.breathTimer = 0;
+  return g;
+}
+
+// Ticks until a batch arrives or the screen changes, holding `hold` the whole
+// way -- nothing in game/ writes `keys`, so setting them once holds them.
+// Returns the camera depth after every tick.
+function ride(g, hold = []) {
+  g.keys.clear();
+  for (const k of hold) g.keys.add(k);
+  const cams = [];
+  for (let i = 0, n = ticks(g, 30); i < n && g.enemies.length === 0 && g.screen === 'playing'; i++) {
+    g.update(g.FIXED_DT);
+    cams.push(g.cameraY);
+  }
+  return cams;
+}
+
+// Kills the batch through the real death path, then plays on until the screen
+// changes -- the mod offer, or the layer end -- or `seconds` run out.
+function clearAndWait(g, seconds = 5) {
+  for (const e of [...g.enemies]) g.killEnemy(e);
+  for (let i = 0, n = ticks(g, seconds); i < n && g.screen === 'playing'; i++) g.update(g.FIXED_DT);
+  return g.screen;
+}
+
+// How far the water flows in one second, after `settle` seconds for its speed
+// to ease. The player is kept alive, so a fight can be measured too; on the
+// menu and end screens the keep-alive does nothing.
+function flowFrom(g, settle = 3) {
+  const tick = () => { g.player.hurt = g.player.iframes; g.update(g.FIXED_DT); };
+  for (let i = 0, n = ticks(g, settle); i < n; i++) tick();
+  const from = g.waterY;
+  for (let i = 0, n = ticks(g, 1); i < n; i++) tick();
+  return g.waterY - from;
+}
+
+describe('the descent', () => {
+  it('never moves the camera while a batch lives, and does move it between (D27)', () => {
+    fc.assert(fc.property(fc.integer({ min: 0, max: 2 ** 31 }), seed => {
+      const g = loadGame();
+      g.reset(seed);
+      // The first violation is recorded and asserted once, after the loop: an
+      // expect() on every tick was half this test's cost and caught nothing more.
+      let moved = false, bad = null;
+      for (let i = 0, n = ticks(g, 60); i < n && g.batchIndex < 4 && !bad; i++) {
+        botInput(g, true);                     // the bot's own tick, kept alive
+        const fighting = g.enemies.length > 0, frozen = g.screen === 'mods';
+        const before = g.cameraY;
+        g.update(g.FIXED_DT);
+        if ((fighting || frozen) && g.cameraY !== before) bad = { tick: i, from: before, to: g.cameraY };
+        // The player never leaves the view, however the camera moves.
+        if (g.player.y < g.cameraY || g.player.y > g.cameraY + g.ARENA_H) {
+          bad = { tick: i, playerY: g.player.y, cameraY: g.cameraY };
+        }
+        if (g.cameraY !== before) moved = true;
+      }
+      expect(bad).toBeNull();
+      // Without this the freeze above passes on a camera that never moves at all.
+      expect(moved).toBe(true);
+    }), { numRuns: 5 });
+  });
+
+  it('keeps the water flowing during a fight -- the current never stops', () => {
+    // "Descent stops" means no further in enemies; the water still moves. Only
+    // the background shows it (graphics, D58), so this reads the flow, not the camera.
+    const g = loadGame();
+    g.reset(1);
+    ride(g);                                     // the first batch arrives
+    expect(g.enemies.length).toBeGreaterThan(0);
+    const cam = g.cameraY;
+    // Three seconds in, then one more measured: a flow that merely decays
+    // toward zero would still "increase every tick", so this demands a speed.
+    const flow = flowFrom(g);
+    expect(g.enemies.length).toBeGreaterThan(0);  // still the same fight
+    expect(flow).toBeGreaterThanOrEqual(0.5 * g.CURRENT_CRAWL);
+    expect(g.cameraY).toBe(cam);                  // the fight itself does not move
+  });
+
+  it('brings the next batch a couple of seconds after the last one is cleared', () => {
+    // Igor, 2026-09-28: "only a couple of seconds between batches".
+    const g = atGate(1);
+    expect(ride(g).length * g.FIXED_DT).toBeLessThanOrEqual(3);
+  });
+
+  it('stops exactly at the gate depth, never past it, swimming or not', () => {
+    for (const hold of [[], ['KeyS']]) {
+      const g = atGate(1);
+      const cams = ride(g, hold);
+      expect(Math.max(...cams)).toBe(g.gateDepth(1));
+      expect(g.cameraY).toBe(g.gateDepth(1));
+      expect(g.enemies.length).toBeGreaterThan(0);   // and the batch arrived there
+    }
+  });
+
+  it('runs the current independently of the player -- swimming does not hurry it', () => {
+    // Igor, 2026-09-28: "revert the player speeding up current ... current must
+    // be independent". Replaces the old "swimming down arrives sooner" test.
+    const idle = ride(atGate(1)).length;
+    const swim = ride(atGate(1), ['KeyS']).length;
+    expect(swim).toBe(idle);
+  });
+
+  it('fires at the cursor wherever the camera is', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;                  // no descent, no arrivals: just the shot
+    g.cameraY = 5000;
+    g.player.x = 640;
+    g.player.y = 5400;
+    g.aim.x = 840;                         // view coords: 200px right of the player,
+    g.aim.y = 400;                         // level with it (5400 - 5000)
+    g.update(g.FIXED_DT);                  // a frame with the button up arms it (D47)
+    g.keys.add(g.CLICK[0]);
+    g.update(g.FIXED_DT);
+    expect(g.bullets).toHaveLength(1);
+    expect(g.bullets[0].vx).toBeGreaterThan(0);
+    expect(Math.abs(g.bullets[0].vy)).toBeLessThan(1e-9);
+  });
+
+  it('ends the layer at the bottom, not in another batch -- and R dives again', () => {
+    const n = loadGame().BATCHES.length;
+    const g = atGate(n);
+    ride(g);
+    expect(g.screen).toBe('bottom');
+    expect(g.enemies).toHaveLength(0);
+    expect(g.cameraY).toBe(g.gateDepth(n));
+    // A stop, not a win: nothing is paid for reaching it.
+    expect(g.rank).toBe(0);
+    g.justPressed.add('KeyR');
+    g.update(g.FIXED_DT);
+    expect(g.screen).toBe('playing');
+    expect(g.cameraY).toBe(0);
+  });
+
+  it('starts a deep scenario with the player in the view, before any tick', () => {
+    // A stepped scenario is inspected as set up (D37), so "the clamp fixes it on
+    // the first tick" is not good enough: the player would be drawn off-screen.
+    const g = loadGame();
+    g.applyScenario('late-swarm', 1);
+    expect(g.cameraY).toBeGreaterThan(0);
+    expect(g.player.y).toBeGreaterThanOrEqual(g.cameraY);
+    expect(g.player.y).toBeLessThanOrEqual(g.cameraY + g.ARENA_H);
+  });
+
+  it('pays a rank and mods between batches, but neither at the layer end', () => {
+    // Igor, 2026-09-28: "no mods should be offered at layer's end, unless a
+    // player goes on to the next one" -- and there is no next layer yet. And
+    // no rank either: "let it stay on 11" (twelve batches, eleven ranks).
+    const mid = loadGame();
+    mid.reset(1);
+    ride(mid);                                  // the first batch arrives
+    expect(clearAndWait(mid)).toBe('mods');
+    expect(mid.rank).toBe(1);
+    // ?dev=last-batch&play -- the scenario for seeing the layer's end without
+    // playing the whole layer -- is the way in.
+    const last = loadGame();
+    expect(last.applyScenario('last-batch', 1)).toBe(true);
+    ride(last);                                 // the last batch arrives
+    expect(last.batchIndex).toBe(last.BATCHES.length);
+    expect(clearAndWait(last)).toBe('bottom');  // straight on, no cards
+    expect(last.rank).toBe(0);                  // and no rank for it
+  });
+
+  it('keeps the water flowing behind the mod cards while play waits', () => {
+    // Igor, 2026-09-28: "The water freezes under the mod cards - it should not".
+    const g = loadGame();
+    g.reset(1);
+    ride(g);                                    // the first batch arrives
+    expect(clearAndWait(g, 2)).toBe('mods');
+    const cam = g.cameraY, px = g.player.x, py = g.player.y;
+    const flow = flowFrom(g, 0);                // one second, no pick
+    expect(g.screen).toBe('mods');              // still waiting on the pick
+    expect(flow).toBeGreaterThanOrEqual(0.5 * g.CURRENT_CRAWL);
+    expect([g.cameraY, g.player.x, g.player.y]).toEqual([cam, px, py]);   // play is frozen
+  });
+
+  it('keeps the water flowing under the death screen and the layer end, at a drift', () => {
+    // Igor, 2026-09-28: "flow under death and the layer end, and freeze under
+    // pause, confirmed". Easing down to the fight-time drift is Claude's call:
+    // at the layer end the descent is over, so the water should not rush on.
+    const dead = loadGame();
+    dead.reset(1);
+    ride(dead);
+    dead.screen = 'dead';
+    const bottom = atGate(dead.BATCHES.length);
+    ride(bottom);
+    expect(bottom.screen).toBe('bottom');
+    for (const g of [dead, bottom]) {
+      const flow = flowFrom(g);
+      expect(flow).toBeGreaterThanOrEqual(0.5 * g.CURRENT_CRAWL);  // never still
+      expect(flow).toBeLessThan(0.5 * g.CURRENT_SPEED);            // but a drift
+    }
+  });
+
+  it('freezes the camera and the water while paused, from the first tick', () => {
+    // Escape must take effect before the camera moves or the water flows, or a
+    // paused dive still descends for a tick.
+    const g = atGate(1);
+    for (let i = 0, n = ticks(g, 0.5); i < n; i++) g.update(g.FIXED_DT);   // mid-descent
+    const cam = g.cameraY, water = g.waterY;
+    expect(cam).toBeGreaterThan(0);
+    g.justPressed.add('Escape');
+    for (let i = 0, n = ticks(g, 1); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.screen).toBe('paused');
+    expect(g.cameraY).toBe(cam);
+    expect(g.waterY).toBe(water);
+  });
+
+  it('brings arrivals in at the edges of the view, wherever the camera is', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.cameraY = 5000;
+    g.spawnBatch({ enemies: [['drifter', 40]] });
+    for (const e of g.enemies) {
+      const outside = e.x < 0 || e.x > g.ARENA_W ||
+                      e.y < g.cameraY || e.y > g.cameraY + g.ARENA_H;
+      expect(outside).toBe(true);
+      expect(e.y).toBeGreaterThan(g.cameraY - 100);
+      expect(e.y).toBeLessThan(g.cameraY + g.ARENA_H + 100);
+    }
+  });
+});

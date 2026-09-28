@@ -1715,3 +1715,180 @@ and the check flagged its own decision file.
 whether prose is *true*. A check can see that D35 is cited and exists; it
 cannot see that the sentence about it is wrong, or that a number went stale.
 That stays the sweep's job, and the sweep stays a habit.
+
+## D58 — The descent: a current between gate depths · 2026-09-28
+Agreed with Igor in the S2 brainstorm; design in
+`superpowers/specs/2026-09-28-s2-descent-design.md`.
+
+**The current moves the dive, on its own, and never stops.** After a batch is
+cleared and a mod is taken, the current speeds up and carries the camera — and
+the player with it — down to the next batch's depth, about two seconds away.
+The player does not have to trigger it. Igor: "it starts on its own ...
+complies with the idea that layers must be dynamic and action-like".
+
+**The current is independent of the player.** The first build let swimming
+down pull the camera faster, from Igor's "the player can speed it up"; he
+reversed it the same day: "revert the player speeding up current, it was a
+wrong assumtion. current must be independent." Swimming moves you within the
+view, never the view.
+
+**During a fight the current slows, it does not stop.** Igor, 2026-09-28: "the
+current never stops, it just slows down during a fight", and "descent stops
+means we dont go further in terms of enemies, but background flows. it's water
+after all". So D27's stopped descent is about *enemies*: the camera and every
+entity hold, nothing drifts into the batch, and only the water keeps moving.
+That flow is **graphics** — specks scrolled by `waterY` — and is a placeholder
+to be replaced with real art later (`ideas.md` → A lively background). It keeps
+flowing behind the mod cards as well — play waits on the pick, the water does
+not. Igor: "The water freezes under the mod cards - it should not". It drifts
+under the death and layer-end screens too, and freezes only under pause — Igor:
+"flow under death and the layer end, and freeze under pause, confirmed". Under
+those end screens it eases down to the fight-time drift rather than rushing on
+at travel speed: Claude's call. Igor's
+standing rule behind it: "it's all about dynamics, something is always
+happening during a layer pass".
+
+**Only a couple of seconds between batches.** Igor: "it takes forever to reach
+the next batch, fix this. only a couple of seconds between batches please."
+The first version took ~12s gate to gate.
+
+**Smooth, not screens.** This answers the draft's own open question
+("screen - down - screen" or "smooth constant motion", "i'd pick smooth").
+Igor, 2026-09-28: "at this point it's answered and settled".
+
+**The world is a tall strip under a fixed view.** `cameraY` in `game/`; the
+view stays 1280×800 world units at every window size, so difficulty stays
+invariant to it (D29). `aim` stays in view coordinates and `game/` adds
+`cameraY` where it reads it — not once in `input.js`, because `aim` is only
+written on mousemove while the camera moves every descent tick, so a
+world-space aim would go stale under a still cursor, and the menus and cards
+hit-test it in view space. The port seam stays six names either way.
+
+**The layer ends at the bottom — a stop, not a win.** After the last batch the
+current carries you one more stretch and a "LAYER CLEARED" screen (Igor's
+wording; first built as "THE BOTTOM") shows the time,
+R to dive again. No reward, no unlock: S3 is still the first stage with an
+ending. The layer is the twelve `BATCHES`, and twelve is Claude's pick (D54),
+so the layer's length is too.
+
+**`GATE_PAUSE` now only opens a dive.** Every later batch waits on the descent,
+which is a beat of its own.
+
+**Claude's picks, not derived**: `GATE_SPACING` 400px (~2s of travel),
+`CURRENT_SPEED` 200px/s, `CURRENT_CRAWL` 30px/s, `CURRENT_EASE` 0.05 (the share
+of a speed change left after a second). The first
+picks were 1600px and 400px/s with a brake to a dead stop; Igor found them "way
+too fast" and too far apart. The bot measures them; feel is Igor's.
+
+**Rejected**: a descent the player has to trigger by swimming down (Claude's
+lean — Igor chose automatic, for pace); a visible net or floor under each gate
+that bursts when the batch dies (Igor: "i dont want a net"); a current that
+brakes to a dead stop at each batch (the first build — Igor: "the current never
+stops"); swimming down to hurry the current (the first build — Igor: "current
+must be independent"); leaving the batch list cycling (the layer would have no bottom, and S2's DoD needs one).
+
+**Left open, in `ideas.md`**: a lively background during batches (Igor: "most
+likely done after the alpha"); gems left behind by the descent (Igor: left for
+S4, "it will be reworked anyways"); how one layer transitions to the next.
+
+**Guarded by**: `tests/descent.test.js` — the camera never moves while a batch
+lives (property over seeds), the water still flows at a real speed three
+seconds into a fight, the next batch arrives within 3s of a clear, the camera
+stops exactly at each depth, swimming does not change when the next batch
+arrives, aim and arrivals follow the camera, and the layer ends at the bottom,
+reachable through the `last-batch` scenario; and the `?test` D29 check — the same seed reaches the bottom in
+the same time at three window sizes through real mouse events. Each verified by
+breaking the rule it guards.
+
+## D59 — No mods at the layer end; the layer end is not a gate · 2026-09-28
+Igor, 2026-09-28, as a high-level decision: "no mods should be offered at
+layer's end, unless a player goes on to the next one. this is a high-level
+decision. the end of layer is not quite a gate. we need a term for layer end
+(or just call it layer end). we need to design what happens there more
+thoroughly. leave this point for todo."
+
+**Decided.** Clearing a layer's last batch offers no mods: the current carries
+you straight on to the "LAYER CLEARED" screen of D58 (the descent). Mods at the
+layer end come only if the player goes on to the next layer — which does not
+exist yet, so today the answer is never. This narrows D49 (one rank per batch,
+mods at the gate), which offered on every clear.
+
+**The layer end is not a gate**, so the glossary gets its own row for it, under
+Igor's working name "layer end". The **gate** row is reworded in the same step
+(Igor: "you can reword the gate, but clarify also what happens there"): its
+old "the dive's one non-combat beat" became literally false once D58's current
+carried you between batches, so it now says what happens there — the batch
+waits at its depth, the water keeps flowing, the clear pays a rank and three
+mods, and the pick is the dive's one pause.
+
+**No rank for it either.** The first build still banked a rank for the last
+batch — Claude's call, flagged; Igor, asked: "let it stay on 11". Twelve
+batches, eleven ranks: the clear of a layer's last batch is the layer end and
+pays nothing — no rank, no mods, no `Mend`. The glossary's rank row says so.
+
+**Left open, in `ideas.md`**: the term itself, and what happens at the layer
+end.
+
+**Guarded by**: `tests/descent.test.js` — "pays a rank and mods between
+batches, but neither at the layer end", which failed before each change: first
+with the cards opening at the bottom, then with the last batch paying rank 1.
+
+**Out of S2 (camera and descent), and recorded as a todo**: the layer-to-layer
+logic — Igor: "we must work thru layer-to-layer logic in detail out of s2".
+`ideas.md` holds it under the layer end, the transition, and what follows a
+layer; D60 gives it a design pass of its own after S3.
+
+## D60 — Layer-to-layer logic gets a design pass of its own, after S3 · 2026-09-28
+Igor, 2026-09-28: "we must work thru layer-to-layer logic in detail out of s2",
+and, asked which stage should own it, "a design pass of its own after S3".
+
+S3 (one boss, one complete layer) delivers the first layer with an ending; the
+pass that follows works out what lies between layers — what happens at the
+layer end (D59 (no mods at the layer end) settles only its rank and mods), what
+follows a layer, and how the transition plays. Until then the questions stay
+open in `ideas.md`. The pass sits in `plan.md` between S3 and S4 (meta loop
+skeleton) as an unnumbered section, so no stage number moves and no citation
+breaks.
+
+**Chosen over**: working it out inside S3, or in a pass before S3 — the two
+options Claude offered.
+
+**S4 (meta loop skeleton) waits for it.** Its entry is now S3 exits *and* this
+pass done. Claude's suggestion, Igor: "yes". S4 builds `home`, layer select
+and the first save format; "home, the next layer, or a choice?" decides when a
+player sees `home`, what a dive spans and what the save records, and a save
+format changed after its first write needs a migration. With one layer S4
+could only build "layer end → home" anyway, so the gate costs a conversation,
+not a stall.
+
+**Reminder**: when S3 closes, Claude reminds Igor to open this conversation
+before S4 — Igor: "remind me to open a conversation about it after s3 / before
+s4". Kept in `plan.md` and in memory.
+
+**Its outcome**, Igor: "decision, checks against foundations, ready plan" —
+the answers recorded as decisions, the design checked against `foundations.md`,
+and a ready plan.
+
+## D61 — "Dive", not "run", for one attempt at a layer · 2026-09-28
+Igor, 2026-09-28: "run -> dive", then "sweep all 13 to \"dive\"". The glossary
+already said "run" is a synonym and to prefer **dive** (D32 — the glossary is
+binding); the help screen still said "Restart a run", and the word was still
+used for a dive across the docs and the code.
+
+Swept: the help screen's key list ("Restart a dive"); in `foundations.md` the
+mod row ("dive-scoped"), the pillar **Dives differ** (was "Runs differ") and
+the technical contract's quote of it; two lines of `design.md`; nine code
+comments in `game/state.js` and `game/content.js`. Claude counted thirteen when
+asking; there were fourteen, all swept.
+
+Then, Igor: "all runs to dives, consistency" — seventeen more across
+`checks.js` (comments and two check messages), `design.md`, `ideas.md` and
+`plan.md`, the bot's measured runs among them, since each is a dive the bot
+plays. `decisions.md` and `changelog.md` keep their old wording: they are
+history, and append-only.
+
+"Run" stays where it means something else: the verb, a test or suite run, a
+driven page session, and the `run:` action keys in the menu tables. The
+glossary's **dive** row is unchanged — "run" is its synonym, **dive** is
+preferred. Making it 'never "run"', like "level" and "upgrade", was offered and
+declined — Igor: "no".

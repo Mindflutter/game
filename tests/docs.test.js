@@ -12,9 +12,11 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 
-const DOCS = new URL('../docs/', import.meta.url);
-const read = f => readFileSync(new URL(f, DOCS), 'utf8');
-const docNames = readdirSync(DOCS).filter(f => f.endsWith('.md'));
+// One reader for the whole repo; `read` is the docs/ view of it.
+const ROOT = new URL('../', import.meta.url);
+const src = f => readFileSync(new URL(f, ROOT), 'utf8');
+const read = f => src('docs/' + f);
+const docNames = readdirSync(new URL('docs/', ROOT)).filter(f => f.endsWith('.md'));
 
 const decisions = read('decisions.md');
 
@@ -76,5 +78,55 @@ describe('docs/', () => {
                      'high level design.md']) {
       expect(docNames).toContain(f);
     }
+  });
+});
+
+// The numbers docs quote about the code, regenerated rather than trusted.
+// CLAUDE.md says "every number the docs quote about the code is regenerable";
+// these regenerate them. Added 2026-09-28 after a sweep that only grepped for
+// what each change was *expected* to break left a stale count behind.
+// The same files CLAUDE.md's `wc -l game/*.js platform/*.js main.js` counts,
+// read from the directories so a new file cannot be silently left out.
+const lineCount = files => files.reduce((n, f) => n + src(f).split('\n').length - 1, 0);
+const js = dir => readdirSync(new URL(dir + '/', ROOT)).filter(f => f.endsWith('.js')).map(f => dir + '/' + f);
+const GAME = js('game');
+const PLATFORM = [...js('platform'), 'main.js'];
+
+describe('numbers the docs quote about the code', () => {
+  const design = read('design.md');
+
+  it('quotes the real line counts and platform share', () => {
+    const game = lineCount(GAME), platform = lineCount(PLATFORM);
+    expect(design).toContain('── ' + game + ' lines. Survives the port.');
+    expect(design).toContain('── ' + platform + ' lines. Rewritten on the port.');
+    const share = Math.round(100 * platform / (game + platform));
+    expect(design).toContain('The platform share is **' + share + '%** (' + platform +
+                             ' of ' + (game + platform) + ')');
+  });
+
+  it('quotes the balance constants at their real values', () => {
+    // `NAME value` pairs from the Balance constants section, against
+    // `const NAME = value` in content.js. Spaces are ignored: 1 / 120 == 1/120.
+    const section = design.slice(design.indexOf('## Balance constants'));
+    const content = src('game/content.js');
+    const wrong = [];
+    for (const [, name, value] of section.split('\n## ')[0].matchAll(/`([A-Z][A-Z_]+) ([^`]+)`/g)) {
+      const m = content.match(new RegExp('const ' + name + '\\s*=\\s*([^;]+);'));
+      if (!m || m[1].replace(/\s/g, '') !== value.replace(/\s/g, '')) {
+        wrong.push(name + ': doc ' + value + ', code ' + (m ? m[1].trim() : 'missing'));
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it('names no constant that the code does not have', () => {
+    // The living docs only; decisions.md and changelog.md are history and may
+    // name what a later change removed.
+    const words = new Set([...GAME, ...PLATFORM].map(src).join('\n').match(/\w+/g));
+    const live = ['design.md', 'roadmap.md', 'plan.md', 'foundations.md'].map(read)
+      .concat(src('CLAUDE.md'), src('README.md')).join('\n');
+    const gone = [...new Set([...live.matchAll(/`([A-Z][A-Z0-9]*_[A-Z0-9_]+)\b/g)].map(m => m[1]))]
+      .filter(name => !words.has(name));
+    expect(gone).toEqual([]);
   });
 });

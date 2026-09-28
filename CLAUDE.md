@@ -23,8 +23,9 @@ canvas layer, a sprite pipeline, or browser-specific polish.
 1. **`foundations.md`** — the layer that does not change before alpha. The
    binding glossary, the genre contract, the pillars as checkable statements,
    the technical contract, the non-goals. **Read it first, every session.**
-2. **`plan.md`** — the stages S0–S7, their definitions of done, and which one
-   is active. The only doc that says "we are here".
+2. **`plan.md`** — the stages S0–S7 (plus the layer-to-layer design pass
+   after S3), their definitions of done, and which one is active. The only
+   doc that says "we are here".
 3. `roadmap.md` — near-term work inside the active stage, and build health.
 4. `decisions.md` — what was decided and why, incl. rejected options.
 5. `ideas.md` — backlog: open / parked / declined.
@@ -53,9 +54,10 @@ draft, which is why they are banned (D32).
   never ES modules (blocked over `file://`). Load order matters.
 - `game/` contains **zero** browser API. It reaches into `platform/` for a
   deliberately short list of names — currently `sound`, `keys`, `justPressed`,
-  `tapped`, `moveCursor`, `aim`. That seam is the port; keep it clean. It will
-  grow (camera, save); every addition is deliberate and listed in `design.md`,
-  never incidental. **`npm test` enforces this**: `tests/harness.js` loads
+  `tapped`, `moveCursor`, `aim`. That seam is the port; keep it clean. It may
+  grow (save); every addition is deliberate and listed in `design.md`, never
+  incidental. The camera did **not** grow it: `cameraY` lives in `game/`, `aim`
+  stays in view coordinates, and `game/` adds the offset itself (D58). **`npm test` enforces this**: `tests/harness.js` loads
   `game/` with only those six stubbed, so a seventh name breaks the build. That
   is how D44 found the seam had quietly become eleven.
 - **Key bindings live in `game/content.js`, not `platform/`.** Which key means
@@ -144,6 +146,9 @@ draft, which is why they are banned (D32).
   means nothing without opening a file. In prose and in chat, put the short
   name in brackets: **"D28 (manual fire)"**, "S1 (combat core)". In `docs/`
   headings the em-dash form stays: `## D28 — Manual fire via LMB`.
+  **Enforced, not remembered**: a Stop hook (`.claude/hooks/check-citations.mjs`,
+  wired in `.claude/settings.json`) refuses any reply with a bare `D<n>` or
+  `S<n>` — added 2026-09-28 after Igor asked for this a fourth time.
 - Small steps: one playable change, then stop and explain what changed.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
@@ -182,6 +187,14 @@ draft, which is why they are banned (D32).
      its own blurb while all 107 checks passed.*
   7. **Memory** (`~/.claude/projects/.../memory/`) — it is auto-loaded before
      any file is read, so a stale line there misleads the next session first.
+
+  **Anything the sweep finds that contradicts, or merely smells, is raised
+  immediately** — stated in that same response and opened as a discussion
+  with Igor, not silently fixed, not parked in a note, not saved for later.
+  Igor, 2026-09-28: "you do something - you check docs. something contradicts
+  or looks smelly - you immediately state it and open a discussion with me."
+  Fixing an unambiguous stale fact (a count, a renamed constant) is fine, but
+  it is still *reported*; anything that needs a judgement waits for Igor.
 
   **Then look at it.** State checks are blind to a blank screen and to
   overlapping text — both have happened. If a change touches anything drawn,

@@ -16,8 +16,8 @@ function makeEnemy(t, x, y, speed) {
                  pushX: 0, pushY: 0 });
 }
 
-// Somewhere just outside the arena, so arrivals fade in from the dark rather
-// than popping into view.
+// Somewhere just outside the view, so arrivals fade in from the dark rather
+// than popping into view. In view coordinates; the caller adds the camera.
 function edgeSpawnPoint() {
   const m = 40;
   const edge = Math.floor(rng() * 4);    // 0 top, 1 right, 2 bottom, 3 left
@@ -35,7 +35,7 @@ function spawnBatch(batch) {
     if (!type) continue;
     for (let i = 0; i < count; i++) {
       const { x, y } = edgeSpawnPoint();
-      makeEnemy(type, x, y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
+      makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
     }
   }
 }
@@ -145,6 +145,11 @@ function mouseMoved() {
 // also deletes the curve: the tunable is "how many mods per layer", which is
 // arithmetic, instead of an income integral.
 function clearBatch() {
+  // Not at the layer end (D59): the clear of a layer's last batch is not a
+  // gate, so it pays nothing -- no rank ("let it stay on 11"), no mods, no Mend.
+  // Mods come back only if the player goes on to the next layer, which does not
+  // exist yet; how that works is open (ideas.md -> the layer end).
+  if (batchIndex >= BATCHES.length) return;
   rank += 1;
   // The comfort mods, both of which are a standing effect rather than a stat.
   if (player.mendOnClear) {
@@ -210,6 +215,13 @@ function advanceBy(elapsed) {
   return ticks;
 }
 
+// ---------- the descent ----------
+// Batch `k` waits at this depth (D58); `k = BATCHES.length` is the layer end.
+// One place, because a layer owning its own batch list (S3) changes it.
+function gateDepth(k) {
+  return k * GATE_SPACING;
+}
+
 // ---------- update ----------
 // One wrapper so this-frame's key presses are forgotten afterwards, whichever
 // way step() returned.
@@ -221,7 +233,19 @@ function update(dt) {
   if (screen !== 'playing') fireArmed = false;
   else if (!CLICK.some(c => keys.has(c))) fireArmed = true;
 
+  const cameraFrom = cameraY;
   step(dt);
+  // The water never stops (D58). Outside step() for the same reason as the
+  // shake below: step() returns early on every screen but play, and the water
+  // must keep flowing behind the mod cards and under the death and layer-end
+  // screens. The menus alone freeze it -- pause is the player stepping out.
+  // Its speed eases up while the camera travels and down to a drift otherwise,
+  // on a time base, and the background scrolls by `waterY`.
+  if (!['title', 'paused', 'help', 'options'].includes(screen)) {
+    const target = cameraY > cameraFrom ? CURRENT_SPEED : CURRENT_CRAWL;
+    current += (target - current) * (1 - Math.pow(CURRENT_EASE, dt));
+    waterY += current * dt;
+  }
   // Outside step(), because step() returns early on every non-playing screen.
   // Dying sets screen = 'dead' in the same frame it sets shake, so decaying
   // inside the gameplay path left the menus rattling forever.
@@ -264,7 +288,8 @@ function step(dt) {
     return;
   }
 
-  if (screen === 'dead') {
+  // Both ends of a dive take the same keys: eaten, or the bottom reached.
+  if (screen === 'dead' || screen === 'bottom') {
     if (justPressed.has('KeyR') || tapped(CLICK)) reset();
     if (justPressed.has('Escape')) { screen = 'title'; menuIndex = 0; }
     return;
@@ -303,6 +328,47 @@ function step(dt) {
 
   elapsed += dt;
   if (player.hurt > 0) player.hurt -= dt;
+
+  // --- the gate: one batch at a time, and nothing arrives until it is clear ---
+  // This replaces the prototype's spawn director (D27). That director grew
+  // arrivals as 1/(1.2 - 0.02t) -- hyperbolic -- against power that grew
+  // logarithmically, so the queue diverged and death was arithmetically
+  // certain. A batch is a *bounded* queue, so that cannot happen.
+  // An empty arena *is* the cleared state, so the beat needs no separate flag:
+  // the timer simply runs while nothing is alive.
+  // `else if`, so a pending offer holding the queue is structural rather than a
+  // condition someone can drop: the two phases of the beat cannot both run.
+  if (offerTimer > 0) {
+    offerTimer -= dt;
+    if (offerTimer <= 0) openModOffer();
+  } else if (!queuePaused && enemies.length === 0) {
+    // Each batch waits at its own depth. Once the last one is cleared, the same
+    // arithmetic points one gate further: the bottom of the layer.
+    const target = gateDepth(batchIndex);
+    // Only a dive's opening beat counts down now; every later batch waits on
+    // the descent instead, which is a beat of its own.
+    if (breathTimer > 0) breathTimer -= dt;
+    if (cameraY < target) {
+      // The current carries the camera down, clamped at the next depth so a
+      // batch always finds you *at* it, and carries the player with it --
+      // otherwise the view would outrun them and its top edge would drag them
+      // like a wall. Swimming moves you within the view, never the view.
+      cameraY = Math.min(target, cameraY + current * dt);
+      player.y += current * dt;
+    }
+    else if (breathTimer <= 0) {
+      // Past the last batch the target is the bottom of the layer. Reaching it
+      // is a stop, not a win (S2): no reward, no unlock -- S3 owns endings.
+      if (batchIndex >= BATCHES.length) screen = 'bottom';
+      else {
+        // ponytail: one flat list is one layer. What S3 must add is not a longer
+        // list but the *layer* -- a layer owns its own batch list. So do not
+        // grow BATCHES into a tuned multi-layer list; that shape will not exist.
+        spawnBatch(BATCHES[batchIndex]);
+        batchIndex += 1;
+      }
+    }
+  }
 
   // --- move the player ---
   let dx = 0, dy = 0;
@@ -354,37 +420,13 @@ function step(dt) {
   player.x += mx * speed * dt;
   player.y += my * speed * dt;
   player.x = Math.max(player.r, Math.min(ARENA_W - player.r, player.x));
-  player.y = Math.max(player.r, Math.min(ARENA_H - player.r, player.y));
+  // To the view, not the world: the world is a tall strip and the camera moves.
+  player.y = Math.max(cameraY + player.r, Math.min(cameraY + ARENA_H - player.r, player.y));
 
   // An afterimage every frame of the dash. Without it the eye sees the player
   // at one end and then the other, and reads a teleport instead of a move.
   if (player.dashTime > 0) {
     spark(player.x, player.y, 0, 0, 0.22, player.r * 0.85, '#bffcff', '#4ff0ff');
-  }
-
-  // --- the gate: one batch at a time, and nothing arrives until it is clear ---
-  // This replaces the prototype's spawn director (D27). That director grew
-  // arrivals as 1/(1.2 - 0.02t) -- hyperbolic -- against power that grew
-  // logarithmically, so the queue diverged and death was arithmetically
-  // certain. A batch is a *bounded* queue, so that cannot happen.
-  // An empty arena *is* the cleared state, so the beat needs no separate flag:
-  // the timer simply runs while nothing is alive.
-  // `else if`, so a pending offer holding the queue is structural rather than a
-  // condition someone can drop: the two phases of the beat cannot both run.
-  if (offerTimer > 0) {
-    offerTimer -= dt;
-    if (offerTimer <= 0) openModOffer();
-  } else if (!queuePaused && enemies.length === 0) {
-    breathTimer -= dt;
-    if (breathTimer <= 0) {
-      // ponytail: the list cycles when it runs out. Finishing a layer is S3.
-      // What S3 must undo is not the modulo but the *flatness* -- a layer owns
-      // its own batch list. So do not grow BATCHES into a tuned 12-entry list
-      // on the assumption those 12 are one layer; that shape will not exist.
-      spawnBatch(BATCHES[batchIndex % BATCHES.length]);
-      batchIndex += 1;
-      breathTimer = GATE_PAUSE;
-    }
   }
 
   // --- the weapon fires while you hold the button, along the cursor ---
@@ -400,7 +442,12 @@ function step(dt) {
   player.fireTimer = Math.max(player.fireTimer - dt, 0);
   if (player.fireTimer <= 0 && fireArmed && CLICK.some(c => keys.has(c))) {
     const tx = aim.x - player.x;
-    const ty = aim.y - player.y;
+    // `aim` is in the view (platform's job, D22); the world sits `cameraY`
+    // below it. Converted here, where it is read, not once in input.js: aim is
+    // only written on mousemove while the camera moves every descent tick, so
+    // a world-space aim would go stale under a still cursor -- and the menus
+    // and cards hit-test it in view space.
+    const ty = aim.y + cameraY - player.y;
     const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
     bullets.push({
       id: ++bulletId,

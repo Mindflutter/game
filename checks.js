@@ -81,8 +81,10 @@ if (location.search === '?test') {
   // dies in seconds, and step() returns early on the death screen -- so any
   // check that lets time pass is otherwise liable to measure a *stopped* game
   // and pass for the wrong reason. That happened to the gate checks below.
-  const runAlive = n => {
-    for (let i = 0; i < n; i++) { player.hurt = player.iframes; update(1 / 60); }
+  // `until` stops it early -- a batch arriving, say -- and still ends on the
+  // same oracle, so a caller that waits cannot skip it.
+  const runAlive = (n, until = () => false) => {
+    for (let i = 0; i < n && !until(); i++) { player.hurt = player.iframes; update(1 / 60); }
     // The oracle lives here, not at the call sites. A check that lets time pass
     // while the sim has quietly stopped passes for the wrong reason -- that
     // happened once already (D48), and relying on each caller to remember the
@@ -94,6 +96,10 @@ if (location.search === '?test') {
   // longer -- a hardcoded frame count both wastes ticks and goes quietly wrong
   // the first time that constant moves.
   const pastGate = () => runAlive(Math.ceil(GATE_PAUSE * 60) + 3);
+  // Later gates wait on the descent (S2), not GATE_PAUSE: ride the current until
+  // something arrives. Bounded, so a camera that never arrives fails instead of
+  // hanging the suite.
+  const arrived = () => enemies.length > 0;
 
   // --- arrivals ---
   reset(1);
@@ -130,9 +136,9 @@ if (location.search === '?test') {
   // Clear it by hand and the gate opens, then the next batch comes.
   enemies = [];
   runAlive(1);
-  check(breathTimer > 0, 'clearing a batch must start the beat before the next');
+  check(cameraY > 0, 'clearing a batch must start the descent before the next');
   check(batchIndex === 1, 'the next batch must not arrive during the gate');
-  pastGate();
+  runAlive(60 * 30, arrived);
   check(batchIndex === 2 && enemies.length > 0, 'the gate must release the next batch');
 
   // A third in a row, which is S1's definition of done. Continues the sequence
@@ -140,8 +146,58 @@ if (location.search === '?test') {
   // clear, and re-walking the whole path costs ~250 sim ticks to learn nothing.
   enemies = [];
   runAlive(1);
-  pastGate();
+  runAlive(60 * 30, arrived);
   check(batchIndex === 3, 'three batches must clear in sequence, got ' + batchIndex);
+
+  // --- window size (D29) ---
+  // The same seed, played through the real mouse path at three window sizes,
+  // must reach the bottom of the layer in the same time. The window reaches the
+  // game only through `aim`, so aim arrives as mousemove events in *client*
+  // pixels -- the letterbox conversion, and the camera on top of it, are what is
+  // under test. The whole layer, because S2's DoD is "one layer", not a sample.
+  const traverse = (w, h) => {
+    resize(w, h);
+    reset(4471);
+    for (let i = 0; i < 900 / FIXED_DT && screen !== 'bottom'; i++) {
+      player.hurt = player.iframes;
+      if (screen === 'mods') justPressed.add('Digit1');
+      else if (enemies.length) {
+        const e = enemies[0];
+        window.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: offX + e.x * scale, clientY: offY + (e.y - cameraY) * scale }));
+        holdFire();
+      } else ceaseFire();
+      update(FIXED_DT);                          // update() clears justPressed
+    }
+    ceaseFire();
+    return screen === 'bottom' ? elapsed : -1;
+  };
+  const traverseFrom = performance.now();
+  const sizes = [[1280, 800], [1920, 1080], [3440, 1440]].map(([w, h]) => traverse(w, h));
+  resize();                                            // back to the real window
+  check(sizes.every(t => t > 0), 'D29: every window size must reach the bottom: ' + sizes.join(', '));
+  // Within 2%, not exact: a synthetic MouseEvent carries whole client pixels,
+  // so aim can land up to a pixel off, which can shift a kill by a tick. A
+  // window-size bug moves it by far more.
+  check(Math.max(...sizes) - Math.min(...sizes) <= 0.02 * Math.min(...sizes),
+    'D29: difficulty must not depend on window size, times ' + sizes.map(t => t.toFixed(2)).join(' / '));
+  console.log('D29 times to the bottom: ' + sizes.map(t => t.toFixed(2)).join(' / ') +
+              ' (check took ' + Math.round(performance.now() - traverseFrom) + 'ms)');
+
+  // --- the dim reaches the letterbox (D58) ---
+  // The water tint paints the margin too, so a dim screen has to cover it as
+  // well -- a dim clipped to the view left bright bands down the sides of the
+  // mod screen. A window wider than 16:10, so there is a side margin to read.
+  resize(1800, 800);
+  reset(1);
+  screen = 'mods';
+  draw();
+  const px = (x, y) => Array.from(ctx.getImageData(x, y, 1, 1).data.slice(0, 3));
+  const margin = px(5, 790);
+  const inside = px(Math.round(offX) + 5, 790);
+  resize();
+  check(margin.every((c, i) => Math.abs(c - inside[i]) <= 2),
+    'a dim screen must darken the margin as much as the view: margin ' + margin + ', view ' + inside);
 
   // Walking an enemy into a standing player must cost exactly one hp.
   reset();
@@ -203,7 +259,7 @@ if (location.search === '?test') {
   check(bullets.length === 1, 'the first shot after a wait must be immediate');
 
   // Held, the rate is the rate: ~fireRate shots per second, not one per frame.
-  // reset() zeroes bulletId, so it counts this run's shots directly.
+  // reset() zeroes bulletId, so it counts this dive's shots directly.
   reset(1);
   queuePaused = true;
   holdFire();
@@ -757,7 +813,7 @@ if (location.search === '?test') {
   screen = 'title'; menuIndex = 0;
   check(MENUS.title.items[0].label === 'Start', 'first title entry is Start');
   tap('Enter');
-  check(screen === 'playing', 'Start must begin a run, got ' + screen);
+  check(screen === 'playing', 'Start must begin a dive, got ' + screen);
 
   tap('Escape');
   check(screen === 'paused', 'Esc in play must open the menu, got ' + screen);
@@ -847,7 +903,7 @@ if (location.search === '?test') {
   // A click the menu consumed must not also reach the weapon. The menu reads
   // the edge (justPressed) while the weapon reads the held state (keys), so one
   // physical click was being read twice: clicking Start fired a shot into the
-  // run it had just begun.
+  // dive it had just begun.
   reset(1);
   queuePaused = true;
   screen = 'title';
@@ -855,7 +911,7 @@ if (location.search === '?test') {
   aim.x = ARENA_W / 2; aim.y = MENU_TOP;      // over the Start row
   keys.add('Mouse0'); justPressed.add('Mouse0');
   update(1 / 60);                              // the menu takes the click
-  check(screen === 'playing', 'setup: clicking Start must begin a run, got ' + screen);
+  check(screen === 'playing', 'setup: clicking Start must begin a dive, got ' + screen);
   for (let i = 0; i < 10; i++) update(1 / 60); // ...and the button is still down
   check(bullets.length === 0 && bulletId === 0,
     'a click the menu ate must not fire the weapon, got ' + bulletId + ' shots');
@@ -979,7 +1035,7 @@ if (location.search === '?test') {
   check(player.speed === speedUnpreviewed,
     'previewing a mod must not apply it, speed ' + player.speed);
 
-  // Mods are run-scoped (D34): last dive's picks must not carry into the next.
+  // Mods are dive-scoped (D34): last dive's picks must not carry into the next.
   modCounts.Fins = 2;
   reset();
   check(Object.keys(modCounts).length === 0,
@@ -1025,7 +1081,7 @@ if (location.search === '?test') {
   // ---------- determinism ----------
   // The same seed must replay the same dive. Every balance number from here on
   // rests on this: without it, comparing two builds compares two different
-  // games, which is why the old measurements needed 21 runs per configuration
+  // games, which is why the old measurements needed 21 dives per configuration
   // to see through the spawn noise. This fails the moment a Math.random()
   // survives anywhere in game/.
   const trace = seed => {

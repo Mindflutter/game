@@ -19,12 +19,12 @@ Original text follows, for the record:
 Options put forward:
 - **(a)** Win condition at ~3 minutes, plus title screen and saved best time.
   Turns it from an endless demo into a game with a beginning, middle and end.
-- **(b)** Only soften the difficulty curve so runs last 2–3 minutes, giving the
+- **(b)** Only soften the difficulty curve so dives last 2–3 minutes, giving the
   upgrade system room to compound. Smallest change; a few constants.
 - **(c)** Call it done at its current state and go straight to sprites.
 - **(d)** Title screen + persistent best score only, no rebalancing.
 
-Igor's read at the time: ~70s runs ending in inevitable death are "bad for a
+Igor's read at the time: ~70s dives ending in inevitable death are "bad for a
 standalone map, but really promising for a rogue-like experience". Part of (d)
 has since shipped (title screen) — the best-score half has not.
 
@@ -68,14 +68,14 @@ right about the scattered call sites — 14 of them — and wrong to call it "no
 free": the whole change took one pass. Raised 2026-09-20 while evaluating the
 `procedural-gen` skill, which is where the gap surfaced.
 
-Today every bot run draws its own spawn sequence, so comparing two builds
+Today every bot dive draws its own spawn sequence, so comparing two builds
 compares two *different games* and the spawn noise has to be averaged out with
-volume — 21 runs per configuration, and the three force-dash policies still
+volume — 21 dives per configuration, and the three force-dash policies still
 landed within a couple of seconds of each other (figures in `roadmap.md` →
 Health). That is the honest reading of an **unpaired** comparison, not
 evidence that the policies are equivalent.
 
-With one seeded RNG per run, the same seed replays the same spawn sequence, so
+With one seeded RNG per dive, the same seed replays the same spawn sequence, so
 two policies can be run against **identical** conditions and compared pairwise.
 Same effort, far more statistical power: differences under a second become
 detectable instead of drowning. It also makes a bug reproducible, which today
@@ -93,7 +93,7 @@ Affects D16.
 ### Roguelite meta-progression
 **Absorbed — this is the game now, 2026-09-26.** No longer a parked item; it is
 the subject of `high level design.md` and S4. Kept for Igor's original framing.
-Persistent unlocks between runs, mod synergies, a reason to replay.
+Persistent unlocks between dives, mod synergies, a reason to replay.
 Igor: "not designing the big strategy here yet, but take a note, I'll probably
 go there at some point." Explicitly a later *phase*, after the standalone ships
 and after the sprite work. See `decisions.md` → "Browser build is a throwaway
@@ -128,7 +128,7 @@ declined, deliberately not next.
 All seven upgrades are strictly good, so the level-up screen is "pick the
 biggest number" rather than a choice. `apply` already supports the fix with no
 code change — `p => { p.damage += 2; p.fireRate *= 0.7; }` — so each one is a
-line of data. Would need floors on `range` and `fireRate` so a bad run can't
+line of data. Would need floors on `range` and `fireRate` so a bad dive can't
 drive them to zero. Related to *Upgrade synergies* below, but much cheaper:
 synergies need interactions, trade-offs need only a second field.
 
@@ -186,11 +186,31 @@ Recorded here so they are not silently decided by accident.
 
 - **The lost item.** What you dropped in the pool. Trivial, per the humorous
   vibe. Drives the title, which is also subject to change.
-- **Screen-by-screen descent vs. smooth motion.** Igor inclines to smooth.
-  Partly settled by D27: motion is smooth *between* gates. Whether the gated
-  segments are discrete screens is still open.
+- ~~**Screen-by-screen descent vs. smooth motion.**~~ **Answered, 2026-09-28**
+  — Igor: "at this point it's answered and settled". Smooth: a current carries
+  the camera down the layer; there are no discrete screens. Recorded as D58
+  (the descent).
 - **After a layer completes:** home, next layer immediately, or choose. Igor
   inclines to choose.
+  **How the transition itself plays** is open too — Igor, 2026-09-28, in the
+  S2 brainstorm: "an open discussion on how to transition between layers -
+  later". S2 ends a layer on a plain "LAYER CLEARED" screen; S3 replaces it.
+- **The layer end — design what happens there (todo).** Igor, 2026-09-28:
+  "the end of layer is not quite a gate. we need a term for layer end (or just
+  call it layer end). we need to design what happens there more thoroughly.
+  leave this point for todo." Decided so far (D59): it is not a gate, and it
+  offers no mods unless the player goes on to the next layer. Open: the term
+  ("layer end" is the working name), what the player sees and does there, and
+  where the mods come from when they do go on. **Owned by the layer-to-layer
+  design pass after S3** (D60, `plan.md`), together with the two entries above.
+- ~~**Is reaching the bottom a win?**~~ **Answered 2026-09-28** — Igor: "ok,
+  yes, it's a stop and not a win." The "LAYER CLEARED" screen earns nothing,
+  as D58 (the descent) and `plan.md` say, so S3 (one boss, one complete layer)
+  is still the first stage with an ending. The heading's wording is the
+  friendlier-messages item below.
+- **Friendlier end-of-dive messages.** Igor, 2026-09-28, renaming the bottom
+  screen to "LAYER CLEARED": "more user-friendy messages we'll do later". The
+  end screens show a heading plus a raw stats line today.
 - **Collectibles found in a dive:** feed player stats, the story, or both.
 - ~~**Do attributes exist at all?**~~ **Answered by D36 (Attributes),
   2026-09-27.** They exist as a second persistent tier: micro-tasks pay points,
@@ -386,9 +406,25 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   different mechanism (pick from a pool of batches of comparable threat, per the
   draft's Hades reference). Needed before S6 (Balance) means anything, since
   measuring one fixed sequence is not measuring the game.
-- **Nothing ends a dive.** The batch list cycles, so a dive is endless, just
-  gated. Layer completion is S3 — noting it so the cycling is not mistaken for
-  a decision.
+- ~~**Nothing ends a dive.**~~ **Partly answered, D58 (the descent),
+  2026-09-28.** The list no longer cycles: a dive ends at the bottom of the
+  layer, on a screen that is a stop, not a win. Layer *completion* — the boss,
+  and what finishing earns — is still S3.
+
+## Open — from the descent (S2)
+
+- **A lively background during batches.** While the camera is locked at a gate
+  the water should still move, not sit stationary. Igor, 2026-09-28: "most
+  likely done after the alpha, when graphics come". **The flow itself is now
+  in** (D58): the current never stops, and specks scrolled by `waterY` keep
+  moving through a fight. Those specks and the depth tint are **placeholder
+  graphics, to be replaced** — Igor: "if it's a graphics matter, state it and
+  document that it's going to be modified later". What stays open is the art.
+- **Gems left behind by the descent.** In S2 gems stay where they drop and
+  scroll off with the world, so uncollected ones are lost. Igor, 2026-09-28:
+  left for the currency stage (S4 — Meta loop skeleton), "it will be reworked
+  anyways". D35 (currency is auto-collected) is decided but not implemented;
+  implementing it is where this closes.
 
 ## Suggested but not yet discussed
 

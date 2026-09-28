@@ -32,9 +32,10 @@ window.addEventListener('mousedown', e => {
 });
 window.addEventListener('mouseup', e => keys.delete('Mouse' + e.button));
 
-// Where you are aiming, in ARENA coordinates. The canvas is a scaled,
-// letterboxed view of a fixed 1280x800 world, so a screen pixel is not a world
-// pixel -- undo the scale and the letterbox offset the renderer applied.
+// Where you are aiming, in VIEW coordinates. The canvas is a scaled,
+// letterboxed 1280x800 view of the world, so a screen pixel is not a view
+// pixel -- undo the scale and the letterbox offset the renderer applied. The
+// world sits `cameraY` below the view; game/ adds it where aim is read (D58).
 // Starts pointing straight up, so the first shot has a direction even if the
 // mouse has never moved.
 const aim = { x: ARENA_W / 2, y: 0 };

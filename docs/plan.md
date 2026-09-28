@@ -10,9 +10,30 @@ must stay true while doing it.
 
 ## Active stage
 
-**None. S1 — Combat core closed 2026-09-28**, all exit conditions met. **S2 —
-The dive: camera and descent** is next and opens in a fresh session, by Igor's
-call — not started here.
+**None. S2 — The dive: camera and descent closed 2026-09-28**, all exit
+conditions met. **S3 — One boss, one complete layer** is next, and opening it
+is Igor's call. When S3 closes, the layer-to-layer design pass (D60) comes
+before S4 — Claude reminds Igor then.
+
+### S2 — The dive: camera and descent · closed 2026-09-28
+
+Done in S2: the descent — a current between gate depths that never stops and
+is independent of the player (D58); no rank and no mods at the layer end,
+which is not a gate (D59); the layer-to-layer logic given a design pass of its
+own after S3 (D60); and "dive", not "run" (D61). Design:
+`superpowers/specs/2026-09-28-s2-descent-design.md`; plan:
+`superpowers/plans/2026-09-28-s2-descent.md` — both history now; where they
+disagree with D58, D58 wins.
+
+**Closed 2026-09-28 by Igor: "commit and finalize s2".** The checks closed
+three exit conditions; the fourth, playable, was Igor's call.
+
+Carried out of S2, none of it blocking: the gems lost to the descent (S4 —
+Meta loop skeleton, with D35), the layer end and everything between layers
+(the design pass after S3), a lively background (post-alpha, in `ideas.md`),
+and the four current numbers — Claude's picks, still open to Igor's feel.
+
+### S1 — Combat core · closed 2026-09-28
 
 Done in S1: the weapon is manual (D45), the batch queue and gate (D48), one
 rank per batch with mods at the gate (D49), the dash sweeps its path (D50), the
@@ -134,18 +155,24 @@ being balanced against each other at the same time.
 **The hard part:** this is the genre change. Everything about the prototype's
 tuning is void here. Expect this stage to take longer than it looks.
 
-## S2 — The dive: camera and descent
+## S2 — The dive: camera and descent · closed 2026-09-28
 
 **Entry:** S1 exits.
 
 **Work:** One layer scrolls. Camera follows the descent. Batches gate it
-(D27): smooth between, locked during.
+(D27): smooth between, locked during. Built as D58 (the descent): a current
+between gate depths that never stops and is independent of the player. The
+layer ends on a "LAYER CLEARED" screen that is **a stop, not a win** — no reward, no unlock — so S3
+below is still the first stage with an ending.
 
 **Exit (DoD):**
-- One layer traversable top to bottom, gated the whole way.
-- Difficulty invariant to window size, **checked** at three window sizes (D29).
-- Bot reports time to traverse one layer.
-- Playable: you descend, you are stopped, you fight, you continue.
+- ~~One layer traversable top to bottom, gated the whole way.~~ Done, D58.
+- ~~Difficulty invariant to window size, **checked** at three window sizes
+  (D29).~~ Done, D58 — a `?test` check plays one seed at all three sizes.
+- ~~Bot reports time to traverse one layer.~~ Done, with an immortal bot — the
+  mortal one dies before the bottom. Figures in `roadmap.md` → Health.
+- ~~Playable: you descend, you are stopped, you fight, you continue.~~ Igor's
+  call, made 2026-09-28: "commit and finalize s2".
 
 ## S3 — One boss, one complete layer
 
@@ -162,9 +189,38 @@ mini-bosses along the way. Layer completion.
 - Bot reports win rate per seed at a stated gear level.
 - Playable: a complete, winnable layer.
 
+## Design pass — layer to layer · after S3
+
+Not a numbered stage: it sits between S3 and S4 without renumbering, so no
+stage citation changes (D60).
+
+**Entry:** S3 exits — the first layer with an ending exists, so there is
+something to go on from.
+
+**Claude opens it.** When S3 closes, Claude reminds Igor to start this
+conversation, before anything of S4 begins. Igor, 2026-09-28: "remind me to
+open a conversation about it after s3 / before s4".
+
+**Work:** the layer-to-layer logic, in detail. Igor, 2026-09-28: "we must work
+thru layer-to-layer logic in detail out of s2", then "a design pass of its own
+after S3". The questions wait in `ideas.md`: what happens at the layer end —
+its term, what the player sees and does, where mods come from when the player
+goes on (D59 settles only that it pays no rank and offers no mods otherwise);
+what follows a layer — home, the next layer, or a choice (Igor inclines to
+choose); and how the transition itself plays.
+
+**Exit:** Igor, 2026-09-28: "decision, checks against foundations, ready
+plan" —
+- the answers recorded as decisions in `decisions.md`;
+- the design checked against `foundations.md`, every friction point resolved or
+  given an owner;
+- a ready plan.
+
 ## S4 — Meta loop skeleton
 
-**Entry:** S3 exits. (The attribute question that used to gate this stage was
+**Entry:** S3 exits **and** the layer-to-layer design pass above is done
+(D60) — S4 builds `home`, layer select and the first save format, which that
+pass's answers shape. (The attribute question that used to gate this stage was
 answered by D36 — Attributes.)
 
 **Work:** `home` screen. Currency drops. One piece of gear, buyable, with
@@ -208,7 +264,7 @@ because the shapes do not exist until S4 exits.
 
 **Entry:** S5 exits.
 
-**Work:** Paired seeded bot runs per weapon, per layer, per gear level. Every
+**Work:** Paired seeded bot dives per weapon, per layer, per gear level. Every
 numeric pillar in `foundations.md` measured and met or revised.
 
 **Exit (DoD):**

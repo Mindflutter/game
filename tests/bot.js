@@ -13,9 +13,12 @@ import { loadGame } from './harness.js';
 // `g.player`, `g.ARENA_W` and friends are vm-bridged accessors, not plain
 // properties -- every read crosses into the sandbox. They are hoisted out of
 // the loop because this runs ~10k times per dive with ~9 enemies each.
-export function kiteAndShoot(g, cx = g.ARENA_W / 2, cy = g.ARENA_H / 2) {
+export function kiteAndShoot(g) {
   const p = g.player;
   const px = p.x, py = p.y;
+  // The middle of the *view*, in world space: the camera moves (S2), and a
+  // centre fixed at 400 would drag the bot to the top of the layer.
+  const cx = g.ARENA_W / 2, cy = g.cameraY + g.ARENA_H / 2;
 
   let near = null, best = Infinity;
   for (const e of g.enemies) {
@@ -28,7 +31,7 @@ export function kiteAndShoot(g, cx = g.ARENA_W / 2, cy = g.ARENA_H / 2) {
   if (!near) return;                        // clear() already released the trigger
 
   g.aim.x = near.x;
-  g.aim.y = near.y;
+  g.aim.y = near.y - g.cameraY;           // aim is in the view, enemies in the world
   g.keys.add(g.CLICK[0]);
 
   // Retreat, but bias toward the middle rather than cornering ourselves.
@@ -46,10 +49,26 @@ export function kiteAndShoot(g, cx = g.ARENA_W / 2, cy = g.ARENA_H / 2) {
 // arena is legitimately empty.
 // `secondsCap` is wall-clock *game* time, not ticks: a tick budget silently
 // halved every dive when D53 moved the step from 1/60 to 1/120.
-export function diveReport(seed, batches = 5, secondsCap = 180) {
+//
+// `immortal` keeps the bot alive, which is how the S2 traverse time is taken:
+// the mortal bot dies on every seed before the bottom, and a layer it cannot
+// finish has no traverse time to report.
+// One tick of the bot's input, without the update: shared by `diveReport` and
+// by tests that assert on every tick, so both play the same bot.
+export function botInput(g, immortal = false) {
+  // Every cleared batch offers three mods (D34), and the dive does not resume
+  // until one is taken -- so the bot has to pick. It always takes the first
+  // card rather than rolling: a bot that chose at random would build itself
+  // differently every dive, and two dives that are not the same dive cannot
+  // be compared.
+  if (immortal) g.player.hurt = g.player.iframes;
+  if (g.screen === 'mods') g.justPressed.add('Digit1');
+  else kiteAndShoot(g);
+}
+
+export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false) {
   const g = loadGame();
   g.reset(seed);
-  const cx = g.ARENA_W / 2, cy = g.ARENA_H / 2;   // bridged reads, fixed values
 
   const TICK = g.FIXED_DT;               // the game's own step, not a copy
   const tickCap = Math.round(secondsCap / TICK);
@@ -57,23 +76,16 @@ export function diveReport(seed, batches = 5, secondsCap = 180) {
   const times = [];
   let ticks = 0, seen = 0, startTick = 0;
 
-  while (times.length < batches && ticks < tickCap && g.screen !== 'dead') {
+  while (times.length < batches && ticks < tickCap && g.screen !== 'dead' &&
+         g.screen !== 'bottom') {
     if (g.batchIndex !== seen) { seen = g.batchIndex; startTick = ticks; }
-    // Every cleared batch offers three mods (D34), and the dive does not resume
-    // until one is taken -- so the bot has to pick. It always takes the first
-    // card rather than rolling: a bot that chose at random would build itself
-    // differently every dive, and two dives that are not the same dive cannot
-    // be compared.
-    if (g.screen === 'mods') g.justPressed.add('Digit1');
-    else kiteAndShoot(g, cx, cy);
-
-    g.update(TICK);
-    g.justPressed.clear();
+    botInput(g, immortal);
+    g.update(TICK);                      // update() clears justPressed itself
     ticks++;
     if (g.batchIndex > times.length && g.enemies.length === 0) {
       times.push(+((ticks - startTick) * TICK).toFixed(2));
     }
   }
-  return { seed, alive: g.screen !== 'dead', ranFor: +(ticks * TICK).toFixed(1),
+  return { seed, alive: g.screen !== 'dead', reachedBottom: g.screen === 'bottom', ranFor: +(ticks * TICK).toFixed(1),
            hpLeft: g.player.hp, clearTimes: times };
 }

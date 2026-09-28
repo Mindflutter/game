@@ -43,12 +43,14 @@ export function loadGame() {
   // Bridge them with accessors generated from the names, rather than eval.
   const STATE = ['player', 'enemies', 'bullets', 'gems', 'particles',
                  'elapsed', 'kills', 'shake', 'queuePaused', 'batchIndex', 'breathTimer',
+                 'cameraY', 'waterY',
                  'rank', 'currency', 'choices', 'choiceIndex', 'modCounts',
                  'screen', 'currentSeed', 'bulletId', 'shakeLevel'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS',
                   'SCENARIOS', 'BATCHES', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
                   'MOD_OFFER_DELAY', 'MOD_ROWS',
+                  'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
                   'GEM_LIFE', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [

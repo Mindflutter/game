@@ -5,14 +5,16 @@ const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
 let scale = 1, offX = 0, offY = 0;
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+// Takes a size so the D29 check can play the same dive at three window sizes;
+// the listener wraps it, or the resize *event* would arrive as `w`.
+function resize(w = window.innerWidth, h = window.innerHeight) {
+  canvas.width = w;
+  canvas.height = h;
   scale = Math.min(canvas.width / ARENA_W, canvas.height / ARENA_H);
   offX = (canvas.width  - ARENA_W * scale) / 2;
   offY = (canvas.height - ARENA_H * scale) / 2;
 }
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => resize());
 resize();
 
 // ---------- draw: paint one frame ----------
@@ -30,7 +32,7 @@ function circle(x, y, r, fill, glow, blur = 20) {
 // as it goes so it guides the eye without competing with the enemies, and a
 // crosshair sitting exactly where the shots will die.
 function drawAimLine() {
-  const dx = aim.x - player.x, dy = aim.y - player.y;
+  const dx = aim.x - player.x, dy = aim.y + cameraY - player.y;   // aim is in the view
   const d = Math.hypot(dx, dy) || 1;
   const ex = player.x + (dx / d) * player.range;
   const ey = player.y + (dy / d) * player.range;
@@ -156,13 +158,60 @@ function audioStatus() {
   return '';
 }
 
+// Dims the whole window, margin included. The margin is painted the water's
+// colour since S2, so a dim limited to the view left it as bright bands.
 function dimArena(alpha = 0.82) {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = 'rgba(4, 7, 13, ' + alpha + ')';
-  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
+}
+
+// Paints over whatever spilled past the view -- an arrival 40px outside it, a
+// spark, the shake -- in the water's colour. This replaced a clip, because the
+// clip also stopped the dim screens from reaching the margin.
+function coverMargins() {
+  const vw = ARENA_W * scale, vh = ARENA_H * scale;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = waterColor();
+  ctx.fillRect(0, 0, offX, canvas.height);
+  ctx.fillRect(offX + vw, 0, canvas.width - offX - vw, canvas.height);
+  ctx.fillRect(0, 0, canvas.width, offY);
+  ctx.fillRect(0, offY + vh, canvas.width, canvas.height - offY - vh);
+  ctx.restore();
+}
+
+// The water: specks carried by the current, so it shows flowing even while a
+// fight holds the camera still (D58). Drawn in the view, scrolled by `waterY`.
+// PLACEHOLDER GRAPHICS -- the moving background is to be replaced with real
+// art later (ideas.md -> "A lively background"); only the flow is settled.
+// Hashed from the grid cell, never from rng(): drawing must not consume the
+// dive's seeded sequence, or the same seed replays differently depending on
+// what happened to be on screen.
+const SPECK_CELL = 90;
+function drawSpecks() {
+  ctx.fillStyle = 'rgba(159, 247, 255, 0.18)';
+  const top = Math.floor(waterY / SPECK_CELL);
+  for (let j = top; j <= top + ARENA_H / SPECK_CELL + 1; j++) {
+    for (let i = 0; i < ARENA_W / SPECK_CELL; i++) {
+      const h = Math.sin(i * 127.1 + j * 311.7) * 43758.5453;
+      const f = h - Math.floor(h);                   // 0..1, fixed per cell
+      if (f < 0.35) ctx.fillRect(i * SPECK_CELL + (f * 200) % SPECK_CELL,
+                                 j * SPECK_CELL + (f * 530) % SPECK_CELL - waterY, 2, 2);
+    }
+  }
 }
 
 // The play field. draw() has already set up arena coordinates and the shake.
 function drawField() {
+  drawSpecks();                  // the water, in the view: it flows on its own
+
+  // World draws go through the camera (S2); the HUD below does not.
+  ctx.save();
+  ctx.translate(0, -cameraY);
+
   // How far your shots reach — the player needs to see this.
   ctx.strokeStyle = 'rgba(79, 240, 255, 0.10)';
   ctx.lineWidth = 1;
@@ -250,6 +299,8 @@ function drawField() {
     ctx.stroke();
   }
 
+  ctx.restore();
+
   // --- HUD ---
   // No bar across the top any more: rank arrives one per batch cleared, so
   // there is no partial progress to draw and D34 deletes the bar outright.
@@ -277,17 +328,25 @@ function drawField() {
   }
 }
 
-function drawDeath() {
+// The end of a dive, either way it ends. The bottom is a stop, not a win (S2):
+// it reports the time and nothing else -- S3 owns endings.
+const END_SCREENS = {
+  dead:   { heading: 'CONSUMED',   color: '#ff5c85' },
+  bottom: { heading: 'LAYER CLEARED', color: '#9ef7ff' },
+};
+
+function drawEnd() {
+  const end = END_SCREENS[screen];
   dimArena(0.75);
 
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#ff5c85';
+  ctx.fillStyle = end.color;
   ctx.font = '44px system-ui, sans-serif';
-  ctx.fillText('CONSUMED', ARENA_W / 2, ARENA_H / 2 - 10);
+  ctx.fillText(end.heading, ARENA_W / 2, ARENA_H / 2 - 10);
 
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '16px system-ui, sans-serif';
-  ctx.fillText('rank ' + rank + ', ' + currency + ' gems, survived ' +
+  ctx.fillText('rank ' + rank + ', ' + currency + ' gems, ' +
                elapsed.toFixed(1) + 's, killed ' + kills,
                ARENA_W / 2, ARENA_H / 2 + 26);
 
@@ -393,20 +452,27 @@ function drawOptions() {
   drawHint('\u2191 \u2193 or mouse,  \u2190 \u2192 or click to change,  Esc to go back');
 }
 
+// The water darkens with depth (S2): a dark navy at the top of the layer, the
+// old near-black at the bottom. The letterbox margin gets the same colour, so
+// it stays invisible.
+function waterColor() {
+  const lit = 1 - Math.min(1, cameraY / gateDepth(BATCHES.length));
+  return 'rgb(' + Math.round(4 + 8 * lit) + ',' + Math.round(7 + 16 * lit) + ',' +
+         Math.round(13 + 26 * lit) + ')';
+}
+
 function draw() {
   // Paint the whole window, including the letterbox margin, then switch
-  // into arena coordinates and clip so nothing spills into the margin.
+  // into view coordinates. What spills into the margin is painted over by
+  // coverMargins() once the field is drawn.
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = '#04070d';
+  ctx.fillStyle = waterColor();
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.save();
   ctx.setTransform(scale, 0, 0, scale, offX, offY);
-  ctx.beginPath();
-  ctx.rect(0, 0, ARENA_W, ARENA_H);
-  ctx.clip();
 
-  // Shake the contents, not the clip window, so the arena edge stays put.
+  // Shake the contents, not the margin, so the view's edge stays put.
   if (shake > 0) {
     ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   }
@@ -416,9 +482,10 @@ function draw() {
   else if (screen === 'options') drawOptions();
   else {
     drawField();
+    coverMargins();
     if (screen === 'mods')        drawModCards();
     else if (screen === 'paused') { dimArena(); drawMenu(MENUS.paused); }
-    else if (screen === 'dead')   drawDeath();
+    else if (screen === 'dead' || screen === 'bottom') drawEnd();
   }
 
   ctx.restore();

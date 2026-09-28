@@ -1,8 +1,8 @@
 // ===== state =====
-// Everything a run owns, plus the settings the options screen edits.
+// Everything a dive owns, plus the settings the options screen edits.
 
 // ---------- game state ----------
-// Everything a run owns lives here, so restarting is one call.
+// Everything a dive owns lives here, so restarting is one call.
 let player, enemies, bullets, gems, particles;
 let elapsed, kills, shake;
 let queuePaused = false;    // a scenario can stop the batch queue (D37)
@@ -12,16 +12,26 @@ let queuePaused = false;    // a scenario can stop the batch queue (D37)
 //
 // `breathTimer` is NOT a gate flag: a **gate** is the whole stretch where the
 // descent is stopped, fight included, so "at a gate" is `enemies.length > 0`.
-// This only counts the quiet beat after a batch dies and before the next
-// arrives -- the beat a mod offer lands in (D33, D34). Naming it `gateTimer`
-// inverted the glossary and would have had S2's camera moving while locked.
+// Since S2 it counts only the quiet beat before a dive's *first* batch
+// (GATE_PAUSE); every later batch waits on the descent instead (D58). Naming it
+// `gateTimer` inverted the glossary and would have had S2's camera moving while
+// locked.
 let batchIndex = 0;
 let breathTimer = 0;
+
+// The camera (S2): how far down the world the top of the view sits. Everything
+// in a dive lives in world coordinates; only `aim` and the HUD are in the view.
+let cameraY = 0;
+// The current (D58): its speed, which is never zero, and how far the water has
+// flowed. The camera holds during a fight; the water does not -- `waterY` is
+// what the background scrolls by, so the flow shows while nothing else moves.
+let current = 0;
+let waterY = 0;
 
 // The trigger is armed only once the button has been seen released. A menu
 // reads a click as an edge (justPressed) while the weapon reads it as a held
 // state (keys), so without this one physical click is read twice -- clicking
-// Start fired a shot into the run it had just begun.
+// Start fired a shot into the dive it had just begun.
 let fireArmed = false;
 
 // In-dive progress, reset every dive (D34). One rank per batch cleared -- there
@@ -38,7 +48,7 @@ let offerTimer = 0;
 
 // Which screen we're on. Replaces the old `paused` and `dead` flags, which
 // could contradict each other; now there is exactly one answer at a time.
-// 'title' | 'playing' | 'mods' | 'paused' | 'help' | 'options' | 'dead'
+// 'title' | 'playing' | 'mods' | 'paused' | 'help' | 'options' | 'dead' | 'bottom'
 let screen = 'title';
 let menuIndex = 0;          // cursor in the title / pause menu
 let choiceIndex = 0;        // highlighted mod card
@@ -98,17 +108,20 @@ function reset(seed) {
   queuePaused = false;   // scenarios switch this on; normal play never does
   batchIndex = 0;
   breathTimer = GATE_PAUSE;   // a dive opens on the beat, so it starts calm
-  fireArmed = false;     // a click that started the run is not a shot
+  cameraY = 0;         // every dive starts at the top of the layer
+  current = CURRENT_CRAWL;   // the water is already moving when a dive opens
+  waterY = 0;
+  fireArmed = false;     // a click that started the dive is not a shot
   bulletId = 0;        // or two dives with the same seed hand out different ids
   shake = 0;           // pixels of screen shake left
-  screen = 'playing';  // a reset run is a running run
+  screen = 'playing';  // a reset dive is a running dive
 
   rank = 0;            // one per batch cleared, so a fresh dive has none
   currency = 0;
   offerTimer = 0;      // no offer pending on a fresh dive
   accumulator = 0;     // no banked time carried into a new dive
   choices = [];
-  modCounts = {};      // mods are run-scoped: last dive's picks do not carry
+  modCounts = {};      // mods are dive-scoped: last dive's picks do not carry
   choiceIndex = 0;
 }
 
@@ -119,10 +132,17 @@ function applyScenario(name, seed) {
   const s = SCENARIOS[name];
   if (!s) return false;
   reset(seed);
-  // `!== undefined`, or `batch: 0` would be unreachable.
-  if (s.batch !== undefined) batchIndex = s.batch;
+  // `!== undefined`, or `batch: 0` would be unreachable. The camera starts at
+  // that batch's depth, or a deep scenario would first descend the whole way.
+  // The player moves with it, or a stepped scenario draws them off-screen.
+  if (s.batch !== undefined) {
+    batchIndex = s.batch;
+    cameraY = gateDepth(s.batch);
+    player.y = cameraY + ARENA_H / 2;
+  }
   if (s.spawn === false) queuePaused = true;
-  for (const [type, x, y] of s.enemies || []) placeEnemy(type, x, y);
+  // Scenario positions are in the view, so they hold at any depth.
+  for (const [type, x, y] of s.enemies || []) placeEnemy(type, x, cameraY + y);
   return true;
 }
 

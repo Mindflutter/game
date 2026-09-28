@@ -19,26 +19,29 @@ The old Phase 1–4 list is superseded by `plan.md` → S0–S7. The old "Phase 
 roguelite, its own brainstorm when the time comes" is the brainstorm that
 happened.
 
-## Next, inside S1
+## Next
 
-S0 closed 2026-09-27; its three items (seeded RNG, the glow cache — cancelled
-by measurement, and the entity-budget spike) all landed and are recorded in
-`plan.md` → S0 and in D41/D43.
+S2 — The dive: camera and descent closed 2026-09-28 (`plan.md`). Nothing is
+queued: **S3 — One boss, one complete layer** is next, and opening it is
+Igor's call. When S3 closes, the layer-to-layer design pass (D60) comes before
+S4.
 
-Nothing is queued. Every S1 item has landed and Igor has confirmed the fight
-("the fight feel better now", 2026-09-27, on D54's batches). The stage is ready
-to close; S2 — The dive: camera and descent is next, and opening it is Igor's
-call.
+Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
+`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), all Claude's picks.
+`?dev=last-batch&play` jumps to the end of a layer.
 
-Not in S1, deliberately: the camera and the scrolling descent (S2), and
-anything to do with `home` or spending currency (S4).
+Not in S2, deliberately: the boss and layer completion (S3), anything to do
+with `home` or spending currency (S4), a lively background (post-alpha, in
+`ideas.md`), and the layer-to-layer logic — Igor: "we must work thru
+layer-to-layer logic in detail out of s2"; it gets a design pass of its own
+after S3 (D60, `plan.md`), with the questions in `ideas.md` → the layer end.
 
 ## Standing constraints
 
 Now in `foundations.md` → The technical contract, and not duplicated here.
 Two changes worth flagging since they reverse what this section used to say:
 dependencies are *permitted* but declined on measurement grounds (D30), and
-the arena stops being fixed at S2 (D29).
+the arena stopped being fixed at S2 (D29, D58).
 
 ## Health of the thing right now
 
@@ -67,15 +70,28 @@ This section owns the measured bot figures. Nothing else quotes them.
 - **The bot is blind to the dash.** `kiteAndShoot` never presses Space, so
   D51's change (dash damage now bought, not free) moved its clear times by
   exactly zero. A bot only measures the mechanics it uses.
-- **Bot survival: it no longer dies.** All five seeds finish eight batches with
-  4–8 hp against a start of 3, where the same bot died at ~38s before mods
-  existed. Consistent with Igor's read, and with Mend and Vitality being strong.
+- **Bot survival: it dies again — and did before S2.** Corrected 2026-09-28.
+  This line used to say all five seeds finish eight batches; re-run on the
+  pre-S2 commit (`04fac4c`) the mortal bot dies on every seed, after 3, 7, 3, 3
+  and 3 clears (seeds 1, 7, 42, 4471, 90210). The claim went stale somewhere
+  after D49, most likely with D54's hp-sized batches. On the S2 build it dies
+  after 3, 3, 5, 5 and 3 clears. Not a difficulty reading (D50) — Igor still
+  finds batches easy — but it means **the mortal bot cannot reach the bottom**.
+- **Time to traverse one layer** (S2 DoD, D58), immortal bot — `diveReport(seed,
+  Infinity, 1800, true)`, 5 seeds, all reach the bottom, with D58's current as
+  reworked (400px gates, 200px/s, independent of the player) and no mods at
+  the layer end (D59): **307.6 / 815.0 / 434.5 / 409.0 / 412.4s, mean 475.7s
+  (7.9 min)**, of which ~30s is travel and the rest is fighting. At
+  the top of the provisional 4–8 min pillar, but it is the kiting bot's clock
+  (D50), not a player's; Igor clears batches far faster, so a human layer is
+  likely well under 4 min — which is S6's problem, not S2's.
 - The 38.7 / 37.8 / 36.6s survival figures (2026-09-19) are **gone, not stale**:
   they measured an auto-firing weapon with an XP curve, neither of which exists.
-- Difficulty is consistent across window sizes (70.6 / 55.0 / 63.0s at
-  1280×800, 1920×1080, 3440×1440). That figure is from the auto-fire build too,
-  so treat it as "the property held once", not as a current number. It must
-  survive the camera at S2 and has a check there (D29).
+- **Difficulty is invariant to window size, with the camera** (D29, D58): seed
+  4471 reaches the bottom of the layer in 217.03 / 217.03 / 217.03s at
+  1280×800, 1920×1080 and 3440×1440 (stationary, immortal, aiming at the first
+  enemy), driven through real mouse events. A `?test` check holds it within
+  2%; dropping the input's `/ scale` fails it at 217.03 / 228.71 / 227.51.
 - **Arrival timing** (D55): from a batch spawning, the first enemy reaches a
   centred player in 2.04s at the earliest, 3.21s on average. Edged, 0.27s;
   cornered, 0.22s. This is what killed the `Lull` mod and what Igor's

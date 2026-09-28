@@ -2,21 +2,24 @@
 
 Describes the **present**, not the plan. Update it when reality changes.
 
-**The present is partway to the design.** S1 — Combat core has started: the
-weapon is manual (D45), the batch queue and gate are in (D48), and rank and mods
-are in (D49). Still to come in S1: the fixed timestep, and the `// balance`
-block re-derived from scratch — which the bot numbers below now say is overdue.
-The arena is still fixed — the camera is S2. Nothing here is a statement of
-intent.
+**The present is partway to the design.** S1 — Combat core is closed: the
+weapon is manual (D45), the batch queue and gate are in (D48), rank and mods
+are in (D49), and the simulation runs on a fixed timestep (D53). S2 — The dive
+is closed: one layer scrolls under a camera, a current carries you between gate
+depths, and the layer ends at the bottom (D58). There is no `home`, no boss and
+no layer completion yet. Nothing here is a statement of intent.
 
 ## What it is
 
-A twin-stick action game in a fixed arena. You move with WASD, aim with the
-mouse and **fire by holding the left button** (D45). Enemies arrive one gated
-**batch** at a time; clearing one raises your **rank** and offers three **mods**
-in the quiet beat that follows, which is the only moment a dive is not combat
-(D33, D49). Kills drop gems, which are money and buy nothing yet. Every dive
-ends in death; the measured times live in `roadmap.md` → Health, and only there.
+A twin-stick action game, diving down one **layer**. You move with WASD, aim
+with the mouse and **fire by holding the left button** (D45). The dive stops at
+each gate depth while a **batch** is alive — no further in enemies, though the
+water keeps flowing; clearing one raises your **rank** and offers three **mods**
+in the quiet beat that follows, the only pause in a dive (D33, D49). Then a
+current carries you down to the next batch, about two seconds away and
+independent of anything the player does (D58). Kills drop gems, which are
+money and buy nothing yet. A dive ends in death or at the bottom of the layer;
+the measured times live in `roadmap.md` → Health, and only there.
 
 ## Files
 
@@ -24,26 +27,28 @@ ends in death; the measured times live in `roadmap.md` → Health, and only ther
 index.html              shell: canvas, CSS, eight script tags in load order
 
 game/       content.js  every tuning number + all content tables
-            state.js    run state, settings, reset(), openScreen()
-            logic.js    step() — arrivals, movement, collision, the gate
-                        ── 1101 lines. Survives the port.
+            state.js    dive state, settings, reset(), openScreen()
+            logic.js    step() — arrivals, the gate, the descent, movement,
+                        collision
+                        ── 1184 lines. Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
-            render.js   canvas, arena scaling, every draw function
+            render.js   canvas, view scaling, the camera, every draw function
 main.js                 frame loop, dt, fps, boot
-                        ── 580 lines. Rewritten on the port.
+                        ── 658 lines. Rewritten on the port.
 
 checks.js               the ?test suite → the port's regression tests
 ```
 
-Line counts are as of 2026-09-27. Regenerate rather than trust them:
+Line counts are as of 2026-09-28. Regenerate rather than trust them:
 `wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
 *reports*, never a grep — some call sites sit inside loops.
 
-The platform share is **35%** (580 of 1681). D17 measured 23% on 2026-09-12 and
+The platform share is **36%** (658 of 1842). D17 measured 23% on 2026-09-12 and
 it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
-while `platform/` did not. This is the number to watch — CLAUDE.md says not to
+while `platform/` did not, and S2 held it level — the camera is one translate
+and the specks, depth tint and margin cover are a few dozen lines. This is the number to watch — CLAUDE.md says not to
 invest in the canvas layer, and this is what that rule looks like when it slips.
 
 Plain `<script>` tags, not modules, so `file://` works. **Load order matters**
@@ -62,7 +67,7 @@ for exactly six names:
 | `justPressed` | `platform/input.js` | an edge-triggered set |
 | `tapped(codes)` | `platform/input.js` | trivial helper |
 | `moveCursor(i, len)` | `platform/input.js` | trivial helper |
-| `aim` | `platform/input.js` | cursor position in world coords |
+| `aim` | `platform/input.js` | cursor position in **view** coords; `game/` adds `cameraY` |
 
 Exactly six, and **enforced rather than claimed**: `npm test` loads `game/` into
 a Node `vm` with only these six stubbed, so reaching for a seventh fails the
@@ -111,7 +116,7 @@ title ──Start──> playing ──Esc──> paused ──Quit──> title
                  mods
                    │
                  death ──R──> playing
-                       ──Esc──> title
+                 bottom       ──Esc──> title
 ```
 
 The mod screen takes three inputs for one choice: `A`/`D` or the arrows
@@ -123,7 +128,9 @@ frame, which is why `lastAimX`/`lastAimY` exist.
 
 The title, pause and options screens work the same way: hover moves the
 cursor, a click activates the row, and on options a click cycles the value
-exactly as Enter does. Help and the death screen take a click as "go on".
+exactly as Enter does. Help and the two end screens take a click as "go on".
+The end screens — `dead` and `bottom` — share one draw function and one input
+branch; the bottom is a stop, not a win, and reports only the time (D58).
 Menu and options rows are full-width bands from `rowRect` in `content.js`.
 
 Mouse buttons ride in `keys` and `justPressed` under codes a keyboard cannot
@@ -131,14 +138,15 @@ produce (`'Mouse0'`), so `tapped()` works for either device and the port seam
 did not grow a name for clicks. Card rectangles live in `content.js`
 (`cardRect`), because the renderer draws them and the logic hit-tests them.
 
-`returnTo` remembers whether help/options was opened from the title or mid-run.
+`returnTo` remembers whether help/options was opened from the title or mid-dive.
 `reset()` sets `screen = 'playing'`, so Start is just `reset()`; boot calls
 `reset()` then overrides to `'title'`.
 
 ## Systems
 
 **Movement.** Direction from held keys, normalised so diagonals aren't 1.41×
-faster, times speed times `dt`. Player clamped to the arena.
+faster, times speed times `dt`. Player clamped to the **view**, which is
+`ARENA_W × ARENA_H` from `cameraY` down (D58).
 
 **Firing.** Manual since D45, and **armed** since D47: the trigger only counts
 once the button has been seen released while playing, and every non-playing
@@ -157,12 +165,30 @@ water, and `enemyInRange()` was deleted with it.
 new arrives until the batch is dead. Twelve batches, sized on total hp and
 ramping 10 to 68 (D54): the weapon does 2.5 hp/s and no mod raises damage, so
 hp *is* the clock, and the previous set held 3 to 15 which made every batch
-trivial. Between batches sits a **gate**:
-`GATE_PAUSE` (1.2s) of quiet, which is where a mod offer will land (D34). A dive
-opens on a gate. `batchIndex` counts batches begun; `gateTimer > 0` means we are
-between them. The list cycles when it runs out — finishing a layer is S3.
+trivial. Batch `k` waits at depth `k × GATE_SPACING`; a dive opens with
+`GATE_PAUSE` (1.2s) of quiet before the first, and every later batch arrives the
+moment the camera reaches its depth. `batchIndex` counts batches begun. The list
+does not cycle: past the last batch the same arithmetic points at the bottom.
 
-Enemies still enter 40px outside the arena so they fade in from the dark, with
+**The descent** (D58). The world is a tall strip and the view is a fixed
+1280×800 window onto it at `cameraY`. While a batch lives the camera does not
+move — "at a gate" is `enemies.length > 0` — but the **current never stops**:
+`current` eases (by `CURRENT_EASE`, on a time base) toward `CURRENT_SPEED`
+while travelling and toward `CURRENT_CRAWL` otherwise, and `waterY` advances by
+it every tick. The background scrolls by `waterY`, so the water flows through a
+fight while the fight itself holds still — and behind the mod cards and under
+the death and layer-end screens too, where play stops but the water drifts on
+at `CURRENT_CRAWL`. `update()` moves it, once, outside `step()` — the same
+reason the shake decays there: `step()` returns early on every screen but
+play. The menus alone freeze it; pause is the player stepping out of the game.
+Once a batch is cleared and the mod is taken, the gate block carries the
+camera and the player down at `current`, clamped to the next depth
+(`gateDepth()`), about two seconds away. The current is independent
+of the player: swimming moves you within the view, never the view. Reaching depth
+`BATCHES.length × GATE_SPACING` opens the `bottom` screen. The gate block runs
+before the player moves, so the clamp always sees this tick's camera.
+
+Enemies still enter 40px outside the **view** so they fade in from the dark, with
 ±15% speed jitter. What is gone: the time-based spawn director, and with it the
 speed ramp and the weighted type-unlock roll. **Difficulty is authored per
 batch now, not ramped by the clock.**
@@ -246,10 +272,13 @@ capsule.
 batch — the sweep seeing a non-empty enemy list go empty — raises `rank` by one
 and starts `offerTimer` at `MOD_OFFER_DELAY`; when that expires,
 `openModOffer()` rolls three mods and opens the `mods` screen, the beat between
-batches and the only moment a dive is not combat. The delay exists because the
+batches and the only pause in a dive. Not after a layer's last batch: its
+clear is the layer end, which is not a gate and pays nothing — no rank, no
+mods, no `Mend` (D59) — so twelve batches make eleven ranks, and the current
+goes straight on to the bottom. The delay exists because the
 kill burst lives 0.5s and the cards were landing on the same frame as the kill,
 which read as a jump cut (D51). A pending offer also holds the batch queue, so
-a `GATE_PAUSE` shorter than the delay cannot sneak the next batch in first. Nothing is offered for a kill, only
+the descent cannot start before the offer has been taken. Nothing is offered for a kill, only
 for a batch. If the same frame kills the last enemy *and* the player, the death
 screen wins: `clearBatch()` is guarded by `screen === 'playing'`.
 
@@ -266,7 +295,7 @@ as a batch arrived — was removed by D55 once measurement showed nothing can
 reach a centred player inside its 1.2s window, so it only ever paid out to a
 cornered one. `modCounts` tracks what has been taken and the roll skips
 anything at its `max`, so a late dive can be offered two cards rather than
-three. Mods are run-scoped: `reset()` clears them.
+three. Mods are dive-scoped: `reset()` clears them.
 
 Anything a mod raises is a field on `player` rather than a `const` — that is why
 `iframes` and `dashCooldown` live in `PLAYER_START`.
@@ -303,7 +332,7 @@ none is given — that choice is outside the deterministic sequence.
 
 Why it matters: two balance measurements can now be of the *same* dive instead of
 two different ones, so a difference under a second is visible without averaging
-21 runs. And "it broke sometimes" becomes "it broke on seed 4471".
+21 dives. And "it broke sometimes" becomes "it broke on seed 4471".
 
 ## The development readout
 
@@ -354,6 +383,7 @@ Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42):
 | `?dev=one-drifter` | Loads it **frozen**. Nothing advances until `advance(n)`. |
 | `?dev=three-types&play` | Loads it **running**, for watching. |
 | `?dev=late-swarm&seed=4471` | Any scenario, on a fixed seed. |
+| `?dev=last-batch&play` | The layer's last batch, then the bottom — the end without the whole layer. |
 
 `applyScenario(name, seed)` resets, then applies the record: `elapsed` to start
 part-way in, `spawn: false` to stop new arrivals (`spawnPaused`), and a list of
@@ -389,8 +419,8 @@ Two suites (D39, D44).
 
 | | Command | Covers |
 |---|---|---|
-| **Node** | `npm test` (`npm run test:watch`) | The seam, and six property-based invariants over generated seeds — no NaN ever, hp bounds, arena bounds, seeded replay, time-based decay. Vitest + fast-check, dev-only. |
-| **Browser** | `index.html?test` | The 104 scripted checks, plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`. |
+| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, the layer end offers no mods, the water flows behind the mod cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the layer ends at the bottom), and the docs (D57). Vitest + fast-check, dev-only. |
+| **Browser** | `index.html?test` | The scripted checks (count under Verification), plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`, and the same seed played to the bottom of the layer at three window sizes through real `MouseEvent`s (D29). |
 
 `tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
 classic script are lexical bindings rather than properties of the global object,
@@ -432,7 +462,8 @@ prototype — they transfer to any port verbatim.
 pierce 0, pickupRange 75, iframes 1, dashCooldown 2.2, dashSpeed 884,
 mendOnClear 0, dashDamage 0) · `BULLET_SPEED 430` · `GEM_PULL 300` ·
 `GEM_LIFE 8` · `ENEMY_JITTER 0.3` ·
-`GATE_PAUSE 1.2` · `MOD_OFFER_DELAY 0.6` · `FIXED_DT 1/120` ·
+`GATE_PAUSE 1.2` · `GATE_SPACING 400` · `CURRENT_SPEED 200` ·
+`CURRENT_CRAWL 30` · `CURRENT_EASE 0.05` · `MOD_OFFER_DELAY 0.6` · `FIXED_DT 1/120` ·
 `MAX_FRAME_DT 0.05` · `DASH_TIME 0.16` ·
 `DASH_GRACE 0.15` · `DASH_REACH 40` · `DASH_ARC 0.2` ·
 `DASH_END 0.18` · `DASH_PUSH 320` · `PUSH_DRAG 0.02` · `SHAKE_FADE 0.02` ·
@@ -440,7 +471,7 @@ mendOnClear 0, dashDamage 0) · `BULLET_SPEED 430` · `GEM_PULL 300` ·
 
 ## Verification
 
-**`index.html?test`** runs the suite in the console (currently **171** checks —
+**`index.html?test`** runs the suite in the console (currently **174** checks —
 this doc owns that count; `roadmap.md` cites it). The old figure of 79 was
 `grep -c`, i.e. *lines containing an assertion*; the suite reports what actually
 **executed**, which is higher because some call sites sit inside loops.
@@ -455,15 +486,19 @@ only wounds once bought and never flashes an enemy it did not hurt, that the
 offer waits out the death before it appears (D51), and — since D49 — that a rank
 arrives per batch and never per kill, that the offer freezes the queue behind it, that the
 mod pool is body and comfort only, that a maxed mod is not offered, and that
-each comfort mod does what its card says.
+each comfort mod does what its card says. Since D58: that the next batch waits
+on the descent and arrives at its own depth, and that the same seed reaches
+the bottom of the layer in the same time at 1280×800, 1920×1080 and 3440×1440, driven through
+real mouse events (D29), and that a dim screen darkens the letterbox margin as
+much as the view.
 
 A check that expects a shot to land must set `aim` itself (`aimAt()`). Four
 checks once passed only because the previous check happened to leave the cursor
 on the firing line.
 
 **Balance** is measured by driving `update()` faster than real time with a
-scripted bot, 21 runs per configuration. The figures live in `roadmap.md` →
-Health and only there, along with the caveat that the current bot is a weaker
+scripted bot, on the same five seeds per configuration, paired (D41). The
+figures live in `roadmap.md` → Health and only there, along with the caveat that the current bot is a weaker
 driver than the pre-mouse-aim one and is comparable only to itself.
 
 **Feel is never asserted** — that judgement is Igor's.
