@@ -38,8 +38,30 @@ if (location.search === '?test') {
   });
 
   const mob = (x, y, over) => Object.assign(
-    { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, xp: 1, lastHitBy: 0,
+    { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, value: 1, lastHitBy: 0,
       pushX: 0, pushY: 0 }, over);
+
+  // A bullet, built the way the weapon builds one. Five checks hand-rolled this
+  // literal; when bullets gained `speed` (D53) every one of them would have
+  // computed NaN travel and flown forever, because `NaN >= maxTravel` is false.
+  const shot = (over = {}) => {
+    const b = Object.assign({ id: ++bulletId, x: player.x, y: player.y, r: 4,
+                              vx: BULLET_SPEED, vy: 0, pierce: 0,
+                              travelled: 0, maxTravel: 300 }, over);
+    b.speed = Math.hypot(b.vx, b.vy);
+    bullets.push(b);
+    return b;
+  };
+
+  // Hold right, tap Space, run the dash out, release. Six checks wrote this by
+  // hand and two of them had already forgotten the release, which is the drift
+  // a copy-pasted fixture always produces.
+  const dashRight = (ticks = 20, dt = 1 / 60) => {
+    keys.add('KeyD');
+    justPressed.add('Space');
+    for (let i = 0; i < ticks; i++) update(dt);
+    keys.delete('KeyD');
+  };
 
   // The weapon fires along the cursor now, so every check that expects a shot
   // to land has to say where the cursor is. Inheriting whatever the previous
@@ -60,7 +82,7 @@ if (location.search === '?test') {
   // check that lets time pass is otherwise liable to measure a *stopped* game
   // and pass for the wrong reason. That happened to the gate checks below.
   const runAlive = n => {
-    for (let i = 0; i < n; i++) { player.hurt = IFRAMES; update(1 / 60); }
+    for (let i = 0; i < n; i++) { player.hurt = player.iframes; update(1 / 60); }
     // The oracle lives here, not at the call sites. A check that lets time pass
     // while the sim has quietly stopped passes for the wrong reason -- that
     // happened once already (D48), and relying on each caller to remember the
@@ -191,45 +213,66 @@ if (location.search === '?test') {
     'one second held must fire about ' + PLAYER_START.fireRate + ' shots, got ' + bulletId);
   ceaseFire();
 
-  // A dash passes through an enemy, hurts it exactly once, and costs no hp.
+  // The dash starts as pure movement (D51): it throws what it passes through
+  // and does not wound it. Damage is bought, never free.
+  const impact = MODS.find(m => m.name === 'Impact');
   reset();
-  const dashed = mob(player.x + 60, player.y, { hp: 5, maxHp: 5 });
-  enemies.push(dashed);
+  const shoved = mob(player.x + 60, player.y, { hp: 5, maxHp: 5 });
+  enemies.push(shoved);
   player.fireTimer = 999;                        // silence the weapon
-  keys.add('KeyD');
-  justPressed.add('Space');
-  for (let i = 0; i < 20; i++) update(1 / 60);   // longer than DASH_TIME
-  check(dashed.hp === 4,
-    'a dash must hit each enemy exactly once, hp=' + dashed.hp);
+  const shovedX = shoved.x;
+  dashRight();   // 20 ticks, longer than DASH_TIME
+  check(shoved.hp === 5,
+    'an unbought dash must not wound what it throws, hp=' + shoved.hp);
+  check(shoved.x > shovedX + 10,
+    'an unbought dash must still shove, moved ' + (shoved.x - shovedX).toFixed(1));
+  check(!shoved.flash,
+    'a dash that did no damage must not flash the enemy white');
   check(player.hp === 3,
     'a dash must pass through unharmed, hp=' + player.hp);
+
+  // ...and with Impact it wounds, exactly once, by exactly what was bought.
+  reset();
+  impact.apply(player);
+  const dashed = mob(player.x + 60, player.y, { hp: 5, maxHp: 5 });
+  enemies.push(dashed);
+  player.fireTimer = 999;
+  dashRight();
+  check(dashed.hp === 4,
+    'a bought dash must hit each enemy exactly once, hp=' + dashed.hp);
+
+  // Two Impacts wound for two, so the mod stacks rather than just switching on.
+  reset();
+  impact.apply(player);
+  impact.apply(player);
+  const twice = mob(player.x + 60, player.y, { hp: 5, maxHp: 5 });
+  enemies.push(twice);
+  player.fireTimer = 999;
+  dashRight();
+  check(twice.hp === 3, 'two Impacts must wound for two, hp=' + twice.hp);
 
   // The wave reaches past the player's body. This one sits 30px beyond the far
   // end of the dash -- never touched, but well inside the wave.
   reset();
+  impact.apply(player);                          // hp is the oracle, so buy it
   player.fireTimer = 999;
   const ahead = mob(player.x + 171, player.y, { hp: 5, maxHp: 5 });
   enemies.push(ahead);
   const aheadX = ahead.x;
-  keys.add('KeyD');
-  justPressed.add('Space');
-  for (let i = 0; i < 20; i++) update(1 / 60);
+  dashRight();
   check(ahead.hp === 4, 'the wave must reach past the body, hp=' + ahead.hp);
   check(ahead.x > aheadX + 10,
     'the wave must shove what it hits, moved ' + (ahead.x - aheadX).toFixed(1));
-  keys.delete('KeyD');
 
   // ...but only forwards. This one is the same 30px away, behind the dash, so
   // a wave that ignored direction would catch it.
   reset();
+  impact.apply(player);
   player.fireTimer = 999;
   const behind = mob(player.x - 30, player.y, { hp: 5, maxHp: 5 });
   enemies.push(behind);
-  keys.add('KeyD');
-  justPressed.add('Space');
-  for (let i = 0; i < 20; i++) update(1 / 60);
+  dashRight();
   check(behind.hp === 5, 'the wave must not hit backwards, hp=' + behind.hp);
-  keys.delete('KeyD');
 
   // The dash closes with a ring, rather than just stopping.
   check(player.dashEnd > 0, 'a finished dash must leave its closing ring');
@@ -240,16 +283,101 @@ if (location.search === '?test') {
   check(particles.some(p => p.vx === 0 && p.vy === 0),
     'a dash must leave an afterimage trail');
 
-  // ...and it cannot be spent again until the cooldown has run.
+  // ...and it cannot be spent again until the cooldown has run. The movement
+  // key has to be held: a dash also needs a direction, so without one this
+  // passed because `len === 0` blocked it, never testing the cooldown at all.
+  keys.add('KeyD');
   justPressed.add('Space');
   update(1 / 60);
-  check(player.dashTime <= 0, 'no second dash inside the cooldown');
+  check(player.dashCd > 0 && player.dashTime <= 0,
+    'no second dash inside the cooldown, cd=' + player.dashCd.toFixed(2));
   keys.delete('KeyD');
+
+  // A fast dash must not step over its own hitbox. The wave reaches 40px past
+  // an enemy's radius, but the dash covers speed x 3.4 x dt in a frame and
+  // `Fins` raises speed with no cap -- so a point test taken once a frame
+  // teleports past whatever it crossed. Eight Fins on a 20fps frame steps 105px
+  // against a 49px reach, and this enemy is in front before the step and behind
+  // after it, which is why the old test never saw it at all. Igor hit this:
+  // "dash ... sometimes doesnt deal damage".
+  reset();
+  impact.apply(player);
+  player.fireTimer = 999;
+  const fins = MODS.find(m => m.name === 'Fins');
+  for (let i = 0; i < 8; i++) fins.apply(player);
+  const swept = mob(player.x + 30, player.y, { hp: 5, maxHp: 5 });
+  enemies.push(swept);
+  dashRight(8, 0.05);                            // the slowest frame dt allows
+  check(swept.hp === 4,
+    'a fast dash must hit what it sweeps through, not step over it: hp=' +
+    swept.hp + ' after passing through it at speed ' + player.speed);
+
+  // Dash length is its own stat and does not ride on `player.speed` (D56).
+  // Igor, twice: "once the dash becomes long, it feels way easier" and then
+  // "dash length still increases over time or mod upgrades". It did: the dash
+  // moved at speed x 3.4, `Fins` raises speed with no cap, so ten of them took
+  // the lunge from 141px to 402px -- a third of the arena, untouchable.
+  // Exactly the dash's own length in ticks, derived: one tick more and the
+  // measurement picks up ordinary walking after the lunge ends.
+  const DASH_TICKS = Math.floor(DASH_TIME / FIXED_DT);
+  const dashDistance = extraFins => {
+    reset();
+    queuePaused = true;
+    keys.clear();
+    player.fireTimer = 999;
+    for (let i = 0; i < extraFins; i++) fins.apply(player);
+    const x0 = player.x;
+    keys.add('KeyD');
+    justPressed.add('Space');
+    for (let i = 0; i < DASH_TICKS; i++) update(FIXED_DT);
+    keys.clear();
+    return player.x - x0;
+  };
+  const bare = dashDistance(0), finned = dashDistance(8);
+  check(Math.abs(bare - finned) < 1,
+    'Fins must not lengthen the dash: ' + bare.toFixed(1) + 'px bare vs ' +
+    finned.toFixed(1) + 'px with eight');
+  check(bare > 100, 'a dash must still cover ground, ' + bare.toFixed(1) + 'px');
+
+  // A dash is a committed lunge. The direction is taken when it starts and live
+  // input cannot steer it -- Igor: "it's possible to change direction during
+  // the dash". Three ways it was steerable, all from travel following the keys
+  // while only the *wave* was frozen: switching keys turned the lunge, holding
+  // the opposite key reversed it (and then the wave faced the way you came, so
+  // it hit nothing), and releasing everything stopped you dead while dashTime
+  // ran on -- a free 0.31s of invulnerability for standing still.
+  const dashAndSwitch = to => {
+    reset();
+    queuePaused = true;
+    keys.clear();                     // or this case inherits the last one's key
+    player.fireTimer = 999;
+    const x0 = player.x, y0 = player.y;
+    keys.add('KeyD');
+    justPressed.add('Space');
+    update(FIXED_DT);                 // committed to +x on this frame
+    keys.clear();
+    if (to) keys.add(to);
+    for (let i = 1; i < DASH_TICKS; i++) update(FIXED_DT);
+    keys.clear();
+    return { dx: player.x - x0, dy: player.y - y0 };
+  };
+  const straight = dashAndSwitch('KeyD');
+  check(straight.dx > 100 && Math.abs(straight.dy) < 1,
+    'a dash held straight must travel its length, moved ' + straight.dx.toFixed(1));
+  for (const [key, label] of [['KeyW', 'turn it'], ['KeyA', 'reverse it'],
+                              [null, 'stop it by letting go']]) {
+    const r = dashAndSwitch(key);
+    check(Math.abs(r.dx - straight.dx) < 1 && Math.abs(r.dy) < 1,
+      'mid-dash input must not ' + label + ': moved ' +
+      r.dx.toFixed(1) + ',' + r.dy.toFixed(1) +
+      ' instead of ' + straight.dx.toFixed(1) + ',0');
+  }
+
+
 
   // A shot dies once it has flown its range, rather than crossing the arena.
   reset();
-  bullets.push({ id: ++bulletId, x: 100, y: 400, r: 4, vx: BULLET_SPEED, vy: 0,
-                 pierce: 0, travelled: 0, maxTravel: 200 });
+  shot({ x: 100, y: 400, maxTravel: 200 });
   for (let i = 0; i < 40; i++) update(1 / 60);   // long enough to fly 280px
   check(bullets.length === 0, 'shots must expire at the edge of their range');
 
@@ -258,14 +386,13 @@ if (location.search === '?test') {
   const tank = mob(player.x + 100, player.y, { hp: 3, maxHp: 3 });
   enemies.push(tank);
   player.fireTimer = 999;                        // silence the auto-weapon
-  bullets.push({ id: ++bulletId, x: player.x, y: player.y, r: 4,
-                 vx: BULLET_SPEED, vy: 0, pierce: 2, travelled: 0, maxTravel: 300 });
+  shot({ pierce: 2 });
   for (let i = 0; i < 30; i++) update(1 / 60);
   check(tank.hp === 2, 'a piercing shot must hit once, hp=' + tank.hp);
 
   // A tough enemy survives a hit that would kill a drifter.
   reset();
-  const big = mob(player.x + 120, player.y, { hp: 6, maxHp: 6, xp: 3 });
+  const big = mob(player.x + 120, player.y, { hp: 6, maxHp: 6, value: 3 });
   enemies.push(big);
   fireAt(big);
   for (let i = 0; i < 45; i++) update(1 / 60);
@@ -285,11 +412,11 @@ if (location.search === '?test') {
   // A tougher enemy is worth more gems. Keep it outside pickupRange, or the
   // gems get vacuumed up the moment they drop and there is nothing to count.
   reset();
-  const rich = mob(player.x + 150, player.y, { hp: 1, maxHp: 6, xp: 3 });
+  const rich = mob(player.x + 150, player.y, { hp: 1, maxHp: 6, value: 3 });
   enemies.push(rich);
   fireAt(rich);
   for (let i = 0; i < 60; i++) update(0.016);
-  check(gems.length === 3, 'xp 3 must drop 3 gems, got ' + gems.length);
+  check(gems.length === 3, 'a value of 3 must drop 3 gems, got ' + gems.length);
   ceaseFire();
 
   // An ignored gem fades out instead of littering the floor forever.
@@ -298,27 +425,139 @@ if (location.search === '?test') {
   for (let i = 0; i < 60; i++) update(1 / 60);
   check(gems.length === 0, 'uncollected gems must expire');
 
-  // Levelling costs more each time, rather than less.
-  const costs = [];
-  for (let lv = 1; lv <= 6; lv++) costs.push(Math.round(5 * Math.pow(XP_GROWTH, lv - 1)));
-  check(costs.every((c, i) => i === 0 || c > costs[i - 1]),
-    'xp cost must rise every level: ' + costs.join(','));
-
-  // Collecting the last gem you need levels you up and pauses the game.
+  // A gem is money now, not XP (D34). Collecting one must pay the purse and
+  // must not rank you up -- the XP bar that did is deleted.
   reset();
-  xp = xpNext - 1;
   gems.push({ x: player.x, y: player.y, r: 4, life: GEM_LIFE });
   update(0.016);
-  check(level === 2 && screen === 'levelup', 'last gem must level you up and pause');
-  check(choices.length === 3, 'a level-up offers 3 choices');
-  check(new Set(choices).size === 3, 'the 3 choices must be different');
-  check(choiceIndex === 1, 'a level-up opens on the middle card');
+  check(currency === 1, 'a collected gem must pay currency, got ' + currency);
+  check(rank === 0 && choices.length === 0 && screen === 'playing',
+    'money must not rank you up: rank ' + rank + ', screen ' + screen);
+
+  // --- one rank per batch, and the offer lands at the gate (D33, D34) ---
+  // Two enemies killed one at a time, so this can see that the offer waits for
+  // the *batch* and not for a kill. That is the rule D33 exists for: the
+  // prototype threw the cards up the instant the bar filled, mid-fight.
+  reset();
+  const pair = [mob(player.x + 150, player.y), mob(player.x - 150, player.y)];
+  enemies.push(...pair);
+  fireAt(pair[0]);
+  for (let i = 0; i < 60; i++) update(1 / 60);
+  check(kills === 1 && enemies.length === 1, 'the first of the two must die');
+  check(rank === 0 && screen === 'playing' && choices.length === 0,
+    'a kill mid-batch must not rank you up or offer a mod (D33)');
+
+  fireAt(pair[1]);
+  for (let i = 0; i < 60 && enemies.length; i++) update(1 / 60);
+  ceaseFire();
+  check(enemies.length === 0 && rank === 1,
+    'clearing the batch must rank you up exactly once, rank ' + rank);
+
+  // The rank is banked on the kill, but the cards wait for the death to finish
+  // playing (D51). Igor: "batch cleared comes too fast, last enemy just
+  // eliminated ... feels unnatural". The kill burst lives 0.5s.
+  check(screen === 'playing' && offerTimer > 0,
+    'the offer must not land on the frame of the kill: screen ' + screen +
+    ', offerTimer ' + offerTimer);
+  check(choices.length === 0, 'no cards exist yet during the beat');
+
+  // Then it opens. Stops the tick it does: the cursor is still parked on the
+  // enemy it just shot, which is over a card, and one more frame of hover would
+  // move the highlight before the check below could read where it opened.
+  for (let i = 0; i < Math.ceil(MOD_OFFER_DELAY * 60) + 3 && screen === 'playing'; i++) {
+    update(1 / 60);
+  }
+  check(screen === 'mods', 'the beat must then offer mods, screen ' + screen);
+  check(choices.length === 3, 'a gate offers 3 mods, got ' + choices.length);
+  check(new Set(choices).size === 3, 'the 3 mods must be different');
+  check(choiceIndex === 1, 'the offer opens on the middle card');
+
+  // Nothing arrives behind the cards. The offer sits inside the beat, so an
+  // offer that let the clock run would hand the next batch a free approach.
+  const heldAt = batchIndex;
+  for (let i = 0; i < 300; i++) update(1 / 60);
+  check(batchIndex === heldAt && enemies.length === 0 && screen === 'mods',
+    'nothing may arrive while the offer is open: batch ' + batchIndex);
+
+  // The pool is body and comfort only until S5 -- Content (D34). A weapon mod
+  // cannot be balanced before the weapons exist: "+1 damage" is huge on a
+  // railgun and nothing on a spray gun.
+  check(MODS.every(m => m.scope === 'body' || m.scope === 'comfort'),
+    'every mod must be body or comfort, found: ' +
+    MODS.filter(m => m.scope !== 'body' && m.scope !== 'comfort')
+        .map(m => m.name + '/' + m.scope).join(','));
+  check(new Set(MODS.map(m => m.name)).size === MODS.length,
+    'two mods must not share a name');
+
+  // A mod already maxed is never offered (D34). Max out every capped mod and it
+  // must drop out of the roll -- 40 rolls, because one proves nothing.
+  reset();
+  for (const m of MODS) if (m.max) modCounts[m.name] = m.max;
+  const rolled = [];
+  for (let i = 0; i < 40; i++) rolled.push(...rollMods());
+  check(rolled.length > 0 && rolled.every(m => !m.max),
+    'a maxed mod must not be offered: ' +
+    [...new Set(rolled.filter(m => m.max).map(m => m.name))].join(','));
+
+  // ...and taking one is what counts it, which is what the roll above reads.
+  reset();
+  screen = 'mods';
+  choices = [MODS.find(m => m.name === 'Mend')];
+  justPressed.add('Digit1');
+  update(0.016);
+  check(modCounts.Mend === 1, 'taking a mod must count it, got ' + modCounts.Mend);
+  check(player.mendOnClear === 1, 'Mend must grant its effect');
+
+  // The two comfort mods are standing effects, not stat bumps, so each needs a
+  // check of its own: that the card was taken proves nothing about what it does.
+  reset();
+  player.mendOnClear = 1;
+  player.hp = 1;
+  const wounded = mob(player.x + 150, player.y);
+  enemies.push(wounded);
+  fireAt(wounded);
+  for (let i = 0; i < 60; i++) update(1 / 60);
+  check(rank === 1 && player.hp === 2, 'Mend must heal on the clear, hp ' + player.hp);
+
+  // ...and not past the maximum, which is the guard a bare `hp += 1` misses.
+  screen = 'playing';
+  player.hp = player.maxHp;
+  const another = mob(player.x + 150, player.y);
+  enemies.push(another);
+  fireAt(another);
+  for (let i = 0; i < 60; i++) update(1 / 60);
+  ceaseFire();
+  check(player.hp === player.maxHp,
+    'Mend must not heal past the maximum, hp ' + player.hp + '/' + player.maxHp);
+
+  // A batch arrives with no grace period. This used to be half of a pair
+  // checking the `Lull` mod; the mod is gone (D55) but the default it contrasted
+  // with is still the rule, and it is what a re-added arrival guard would have
+  // to break deliberately.
+  reset();
+  for (let i = 0; i < Math.ceil(GATE_PAUSE / FIXED_DT) + 3; i++) update(FIXED_DT);
+  check(enemies.length > 0 && player.hurt <= 0,
+    'a batch must arrive with no grace, hurt ' + player.hurt);
+
+  // A frame that kills the last enemy *and* the player is a death, not a
+  // rank-up. Without the guard the mod cards bury the death screen.
+  reset();
+  player.hp = 1;
+  player.hurt = 0;
+  const fatal = mob(player.x, player.y, { speed: 0 });
+  enemies.push(fatal);
+  shot({ vx: 0, maxTravel: 100 });      // already on top of it; no travel needed
+  update(1 / 60);
+  check(kills === 1 && enemies.length === 0, 'the last enemy must still have died');
+  check(screen === 'dead', 'dying on the last kill must show death, not a card: ' + screen);
+  check(rank === 0, 'a dive that ends on its last kill grants no rank, rank ' + rank);
 
   // Arrows move the highlight and wrap; Enter takes the highlighted card.
   // The stubs record which one was applied, so taking the wrong card fails.
   let picked = -1;
   const stubs = () => [0, 1, 2].map(i =>
     ({ name: 'c' + i, desc: '', apply: () => { picked = i; } }));
+  screen = 'mods';
   choices = stubs();
   choiceIndex = 1;
   aim.x = 0;                 // cursor parked off the cards, so that hover
@@ -327,7 +566,7 @@ if (location.search === '?test') {
   update(0.016);
   check(choiceIndex === 2, 'right arrow must move the highlight');
   // D and A steer the cards as well as the arrows do -- the hand is already on
-  // WASD, and reaching for the arrows to pick an upgrade is the whole
+  // WASD, and reaching for the arrows to pick a mod is the whole
   // complaint that put the mouse and Enter here.
   justPressed.add('KeyD');
   update(0.016);
@@ -343,7 +582,7 @@ if (location.search === '?test') {
     'Enter must take the highlighted card, took ' + picked);
 
   // Clicking a card takes that card, whatever the arrows had highlighted.
-  screen = 'levelup';
+  screen = 'mods';
   picked = -1;
   choices = stubs();
   choiceIndex = 1;
@@ -357,20 +596,20 @@ if (location.search === '?test') {
 
   // A still mouse must not overrule the arrows -- the cursor is left sitting
   // on card 2 from the click above.
-  screen = 'levelup';
+  screen = 'mods';
   choices = stubs();
   choiceIndex = 0;
   update(0.016);
   check(choiceIndex === 0, 'a still cursor must not move the highlight');
-  // ...and the level-up is left open, for the number-key check below.
+  // ...and the offer is left open, for the number-key check below.
 
-  // Pressing its number applies the upgrade and resumes play.
+  // Pressing its number applies the mod and resumes play.
   const before = player.speed;
-  choices = [UPGRADES.find(u => u.name === 'Fins')];
+  choices = [MODS.find(u => u.name === 'Fins')];
   justPressed.add('Digit1');
   update(0.016);
   check(screen === 'playing' && player.speed > before,
-    'picking must apply the upgrade and resume');
+    'picking must apply the mod and resume');
 
   // --- menus take the mouse as well as the keys ---
   // Hovering a row moves the cursor to it, and a click runs that row. The
@@ -439,7 +678,7 @@ if (location.search === '?test') {
   // A hit that doesn't kill must still throw sparks, or damage looks like
   // nothing happened.
   reset();
-  const tough = mob(player.x + 90, player.y, { hp: 9, maxHp: 9, xp: 1 });
+  const tough = mob(player.x + 90, player.y, { hp: 9, maxHp: 9, value: 1 });
   enemies.push(tough);
   fireAt(tough);
   for (let i = 0; i < 40; i++) update(1 / 60);
@@ -499,14 +738,14 @@ if (location.search === '?test') {
   window.dispatchEvent(new KeyboardEvent('keyup', { key: 'к', code: 'KeyR' }));
 
   reset();
-  screen = 'levelup';
-  choices = [UPGRADES.find(u => u.name === 'Fins')];
+  screen = 'mods';
+  choices = [MODS.find(u => u.name === 'Fins')];
   const speedBefore = player.speed;
   // '&' is what an unshifted 1 types on a French AZERTY keyboard.
   window.dispatchEvent(new KeyboardEvent('keydown', { key: '&', code: 'Digit1' }));
   update(1 / 60);
   check(screen === 'playing' && player.speed > speedBefore,
-    'an AZERTY-layout 1 must pick the first upgrade');
+    'an AZERTY-layout 1 must pick the first mod');
   window.dispatchEvent(new KeyboardEvent('keyup', { key: '&', code: 'Digit1' }));
   keys.clear();
 
@@ -634,6 +873,112 @@ if (location.search === '?test') {
     ', hint sits at ' + HINT_Y + ' -- add a row and it overflows');
   screen = 'title';
 
+  // The same rule sideways: a mod description is prose in a fixed-width box, and
+  // the renderer centres it, so it cannot notice one running off the edge. Two
+  // of them did, and every check passed while the cards were unreadable.
+  const widest = widestModDesc();
+  check(widest <= CARD_W - CARD_PAD * 2,
+    'a mod description must fit its card: widest is ' + Math.round(widest) +
+    'px, the card allows ' + (CARD_W - CARD_PAD * 2) + 'px');
+
+  // ...and downwards. The cards grew from 140 to 186 tall when the numbers went
+  // on them (D52); another row would put them through the hint below.
+  // Read from cardRect(), which owns the card's box, so moving the cards moves
+  // this check with them instead of leaving it measuring the old place.
+  const cardsEnd = cardRect(0, 3).y + CARD_H;
+  check(cardsEnd < MOD_HINT_Y - 10,
+    'the mod cards must end above the hint: cards end at ' + cardsEnd +
+    ', hint sits at ' + MOD_HINT_Y);
+
+  // ...and sideways is not the only way a card overflows. Every mod must fit
+  // inside the rows the card draws, or a number silently falls off the bottom.
+  const tooTall = MODS.filter(m => modPreview(m).length > MOD_ROWS);
+  check(tooTall.length === 0,
+    'a mod must move at most ' + MOD_ROWS + ' stats, over: ' +
+    tooTall.map(m => m.name + ' (' + modPreview(m).length + ')').join(','));
+
+  // --- the fixed timestep (D53) ---
+  // S1's DoD: "a railgun-speed projectile cannot tunnel a thin enemy at any dt
+  // the frame cap allows". A fixed step bounds dt but not bullet *speed*, so
+  // the shot is swept like the dash. 6000px/s is 50px per tick against a
+  // darter's 10px reach -- a point test flies straight through.
+  // +325, not +300: at 6000px/s the bullet samples every 50px from the player,
+  // so an enemy at +300 sits *exactly* on a sample and a point test hits it by
+  // arithmetic luck. Placed mid-step, halfway between two samples, it is the
+  // case that actually tunnels.
+  reset();
+  queuePaused = true;
+  const thin = mob(player.x + 325, player.y, { r: 6, hp: 5, maxHp: 5 });
+  enemies.push(thin);
+  shot({ vx: 6000, maxTravel: 900 });   // railgun speed: 50px per fixed tick
+  for (let i = 0; i < 20 && thin.hp === 5; i++) update(FIXED_DT);
+  check(thin.hp === 4, 'a railgun-speed shot must not tunnel a thin enemy, hp=' + thin.hp);
+
+  // A shot's range is the distance it actually covered, not BULLET_SPEED x time.
+  // Identical today, wrong the moment a weapon fires at another speed.
+  reset();
+  queuePaused = true;
+  shot({ x: 100, y: 400, vx: 2000, maxTravel: 200 });
+  for (let i = 0; i < 40 && bullets.length; i++) update(FIXED_DT);
+  check(bullets.length === 0,
+    'a fast shot must still die at its own range, not at BULLET_SPEED\'s');
+
+  // The clock banks leftover time rather than stretching a tick to fit the
+  // frame. A 60Hz frame is two ticks at 1/120, a 144Hz frame is one or none,
+  // and the remainder carries -- which is what makes both simulate the same
+  // game. `advanceBy` returns its tick count so this can read it, not infer it.
+  reset();
+  check(advanceBy(0) === 0, 'no elapsed time must run no ticks');
+  check(advanceBy(FIXED_DT * 2) === 2, 'a 60Hz frame must run two ticks at 1/120');
+  check(advanceBy(FIXED_DT * 0.6) === 0, 'a part-tick must run nothing yet...');
+  check(advanceBy(FIXED_DT * 0.6) === 1, '...and the banked remainder must then fire');
+  // The cap is inside advanceBy now, so it is reachable: a frame that claims a
+  // whole minute passed must still simulate only MAX_FRAME_DT of it, or coming
+  // back to a tab would run the dive forward all at once.
+  reset();
+  check(advanceBy(MAX_FRAME_DT) === MAX_FRAME_DT / FIXED_DT,
+    'a full frame must run its whole budget of ticks');
+  reset();
+  check(advanceBy(60) === MAX_FRAME_DT / FIXED_DT,
+    'a minute away from the tab must still only advance the capped budget');
+
+  // --- the development readout (D52) ---
+  // Every stat a mod can move must be on screen, or the readout quietly stops
+  // covering the thing that changed. Derived from the mods themselves, so
+  // adding a mod that touches a new field fails here rather than going unseen.
+  reset();
+  // hp/maxHp are the exception: they are the `HP 3/4` on the line above.
+  const shown = PLAYER_STATS.map(s => s.stat).concat(['hp', 'maxHp']);
+  const unshown = [...new Set(MODS.flatMap(m => modPreview(m).map(c => c.stat)))]
+    .filter(k => !shown.includes(k));
+  check(unshown.length === 0,
+    'every stat a mod changes must be in PLAYER_STATS, missing: ' + unshown.join(','));
+  check(PLAYER_STATS.every(s => s.stat in player),
+    'every PLAYER_STATS entry must name a real player field: ' +
+    PLAYER_STATS.filter(s => !(s.stat in player)).map(s => s.stat).join(','));
+
+  // The preview is computed from `apply`, so it cannot advertise a number the
+  // mod does not deliver. Check it against actually taking the mod.
+  reset();
+  const preview = modPreview(fins);
+  fins.apply(player);
+  check(preview.length === 1 && preview[0].stat === 'speed' &&
+        preview[0].to === player.speed,
+    'a mod preview must match what taking it does: previewed ' +
+    JSON.stringify(preview) + ', speed is now ' + player.speed);
+  // ...and it must not have changed the player just by being previewed.
+  reset();
+  const speedUnpreviewed = player.speed;
+  modPreview(fins);
+  check(player.speed === speedUnpreviewed,
+    'previewing a mod must not apply it, speed ' + player.speed);
+
+  // Mods are run-scoped (D34): last dive's picks must not carry into the next.
+  modCounts.Fins = 2;
+  reset();
+  check(Object.keys(modCounts).length === 0,
+    'a new dive must start with no mods held, got ' + JSON.stringify(modCounts));
+
   // ---------- scenarios ----------
   // A scenario must set up exactly what it names and nothing else, or it is not
   // isolation. The load-bearing one is "no new arrivals": without it a scenario
@@ -662,8 +1007,11 @@ if (location.search === '?test') {
   applyScenario('one-drifter');
   const steppedFrom = elapsed;
   advance(30);
-  check(Math.abs(elapsed - steppedFrom - 30 / 60) < 1e-9,
-    'advance(30) must move exactly 30 ticks, moved ' + (elapsed - steppedFrom));
+  // Derived from FIXED_DT, not from a hardcoded 1/60: this check asserted the
+  // old step size and failed the moment D53 changed it, which is the right
+  // failure but the wrong reason to have to edit a test.
+  check(Math.abs(elapsed - steppedFrom - 30 * FIXED_DT) < 1e-9,
+    'advance(30) must move exactly 30 fixed ticks, moved ' + (elapsed - steppedFrom));
 
   // ?test is not a scenario, so the frame loop must still run normally here.
   check(stepped === false, '?test must not be stepped');

@@ -4,7 +4,183 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-09-28
+
+**S1 — Combat core closed.** Igor: "close s1, s2 coming in a different
+session". All DoD bullets met; `plan.md` records no active stage. Eleven
+decisions, D45 (the weapon is manual) through D56 (the dash is a fixed,
+committed lunge), plus D57 (docs gets its own checks).
+
+**`docs/` gets its own checks**
+D57, asked for by Igor after three corruptions in one day went unnoticed: an
+idea of his deleted by a bad splice, D56's changelog entry silently never
+written, and decisions cited as bare numbers. `tests/docs.test.js` checks that
+every decision has a name, that numbering is gapless, that no doc cites a
+decision that does not exist, that the newest decision reached the changelog,
+and that the docs `CLAUDE.md` names still exist. Verified by breaking each.
+13 Node tests, was 8. It cannot check whether prose is *true* — that stays the
+consistency sweep's job.
+
+**`Lull` stays out, and five misreadings corrected**
+Igor: "Lull leave out" — D55's removal is confirmed, though the removal itself
+was Claude's overreach at the time ("useless *at this point*" was a "not yet",
+not a delete). An audit for the same error found four more: D34's 12-batch
+*example* cited as if it sized a layer, an unmarked design call (the dash's
+free shove), invented constants presented as derived (the mod caps,
+`MOD_OFFER_DELAY`), and `foundations.md` amended without asking (D53 dropping
+render interpolation). All now marked in `decisions.md` as Claude's picks.
+
+The audit also found that **Igor's "fish from behind the screen" idea had been
+deleted** from `ideas.md` — an index-splice edit during the D56 write-up wiped
+everything between two anchors. Restored, and `git diff` confirms nothing else
+was lost. No check covers `ideas.md`, so nothing would have caught it.
+
+`CLAUDE.md` gained the rule all of this points at: Claude unsure → ask before
+documenting; Igor unsure → it is an open question and goes in `ideas.md`. Leans
+("inclined to", "might", "at this point", "for later") are never rounded up
+into decisions.
+
+**Fix: the dash is a fixed, committed lunge**
+D56, two bugs from Igor. **Dash length no longer rides on `player.speed`** —
+`DASH_SPEED_MUL` is gone and `player.dashSpeed` (884px/s) is its own field, so
+`Fins` stops lengthening the lunge. Measured: flat 141px at every Fins count,
+where it ran 141 → 402px; peak escape falls from 386 to 141 invulnerable px/s.
+The root-cause fix rather than capping Fins, and it makes dash reach a stat
+that can be sold at `home` later.
+
+**Live input can no longer steer a dash.** Travel followed the keys held this
+frame while only the wave's facing was frozen, so switching keys turned the
+lunge, holding the opposite key reversed it (wave facing backwards, hitting
+nothing), and *releasing* everything stopped you dead after 7px while
+`dashTime` ran on — a free 0.31s of invulnerability for standing still, 31%
+uptime with three `Reflex`. Travel now follows the frozen direction.
+
+Verified by breaking both. 171 checks, was 165. Two of the new checks were
+themselves wrong first: one looped on `dashTime > 0` before the dash had
+started so it never ran, and one inherited the previous case's held key and
+dashed diagonally, which nearly read as a game bug.
+
 ## 2026-09-27
+
+**`Lull` removed: a mod that paid for being cornered**
+D55, from Igor playing D54's batches — "gate safety mod is useless at this
+point". Measured across 12 batches and 3 seeds: with the player centred, **0 of
+36** arrivals reach them inside the 1.2s guard (earliest contact 2.04s). It
+only fires when you are edged or cornered — 29 and 35 of 36 — so it rewarded
+the position the game is trying to punish. Removed with `player.gateGuard` and
+its readout row. The pool is six and comfort is down to one, since two of D34's
+three comfort candidates are now dead (the currency magnet by D35, this by
+measurement). Recorded with the condition that revives it: arrivals that begin
+near the player, which is Igor's "fish from behind the screen" idea, now in
+`ideas.md`. 165 checks, was 166.
+
+**S1 — Combat core: the batches, re-derived from scratch**
+D54, closing the last S1 work item. Igor played it: batches were "very easy".
+The arithmetic says why — the weapon does 2.5 hp/s and no mod raises damage
+(D34), so a 10–45s batch needs 25–112 hp. The old batches held **3 to 15**,
+i.e. 1.2–6.0s of shooting. Every one was under target by a factor of five.
+Twelve batches now, sized on hp, ramping 10 → 68 hp; peak 38 simultaneous
+enemies against a 500 budget. Bot went from surviving every seed to dying on
+four of five — direction, not verdict (D50). Enemy hp, speed and movement
+untouched: behaviours are S5.
+
+**S1 — Combat core: fixed timestep, and bullets sweep too**
+D53, S1's last DoD item. `FIXED_DT` is 1/120 and `stepFixed()` banks leftover
+time, so every machine simulates the same game whatever its refresh rate. Render
+interpolation is **not** built and `foundations.md` is amended: a shorter tick
+buys the same smoothness without touching every draw call, 8ms of stale picture
+against 17ms, for ~1.1ms of a 16.7ms frame. Bullets now sweep their path like
+the dash — a fixed step bounds `dt` but not bullet speed, and the DoD names a
+railgun; measured, the old point test tunneled a darter on 9% of positions.
+A shot's range is now the distance it actually covered.
+
+Verified by breaking all three. One check had to be fixed rather than trusted:
+the railgun enemy sat exactly on a sample boundary, so a point test hit it by
+luck and the check could only pass. Also fixed a bot bug this exposed — its run
+budget was counted in ticks, so halving the step halved every dive.
+
+**The development readout: show the numbers**
+D52, Igor's request. A second HUD line built from `PLAYER_STATS`, and every mod
+card now shows the change it makes and how many you hold. The change is computed
+by applying the mod to a copy of the player, so a card cannot advertise a number
+the mod does not deliver. A check proves every stat a mod can move is on screen.
+This is why `Impact` offered twice looked like a bug — five of seven mods stack
+and the card was identical on a repeat. Partially overrides D34 on presentation,
+deliberately and only for development.
+
+166 checks, was 151. `npm test` 8, was 7.
+
+**S1 — Combat core: the dash is bought, and the offer waits for the death**
+D51, both from Igor playing D50. `player.dashDamage` starts at 0 and the new
+`Impact` mod (body, max 3) buys it — the dash still moves, grants i-frames and
+**always shoves**, because scattering a crowd is what makes diving into one a
+play; only the wound is priced. The hit flash is gated on damage too, since a
+flash on a push that did nothing is a lie. Seven mods now, and this is the first
+with an obvious `gear` twin for S4, per Igor's "can be home screen upgrade too".
+
+The mod cards no longer land on the frame of the kill: the kill burst lives
+0.5s and the offer was dimming the arena over it. `MOD_OFFER_DELAY` (0.6s) holds
+the offer — and the batch queue — until the death has played. The rank is still
+banked on the kill.
+
+151 checks, was 145. Verified by breaking both: opening on the kill frame fails
+2, restoring free dash damage fails 6. The bot's numbers are unchanged, because
+it has no dash policy and cannot see either change (D50).
+
+**Fix: the dash stepped over its own hitbox**
+D50, from Igor playing the D49 build. The dash's wave was a point test with a
+fixed 40px reach taken once a frame, while the dash covers
+`player.speed * 3.4 * dt` — and `Fins` raises speed with no cap. So its range
+grew all dive (147px at 0 Fins, 402px at 10) and it flew straight through
+enemies: 54% of positions connected at 8 Fins on a 30fps frame, 27% at 20fps,
+worst of all against an enemy right next to you. Now swept along the segment
+travelled, with facing judged from where the frame started. 100% at every speed
+and frame time tested. 145 checks, was 144, verified by restoring the point test.
+
+Bullets have the same hole — measured at 9% of shots passing through a darter
+at the 20fps `dt` cap, clean at 30fps and above — and are deliberately left for
+the fixed timestep, S1's last DoD item.
+
+**Correction: the bot is not a difficulty instrument.** D49 called the bulwark
+batches too slow at 24–99.7s. Igor played it: batches are *too easy*. The bot
+kites and never commits, so the figure measured the bot, not the batch. Bot
+clear-times are a regression signal only (D50).
+
+Also: the `Vitality` card said "already full", which reads as a promise of full
+health; it only means the new heart arrives filled.
+
+**S1 — Combat core: one rank per batch, mods at the gate**
+D49, implementing D33 and D34. The XP bar is deleted. Clearing a batch raises
+`rank` by one and offers three mods; nothing is offered mid-batch, which is the
+comfort requirement D33 exists for. The mod pool is six, body and comfort only —
+Fins, Vitality, Reflex, Nerve, Mend, Lull — and a check refuses any other
+`scope`, so a weapon mod cannot be added by reflex before S5 — Content.
+
+Removed as husks: `gainXp`, `xp`, `xpNext`, `level`, `XP_BASE`, `XP_GROWTH`, the
+geometric curve, the XP bar across the top of the screen, and the prototype's
+four weapon upgrades. `IFRAMES` and `DASH_COOLDOWN` became `player.iframes` and
+`player.dashCooldown` — a mod is a line of data and a line of data cannot edit a
+`const`. Gems are money: `ENEMY_TYPES.xp` is `.value` and collecting one pays
+`currency`, which buys nothing until S4.
+
+Two mods D34 named were **not** built: pickup radius and a currency magnet. D35
+auto-collects currency and leaves both with nothing to do, so they would have
+been husks with a known expiry date. Recorded as a correction to D34.
+
+**Verified by breaking it**: five mutations, each failing exactly its own
+checks — ranking up per kill instead of per batch (5 failures), dropping the
+death-outranks-rank-up guard (2), ignoring a mod's `max` (1), healing without
+the clamp (1), deleting `Lull` (1). 144 checks, was 119.
+
+Two mod descriptions overflowed their cards — caught by looking at the screen,
+not by a check, because the renderer centres the text. Shortened and guarded:
+`widestModDesc()` measures the pool and a check holds it inside the card.
+
+**Measured**, and it is a finding: bot, 5 seeds, 8 batches, mean 16.1s per batch
+but a 3.4–99.7s range. The bulwark batches take 24–99.7s against a 10–45s
+target, because no mod raises damage any more and the bulwark's 6hp was tuned
+against a weapon that compounded. The `// balance` block is next in S1 and now
+has a number to aim at. Figures live in `roadmap.md` → Health.
 
 **`073a3ef` Track docs and CLAUDE.md in git**
 D40. Reverses `10b3b96` and `002a562`. The docs now hold 40 decisions, the
@@ -258,3 +434,52 @@ i-frames; death and restart.
 ## 2026-09-06
 
 **`6d114bf` Initial commit.** Canvas, a glowing circle, WASD movement.
+
+**Cleanup pass (`/simplify`, four angles)**
+Quality only, no behaviour change; 165 checks and `npm test` 8 throughout, and
+both sweeps re-verified by reverting them to point tests (2 failures, exactly
+theirs). The findings worth naming:
+
+- **The fixed-timestep clock moved into `game/`.** `stepFixed()` lived in
+  `main.js`, which is rewritten on the port — so the mechanism behind "every
+  machine simulates the same game" would have been re-derived from scratch, and
+  its check was testing a throwaway file. It is `advanceBy()` in `game/logic.js`
+  now, owning the accumulator, the cap (`MAX_FRAME_DT`, previously a bare `0.05`
+  literal in three places and outside the `// balance` block) and the tick
+  count. Node drives the same entry point the browser does, and the frame-cap
+  branch is reachable from a check for the first time — it was unreachable
+  inside `frame()`.
+- **Two `Math.hypot` calls were reintroduced into per-frame loops**, which
+  CLAUDE.md bans outright and which the `segDistanceSq` comment cites in its own
+  defence. The dash's `fx/fy/hypot` setup also ran for *every* enemy on *every*
+  tick while being read only during a dash — ~93% waste. Now behind its guard,
+  with the facing cone compared squared (no sqrt, no divide), and `dashing` and
+  `Math.pow(PUSH_DRAG, dt)` hoisted out of the enemy loop.
+- **Bullets stopped carrying `px`/`py`.** Unlike the player they are never
+  clamped, so the swept segment's start is exactly `b.x - b.vx * dt` — two
+  fields and a per-bullet hypot for something already derivable. They carry
+  `speed` instead, which is what the range measurement actually wanted.
+- **`TICK` in the harness was a hand-copy of `FIXED_DT` with a test to notice
+  when they disagreed.** Every caller already had a loaded game, so the copy
+  and its guard are gone — deletion, not a guard, was the answer.
+- Removed: `modStack()` (one caller), `cardBottom()` (restated what `cardRect`
+  owns, in the wrong file), `STATS_SHOWN_ELSEWHERE` (a content constant no
+  content read), a mutable `hudY` that was always 70, and `CARD_DESC_FONT`
+  moved to `platform/` — a CSS string means nothing in the layer that ports.
+- **A renderer `.slice(0, 2)` was a symptom patch**: it silently dropped a third
+  change-row. Replaced by `MOD_ROWS` and a check over the pool.
+- `checks.js`: five hand-rolled bullet literals became one `shot()` helper —
+  every one would have computed `NaN` travel once bullets gained `speed` — and
+  six copy-pasted dash setups became `dashRight()`, two of which had already
+  drifted and forgotten to release the key.
+- **Found a check that could not fail**: "no second dash inside the cooldown"
+  ran with no movement key held, so `len === 0` blocked the dash and the
+  cooldown was never tested. It holds the key now and asserts `dashCd > 0`.
+
+Skipped, with reasons: moving `PLAYER_STATS` wholesale to `platform/` (a real
+seam argument, but it is a content table and the call is Igor's); reusing
+`drawHint()` on the mod screen (moves the hint 216px and recolours it — a
+visible change, not a refactor); deleting the five stat rows no mod can move
+(Igor asked for those numbers by name, range included); and making the beat
+total `GATE_PAUSE` rather than `GATE_PAUSE + MOD_OFFER_DELAY` (a feel change,
+so Igor's).

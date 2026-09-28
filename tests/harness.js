@@ -10,8 +10,10 @@ import vm from 'node:vm';
 // The six names, and only the six.
 export const SEAM = ['sound', 'keys', 'justPressed', 'tapped', 'moveCursor', 'aim'];
 
-// The fixed timestep, in one place. Everything that drives update() uses it.
-export const TICK = 1 / 60;
+// No TICK constant here on purpose. It used to be a copy of the game's
+// FIXED_DT with a test to notice when the two disagreed, but every caller
+// already has a loaded game in hand -- so the deeper answer was to delete the
+// copy, not to guard it. Read `g.FIXED_DT`.
 
 export function loadGame() {
   const src = ['game/content.js', 'game/state.js', 'game/logic.js']
@@ -41,12 +43,13 @@ export function loadGame() {
   // Bridge them with accessors generated from the names, rather than eval.
   const STATE = ['player', 'enemies', 'bullets', 'gems', 'particles',
                  'elapsed', 'kills', 'shake', 'queuePaused', 'batchIndex', 'breathTimer',
-                 'xp', 'xpNext', 'level', 'choices', 'choiceIndex',
+                 'rank', 'currency', 'choices', 'choiceIndex', 'modCounts',
                  'screen', 'currentSeed', 'bulletId', 'shakeLevel'];
   // Constants are `const`, so they get a getter only.
-  const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'UPGRADES',
-                  'SCENARIOS', 'BATCHES', 'GATE_PAUSE', 'XP_BASE', 'XP_GROWTH',
-                  'GEM_LIFE', 'IFRAMES', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
+  const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS',
+                  'SCENARIOS', 'BATCHES', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
+                  'MOD_OFFER_DELAY', 'MOD_ROWS',
+                  'GEM_LIFE', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [
     ...STATE.map(n => `${n}: { get: () => ${n}, set: v => { ${n} = v; }, configurable: true }`),

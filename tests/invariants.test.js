@@ -6,7 +6,7 @@
 // silently, and that is what this file is for.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { loadGame, SEAM, TICK } from './harness.js';
+import { loadGame, SEAM } from './harness.js';
 import { diveReport } from './bot.js';
 
 // Drives a dive with pseudo-random but seed-derived input, so a failing case
@@ -35,7 +35,7 @@ function dive(seed, ticks, inputSeed = seed) {
       g.aim.x = next() * 1280;
       g.aim.y = next() * 800;
     }
-    g.update(TICK);
+    g.update(g.FIXED_DT);
     g.justPressed.clear();
   }
   return g;
@@ -47,7 +47,8 @@ function allNumbers(g) {
   const take = o => { for (const k in o) if (typeof o[k] === 'number') out.push([k, o[k]]); };
   take(g.player);
   for (const arr of [g.enemies, g.bullets, g.gems, g.particles]) for (const e of arr) take(e);
-  out.push(['elapsed', g.elapsed], ['shake', g.shake], ['xp', g.xp], ['kills', g.kills]);
+  out.push(['elapsed', g.elapsed], ['shake', g.shake],
+           ['rank', g.rank], ['currency', g.currency], ['kills', g.kills]);
   return out;
 }
 
@@ -59,6 +60,20 @@ describe('the port seam', () => {
     const g = loadGame();
     expect(typeof g.update).toBe('function');
     expect(typeof g.reset).toBe('function');
+    // The fixed-step clock is game/'s now (D53), so Node can drive the same
+    // entry point the browser does instead of calling update() by hand.
+    expect(typeof g.advanceBy).toBe('function');
+  });
+
+  it('banks real time into whole fixed steps, capped (D53)', () => {
+    const g = loadGame();
+    g.reset(1);
+    expect(g.advanceBy(0)).toBe(0);
+    expect(g.advanceBy(g.FIXED_DT * 2)).toBe(2);
+    expect(g.advanceBy(g.FIXED_DT * 0.6)).toBe(0);   // banked, not stretched
+    expect(g.advanceBy(g.FIXED_DT * 0.6)).toBe(1);
+    // A minute in another tab must not be simulated all at once.
+    expect(g.advanceBy(60)).toBe(g.MAX_FRAME_DT / g.FIXED_DT);
   });
 });
 
@@ -67,9 +82,10 @@ describe('the bot', () => {
     // The bot is the instrument every balance number comes from (D16), so it
     // needs a caller: without one it can rot silently and nothing would say so.
     const a = diveReport(4471, 3);
-    // Not '=== 3': the prototype's level-up screen still interrupts a dive, so
-    // how many batches a seed reaches is not fixed until D34 removes it. What
-    // must hold is that the bot clears *something* and does so deterministically.
+    // Not '=== 3': how many batches a seed reaches depends on the batch table,
+    // which D54 re-derived and S6 will move again. What must hold is that the
+    // bot clears *something* and does so deterministically. (The level-up
+    // screen that used to truncate this is gone -- D49.)
     expect(a.clearTimes.length).toBeGreaterThan(0);
     expect(diveReport(4471, 3)).toEqual(a);
   });

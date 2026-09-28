@@ -10,14 +10,23 @@ must stay true while doing it.
 
 ## Active stage
 
-**S1 — Combat core.** Started 2026-09-27. S0 — Foundations & spike closed the
-same day, all exit conditions met.
+**None. S1 — Combat core closed 2026-09-28**, all exit conditions met. **S2 —
+The dive: camera and descent** is next and opens in a fresh session, by Igor's
+call — not started here.
 
-Done in S1: the weapon is manual (D45), the batch queue and gate (D48).
-Next in S1: **one rank per batch and mods at the gate** (D34) — the prototype's
-XP bar still interrupts mid-batch, which D33 forbids; then a fixed timestep;
-then the `// balance` block re-derived from scratch, now that batches exist to
-derive it against.
+Done in S1: the weapon is manual (D45), the batch queue and gate (D48), one
+rank per batch with mods at the gate (D49), the dash sweeps its path (D50), the
+dash is bought (D51), the development readout (D52), the fixed timestep with
+swept bullets (D53), and the batches re-derived (D54).
+
+**Closed 2026-09-28 by Igor: "close s1, s2 coming in a different session".**
+Every DoD bullet was met and Igor confirmed the fight (2026-09-27, on D54's
+batches: "the fight feel better now") — the one thing the bot could not judge.
+
+Carried out of S1, none of it blocking: the dash economy rebalance (S6 —
+Balance owns it), the `home`-vs-`mod` tier question for dash upgrades (S4 —
+Meta loop skeleton), Igor's fish-from-behind-the-screen arrival idea, and the
+gate beat running 1.8s rather than 1.2s — Igor, asked, said leave it.
 
 ### S0 — Foundations & spike · closed 2026-09-27
 
@@ -95,7 +104,7 @@ fast-check land as dev dependencies.
 **Why first:** the seeded RNG is what makes every later balance claim mean
 something, and the glow measurement is what decides whether D30 holds.
 
-## S1 — Combat core: manual fire and the batch gate
+## S1 — Combat core: manual fire and the batch gate · closed 2026-09-28
 
 **Entry:** S0 exits.
 
@@ -107,13 +116,20 @@ pool is **body and comfort only** (D34 — Mods), so mods and manual fire are no
 being balanced against each other at the same time.
 
 **Exit (DoD):**
-- Three batches clear in sequence; the gate provably blocks progress while a
-  batch is non-empty, and provably releases when it empties.
-- Fixed timestep in place; a railgun-speed projectile cannot tunnel a thin
-  enemy at any `dt` the frame cap allows.
-- Bot reports time-to-clear per batch, paired across seeds.
-- A mod is offered only at a gate, never mid-batch — checked, not assumed.
-- Playable: you fight batches with a mouse and it is recognisably a game.
+- ~~Three batches clear in sequence; the gate provably blocks progress while a
+  batch is non-empty, and provably releases when it empties.~~ Done, D48.
+- ~~Fixed timestep in place; a railgun-speed projectile cannot tunnel a thin
+  enemy at any `dt` the frame cap allows.~~ Done, D53 — and the tunneling half
+  needed swept collision, not just a bounded `dt`.
+- ~~Bot reports time-to-clear per batch, paired across seeds.~~ Done, D49 — the
+  bot takes a mod now, so it no longer stalls at the offer. The numbers are in
+  `roadmap.md` → Health, and they are what says the balance block is next.
+- ~~A mod is offered only at a gate, never mid-batch — checked, not assumed.~~
+  Done, D49, and verified by ranking up per kill instead: 5 failures.
+- ~~Playable: you fight batches with a mouse and it is recognisably a game.~~
+  Igor has been playing it since D49.
+- ~~**Igor confirms the fight.**~~ Done, 2026-09-27: "the fight feel better
+  now", on D54's batches.
 
 **The hard part:** this is the genre change. Everything about the prototype's
 tuning is void here. Expect this stage to take longer than it looks.

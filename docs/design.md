@@ -3,21 +3,20 @@
 Describes the **present**, not the plan. Update it when reality changes.
 
 **The present is partway to the design.** S1 — Combat core has started: the
-weapon is manual (D45) and the batch queue and gate are in (D48). Still to come
-in S1: one rank per batch with mods at the gate (D34), which removes the
-prototype's XP bar and its mid-batch interruption, and the re-derived
-`// balance` block. The arena is still fixed — the camera is S2. Nothing here
-is a statement of intent.
+weapon is manual (D45), the batch queue and gate are in (D48), and rank and mods
+are in (D49). Still to come in S1: the fixed timestep, and the `// balance`
+block re-derived from scratch — which the bot numbers below now say is overdue.
+The arena is still fixed — the camera is S2. Nothing here is a statement of
+intent.
 
 ## What it is
 
 A twin-stick action game in a fixed arena. You move with WASD, aim with the
-mouse and **fire by holding the left button** (D45); kills drop motes that are
-XP; filling the bar pauses the game and offers three random upgrades — that
-interruption is the prototype's, and D34 replaces it. Enemies arrive one gated
-**batch** at a time. Every dive ends in death; the current measured times live in
-`roadmap.md` → Health, and only there, and **they are void** — they measured an
-auto-firing weapon.
+mouse and **fire by holding the left button** (D45). Enemies arrive one gated
+**batch** at a time; clearing one raises your **rank** and offers three **mods**
+in the quiet beat that follows, which is the only moment a dive is not combat
+(D33, D49). Kills drop gems, which are money and buy nothing yet. Every dive
+ends in death; the measured times live in `roadmap.md` → Health, and only there.
 
 ## Files
 
@@ -26,25 +25,26 @@ index.html              shell: canvas, CSS, eight script tags in load order
 
 game/       content.js  every tuning number + all content tables
             state.js    run state, settings, reset(), openScreen()
-            logic.js    step() — spawning, movement, collision, XP
-                        ── 654 lines. Survives the port.
+            logic.js    step() — arrivals, movement, collision, the gate
+                        ── 1101 lines. Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
             render.js   canvas, arena scaling, every draw function
 main.js                 frame loop, dt, fps, boot
-                        ── 476 lines. Rewritten on the port.
+                        ── 580 lines. Rewritten on the port.
 
 checks.js               the ?test suite → the port's regression tests
 ```
 
-Line counts are as of 2026-09-19. Regenerate rather than trust them:
-`wc -l game/*.js platform/*.js main.js && grep -c console.assert checks.js`.
+Line counts are as of 2026-09-27. Regenerate rather than trust them:
+`wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
+*reports*, never a grep — some call sites sit inside loops.
 
-The platform share is **42%** (476 of 1130). D17 measured 23% on 2026-09-12;
-it grew because `render.js` took on the mouse work. This is the number to
-watch — CLAUDE.md says not to invest in the canvas layer, and this is what
-that rule looks like when it slips.
+The platform share is **35%** (580 of 1681). D17 measured 23% on 2026-09-12 and
+it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
+while `platform/` did not. This is the number to watch — CLAUDE.md says not to
+invest in the canvas layer, and this is what that rule looks like when it slips.
 
 Plain `<script>` tags, not modules, so `file://` works. **Load order matters**
 and is documented in `index.html`.
@@ -73,14 +73,30 @@ in `game/content.js`, because which key means which action is content (D44).
 ## The frame
 
 ```
-frame(now)                        main.js
-  dt = min(elapsed, 0.05)         capped so tab-switching can't teleport things
-  update(dt)                      game/logic.js
-    step(dt)                      screen dispatch, then gameplay
-    shake fade                    outside step(): step() returns early on menus
-    justPressed.clear()
-  draw()                          platform/render.js
+frame(now)                        main.js -- only measures how long a frame took
+  advanceBy(elapsed)              game/logic.js: banks time into whole ticks
+    min(elapsed, MAX_FRAME_DT)    a minute in another tab is discarded, and the
+                                  same cap bounds catch-up to 6 ticks
+    update(FIXED_DT)  x0..6       0 ticks on a fast frame, 2 on a 60Hz one
+      step(FIXED_DT)              screen dispatch, then gameplay
+      shake fade                  outside step(): step() returns early on menus
+      justPressed.clear()
+  draw()                          platform/render.js -- every frame, regardless
 ```
+
+**The simulation runs at `FIXED_DT` (1/120) and nothing else** (D53). Leftover
+time is banked in an accumulator, so the same dive plays identically on a 60Hz
+and a 144Hz machine — with a variable `dt`, every collision test sampled at a
+distance set by the player's frame rate. There is no render interpolation: the
+picture is drawn wherever the last tick left things, at most 8ms stale, which
+is why the step is 1/120 rather than 1/60.
+
+The clock lives in **`game/`**, not in the frame loop. A fixed timestep is a
+property of the simulation, so putting the accumulator in `main.js` would have
+meant the port re-deriving it and its check testing a file that gets thrown
+away. `main.js` now measures elapsed time and hands it over; `advanceBy()`
+owns the banking, the cap and the tick count, Node drives the same entry point
+the browser does, and the invariant guarding D53 runs in both suites.
 
 `update` / `draw` are strictly separated: `update` changes numbers, `draw`
 reads them. Nothing persists on screen — the arena is repainted every frame.
@@ -90,15 +106,15 @@ reads them. Nothing persists on screen — the arena is repainted every frame.
 ```
 title ──Start──> playing ──Esc──> paused ──Quit──> title
                    │ ▲              │
-             level │ │ pick         ├──> help ───Esc──> back to caller
+      batch cleared│ │ pick         ├──> help ───Esc──> back to caller
                    ▼ │              └──> options ─Esc──> back to caller
-                levelup
+                 mods
                    │
                  death ──R──> playing
                        ──Esc──> title
 ```
 
-The level-up screen takes three inputs for one choice: `A`/`D` or the arrows
+The mod screen takes three inputs for one choice: `A`/`D` or the arrows
 move `choiceIndex` (it opens on the middle card), Enter or Space takes the
 highlighted one, a click takes the one under the cursor, and `1`/`2`/`3` still
 take theirs outright. The mouse only moves the highlight when it has actually
@@ -136,9 +152,12 @@ instant. There is no longer any "hold the shot unless something is in range"
 rule — that existed only to stop an automatic weapon emptying itself into open
 water, and `enemyInRange()` was deleted with it.
 
-**Arrivals: the batch queue and the gate** (D27, D48). Enemies come one
+**Arrivals: the batch queue and the gate** (D27, D48, D54). Enemies come one
 **batch** at a time — a record in `BATCHES` naming counts per type — and nothing
-new arrives until the batch is dead. Between batches sits a **gate**:
+new arrives until the batch is dead. Twelve batches, sized on total hp and
+ramping 10 to 68 (D54): the weapon does 2.5 hp/s and no mod raises damage, so
+hp *is* the clock, and the previous set held 3 to 15 which made every batch
+trivial. Between batches sits a **gate**:
 `GATE_PAUSE` (1.2s) of quiet, which is where a mod offer will land (D34). A dive
 opens on a gate. `batchIndex` counts batches begun; `gateTimer > 0` means we are
 between them. The list cycles when it runs out — finishing a layer is S3.
@@ -151,29 +170,55 @@ batch now, not ramped by the clock.**
 **Enemy types** (`ENEMY_TYPES`). No unlock times any more — which types appear
 is named per batch (D48):
 
-| | radius | hp | speed | xp | role |
+| | radius | hp | speed | value | role |
 |---|---|---|---|---|---|
 | drifter | 9 | 1 | 85 | 1 | the baseline swarm |
 | darter | 6 | 1 | 190 | 1 | fast enough to punish lazy kiting |
 | bulwark | 17 | 6 | 52 | 3 | soaks shots, blocks escape routes |
 
-**The weapon.** A cooldown timer; on expiry it fires along the cursor, but
-only if something is inside the ring (`enemyInRange()`). The range is still a
-real range — it just no longer picks the target. If nothing is in range the
-timer is not reset, so you fire instantly when something arrives rather than
-waiting out a cooldown that ticked against an empty screen. Bullets store
-velocity once at birth and fly straight — that's why shots can be dodged and
-why yours sail past into the dark. Each carries an `id`; enemies remember
-`lastHitBy`, so a piercing shot damages any given enemy at most once.
+`value` is how much currency it drops. It was `xp` until D49.
+
+**Bullets** store velocity once at birth and fly straight — that's why shots can
+be dodged and why yours sail past into the dark. Each carries an `id`; enemies
+remember `lastHitBy`, so a piercing shot damages any given enemy at most once.
 
 **The dash.** `Space`, in the direction of the held movement keys — never the
 cursor, which is usually the direction you least want to travel in. 0.16s at
-3.4x speed on a 2.2s cooldown, invulnerable for the dash plus a moment after,
-so landing inside what you flew through costs nothing. It pushes a wave ahead
-of it: everything within `DASH_REACH` that the dash is facing (`DASH_ARC`, a
-156-degree front) takes `player.damage` once and is shoved away at `DASH_PUSH`,
-bleeding off per second. The facing is frozen at the dash's start in
-`dashDx/dashDy`, so releasing the keys mid-lunge cannot spin the wave. It takes
+`player.dashSpeed` (884px/s) on a `player.dashCooldown` (2.2s) leash,
+invulnerable for the dash plus a moment after, so landing inside what you flew
+through costs nothing. **Committed**: travel follows the direction frozen when
+it started, so live input cannot turn it, reverse it, or stop it by letting go
+(D56) — the last of those was a free 0.31s of invulnerability for standing
+still. It
+pushes a wave ahead of it: everything within `DASH_REACH` of **the line it swept
+this frame** that the dash is facing (`DASH_ARC`, a 156-degree front) is shoved
+away at `DASH_PUSH`, bleeding off per second, and takes `player.dashDamage` —
+which is **0 until bought** (D51).
+The facing is frozen at the dash's start in `dashDx/dashDy`, so releasing the
+keys mid-lunge cannot spin the wave.
+
+**Swept, not sampled** (D50). The wave used to be a circle at wherever the
+player landed that frame, and a dash covers `speed × 3.4 × dt` — which grows,
+because `Fins` raises speed with no cap and `dt` stretches on a slow frame. At 8
+Fins on a 20fps frame the dash stepped 105px against a 49px reach and flew
+through what it should have hit, connecting on 27% of the positions an enemy
+could occupy. `segDistance()` measures the enemy against the segment travelled
+instead, and facing is judged from where the frame started — otherwise something
+the dash swept through reads as "behind me" purely because the step overshot it.
+Bullets have the same hole and do not have this fix; that is the fixed timestep,
+still open in S1.
+
+**The shove is free; the wound is bought** (D51). `dashDamage` starts at 0 and
+the `Impact` mod buys it a point at a time. The push is never gated: scattering
+a crowd is what makes diving into one a play rather than a mistake, and that has
+to work at tier 0. The white hit flash *is* gated, because a flash reads as
+"that hurt" and firing it on a harmless push is a lie.
+
+Dash reach is **fixed at 141px** and does not grow (D56). It used to be
+`player.speed × 3.4`, so every `Fins` lengthened it — 141px at none, 402px at
+ten, a third of the arena crossed untouchable. `dashSpeed` being its own field
+is what makes reach a stat that can be *sold* at `home` later rather than a
+side effect of a movement mod. It takes
 its id from the bullet id space, so `lastHitBy` stops it hitting the same enemy
 twice — the same trick as pierce. Enemies carry `pushX/pushY` for the shove,
 their only velocity; everything else about them is a fixed walk toward you.
@@ -183,13 +228,55 @@ i-frame blink is what made the dash read as a teleport. An afterimage spark each
 frame and a ring on landing (`dashEnd`) do the rest.
 
 **Collision.** Brute force, every bullet against every enemy, compared in
-**squared** space — `dx*dx + dy*dy < r*r` — which measured 8.3× faster than
-`Math.hypot` over 3.2M pairs. Fine to a few hundred per array; spatial grid is
-the documented upgrade.
+**squared** space — which measured 8.3× faster than `Math.hypot` over 3.2M
+pairs. Fine to a few hundred per array; a spatial grid is the documented next
+step.
 
-**XP.** Kills drop `xp` motes at the corpse, so the reward sits where the
-danger was. Motes within `pickupRange` drift toward you; they expire after 8s,
-blinking for the last two. Level cost is geometric: `5 × 1.45^(level−1)`.
+Both fast hitboxes are **swept**, not sampled: `segDistanceSq()` measures an
+enemy against the segment the bullet or the dash crossed this frame, rather
+than the point it ended on. A point test misses whatever it stepped over, which
+is a function of speed, and speed is not bounded — `Fins` is uncapped and a
+railgun is named in S1's own definition of done. Measured before the fix: the
+dash connected on 27% of positions at 8 Fins on a 20fps frame (D50), and
+bullets tunneled a darter on 9% (D53). The squared form is used because these
+are the per-frame loops and that rule does not lapse because the shape became a
+capsule.
+
+**Rank and mods** (D33, D34, D49). There is no XP bar and no curve. Clearing a
+batch — the sweep seeing a non-empty enemy list go empty — raises `rank` by one
+and starts `offerTimer` at `MOD_OFFER_DELAY`; when that expires,
+`openModOffer()` rolls three mods and opens the `mods` screen, the beat between
+batches and the only moment a dive is not combat. The delay exists because the
+kill burst lives 0.5s and the cards were landing on the same frame as the kill,
+which read as a jump cut (D51). A pending offer also holds the batch queue, so
+a `GATE_PAUSE` shorter than the delay cannot sneak the next batch in first. Nothing is offered for a kill, only
+for a batch. If the same frame kills the last enemy *and* the player, the death
+screen wins: `clearBatch()` is guarded by `screen === 'playing'`.
+
+The pool is six, **body and comfort only** until S5 — Content, because a
+weapon mod cannot be balanced before the weapons exist. Body: Fins (speed),
+Vitality (+1 max HP, filled), Reflex (dash cooldown, max 3), Nerve (i-frames,
+max 3), Impact (dash damage, max 3). Comfort: Mend (a heart per batch cleared,
+max 1). `Impact` is `body` rather than `weapon` because the dash is
+weapon-agnostic.
+
+Comfort is down to one on purpose. D34 named three candidates; a currency
+magnet has nothing to do since D35 auto-collects, and `Lull` — invulnerability
+as a batch arrived — was removed by D55 once measurement showed nothing can
+reach a centred player inside its 1.2s window, so it only ever paid out to a
+cornered one. `modCounts` tracks what has been taken and the roll skips
+anything at its `max`, so a late dive can be offered two cards rather than
+three. Mods are run-scoped: `reset()` clears them.
+
+Anything a mod raises is a field on `player` rather than a `const` — that is why
+`iframes` and `dashCooldown` live in `PLAYER_START`.
+
+**Currency.** Kills drop gems at the corpse, so the reward sits where the danger
+was. Gems within `pickupRange` drift toward you; they expire after 8s, blinking
+for the last two, and collecting one adds to `currency`. It buys nothing until
+S4 — Meta loop skeleton. D35 (auto-collection, no expiry) is decided and **not
+implemented**; what is described here is what the code does. Nothing in the code
+names the currency, because what it is called is still open in `ideas.md`.
 
 **Damage.** Contact costs 1 HP behind 1s of invulnerability, during which the
 player blinks — without the i-frames a touching enemy drains 3 HP in 50ms.
@@ -218,6 +305,29 @@ Why it matters: two balance measurements can now be of the *same* dive instead o
 two different ones, so a difference under a second is visible without averaging
 21 runs. And "it broke sometimes" becomes "it broke on seed 4471".
 
+## The development readout
+
+Two on-screen readouts exist to be looked at while building, not to ship
+(D52). Igor: "i'd always show all relevant numbers at least at the development
+stage."
+
+`PLAYER_STATS` (`content.js`) is a flat list of the player numbers worth
+watching, drawn as the HUD's second line; the fps line shifts below it from
+`.length` rather than a hardcoded `y`. Each entry names the player field as
+well as its label, which is what lets a check prove the list is **complete**:
+every stat any mod can change must be on screen, computed from the mods, so a
+new mod touching a new field fails the suite rather than going unwatched.
+
+Each mod card shows the change it makes and how many are held.
+`modPreview(mod)` applies the mod to a copy of the player and diffs the
+numbers, so a card cannot advertise something `apply` does not do — the
+alternative, a written-out `preview` per record, is a second source of truth.
+`modStack(mod)` gives held/max. Without this a repeated card was identical to a
+fresh one, and four of the six mods stack.
+
+This is instrumentation and it partly contradicts D34 (mods), which wants no
+numbers on a card. Scoped to development on purpose; revisit at S7.
+
 ## Screens must fit
 
 Any screen that stacks rows from a data table derives its positions from
@@ -226,8 +336,14 @@ bottom hint sits) and `helpBottom` (where the help screen's last line ends), and
 a check asserts one is above the other — adding a row to `HELP_KEYS` once pushed
 the list straight through the blurb below while every check passed (D46).
 
-Only the help screen is guarded. Options and the menus stack rows the same way
-and are not.
+The same rule sideways: a mod description is prose in a fixed-width card, and
+the renderer centres it, so it cannot notice one overflowing. `widestModDesc()`
+measures the pool at `CARD_DESC_FONT` and a check holds it inside
+`CARD_W - 2 × CARD_PAD`. Two descriptions were over when it was written (D49),
+which is how it was found — from a screenshot, not from a check.
+
+Help and the mod cards are guarded. Options and the menus stack rows the same
+way and are not.
 
 ## Scenarios
 
@@ -297,26 +413,33 @@ All in `game/content.js` under `// balance`. These are the real product of the
 prototype — they transfer to any port verbatim.
 
 `PLAYER_START` (r 10, speed 260, hp 3, fireRate 2.5, damage 1, range 250,
-pierce 0, pickupRange 75) · `IFRAMES 1` · `BULLET_SPEED 430` · `GEM_PULL 300` ·
-`GEM_LIFE 8` · `XP_BASE 5` · `XP_GROWTH 1.45` · `ENEMY_JITTER 0.3` ·
-`GATE_PAUSE 1.2` · `DASH_SPEED_MUL 3.4` · `DASH_TIME 0.16` ·
-`DASH_COOLDOWN 2.2` · `DASH_GRACE 0.15` · `DASH_REACH 40` · `DASH_ARC 0.2` ·
+pierce 0, pickupRange 75, iframes 1, dashCooldown 2.2, dashSpeed 884,
+mendOnClear 0, dashDamage 0) · `BULLET_SPEED 430` · `GEM_PULL 300` ·
+`GEM_LIFE 8` · `ENEMY_JITTER 0.3` ·
+`GATE_PAUSE 1.2` · `MOD_OFFER_DELAY 0.6` · `FIXED_DT 1/120` ·
+`MAX_FRAME_DT 0.05` · `DASH_TIME 0.16` ·
+`DASH_GRACE 0.15` · `DASH_REACH 40` · `DASH_ARC 0.2` ·
 `DASH_END 0.18` · `DASH_PUSH 320` · `PUSH_DRAG 0.02` · `SHAKE_FADE 0.02` ·
 `SHAKE_FLOOR 0.15` · `SHAKE_HURT 7` · `SHAKE_DEATH 38`
 
 ## Verification
 
-**`index.html?test`** runs the `console.assert` suite in the console
-(currently **119** checks — this doc owns that count; `roadmap.md` cites it).
-The old figure of 79 was `grep -c`, i.e. *lines containing an assertion*; the
-suite now reports what actually **executed**, which is higher because some call
-sites sit inside loops. Covering: spawning,
-collision, i-frames, bullet range, piercing, gem expiry, XP curve, every screen
-transition, cursor wrapping, each option, non-Latin keyboard layouts, shake
-settling, frame-rate independence, that every sound is loud enough to hear,
-and — since 2026-09-19 — that shots follow the cursor, that the dash's wave
-reaches past the body but only forwards and shoves what it hits, and that every
-screen answers the mouse as well as the keys.
+**`index.html?test`** runs the suite in the console (currently **171** checks —
+this doc owns that count; `roadmap.md` cites it). The old figure of 79 was
+`grep -c`, i.e. *lines containing an assertion*; the suite reports what actually
+**executed**, which is higher because some call sites sit inside loops.
+Covering: arrivals and the gate, collision, i-frames, bullet range, piercing,
+gem expiry, every screen transition, cursor wrapping, each option, non-Latin
+keyboard layouts, shake settling, frame-rate independence, that every sound is
+loud enough to hear, that shots follow the cursor, that the dash's wave reaches
+past the body but only forwards and shoves what it hits, that every screen
+answers the mouse as well as the keys, that a fast dash hits what it sweeps
+through rather than stepping over it (D50), that the dash shoves for free but
+only wounds once bought and never flashes an enemy it did not hurt, that the
+offer waits out the death before it appears (D51), and — since D49 — that a rank
+arrives per batch and never per kill, that the offer freezes the queue behind it, that the
+mod pool is body and comfort only, that a maxed mod is not offered, and that
+each comfort mod does what its card says.
 
 A check that expects a shot to land must set `aim` itself (`aimAt()`). Four
 checks once passed only because the previous check happened to leave the cursor

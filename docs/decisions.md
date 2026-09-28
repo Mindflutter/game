@@ -1221,3 +1221,497 @@ rotting.
 **Also:** `late-swarm` was redefined. It meant "a minute into the run", which
 stopped meaning anything once time no longer drove density; it now starts at
 batch 5. Scenarios gained a `batch` field.
+
+## D49 — One rank per batch, mods at the gate · 2026-09-27
+S1 (Combat core), implementing D33 and D34. **The XP bar is deleted.** Rank is
+one per batch cleared, and the three-mod offer lands in the beat after the
+batch dies — the only moment the dive is not combat.
+
+**What replaced what.** `gainXp()`, `xp`, `xpNext`, `level`, `XP_BASE`,
+`XP_GROWTH` and the geometric curve are gone. `clearBatch()` fires from the
+one place that can tell a batch died — the sweep, when a non-empty enemy list
+becomes empty — and raises `rank`, rolls three mods and opens the `mods` screen.
+State carries `rank`, `currency` and `modCounts`. The screen formerly called
+`levelup` is `mods`, which is the word the glossary has (D32).
+
+**Why the sweep and not the kill.** Ranking up inside `killEnemy()` is one line
+shorter and wrong: it is exactly the prototype's rule, an offer per event rather
+than per gate, and D33 forbids it. The sweep is the only place that knows the
+*batch* is finished rather than an enemy. A check kills two enemies one at a
+time and asserts nothing is offered for the first.
+
+**A frame can kill the last enemy and the player at once**, so `clearBatch()` is
+guarded by `screen === 'playing'`. Without it, dying on your last shot buries
+the death screen under three mod cards, and the dive that just ended awards a
+rank. Found by writing the check, not by playing.
+
+**The pool is six mods, body and comfort only** (D34): Fins, Vitality, Reflex,
+Nerve (body), Mend, Lull (comfort). `scope` is on every record and a check
+refuses anything that is not `body` or `comfort`, which is what stops a weapon
+mod being added by reflex before S5 — Content.
+
+**Two mods D34 named were not built, and that is a correction to D34.** Pickup
+radius and a currency magnet were in its body/comfort list; D35 (Currency is
+auto-collected) was recorded hours later the same day and leaves both with
+nothing to do. Building them now would be building husks with a known expiry.
+The prototype's `Lure` went with them. `pickupRange` stays as a player stat,
+because gems still have to be walked over until D35 is implemented.
+
+**Anything a mod raises has to be a field, not a `const`.** `IFRAMES` and
+`DASH_COOLDOWN` moved into `PLAYER_START` as `iframes` and `dashCooldown`. A mod
+is a line of data and a line of data cannot edit a `const`; the numbers did not
+move out of the one `// balance` block, they moved within it.
+
+**`max` and `modCounts` answer Igor's stacking pitfall from D33.** A mod with a
+`max` drops out of the roll once it is there. **The cap values are Claude's
+picks** — D34 requires that a maxed mod is not offered, and says nothing about
+where the ceilings sit. Reflex and Nerve at 3 (a cooldown has a floor of zero),
+Mend and Lull at 1. Consequence worth naming: a
+long dive can exhaust the capped mods and be offered two cards instead of three.
+That is a content shortage, fixed by S5 — Content, not by padding the pool now.
+
+**Gems are money.** `ENEMY_TYPES.xp` is `ENEMY_TYPES.value`, collecting one adds
+to `currency`, and nothing in the code names the currency, because what it is
+called is still open in `ideas.md`. It buys nothing until S4 — Meta loop
+skeleton; the counter exists so the drop is not a lie.
+
+**The bot now takes a mod**, always the first card. Random picks would build a
+different character every dive and two dives that are not the same dive cannot
+be compared. This is what unblocks S1's "bot reports time-to-clear per batch":
+the level-up screen used to stop it dead after two or three batches (D48).
+
+**Verified by breaking it**, five mutations, each failing exactly what it should
+and nothing else: ranking up in `killEnemy()` instead of the sweep (5 failures,
+including "a kill mid-batch must not rank you up"), dropping the
+`screen === 'playing'` guard (2), `rollMods` ignoring `max` (1, naming all four
+capped mods), `Mend` healing without the `Math.min` clamp (1, "hp 4/3"), and
+deleting the `Lull` line (1). 144 checks, was 119.
+
+**Two mod descriptions ran off their cards**, found by screenshotting the
+screen rather than by any check — the renderer centres the text, so nothing in
+the state can see it overflow. Shortened, and guarded: `widestModDesc()` in
+`render.js` measures the pool and a check holds it inside `CARD_W - 2 ×
+CARD_PAD`. It only works in the browser suite, because `measureText` is canvas —
+which is precisely the split D39 draws between the two suites. Verified by
+putting the long description back: "widest is 217px, the card allows 196px".
+This is the second time the "layout coupled to data" surface has caught
+something after every state check passed (D46 was the first).
+
+**Measured, and the finding is that the bulwark batches are now unclearable in
+target time.** Bot, 5 seeds, 8 batches: mean 16.1s per batch, range 3.4–99.7s.
+`foundations.md` wants 10–45s. Batches 5 and 7 — the ones with bulwarks — run
+24–99.7s and two seeds hit the 180s cap. The cause is arithmetic and was
+predictable: a bulwark has 6hp, the weapon does 1 damage at 2.5 shots/s, and
+**no mod in the pool raises damage any more**, so a dive's kill speed is now
+flat where the prototype's compounded. The bulwark's 6hp was tuned against a
+weapon that grew. This is not a bug in the mods; it is the balance block being
+void, which is the next item in S1 and now has a number attached to it.
+
+The bot also stopped dying: all five seeds survive all eight batches with 4–8 hp
+left, against a start of 3. Mend and Vitality are doing that, and it says the
+comfort mods are strong rather than that the game is easy — the same bot died at
+~38s before mods existed.
+
+## D50 — The dash sweeps its path; the bot is not a difficulty instrument · 2026-09-27
+Two findings from Igor playing the D49 build. Neither was visible to the suite,
+and one of them makes last session's headline measurement wrong.
+
+**The dash stepped over its own hitbox.** Igor: "dash became longer, sometimes
+doesnt deal damage" and then, precisely, "dash extends its range over time".
+Both are the same root cause, and he is right on both counts.
+
+The dash moves `player.speed * DASH_SPEED_MUL * dt` in a frame and its wave was
+a **point** test with a fixed 40px reach, taken once per frame. Two things grow
+that step and nothing bounded either: `Fins` raises `player.speed` with **no
+`max`**, and `dt` stretches on a slow frame.
+
+- *Range*: 147px of travel at 0 Fins, **402px at 10**. Exactly what Igor saw,
+  and `Fins` is now 1 of only 6 mods, so it is drawn constantly. D49 made a
+  pre-existing coupling far more visible by deleting the weapon mods around it.
+- *Misses*: measured by placing a drifter at every 1px along the path. At 8
+  Fins the dash connected on **54%** of positions at 30fps and **27%** at
+  20fps. The worst case is the one that reads as broken — an enemy *right next
+  to you*, which is in front before the step and behind after it, so the facing
+  test never saw it in range at all. Diving into a crowd is the move the dash
+  exists for, and it was the move most likely to do nothing.
+
+**Fixed by sweeping, not by sampling.** `segDistance()` gives the distance from
+a point to the segment the player crossed this frame, so the wave is a capsule
+along the travel rather than a circle at the landing point. Facing is judged
+from where the frame *started*, for the same reason: something the dash swept
+through must not count as "behind me" because the step overshot it. Hit rate is
+now 100% at every Fins count and every `dt` tested; the only remaining misses
+are enemies genuinely beyond the dash's reach.
+
+**Verified by breaking it**: restoring the point test fails the new check and
+only it — "hp=5 after passing through it at speed 620". 145 checks, was 144.
+
+**Bullets have the same hole and it is not fixed here.** 430px/s is 21.5px on a
+20fps frame against a darter's 10px reach; measured, that is 9% of shots passing
+through a darter at the `dt` cap and nothing at 30fps or better
+(`roadmap.md` → Health). Milder than the dash was, but the same defect. That is S1's remaining DoD item (the
+fixed timestep), and `segDistance()` is written so it has a second caller
+waiting. Note that a fixed timestep alone would *not* have fixed the dash: at 8
+Fins a 1/60 step is still 35px, which still left a gap at 20–35px.
+
+**The bot is not an instrument for "is this hard".** D49 reported the bulwark
+batches at 24–99.7s against a 10–45s target and called that the balance brief.
+Igor played the same build: "nothing breaks the target, currently batches are
+very easy to complete". **Igor is right and the measurement was misread.** The
+bot kites and never commits, so it takes an age to chew through 6hp — the number
+measured *the bot's policy*, not the batch's difficulty. A human closes and
+kills it. What the figure actually says is that the bot is a weak driver, which
+`roadmap.md` already warned in one line and D49 then ignored.
+
+Consequence, recorded so it is not re-learned: **bot clear-times are a
+regression signal, not a difficulty signal.** They are comparable to themselves
+across seeds and builds and say nothing about whether a human is challenged.
+Until an "exploit finder" bot exists (`ideas.md` — There are three bots),
+difficulty is Igor's call, measured by him playing. The direction of travel is
+now the opposite of D49's: batches need to get **harder**, not the bulwark
+weaker.
+
+**Also fixed:** the `Vitality` card read "one more heart, already full", which
+Igor read as a promise that he would be at full health — it only means the new
+heart arrives filled. Now "one more heart, it comes full". The mod grants
+`maxHp += 1; hp += 1`, which is unchanged; only the sentence was wrong.
+
+## D51 — The dash is bought, and the offer waits for the death · 2026-09-27
+Two changes from Igor playing D50. One is his design call, one is a feel bug he
+reported precisely enough to fix without discussion.
+
+### The dash starts as pure movement
+
+Igor, 2026-09-27: "dash dealing damage might be off at the start, then upgraded
+at home or thru mods ... i'm inclined to mod thing, but in some aspects can be
+home screen upgrade too." A lean and an instruction to ship, not a decision
+between the two tiers: built as a mod now, with `gear` left open in
+`ideas.md`.
+
+`player.dashDamage` starts at **0**. The new `Impact` mod (`body`, max 3) buys
+it a point at a time. The dash still costs nothing to own: it moves, it grants
+i-frames, and **it always shoves**. Only the wound is bought.
+
+**The shove is deliberately not part of the purchase — Claude's call, not
+asked.** Scattering a crowd is
+what makes diving into one a play rather than a mistake, and that has to
+survive `dashDamage` being zero — otherwise a tier-0 dash is just a dodge and
+the whole "offensive dash" idea (D14) is gone until you pay for it. The white
+hit flash *is* gated on damage, because a flash reads as "that hurt" and firing
+it on a push that did nothing is a lie the renderer tells.
+
+**Why it fits.** The dash had nowhere to grow except "further and faster",
+which is the coupling that caused D50 — `Fins` made its range balloon because
+range was the only axis it had. Damage is a second axis and it is priced. It
+also removes a chunk of free damage from the opening minute, which is the part
+Igor says is too easy, so it pushes in the direction the balance work wants.
+
+`scope: 'body'`, not `weapon`: the dash is weapon-agnostic by construction, so
+this does not breach D34's "no weapon mods before S5". Seven mods now.
+
+**Marked for S4** — Meta loop skeleton: this is the first mod with an obvious
+`gear` twin, per Igor's "can be home screen upgrade too". Whether a stat can be
+raised by *both* a mod and gear is not decided and is the question S4 has to
+answer; filed in `ideas.md`.
+
+### The offer waits for the death to finish
+
+Igor: "batch cleared (mods screen) comes too fast, last enemy just eliminated.
+at least wait for its animation to complete, feels unnatural atm."
+
+Correct, and measurable: `killEnemy` throws a burst that lives **0.5s**, and
+the cards were dimming the arena over it on the same frame as the kill. The
+reward landed on top of the thing it was rewarding.
+
+The rank is still banked on the kill; only the *offer* waits.
+`MOD_OFFER_DELAY` (0.6s — Claude's pick, just past the 0.5s burst; a feel
+number, so Igor's to move) counts down in `offerTimer`, and
+`openModOffer()` rolls the cards when it expires. A pending offer also holds the
+batch queue, so tuning `GATE_PAUSE` below the delay cannot land the next batch
+before the cards appear.
+
+**Verified by breaking both**: opening the offer on the kill frame fails "the
+offer must not land on the frame of the kill" and "no cards exist yet during
+the beat"; restoring free dash damage fails six, including "an unbought dash
+must not wound what it throws" and "a dash that did no damage must not flash
+the enemy white". 151 checks, was 145.
+
+**The bot cannot see either change.** Its clear times are byte-identical before
+and after, because `kiteAndShoot` never presses Space — it has no dash policy
+at all. Consistent with D50: the bot is a regression signal, and it is blind to
+any mechanic it does not use. Worth remembering before trusting it on the dash.
+
+## D52 — The development readout: show the numbers · 2026-09-27
+Igor, 2026-09-27: "i'd always show all relevant numbers at least at the
+development stage. might be dropped later, but i'd like to know what my current
+numbers are (speed, range, mod level, increase in mod screen)."
+
+**Two readouts, both derived from data rather than written out.**
+
+`PLAYER_STATS` in `content.js` is a flat list of the player numbers worth
+watching; the HUD draws a second line from it, and the fps line below shifts on
+its own rather than needing a new hardcoded `y`. Adding a stat is a line.
+
+Each entry carries `stat` (the player field) as well as `label`, which buys a
+check worth more than the readout itself: **every stat any mod can change must
+appear in the list**, computed from the mods, so adding a mod that touches a new
+field fails the suite instead of quietly going unwatched.
+
+On the cards, `modPreview(mod)` applies the mod to a *copy* of the player and
+diffs the numbers. The card therefore cannot advertise a number the mod does not
+deliver — the alternative, a `preview` string on each record, is a second source
+of truth that drifts from `apply` the first time someone edits one and not the
+other. `modStack(mod)` reports held/max alongside it.
+
+**This answers a real confusion, not just a preference.** Igor, on being offered
+`Impact` twice: "the dash mod offered multiple times - what does that mean?
+damge grows?" It does — +1 each, capped at 3 — but the card was identical on a
+repeat, and five of the seven mods stack. A repeated offer looked like a bug.
+
+**It partially overrides D34 (mods) on presentation.** D34 says mods differ in
+kind not degree and carry no number to compare, because arithmetic is the heavy
+thinking a dive must not contain. The stat lines put arithmetic back on the
+cards. Deliberate and **scoped to development**: Igor's own framing is "might be
+dropped later". D34's rule stands for the shipped game; this is instrumentation,
+and the sentence at the top of each card is still the thing you read in a
+second. Revisit at S7 — Alpha polish.
+
+Cards grew 140 -> 186px tall to hold it, so `MOD_HINT_Y` and `cardBottom()` are
+exposed and a check holds one above the other — the same guard the help screen
+got in D46, added because the same class of bug was one row away.
+
+## D53 — Fixed timestep, and bullets sweep too · 2026-09-27
+S1's last DoD item: "fixed timestep in place; a railgun-speed projectile cannot
+tunnel a thin enemy at any `dt` the frame cap allows." Both halves, because the
+first does not deliver the second.
+
+**The timestep.** `FIXED_DT` is 1/120 and `stepFixed()` in `main.js` banks
+leftover time, so a 60Hz screen runs two ticks a frame and a 144Hz screen runs
+one or none. The existing 0.05s cap on elapsed time doubles as the catch-up
+bound — six ticks — so a slow frame cannot spiral. Before this, every collision
+test sampled at a distance set by the player's frame rate: the same dive was a
+different game on a slower machine.
+
+**1/120 rather than 1/60, and no render interpolation.**
+`foundations.md` asked for "fixed timestep with render interpolation". The
+interpolation is **not** built, and this supersedes that clause. **Amending
+`foundations.md` was Claude's call and Igor was not asked** — the file is the
+layer that does not change before alpha, so that was a question to put to him,
+not one to settle with a measurement. Reversible: if judder shows on real
+hardware, interpolation is the answer. Interpolation
+means storing a previous position for every entity and lerping in every draw
+call — work in `render.js`, the layer CLAUDE.md says not to invest in, to buy
+smoothness that a shorter tick buys more cheaply. At 1/120 the picture is at
+most 8ms stale, against 17ms at 1/60, and D43 measured `update()` at 0.55ms for
+500 entities, so doubling the rate costs ~1.1ms of a 16.7ms frame. If judder
+ever shows up on real hardware, interpolation is the answer and this entry is
+what to reopen.
+
+**Bullets sweep, like the dash.** A fixed step bounds `dt`; it does not bound
+bullet *speed*, and the DoD names a railgun. At 6000px/s a shot covers 50px per
+tick against a darter's 10px reach. `segDistanceSq()` — the squared form, since
+this is the hot loop and D5's 8.3x measurement still applies — tests the segment
+the bullet crossed. Measured before the fix: bullets tunneled a darter on 9% of
+positions at the old 20fps `dt` cap.
+
+Also: a shot's range is now the distance it actually covered rather than
+`BULLET_SPEED x dt`. Identical today because every bullet flies at
+`BULLET_SPEED`, and wrong the moment one does not — which "railgun" implies.
+
+**Verified by breaking it.** Reverting bullets to a point test fails the railgun
+check; measuring range at `BULLET_SPEED` fails its own; replacing the
+accumulator with `update(elapsed)` fails four. One check had to be *fixed* first
+rather than trusted: the railgun enemy originally sat at +300, exactly on a
+50px sample boundary, so a point test hit it by arithmetic luck and the check
+could only pass. Moved to +325, mid-step.
+
+`advance(30)` asserted `30 / 60` and broke when the step changed — the right
+failure, but it now derives from `FIXED_DT`. `tests/harness.js` keeps its own
+`TICK` because the bot needs a step size before a game is loaded; a copied
+number gets a check, and `invariants.test.js` asserts the two agree.
+
+**A bug this exposed in the bot**: `diveReport`'s budget was counted in *ticks*,
+so halving the step silently halved every dive. It is seconds now.
+
+## D54 — The batches, re-derived from scratch · 2026-09-27
+The S1 work item D28 (manual fire) named, and the last of the stage. Igor,
+having played it: "nothing breaks the target, currently batches are very easy
+to complete."
+
+**The old batches were not slightly small, they were a factor of five small.**
+The weapon does `fireRate x damage` = 2.5 hp/s, and **nothing in the mod pool
+raises damage** — D34 made the pool body and comfort only, so a dive's kill rate
+is flat where the prototype's compounded. A batch that should occupy 10-45s
+therefore has to hold 25-112 hp. The old set held **3 to 15**, i.e. 1.2s to 6.0s
+of shooting. Every single batch was under target, and no amount of placement or
+pacing was going to cover a factor of five. This is why D49's reading of the bot
+was wrong in both directions at once: the bot's 24-99.7s said "too slow" about
+batches that were arithmetically trivial.
+
+**Twelve batches now, sized on hp**, ramping 10 -> 68 hp (4.0s -> 27.2s of
+shooting). Twelve is **Claude's pick, not a derived number**: D34 uses "a
+12-batch layer grants 12 mods" to illustrate that balancing became arithmetic,
+and this entry originally cited that as if it sized a layer. It does not. How
+long a layer is has not been decided. The low end is deliberately under 25 hp, because approaching,
+missing and kiting are not shooting and real clears run longer than the raw
+figure. Peak 38 simultaneous enemies against a design budget of 500 (D43);
+screenshotted at batch 12 and still readable, types still distinguishable.
+
+**Bot, as a regression signal only** (D50): it went from surviving all eight
+batches on all five seeds to **dying on four of five**, clears 6.0-63.3s, mean
+18.7s. That says the change is large and in the intended direction. It does not
+say the result is right — the bot kites, never commits and never dashes, so it
+is the wrong instrument for this question by construction. **Igor's playthrough
+is the oracle**, and this is a first pass keyed to arithmetic, not a finished
+tuning.
+
+Deliberately **not** changed: enemy hp, speed and radius, and anything about how
+enemies move. Igor asked to confirm the scope and it is confirmed — behaviours
+are S5 — Content, boss patterns are S3. Difficulty here is composition and
+count, which is data.
+
+## D55 — `Lull` is removed: a mod that pays for being cornered · 2026-09-27
+Igor, 2026-09-27, having played D54's batches: "gate safety mod is useless at
+this point - enemies arrive from screen sides, it wears off before any enemy
+can harm the player."
+
+**Removing it was Claude's call, and it overreached** — Igor said "useless **at
+this point**" and, in the same message, proposed the arrival change that would
+make it useful again, which reads as "not yet", not "delete it". The
+measurement below is sound; it did not license the deletion.
+
+**Igor confirmed the outcome on 2026-09-28: "Lull leave out".** So the mod
+stays gone — but by his decision, not by the measurement, and the process
+failure is recorded here rather than tidied away.
+
+The measurement makes it worse than useless. Seconds from a batch
+arriving to the first enemy that can touch a standing player, across all 12
+batches and 3 seeds:
+
+| player is | earliest contact | arrivals inside the 1.2s guard |
+|---|---|---|
+| at the centre | 2.04s | **0 of 36** |
+| near the top edge | 0.27s | 29 of 36 |
+| in a corner | 0.22s | 35 of 36 |
+
+**It cannot fire where a competent player stands, and only pays out when you
+are cornered.** That is not a weak mod, it is an *anti-aligned* one: it rewards
+the position the game is trying to punish, against the `foundations.md` pillar
+"no batch is cleared without the player moving". Widening the guard past 2.04s
+would make it fire everywhere, but it would then be two and a half seconds of
+invulnerability per gate protecting against a threat that was never there.
+
+Removed, with `player.gateGuard`, its `PLAYER_STATS` row and the spawn-time
+line that applied it. The pool is six: Fins, Vitality, Reflex, Nerve, Impact
+(body) and Mend (comfort) — **comfort is down to one**, since D34 named three
+comfort candidates and two are now dead: the currency magnet by D35
+(auto-collection leaves it nothing to do) and this one by measurement. No
+replacement invented; a thin pool is filed in `ideas.md`, not patched by
+guessing.
+
+**The condition that brings it back is recorded**, because this is a good mod
+against a different arrival model: enemies that appear *near or inside* the
+arena rather than walking in from an edge. Igor proposed exactly that in the
+same message (`ideas.md` — "fish that arrive from behind the screen"). If that
+lands, an arrival guard becomes meaningful and this entry is what to reopen.
+
+One of its two checks stayed. "A batch arrives with no grace" was the control
+half of the pair, and it is still the rule — it is precisely what a re-added
+arrival guard would have to break on purpose. 165 checks, was 166.
+
+## D56 — The dash is a fixed, committed lunge · 2026-09-28
+Two bugs from Igor, both in the dash, both fixed at the root.
+
+### Dash length no longer rides on `player.speed`
+
+Igor: "dash length still increases over time or mod upgrades - this hasnt been
+addressed at all." Fair: D50 measured it, `ideas.md` recorded it, and S6 was
+told to own it — but he had already said it made the game feel easier, so
+filing it was under-delivering on a reported problem. Filed twice is a fix.
+
+The dash moved at `player.speed * DASH_SPEED_MUL`, so every `Fins` lengthened
+it: 141px at none, 402px at ten, a third of the arena crossed untouchable.
+**`DASH_SPEED_MUL` is deleted and `player.dashSpeed` (884 px/s) is its own
+field in `PLAYER_START`.** Dash length is now constant at 141px at every `Fins`
+count, measured, and the peak escape figure falls from 386 to 141 invulnerable
+px/s — the remaining growth is `Reflex` alone, which is the honest one because
+it is capped.
+
+This is the root-cause fix rather than capping `Fins`, and it is what Igor's
+own direction needs: dash reach is now a *stat that can be sold* (`gear` at S4)
+instead of a side effect of a movement mod. `Fins` still earns its place — base
+speed 260 against a darter's 190 is a 70px/s margin, and each Fins adds 45 to
+it, which is kiting room rather than dash reach.
+
+### The dash is committed: live input cannot steer it
+
+Igor: "it's possible to change direction during the dash." True, and worse than
+reported. Travel used the keys held *this frame* while only the wave's facing
+(`dashDx/dashDy`) was frozen, so:
+
+| mid-dash input | what happened |
+|---|---|
+| switch keys | the lunge turned — 142px in the new direction |
+| hold the opposite key | the lunge **reversed**, and the wave then faced the way you came, so it hit nothing |
+| release everything | you stopped dead after 7px while `dashTime` ran on |
+
+The last is the serious one: a free `DASH_TIME + DASH_GRACE` = **0.31s of
+invulnerability for standing still**, on a 2.2s cooldown — or 1.0s with three
+`Reflex`, which is 31% uptime. Tap and release was strictly better than dashing.
+
+Travel now follows `dashDx/dashDy` like the wave always did. A dash is a
+commitment, which is what `design.md` already claimed and what makes "diving
+into a crowd is a play" mean anything. The reversal case also explains part of
+the older "sometimes doesn't deal damage": a reversed dash pointed its wave
+backwards.
+
+**Verified by breaking both**: restoring live-input travel fails the three
+steering checks; putting dash speed back on `player.speed` fails the Fins one.
+171 checks, was 165.
+
+**Two defects were in my own checks, not the game**, and both are the same trap
+this suite keeps falling into. `dashDistance` tested `player.dashTime > 0` as
+its loop condition *before* the dash had started, so it never ran a tick and
+reported 0px. `dashAndSwitch` never cleared `keys` on entry, so each case
+inherited the key the previous one left held — the "reverse" case dashed
+diagonally because `KeyW` was still down, and I nearly read that as a game bug.
+Both helpers now clear input on entry and drive exactly `DASH_TICKS`, derived
+from `DASH_TIME / FIXED_DT`, so no measurement includes a post-dash walking
+tick.
+
+## D57 — `docs/` gets its own checks · 2026-09-28
+Igor, 2026-09-28: "why docs has no check? can you add the check?"
+
+Because every check until now was about the game. `docs/` was held together by
+the consistency sweep (D46 — The consistency sweep is part of every change),
+which is a habit — and habits fail quietly. Three corruptions got through in a
+single day, none of them visible to anyone reading the files:
+
+- an idea of Igor's (fish arriving from behind the screen) **deleted outright**
+  by an index-splice edit that ran between two anchors and took everything in
+  between;
+- D56 (the dash is a fixed, committed lunge) written to `decisions.md` and
+  **never given a changelog entry**, because a string replace matched nothing
+  and failed silently — then reported as documented;
+- decisions cited as bare numbers, so "D35" told the reader nothing. Igor had
+  to ask three times what it meant.
+
+`tests/docs.test.js` now covers the mechanical parts of the sweep:
+
+1. every decision has a `## D<n> — <name>` heading, so there is a name to cite;
+2. decision numbers are unique and gapless — a gap is an entry that was lost;
+3. no doc cites a `D<n>` that does not exist;
+4. the newest decision appears in `changelog.md` — the exact failure D56 hit;
+5. the seven docs `CLAUDE.md` tells a cold session to open all still exist.
+
+**Verified by breaking it**: a citation of a decision that was never written,
+a stripped decision name, and the newest decision removed from the changelog
+each fail their own check and no others — four failures across three
+mutations. 13 Node tests, was 8. It then caught a real one immediately: this
+entry originally spelled out the fake citation used in that first mutation,
+and the check flagged its own decision file.
+
+**What this does not cover, stated so it is not mistaken for coverage**:
+whether prose is *true*. A check can see that D35 is cited and exists; it
+cannot see that the sentence about it is wrong, or that a number went stale.
+That stays the sweep's job, and the sweep stays a habit.

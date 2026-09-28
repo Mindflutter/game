@@ -23,14 +23,25 @@ let breathTimer = 0;
 // state (keys), so without this one physical click is read twice -- clicking
 // Start fired a shot into the run it had just begun.
 let fireArmed = false;
-let xp, xpNext, level, choices;
+
+// In-dive progress, reset every dive (D34). One rank per batch cleared -- there
+// is no XP bar and no curve, so `rank` is simply how many batches you have put
+// down. `currency` is the dive's takings; spending them at `home` is S4.
+// `modCounts` is how many times each mod has been taken, which is what lets the
+// roll refuse one that is already maxed.
+let rank, currency, choices, modCounts;
+
+// Seconds until the mod cards appear, counting from the last enemy dying.
+// `> 0` means "a batch is cleared and the offer is coming" -- the death gets to
+// finish playing before the game asks you to read three cards.
+let offerTimer = 0;
 
 // Which screen we're on. Replaces the old `paused` and `dead` flags, which
 // could contradict each other; now there is exactly one answer at a time.
-// 'title' | 'playing' | 'levelup' | 'paused' | 'help' | 'options' | 'dead'
+// 'title' | 'playing' | 'mods' | 'paused' | 'help' | 'options' | 'dead'
 let screen = 'title';
 let menuIndex = 0;          // cursor in the title / pause menu
-let choiceIndex = 0;        // highlighted upgrade card
+let choiceIndex = 0;        // highlighted mod card
 let lastAimX = 0, lastAimY = 0;   // so a still mouse doesn't fight the arrows
 let optionIndex = 0;        // cursor in the options list
 let returnTo = 'title';     // where Esc goes back to from help / options
@@ -92,10 +103,12 @@ function reset(seed) {
   shake = 0;           // pixels of screen shake left
   screen = 'playing';  // a reset run is a running run
 
-  xp = 0;
-  xpNext = XP_BASE;
-  level = 1;
+  rank = 0;            // one per batch cleared, so a fresh dive has none
+  currency = 0;
+  offerTimer = 0;      // no offer pending on a fresh dive
+  accumulator = 0;     // no banked time carried into a new dive
   choices = [];
+  modCounts = {};      // mods are run-scoped: last dive's picks do not carry
   choiceIndex = 0;
 }
 

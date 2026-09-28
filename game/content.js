@@ -13,6 +13,9 @@ const ARENA_H = 800;
 // Every number that decides how the game plays, in one place. These are the
 // real product of this prototype: the rendering gets rewritten on any port,
 // these transfer as-is.
+// Anything a mod can raise has to be a field here rather than a bare constant,
+// which is why the dash cooldown and the i-frames moved in (D34): a mod is a
+// line of data, and a line of data cannot edit a `const`.
 const PLAYER_START = {
   r: 10,             // radius, in pixels
   speed: 260,        // pixels per second
@@ -23,14 +26,21 @@ const PLAYER_START = {
   range: 250,        // how far a shot travels before it dies
   pierce: 0,         // extra enemies a shot passes through
   pickupRange: 75,
+  iframes: 1,        // seconds of invulnerability after a hit
+  dashCooldown: 2.2, // seconds before you can dash again
+  dashSpeed: 884,    // px/s while dashing -- its OWN number, not a multiple of
+                     // `speed`. It used to be speed x 3.4, which meant every
+                     // `Fins` lengthened the lunge and a late dive crossed a
+                     // third of the arena untouchable (D56)
+  mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
+  dashDamage: 0,     // the dash starts as pure movement (D51). It always shoves;
+                     // hurting what it shoves is bought, never free
 };
 
 // The dash. Short, offensive, and on a long enough leash that spending it is a
 // decision: you pass through the swarm unharmed and hurt everything you touch,
 // so diving into a crowd is a play rather than a mistake.
-const DASH_SPEED_MUL = 3.4;   // times normal speed while dashing
 const DASH_TIME      = 0.16;  // seconds of dash -- about 140px of travel
-const DASH_COOLDOWN  = 2.2;   // seconds before you can dash again
 const DASH_GRACE     = 0.15;  // extra invulnerability after it, so you don't
                               // land inside the enemy you just flew through
 // The dash pushes a wave ahead of it rather than only hitting what it bumps
@@ -41,16 +51,29 @@ const DASH_END       = 0.18;  // seconds of the ring that closes the dash
 const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
 const PUSH_DRAG      = 0.02;  // ...bleeding to 2% per second, so about 80px
 
-const IFRAMES        = 1;     // seconds of invulnerability after a hit
 const BULLET_SPEED   = 430;   // pixels per second
 const GEM_PULL       = 300;   // how fast gems fly to you once in range
-const GEM_LIFE       = 8;     // seconds before an uncollected gem fades out
-const XP_BASE        = 5;     // motes needed for level 2
-const XP_GROWTH      = 1.45;  // each level costs this much more than the last
+const GEM_LIFE       = 8;     // seconds before an uncollected coin fades out
 const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
-const GATE_PAUSE     = 1.2;   // seconds of quiet between batches -- the beat a
-                              // mod offer will land in (D33, D34). Long enough
-                              // to read as a breath, short enough not to stall.
+const GATE_PAUSE     = 1.2;   // seconds of quiet between batches (D33, D34),
+                              // counted from when the mod offer is taken. Long
+                              // enough to read as a breath, short enough not to
+                              // stall. The full beat is MOD_OFFER_DELAY + this.
+// The simulation's one and only step size (D53). Everything that drives
+// `update()` uses it: the frame loop's accumulator, `advance()`, and the bot.
+// 1/120 rather than 1/60 because there is no render interpolation — the picture
+// is drawn wherever the last tick left things, so the step size *is* the
+// smoothness, and 8ms of stale position is invisible where 17ms is not.
+const FIXED_DT       = 1 / 120;
+// The longest real frame the simulation will believe in. Caps tab-switching
+// (a minute away must not teleport everything) and doubles as the catch-up
+// bound: at most MAX_FRAME_DT / FIXED_DT = 6 ticks per frame, so a slow frame
+// cannot spiral into simulating forever.
+const MAX_FRAME_DT   = 0.05;
+const MOD_OFFER_DELAY = 0.6;  // seconds between the last enemy dying and the
+                              // cards appearing. The kill burst lives 0.5s, so
+                              // anything shorter drops the offer on top of the
+                              // death it is rewarding and reads as a jump cut.
 
 let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
@@ -78,20 +101,71 @@ const SOUNDS = {
   gem:    { freq: 1150, dur: 0.05, type: 'sine',     vol: 0.22, slide: 1.3  },
   hurt:   { freq: 110,  dur: 0.28, type: 'sawtooth', vol: 0.55, slide: 0.4  },
   death:  { freq: 70,   dur: 0.90, type: 'sawtooth', vol: 0.60, slide: 0.3  },
-  levelA: { freq: 520,  dur: 0.09, type: 'triangle', vol: 0.40, slide: 1    },
-  levelB: { freq: 780,  dur: 0.16, type: 'triangle', vol: 0.35, slide: 1.25 },
+  rankA:  { freq: 520,  dur: 0.09, type: 'triangle', vol: 0.40, slide: 1    },
+  rankB:  { freq: 780,  dur: 0.16, type: 'triangle', vol: 0.35, slide: 1.25 },
 };
 
-// ---------- upgrades ----------
-// Just data. Adding one is a new line here and nothing else.
-const UPGRADES = [
-  { name: 'Rapid Fire', desc: '+35% fire rate',        apply: p => p.fireRate *= 1.35 },
-  { name: 'Power',      desc: '+1 damage',             apply: p => p.damage += 1 },
-  { name: 'Reach',      desc: '+70 firing range',      apply: p => p.range += 70 },
-  { name: 'Fins',       desc: '+45 move speed',        apply: p => p.speed += 45 },
-  { name: 'Pierce',     desc: 'shots pass through +1', apply: p => p.pierce += 1 },
-  { name: 'Lure',       desc: '+45 pickup range',      apply: p => p.pickupRange += 45 },
-  { name: 'Vitality',   desc: '+1 max HP, heal 1',     apply: p => { p.maxHp += 1; p.hp += 1; } },
+// ---------- mods ----------
+// A run-scoped pick, offered as one of three at a gate and gone at the end of
+// the dive (D34). Just data: adding one is a line here and nothing else.
+//
+// `scope` is **body** or **comfort**, and nothing else until S5 — Content.
+// Weapon-scoped mods are deliberately absent: "+35% fire rate" is meaningless on
+// a melee weapon and "+1 damage" is huge on a railgun and nothing on a spray
+// gun, so a weapon mod cannot be balanced before the weapons exist. Body and
+// comfort mods are weapon-agnostic by construction, which is what makes them
+// the safe starting pool — and it keeps S1 from balancing mods and manual fire
+// against each other at once. The prototype's Rapid Fire, Power, Reach and
+// Pierce were all weapon mods; they went here.
+//
+// No number the player has to compare across categories: mods differ in **kind,
+// not degree**, because arithmetic is the heavy thinking a dive must not
+// contain. That is why the descriptions read as sentences and not as stat lines.
+//
+// `max` is how many times one mod can be taken; absent means no limit. It exists
+// so the roll can refuse a mod that is already maxed, which is the only way a
+// bounded stat (a cooldown has a floor of zero) stays honest.
+//
+// Two mods D34 named are deliberately absent: pickup radius and a currency
+// magnet. D35 was recorded hours later and auto-collects currency, which leaves
+// both of them with nothing to do — building either now would be building a
+// husk. Two mods can max out, so a late dive may be offered fewer than three
+// cards; more mods is S5 — Content, not a reason to pad the pool here.
+const MODS = [
+  { name: 'Fins',     scope: 'body',    desc: 'you swim faster',
+    apply: p => p.speed += 45 },
+  { name: 'Vitality', scope: 'body',    desc: 'one more heart, it comes full',
+    apply: p => { p.maxHp += 1; p.hp += 1; } },
+  { name: 'Reflex',   scope: 'body',    desc: 'the dash comes back sooner', max: 3,
+    apply: p => p.dashCooldown -= 0.4 },
+  { name: 'Nerve',    scope: 'body',    desc: 'hits leave you safe longer', max: 3,
+    apply: p => p.iframes += 0.3 },
+  { name: 'Impact',   scope: 'body',    desc: 'the dash wounds what it throws', max: 3,
+    apply: p => p.dashDamage += 1 },
+  { name: 'Mend',     scope: 'comfort', desc: 'a heart back each batch', max: 1,
+    apply: p => p.mendOnClear = 1 },
+];
+
+// ---------- the development readout ----------
+// Every player number worth watching while the game is being built, as a flat
+// list so adding a stat is a line (D52). These are *development* numbers: Igor
+// wants to see what his character actually is, and the whole block is expected
+// to be dropped or trimmed before alpha. `read` returns a string or a number.
+// `stat` names the player field, which is what lets a check prove the readout
+// is complete: anything a mod can change must be shown, or the number Igor is
+// watching silently stops covering the thing that moved. `hp` and `maxHp` are
+// the exception, drawn as `HP 3/4` on the line above; the check names them.
+const PLAYER_STATS = [
+  { stat: 'speed',        label: 'spd',     read: p => Math.round(p.speed) },
+  { stat: 'range',        label: 'rng',     read: p => Math.round(p.range) },
+  { stat: 'fireRate',     label: 'rate',    read: p => p.fireRate.toFixed(2) + '/s' },
+  { stat: 'damage',       label: 'dmg',     read: p => p.damage },
+  { stat: 'pierce',       label: 'pierce',  read: p => p.pierce },
+  { stat: 'dashDamage',   label: 'dashdmg', read: p => p.dashDamage },
+  { stat: 'dashCooldown', label: 'dashcd',  read: p => p.dashCooldown.toFixed(1) + 's' },
+  { stat: 'iframes',      label: 'ifr',     read: p => p.iframes.toFixed(2) + 's' },
+  { stat: 'pickupRange',  label: 'pickup',  read: p => Math.round(p.pickupRange) },
+  { stat: 'mendOnClear',  label: 'mend',    read: p => p.mendOnClear },
 ];
 
 // Menu and options rows: one full-width band per entry, anchored on the text
@@ -103,18 +177,28 @@ function rowRect(i, top) {
   return { x: ARENA_W / 2 - ROW_W / 2, y: top + i * ROW_STEP - 26, w: ROW_W, h: ROW_H };
 }
 
-// Where the three upgrade cards sit, in arena coordinates. The renderer draws
+// Where the three mod cards sit, in arena coordinates. The renderer draws
 // these and the logic hit-tests the mouse against them, so the numbers belong
 // to neither of them.
-const CARD_W = 220, CARD_H = 140, CARD_GAP = 24;
+// `CARD_PAD` is the margin a description must leave on each side. The renderer
+// centres the text and so cannot notice it overflowing; the check measures
+// against this.
+const CARD_W = 220, CARD_H = 186, CARD_GAP = 24, CARD_PAD = 12;
+// How many "stat from -> to" rows a card has room for. A check holds the mod
+// pool to this, so a mod that moves a third stat fails the suite rather than
+// dropping a number off the bottom of the card.
+const MOD_ROWS = 2;
 function cardRect(i, n) {
   const totalW = n * CARD_W + (n - 1) * CARD_GAP;
   return { x: ARENA_W / 2 - totalW / 2 + i * (CARD_W + CARD_GAP),
            y: ARENA_H / 2 - CARD_H / 2, w: CARD_W, h: CARD_H };
 }
 
-function rollUpgrades() {
-  const pool = UPGRADES.slice();       // a copy, so we don't wreck the original
+// Three distinct mods, never one that is already maxed (D34). A copy, so the
+// splicing doesn't wreck the table. Offers fewer than three rather than
+// repeating itself if the pool has run short -- a duplicate card is not a choice.
+function rollMods() {
+  const pool = MODS.filter(m => (modCounts[m.name] || 0) < (m.max || Infinity));
   const out = [];
   while (out.length < 3 && pool.length) {
     out.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
@@ -146,14 +230,48 @@ const CLICK = ['Mouse0'];
 // These sizes are NOT tuned. D28 invalidated every balance constant when the
 // weapon became manual, and there is no point deriving new ones until the queue
 // they feed exists -- which is what this is. Tuning is the next step.
+// **Re-derived from scratch, D54.** The first set was never tuned -- D48 said
+// so at the time -- and Igor playing it confirmed they were trivial. The
+// arithmetic says why: the weapon does `fireRate x damage` = 2.5 hp/s and
+// **nothing in the mod pool raises damage** (D34 -- the pool is body and
+// comfort), so a dive's kill rate is flat. To occupy the 10-45s a batch is
+// supposed to take, a batch has to hold 25-112 hp. The old ones held 3-15,
+// i.e. 1.2-6.0s of shooting: every one of them was under target, and no
+// amount of enemy *placement* was going to fix a factor of five.
+//
+// These are sized on hp first. Real clears run longer than the raw figure,
+// because approaching, missing and kiting are not shooting -- so the low end
+// is deliberately under 25.
+//
+//  #   composition                        hp   shooting time
+//  1   10 drifter                         10   4.0s
+//  2   16 drifter                         16   6.4s
+//  3   12 drifter + 6 darter              18   7.2s
+//  4   14 darter                          14   5.6s
+//  5   2 bulwark + 12 drifter             24   9.6s
+//  6   18 drifter + 8 darter              26  10.4s
+//  7   3 bulwark + 10 darter              28  11.2s
+//  8   20 drifter + 12 darter             32  12.8s
+//  9   4 bulwark + 16 drifter             40  16.0s
+// 10   18 darter + 16 drifter             34  13.6s
+// 11   5 bulwark + 18 drifter + 8 darter  56  22.4s
+// 12   6 bulwark + 20 drifter + 12 darter 68  27.2s
+//
+// Twelve, because D34 sizes a layer at about twelve gates and therefore twelve
+// mods. The peak is 32 simultaneous enemies, against a design budget of 500.
 const BATCHES = [
-  { enemies: [['drifter', 3]] },
-  { enemies: [['drifter', 5]] },
-  { enemies: [['drifter', 4], ['darter', 2]] },
-  { enemies: [['darter', 4]] },
-  { enemies: [['bulwark', 1], ['drifter', 4]] },
-  { enemies: [['drifter', 6], ['darter', 3]] },
-  { enemies: [['bulwark', 2], ['darter', 3]] },
+  { enemies: [['drifter', 10]] },
+  { enemies: [['drifter', 16]] },
+  { enemies: [['drifter', 12], ['darter', 6]] },
+  { enemies: [['darter', 14]] },
+  { enemies: [['bulwark', 2], ['drifter', 12]] },
+  { enemies: [['drifter', 18], ['darter', 8]] },
+  { enemies: [['bulwark', 3], ['darter', 10]] },
+  { enemies: [['drifter', 20], ['darter', 12]] },
+  { enemies: [['bulwark', 4], ['drifter', 16]] },
+  { enemies: [['darter', 18], ['drifter', 16]] },
+  { enemies: [['bulwark', 5], ['drifter', 18], ['darter', 8]] },
+  { enemies: [['bulwark', 6], ['drifter', 20], ['darter', 12]] },
 ];
 
 // ---------- scenarios ----------
@@ -179,17 +297,21 @@ const SCENARIOS = {
 // Also just data. Which types appear, and how many, is now named per batch
 // (D48) -- the `weight` and `from` fields that let the deleted spawn director
 // roll a type by unlock time went with it.
+// `value` is how much currency it drops. It was `xp` until D34 deleted the XP
+// curve -- the drop is money now, and money is spent at `home` (S4), not here.
+// What the currency is *called* is still open (`ideas.md`), which is why nothing
+// in the code names it.
 const ENEMY_TYPES = [
-  { name: 'drifter', r: 9,  hp: 1, speed: 85,  xp: 1,
+  { name: 'drifter', r: 9,  hp: 1, speed: 85,  value: 1,
     color: '#e8446e', glow: '#ff1e5a' },
-  { name: 'darter',  r: 6,  hp: 1, speed: 190, xp: 1,
+  { name: 'darter',  r: 6,  hp: 1, speed: 190, value: 1,
     color: '#ffb648', glow: '#ff8a00' },
-  { name: 'bulwark', r: 17, hp: 6, speed: 52,  xp: 3,
+  { name: 'bulwark', r: 17, hp: 6, speed: 52,  value: 3,
     color: '#a05cff', glow: '#7b2fff' },
 ];
 
 // ---------- menus ----------
-// Same trick as upgrades and enemy types: a list of entries, so adding one
+// Same trick as mods and enemy types: a list of entries, so adding one
 // is a line and nothing else changes.
 const MENUS = {
   title: {
@@ -236,7 +358,7 @@ const HELP_KEYS = [
   ['Aim',            'mouse'],
   ['Shoot',          'hold left mouse button'],
   ['Dash',           'Space'],
-  ['Choose upgrade', 'arrows + Enter,  click,  or 1 2 3'],
+  ['Choose a mod',   'arrows + Enter,  click,  or 1 2 3'],
   ['Restart a run',  'R'],
   ['Mute sound',     'M'],
   ['Menu / back',    'Esc'],
@@ -247,7 +369,7 @@ const HELP_BLURB = [
   'Hold the left mouse button to shoot, along whatever you point at.',
   'Shots die at the edge of the ring, so range is a real range.',
   'Space dashes: you pass through the swarm unharmed, and hurt it.',
-  'Things you kill drop green motes. Walk over them to gain XP.',
-  'Motes fade after eight seconds, so the reward sits where the danger was.',
-  'Fill the bar, take one of three upgrades, and see how long you last.',
+  'Enemies come one batch at a time. Nothing new arrives until it is dead.',
+  'Things you kill drop gems. They are money, and they fade in eight seconds.',
+  'Every batch cleared is a rank: take one of three mods, and carry on.',
 ];

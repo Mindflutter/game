@@ -119,9 +119,14 @@ Igor's call and gets no check.
   contains zero browser API and reaches across for exactly six names. This is
   **enforced, not asserted**: `npm test` loads `game/` in Node with only those
   six stubbed. Every addition is deliberate and listed in `design.md`.
-- **Fixed timestep for the simulation**, with render interpolation, from S1.
-  Variable `dt` tunnels fast projectiles and melee hitboxes through thin
-  enemies. Time-based decay still uses `Math.pow(x, dt)`.
+- **Fixed timestep for the simulation**, from S1. `FIXED_DT` is 1/120 and the
+  frame loop banks leftover time, so every machine simulates the same game.
+  Time-based decay still uses `Math.pow(x, dt)`. **Render interpolation was
+  dropped** (D53): a shorter tick buys the same smoothness without touching
+  every draw call, which is the layer this project does not invest in. Fast
+  hitboxes do not rely on the timestep at all — the dash and bullets sweep the
+  segment they crossed (D50, D53), so tunneling is impossible at any speed
+  rather than merely unlikely at a bounded one.
 - **Seeded RNG for every dive**, from S0. Required twice over: for paired
   balance comparisons, and because "runs must differ" is a claim about
   controlled variation, which needs control.

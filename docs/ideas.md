@@ -278,7 +278,93 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
 - ~~**Do gems still expire, now that they are currency?**~~ **Closed by D35
   (Currency is auto-collected), 2026-09-27** — auto-collection means nothing can
   be stranded, so nothing needs to expire. The question dissolved rather than
-  being answered.
+  being answered. **Note: D35 is decided and not yet implemented** — gems are
+  still walked over and still expire at 8s (`design.md` → Currency). D49 kept
+  that rather than smuggling S4's work into S1.
+
+- **The mod pool runs short late in a dive, and comfort is down to one.** Four
+  of six mods cap (D49, D51, D55) — only Fins and Vitality are unbounded — and
+  Mend is the last comfort mod standing, the other two candidates D34 named
+  having been killed by D35 and D55 respectively. so a long dive can be offered
+  two cards instead of three, and eventually the same two every time. Not a design problem yet — a layer is ~12 batches and S5
+  (Content) adds mods — but if a fix is ever wanted before then, the mod-points
+  idea below prices repeats instead of banning them.
+
+- **The dash starts harmless and is bought — built as a mod, tier not settled.**
+  Igor, 2026-09-27: "land the dash idea, i'm inclined to mod thing, but in some
+  aspects can be home screen upgrade too". A lean plus an instruction to ship,
+  **not** a decision between `mod` and `gear` — so D51 built the mod (`Impact`,
+  `dashDamage` starts at 0) and the tier question stays open here. The
+  objection recorded earlier — that this would stop diving into a crowd being a
+  play — was answered by keeping the *shove* free and pricing only the wound.
+  D56 then made `dashSpeed` a field too, so reach is sellable as `gear`
+  whenever that is decided.
+
+- **Can one stat be raised by both a mod and gear?** Opened by D51: `Impact` is
+  the first mod with an obvious `gear` twin, per Igor's "in some aspects can be
+  home screen upgrade too". If dash damage is buyable at `home` *and* droppable
+  as a mod, the two stack within a dive, which is the compounding `foundations.md`
+  keeps out of the gear/attribute pair. Options: gear sets the floor and mods
+  add to it, gear and mods own disjoint stats, or mods only appear for stats you
+  already own a tier of. S4 — Meta loop skeleton has to answer this before the
+  shop exists.
+
+- **The dash economy: two of six mods feed one verb.** Igor, 2026-09-27,
+  playing D54: "once the dash becomes long, it feels way easier" and "dash
+  length + dash damage is the cool build, might want to rebalance". Measured
+  numbers live in `roadmap.md` -> Health.
+
+  **Partly fixed by D56.** `Fins` no longer feeds the dash at all — dash reach
+  is its own stat and is fixed at 141px — so what remains pointed at the dash
+  is `Reflex` (cooldown) and `Impact` (damage), both capped at 3. Peak escape
+  power fell from 386 to 141 invulnerable px/s, and the free-invulnerability
+  exploit (tap and release) is gone.
+
+  What is still open:
+  - **`Reflex` is the real multiplier.** Cooldown 2.2s -> 1.0s doubles dash
+    kills/s *and* invulnerability uptime (14% -> 31%). It was never the mod
+    Igor named, and it is the one doing the work.
+  - **`Impact` beyond x1 is nearly dead.** Drifters and darters have 1hp and
+    are the bulk of every batch, so x1 kills as many as x3. Only bulwarks see
+    the rest. Dropping its max to 1 until enemies with real hp exist is the
+    obvious move and is not taken.
+  - **Igor's direction: some dash upgrades belong at `home`** ("for later
+    think-thru"). D56 made this *possible* — `dashSpeed` is a field that can be
+    sold as `gear` — without deciding it. Dash power is the compounding,
+    strategic growth D31 puts in `gear` and keeps out of `mod`s.
+  - Caveat on all of it: the probe dashes once, in a fixed direction, from a
+    standstill. A human lines the dash up along a crowd, which is where reach
+    pays. The D50 lesson applies — where the measurement and Igor's feel
+    disagree, his feel wins.
+
+  **S6 — Balance owns the tuning.**
+
+- ~~**Should `Lull` come back?**~~ **Closed by Igor, 2026-09-28: "Lull leave
+  out".** D55 removed it, which was Claude's overreach at the time — Igor had
+  said "useless *at this point*", a "not yet" rather than a deletion — but the
+  outcome is now his. It stays out. The measurement behind it holds: nothing
+  reaches a centred player inside a 1.2s window, so an arrival guard has
+  nothing to guard against while every enemy walks in from an edge.
+
+- **Fish that arrive from behind the screen.** Igor, 2026-09-27: "make some
+  fish appear slowly from 'behind the screen' - still 2d, but adds to the
+  overwhelming trick". An arrival that fades and grows in from *depth* rather
+  than walking in from an arena edge. Still 2D — the depth is implied by alpha
+  and scale, both drawn in code, so D4 (no asset files) is untouched.
+
+  Three reasons it is more than flavour. It is the only arrival that can put
+  something *near* you, which is the pressure a fixed arena cannot otherwise
+  generate once you learn the edges — measured, nothing reaches a centred
+  player inside 2.04s. It makes the arena read as water with a volume rather
+  than a box with four doors. And it is the only thing that would give an
+  arrival-guard mod a reason to exist — `Lull` is out for good (above), but
+  the *slot* reopens if arrivals ever start near the player.
+
+  The risk is the obvious one — something materialising on top of you is
+  unfair unless telegraphed, and the fade-in *is* the telegraph, so the tuning
+  knob is how long it takes. Belongs with the arrival model rather than with
+  enemy behaviour: S5 — Content, or earlier if the fixed arena needs the
+  pressure before then.
 
 - **Elemental weaknesses and resistances** — certain enemies weak or resistant
   to certain weapon types. The draft itself calls this too much for the initial

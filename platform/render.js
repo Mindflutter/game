@@ -64,13 +64,34 @@ function drawAimLine() {
   ctx.stroke();
 }
 
-function drawUpgradeCards() {
+// A CSS font string, so it lives here and not in game/: it means nothing in
+// the layer that survives to Rust, and both of its readers are in this file.
+const CARD_DESC_FONT = '13px system-ui, sans-serif';
+
+// Whole numbers stay whole; anything fractional gets two places at most, so a
+// 0.30000000000000004 cannot reach the screen.
+const fmtStat = n => (Number.isInteger(n) ? n : +n.toFixed(2));
+
+// The widest mod description, in pixels, at the font the cards draw it in.
+// A mod is a line of prose in a fixed-width box and nothing in the game state
+// can see it running off the edge -- two of them did. The check calls this;
+// `measureText` is canvas, so the rule can only be enforced in the browser
+// suite, which is exactly what that suite is for.
+function widestModDesc() {
+  ctx.font = CARD_DESC_FONT;
+  return Math.max(...MODS.map(m => ctx.measureText(m.desc).width));
+}
+
+function drawModCards() {
   dimArena();
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#9ef7ff';
   ctx.font = '30px system-ui, sans-serif';
-  ctx.fillText('LEVEL UP', ARENA_W / 2, ARENA_H / 2 - 130);
+  ctx.fillText('BATCH CLEARED', ARENA_W / 2, ARENA_H / 2 - 130);
+  ctx.fillStyle = '#5d8b99';
+  ctx.font = '15px system-ui, sans-serif';
+  ctx.fillText('rank ' + rank, ARENA_W / 2, ARENA_H / 2 - 105);
 
   choices.forEach((u, i) => {
     const { x, y, w, h } = cardRect(i, choices.length);
@@ -84,22 +105,48 @@ function drawUpgradeCards() {
 
     ctx.fillStyle = '#bffcff';
     ctx.font = '19px system-ui, sans-serif';
-    ctx.fillText(u.name, x + w / 2, y + 48);
+    ctx.fillText(u.name, x + w / 2, y + 38);
 
     ctx.fillStyle = on ? '#9ef7ff' : '#7fb0c0';
-    ctx.font = '13px system-ui, sans-serif';
-    ctx.fillText(u.desc, x + w / 2, y + 78);
+    ctx.font = CARD_DESC_FONT;
+    ctx.fillText(u.desc, x + w / 2, y + 64);
+
+    // The numbers (D52). Both come from the mod itself: the change is computed
+    // by applying it to a copy of the player, and the stack from modCounts. A
+    // repeated card is no longer indistinguishable from a fresh one — which is
+    // what made Igor read a second `Impact` offer as a bug.
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = on ? '#6fd8e8' : '#4d7a8a';
+    // No slice: the card draws every row the mod moves, and a check holds the
+    // pool to MOD_ROWS, so a mod that moved a third stat fails the suite rather
+    // than quietly losing a number off the bottom of the card.
+    modPreview(u).forEach((c, n) => {
+      ctx.fillText(c.stat + '  ' + fmtStat(c.from) + ' → ' + fmtStat(c.to),
+                   x + w / 2, y + 90 + n * 17);
+    });
+
+    const held = modCounts[u.name] || 0;
+    ctx.fillStyle = on ? '#4d7a8a' : '#3d6270';
+    ctx.fillText('held ' + held + (u.max ? ' of ' + u.max : ''),
+                 x + w / 2, y + 132);
 
     ctx.fillStyle = on ? '#4ff0ff' : '#2b6b7d';
     ctx.font = '16px system-ui, sans-serif';
-    ctx.fillText(on ? '[ ENTER ]' : '[ ' + (i + 1) + ' ]', x + w / 2, y + 114);
+    ctx.fillText(on ? '[ ENTER ]' : '[ ' + (i + 1) + ' ]', x + w / 2, y + 160);
   });
 
   ctx.fillStyle = '#5d8b99';
   ctx.font = '14px system-ui, sans-serif';
   ctx.fillText('arrows or mouse to choose, Enter or click to take it',
-               ARENA_W / 2, ARENA_H / 2 + 120);
+               ARENA_W / 2, MOD_HINT_Y);
 }
+
+// Where the mod screen's bottom hint sits. Exposed so a check can hold the
+// cards above it: they grew from 140 to 186 tall when the numbers went on them
+// (D52), and a taller card silently runs into this line. Same guard as the
+// help screen's (D46). Where the cards *end* is not restated here --
+// `cardRect()` in content.js already owns that.
+const MOD_HINT_Y = ARENA_H / 2 + 120;
 
 // So a silent game can tell you why it is silent.
 function audioStatus() {
@@ -194,7 +241,7 @@ function drawField() {
   // The dash recharging: an arc that sweeps closed as it comes back. Nothing
   // is drawn once it's ready, so a clean ring means you have it.
   if (player.dashCd > 0) {
-    const left = player.dashCd / DASH_COOLDOWN;
+    const left = player.dashCd / player.dashCooldown;
     ctx.strokeStyle = 'rgba(79, 240, 255, 0.45)';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -203,25 +250,30 @@ function drawField() {
     ctx.stroke();
   }
 
-  // --- XP bar across the very top ---
-  ctx.fillStyle = '#12303a';
-  ctx.fillRect(0, 0, ARENA_W, 5);
-  ctx.fillStyle = '#4ff0ff';
-  ctx.fillRect(0, 0, ARENA_W * (xp / xpNext), 5);
-
   // --- HUD ---
+  // No bar across the top any more: rank arrives one per batch cleared, so
+  // there is no partial progress to draw and D34 deletes the bar outright.
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '14px system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '   LV ' + level +
-               '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed' +
+  ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '   RANK ' + rank +
+               '   BATCH ' + batchIndex + '   GEMS ' + currency + '   ' +
+               elapsed.toFixed(1) + 's   ' + kills + ' killed' +
                audioStatus(), 16, 30);
+
+  // The development readout (D52): what the character actually is, right now.
+  // Built from PLAYER_STATS, so adding a stat is a line in content.js and the
+  // rows below shift on their own rather than needing a new hardcoded y.
+  ctx.fillStyle = '#4d7a8a';
+  ctx.font = '13px system-ui, sans-serif';
+  ctx.fillText(PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   '),
+               16, 50);
 
   if (showFps) {
     ctx.fillStyle = '#3d6270';
     ctx.fillText('fps ' + Math.round(fps) + '    enemies ' + enemies.length +
-                 '   shots ' + bullets.length + '   motes ' + gems.length +
-                 '   sparks ' + particles.length, 16, 50);
+                 '   shots ' + bullets.length + '   gems ' + gems.length +
+                 '   sparks ' + particles.length, 16, 70);
   }
 }
 
@@ -235,8 +287,9 @@ function drawDeath() {
 
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '16px system-ui, sans-serif';
-  ctx.fillText('level ' + level + ', survived ' + elapsed.toFixed(1) + 's, killed ' +
-               kills, ARENA_W / 2, ARENA_H / 2 + 26);
+  ctx.fillText('rank ' + rank + ', ' + currency + ' gems, survived ' +
+               elapsed.toFixed(1) + 's, killed ' + kills,
+               ARENA_W / 2, ARENA_H / 2 + 26);
 
   ctx.fillStyle = '#2f5563';
   ctx.font = '13px system-ui, sans-serif';
@@ -363,7 +416,7 @@ function draw() {
   else if (screen === 'options') drawOptions();
   else {
     drawField();
-    if (screen === 'levelup')     drawUpgradeCards();
+    if (screen === 'mods')        drawModCards();
     else if (screen === 'paused') { dimArena(); drawMenu(MENUS.paused); }
     else if (screen === 'dead')   drawDeath();
   }

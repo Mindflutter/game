@@ -4,14 +4,16 @@
 // ---------- the loop ----------
 let last = performance.now();
 let fps = 60;
-function frame(now) {
-  // Seconds since the previous frame. Capped, so that switching tabs
-  // for a minute doesn't teleport everything across the screen.
-  const dt = Math.min((now - last) / 1000, 0.05);
-  last = now;
-  if (dt > 0) fps += (1 / dt - fps) * 0.1;    // smoothed, or it's unreadable
 
-  update(dt);
+// All this layer does with time is measure it. Banking it into fixed steps is
+// `advanceBy()` in game/logic.js, because the fixed timestep is a property of
+// the simulation and has to survive the port -- this file does not.
+function frame(now) {
+  const elapsed = (now - last) / 1000;
+  last = now;
+  if (elapsed > 0) fps += (1 / elapsed - fps) * 0.1;   // smoothed, or unreadable
+
+  advanceBy(elapsed);
   draw();
   requestAnimationFrame(frame);
 }
@@ -46,7 +48,7 @@ if (devScenario !== null) {
 // NOT named step(): game/logic.js already owns step(dt) as the simulation's own
 // per-frame function, and shadowing it from here recursed infinitely.
 function advance(n = 1) {
-  for (let i = 0; i < n; i++) update(1 / 60);
+  for (let i = 0; i < n; i++) update(FIXED_DT);
   draw();
 }
 

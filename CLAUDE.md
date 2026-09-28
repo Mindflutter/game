@@ -113,6 +113,26 @@ draft, which is why they are banned (D32).
   top. Not a one-line recap: a short block saying what was done, what it means,
   and what is now open or blocked, readable on its own by someone who skips the
   rest. Concise but actionable. Every response, including short ones.
+- **Uncertainty is never resolved by documenting it.** Two rules, one each way:
+  - **Claude is unsure → ask before writing it down.** Not after. A decision
+    entry is a record of something settled; writing one to resolve your own
+    doubt launders a guess into project history. This applies to the numbers
+    too — an invented constant, a cap, a delay — which get marked as Claude's
+    pick, not presented as derived.
+  - **Igor is unsure → it is an open question, and it goes in `ideas.md`.**
+    "I'm inclined to", "might", "maybe", "for later", "at this point" are
+    leans, not decisions. Do not round them up. A lean plus an instruction to
+    ship means *build it and leave the question open*, never *the question is
+    closed*.
+
+  **Every little aspect gets this treatment, whether or not it seems
+  important.** The failure is always the same shape and never feels like a
+  failure at the time: evidence is in hand, the call looks obvious, so Claude
+  makes it and records it as settled. Recorded, 2026-09-28, after four
+  instances in one stage — reading "for later think-thru" as covering a bug
+  fix, "i'm inclined to mod thing" as a chosen tier, "useless at this point"
+  as "delete it", and an example in D34 as a sizing decision.
+
 - **One question per response.** Not four. Igor has to hold the whole context
   to answer, and a wall of simultaneous decisions is expensive for a human in a
   way it is not for a model. Ask the most load-bearing one, act on assumptions
@@ -120,9 +140,10 @@ draft, which is why they are banned (D32).
 - **Keep responses short.** Long analyses are hard to process. Put the detail
   in the docs, where it can be re-read, and keep the message to what Igor has
   to act on now.
-- **Always name a stage or decision, never just its number.** "S1 — Combat
-  core", "D28 — Manual fire", not a bare "S1" or "D28". A number alone means
-  nothing without opening a file.
+- **Always name a stage or decision, never just its number.** A number alone
+  means nothing without opening a file. In prose and in chat, put the short
+  name in brackets: **"D28 (manual fire)"**, "S1 (combat core)". In `docs/`
+  headings the em-dash form stays: `## D28 — Manual fire via LMB`.
 - Small steps: one playable change, then stop and explain what changed.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
@@ -152,7 +173,7 @@ draft, which is why they are banned (D32).
      suites, the constraints) and they go stale. *Missed: it claimed six seam
      names while the code used eleven.*
   5. **In-game text** — `HELP_KEYS`, `HELP_BLURB`, menu labels, option names,
-     upgrade descriptions. Prose inside `game/content.js` describes behaviour
+     mod descriptions. Prose inside `game/content.js` describes behaviour
      and no check can read it. *Missed: the help still said the weapon fires
      itself, a full change after it stopped doing so.*
   6. **Layout coupled to data** — adding a row to any table can push a fixed

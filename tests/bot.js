@@ -5,7 +5,7 @@
 // It is deliberately a weak, simple driver: for regression it only has to be
 // *consistent*, and a bot that plays brilliantly would flatter the balance and
 // make everything look too easy. See `ideas.md` -> "There are three bots".
-import { loadGame, TICK } from './harness.js';
+import { loadGame } from './harness.js';
 
 // Aim at the nearest enemy, hold the trigger, and back away from it. That is
 // the whole policy.
@@ -44,17 +44,29 @@ export function kiteAndShoot(g, cx = g.ARENA_W / 2, cy = g.ARENA_H / 2) {
 // so no separate timing flag is needed: once a clear is pushed the condition is
 // false, which is what stops the timer re-arming during the quiet beat when the
 // arena is legitimately empty.
-export function diveReport(seed, batches = 5, tickCap = 60 * 180) {
+// `secondsCap` is wall-clock *game* time, not ticks: a tick budget silently
+// halved every dive when D53 moved the step from 1/60 to 1/120.
+export function diveReport(seed, batches = 5, secondsCap = 180) {
   const g = loadGame();
   g.reset(seed);
   const cx = g.ARENA_W / 2, cy = g.ARENA_H / 2;   // bridged reads, fixed values
 
+  const TICK = g.FIXED_DT;               // the game's own step, not a copy
+  const tickCap = Math.round(secondsCap / TICK);
+
   const times = [];
   let ticks = 0, seen = 0, startTick = 0;
 
-  while (times.length < batches && ticks < tickCap && g.screen === 'playing') {
+  while (times.length < batches && ticks < tickCap && g.screen !== 'dead') {
     if (g.batchIndex !== seen) { seen = g.batchIndex; startTick = ticks; }
-    kiteAndShoot(g, cx, cy);
+    // Every cleared batch offers three mods (D34), and the dive does not resume
+    // until one is taken -- so the bot has to pick. It always takes the first
+    // card rather than rolling: a bot that chose at random would build itself
+    // differently every dive, and two dives that are not the same dive cannot
+    // be compared.
+    if (g.screen === 'mods') g.justPressed.add('Digit1');
+    else kiteAndShoot(g, cx, cy);
+
     g.update(TICK);
     g.justPressed.clear();
     ticks++;
@@ -62,6 +74,6 @@ export function diveReport(seed, batches = 5, tickCap = 60 * 180) {
       times.push(+((ticks - startTick) * TICK).toFixed(2));
     }
   }
-  return { seed, alive: g.screen === 'playing', ranFor: +(ticks * TICK).toFixed(1),
+  return { seed, alive: g.screen !== 'dead', ranFor: +(ticks * TICK).toFixed(1),
            hpLeft: g.player.hp, clearTimes: times };
 }
