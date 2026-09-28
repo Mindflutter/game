@@ -401,6 +401,22 @@ initially passed even with a divide-by-zero guard deleted, because the generator
 never put the cursor exactly on the player. It now does so 8% of the time. Treat
 an invariant as unproven until a deliberate break makes it fail.
 
+## Driven runs are silent
+
+`?test` and any `?dev=` scenario boot with `volume = 0`: those are the URLs
+Playwright drives, and a driven run should not make noise on the machine
+running it. Playing the game normally — no query string — is unaffected.
+
+It does not weaken the audio checks. They synthesise each sound in an
+`OfflineAudioContext` and measure its peak there, which never reaches the
+speakers and never reads the live master gain; all eight still pass muted. The
+headless bot has no audio at all, since `sound` is stubbed at the seam.
+
+The one trap: the options check drives the volume control, and `change()`
+plays a sound to preview the new level. It restores whatever the run booted
+with rather than a hardcoded 0.6 — the hardcode silently un-muted the whole
+remainder of the suite.
+
 ## Local server
 
 `python3 serve.py 8222`. Needed only for Playwright, which refuses `file://`.

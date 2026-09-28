@@ -790,13 +790,19 @@ if (location.search === '?test') {
   update(1 / 60);
   check(menuIndex === 0, 'key auto-repeat must not move the cursor');
 
-  // Each option changes the thing it claims to.
+  // Each option changes the thing it claims to. The volume is put back to what
+  // the run started with, not to 0.6 -- `?test` boots muted, and restoring a
+  // hardcoded 0.6 un-muted the rest of the suite, which is the noise Igor asked
+  // to stop. `change()` also plays a sound to preview the new level, so this
+  // check is itself a speaker if it leaves the volume up.
+  const bootVolume = volume;
   screen = 'options'; optionIndex = 0; volume = 0.6;
   tap('ArrowLeft');
   check(Math.abs(volume - 0.5) < 1e-9, 'volume must go down, got ' + volume);
   tap('ArrowRight'); tap('ArrowRight');
   check(Math.abs(volume - 0.7) < 1e-9, 'volume must go up, got ' + volume);
-  volume = 0.6;
+  volume = bootVolume;
+  if (master) master.gain.value = volume;
 
   screen = 'options'; optionIndex = 1; shakeLevel = 2;
   tap('ArrowLeft');

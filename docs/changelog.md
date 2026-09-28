@@ -6,6 +6,14 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-09-28
 
+**Driven runs are muted**
+Igor: "mute the game when testing with bot / playwright". `?test` and `?dev=`
+now boot at `volume = 0`. The audio checks are untouched — they measure peaks
+in an `OfflineAudioContext` that never reaches the speakers, and all eight pass
+muted. Also fixed the options check, which restored a hardcoded 0.6 and so
+un-muted the rest of the suite behind its own back; it restores the boot volume
+now.
+
 **S1 — Combat core closed.** Igor: "close s1, s2 coming in a different
 session". All DoD bullets met; `plan.md` records no active stage. Eleven
 decisions, D45 (the weapon is manual) through D56 (the dash is a fixed,

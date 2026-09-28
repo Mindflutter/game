@@ -27,6 +27,16 @@ const seedParam = params.get('seed');
 const seed = seedParam === null ? undefined : Number(seedParam) >>> 0;
 const devScenario = params.get('dev');
 
+// Silent whenever the game is being *driven* rather than played: `?test` runs
+// unattended, and `?dev=` scenarios are what Playwright drives. Neither should
+// make noise on the machine running them.
+//
+// This does not weaken the audio checks. They synthesise each sound in an
+// `OfflineAudioContext` and measure its peak there (checks.js), which never
+// reaches the speakers and never touches this gain. The headless bot has no
+// audio at all -- `sound` is stubbed at the seam.
+if (params.has('test') || devScenario !== null) volume = 0;
+
 // A stepped scenario deliberately does NOT start the frame loop: nothing moves
 // until step() asks it to. That is what makes a scenario inspectable -- read the
 // state and it is still the state you set up -- and it is how the bot drives the
