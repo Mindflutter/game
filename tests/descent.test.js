@@ -2,12 +2,8 @@
 // Each test guards a line of docs/superpowers/specs/2026-09-28-s2-descent-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { loadGame } from './harness.js';
+import { loadGame, ticks, ride, clearAndWait } from './harness.js';
 import { botInput } from './bot.js';
-
-// Ticks for `seconds` of game time, in the game's own step: a hardcoded 120
-// is exactly the budget D53 once halved without anyone noticing.
-const ticks = (g, seconds) => Math.round(seconds / g.FIXED_DT);
 
 // A fresh game standing at the start of gate `k`'s descent: batch k-1 is
 // cleared, the camera is still at its depth, the dive's opening beat is spent.
@@ -21,33 +17,12 @@ function atGate(k) {
   return g;
 }
 
-// Ticks until a batch arrives or the screen changes, holding `hold` the whole
-// way -- nothing in game/ writes `keys`, so setting them once holds them.
-// Returns the camera depth after every tick.
-function ride(g, hold = []) {
-  g.keys.clear();
-  for (const k of hold) g.keys.add(k);
-  const cams = [];
-  for (let i = 0, n = ticks(g, 30); i < n && g.enemies.length === 0 && g.screen === 'playing'; i++) {
-    g.update(g.FIXED_DT);
-    cams.push(g.cameraY);
-  }
-  return cams;
-}
-
-// Kills the batch through the real death path, then plays on until the screen
-// changes -- the mod offer, or the layer end -- or `seconds` run out.
-function clearAndWait(g, seconds = 5) {
-  for (const e of [...g.enemies]) g.killEnemy(e);
-  for (let i = 0, n = ticks(g, seconds); i < n && g.screen === 'playing'; i++) g.update(g.FIXED_DT);
-  return g.screen;
-}
-
 // How far the water flows in one second, after `settle` seconds for its speed
 // to ease. The player is kept alive, so a fight can be measured too; on the
 // menu and end screens the keep-alive does nothing.
 function flowFrom(g, settle = 3) {
-  const tick = () => { g.player.hurt = g.player.iframes; g.update(g.FIXED_DT); };
+  g.immortal = true;
+  const tick = () => g.update(g.FIXED_DT);
   for (let i = 0, n = ticks(g, settle); i < n; i++) tick();
   const from = g.waterY;
   for (let i = 0, n = ticks(g, 1); i < n; i++) tick();
@@ -62,8 +37,9 @@ describe('the descent', () => {
       // The first violation is recorded and asserted once, after the loop: an
       // expect() on every tick was half this test's cost and caught nothing more.
       let moved = false, bad = null;
+      g.immortal = true;                       // the bot kept alive
       for (let i = 0, n = ticks(g, 60); i < n && g.batchIndex < 4 && !bad; i++) {
-        botInput(g, true);                     // the bot's own tick, kept alive
+        botInput(g);                           // the bot's own tick
         const fighting = g.enemies.length > 0, frozen = g.screen === 'mods';
         const before = g.cameraY;
         g.update(g.FIXED_DT);
@@ -224,6 +200,25 @@ describe('the descent', () => {
     expect(g.screen).toBe('paused');
     expect(g.cameraY).toBe(cam);
     expect(g.waterY).toBe(water);
+  });
+
+  it('pauses from the mod cards, and resumes back to the same cards', () => {
+    // Igor: "cannot invoke pause from mod screen". Resume must return to the
+    // cards it was opened over -- by Esc or by the menu -- not to play.
+    const g = loadGame();
+    g.applyScenario('late-swarm', 1);
+    ride(g);
+    expect(clearAndWait(g)).toBe('mods');
+    const cards = g.choices.map(m => m.name).join();
+    for (const resume of ['Escape', 'Enter']) {        // Esc, and the menu's Resume
+      g.justPressed.add('Escape');
+      g.update(g.FIXED_DT);
+      expect(g.screen).toBe('paused');
+      g.justPressed.add(resume);
+      g.update(g.FIXED_DT);
+      expect(g.screen).toBe('mods');
+      expect(g.choices.map(m => m.name).join()).toBe(cards);
+    }
   });
 
   it('brings arrivals in at the edges of the view, wherever the camera is', () => {

@@ -45,7 +45,8 @@ export function loadGame() {
                  'elapsed', 'kills', 'shake', 'queuePaused', 'batchIndex', 'breathTimer',
                  'cameraY', 'waterY',
                  'rank', 'currency', 'choices', 'choiceIndex', 'modCounts',
-                 'screen', 'currentSeed', 'bulletId', 'shakeLevel'];
+                 'screen', 'currentSeed', 'bulletId', 'shakeLevel',
+                 'immortal', 'damageOverride'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS',
                   'SCENARIOS', 'BATCHES', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
@@ -60,4 +61,32 @@ export function loadGame() {
 
   vm.runInContext(src + '\n;\n' + bridge, ctx, { filename: 'game-bundle.js' });
   return ctx;
+}
+
+// ---------- shared by the test files ----------
+
+// Ticks for `seconds` of game time, in the game's own step: a hardcoded 120
+// is exactly the budget D53 once halved without anyone noticing.
+export const ticks = (g, seconds) => Math.round(seconds / g.FIXED_DT);
+
+// Ticks until a batch arrives or the screen changes, holding `hold` the whole
+// way -- nothing in game/ writes `keys`, so setting them once holds them.
+// Returns the camera depth after every tick.
+export function ride(g, hold = []) {
+  g.keys.clear();
+  for (const k of hold) g.keys.add(k);
+  const cams = [];
+  for (let i = 0, n = ticks(g, 30); i < n && g.enemies.length === 0 && g.screen === 'playing'; i++) {
+    g.update(g.FIXED_DT);
+    cams.push(g.cameraY);
+  }
+  return cams;
+}
+
+// Kills the batch through the real death path, then plays on until the screen
+// changes -- the mod offer, or the layer end -- or `seconds` run out.
+export function clearAndWait(g, seconds = 5) {
+  for (const e of [...g.enemies]) g.killEnemy(e);
+  for (let i = 0, n = ticks(g, seconds); i < n && g.screen === 'playing'; i++) g.update(g.FIXED_DT);
+  return g.screen;
 }

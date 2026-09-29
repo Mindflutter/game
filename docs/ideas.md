@@ -146,6 +146,12 @@ question art has to answer here (can you tell a darter from a bulwark at a
 glance), and "does it look good" can only usefully be asked in the engine you
 are shipping in.
 
+**For the record** — Igor, 2026-09-29: "keeping graphics in mind, enemies and
+the player will look significantly bigger with all assets. record for info."
+Today the drawn circle *is* the hitbox, so bigger art means either bigger
+hitboxes — every radius in the balance block moves — or art that overhangs
+what it collides with.
+
 ### Port to a native executable
 **Reaffirmed as post-alpha by D30**, after the question was reopened on
 2026-09-26 and answered "still throwaway". Rust or C++, dropping the browser
@@ -240,6 +246,22 @@ previously needed only movement.
 **Declined:** a learned/RL bot. Needs a training harness and compute, and would
 be a research project that teaches nothing about this game.
 
+**The balance bot is Igor's wish, left for now.** Igor, 2026-09-29: "well write
+a good bot. nor sure it's worth it, but would be nice and handy to have a bot
+mimicking real player's behavior. leave it now if complicated (i assume so)."
+It is — threat-field navigation plus dash timing is a project of its own — so
+S3 (one boss, one complete layer) measures around the gap instead: the win
+rate is taken on the boss fight alone (D63 — the win rate is the boss
+fight's).
+
+**Found building S3, 2026-09-29: the kiting bot backs out of its own range.**
+Against a lone slow enemy it holds it inside its 250px range 1% to 18% of the
+time, so its shots never land — the mini-boss outlasts it for minutes, and the
+immortal layer time trebled (figures in `roadmap.md` → Health). Backing off
+only while closer than the range, and closing in otherwise, is a few lines —
+but it moves every bot baseline. Not taken in S3 — Igor, closing it: "let's
+just focus on what the stage DoD says".
+
 **The trap worth naming:** a bot that plays *well* actively misleads. If it
 clears a batch with frame-perfect dodging no human can perform, difficulty gets
 over-tuned. Bot numbers are a **floor** on difficulty, never a measure of human
@@ -306,7 +328,7 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   of six mods cap (D49, D51, D55) — only Fins and Vitality are unbounded — and
   Mend is the last comfort mod standing, the other two candidates D34 named
   having been killed by D35 and D55 respectively. so a long dive can be offered
-  two cards instead of three, and eventually the same two every time. Not a design problem yet — a layer is ~12 batches and S5
+  two cards instead of three, and eventually the same two every time. Not a design problem yet — a layer is fifteen batches and S5
   (Content) adds mods — but if a fix is ever wanted before then, the mod-points
   idea below prices repeats instead of banning them.
 
@@ -409,7 +431,9 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
 - ~~**Nothing ends a dive.**~~ **Partly answered, D58 (the descent),
   2026-09-28.** The list no longer cycles: a dive ends at the bottom of the
   layer, on a screen that is a stop, not a win. Layer *completion* — the boss,
-  and what finishing earns — is still S3.
+  and what finishing earns — is still S3. **The boss is in, 2026-09-29** (D62 —
+  the boss is the layer's last batch): killing it finishes the layer. What
+  finishing earns is the layer-to-layer pass's (D60).
 
 ## Open — from the descent (S2)
 
@@ -425,6 +449,21 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   left for the currency stage (S4 — Meta loop skeleton), "it will be reworked
   anyways". D35 (currency is auto-collected) is decided but not implemented;
   implementing it is where this closes.
+
+## Open — from the boss (S3)
+
+- **Normal enemies alongside the boss.** Igor, 2026-09-29: "no one cancels the
+  normal enemies along the boss, but let's get the boss finished first". Not
+  ruled out, and after the boss itself (D62 — the boss is the layer's last
+  batch). When it comes, the glossary's **batch** row — "enemies of comparable
+  threat" — no longer fits that batch, since a boss and its escorts are not
+  comparable.
+- **More boss attacks.** The spit — a fan of slow toxic blobs, from the draft's
+  "spitting out dangerous toxins" and "shooting an arc" — and the lunge and
+  the spit in turn. Offered alongside the lunge; Igor took the lunge alone
+  (D64 — the boss lunges): "we will do enemy polishing later anyways". The
+  spit needs enemy projectiles first — see the ranged drifter under "Enemy
+  behaviours, not just enemy stats".
 
 ## Suggested but not yet discussed
 

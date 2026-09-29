@@ -261,30 +261,39 @@ const CLICK = ['Mouse0'];
 //  2   16 drifter                         16   6.4s
 //  3   12 drifter + 6 darter              18   7.2s
 //  4   14 darter                          14   5.6s
+//  -   1 mini-boss                        24   9.6s
 //  5   2 bulwark + 12 drifter             24   9.6s
 //  6   18 drifter + 8 darter              26  10.4s
 //  7   3 bulwark + 10 darter              28  11.2s
 //  8   20 drifter + 12 darter             32  12.8s
+//  -   1 mini-boss                        24   9.6s
 //  9   4 bulwark + 16 drifter             40  16.0s
 // 10   18 darter + 16 drifter             34  13.6s
 // 11   5 bulwark + 18 drifter + 8 darter  56  22.4s
 // 12   6 bulwark + 20 drifter + 12 darter 68  27.2s
+//  -   1 boss                             60  24.0s
 //
 // Twelve, because D34 sizes a layer at about twelve gates and therefore twelve
-// mods. The peak is 32 simultaneous enemies, against a design budget of 500.
+// mods. The peak is 38 simultaneous enemies, against a design budget of 500.
+// S3 added the rows marked `-`: a mini-boss after batches 4 and 8, and the
+// boss as the layer's last batch (D62, D65) -- fifteen in all. Where the
+// mini-bosses sit is Claude's pick.
 const BATCHES = [
   { enemies: [['drifter', 10]] },
   { enemies: [['drifter', 16]] },
   { enemies: [['drifter', 12], ['darter', 6]] },
   { enemies: [['darter', 14]] },
+  { enemies: [['mini-boss', 1]] },
   { enemies: [['bulwark', 2], ['drifter', 12]] },
   { enemies: [['drifter', 18], ['darter', 8]] },
   { enemies: [['bulwark', 3], ['darter', 10]] },
   { enemies: [['drifter', 20], ['darter', 12]] },
+  { enemies: [['mini-boss', 1]] },
   { enemies: [['bulwark', 4], ['drifter', 16]] },
   { enemies: [['darter', 18], ['drifter', 16]] },
   { enemies: [['bulwark', 5], ['drifter', 18], ['darter', 8]] },
   { enemies: [['bulwark', 6], ['drifter', 20], ['darter', 12]] },
+  { enemies: [['boss', 1]] },
 ];
 
 // ---------- scenarios ----------
@@ -306,7 +315,10 @@ const SCENARIOS = {
   'late-swarm':  { batch: 5 },
   // The last batch, then the bottom of the layer -- for seeing how a layer
   // ends without playing all of it. Derived, so it follows BATCHES' length.
+  // Since S3 the last batch is the boss (D62).
   'last-batch':  { batch: BATCHES.length - 1 },
+  // The first mini-boss (D65), alone. Derived the same way.
+  'mini-boss':   { batch: BATCHES.findIndex(b => b.enemies.some(([n]) => n === 'mini-boss')) },
 };
 
 // ---------- enemy types ----------
@@ -324,6 +336,19 @@ const ENEMY_TYPES = [
     color: '#ffb648', glow: '#ff8a00' },
   { name: 'bulwark', r: 17, hp: 6, speed: 52,  value: 3,
     color: '#a05cff', glow: '#7b2fff' },
+  // The lungers (S3): the boss, and the mini-boss that rehearses it (D62, D64,
+  // D65). They chase, then stop and wind up with their line showing, charge
+  // along it and rest. `lunge` holds the timings -- `chase` seconds before a
+  // wind-up may start, `windup` and `rest` in seconds, the charge's `speed`
+  // in px/s and its `reach` in px -- and its presence is the behaviour. Every
+  // number here is Claude's pick. The boss rises from below the view, centred:
+  // Igor, "The boss swims in from the bottom".
+  { name: 'mini-boss', r: 26, hp: 24, speed: 70, value: 5,
+    color: '#e2ff8a', glow: '#c6ff3c',
+    lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
+  { name: 'boss',      r: 42, hp: 60, speed: 60, value: 10,
+    color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
+    lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 } },
 ];
 
 // ---------- menus ----------
@@ -343,7 +368,7 @@ const MENUS = {
     heading: 'PAUSED',
     sub: '',
     items: [
-      { label: 'Resume',        run: () => { screen = 'playing'; } },
+      { label: 'Resume',        run: () => { screen = resumeTo; } },
       { label: 'Help',          run: () => openScreen('help') },
       { label: 'Options',       run: () => openScreen('options') },
       { label: 'Quit to title', run: () => { screen = 'title'; menuIndex = 0; } },

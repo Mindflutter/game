@@ -51,7 +51,7 @@ the context these docs exist to preserve.
 ## Vocabulary
 
 Binding (D32). In docs **and** in code identifiers: `layer`, `dive`, `rank`,
-`mod`, `gear`, `tier`, `batch`, `wave`, `gate`, `home`, `attribute`,
-`micro-task`, `prototype`. Never "level" or "upgrade" — each meant two different
+`mod`, `gear`, `tier`, `batch`, `wave`, `gate`, `layer end`, `boss`, `home`,
+`attribute`, `micro-task`, `prototype`. Never "level" or "upgrade" — each meant two different
 things in the source draft, which is why both are banned. Full table in
 `foundations.md`.

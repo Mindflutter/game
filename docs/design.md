@@ -6,8 +6,10 @@ Describes the **present**, not the plan. Update it when reality changes.
 weapon is manual (D45), the batch queue and gate are in (D48), rank and mods
 are in (D49), and the simulation runs on a fixed timestep (D53). S2 — The dive
 is closed: one layer scrolls under a camera, a current carries you between gate
-depths, and the layer ends at the bottom (D58). There is no `home`, no boss and
-no layer completion yet. Nothing here is a statement of intent.
+depths, and the layer ends at the bottom (D58). S3 — One boss, one complete
+layer is closed: two mini-bosses along the way and the boss as the layer's last
+batch, both lunging (D62, D64, D65), so the layer can be finished. There is no `home` yet. Nothing here is a statement of
+intent.
 
 ## What it is
 
@@ -30,25 +32,26 @@ game/       content.js  every tuning number + all content tables
             state.js    dive state, settings, reset(), openScreen()
             logic.js    step() — arrivals, the gate, the descent, movement,
                         collision
-                        ── 1184 lines. Survives the port.
+                        ── 1284 lines. Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
             render.js   canvas, view scaling, the camera, every draw function
 main.js                 frame loop, dt, fps, boot
-                        ── 658 lines. Rewritten on the port.
+                        ── 681 lines. Rewritten on the port.
 
 checks.js               the ?test suite → the port's regression tests
 ```
 
-Line counts are as of 2026-09-28. Regenerate rather than trust them:
+Line counts are as of 2026-09-29. Regenerate rather than trust them:
 `wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
 *reports*, never a grep — some call sites sit inside loops.
 
-The platform share is **36%** (658 of 1842). D17 measured 23% on 2026-09-12 and
+The platform share is **35%** (681 of 1965). D17 measured 23% on 2026-09-12 and
 it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
 while `platform/` did not, and S2 held it level — the camera is one translate
-and the specks, depth tint and margin cover are a few dozen lines. This is the number to watch — CLAUDE.md says not to
+and the specks, depth tint and margin cover are a few dozen lines. S3 took it
+down a point: the lunge is logic, and its tell is a few lines of drawing. This is the number to watch — CLAUDE.md says not to
 invest in the canvas layer, and this is what that rule looks like when it slips.
 
 Plain `<script>` tags, not modules, so `file://` works. **Load order matters**
@@ -124,13 +127,16 @@ move `choiceIndex` (it opens on the middle card), Enter or Space takes the
 highlighted one, a click takes the one under the cursor, and `1`/`2`/`3` still
 take theirs outright. The mouse only moves the highlight when it has actually
 moved — a cursor resting on a card would otherwise overrule the keys every
-frame, which is why `lastAimX`/`lastAimY` exist.
+frame, which is why `lastAimX`/`lastAimY` exist. Esc pauses here as it does in
+play, and Resume — or Esc again — brings the same cards back: the pause menu
+returns to whichever screen opened it (`resumeTo`).
 
 The title, pause and options screens work the same way: hover moves the
 cursor, a click activates the row, and on options a click cycles the value
 exactly as Enter does. Help and the two end screens take a click as "go on".
 The end screens — `dead` and `bottom` — share one draw function and one input
-branch; the bottom is a stop, not a win, and reports only the time (D58).
+branch. The bottom is reached only by killing the boss, the layer's last batch
+(D62), so it is the layer's ending; it still reports only the time (D58).
 Menu and options rows are full-width bands from `rowRect` in `content.js`.
 
 Mouse buttons ride in `keys` and `justPressed` under codes a keyboard cannot
@@ -162,10 +168,12 @@ water, and `enemyInRange()` was deleted with it.
 
 **Arrivals: the batch queue and the gate** (D27, D48, D54). Enemies come one
 **batch** at a time — a record in `BATCHES` naming counts per type — and nothing
-new arrives until the batch is dead. Twelve batches, sized on total hp and
-ramping 10 to 68 (D54): the weapon does 2.5 hp/s and no mod raises damage, so
-hp *is* the clock, and the previous set held 3 to 15 which made every batch
-trivial. Batch `k` waits at depth `k × GATE_SPACING`; a dive opens with
+new arrives until the batch is dead. Fifteen batches: D54's twelve, sized on
+total hp and ramping 10 to 68 — the weapon does 2.5 hp/s and no mod raises
+damage, so hp *is* the clock, and the previous set held 3 to 15 which made every
+batch trivial — plus a lone mini-boss after batches 4 and 8 and the boss as the
+last (D62, D65). The boss rises from below the view, centred; everything else
+arrives at a random edge. Batch `k` waits at depth `k × GATE_SPACING`; a dive opens with
 `GATE_PAUSE` (1.2s) of quiet before the first, and every later batch arrives the
 moment the camera reaches its depth. `batchIndex` counts batches begun. The list
 does not cycle: past the last batch the same arithmetic points at the bottom.
@@ -201,8 +209,21 @@ is named per batch (D48):
 | drifter | 9 | 1 | 85 | 1 | the baseline swarm |
 | darter | 6 | 1 | 190 | 1 | fast enough to punish lazy kiting |
 | bulwark | 17 | 6 | 52 | 3 | soaks shots, blocks escape routes |
+| mini-boss | 26 | 24 | 70 | 5 | a lunger that rehearses the boss (D65) |
+| boss | 42 | 60 | 60 | 10 | a lunger, alone in the layer's last batch (D62) |
 
 `value` is how much currency it drops. It was `xp` until D49.
+
+**The lunge** (D64), in `lungeStep()`: the boss's and the mini-boss's. Chase;
+then — after `lunge.chase` seconds, within `reach` and wholly inside the view —
+wind up for `windup` seconds with the line locked at where the player was;
+charge along it at `lunge.speed` for `reach` px or to the view's edge; rest for
+`rest` seconds, the opening; chase again. From the wind-up on, the view holds
+the lunger. The timings are the type's `lunge` field, whose presence is the
+behaviour: boss wind-up 1.0s, mini-boss 1.5s; charge 780px/s, reach 450px, rest
+1.2s — all Claude's picks. Contact costs a heart as with any enemy. Drawn:
+during the wind-up the body swells ×1.25 and glows harder, and a lane as wide
+as its radius lies along the line — placeholder graphics.
 
 **Bullets** store velocity once at birth and fly straight — that's why shots can
 be dodged and why yours sail past into the dark. Each carries an `id`; enemies
@@ -247,7 +268,8 @@ is what makes reach a stat that can be *sold* at `home` later rather than a
 side effect of a movement mod. It takes
 its id from the bullet id space, so `lastHitBy` stops it hitting the same enemy
 twice — the same trick as pierce. Enemies carry `pushX/pushY` for the shove,
-their only velocity; everything else about them is a fixed walk toward you.
+their only velocity; everything else about them is a fixed walk toward you,
+or a lunger's step (D64).
 
 The player never blinks while dashing even though `hurt` is set, because the
 i-frame blink is what made the dash read as a teleport. An afterimage spark each
@@ -274,7 +296,7 @@ and starts `offerTimer` at `MOD_OFFER_DELAY`; when that expires,
 `openModOffer()` rolls three mods and opens the `mods` screen, the beat between
 batches and the only pause in a dive. Not after a layer's last batch: its
 clear is the layer end, which is not a gate and pays nothing — no rank, no
-mods, no `Mend` (D59) — so twelve batches make eleven ranks, and the current
+mods, no `Mend` (D59) — so fifteen batches make fourteen ranks, and the current
 goes straight on to the bottom. The delay exists because the
 kill burst lives 0.5s and the cards were landing on the same frame as the kill,
 which read as a jump cut (D51). A pending offer also holds the batch queue, so
@@ -383,12 +405,26 @@ Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42):
 | `?dev=one-drifter` | Loads it **frozen**. Nothing advances until `advance(n)`. |
 | `?dev=three-types&play` | Loads it **running**, for watching. |
 | `?dev=late-swarm&seed=4471` | Any scenario, on a fixed seed. |
-| `?dev=last-batch&play` | The layer's last batch, then the bottom — the end without the whole layer. |
+| `?dev=last-batch&play` | The boss — the layer's last batch — then the bottom: the end without the whole layer. |
+| `?dev=mini-boss&play` | The first mini-boss, alone. |
 
-`applyScenario(name, seed)` resets, then applies the record: `elapsed` to start
-part-way in, `spawn: false` to stop new arrivals (`spawnPaused`), and a list of
-`[type, x, y]` placed at nominal speed with no jitter or ramp. An unknown name
-logs the known ones and does not throw.
+`applyScenario(name, seed)` resets, then applies the record: `batch` to start
+at that batch's depth, `spawn: false` to stop new arrivals (`queuePaused`), and
+a list of `[type, x, y]` placed in the view at nominal speed with no jitter. An
+unknown name logs the known ones and does not throw.
+
+Two dev flags ride on any URL, with a scenario or without, and survive R:
+`main.js` sets them, and `reset()` leaves them alone and re-applies the damage.
+
+| Flag | Does |
+|---|---|
+| `&immortal` | Nothing hurts the player. |
+| `&damage=<n>` | Every shot does `n`. A bare `&damage` is 100, one shot for anything. |
+
+A URL's first argument follows `?` and every later one `&`, in any order:
+`?dev=last-batch&play&immortal&damage`, or without a scenario
+`?immortal&damage=5`. `?test` is the exception — it runs only as the whole
+query.
 
 `advance(n)` runs exactly n fixed ticks and draws once — no wall clock involved.
 This is what the bot drives, and the same entries it selects by name, so there
@@ -419,7 +455,7 @@ Two suites (D39, D44).
 
 | | Command | Covers |
 |---|---|---|
-| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, the layer end offers no mods, the water flows behind the mod cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the layer ends at the bottom), and the docs (D57). Vitest + fast-check, dev-only. |
+| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, the layer end offers no mods, the water flows behind the mod cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the layer ends at the bottom), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; the layer ends on the boss with two lone mini-bosses along the way; a mini-boss's clear pays a rank and mods), the bot starting from a scenario, the dev flags, and the docs (D57). Vitest + fast-check, dev-only. |
 | **Browser** | `index.html?test` | The scripted checks (count under Verification), plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`, and the same seed played to the bottom of the layer at three window sizes through real `MouseEvent`s (D29). |
 
 `tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a

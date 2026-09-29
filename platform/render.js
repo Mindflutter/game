@@ -228,11 +228,27 @@ function drawField() {
   }
 
   // A wounded enemy shrinks, so you can see a big one is nearly finished,
-  // and flashes white for a frame or two when hit.
+  // and flashes white for a frame or two when hit. A lunger winding up (D64)
+  // swells, glows harder and lays its lane down ahead of it -- the tell --
+  // all of it growing with `k`, 0 to 1 across the wind-up.
   for (const e of enemies) {
     const hit = e.flash > 0;
-    circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp),
-           hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18);
+    const winding = e.phase === 'windup';
+    const k = winding ? e.phaseTime / e.lunge.windup : 0;
+    if (winding) {
+      ctx.save();
+      ctx.globalAlpha = 0.1 + 0.25 * k;
+      ctx.strokeStyle = e.glow;
+      ctx.lineWidth = e.r;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(e.x, e.y);
+      ctx.lineTo(e.x + e.aimX * e.lunge.reach, e.y + e.aimY * e.lunge.reach);
+      ctx.stroke();
+      ctx.restore();
+    }
+    circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + 0.25 * k),
+           hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
   }
 
   // Sparks shrink as they die.

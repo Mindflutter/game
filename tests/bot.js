@@ -52,23 +52,27 @@ export function kiteAndShoot(g) {
 //
 // `immortal` keeps the bot alive, which is how the S2 traverse time is taken:
 // the mortal bot dies on every seed before the bottom, and a layer it cannot
-// finish has no traverse time to report.
+// finish has no traverse time to report. `scenario` starts it from a named
+// setup instead of the top (D37) -- how the boss fight is measured alone (D63).
+// A scenario can start deep in the list, so batches count from where it began.
 // One tick of the bot's input, without the update: shared by `diveReport` and
 // by tests that assert on every tick, so both play the same bot.
-export function botInput(g, immortal = false) {
+export function botInput(g) {
   // Every cleared batch offers three mods (D34), and the dive does not resume
   // until one is taken -- so the bot has to pick. It always takes the first
   // card rather than rolling: a bot that chose at random would build itself
   // differently every dive, and two dives that are not the same dive cannot
   // be compared.
-  if (immortal) g.player.hurt = g.player.iframes;
   if (g.screen === 'mods') g.justPressed.add('Digit1');
   else kiteAndShoot(g);
 }
 
-export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false) {
+export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false, scenario) {
   const g = loadGame();
-  g.reset(seed);
+  if (scenario) g.applyScenario(scenario, seed);
+  else g.reset(seed);
+  g.immortal = immortal;                   // the &immortal flag, set once
+  const base = g.batchIndex;
 
   const TICK = g.FIXED_DT;               // the game's own step, not a copy
   const tickCap = Math.round(secondsCap / TICK);
@@ -79,10 +83,10 @@ export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false
   while (times.length < batches && ticks < tickCap && g.screen !== 'dead' &&
          g.screen !== 'bottom') {
     if (g.batchIndex !== seen) { seen = g.batchIndex; startTick = ticks; }
-    botInput(g, immortal);
+    botInput(g);
     g.update(TICK);                      // update() clears justPressed itself
     ticks++;
-    if (g.batchIndex > times.length && g.enemies.length === 0) {
+    if (g.batchIndex - base > times.length && g.enemies.length === 0) {
       times.push(+((ticks - startTick) * TICK).toFixed(2));
     }
   }

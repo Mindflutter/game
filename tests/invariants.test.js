@@ -6,7 +6,7 @@
 // silently, and that is what this file is for.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { loadGame, SEAM } from './harness.js';
+import { loadGame, SEAM, ticks } from './harness.js';
 import { diveReport } from './bot.js';
 
 // Drives a dive with pseudo-random but seed-derived input, so a failing case
@@ -87,6 +87,48 @@ describe('the bot', () => {
     // screen that used to truncate this is gone -- D49.)
     expect(a.clearTimes.length).toBeGreaterThan(0);
     expect(diveReport(4471, 3)).toEqual(a);
+  });
+
+  it('starts from a scenario and records only the fights it plays (D63)', () => {
+    // From the boss's batch: one clear, then the layer end. A report that
+    // started from the top instead, or logged a zero-second "clear" at tick
+    // one because the scenario's batchIndex did not start at 0, fails one of
+    // the two.
+    const r = diveReport(4471, 2, 300, true, 'last-batch');
+    expect(r.clearTimes.length).toBe(1);
+    expect(r.reachedBottom).toBe(true);
+  });
+});
+
+// Igor's testing aids: `&immortal` and `&damage=<n>` in the URL. main.js reads
+// the URL; what the flags *do* is game state, so it is checked here.
+describe('dev flags', () => {
+  // hp after two seconds with a bulwark parked on the player.
+  function hpUnderBulwark(immortal) {
+    const g = loadGame();
+    g.immortal = immortal;
+    g.reset(1);
+    g.queuePaused = true;
+    g.placeEnemy('bulwark', g.player.x, g.player.y);
+    for (let i = 0, n = ticks(g, 2); i < n; i++) g.update(g.FIXED_DT);
+    return g.player.hp;
+  }
+
+  it('&immortal: an enemy on the player does no harm', () => {
+    expect(hpUnderBulwark(false)).toBeLessThan(3);   // the control: it does hurt
+    expect(hpUnderBulwark(true)).toBe(3);
+  });
+
+  it('&damage: replaces shot damage from the first dive on, and survives R', () => {
+    const g = loadGame();
+    g.damageOverride = 100;
+    g.reset(1);
+    expect(g.player.damage).toBe(100);
+    g.reset(2);                                        // what R does
+    expect(g.player.damage).toBe(100);
+    g.damageOverride = 0;
+    g.reset(3);
+    expect(g.player.damage).toBe(g.PLAYER_START.damage);
   });
 });
 

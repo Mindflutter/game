@@ -27,6 +27,13 @@ const seedParam = params.get('seed');
 const seed = seedParam === null ? undefined : Number(seedParam) >>> 0;
 const devScenario = params.get('dev');
 
+// Dev flags, combinable with everything above and with each other: &immortal
+// (nothing hurts you) and &damage=<n> (every shot does n; a bare &damage is
+// 100, one shot for anything in the game). Set before the first reset(), which
+// is what applies the damage, and every later reset() applies it again.
+immortal = params.has('immortal');
+if (params.has('damage')) damageOverride = Number(params.get('damage')) || 100;
+
 // Silent whenever the game is being *driven* rather than played: `?test` runs
 // unattended, and `?dev=` scenarios are what Playwright drives. Neither should
 // make noise on the machine running them.

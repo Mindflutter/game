@@ -13,13 +13,20 @@ function enemyType(name) {
 function makeEnemy(t, x, y, speed) {
   enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
                  color: t.color, glow: t.glow, lastHitBy: 0,
-                 pushX: 0, pushY: 0 });
+                 pushX: 0, pushY: 0,
+                 // A lunger's step (D64) and how long it has been on it; the
+                 // line it locks, aimX/aimY, is set when it winds up. Chasers
+                 // carry these and never touch them.
+                 lunge: t.lunge, phase: 'chase', phaseTime: 0 });
 }
 
 // Somewhere just outside the view, so arrivals fade in from the dark rather
 // than popping into view. In view coordinates; the caller adds the camera.
-function edgeSpawnPoint() {
+// The boss rises from below, centred -- Igor, "The boss swims in from the
+// bottom" -- before any draw from the seed, so no other arrival moves.
+function edgeSpawnPoint(t) {
   const m = 40;
+  if (t.enters === 'bottom') return { x: ARENA_W / 2, y: ARENA_H + m + t.r };
   const edge = Math.floor(rng() * 4);    // 0 top, 1 right, 2 bottom, 3 left
   if (edge === 0) return { x: rng() * ARENA_W, y: -m };
   if (edge === 1) return { x: ARENA_W + m,     y: rng() * ARENA_H };
@@ -34,7 +41,7 @@ function spawnBatch(batch) {
     const type = enemyType(name);
     if (!type) continue;
     for (let i = 0; i < count; i++) {
-      const { x, y } = edgeSpawnPoint();
+      const { x, y } = edgeSpawnPoint(type);
       makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
     }
   }
@@ -47,12 +54,64 @@ function placeEnemy(name, x, y) {
   if (t) makeEnemy(t, x, y, t.speed);
 }
 
+// Where `o` would sit held inside the view, to its own radius: the view is a
+// fixed window onto the world, `cameraY` from the top. Returns the pair rather
+// than moving `o`, so "is it wholly inside?" is the same call.
+function viewClamp(o) {
+  return [Math.max(o.r, Math.min(ARENA_W - o.r, o.x)),
+          Math.max(cameraY + o.r, Math.min(cameraY + ARENA_H - o.r, o.y))];
+}
+
+// ---------- the lunge ----------
+// The boss's attack, and the mini-boss's (D64, D65): chase, wind up, charge,
+// rest -- then chase again. The wind-up is the tell: the lunger stands and
+// swells with its line drawn, and the line is fixed when the wind-up *starts*,
+// at where the player was, which is what makes "get out of its line" possible.
+// It winds up only wholly inside the view, so the tell is always seen, and from
+// then on the view holds it: a charge that left the view would take the fight
+// with it. The rest is the opening. Moves the lunger itself, the dash's push
+// included.
+function lungeStep(e, ux, uy, d, dt) {
+  const L = e.lunge;
+  e.phaseTime += dt;
+  let vx = 0, vy = 0;
+  if (e.phase === 'chase') {
+    vx = ux * e.speed;
+    vy = uy * e.speed;
+    const [cx, cy] = viewClamp(e);          // nothing to clamp: wholly inside
+    if (e.phaseTime >= L.chase && d < L.reach && cx === e.x && cy === e.y) {
+      e.phase = 'windup';
+      e.phaseTime = 0;
+      e.aimX = ux;
+      e.aimY = uy;
+    }
+  } else if (e.phase === 'windup') {
+    if (e.phaseTime >= L.windup) { e.phase = 'charge'; e.phaseTime = 0; }
+  } else if (e.phase === 'charge') {
+    vx = e.aimX * L.speed;
+    vy = e.aimY * L.speed;
+  } else if (e.phaseTime >= L.rest) {        // resting: the opening
+    e.phase = 'chase';
+    e.phaseTime = 0;
+  }
+  e.x += vx * dt + e.pushX * dt;
+  e.y += vy * dt + e.pushY * dt;
+  if (e.phase === 'chase') return;
+  const [x, y] = viewClamp(e);
+  if (e.phase === 'charge' && (x !== e.x || y !== e.y || e.phaseTime * L.speed >= L.reach)) {
+    e.phase = 'rest';
+    e.phaseTime = 0;
+  }
+  e.x = x;
+  e.y = y;
+}
+
 // How far a point is from a line segment. Needed because a fast-moving hitbox
 // tested only where it *landed* skips whatever it crossed on the way: the dash
 // covers `player.dashSpeed * dt` in a frame, and a bullet `b.speed * dt` —
 // neither of which the reach knows about.
-// Bullets have the same hole (430px/s is 21.5px on a 20fps frame against a
-// darter's 10px reach) and will want this too when the fixed timestep lands.
+// Bullets had the same hole (430px/s is 21.5px on a 20fps frame against a
+// darter's 10px reach), and have swept their path too since D53.
 // **Squared**, because both callers are per-frame collision loops and the
 // bullet one is the hot one -- `dx*dx + dy*dy < r*r` measured 8.3x faster than
 // `Math.hypot` over 3.2M pairs, and that rule does not stop applying because
@@ -151,7 +210,7 @@ function clearBatch() {
   // exist yet; how that works is open (ideas.md -> the layer end).
   if (batchIndex >= BATCHES.length) return;
   rank += 1;
-  // The comfort mods, both of which are a standing effect rather than a stat.
+  // A comfort mod is a standing effect rather than a stat, so it acts here.
   if (player.mendOnClear) {
     player.hp = Math.min(player.maxHp, player.hp + player.mendOnClear);
   }
@@ -217,7 +276,8 @@ function advanceBy(elapsed) {
 
 // ---------- the descent ----------
 // Batch `k` waits at this depth (D58); `k = BATCHES.length` is the layer end.
-// One place, because a layer owning its own batch list (S3) changes it.
+// One place, because a layer owning its own batch list -- once there is a
+// second layer -- changes it.
 function gateDepth(k) {
   return k * GATE_SPACING;
 }
@@ -267,7 +327,7 @@ function step(dt) {
 
     if (tapped(GO)) items[menuIndex].run();
     else if (tapped(CLICK) && hovered >= 0) items[hovered].run();
-    else if (justPressed.has('Escape') && screen === 'paused') screen = 'playing';
+    else if (justPressed.has('Escape') && screen === 'paused') screen = resumeTo;
     return;
   }
 
@@ -294,6 +354,10 @@ function step(dt) {
     if (justPressed.has('Escape')) { screen = 'title'; menuIndex = 0; }
     return;
   }
+
+  // Esc pauses from play and from the mod cards alike -- the only two screens
+  // that reach this line -- and Resume goes back to whichever it was.
+  if (justPressed.has('Escape')) { resumeTo = screen; screen = 'paused'; menuIndex = 0; return; }
 
   // Picking a mod. The arena is empty -- this only opens on a cleared batch --
   // so freezing until you choose interrupts nothing (D33).
@@ -323,8 +387,6 @@ function step(dt) {
     }
     return;
   }
-
-  if (justPressed.has('Escape')) { screen = 'paused'; menuIndex = 0; return; }
 
   elapsed += dt;
   if (player.hurt > 0) player.hurt -= dt;
@@ -357,13 +419,15 @@ function step(dt) {
       player.y += current * dt;
     }
     else if (breathTimer <= 0) {
-      // Past the last batch the target is the bottom of the layer. Reaching it
-      // is a stop, not a win (S2): no reward, no unlock -- S3 owns endings.
+      // Past the last batch the target is the bottom of the layer. The last
+      // batch is the boss (D62), so reaching it means the layer is finished;
+      // what that earns, and what follows, is the layer-to-layer pass (D60).
       if (batchIndex >= BATCHES.length) screen = 'bottom';
       else {
-        // ponytail: one flat list is one layer. What S3 must add is not a longer
-        // list but the *layer* -- a layer owns its own batch list. So do not
-        // grow BATCHES into a tuned multi-layer list; that shape will not exist.
+        // ponytail: one flat list is one layer, the boss last (D62). A second
+        // layer needs not a longer list but the *layer* -- a layer owns its own
+        // batch list. So do not grow BATCHES into a tuned multi-layer list;
+        // that shape will not exist.
         spawnBatch(BATCHES[batchIndex]);
         batchIndex += 1;
       }
@@ -419,9 +483,8 @@ function step(dt) {
 
   player.x += mx * speed * dt;
   player.y += my * speed * dt;
-  player.x = Math.max(player.r, Math.min(ARENA_W - player.r, player.x));
   // To the view, not the world: the world is a tall strip and the camera moves.
-  player.y = Math.max(cameraY + player.r, Math.min(cameraY + ARENA_H - player.r, player.y));
+  [player.x, player.y] = viewClamp(player);
 
   // An afterimage every frame of the dash. Without it the eye sees the player
   // at one end and then the other, and reads a teleport instead of a move.
@@ -476,8 +539,11 @@ function step(dt) {
     const ey = player.y - e.y;
     const d = Math.sqrt(ex * ex + ey * ey) || 1;   // || 1 avoids dividing by zero
 
-    e.x += (ex / d) * e.speed * dt + e.pushX * dt;
-    e.y += (ey / d) * e.speed * dt + e.pushY * dt;
+    if (e.lunge) lungeStep(e, ex / d, ey / d, d, dt);   // the boss's kind (D64)
+    else {
+      e.x += (ex / d) * e.speed * dt + e.pushX * dt;
+      e.y += (ey / d) * e.speed * dt + e.pushY * dt;
+    }
 
     e.pushX *= pd;
     e.pushY *= pd;
@@ -526,7 +592,7 @@ function step(dt) {
       }
     }
 
-    if (d < e.r + player.r && player.hurt <= 0) {
+    if (d < e.r + player.r && player.hurt <= 0 && !immortal) {
       player.hp -= 1;
       player.hurt = player.iframes;
       shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;

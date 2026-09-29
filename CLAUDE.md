@@ -114,7 +114,10 @@ draft, which is why they are banned (D32).
 - **Every response ends with a `TL;DR` section** — at the bottom, never the
   top. Not a one-line recap: a short block saying what was done, what it means,
   and what is now open or blocked, readable on its own by someone who skips the
-  rest. Concise but actionable. Every response, including short ones.
+  rest. Concise but actionable. Every response, including short ones. No
+  standing "not committed" line — Igor, 2026-09-29: "no need to state "not
+  committed" section every time in tldr. other sections are very useful". It
+  appears only when the commit itself is the open point.
 - **Uncertainty is never resolved by documenting it.** Two rules, one each way:
   - **Claude is unsure → ask before writing it down.** Not after. A decision
     entry is a record of something settled; writing one to resolve your own
@@ -134,6 +137,15 @@ draft, which is why they are banned (D32).
   instances in one stage — reading "for later think-thru" as covering a bug
   fix, "i'm inclined to mod thing" as a chosen tier, "useless at this point"
   as "delete it", and an example in D34 as a sizing decision.
+
+  S2 (camera and descent) added a sibling shape, twice: a word *strengthened*
+  rather than a lean rounded up. "Slows down on the next batch" was built as a
+  dead stop. D27 (batches are hard-gated)'s "the descent stops" was read as
+  camera mechanics when it means *no further in enemies* — the water keeps
+  flowing — and was then presented back as a foundations reversal, with
+  options on an answer Igor had already given. **Igor's words keep their exact
+  strength** ("slows" is not "stops"), and a rule is read for what it means in
+  the game before anything is called a contradiction.
 
 - **One question per response.** Not four. Igor has to hold the whole context
   to answer, and a wall of simultaneous decisions is expensive for a human in a
@@ -206,3 +218,37 @@ draft, which is why they are banned (D32).
   `roadmap.md` → Health, and nowhere else.
 - After a squash or rebase, re-check the changelog: it cites commits, and
   rewriting history turns its entries into fiction.
+
+## Skills and plugins
+
+This file, `foundations.md` and `plan.md` outrank every skill and plugin that
+loads here — superpowers itself says user instructions take precedence. Igor,
+2026-09-28, after a skill's options-and-rulings style reopened a settled
+answer: "make it respect all the strict rules, foundations and plan". Where a
+step below collides with a rule here, the rule wins, and nothing needs asking:
+
+- **superpowers — brainstorming.** Approaches are proposed only for what the
+  docs and Igor have not settled; a settled answer is acted on. Its spec
+  self-review says a requirement that reads two ways gets one reading picked —
+  here it gets *asked*. Picking is how "slows down" was built as a stop.
+- **superpowers — writing-plans, executing-plans, subagent-driven-development.**
+  Nothing is committed before Igor's `/simplify` — not the spec, not a task —
+  so plans carry no commit steps. "Do not pause between tasks" yields to small
+  steps; "make a ruling and keep going" yields to asking. Subagents only when
+  Igor picks them.
+- **superpowers — using-git-worktrees, finishing-a-development-branch.** Not
+  used. Work happens in place, in this checkout; there is no branch or PR menu.
+- **ponytail.** Its lone `assert` self-check and "trivial one-liners need no
+  test" yield to *every behavioural change lands with a check that fails
+  without it*, in `tests/` or `checks.js`. "Code first, three lines" and
+  "default rather than stall" govern code only — never the TL;DR, the gamedev
+  explanation, or a design question.
+- **disciplines** (`game-ai`, `game-feel`). The concept, not the shape: a state
+  machine is a `behavior` field plus a branch, never state classes (D26 —
+  disciplines installed); juice is S7 (alpha polish) work.
+- **Global rules** in `~/.claude/rules/` are written for a Python backend.
+  Where one collides with this file — "a constant lives next to its one
+  consumer" against the single `// balance` block — this file wins.
+
+Test-driven development, systematic debugging and verification before
+completion agree with the rules here and apply as written.

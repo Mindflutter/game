@@ -10,10 +10,25 @@ must stay true while doing it.
 
 ## Active stage
 
-**None. S2 — The dive: camera and descent closed 2026-09-28**, all exit
-conditions met. **S3 — One boss, one complete layer** is next, and opening it
-is Igor's call. When S3 closes, the layer-to-layer design pass (D60) comes
-before S4 — Claude reminds Igor then.
+**None. S3 — One boss, one complete layer closed 2026-09-29.** The
+layer-to-layer design pass (D60) comes next, before S4; Claude reminded Igor
+when S3 closed, and opening the conversation is Igor's call.
+
+### S3 — One boss, one complete layer · closed 2026-09-29
+
+Done in S3: the boss is the layer's last batch (D62) and lunges (D64); a
+mini-boss is a smaller boss (D65); the win rate is the boss fight's (D63).
+Plan, with the design at its head: `superpowers/plans/2026-09-29-s3-boss.md` —
+history now.
+
+**Closed 2026-09-29 by Igor: "wrap up s3"**, having played it: "right now it's
+very easy for me. but: i suggest we leave all balance fine-tuning for later.
+let's just focus on what the stage DoD says."
+
+Carried out of S3, none of it blocking: balance (S6 — Balance), the kiting bot
+that backs out of its own range, normal enemies alongside the boss and more
+boss attacks (all three in `ideas.md`), and every number of the lunge —
+Claude's picks.
 
 ### S2 — The dive: camera and descent · closed 2026-09-28
 
@@ -174,20 +189,27 @@ below is still the first stage with an ending.
 - ~~Playable: you descend, you are stopped, you fight, you continue.~~ Igor's
   call, made 2026-09-28: "commit and finalize s2".
 
-## S3 — One boss, one complete layer
+## S3 — One boss, one complete layer · closed 2026-09-29
 
-**Entry:** S2 exits.
+**Entry:** S2 exits. Met 2026-09-28.
 
 **Work:** A boss at the bottom with a telegraphed, readable pattern. 2–3
-mini-bosses along the way. Layer completion.
+mini-bosses along the way. Layer completion. Built as D62–D65: two mini-bosses
+and the boss, each alone in its batch, all lunging.
 
 **Exit (DoD):**
-- The layer can be **finished**, not just survived. First stage that produces a
-  game with an ending.
-- The boss's tell is readable: a check on telegraph duration, and Igor's
-  judgement on whether it reads.
-- Bot reports win rate per seed at a stated gear level.
-- Playable: a complete, winnable layer.
+- ~~The layer can be **finished**, not just survived. First stage that produces
+  a game with an ending.~~ Built, D62: killing the boss is the layer end, and
+  "LAYER CLEARED" the ending.
+- ~~The boss's tell is readable: a check on telegraph duration, and Igor's
+  judgement on whether it reads.~~ The check is D64's; Igor played it and
+  closed the stage.
+- ~~Bot reports win rate per seed at a stated gear level. Measured on the boss
+  fight, from the `last-batch` scenario, at the starting kit — plus how far the
+  bot gets from the top — per D63 (the win rate is the boss fight's).~~ Done;
+  figures in `roadmap.md` → Health.
+- ~~Playable: a complete, winnable layer.~~ Igor, having played it: "right now
+  it's very easy for me".
 
 ## Design pass — layer to layer · after S3
 
@@ -195,7 +217,7 @@ Not a numbered stage: it sits between S3 and S4 without renumbering, so no
 stage citation changes (D60).
 
 **Entry:** S3 exits — the first layer with an ending exists, so there is
-something to go on from.
+something to go on from. Met 2026-09-29.
 
 **Claude opens it.** When S3 closes, Claude reminds Igor to start this
 conversation, before anything of S4 begins. Igor, 2026-09-28: "remind me to

@@ -29,7 +29,9 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 | **gear** | A persistent item bought with currency on the home screen. Weapons, suit, mask, flippers, trinkets. | never "upgrade" |
 | **tier** | One of the 3–4 purchasable steps a piece of gear advances through. | never "level", never "upgrade" |
 | **gate** | The depth where a batch waits. The descent stops there — no further in enemies until the batch is cleared, though the water keeps flowing (D27, D58). Clearing it pays one rank and offers three mods (D33, D34): the dive's one pause, since play waits on the pick. The layer's last batch is the exception — its clear is the layer end. Then the current carries you on to the next gate. | not a "wave", not a "batch", not the **layer end** |
-| **layer end** | The clear of a layer's last batch, and the bottom the current then carries you to. **Not a gate**: it pays no rank and offers no mods — mods only if the player goes on to the next layer (D59). What else happens there is not designed yet — `ideas.md`. The name is Igor's working one: "or just call it layer end". | not a "gate" |
+| **layer end** | The clear of a layer's last batch — the boss's (D62) — and the bottom the current then carries you to. **Not a gate**: it pays no rank and offers no mods — mods only if the player goes on to the next layer (D59). What else happens there is not designed yet — `ideas.md`. The name is Igor's working one: "or just call it layer end". | not a "gate" |
+| **boss** | A special enemy type, met in a layer's last batch — a normal batch in every other way (D62). It lunges (D64). Clearing its batch is the **layer end**. | not a "mini-boss" |
+| **mini-boss** | A smaller boss: one tougher enemy in a batch of its own at an ordinary gate along the layer. It lunges like the boss, weaker and slower to wind up, so it teaches the boss's tell; its gate pays a rank and mods like any other (D65). | not the "boss" |
 | **batch** | The gated unit. Cleared before the descent resumes. Contains 1–N enemies of comparable threat. | not a "wave" |
 | **wave** | A spawn group *inside* a batch. **Default: one batch is one wave.** Multi-wave batches are permitted but are a UX risk — Igor's concern, 2026-09-26: a batch that keeps refilling reads as "the gate is broken" rather than as a second wave. Any multi-wave batch must telegraph that more is coming. | not a "batch" |
 | **prototype** | The survivors-like auto-shooter this grew out of. A closed phase, not a version of the current game. | not "the game" |
@@ -166,7 +168,7 @@ Named so they stop being re-proposed.
 Tracked in `ideas.md`, not here. The draft's own `(?)` markers plus what this
 contract does not decide: the lost item, what happens at the **layer end** —
 whether it returns you home or offers a choice, and what it looks like (D59
-settles only that it offers no mods unless you go on), what currency is called, what mini-bosses are, whether
+settles only that it offers no mods unless you go on), what currency is called, whether
 collectibles feed stats or story or both, **which** attributes exist and what
 each micro-task is (the tier itself is settled by D36; its content is S5 work),
 terrain complexity beyond a vertical shaft.

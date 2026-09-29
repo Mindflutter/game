@@ -1892,3 +1892,127 @@ driven page session, and the `run:` action keys in the menu tables. The
 glossary's **dive** row is unchanged — "run" is its synonym, **dive** is
 preferred. Making it 'never "run"', like "level" and "upgrade", was offered and
 declined — Igor: "no".
+
+## D62 — The boss is the layer's last batch · 2026-09-29
+S3 (one boss, one complete layer). Claude asked whether the boss is the
+layer's last batch — a batch like any other, whose clear is the layer end — or
+a fight waiting at the bottom, after the layer end. Igor: "yes. normal batch,
+with just a special type of enemy sets. no one cancels the normal enemies along
+the boss, but let's get the boss finished first."
+
+**Decided.** The boss is an enemy type, and the layer's last batch holds it.
+That batch is a normal batch in every other way: it waits at the last gate
+depth, the camera holds while it lives, and its clear is the layer end — no
+rank and no mods (D59). The batch before it pays a rank and three mods like
+any gate, so the player meets the boss with every mod the layer pays.
+
+This answers the draft's "main boss at the bottom (end of the level)" without
+a new rule: the gate already locks the arena for a fight, which is what a boss
+fight needs.
+
+**Left open, in `ideas.md`**: normal enemies fighting alongside the boss.
+"No one cancels" them, so they are not ruled out; "let's get the boss finished
+first" puts them after it. When they come they collide with the glossary's
+**batch** row — "enemies of comparable threat", from the draft — since a boss
+and its escorts are not comparable. That is for then.
+
+**Glossary**: a **boss** row in `foundations.md`, in the same step.
+
+**Guarded by**: `tests/boss.test.js` — the layer ends on the boss, alone —
+and `descent.test.js`'s "neither at the layer end", which now plays the boss's
+batch.
+
+## D63 — The win rate is the boss fight's, at the starting kit · 2026-09-29
+The S3 (one boss, one complete layer) exit asks the bot for a "win rate per
+seed at a stated gear level". Igor, asked how: "no idea, you decide" — so this
+is **Claude's call**, delegated, and open to Igor to reopen.
+
+The problem it answers: the mortal bot dies after three to five batches
+(`roadmap.md` → Health), so a win rate from the top of the layer is zero on
+every seed. That number would be about the bot, not the layer (D50).
+
+**Decided, by Claude:**
+- **The win rate is the boss fight's.** The bot starts at the layer's last
+  batch — the boss's (D62) — through the `last-batch` scenario (D37). Mortal,
+  the usual five seeds; each reports won or lost, time to kill, and hp left.
+- **The stated gear level is the starting kit**: no gear, since none exists
+  before S4 (meta loop skeleton), and no mods. That is the weakest the boss can
+  ever be met with, so a win proves the layer can be finished. A loss says
+  nothing about a human (D50); Igor's playthrough decides then.
+- **The whole layer is still reported**, from the top, on the same seeds: how
+  many batches the bot clears before it dies. That keeps "the bot cannot reach
+  the boss" in view rather than hidden behind the isolated figure.
+
+**Not taken: a better bot.** Igor: "well write a good bot. nor sure it's worth
+it, but would be nice and handy to have a bot mimicking real player's
+behavior. leave it now if complicated (i assume so)." It is: `ideas.md` →
+"There are three bots" sizes it as threat-field navigation plus dash timing,
+which is a project of its own. It waits there.
+
+**Guarded by**: `tests/invariants.test.js` — the bot starts from a scenario and
+records only the fights it plays; without counting from the scenario's batch,
+it logged a zero-second clear at tick one.
+
+## D64 — The boss lunges · 2026-09-29
+S3 (one boss, one complete layer). Claude offered three attacks from the
+draft's own list, cheapest first: the lunge, the spit (a fan of slow toxic
+blobs), and both in turn. Igor: "boss does (a). we will do enemy polishing
+later anyways".
+
+**Decided.** The boss drifts after the player, stops, and winds up — it
+swells while a faint line shows the path it is about to take — then charges
+straight along that line and rests where it lands. Then again. The wind-up is
+the tell the S3 exit asks for; the rest is the opening, the moment to shoot
+it. In one sentence, per the pillar: when it swells, get out of its line.
+
+Nothing new under the hood: a `lunge` field on the enemy record — the
+behaviour, holding its own timings — and one branch in the enemy loop,
+stepping chase → wind-up → charge → rest: the concept of a state machine
+without its classes (D26 — disciplines installed).
+Every other enemy still only chases; behaviours for them are S5 (content).
+
+**The numbers are Claude's picks**, still to be chosen and marked as such: the
+wind-up's length, the charge's speed and reach, the rest, the boss's hp and
+size. The bot measures them; Igor's feel judges them.
+
+**Not taken now**: the spit, which needs enemy projectiles that do not exist
+yet, and both attacks in turn. Waiting in `ideas.md`, not declined — "we will
+do enemy polishing later anyways".
+
+**Guarded by**: `tests/boss.test.js`, over seeds and both lungers — no charge
+without a full wind-up, the line fixed through it, and from the wind-up on the
+lunger inside the view without jumping. That is the S3 exit's "a check on
+telegraph duration". Each part verified by breaking it.
+
+## D65 — A mini-boss is a smaller boss · 2026-09-29
+S3 (one boss, one complete layer). The draft asks for "2-3 mini-bosses along
+the way" and `foundations.md` left the term open. Claude offered three
+readings: a smaller boss in a batch of its own, a big chaser in a batch of its
+own, or an elite inside a normal batch — leaning to the first. Igor:
+"agreed", to that lean and to two of the three assumptions stated with it; the
+third was corrected in the same breath (below).
+
+**Decided.** A mini-boss is a batch of its own at an ordinary gate, holding one
+tougher enemy that lunges like the boss (D64 — the boss lunges) but is weaker
+and slower to wind up. Its gate pays a rank and three mods like any other.
+
+Why this one: a game teaches a danger somewhere safe before it tests it
+somewhere hard. The mini-bosses rehearse the boss's tell at low stakes, so by
+the bottom the player already knows what a swell means. It costs one enemy
+record and no new behaviour. The big chaser was cheaper but taught nothing
+about the boss; the elite in a normal batch was the "normal enemies alongside"
+shape Igor had put after the boss (D62 — the boss is the layer's last batch).
+
+**Agreed with it**: killing the boss's batch leads to the existing "LAYER
+CLEARED" screen, which becomes the layer's real ending, wording unchanged until
+the friendlier-messages pass; and the boss's numbers are Claude's picks, marked
+as such. **Corrected with it**: Claude assumed the boss swims in from a random
+edge like any batch. Igor: "The boss swims in from the bottom". That is said of
+the boss; how a mini-boss arrives is not settled by it.
+
+**Glossary**: a **mini-boss** row, and "what mini-bosses are" leaves the list of
+what is still open, both in `foundations.md` in the same step.
+
+**Guarded by**: `tests/boss.test.js` — two lone mini-bosses along the layer,
+winding up longer and weaker than the boss, whose clear pays a rank and mods;
+and the boss rising from below the view, centred.

@@ -61,8 +61,23 @@ Named setups for looking at one thing at a time, on the same server:
 |---|---|
 | `index.html?dev=one-drifter&play` | One enemy, nothing else arriving |
 | `index.html?dev=three-types&play` | All three enemy types, at known spots |
-| `index.html?dev=late-swarm&play` | The swarm as it looks a minute in |
+| `index.html?dev=late-swarm&play` | Several batches into the dive |
+| `index.html?dev=mini-boss&play` | The first mini-boss, alone |
+| `index.html?dev=last-batch&play` | The boss — the layer's last batch — then the layer end |
 | `…&seed=4471` | Any of the above as an exact, repeatable dive |
+
+Two dev flags work on any URL, with a scenario or without, and stay on after
+R:
+
+| Flag | What it does |
+|---|---|
+| `&immortal` | Nothing can hurt you |
+| `&damage=<n>` | Every shot does `n` damage; a bare `&damage` is 100, one shot for anything |
+
+To combine them, the first argument goes after `?` and every later one after
+`&`, in any order: `index.html?dev=last-batch&play&immortal&damage`. Without a
+scenario a flag leads: `index.html?immortal&damage=5`. `?test` is the one
+exception — it runs only when it is the whole query.
 
 Drop `&play` and the scenario loads **frozen** — nothing advances until you call
 `advance(30)` in the console. That is how the tests and the bot drive the game

@@ -55,6 +55,8 @@ let choiceIndex = 0;        // highlighted mod card
 let lastAimX = 0, lastAimY = 0;   // so a still mouse doesn't fight the arrows
 let optionIndex = 0;        // cursor in the options list
 let returnTo = 'title';     // where Esc goes back to from help / options
+let resumeTo = 'playing';   // where the pause menu resumes: play, or the mod
+                            // cards it was opened over
 
 // ---------- randomness ----------
 // Every random number in a dive comes from here, seeded, so the same seed
@@ -99,6 +101,7 @@ function reset(seed) {
     dashDy: 0,         // so letting go of the keys can't spin it
     dashEnd: 0,        // seconds of the closing ring left
   };
+  if (damageOverride > 0) player.damage = damageOverride;   // a dev flag
   enemies = [];
   bullets = [];
   gems = [];
@@ -149,6 +152,12 @@ function applyScenario(name, seed) {
 let volume = 0.6;           // master gain, 0..1
 let shakeLevel = 2;         // index into SHAKE_LEVELS
 let showFps = false;
+
+// Dev flags, set from the URL by main.js: `&immortal` and `&damage=<n>`. Like
+// the settings above they are not part of a dive, so reset() leaves them alone
+// and they survive R. Nothing in the game itself ever turns them on.
+let immortal = false;       // nothing can hurt the player
+let damageOverride = 0;     // above 0, every shot does this much
 
 function openScreen(name) {
   returnTo = screen;

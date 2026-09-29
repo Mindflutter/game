@@ -4,6 +4,136 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-09-29
+
+**S3 — One boss, one complete layer closed.** Igor: "wrap up s3", having
+played it: "right now it's very easy for me. but: i suggest we leave all
+balance fine-tuning for later. let's just focus on what the stage DoD says."
+Every exit condition is met. Balance goes to S6 — Balance; the bot's
+range-keeping, escorts for the boss and more boss attacks wait in `ideas.md`.
+Next is the layer-to-layer design pass (D60), before S4.
+
+**Cleanup after `/simplify`**
+Four review passes (reuse, simplification, efficiency, altitude) over the S3
+(one boss, one complete layer) diff. No behaviour change: whole-layer bot
+dives, mortal dives, both lunger fights and a tick trace of each lunger replay
+byte-identical before and after, and six rule-breaking mutations still fail
+their tests. One pause entry covers play and the mod cards (`resumeTo =
+screen`); the boss's entrance moved into `edgeSpawnPoint`, on its margin;
+`viewClamp()` is the view box for the player and the lungers alike;
+`travelled` went, since it was always the charge's time × speed; lungers no
+longer seed an aim they overwrite. Tests keep the player alive one way — the
+`immortal` flag — instead of also pinning `hurt`; `ticks`, `ride` and
+`clearAndWait` moved into `harness.js`; the lunge's property test asserts once
+per run instead of every tick, and draws its walk from fast-check so a failure
+shrinks; a mini-boss arrival assertion that could not fail was removed.
+Skipped: a shared base for the two lunge records (it breaks the flat-record
+convention), and the `?test` window-size check's own keep-alive, which is
+outside this diff.
+
+**Pause from the mod cards** — Igor: "cannot invoke pause from mod screen -
+fix now". Esc pauses over the cards as it does in play, and Resume — or Esc
+again — brings the same cards back: the pause menu remembers which screen
+opened it (`resumeTo`). A test failed first (Esc left the cards up) and fails
+again if the menu's Resume goes back to play; 38 Node tests.
+
+**Recorded: art will be bigger** — Igor: "enemies and the player will look
+significantly bigger with all assets. record for info." In `ideas.md` →
+Sprites and real art, with what it means for the hitboxes.
+
+**S3 built: the boss, two mini-bosses, a layer that can be finished**
+Igor: "just write a plan for yourself and implement immediately, natively. i
+want s3 done now, then i will check". Built to the approved design, as
+D62–D65 say. The layer is fifteen batches: D54's twelve, a lone mini-boss
+after batches 4 and 8, and the boss last, rising from below the view, centred.
+Both lunge — chase, wind up with the line locked, charge, rest — through one
+`lungeStep()` and a `lunge` field on the type; the chasers' movement is
+untouched. The wind-up swells the body and lays a lane along the line
+(placeholder graphics). Killing the boss is the layer end, so "LAYER CLEARED"
+is now an ending. New scenario `mini-boss`; `last-batch` is the boss. The bot
+can start from a scenario (D63). Every number of the lunge is Claude's pick.
+
+Checks: `tests/boss.test.js` (five tests — the tell, as a property over seeds
+and both lungers, is the S3 exit's telegraph check) and a bot test, each
+verified by breaking what it guards; 37 Node tests, `?test` 174. The
+window-size check now plays the whole layer, boss included — identical at all
+three sizes. Three comments reworded: two Igor approved, and the layer-end one,
+which this build made false ("a stop, not a win … S3 owns endings").
+
+Measured (`roadmap.md` → Health): the bot wins 0 of 5 boss fights and 1 of 5
+mini-boss fights at the starting kit. That is the bot: against a lone slow
+enemy it backs out of its own range. The plan, with the design at its head:
+`superpowers/plans/2026-09-29-s3-boss.md`.
+
+**The TL;DR drops its standing "not committed" line** — Igor: "no need to
+state "not committed" section every time in tldr. other sections are very
+useful". `CLAUDE.md` says so; the line appears only when the commit is the
+open point.
+
+**Dev flags: `&immortal` and `&damage=<n>`**
+Igor: "give me also dev urls for big damage and invincibility. also
+instructions how to combine these args". Both ride on any URL, with a scenario
+or without, and survive R: `main.js` reads them, and they live in game state
+that `reset()` leaves alone. A bare `&damage` is 100 — Claude's pick, one shot
+for anything. Two Node tests, each verified by breaking its rule: 31 tests.
+`design.md` and `README.md` explain how to combine arguments. The same sweep
+found both files stale on scenarios, fixed: `design.md` still named the
+`elapsed` field, `spawnPaused` and the ramp — all gone or renamed when the
+batch queue replaced the spawn director (D48) — and `README.md` still called
+`late-swarm` "a minute in" and lacked `last-batch`.
+
+**A mini-boss is a smaller boss** (D65)
+Igor: "agreed". A mini-boss is one tougher enemy in a batch of its own at an
+ordinary gate: it lunges like the boss, weaker and slower to wind up, so it
+rehearses the boss's tell, and its gate pays a rank and mods. The glossary
+gains a **mini-boss** row and loses it from the list of what is still open.
+Agreed with it: "LAYER CLEARED" becomes the real ending once the boss dies.
+Corrected with it — Igor: "The boss swims in from the bottom", not from a
+random edge like other batches. Design only.
+
+**The boss lunges** (D64)
+Igor: "boss does (a). we will do enemy polishing later anyways". It drifts
+after you, stops and swells while a line shows its path, charges along it, and
+rests where it lands — the wind-up is the tell, the rest is the opening. The
+spit and a mixed pattern wait in `ideas.md`. Design only; the numbers will be
+Claude's picks.
+
+**The boss is the layer's last batch** (D62)
+Igor: "yes. normal batch, with just a special type of enemy sets". The boss is
+an enemy type held by the layer's last batch, so its clear is the layer end,
+and the batch before it pays a rank and mods like any gate. The glossary gains
+a **boss** row; `docs/README.md`'s copy of the term list gains it too, along
+with **layer end**, which it had missed since S2 (camera and descent). Normal
+enemies alongside the boss are not ruled out — "let's get the boss finished
+first" — and wait in `ideas.md`. Design only; no code yet.
+
+**The win rate is the boss fight's** (D63)
+Igor, on how to measure it: "no idea, you decide". Claude's call: the bot
+fights the boss from the `last-batch` scenario at the starting kit, five
+seeds, and also reports how far it gets from the top. A human-like bot is
+Igor's wish, left in `ideas.md` — "leave it now if complicated".
+
+**Three stale comments fixed** — Igor: "comment edit: OK". The batch table's
+peak was 38 enemies, not 32; bullets already sweep their path since D53
+(fixed timestep, bullets sweep); and "both" comfort mods had been one since
+D55 (`Lull` removed) — now written without a count. No behaviour change.
+
+**S3 — One boss, one complete layer opened.** Igor: "proceed with s3". It
+opens with its design, because the glossary has no row for a boss or a
+mini-boss and `foundations.md` leaves what a mini-boss is open. No code yet;
+both suites green at the start.
+
+**Skills and plugins yield to the project rules**
+Igor: "make sure that loaded plugins and skills do not mess up project rules
+(looking at superpowers here)". `CLAUDE.md` gained a *Skills and plugins*
+section: each skill step that collides with a rule here, and the rule that
+wins — nothing committed before `/simplify`, a two-way reading asked rather
+than picked, small steps over continuous execution, a check that fails
+without the change over ponytail's lone assert, a state machine as a field and
+a branch rather than classes. It also records S2 (camera and descent)'s two
+misreadings, both a word made stronger than Igor said it: "slows down" built
+as a stop, and "the descent stops" read as camera mechanics.
+
 ## 2026-09-28
 
 **S2 — The dive: camera and descent closed.** Igor: "commit and finalize s2".

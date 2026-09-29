@@ -21,20 +21,21 @@ happened.
 
 ## Next
 
-S2 — The dive: camera and descent closed 2026-09-28 (`plan.md`). Nothing is
-queued: **S3 — One boss, one complete layer** is next, and opening it is
-Igor's call. When S3 closes, the layer-to-layer design pass (D60) comes before
-S4.
+S3 — One boss, one complete layer closed 2026-09-29 (`plan.md`). Nothing is
+queued: **the layer-to-layer design pass (D60)** comes next, before S4 — a
+conversation ending in decisions and a plan, not a build — and opening it is
+Igor's call. Its questions wait in `ideas.md` → the layer end.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
-`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), all Claude's picks.
-`?dev=last-batch&play` jumps to the end of a layer.
+`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`) and the lunge's (`design.md`
+→ The lunge), all Claude's picks. `?dev=mini-boss&play` and
+`?dev=last-batch&play` start at a lunger; `&immortal` and `&damage` ride on any
+URL.
 
-Not in S2, deliberately: the boss and layer completion (S3), anything to do
-with `home` or spending currency (S4), a lively background (post-alpha, in
-`ideas.md`), and the layer-to-layer logic — Igor: "we must work thru
-layer-to-layer logic in detail out of s2"; it gets a design pass of its own
-after S3 (D60, `plan.md`), with the questions in `ideas.md` → the layer end.
+Deliberately not yet: balance fine-tuning — Igor, closing S3: "i suggest we
+leave all balance fine-tuning for later"; S6 — Balance owns it. Anything to do
+with `home` or spending currency (S4), and a lively background (post-alpha, in
+`ideas.md`).
 
 ## Standing constraints
 
@@ -52,7 +53,8 @@ This section owns the measured bot figures. Nothing else quotes them.
 - **Difficulty, from Igor playing it, 2026-09-27: batches are too easy.**
   "nothing breaks the target, currently batches are very easy to complete."
   This is the number that counts, and the direction is that batches must get
-  **harder**.
+  **harder**. **2026-09-29, the boss: "right now it's very easy for me."**
+  Tuning is left for later, per Igor — S6 (balance) owns it.
 - **Time to clear a batch**, bot, 5 seeds (1, 7, 42, 4471, 90210), 8 batches
   each, after D49: mean 16.1s, range 3.4–99.7s, 35 clears, the long tail all in
   the two bulwark batches. **Do not read this as difficulty** (D50). The bot
@@ -75,23 +77,36 @@ This section owns the measured bot figures. Nothing else quotes them.
   pre-S2 commit (`04fac4c`) the mortal bot dies on every seed, after 3, 7, 3, 3
   and 3 clears (seeds 1, 7, 42, 4471, 90210). The claim went stale somewhere
   after D49, most likely with D54's hp-sized batches. On the S2 build it dies
-  after 3, 3, 5, 5 and 3 clears. Not a difficulty reading (D50) — Igor still
+  after 3, 3, 5, 5 and 3 clears; on the S3 build after 4, 3, 4, 6 and 3 — seed
+  1 does not die but sits at the first mini-boss until the 1800s cap (the boss
+  fight, below). Not a difficulty reading (D50) — Igor still
   finds batches easy — but it means **the mortal bot cannot reach the bottom**.
 - **Time to traverse one layer** (S2 DoD, D58), immortal bot — `diveReport(seed,
-  Infinity, 1800, true)`, 5 seeds, all reach the bottom, with D58's current as
-  reworked (400px gates, 200px/s, independent of the player) and no mods at
-  the layer end (D59): **307.6 / 815.0 / 434.5 / 409.0 / 412.4s, mean 475.7s
-  (7.9 min)**, of which ~30s is travel and the rest is fighting. At
-  the top of the provisional 4–8 min pillar, but it is the kiting bot's clock
-  (D50), not a player's; Igor clears batches far faster, so a human layer is
-  likely well under 4 min — which is S6's problem, not S2's.
+  Infinity, 1800, true)`, 5 seeds. On the S2 build all reached the bottom:
+  307.6 / 815.0 / 434.5 / 409.0 / 412.4s, mean 475.7s (7.9 min). **On the S3
+  build: 1800 (the cap — seed 1 never kills the first mini-boss) / 1180.7 /
+  1183.6 / 820.4 / 763.2s.** That jump is the bot, not the layer: against a
+  lone slow enemy it backs out of its own range (the boss fight, below). Igor
+  clears batches far faster, so a human layer is likely well under the 4–8 min
+  pillar — which is S6's problem.
 - The 38.7 / 37.8 / 36.6s survival figures (2026-09-19) are **gone, not stale**:
   they measured an auto-firing weapon with an XP curve, neither of which exists.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
-  4471 reaches the bottom of the layer in 217.03 / 217.03 / 217.03s at
-  1280×800, 1920×1080 and 3440×1440 (stationary, immortal, aiming at the first
-  enemy), driven through real mouse events. A `?test` check holds it within
-  2%; dropping the input's `/ scale` fails it at 217.03 / 228.71 / 227.51.
+  4471 reaches the bottom of the layer — boss included since S3 — in 296.34 /
+  296.34 / 296.34s at 1280×800, 1920×1080 and 3440×1440 (stationary, immortal,
+  aiming at the first enemy), driven through real mouse events. A `?test` check
+  holds it within 2%; on the S2 layer, dropping the input's `/ scale` failed it
+  at 217.03 / 228.71 / 227.51.
+- **The boss fight** (S3 DoD, D63), mortal bot at the starting kit — no gear,
+  no mods — from `last-batch`, seeds 1, 7, 42, 4471, 90210: **0 of 5 won**; it
+  dies after 24.6 / 28.1 / 24.7 / 25.1 / 26.4s. Immortal, it kills the boss in
+  92.3 / 105.1 / 93.3 / 94.4 / 99.3s. **The mini-boss**, from `mini-boss`: 1 of
+  5 won (seed 1, 122.2s, 2 hp left); three seeds time out at 300s alive, one
+  dies at 22.5s. **Why**: against a lone slow enemy the kiting bot holds it
+  inside its own 250px range 1% (seed 7) to 18% (seed 4471) of the time — it
+  backs out of range, so its shots never land, and backs straight along the
+  lunge's line, so the charges do. A measure of the bot's policy, not of the
+  boss (D50); Igor's playthrough decides whether the layer is winnable.
 - **Arrival timing** (D55): from a batch spawning, the first enemy reaches a
   centred player in 2.04s at the earliest, 3.21s on average. Edged, 0.27s;
   cornered, 0.22s. This is what killed the `Lull` mod and what Igor's
