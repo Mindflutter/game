@@ -2494,6 +2494,11 @@ sensible layout with tables & naming 2. mods rework from choice to enemy drops
   enemies — the idea `ideas.md` carries as "Mods as drops, never offered".
 - **Both come before S5 (content)**, each in its own session. `plan.md` puts
   them between S4 and S5 without renumbering.
+- **The entity docs also settle the weapon record and reserve the enemy
+  `threat` field** — S5 (content)'s entry asks for final data shapes, and there
+  is no weapon record yet, while S6 (balance)'s threat number (D79 (a dive goes
+  from easiest to hardest)) would add a field to every enemy. Claude's
+  proposal; Igor: "yes".
 
 **Not decided**: everything inside each session — the docs' layout and where
 they live; how drops work, pseudo-random or not, permanent or temporary, and

@@ -6,6 +6,16 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-09-30
 
+**Two false comments removed** — Igor: "fix them already". In `game/logic.js`:
+the `ponytail:` note on `BATCHES`, whose debt S4 (meta loop skeleton) paid — a
+layer owns its batches (D71 (batches are drawn from pools)); and `clearBatch`'s
+D59 (no mods at the layer end) paragraph, which D68 (the layer end is a
+milestone) had made false. The last layer's line now cites both. And the
+entity-docs session gains a job, Igor: "yes" — it settles the weapon record,
+which does not exist yet, and reserves the enemies' `threat` field, so S5
+(content) starts on final shapes (D80 (before S5: entity docs, mods from
+drops)).
+
 **S4 (meta loop skeleton) closes; two requirements come before S5** (D80)
 Igor: "yes, close s4 and commit after cleanup", the playable exit his call —
 "if you ask if it's ok at current stage, yes it is". `/simplify` ran four

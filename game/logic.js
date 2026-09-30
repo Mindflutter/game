@@ -204,10 +204,6 @@ function mouseMoved() {
 // also deletes the curve: the tunable is "how many mods per layer", which is
 // arithmetic, instead of an income integral.
 function clearBatch() {
-  // Not at the layer end (D59): the clear of a layer's last batch is not a
-  // gate, so it pays nothing -- no rank ("let it stay on 11"), no mods, no Mend.
-  // Mods come back only if the player goes on to the next layer, which does not
-  // exist yet; how that works is open (ideas.md -> the layer end).
   // Enemies placed by hand -- a scenario's (D37), a check's -- belong to no
   // batch of the plan: they pay a gate's rank and cards, and nothing that
   // belongs to a layer.
@@ -230,7 +226,7 @@ function clearBatch() {
     }
   }
   // The last layer's end pays no rank and no mods -- nothing to go on to
-  // (D68). The current carries you to the bottom, which is the win.
+  // (D59, narrowed by D68). The current carries you to the bottom, the win.
   if (batchIndex >= plan.length) return;
   rank += 1;
   // A comfort mod is a standing effect rather than a stat, so it acts here.
@@ -530,10 +526,6 @@ function step(dt) {
       // the dive is banked at the end of this tick.
       if (batchIndex >= plan.length) screen = 'won';
       else {
-        // ponytail: one flat list is one layer, the boss last (D62). A second
-        // layer needs not a longer list but the *layer* -- a layer owns its own
-        // batch list. So do not grow BATCHES into a tuned multi-layer list;
-        // that shape will not exist.
         spawnBatch(plan[batchIndex].batch);
         batchHit = false;
         batchIndex += 1;

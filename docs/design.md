@@ -42,7 +42,7 @@ game/       content.js  every tuning number + all content tables
                         snapshot and the save text
             logic.js    step() — arrivals, the gate, the descent, movement,
                         collision; the plan; home's buying and banking
-                        ── 1673 lines. Survives the port.
+                        ── 1665 lines. Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
@@ -57,7 +57,7 @@ Line counts are as of 2026-09-30. Regenerate rather than trust them:
 `wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
 *reports*, never a grep — some call sites sit inside loops.
 
-The platform share is **32%** (772 of 2445). D17 measured 23% on 2026-09-12 and
+The platform share is **32%** (772 of 2437). D17 measured 23% on 2026-09-12 and
 it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
 while `platform/` did not, and S2 held it level — the camera is one translate
 and the specks, depth tint and margin cover are a few dozen lines. S3 took it

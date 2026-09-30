@@ -13,12 +13,12 @@ must stay true while doing it.
 **None. S4 — Meta loop skeleton closed 2026-09-30** — Igor: "yes, close s4 and
 commit after cleanup". **Next: the two requirements before S5** (D80), each in
 a session of its own — a doc per game entity, and mods reworked from a choice
-into enemy drops; see "Before S5" below. Then S5 — Content to the DoD numbers,
-whose entry has one more gap, raised with Igor 2026-09-30: it asks for "the
-data shapes for enemy, weapon, gear and mod … settled and will not change", and
-there is no weapon record yet — the one gun is `PLAYER_START` fields plus the
-Gun's tiers — while S6 — Balance's threat number (D79) will add a field to
-every enemy.
+into enemy drops; see "Before S5" below. Then S5 — Content to the DoD numbers.
+Its entry asks for "the data shapes for enemy, weapon, gear and mod … settled
+and will not change"; there is no weapon record yet — the one gun is
+`PLAYER_START` fields plus the Gun's tiers — and S6 — Balance's threat number
+(D79) will add a field to every enemy. Both go to the entity-docs session
+(Igor, 2026-09-30: "yes").
 
 ### S4 — Meta loop skeleton · closed 2026-09-30
 
@@ -38,10 +38,10 @@ enemies cannot show the flow.
 
 Carried out of S4, none of it blocking: the threat system for enemies and how
 batches grow (S6 — Balance, D79); which enemies drop gems (S6, D78); D35's
-`+N` popup (S7 — Alpha polish); layer 2's own content (S5); every number marked
-Claude's pick in `design.md` → What persists; and two comments in
-`game/logic.js` the build made false — the `ponytail:` note on `BATCHES` and
-`clearBatch`'s D59 paragraph — left until Igor says.
+`+N` popup (S7 — Alpha polish); layer 2's own content (S5); and every number
+marked Claude's pick in `design.md` → What persists. Two comments the build
+made false — the `ponytail:` note on `BATCHES`, whose debt S4 paid, and
+`clearBatch`'s D59 paragraph — were removed at Igor's word after the close.
 
 ### The layer-to-layer design pass · closed 2026-09-30
 
@@ -347,7 +347,11 @@ these are two big tasks, i'll do them in separate sessions" (D80).
    structure of docs is better and agents know exactly where to look for info.
    every entity doc has a sensible layout with tables & naming." Earlier the
    same day: "a set of md files with strict documentation of each enemy, each
-   gear piece and each mod, so that there is always reference."
+   gear piece and each mod, so that there is always reference." **It also
+   settles the weapon record** — what a weapon is as data, how one is owned and
+   equipped, its tiers, where weapon-scoped mods attach (D31) — **and reserves
+   the enemy `threat` field** S6 fills (D79), so S5's shapes are final before
+   its content is written. Asked and answered, 2026-09-30: "yes".
 2. **Mods reworked from a choice into enemy drops.** Igor: "mods rework from
    choice to enemy drops (from ideas)" — the idea is in `ideas.md` → Open —
    raised during S4 ("Mods as drops, never offered"), with what it touches.

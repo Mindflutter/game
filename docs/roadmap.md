@@ -24,7 +24,8 @@ happened.
 **S4 — Meta loop skeleton closed 2026-09-30** (D74–D79). Next come the two
 requirements below, then **S5 — Content**, whose entry also asks for the
 enemy, weapon, gear and mod data shapes to be final — and there is no weapon
-record yet (`plan.md` → Active stage). Raised during S4 and answered: gems are pulled to the player (D78), and threat
+record yet; the entity-docs session settles it, and reserves the enemies'
+`threat` field (`plan.md` → Before S5). Raised during S4 and answered: gems are pulled to the player (D78), and threat
 rises overall and gradually through a dive (D79); the threat system that
 measures it is S6 — Balance's, and not done now.
 
