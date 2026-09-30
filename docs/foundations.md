@@ -23,19 +23,19 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 | Term | Means | Not |
 |---|---|---|
 | **layer** | One section of the abyss you dive into. 3–5 of them at alpha. Unlocked by completing the previous one. | never "level" |
-| **dive** | One attempt at a layer, start to death or completion. | "run" is its synonym; prefer **dive** |
-| **rank** | In-dive progress, reset every dive. **One rank per batch cleared** — there is no XP bar and no curve (D34 — Mods) — except a layer's last batch, whose clear is the **layer end** and pays none (D59): a layer of N batches pays N − 1 ranks. | never "level" |
-| **mod** | A dive-scoped pick, offered as one of three at a gate, gone at the end of the dive. Momentum, not strategy. | never "upgrade" |
+| **dive** | One attempt, start to death or completion. It starts at the top of the first layer and runs on through the layers; completion is clearing the last one — the win (D66, D68). | "run" is its synonym; prefer **dive** |
+| **rank** | In-dive progress, carried through every layer of a dive and reset when it ends (D66). **One rank per batch cleared** — there is no XP bar and no curve (D34 — Mods) — each layer's boss included (D68), except the last layer's: its clear wins the game and pays none. | never "level" |
+| **mod** | A dive-scoped pick, offered as one of three at a gate or a layer end, gone at the end of the dive. Every mod has a cap (D69). Momentum, not strategy. | never "upgrade" |
 | **gear** | A persistent item bought with currency on the home screen. Weapons, suit, mask, flippers, trinkets. | never "upgrade" |
 | **tier** | One of the 3–4 purchasable steps a piece of gear advances through. | never "level", never "upgrade" |
 | **gate** | The depth where a batch waits. The descent stops there — no further in enemies until the batch is cleared, though the water keeps flowing (D27, D58). Clearing it pays one rank and offers three mods (D33, D34): the dive's one pause, since play waits on the pick. The layer's last batch is the exception — its clear is the layer end. Then the current carries you on to the next gate. | not a "wave", not a "batch", not the **layer end** |
-| **layer end** | The clear of a layer's last batch — the boss's (D62) — and the bottom the current then carries you to. **Not a gate**: it pays no rank and offers no mods — mods only if the player goes on to the next layer (D59). What else happens there is not designed yet — `ideas.md`. The name is Igor's working one: "or just call it layer end". | not a "gate" |
+| **layer end** | The clear of a layer's last batch — the boss's (D62) — and the bottom the current then carries you to. **Not a gate but a milestone, bigger than one** (D68): it pays a gate's rank and three mods, heals you fully, and the boss drops a big haul of gems — then the current carries you on into the next layer (D66). The last layer's end pays no rank and no mods — there is nothing to go on to — and is the win; its boss still drops its haul. It plays with no screen — the mod pick is its one pause, then the current carries you into the next layer (D72). The term is Igor's: "or just call it layer end", kept as final (D73). | not a "gate" |
 | **boss** | A special enemy type, met in a layer's last batch — a normal batch in every other way (D62). It lunges (D64). Clearing its batch is the **layer end**. | not a "mini-boss" |
 | **mini-boss** | A smaller boss: one tougher enemy in a batch of its own at an ordinary gate along the layer. It lunges like the boss, weaker and slower to wind up, so it teaches the boss's tell; its gate pays a rank and mods like any other (D65). | not the "boss" |
 | **batch** | The gated unit. Cleared before the descent resumes. Contains 1–N enemies of comparable threat. | not a "wave" |
 | **wave** | A spawn group *inside* a batch. **Default: one batch is one wave.** Multi-wave batches are permitted but are a UX risk — Igor's concern, 2026-09-26: a batch that keeps refilling reads as "the gate is broken" rather than as a second wave. Any multi-wave batch must telegraph that more is coming. | not a "batch" |
 | **prototype** | The survivors-like auto-shooter this grew out of. A closed phase, not a version of the current game. | not "the game" |
-| **home** | The surface screen: shop, layer select, launch. | "base", "backyard" are flavour, not terms |
+| **home** | The surface screen: shop, the layers unlocked and the depth reached, launch. Every dive starts at the top — there is no layer select (D66). | "base", "backyard" are flavour, not terms |
 | **attribute** | A **body** stat raised by spending attribute points at home. Points are earned by in-dive micro-tasks, never bought, and are capped at the source — a layer holds a finite set of tasks (D36). | not "gear", not a "mod" |
 | **micro-task** | An in-dive objective that pays attribute points, rewarding **mastery not quotas** — "clear a batch undamaged", never "kill 50 darters" (D36). | not an "achievement" |
 
@@ -53,7 +53,7 @@ What this game *is*, stated so a branching session cannot drift off it.
    - `gear` — bought with currency, persists, **combat** stats.
    - `attribute` — earned as points by in-dive micro-tasks, spent freely at
      home, persists, **body** stats.
-   - `mod` — picked at a gate, gone at the end of the dive.
+   - `mod` — picked at a gate or a layer end, gone at the end of the dive.
 
    `gear` and `attribute` **sum; they never multiply** (D36). Gear may *require*
    an attribute threshold — that is scheduling, not scaling, and is allowed.
@@ -61,7 +61,7 @@ What this game *is*, stated so a branching session cannot drift off it.
    gear. That non-fungibility is the entire reason the tier exists.
 5. **Nothing interrupts combat** (D33 — Mod offers do not interrupt, D34 —
    Mods). One rank per batch cleared and three mods offered at the gate —
-   neither at the layer end (D59); chosen in about a second. Mods differ in **kind, not degree** — comparing numbers is
+   and at every layer end but the last (D68); chosen in about a second. Mods differ in **kind, not degree** — comparing numbers is
    the heavy thinking the dive must not contain. No modal pop-up mid-fight, and
    no XP bar.
 6. **Combat is the dive's only dynamic system** (D35 — Currency is
@@ -86,14 +86,14 @@ has an answer.
 | Pillar | Stated as | Target |
 |---|---|---|
 | Fast-paced | Time to clear one batch | 10–45s |
-| Dives are a session, not a sitting | Time to complete one layer | 4–8 min |
+| Dives are a session, not a sitting | Time to complete one layer; a dive runs until death but can be put down at any point and resumed (D70) | 4–8 min |
 | Nothing unbeatable | Every batch is clearable at the gear level expected when it is first met | must hold |
 | Nothing trivial | No batch is cleared without the player moving | must hold |
 | Relaxed only at home | `home` has no timer, no threat, no fail state | must hold |
 | Responsive control | Input to on-screen response | ≤ 2 frames |
 | Addictive, not grindy | Dives needed before the first meaningful purchase | ≤ 3 |
 | Easy layers stay relevant | A completed layer still rewards a skilled fast clear | must hold |
-| Dives differ | Two dives of the same layer draw different batches | must hold |
+| Dives differ | Two dives of the same layer draw different batches (D71) | must hold |
 | Funny, childish, straightforward | No mechanic needs explaining in more than one sentence | judgement, Igor's |
 
 **Feel is never asserted** (D16). Anything on this list marked "judgement" is
@@ -134,7 +134,9 @@ Igor's call and gets no check.
   balance comparisons, and because "dives must differ" is a claim about
   controlled variation, which needs control.
 - **Saves carry a `version` field from the first write.** Retrofitting schema
-  migration is near-impossible once saves exist, including your own.
+  migration is near-impossible once saves exist, including your own. From its
+  first version the save also holds the dive in progress, resumable at any
+  point (D70).
 - **Difficulty is invariant to window size** (D29). It was a measured bug once;
   a camera is what can silently reintroduce it. It has a check.
 - **Checks run two ways**: `index.html?test` in the browser, and headless in
@@ -166,9 +168,7 @@ Named so they stop being re-proposed.
 ## What is deliberately still open
 
 Tracked in `ideas.md`, not here. The draft's own `(?)` markers plus what this
-contract does not decide: the lost item, what happens at the **layer end** —
-whether it returns you home or offers a choice, and what it looks like (D59
-settles only that it offers no mods unless you go on), what currency is called, whether
-collectibles feed stats or story or both, **which** attributes exist and what
-each micro-task is (the tier itself is settled by D36; its content is S5 work),
+contract does not decide: the lost item, what currency is called, whether
+collectibles feed stats or story or both, **which** attributes exist and what each
+micro-task is (the tier itself is settled by D36; its content is S5 work),
 terrain complexity beyond a vertical shaft.

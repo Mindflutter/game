@@ -2016,3 +2016,285 @@ what is still open, both in `foundations.md` in the same step.
 **Guarded by**: `tests/boss.test.js` — two lone mini-bosses along the layer,
 winding up longer and weaker than the boss, whose clear pays a rank and mods;
 and the boss rising from below the view, centred.
+
+## D66 — The dive runs on through the layers; death restarts it from the top · 2026-09-30
+The layer-to-layer design pass (D60 (layer-to-layer logic gets a design pass
+of its own)). What follows a layer — home, the next layer, or a choice (the
+draft: "inclined to choose") — answered by Igor, 2026-09-30: "let's make it a
+proper roguelite for alpha. yes, you go on. yes, death sends you to the start.
+unlocking layers + what depth you reached is visualised on home screen. ranks
+go all the way through the dive, the dive definition doesnt change."
+
+**Decided.**
+- **Every layer end but the last goes on.** The current carries you into the
+  next layer; there is no way home from a layer end. A dive ends in death, or
+  in the win at the last layer's end (D68 (the layer end is a milestone)).
+- **Death sends you home, and every dive starts at the top of the first
+  layer.** Igor, a message earlier: "what if you cant start from a level, but
+  rather always start from the very beginning". There is **no layer select**,
+  which supersedes the draft's "i'd allow to choose".
+- **`home` shows progress instead of offering a choice**: the layers unlocked
+  and the depth reached. A layer still unlocks by completing the one before
+  it; unlocking reveals it at `home` rather than making it selectable.
+- **Rank and mods carry through the whole dive**, and reset when it ends, as
+  the glossary always said.
+- **The dive keeps its definition** — one attempt, start to death or
+  completion — and loses only the words "at a layer", which a dive spanning
+  layers made false. That is Claude's reading of "the dive definition doesnt
+  change", stated to Igor and not corrected.
+
+**Why.** Igor: "risky? might be, but i see the game as thrilling and dynamic.
+losing momentum is bad i think." And, turning down Claude's "always home for
+alpha, add going on later": "i'm ok with redoing the desgin afterwards, but i
+think fundamentals are better settled earlier". It also fits the premise — one
+descent after the thing you dropped — and gives balance one path: every layer
+is met by a player who swam through the ones above it.
+
+**Chosen over**: always home — every layer end returns you home, and each layer
+balances on its own (Claude's "simplest for alpha"; Igor: it "kinda cuts the
+thrill"); a choice at the layer end, home or on, with the ranks cashed out as
+currency on the way home and forfeited by death (Claude's earlier lean — a real
+gamble, but a second decision inside the dive, against the genre contract's
+"nothing else"); layer select, free as the draft had it, or bought as a vessel
+that rides you down to a depth (Igor's idea: "record as idea, not doing now" —
+parked in `ideas.md`).
+
+**Known costs, with owners.** The top layers are replayed every dive, and
+`BATCHES` gives every dive the same fifteen — what a layer is, a fixed list or
+a pool it draws from, is now this pass's question. A dive cannot be stopped
+short of dying, so the pillar "dives are a session, not a sitting" needs new
+words — this pass too. The mod pool was sized for one layer — D69 (mods across
+a whole dive).
+
+**S4 (meta loop skeleton) builds no layer select**; `plan.md` says so.
+
+**Glossary**: the **dive**, **rank**, **mod** and **home** rows in
+`foundations.md`, in the same step.
+
+**Guarded by**: nothing yet — none of it is built. The checks arrive with the
+build, and the plan this pass ends in names them.
+
+## D67 — Currency is kept on death · 2026-09-30
+Claude had carried it as its own suggestion, waiting on Igor's word. Igor:
+"dont know why still pending, of course you keep currency."
+
+**Decided.** The gems a dive collects are kept however it ends, death
+included. Death costs a dive its momentum — rank and mods — never its money.
+It is also the floor under the pillar "addictive, not grindy": a new player
+dies mid-layer often, and every dive still pays.
+
+Why it was pending: nothing had decided what death costs, and the working
+agreement makes Claude's picks wait for Igor.
+
+**Guarded by**: nothing yet — until S4 (meta loop skeleton) there is no `home`
+to carry currency to. Its check lands there.
+
+## D68 — The layer end is a milestone; clearing the last layer wins the game · 2026-09-30
+Igor, 2026-09-30: "essentially, layer end becomes a milestone in the dive,
+bigger than defeating a batch." On Claude's lean for what makes it bigger: "a
+full heal plus a big haul of gems from the boss - agreed". And: "you clear the
+last layer - you won the game".
+
+**Decided.** Every layer end but the last:
+- **pays what a gate pays** — one rank and three mods. This is the exception
+  D59 (no mods at the layer end) already wrote in, "unless a player goes on to
+  the next one", and under D66 (the dive runs on through the layers) every
+  layer but the last goes on;
+- **heals you fully**, so a harder layer starts fair and momentum does not turn
+  into a slide — Slay the Spire heals you after every act's boss;
+- **pays a big haul of gems from the boss**, so reaching the milestone pays
+  even if the next layer kills you, and D67 (currency is kept on death) keeps
+  it. The haul is the boss's own drop, so the last layer's boss drops it too.
+
+Then the current carries you on into the next layer. How that plays is still
+open — this pass.
+
+**The last layer's end is the win.** No rank and no mods: there is nothing to
+go on to. Its boss's haul still lands. What follows a win is not designed (`ideas.md`).
+
+**Narrows D59 (no mods at the layer end)**: its rule now holds for the last
+layer only.
+
+**Claude's picks, left to the build and to S6 (balance)**: how big "big" is.
+The boss's `value` is 10 today, a drifter's 1.
+
+**Glossary**: the **layer end** and **rank** rows, and the genre contract's
+"neither at the layer end", in `foundations.md`, in the same step.
+
+**Guarded by**: nothing yet — built with the second layer, wherever the plan
+puts it.
+
+## D69 — Mods across a whole dive: every mod capped, an offer that never runs dry · 2026-09-30
+D66 (the dive runs on through the layers) carries rank through the whole dive,
+and one rank per batch (D34 (mods)) was sized for one layer. A layer is fifteen
+batches, fourteen ranks; a full dive of 3–5 layers pays some 45–75. The pool is
+six mods, four of them capped, and those caps add up to ten picks: once they
+are taken, every gate offers the same two cards, Fins and Vitality, both
+unbounded, and a deep player stacks hearts and speed without limit.
+
+Igor, asked how mods should work across a dive: "you decide, my requirement is
+make it consistent and diverse, generic baseline." **Claude's call,
+delegated**, and open to Igor to reopen, as D63 (the win rate is the boss
+fight's) was.
+
+**Decided, by Claude:**
+1. **One rank per batch, all the way down.** The rate D34 (mods) set,
+   unchanged; only the total grows with the layers.
+2. **Every mod has a cap: a switch caps at 1, anything that stacks at 3.**
+   That is what the four capped mods already do; Fins and Vitality lose their
+   exemption. A dive's power then has a ceiling, so deep layers are tuned
+   against a known number — D34's "balancing becomes arithmetic", kept across
+   a whole dive. The 3 is Claude's pick and S6 (balance) may move it; the rule
+   stays.
+3. **The offer never runs dry.** Mods fill the three cards first; a handful of
+   gems, then a heart back, fill any card the pool cannot. Neither is a mod —
+   no cap, nothing carried. Momentum with nowhere left to go becomes money or
+   health, as in Vampire Survivors once everything is maxed. With every mod
+   capped the offer is those two alone; rule 4 keeps a full dive from getting
+   there.
+4. **The pool grows with the dive.** S5 (content) sizes it so the caps cover a
+   full dive's ranks with three cards to spare, so the gems and the heart are a
+   safety net, not the late dive. That is computable from the tables, so it
+   becomes a check.
+
+**Consistent**: one rule for every mod, none exempt. **Diverse**: the pool is
+sized to the dive, so offers stay varied to the bottom. **Generic baseline**:
+all four rules are about the mod record, never about a particular mod, so
+weapon-scoped mods (D31 (two-tier progression)), due at S5 (content), arrive as
+data.
+
+**Rejected**: fewer ranks — one per layer, or per mini-boss (it undoes the rate
+D34 settled with Igor, to solve a pool that is simply too small); diminishing
+returns on repeats (arithmetic inside the pick, which D34 keeps out of the
+dive); caps that grow with depth (a second rule doing the first one's job).
+
+**Guarded by**: nothing yet. The caps and the fill order can be checked against
+`MODS` as soon as they are built; the pool-covers-a-dive check needs the
+layers. The plan places all three.
+
+## D70 — A dive can be saved at any point · 2026-09-30
+Igor, asked whether a dive can be put down at a layer end and picked up later:
+"ideally, you could save at any point. if difficult, leave for later".
+
+**It is not difficult here, so it is not left for later.** Save-anywhere is
+usually the hard kind of save: game objects hold references to engine things —
+textures, physics bodies, callbacks — that cannot be written to a file. A dive
+here is plain numbers in plain objects (D5 (plain objects in flat arrays)),
+about twenty-five variables; its randomness is one 32-bit number (D41 (seeded
+RNG)); and it runs in fixed ticks (D53 (fixed timestep)). So a dive is a text
+document, and a restored one plays on exactly as it would have. The one field
+that is not plain data, the offered mod cards, is saved by name.
+
+**Decided.**
+- A dive can be put down at any moment and resumes exactly where it was. No
+  rollback: quitting neither loses nor farms anything, and closing the page
+  cannot undo a death.
+- Death and the win end the dive and delete it from the save.
+- The dive in progress is part of the save **from its first version**, which
+  S4 (meta loop skeleton) writes. A dive saved by an older build is rejected
+  loudly — the dive is dropped, everything persistent kept — as the technical
+  contract requires.
+- **Claude's picks**: a resumed dive opens on the pause screen, not
+  mid-swing; it is written when the game pauses and when the page is hidden or
+  closed.
+
+**The session pillar keeps its name.** A dive runs until death (D66 (the dive
+runs on through the layers)), but it can be put down anywhere, so play still
+fits a session; the pillar's target — 4–8 min a layer — is unchanged.
+
+**Supersedes Claude's two proposals**: quitting as death, and resuming from the
+last layer end with everything since rolled back.
+
+**The seam**: `game/` gains the snapshot and its restore, which port; storing
+the text is `platform/`'s, rewritten on the port. The names cross with the
+rest of S4 (meta loop skeleton)'s save and are listed in `design.md` then.
+
+**Guarded by**, when built: the replay check extended — a dive saved and
+restored at a random tick plays on identically to one never interrupted, a
+property over seeds and ticks. A variable the snapshot forgets makes the two
+diverge, so that one check keeps save-anywhere true as the state grows.
+
+## D71 — Batches are drawn from pools, never a fixed list · 2026-09-30
+The mechanism for a requirement settled from the start: `foundations.md`'s
+pillar "Dives differ — two dives of the same layer draw different batches"; the
+draft's "level runs must not look the same on every dive"; and Igor,
+2026-09-27: "the batches are concrete now? randomized batches coming later?",
+answered then as "pick whole batches of comparable threat from a pool". Claude
+asked it again on 2026-09-30 as an open choice, and Igor: "settled when we
+started. batches are never the same, but are balanced in difficulty. right now
+the batches are hardcoded. when alpha is complete they shouldnt be. why are you
+even asking? check docs, check other sessions, fill the gaps". **The mechanism
+is Claude's call, delegated.**
+
+**Decided, by Claude:**
+- **A layer is a record that owns its batches** — as the code's note on
+  `BATCHES` already says it must.
+- **A layer is a run of stretches, each with a pool.** A stretch holds a few
+  hand-made batches of comparable threat, more than it has gates, and a dive
+  draws one per gate from the dive's seed, never the same batch twice. The
+  order is shaped: the stretches get harder down the layer.
+- **Comparable threat is hp, as D54 (the batches, re-derived from scratch)
+  sized them**: a stretch's batches sit in one band of total hp — seconds of
+  shooting — so any draw is as hard as any other. The bot measures clears per
+  batch and flags one outside its band; S6 (balance) owns the tuning.
+- **The mini-bosses and the boss keep fixed places.** The mini-bosses rehearse
+  the boss's tell and the boss tests it (D65 (a mini-boss is a smaller boss)),
+  and the rehearsal has to come first.
+- **Hand-made, not generated.** Every batch stays a line of data, tuned and
+  measured one by one, as the draft pictures a batch: "a number of enemies that
+  have a very similar strength". Rejected: assembling each batch from a threat
+  budget — more variety for less writing, less control over what a fight is.
+- **Where**: the shape in S4 (meta loop skeleton), which builds the second
+  layer; the pools' content in S5 (content). **By alpha no layer is a fixed
+  list.**
+
+**Why Claude asked, so it is not repeated**: the requirement was settled and
+only its mechanism was open — and a mechanism under a settled requirement is
+Claude's to fill. The 2026-09-27 exchange had already named it.
+
+**Guarded by**, when built: over seeds, two dives draw different batch
+sequences; every drawn batch comes from its stretch's pool; the same seed draws
+the same sequence (D41 (seeded RNG)).
+
+## D72 — Between layers there is no screen; the win has one · 2026-09-30
+The pass's last two questions: how the transition plays — Igor, 2026-09-28:
+"an open discussion on how to transition between layers - later" — and what
+follows the win (D68 (the layer end is a milestone)). Filled by Claude under
+the same instruction, "fill the gaps", from what the docs already settle:
+smooth, not screens (D58 (the descent)); Igor's "it's all about dynamics,
+something is always happening during a layer pass"; and the mod pick as the
+dive's one pause.
+
+**Decided, by Claude:**
+- **The layer end plays over moving water.** The boss dies, the heal and its
+  haul of gems land, the three mod cards open as at any gate — the one pause —
+  and the current carries you on down. The water takes the next layer's colour
+  and its name shows for a moment; its first batch arrives like any other. No
+  screen and no click between layers.
+- **The abyss is one tall strip.** The next layer starts where the last one
+  ended, so depth keeps adding up — the depth `home` shows (D66 (the dive runs
+  on through the layers)).
+- **"LAYER CLEARED" becomes the win screen**, shown only at the last layer's
+  end: the dive's numbers, then `home`. Its wording is the friendlier-messages
+  item in `ideas.md`.
+- **After a win**, `home` shows every layer cleared, and diving again works as
+  always — from the top, for gems and micro-tasks. Nothing new unlocks at
+  alpha.
+
+**Graphics, and placeholders** — Igor's rule, "if it's a graphics matter, state
+it and document that it's going to be modified later": the colour change and
+the name are the cheapest way to say "a new layer" until art exists.
+
+**Guarded by**, when built: going on from a layer end opens no screen but the
+mod cards, and the next batch arrives within the usual travel; the win screen
+shows only at the last layer's end; depth never resets within a dive.
+
+## D73 — "Layer end" is the term · 2026-09-30
+D59 (no mods at the layer end) put it in the glossary under Igor's working
+name — "we need a term for layer end (or just call it layer end)". Asked at the
+close of the layer-to-layer pass whether to keep it, Igor: "layer end is ok".
+
+**Decided.** **Layer end** is the term, final, and binding like the rest of the
+glossary (D32 (fixed vocabulary)). The glossary row drops "working".
+
+**Guarded by**: nothing — it is a word. The glossary is what holds it.

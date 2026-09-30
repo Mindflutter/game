@@ -21,10 +21,11 @@ happened.
 
 ## Next
 
-S3 — One boss, one complete layer closed 2026-09-29 (`plan.md`). Nothing is
-queued: **the layer-to-layer design pass (D60)** comes next, before S4 — a
-conversation ending in decisions and a plan, not a build — and opening it is
-Igor's call. Its questions wait in `ideas.md` → the layer end.
+**S4 — Meta loop skeleton**, whose entry is met: the layer-to-layer design
+pass (D60) closed 2026-09-30 with D66–D73, and `plan.md` has S4 re-planned from
+it — the dive's loop across two layers first, then `home` and the save. It
+opens with its own questions (in `ideas.md`) and a task-by-task plan; starting
+it is Igor's call.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`) and the lunge's (`design.md`

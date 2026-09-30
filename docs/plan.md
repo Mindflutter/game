@@ -10,9 +10,22 @@ must stay true while doing it.
 
 ## Active stage
 
-**None. S3 — One boss, one complete layer closed 2026-09-29.** The
-layer-to-layer design pass (D60) comes next, before S4; Claude reminded Igor
-when S3 closed, and opening the conversation is Igor's call.
+**None. The layer-to-layer design pass closed 2026-09-30** — Igor: "layer
+end is ok, wrap up and commit". S4 — Meta loop skeleton is next, and its entry
+is met; it opens with its own questions (`ideas.md`: can one stat be raised by
+both a mod and gear, and are dash improvements gear or mods) and a
+task-by-task plan, as S3 did.
+
+### The layer-to-layer design pass · closed 2026-09-30
+
+Decided: the dive runs on through the layers and death restarts it from the
+top (D66), currency is kept on death (D67), the layer end is a milestone and
+clearing the last layer wins the game (D68), every mod is capped across a dive
+(D69), a dive can be saved at any point (D70), batches are drawn from pools
+(D71), between layers there is no screen (D72), and "layer end" is the term
+(D73). The design and its check against `foundations.md`:
+`superpowers/specs/2026-09-30-layer-to-layer-design.md` — history now. The
+ready plan is S4, S5 and S6 below, re-planned from it.
 
 ### S3 — One boss, one complete layer · closed 2026-09-29
 
@@ -221,7 +234,10 @@ something to go on from. Met 2026-09-29.
 
 **Claude opens it.** When S3 closes, Claude reminds Igor to start this
 conversation, before anything of S4 begins. Igor, 2026-09-28: "remind me to
-open a conversation about it after s3 / before s4".
+open a conversation about it after s3 / before s4". Opened 2026-09-29,
+closed 2026-09-30: D66–D73 decided, the design checked in
+`superpowers/specs/2026-09-30-layer-to-layer-design.md`, and S4, S5 and S6
+below re-planned from it.
 
 **Work:** the layer-to-layer logic, in detail. Igor, 2026-09-28: "we must work
 thru layer-to-layer logic in detail out of s2", then "a design pass of its own
@@ -241,16 +257,36 @@ plan" —
 ## S4 — Meta loop skeleton
 
 **Entry:** S3 exits **and** the layer-to-layer design pass above is done
-(D60) — S4 builds `home`, layer select and the first save format, which that
-pass's answers shape. (The attribute question that used to gate this stage was
+(D60) — S4 builds `home` and the first save format, which that pass's
+answers shape. **Met 2026-09-30.** (The attribute question that used to gate this stage was
 answered by D36 — Attributes.)
 
-**Work:** `home` screen. Currency drops. One piece of gear, buyable, with
-tiers. One attribute, raisable by spending points. Persistence with a `version`
-field, holding owned gear + tiers + points spent + **micro-task counters** from
-its first version (D36). Layer select.
+**Work**, in this order — the dive's loop first, because `home` shows what it
+produces:
+1. **The dive through the layers.** A layer becomes a record of stretches with
+   pools of batches, drawn per dive from its seed (D71). A second layer — the
+   first one's content under its own colour, a placeholder until S5 — so a
+   dive can go on (D66). The layer end as a milestone: a gate's rank and mods,
+   a full heal, the boss's haul of gems (D68); no screen between layers, and
+   the win screen at the last layer's end (D72). Every mod capped, and gems
+   and a heart fill an offer the pool cannot (D69). Scenarios that start at a
+   layer with a stated kit, for the bot.
+2. **The meta loop.** `home` screen: shop, the layers unlocked and the depth
+   reached, launch — no layer select, every dive starts at the top (D66).
+   Currency drops, auto-collected (D35) and kept on death (D67). One piece of
+   gear, buyable, with tiers. One attribute, raisable by spending points.
+   Persistence with a `version` field, holding owned gear + tiers + points
+   spent + **micro-task counters** (D36) and the dive in progress, resumable at
+   any point (D70) — all from its first version.
 
 **Exit (DoD):**
+- A dive goes on from the first layer into the second with rank and mods
+  intact; the layer end heals and pays; death returns you `home` with your
+  gems; clearing the last layer shows the win.
+- Two seeds draw different batches, and one seed the same ones (D71).
+- No mod passes its cap, and an offer holds three cards while any mod is under
+  its cap (D69).
+- A dive saved and restored at a random tick plays on identically (D70).
 - The loop closes: dive → earn → buy → dive again, **measurably** stronger.
 - Survives a reload. A save written by the previous build still loads, or
   migrates, or is rejected loudly — never silently corrupts.
@@ -258,7 +294,8 @@ its first version (D36). Layer select.
   (target ≤ 3, per `foundations.md`).
 - At least one micro-task pays an attribute point, and the counter survives a
   reload.
-- Playable: the roguelite loop exists with one item in it.
+- Playable: the roguelite loop exists with one item in it, across two
+  layers.
 
 **Note:** the `mod` pool stays entirely generic through here (D31). One
 progression system is balanced at a time.
@@ -268,14 +305,18 @@ progression system is balanced at a time.
 **Entry:** S4 exits. The data shapes for enemy, weapon, gear and mod are
 settled and will not change.
 
-**Work:** 5–7 enemy behaviours, 2–3 weapons, 2–3 gear items, 3–5 layers, 3–4
-tiers each. Weapon-scoped mods arrive here if they arrive (D31).
+**Work:** 5–7 enemy behaviours, 2–3 weapons, 2–3 gear items, 3–5 layers —
+each with its own pools of batches (D71) — and 3–4 tiers each. Weapon-scoped
+mods arrive here if they arrive (D31). The mod pool grows until its caps cover
+a full dive (D69).
 
 **Exit (DoD):**
 - The DoD counts from the draft are met.
 - Adding the last enemy cost what adding the second did. If it did not, the
   data shape was wrong and that is the finding.
 - Every enemy behaviour has a check on its state transitions.
+- No layer is a fixed list (D71), and the mod pool covers a full dive — its
+  check passes (D69).
 - Playable: the alpha's content is in.
 
 **This stage is repetition of a settled procedure**, which is where the
@@ -287,7 +328,9 @@ because the shapes do not exist until S4 exits.
 **Entry:** S5 exits.
 
 **Work:** Paired seeded bot dives per weapon, per layer, per gear level. Every
-numeric pillar in `foundations.md` measured and met or revised.
+numeric pillar in `foundations.md` measured and met or revised. Every batch
+measured against its stretch's band (D71), and each layer against the kit
+expected there — the mods from the layers above included (D66).
 
 **Exit (DoD):**
 - No unbeatable batch. No batch cleared without moving.

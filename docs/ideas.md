@@ -196,24 +196,32 @@ Recorded here so they are not silently decided by accident.
   — Igor: "at this point it's answered and settled". Smooth: a current carries
   the camera down the layer; there are no discrete screens. Recorded as D58
   (the descent).
-- **After a layer completes:** home, next layer immediately, or choose. Igor
-  inclines to choose.
-  **How the transition itself plays** is open too — Igor, 2026-09-28, in the
-  S2 brainstorm: "an open discussion on how to transition between layers -
-  later". S2 ends a layer on a plain "LAYER CLEARED" screen; S3 replaces it.
-- **The layer end — design what happens there (todo).** Igor, 2026-09-28:
+- ~~**After a layer completes:** home, next layer immediately, or choose.~~
+  **Answered 2026-09-30: the next layer, every time** — D66 (the dive runs on
+  through the layers). Igor: "let's make it a proper roguelite for alpha. yes,
+  you go on." The draft inclined to choose; the choice went, and so did layer
+  select — every dive starts at the top.
+  **How the transition itself plays** — Igor, 2026-09-28: "an open
+  discussion on how to transition between layers - later" — **answered by
+  D72 (between layers there is no screen)**: over moving water, the mod pick
+  its one pause, the next layer's colour and name, then its first batch.
+- ~~**The layer end — design what happens there (todo).**~~ **Done,
+  2026-09-30.** Igor, 2026-09-28:
   "the end of layer is not quite a gate. we need a term for layer end (or just
   call it layer end). we need to design what happens there more thoroughly.
-  leave this point for todo." Decided so far (D59): it is not a gate, and it
-  offers no mods unless the player goes on to the next layer. Open: the term
-  ("layer end" is the working name), what the player sees and does there, and
-  where the mods come from when they do go on. **Owned by the layer-to-layer
-  design pass after S3** (D60, `plan.md`), together with the two entries above.
+  leave this point for todo." Decided so far: it is not a gate (D59 (no mods
+  at the layer end)); it is a milestone, bigger than one — a gate's rank and
+  three mods, a full heal, and a big haul of gems from the boss — and the last
+  layer's end is the win (D68 (the layer end is a milestone)); it plays with
+  no screen (D72 (between layers there is no screen)). **Designed by the
+  layer-to-layer pass.** The term is final — Igor: "layer end is ok" (D73
+  ("layer end" is the term)).
 - ~~**Is reaching the bottom a win?**~~ **Answered 2026-09-28** — Igor: "ok,
   yes, it's a stop and not a win." The "LAYER CLEARED" screen earns nothing,
   as D58 (the descent) and `plan.md` say, so S3 (one boss, one complete layer)
   is still the first stage with an ending. The heading's wording is the
-  friendlier-messages item below.
+  friendlier-messages item below. Since D68 (the layer end is a milestone) the
+  *last* layer's end is the win, and "LAYER CLEARED" becomes its screen (D72).
 - **Friendlier end-of-dive messages.** Igor, 2026-09-28, renaming the bottom
   screen to "LAYER CLEARED": "more user-friendy messages we'll do later". The
   end screens show a heading plus a raw stats line today.
@@ -324,7 +332,11 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   still walked over and still expire at 8s (`design.md` → Currency). D49 kept
   that rather than smuggling S4's work into S1.
 
-- **The mod pool runs short late in a dive, and comfort is down to one.** Four
+- **The mod pool runs short late in a dive, and comfort is down to one.**
+  **The pool half is answered by D69 (mods across a whole dive),
+  2026-09-30** — every mod capped, gems and a heart fill an offer the pool
+  cannot, and S5 (content) grows the pool to cover a whole dive. Comfort being
+  down to one is still true. The original note: four
   of six mods cap (D49, D51, D55) — only Fins and Vitality are unbounded — and
   Mend is the last comfort mod standing, the other two candidates D34 named
   having been killed by D35 and D55 respectively. so a long dive can be offered
@@ -417,23 +429,47 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   design; arrives at S5 or not at all.
 - **Timed fast clears of completed layers** rewarding the player, so easy
   layers do not go obsolete. In `foundations.md` as a pillar, unimplemented.
+  Since D66 (the dive runs on through the layers) every dive passes through
+  them, so they cannot go obsolete; a timed bonus would reward crossing them
+  fast on the way down.
+- **The vessel — a bought ride down to a depth.** Igor, 2026-09-29: "as an
+  idea, there could be a purchasable vessel ship that submerges you to a
+  certain depth"; 2026-09-30: "vessel idea - record as idea, not doing now".
+  A shortcut, bought at `home`: a dive that starts deeper than the top.
+  Spelunky's shortcuts work this way. From the discussion: it works if you
+  arrive with the starting kit and no mods, so riding down trades momentum for
+  time instead of skipping for free — otherwise it makes the top layers
+  pointless; and it goes only as deep as you have cleared. It is also the fix
+  waiting if replaying the top layers every dive (D66) turns out boring.
 - **A second currency** — a fancy shell worth a lot. After alpha.
 
 ## Open — from the batch work
 
-- **Every dive draws the same batches.** `BATCHES` is a fixed list, so two dives
+- **Answered by D71 (batches are drawn from pools), 2026-09-30** — the
+  requirement was settled from the start; the mechanism is hand-made batches of
+  comparable threat, in pools per stretch of a layer, drawn from the dive's
+  seed. Shape in S4, content in S5; by alpha no layer is a fixed list. The
+  original note:
+  **Every dive draws the same batches.** `BATCHES` is a fixed list, so two dives
   of the same layer are identical — which contradicts the `foundations.md`
   pillar "two dives of the same layer draw different batches". The deleted
   `weight`/`from` fields solved this for *types*; the batch-level version is a
   different mechanism (pick from a pool of batches of comparable threat, per the
   draft's Hades reference). Needed before S6 (Balance) means anything, since
   measuring one fixed sequence is not measuring the game.
+  **Load-bearing since D66 (the dive runs on through the layers)**: every dive
+  starts at the top, so this list is replayed every dive, and mods are a
+  one-second pick by design (D34), so batches carry the variety. What a layer
+  is — a fixed list or a pool it draws from — is a question for the
+  layer-to-layer pass.
 - ~~**Nothing ends a dive.**~~ **Partly answered, D58 (the descent),
   2026-09-28.** The list no longer cycles: a dive ends at the bottom of the
   layer, on a screen that is a stop, not a win. Layer *completion* — the boss,
   and what finishing earns — is still S3. **The boss is in, 2026-09-29** (D62 —
   the boss is the layer's last batch): killing it finishes the layer. What
-  finishing earns is the layer-to-layer pass's (D60).
+  finishing earns is D68 (the layer end is a milestone): a gate's rank and
+  mods, a full heal and the boss's haul of gems — and the last layer's end is
+  the win.
 
 ## Open — from the descent (S2)
 
@@ -464,6 +500,20 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   (D64 — the boss lunges): "we will do enemy polishing later anyways". The
   spit needs enemy projectiles first — see the ranged drifter under "Enemy
   behaviours, not just enemy stats".
+
+## Open — from the layer-to-layer pass
+
+- ~~**The session pillar.**~~ **Answered 2026-09-30 by D70 (a dive can be
+  saved at any point).** Igor: "ideally, you could save at any point. if
+  difficult, leave for later". It is not difficult here — a dive is plain data
+  and its randomness one number — so it resumes exactly, with no rollback. The
+  pillar keeps its name. Claude's two proposals, quitting as death and resuming
+  from the last layer end, are superseded.
+- ~~**What follows the win.**~~ **Answered by D72 (between layers there is
+  no screen), 2026-09-30** — the win screen with the dive's numbers, then
+  `home`, which shows every layer cleared; diving again works as always.
+  Nothing new unlocks at alpha. What might come after alpha — harder dives,
+  more layers — is not designed.
 
 ## Suggested but not yet discussed
 

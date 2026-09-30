@@ -4,6 +4,61 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-09-30
+
+**The layer-to-layer pass closes** (D73)
+Igor: "layer end is ok, wrap up and commit". "Layer end" is the final term
+(D73 ("layer end" is the term)); the glossary drops "working". A last sweep
+found one contradiction of Claude's making and fixed it: the glossary said the
+last layer's end "pays nothing", while every boss drops its gems (D35
+(currency is auto-collected)) — now no rank and no mods, the haul still lands,
+and D68 (the layer end is a milestone) says so. Logged for the build: the help
+screen's "a rank and a pick of three mods, until the layer ends" goes false
+with a second layer, and its new wording is Igor's. `plan.md`: no active
+stage; S4 (meta loop skeleton) is next, its entry met.
+
+**Layer-to-layer pass: the gaps filled, checked, planned** (D71, D72)
+Docs only. Asked how batches vary between dives, Igor: "settled when we
+started. batches are never the same, but are balanced in difficulty ... why
+are you even asking? check docs, check other sessions, fill the gaps". Batches
+are drawn from pools — hand-made batches of comparable threat per stretch of a
+layer, from the dive's seed; by alpha no layer is a fixed list (D71 (batches
+are drawn from pools)). Between layers there is no screen: the mod pick is the
+layer end's one pause, and "LAYER CLEARED" becomes the win screen (D72
+(between layers there is no screen)). The design and its check against
+`foundations.md`: `superpowers/specs/2026-09-30-layer-to-layer-design.md`.
+`plan.md`'s S4 (meta loop skeleton) now carries the dive's loop across two
+layers as well as the meta loop, and S5 (content) the pools and a mod pool
+that covers a full dive. `foundations.md`, `ideas.md` and `roadmap.md` follow.
+
+**A dive can be saved at any point** (D70 (a dive can be saved at any point))
+Docs only. Igor: "ideally, you could save at any point. if difficult, leave
+for later". It is not difficult here — a dive is plain data and its randomness
+one number — so the dive in progress joins the save from its first version in
+S4 (meta loop skeleton) and resumes exactly, with no rollback. The session
+pillar keeps its name; `foundations.md`'s pillar row, technical contract and
+open list follow, with `ideas.md`, `plan.md` and `roadmap.md`.
+
+**Layer-to-layer pass: the dive runs on through the layers** (D66–D69)
+Docs only — nothing is built. The pass (D60 (layer-to-layer logic gets a
+design pass of its own)) opened on what follows a layer, and Igor settled it:
+"let's make it a proper roguelite for alpha. yes, you go on. yes, death sends
+you to the start." Every layer end but the last goes on, death restarts the
+dive from the top, there is no layer select — `home` shows the layers unlocked
+and the depth reached — and rank and mods carry through the dive (D66 (the
+dive runs on through the layers)). Currency is kept on death (D67 (currency is
+kept on death)). The layer end is a milestone: a gate's rank and mods, a full
+heal and a big haul of gems from the boss; clearing the last layer wins the
+game (D68 (the layer end is a milestone)). How mods work across a dive was
+Claude's call, at Igor's request — "consistent and diverse, generic baseline":
+one rank per batch still, every mod capped, gems and a heart fill any card the
+pool cannot, and the pool grows with the dive (D69 (mods across a whole
+dive)). The vessel — a bought ride down to a depth — is parked in `ideas.md`.
+`foundations.md` follows in the same step: the dive, rank, mod, home and layer
+end rows, the genre contract's mod lines, and what is still open. `plan.md`
+drops layer select from S4 (meta loop skeleton). Still open in the pass: the
+session pillar, what a layer is, the transition, and what follows the win.
+
 ## 2026-09-29
 
 **S3 — One boss, one complete layer closed.** Igor: "wrap up s3", having
