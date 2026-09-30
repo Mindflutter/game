@@ -21,22 +21,30 @@ happened.
 
 ## Next
 
-**S4 — Meta loop skeleton**, whose entry is met: the layer-to-layer design
-pass (D60) closed 2026-09-30 with D66–D73, and `plan.md` has S4 re-planned from
-it — the dive's loop across two layers first, then `home` and the save. It
-opens with its own questions (in `ideas.md`) and a task-by-task plan; starting
-it is Igor's call.
+**S4 — Meta loop skeleton closed 2026-09-30** (D74–D79). Next come the two
+requirements below, then **S5 — Content**, whose entry also asks for the
+enemy, weapon, gear and mod data shapes to be final — and there is no weapon
+record yet (`plan.md` → Active stage). Raised during S4 and answered: gems are pulled to the player (D78), and threat
+rises overall and gradually through a dive (D79); the threat system that
+measures it is S6 — Balance's, and not done now.
+
+**Before S5, two requirements, each its own session** (D80, `plan.md` →
+Before S5): a markdown doc for every game entity — "every entity doc has a
+sensible layout with tables & naming" — and mods reworked from a choice into
+enemy drops.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
-`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`) and the lunge's (`design.md`
-→ The lunge), all Claude's picks. `?dev=mini-boss&play` and
-`?dev=last-batch&play` start at a lunger; `&immortal` and `&damage` ride on any
-URL.
+`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's (`design.md`
+→ The lunge), and S4's — prices, tier steps, the haul, the gems card,
+`GEM_PULL` (`design.md` → What persists) — all Claude's picks.
+`?dev=mini-boss&play` and `?dev=last-batch&play` start at a lunger,
+`?dev=layer-2&play` at the second layer with a kit; `&immortal` and `&damage`
+ride on any URL. A scenario never touches the save.
 
 Deliberately not yet: balance fine-tuning — Igor, closing S3: "i suggest we
-leave all balance fine-tuning for later"; S6 — Balance owns it. Anything to do
-with `home` or spending currency (S4), and a lively background (post-alpha, in
-`ideas.md`).
+leave all balance fine-tuning for later"; S6 — Balance owns it, the threat
+system for enemies included (Igor, 2026-09-30: "is it part of balance? yes").
+A lively background (post-alpha, in `ideas.md`).
 
 ## Standing constraints
 
@@ -82,7 +90,8 @@ This section owns the measured bot figures. Nothing else quotes them.
   1 does not die but sits at the first mini-boss until the 1800s cap (the boss
   fight, below). Not a difficulty reading (D50) — Igor still
   finds batches easy — but it means **the mortal bot cannot reach the bottom**.
-- **Time to traverse one layer** (S2 DoD, D58), immortal bot — `diveReport(seed,
+- **Time to traverse one layer** — S2 and S3 figures, **not re-measured on the
+  S4 build**, where a dive is two layers drawn from pools (S2 DoD, D58), immortal bot — `diveReport(seed,
   Infinity, 1800, true)`, 5 seeds. On the S2 build all reached the bottom:
   307.6 / 815.0 / 434.5 / 409.0 / 412.4s, mean 475.7s (7.9 min). **On the S3
   build: 1800 (the cap — seed 1 never kills the first mini-boss) / 1180.7 /
@@ -93,9 +102,10 @@ This section owns the measured bot figures. Nothing else quotes them.
 - The 38.7 / 37.8 / 36.6s survival figures (2026-09-19) are **gone, not stale**:
   they measured an auto-firing weapon with an XP curve, neither of which exists.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
-  4471 reaches the bottom of the layer — boss included since S3 — in 296.34 /
-  296.34 / 296.34s at 1280×800, 1920×1080 and 3440×1440 (stationary, immortal,
-  aiming at the first enemy), driven through real mouse events. A `?test` check
+  4471 reaches the bottom of the dive — both layers since S4 — in 578.00 /
+  578.00 / 578.00s at 1280×800, 1920×1080 and 3440×1440 (stationary, immortal,
+  aiming at the first enemy), driven through real mouse events. On the S3
+  build, one layer: 296.34s at all three. A `?test` check
   holds it within 2%; on the S2 layer, dropping the input's `/ scale` failed it
   at 217.03 / 228.71 / 227.51.
 - **The boss fight** (S3 DoD, D63), mortal bot at the starting kit — no gear,
@@ -108,6 +118,23 @@ This section owns the measured bot figures. Nothing else quotes them.
   backs out of range, so its shots never land, and backs straight along the
   lunge's line, so the charges do. A measure of the bot's policy, not of the
   boss (D50); Igor's playthrough decides whether the layer is winnable.
+- **The meta loop** (S4 DoD), measured 2026-09-30 — mortal bot, seeds 1, 7, 42,
+  4471, 90210, from the top, each a whole dive:
+
+  | | gates cleared | gems banked | mean gates | mean gems |
+  |---|---|---|---|---|
+  | starting gun | 0 / 4 / 0 / 5 / 1 | 10 / 54 / 11 / 79 / 29 | 2.0 | 36.6 |
+  | gun tier 1 | 0 / 5 / 7 / 12 / 9 | 11 / 72 / 133 / 266 / 145 | 6.6 | 125.4 |
+
+  **Dives to the first purchase: 2** (target ≤ 3) — seeds 1 then 7 bank 64
+  against the first tier's 40. **Measurably stronger**: the same seeds, tier 1
+  against the starting gun, clear 3.3× the gates. Seeds 1 and 42 die in their
+  first batch because their dive opens on 14 darters (D71 draws the opener
+  from stretch 1's pool; `ideas.md` → Open — raised during S4) — before S4 every
+  dive opened on 10 drifters and the bot died after 3–7 clears. **Layer 2**,
+  from `layer-2` (a kit of fifteen mods, the starting gun): dies after 8 / 10 /
+  11 / 10 / 10 clears, banking 215–312 gems — it never reaches layer 2's boss.
+  Bot policy as ever (D50): Igor finds batches easy.
 - **Arrival timing** (D55): from a batch spawning, the first enemy reaches a
   centred player in 2.04s at the earliest, 3.21s on average. Edged, 0.27s;
   cornered, 0.22s. This is what killed the `Lull` mod and what Igor's
@@ -134,7 +161,11 @@ This section owns the measured bot figures. Nothing else quotes them.
 
   Dash reach is flat since D56 — it used to ride on `player.speed`, so the
   bottom row was 386px and 386 invulnerable px/s. `Reflex` is now the only mod
-  that raises escape power, and it caps at 3.
+  that raises escape power, and it caps at 3. **The Fins ×10 rows are no longer
+  reachable**: every mod caps at 3 since D69 (every mod capped). They stay as
+  measured, as the proof that `Fins` does not feed the dash. Dash reach is now
+  also an attribute (D75), 165 and 189px at one and two points — not measured
+  in these tables.
 
   Caveat as ever: the probe dashes once from a standstill in a fixed direction,
   so it cannot see a human lining the dash up along a crowd. It is a weak

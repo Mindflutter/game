@@ -6,6 +6,72 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-09-30
 
+**S4 (meta loop skeleton) closes; two requirements come before S5** (D80)
+Igor: "yes, close s4 and commit after cleanup", the playable exit his call —
+"if you ask if it's ok at current stage, yes it is". `/simplify` ran four
+reviewers over the stage's code; applied: one seeded draw without repeats
+(`drawDistinct`) for the mod cards and the plan; menus found by `MENUS[screen]`,
+with `back` for Esc and one `openMenu()`, so `home` now freezes the water like
+every menu; `home`'s layer lines built in `game/` (`MENUS.home.lines`) and only
+printed by the renderer; fillers marked by having no `max`, so their cards no
+longer read "held 0"; the Gun row dimmed by the same `canBuy` that `buy()`
+checks; boot without a throwaway dive, the title's no-dive state being the
+state's own defaults; `saveError` moved to the renderer that shows it; `atGate`
+shared from the harness; nine unused harness names dropped; the window-size
+check's cap scaled by the number of layers; `meta.test.js` loading one game per
+property rather than one per case. One check added: Esc on `home` returns to
+the title. Every refactored rule broken again, all ten caught. Then Igor set
+two requirements before S5 (content), each its own session: a markdown doc for
+every game entity, and mods reworked from a choice into enemy drops (D80
+(before S5: entity docs, mods from drops)). Raised: S5 (content)'s entry also
+needs a weapon record, which does not exist.
+
+**Gems go to the player; dives go from easiest to hardest** (D78, D79)
+Docs only. Igor answered the two things S4 (meta loop skeleton)'s sweep
+raised. Gems: "dropped by enemies (sometimes it should not - balance),
+autocollected by pulling towards a player" — what was built; D35 (currency is
+auto-collected) is amended to match, and whether an enemy drops at all becomes
+a balance lever (D78 (gems are pulled to the player)). The `+N` popup D35
+promised is feel, left for S7 (alpha polish). Batches: "all dives go from
+easiest to hardest. what it means is a question of balance" (D79 (a dive goes
+from easiest to hardest)). Claude read that as "every batch harder than the
+last" and opened a design pass on batch difficulty; Igor corrected both the
+same day — "OVERALL gradual increase in threat", "some later batches might be
+easier", and the threat system for enemies "is part of balance", so S6
+(balance) builds it, in the direction he chose (a threat number per enemy
+type). D79 now says so; `plan.md`'s S6 (balance) carries the work. Queued for
+a later session: strict reference docs, one per enemy, gear piece and mod.
+
+**S4 (meta loop skeleton) built — awaiting Igor's play and close** (D74–D77)
+Igor opened the stage ("kick off with s4"), settled its two questions — mods
+add on top of gear and attributes, which he had already answered (D74 (mods on
+top; dash improvements are attributes)) — agreed the content (D75 (the gun's
+tiers, dash reach, a clean batch)), approved the design in three parts, and
+said "just plan for yourself and implement". Design:
+`superpowers/specs/2026-09-30-s4-meta-loop-design.md`; plan:
+`superpowers/plans/2026-09-30-s4-meta-loop.md`.
+
+Built: a layer is a record of stretches with pools, and a dive draws its whole
+`plan` from its seed (D71); a second layer, the first one's content under its
+own name and colour; the layer end pays a rank, the cards, a full heal and the
+boss's haul of 30, and the last one is the win (D68); every mod capped, gems
+and a heart filling an offer (D69); gems that come to you from anywhere and
+never fade; `home` between dives only (D76), with the gun's three tiers, dash
+reach and the "untouched" micro-task; a versioned save holding the dive in
+progress, written on pause, purchase, dive end and page hide, refused loudly
+and kept aside when unreadable, with `persist` as the seam's seventh name
+(D70, D77). `BATCHES`, `GEM_LIFE` and `pickupRange` are gone; `GEM_PULL` is
+600. Checks: `tests/meta.test.js` new, 59 Node tests and 178 `?test` checks
+pass, every new rule broken once to see its check fail — 24 breaks, 23 in
+Node and `home`'s layout in `?test`, all caught, one only after its test was
+tightened. Found and fixed on the way: killing a
+scenario's hand-placed enemy crashed (`?dev=one-drifter&play`), and a gem
+caught on the frame of death was not banked. **Raised, not fixed**: D35
+(currency is auto-collected) says gems fly to the *counter* with a debounced
+`+N` and a random value; S4 built "they fly to you" from its spec's reading.
+Measured in `roadmap.md` → Health: two dives to the first purchase; the gun's
+first tier roughly triples the gates the bot clears.
+
 **The layer-to-layer pass closes** (D73)
 Igor: "layer end is ok, wrap up and commit". "Layer end" is the final term
 (D73 ("layer end" is the term)); the glossary drops "working". A last sweep

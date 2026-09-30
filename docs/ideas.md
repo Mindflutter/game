@@ -328,13 +328,13 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
 - ~~**Do gems still expire, now that they are currency?**~~ **Closed by D35
   (Currency is auto-collected), 2026-09-27** — auto-collection means nothing can
   be stranded, so nothing needs to expire. The question dissolved rather than
-  being answered. **Note: D35 is decided and not yet implemented** — gems are
-  still walked over and still expire at 8s (`design.md` → Currency). D49 kept
-  that rather than smuggling S4's work into S1.
+  being answered. **Built by S4 (meta loop skeleton), 2026-09-30** — nothing
+  expires and nothing is walked over; gems are pulled to the player, which D78
+  (gems are pulled to the player) made the rule.
 
 - **The mod pool runs short late in a dive, and comfort is down to one.**
   **The pool half is answered by D69 (mods across a whole dive),
-  2026-09-30** — every mod capped, gems and a heart fill an offer the pool
+  2026-09-30, and built in S4** — every mod capped, gems and a heart fill an offer the pool
   cannot, and S5 (content) grows the pool to cover a whole dive. Comfort being
   down to one is still true. The original note: four
   of six mods cap (D49, D51, D55) — only Fins and Vitality are unbounded — and
@@ -344,7 +344,11 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   (Content) adds mods — but if a fix is ever wanted before then, the mod-points
   idea below prices repeats instead of banning them.
 
-- **The dash starts harmless and is bought — built as a mod, tier not settled.**
+- ~~**The dash starts harmless and is bought — built as a mod, tier not settled.**~~
+  **Tier settled by D74 (mods on top; dash improvements are attributes),
+  2026-09-30**: permanent dash improvements are attributes — D36 names dash a
+  body stat — and the mods keep adding on top; S4 built dash reach as the first
+  attribute (D75). The original note:
   Igor, 2026-09-27: "land the dash idea, i'm inclined to mod thing, but in some
   aspects can be home screen upgrade too". A lean plus an instruction to ship,
   **not** a decision between `mod` and `gear` — so D51 built the mod (`Impact`,
@@ -354,7 +358,10 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   D56 then made `dashSpeed` a field too, so reach is sellable as `gear`
   whenever that is decided.
 
-- **Can one stat be raised by both a mod and gear?** Opened by D51: `Impact` is
+- ~~**Can one stat be raised by both a mod and gear?**~~ **Answered by D74,
+  2026-09-30** — Igor: "mods on top of gear/equipment/stats, havent we agreed
+  on that?" Gear and attributes set the floor; mods add on top; nothing
+  multiplies. The original note: Opened by D51: `Impact` is
   the first mod with an obvious `gear` twin, per Igor's "in some aspects can be
   home screen upgrade too". If dash damage is buyable at `home` *and* droppable
   as a mod, the two stack within a dive, which is the compounding `foundations.md`
@@ -383,7 +390,7 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
     the rest. Dropping its max to 1 until enemies with real hp exist is the
     obvious move and is not taken.
   - **Igor's direction: some dash upgrades belong at `home`** ("for later
-    think-thru"). D56 made this *possible* — `dashSpeed` is a field that can be
+    think-thru"). **Built in S4** as the attribute dash reach (D75). D56 made this *possible* — `dashSpeed` is a field that can be
     sold as `gear` — without deciding it. Dash power is the compounding,
     strategic growth D31 puts in `gear` and keeps out of `mod`s.
   - Caveat on all of it: the probe dashes once, in a fixed direction, from a
@@ -448,7 +455,8 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
 - **Answered by D71 (batches are drawn from pools), 2026-09-30** — the
   requirement was settled from the start; the mechanism is hand-made batches of
   comparable threat, in pools per stretch of a layer, drawn from the dive's
-  seed. Shape in S4, content in S5; by alpha no layer is a fixed list. The
+  seed. **The shape is built** (S4, 2026-09-30); content in S5; by alpha no
+  layer is a fixed list. The
   original note:
   **Every dive draws the same batches.** `BATCHES` is a fixed list, so two dives
   of the same layer are identical — which contradicts the `foundations.md`
@@ -480,7 +488,9 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   moving through a fight. Those specks and the depth tint are **placeholder
   graphics, to be replaced** — Igor: "if it's a graphics matter, state it and
   document that it's going to be modified later". What stays open is the art.
-- **Gems left behind by the descent.** In S2 gems stay where they drop and
+- ~~**Gems left behind by the descent.**~~ **Closed by S4 (meta loop
+  skeleton), 2026-09-30**: every gem now flies to the player from anywhere and
+  never fades, so the descent strands nothing. The original note: In S2 gems stay where they drop and
   scroll off with the world, so uncollected ones are lost. Igor, 2026-09-28:
   left for the currency stage (S4 — Meta loop skeleton), "it will be reworked
   anyways". D35 (currency is auto-collected) is decided but not implemented;
@@ -514,6 +524,57 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   `home`, which shows every layer cleared; diving again works as always.
   Nothing new unlocks at alpha. What might come after alpha — harder dives,
   more layers — is not designed.
+
+## Open — raised during S4 (meta loop skeleton)
+
+- **Mods as drops, never offered — a requirement before S5 since D80 (before
+  S5: entity docs, mods from drops).** Igor, 2026-09-30, closing S4: "mods
+  rework from choice to enemy drops (from ideas)", its own session. How drops
+  work stays open until then. The original note: Igor, 2026-09-30, a "wild idea" for
+  discussion after S4: "mods become random (most likely pseudo-random) drops
+  from enemies, never offered, smooth part of the dive, some of them permanent,
+  some temporary. would this help with mod vs gear resolution? would it allow
+  more variety to mod system? would it make the game feel more dynamic and
+  more understandable?" Undecided — a question, not a lean. What it touches,
+  so the discussion starts from the docs: D33 (mod offers do not interrupt)
+  and D34 (mods), which put the pick at the gate; the genre contract's "one
+  one-second mod pick" (4, 5); D69 (every mod capped), whose fill cards exist
+  because an offer can run dry; D35 (currency is auto-collected), which a drop
+  would ride on; and "permanent" mods, which would cross into what `gear` and
+  `attribute` own (D31 (two-tier progression), D36 (attributes)).
+- ~~**D35 as written, against what S4 built.**~~ **Answered by D78 (gems are
+  pulled to the player), 2026-09-30** — Igor: "autocollected by pulling towards
+  a player"; whether an enemy drops is balance's. The original note: Raised by Claude, 2026-09-30,
+  during the build's sweep. D35 (currency is auto-collected) says gems "fly to
+  the counter on their own, and show a `+N`" — debounced, one aggregated `+7`
+  rather than seven `+1`s, placed at the corner counter or at the kill, both
+  built for Igor to pick — that only the drop's *value* is random, and that
+  `GEM_PULL` goes. The S4 spec paraphrased it as "every gem flies to you", Igor
+  approved that paraphrase, and that is what was built: gems fly to the player
+  at `GEM_PULL` 600, a fixed value per type, no `+N`. Claude's mistake — D35 was
+  not re-read. Asked of Igor: build D35 as written, or keep what was built.
+- ~~**A dive can now open on its fastest batch.**~~ **Answered by D79 (a dive
+  goes from easiest to hardest), 2026-09-30** — what "hardest" means is
+  balance's, and open below. The original note: Measured 2026-09-30: stretch
+  1's pool includes 14 darters, and a dive draws its opener from that pool
+  (D71), so seeds 1 and 42 open on it and the mortal bot dies before a clear;
+  every dive used to open on 10 drifters. Within D71's rule — the stretch's
+  batches share an hp band — but darters are fast. Not a human difficulty
+  reading (D50); S6 (balance) owns it, or a fixed gentle opener if Igor wants
+  one.
+- **How batches grow, balance-wise — S6 (balance)'s.** Igor, 2026-09-30:
+  "right now the batches are hard coded and are shitty because of that - you
+  know no level of difficulty, we havent settled how batches grow
+  balance-wise." Then, placing it: "develop a complex mathematical system for
+  enemies that impact the game and player feel - yes, of course. is it part of
+  balance? yes." Its direction is chosen — approach A, a threat number per
+  enemy type, a batch's threat computed from its enemies, measurement
+  correcting the numbers — and so is the shape it serves: an overall, gradual,
+  non-linear rise, "in numbers and in enemy types" (D79 (a dive goes from
+  easiest to hardest)). Everything else is S6's: the system itself, and how
+  batches are written against it. D54 (the batches, re-derived) and D71
+  (batches are drawn from pools) size by total hp until then, and 14 darters
+  against 10 drifters shows hp is not it.
 
 ## Suggested but not yet discussed
 

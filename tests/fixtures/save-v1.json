@@ -1,0 +1,835 @@
+{
+ "version": 1,
+ "bank": 57,
+ "gear": {
+  "Gun": 1
+ },
+ "spent": {},
+ "tasks": {
+  "The Shelf": {
+   "untouched": 1
+  }
+ },
+ "deepest": 2400,
+ "cleared": 0,
+ "dive": {
+  "player": {
+   "r": 10,
+   "speed": 260,
+   "hp": 3,
+   "maxHp": 3,
+   "fireRate": 3,
+   "damage": 1,
+   "range": 250,
+   "pierce": 0,
+   "iframes": 1,
+   "dashCooldown": 2.2,
+   "dashSpeed": 884,
+   "mendOnClear": 0,
+   "dashDamage": 1,
+   "x": 576.2241041744871,
+   "y": 824.2609069357707,
+   "hurt": 0,
+   "fireTimer": 0.14999999999999977,
+   "dashTime": 0,
+   "dashCd": 0,
+   "dashId": 0,
+   "dashDx": 1,
+   "dashDy": 0,
+   "dashEnd": 0
+  },
+  "enemies": [
+   {
+    "x": 907.5503554102619,
+    "y": 735.7661257730778,
+    "r": 9,
+    "speed": 92.79990155377891,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 314.5425584205461,
+    "y": 574.9644894096707,
+    "r": 9,
+    "speed": 80.85057161794975,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 934.1224368183248,
+    "y": 726.6929457070815,
+    "r": 9,
+    "speed": 86.93939323385713,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 663.2012340195558,
+    "y": 926.555142946582,
+    "r": 9,
+    "speed": 79.55307181284297,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 372.60365705197466,
+    "y": 736.9174952802846,
+    "r": 9,
+    "speed": 94.8149891187204,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 1002.3359272801474,
+    "y": 941.4674701102425,
+    "r": 9,
+    "speed": 75.71461262868252,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 525.5232608308345,
+    "y": 699.5504705455726,
+    "r": 9,
+    "speed": 92.14325738186017,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 315.5630092369601,
+    "y": 633.6913877604565,
+    "r": 9,
+    "speed": 89.89050188008697,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   },
+   {
+    "x": 941.2564306583886,
+    "y": 560.5356783789646,
+    "r": 9,
+    "speed": 80.28605582402088,
+    "hp": 1,
+    "maxHp": 1,
+    "value": 1,
+    "color": "#e8446e",
+    "glow": "#ff1e5a",
+    "lastHitBy": 0,
+    "pushX": 0,
+    "pushY": 0,
+    "phase": "chase",
+    "phaseTime": 0
+   }
+  ],
+  "bullets": [
+   {
+    "id": 38,
+    "x": 552.1061258796118,
+    "y": 599.8029250706354,
+    "r": 4,
+    "vx": -45.939006275947406,
+    "vy": -427.5390130764424,
+    "speed": 430,
+    "pierce": 0,
+    "travelled": 225.7500000000002,
+    "maxTravel": 250
+   },
+   {
+    "id": 39,
+    "x": 545.2116734537848,
+    "y": 747.901650226199,
+    "r": 4,
+    "vx": -161.80398636887577,
+    "vy": -398.3961219629788,
+    "speed": 430,
+    "pierce": 0,
+    "travelled": 82.41666666666666,
+    "maxTravel": 250
+   }
+  ],
+  "gems": [],
+  "particles": [
+   {
+    "x": 570.9378234587803,
+    "y": 675.3132218326698,
+    "vx": 12.933485566974,
+    "vy": 24.439272356038686,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 582.8859875448923,
+    "y": 643.7655457552089,
+    "vx": 24.40798279319233,
+    "vy": -5.857743908175978,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 541.8589615661871,
+    "y": 686.3382315791957,
+    "vx": -14.992588909687132,
+    "vy": 35.02721229758883,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 583.661923699053,
+    "y": 664.4435750056961,
+    "vx": 25.153158134312935,
+    "vy": 14.000536206519994,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 582.0165238619919,
+    "y": 626.3602442097591,
+    "vx": 23.572987680483898,
+    "vy": -22.573038648469485,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 592.1525688185837,
+    "y": 682.478961385222,
+    "vx": 33.307204494129756,
+    "vy": 31.32093702242286,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 587.9952919607529,
+    "y": 658.9916049648751,
+    "vx": 29.314736577720694,
+    "vy": 8.764701256484813,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 578.5606956978437,
+    "y": 685.139142493589,
+    "vx": 20.254160587215424,
+    "vy": 33.87565928177624,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 519.7021719075257,
+    "y": 663.7722400314768,
+    "vx": -36.27100621697201,
+    "vy": 13.355815290066142,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 560.4686202831589,
+    "y": 669.0695059612066,
+    "vx": 2.8793180870503634,
+    "vy": 18.443079139068363,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 583.9130059225108,
+    "y": 610.2620510542861,
+    "vx": 25.39428658349242,
+    "vy": -38.033043330218646,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 537.3648661957601,
+    "y": 659.2362185590835,
+    "vx": -19.30852267914905,
+    "vy": 8.999617515418725,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 582.2450466530927,
+    "y": 680.5285723430214,
+    "vx": 23.792451031817034,
+    "vy": 29.447868198335875,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   },
+   {
+    "x": 534.8951445959459,
+    "y": 624.864659750568,
+    "vx": -21.68033590855856,
+    "vy": -24.009332928065877,
+    "life": 0.01666666666666597,
+    "maxLife": 0.5,
+    "r": 3,
+    "color": "#e8446e",
+    "glow": "#ff1e5a"
+   }
+  ],
+  "elapsed": 16.65833333333303,
+  "kills": 25,
+  "shake": 0,
+  "queuePaused": false,
+  "batchIndex": 2,
+  "breathTimer": -0.008333333333331616,
+  "cameraY": 400,
+  "current": 30.00021477952217,
+  "waterY": 889.5832625293593,
+  "fireArmed": true,
+  "rank": 1,
+  "currency": 25,
+  "modCounts": {
+   "Impact": 1
+  },
+  "offerTimer": -3.642919299551295e-16,
+  "choiceIndex": 0,
+  "choices": [],
+  "accumulator": 0,
+  "rngState": 63030962,
+  "currentSeed": 4471,
+  "bulletId": 39,
+  "plan": [
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       12
+      ],
+      [
+       "darter",
+       6
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       16
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       8
+      ],
+      [
+       "darter",
+       6
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       10
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "mini-boss",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       20
+      ],
+      [
+       "darter",
+       12
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       3
+      ],
+      [
+       "darter",
+       10
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       18
+      ],
+      [
+       "darter",
+       8
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       1
+      ],
+      [
+       "drifter",
+       14
+      ],
+      [
+       "darter",
+       6
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "mini-boss",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       4
+      ],
+      [
+       "drifter",
+       16
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       5
+      ],
+      [
+       "drifter",
+       18
+      ],
+      [
+       "darter",
+       8
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "darter",
+       18
+      ],
+      [
+       "drifter",
+       16
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       3
+      ],
+      [
+       "darter",
+       14
+      ],
+      [
+       "drifter",
+       10
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 0,
+    "batch": {
+     "enemies": [
+      [
+       "boss",
+       1
+      ]
+     ]
+    },
+    "end": true
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       16
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       8
+      ],
+      [
+       "darter",
+       6
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       12
+      ],
+      [
+       "darter",
+       6
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "darter",
+       14
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "mini-boss",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       20
+      ],
+      [
+       "darter",
+       12
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "drifter",
+       18
+      ],
+      [
+       "darter",
+       8
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       2
+      ],
+      [
+       "drifter",
+       12
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       3
+      ],
+      [
+       "darter",
+       10
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "mini-boss",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       3
+      ],
+      [
+       "darter",
+       14
+      ],
+      [
+       "drifter",
+       10
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       6
+      ],
+      [
+       "drifter",
+       20
+      ],
+      [
+       "darter",
+       12
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "bulwark",
+       5
+      ],
+      [
+       "drifter",
+       18
+      ],
+      [
+       "darter",
+       8
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "darter",
+       18
+      ],
+      [
+       "drifter",
+       16
+      ]
+     ]
+    }
+   },
+   {
+    "layer": 1,
+    "batch": {
+     "enemies": [
+      [
+       "boss",
+       1
+      ]
+     ]
+    },
+    "end": true
+   }
+  ],
+  "batchHit": false,
+  "notice": "",
+  "noticeTime": 0,
+  "at": "playing"
+ }
+}

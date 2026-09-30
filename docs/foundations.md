@@ -119,9 +119,10 @@ Igor's call and gets no check.
   bear. Dependencies are revisited only on a measured failure, and there is
   currently no failure to revisit.
 - **The `game/` ⁄ `platform/` seam is maintained** (D18, D30, D44). `game/`
-  contains zero browser API and reaches across for exactly six names. This is
-  **enforced, not asserted**: `npm test` loads `game/` in Node with only those
-  six stubbed. Every addition is deliberate and listed in `design.md`.
+  contains zero browser API and reaches across for exactly seven names — the
+  seventh, `persist`, is the save's (D77). This is **enforced, not asserted**:
+  `npm test` loads `game/` in Node with only those seven stubbed. Every
+  addition is deliberate and listed in `design.md`.
 - **Fixed timestep for the simulation**, from S1. `FIXED_DT` is 1/120 and the
   frame loop banks leftover time, so every machine simulates the same game.
   Time-based decay still uses `Math.pow(x, dt)`. **Render interpolation was

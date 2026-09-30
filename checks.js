@@ -113,7 +113,7 @@ if (location.search === '?test') {
   // Every batch must name types that exist, in counts that mean something. This
   // is the check the "content is data" convention implies for any data table:
   // a typo here would just make the game quietly easier.
-  const named = BATCHES.flatMap(b => b.enemies);
+  const named = LAYERS.flatMap(l => l.stretches.flatMap(st => st.pool)).flatMap(b => b.enemies);
   check(named.every(([name]) => ENEMY_TYPES.some(t => t.name === name)),
     'every batch must name a real enemy type, unknown: ' +
     named.filter(([n]) => !ENEMY_TYPES.some(t => t.name === n)).map(([n]) => n).join(','));
@@ -151,14 +151,18 @@ if (location.search === '?test') {
 
   // --- window size (D29) ---
   // The same seed, played through the real mouse path at three window sizes,
-  // must reach the bottom of the layer in the same time. The window reaches the
+  // must reach the bottom of the dive in the same time. The window reaches the
   // game only through `aim`, so aim arrives as mousemove events in *client*
   // pixels -- the letterbox conversion, and the camera on top of it, are what is
-  // under test. The whole layer, because S2's DoD is "one layer", not a sample.
+  // under test. The whole dive -- S2's DoD said "one layer", and since S4
+  // (D66) a dive runs on through every layer, so that is the whole of it.
   const traverse = (w, h) => {
     resize(w, h);
     reset(4471);
-    for (let i = 0; i < 900 / FIXED_DT && screen !== 'bottom'; i++) {
+    // The cap grows with the dive: a layer takes ~290s here, so 450s each is
+    // headroom, and a third layer does not fail this for a reason that has
+    // nothing to do with window size.
+    for (let i = 0; i < LAYERS.length * 450 / FIXED_DT && screen !== 'won'; i++) {
       player.hurt = player.iframes;
       if (screen === 'mods') justPressed.add('Digit1');
       else if (enemies.length) {
@@ -170,7 +174,7 @@ if (location.search === '?test') {
       update(FIXED_DT);                          // update() clears justPressed
     }
     ceaseFire();
-    return screen === 'bottom' ? elapsed : -1;
+    return screen === 'won' ? elapsed : -1;
   };
   const traverseFrom = performance.now();
   const sizes = [[1280, 800], [1920, 1080], [3440, 1440]].map(([w, h]) => traverse(w, h));
@@ -462,29 +466,33 @@ if (location.search === '?test') {
   fireAt(drifter);
   for (let i = 0; i < 60; i++) update(0.016);    // ~1s
   check(kills === 1, 'expected one kill, got ' + kills);
-  check(gems.length === 1, 'a kill must drop a gem');
+  // In flight or already in the purse: gems fly to you from the drop (D35).
+  check(gems.length + currency === 1, 'a kill must drop a gem');
   ceaseFire();
 
-  // A tougher enemy is worth more gems. Keep it outside pickupRange, or the
-  // gems get vacuumed up the moment they drop and there is nothing to count.
+  // A tougher enemy is worth more gems. Counted in flight and in the purse
+  // together, since they fly to you the moment they drop (D35).
   reset();
   const rich = mob(player.x + 150, player.y, { hp: 1, maxHp: 6, value: 3 });
   enemies.push(rich);
   fireAt(rich);
   for (let i = 0; i < 60; i++) update(0.016);
-  check(gems.length === 3, 'a value of 3 must drop 3 gems, got ' + gems.length);
+  check(gems.length + currency === 3, 'a value of 3 must drop 3 gems, got ' + (gems.length + currency));
   ceaseFire();
 
-  // An ignored gem fades out instead of littering the floor forever.
+  // A gem nowhere near you still reaches you: it flies to you from anywhere
+  // and never fades (D35). This replaced "uncollected gems must expire" --
+  // there is nothing uncollected any more.
   reset();
-  gems.push({ x: 40, y: 40, r: 4, life: 0.5 });
-  for (let i = 0; i < 60; i++) update(1 / 60);
-  check(gems.length === 0, 'uncollected gems must expire');
+  queuePaused = true;
+  gems.push({ x: 40, y: cameraY + 40, r: 4 });
+  runAlive(180);
+  check(gems.length === 0 && currency === 1, 'a far gem must fly to you and pay, currency ' + currency);
 
   // A gem is money now, not XP (D34). Collecting one must pay the purse and
   // must not rank you up -- the XP bar that did is deleted.
   reset();
-  gems.push({ x: player.x, y: player.y, r: 4, life: GEM_LIFE });
+  gems.push({ x: player.x, y: player.y, r: 4 });
   update(0.016);
   check(currency === 1, 'a collected gem must pay currency, got ' + currency);
   check(rank === 0 && choices.length === 0 && screen === 'playing',
@@ -699,7 +707,7 @@ if (location.search === '?test') {
   check(showFps !== fpsWas, 'clicking an options row must change it');
   showFps = fpsWas;
 
-  // Click dismisses the help screen, and restarts from the death screen.
+  // Click dismisses the help screen, and goes home from the death screen (D66).
   screen = 'help';
   returnTo = 'title';
   justPressed.add('Mouse0');
@@ -709,7 +717,7 @@ if (location.search === '?test') {
   screen = 'dead';
   justPressed.add('Mouse0');
   update(0.016);
-  check(screen === 'playing', 'a click must restart from the death screen');
+  check(screen === 'home', 'a click must go home from the death screen, got ' + screen);
 
   // Sparks appear on a kill, then clean themselves up.
   reset();
@@ -810,10 +818,13 @@ if (location.search === '?test') {
   const tap = code => { justPressed.add(code); update(1 / 60); };
 
   reset();
+  diveLive = false;              // between dives: the title offers Start
   screen = 'title'; menuIndex = 0;
   check(MENUS.title.items[0].label === 'Start', 'first title entry is Start');
   tap('Enter');
-  check(screen === 'playing', 'Start must begin a dive, got ' + screen);
+  check(screen === 'home', 'Start must go home between dives, got ' + screen);
+  tap('Enter');
+  check(screen === 'playing', 'Dive must begin a dive, got ' + screen);
 
   tap('Escape');
   check(screen === 'paused', 'Esc in play must open the menu, got ' + screen);
@@ -888,9 +899,9 @@ if (location.search === '?test') {
   update(1 / 60);
   justPressed.add('Escape');
   update(1 / 60);
-  check(screen === 'title', 'setup: Esc should leave to the title');
+  check(screen === 'home', 'setup: Esc should leave for home');
   for (let i = 0; i < 150; i++) update(1 / 60);
-  check(shake === 0, 'the title must not inherit a shake, got ' + shake);
+  check(shake === 0, 'home must not inherit a shake, got ' + shake);
 
   // "off" has to actually mean off, not merely smaller.
   shakeLevel = 0;
@@ -903,15 +914,15 @@ if (location.search === '?test') {
   // A click the menu consumed must not also reach the weapon. The menu reads
   // the edge (justPressed) while the weapon reads the held state (keys), so one
   // physical click was being read twice: clicking Start fired a shot into the
-  // dive it had just begun.
+  // dive it had just begun. Since S4 the click is on `home`'s Dive row.
   reset(1);
-  queuePaused = true;
-  screen = 'title';
+  screen = 'home';
   menuIndex = 0;
-  aim.x = ARENA_W / 2; aim.y = MENU_TOP;      // over the Start row
+  aim.x = ARENA_W / 2; aim.y = HOME_TOP;      // over the Dive row
   keys.add('Mouse0'); justPressed.add('Mouse0');
   update(1 / 60);                              // the menu takes the click
-  check(screen === 'playing', 'setup: clicking Start must begin a dive, got ' + screen);
+  check(screen === 'playing', 'setup: clicking Dive must begin a dive, got ' + screen);
+  queuePaused = true;
   for (let i = 0; i < 10; i++) update(1 / 60); // ...and the button is still down
   check(bullets.length === 0 && bulletId === 0,
     'a click the menu ate must not fire the weapon, got ' + bulletId + ' shots');
@@ -934,6 +945,24 @@ if (location.search === '?test') {
     'the help screen must end above the hint: content ends at ' + helpBottom +
     ', hint sits at ' + HINT_Y + ' -- add a row and it overflows');
   screen = 'title';
+
+  // `home` stacks its layer list above its rows and its rows above the hint,
+  // both from tables (LAYERS, GEAR, ATTRIBUTES). Drawn with every layer shown
+  // -- the tallest the list gets -- so a sixth layer or a third gear item fails
+  // here rather than running text through text.
+  // Read from the layout's own owners: the lines from `MENUS.home.lines`, drawn
+  // `HOME_LINE` apart from `HOME_LAYERS_TOP`, the rows from `rowRect()`.
+  const metaWas = meta;
+  meta = { ...freshMeta(), cleared: LAYERS.length };
+  const listEnd = HOME_LAYERS_TOP + (MENUS.home.lines.length - 1) * HOME_LINE;
+  const firstRow = rowRect(0, HOME_TOP), lastRow = rowRect(MENUS.home.items.length - 1, HOME_TOP);
+  meta = metaWas;
+  check(listEnd < firstRow.y - 4,
+    'home: the layer list must end above the rows, list ends at ' + listEnd +
+    ', rows start at ' + firstRow.y);
+  check(lastRow.y + lastRow.h < HINT_Y - 10,
+    'home: the rows must end above the hint, rows end at ' + (lastRow.y + lastRow.h) +
+    ', hint at ' + HINT_Y);
 
   // The same rule sideways: a mod description is prose in a fixed-width box, and
   // the renderer centres it, so it cannot notice one running off the edge. Two

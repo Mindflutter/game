@@ -2,20 +2,8 @@
 // Each test guards a line of docs/superpowers/specs/2026-09-28-s2-descent-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { loadGame, ticks, ride, clearAndWait } from './harness.js';
+import { loadGame, ticks, ride, clearAndWait, atGate } from './harness.js';
 import { botInput } from './bot.js';
-
-// A fresh game standing at the start of gate `k`'s descent: batch k-1 is
-// cleared, the camera is still at its depth, the dive's opening beat is spent.
-function atGate(k) {
-  const g = loadGame();
-  g.reset(1);
-  g.batchIndex = k;
-  g.cameraY = g.gateDepth(k - 1);
-  g.player.y = g.cameraY + g.ARENA_H / 2;
-  g.breathTimer = 0;
-  return g;
-}
 
 // How far the water flows in one second, after `settle` seconds for its speed
 // to ease. The player is kept alive, so a fight can be measured too; on the
@@ -113,14 +101,14 @@ describe('the descent', () => {
     expect(Math.abs(g.bullets[0].vy)).toBeLessThan(1e-9);
   });
 
-  it('ends the layer at the bottom, not in another batch -- and R dives again', () => {
-    const n = loadGame().BATCHES.length;
+  it('ends the dive at the bottom of the last layer, not in another batch -- and R dives again', () => {
+    const n = atGate(0).plan.length;            // drawn at reset; one length for all
     const g = atGate(n);
     ride(g);
-    expect(g.screen).toBe('bottom');
+    expect(g.screen).toBe('won');                 // the win (D68)
     expect(g.enemies).toHaveLength(0);
     expect(g.cameraY).toBe(g.gateDepth(n));
-    // A stop, not a win: nothing is paid for reaching it.
+    // Reaching the bottom pays nothing of its own.
     expect(g.rank).toBe(0);
     g.justPressed.add('KeyR');
     g.update(g.FIXED_DT);
@@ -138,22 +126,22 @@ describe('the descent', () => {
     expect(g.player.y).toBeLessThanOrEqual(g.cameraY + g.ARENA_H);
   });
 
-  it('pays a rank and mods between batches, but neither at the layer end', () => {
+  it('pays a rank and mods between batches, but neither at the last layer end', () => {
     // Igor, 2026-09-28: "no mods should be offered at layer's end, unless a
-    // player goes on to the next one" -- and there is no next layer yet. And
-    // no rank either: "let it stay on 11" (twelve batches, eleven ranks).
+    // player goes on to the next one" -- D68 keeps that for the last layer
+    // only: "you clear the last layer - you won the game".
     const mid = loadGame();
     mid.reset(1);
     ride(mid);                                  // the first batch arrives
     expect(clearAndWait(mid)).toBe('mods');
     expect(mid.rank).toBe(1);
-    // ?dev=last-batch&play -- the scenario for seeing the layer's end without
-    // playing the whole layer -- is the way in.
+    // ?dev=last-batch&play -- the scenario for seeing the dive's end without
+    // playing all of it -- is the way in.
     const last = loadGame();
     expect(last.applyScenario('last-batch', 1)).toBe(true);
     ride(last);                                 // the last batch arrives
-    expect(last.batchIndex).toBe(last.BATCHES.length);
-    expect(clearAndWait(last)).toBe('bottom');  // straight on, no cards
+    expect(last.batchIndex).toBe(last.plan.length);
+    expect(clearAndWait(last)).toBe('won');     // straight on, no cards
     expect(last.rank).toBe(0);                  // and no rank for it
   });
 
@@ -178,9 +166,9 @@ describe('the descent', () => {
     dead.reset(1);
     ride(dead);
     dead.screen = 'dead';
-    const bottom = atGate(dead.BATCHES.length);
+    const bottom = atGate(dead.plan.length);
     ride(bottom);
-    expect(bottom.screen).toBe('bottom');
+    expect(bottom.screen).toBe('won');
     for (const g of [dead, bottom]) {
       const flow = flowFrom(g);
       expect(flow).toBeGreaterThanOrEqual(0.5 * g.CURRENT_CRAWL);  // never still

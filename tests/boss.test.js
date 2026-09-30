@@ -79,14 +79,22 @@ describe('the lunge (D64)', () => {
 });
 
 describe('the layer (D62, D65)', () => {
-  const has = name => b => b.enemies.some(([n]) => n === name);
+  const has = name => e => e.batch.enemies.some(([n]) => n === name);
 
-  it('ends on the boss, alone, with two lone mini-bosses along the way', () => {
+  it('ends every layer on the boss, alone, with two lone mini-bosses along the way', () => {
+    // Over a drawn dive (D71), layer by layer: the fixed places hold whatever
+    // the pools drew around them.
     const g = loadGame();
-    expect(g.BATCHES[g.BATCHES.length - 1].enemies).toEqual([['boss', 1]]);
-    expect(g.BATCHES.filter(has('mini-boss')).map(b => b.enemies))
-      .toEqual([[['mini-boss', 1]], [['mini-boss', 1]]]);
-    expect(g.BATCHES.slice(0, -1).some(has('boss'))).toBe(false);
+    g.reset(1);
+    g.LAYERS.forEach((_, l) => {
+      const layer = g.plan.filter(e => e.layer === l);
+      expect(layer.at(-1).batch.enemies).toEqual([['boss', 1]]);
+      expect(layer.at(-1).end).toBe(true);
+      expect(layer.filter(has('mini-boss')).map(e => e.batch.enemies))
+        .toEqual([[['mini-boss', 1]], [['mini-boss', 1]]]);
+      expect(layer.slice(0, -1).some(has('boss'))).toBe(false);
+      expect(layer.slice(0, -1).some(e => e.end)).toBe(false);
+    });
   });
 
   it('pays a rank and the mod cards when a mini-boss dies', () => {

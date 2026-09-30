@@ -2071,8 +2071,11 @@ a whole dive).
 **Glossary**: the **dive**, **rank**, **mod** and **home** rows in
 `foundations.md`, in the same step.
 
-**Guarded by**: nothing yet — none of it is built. The checks arrive with the
-build, and the plan this pass ends in names them.
+**Guarded by** (built in S4 (meta loop skeleton), 2026-09-30):
+`tests/meta.test.js` — going on from a layer end opens only the cards, then the
+next layer's batch arrives with rank, mods and depth carried; `tests/descent.test.js`
+— the dive ends at the bottom of the last layer; death goes `home`, R dives
+again (both suites).
 
 ## D67 — Currency is kept on death · 2026-09-30
 Claude had carried it as its own suggestion, waiting on Igor's word. Igor:
@@ -2086,8 +2089,9 @@ dies mid-layer often, and every dive still pays.
 Why it was pending: nothing had decided what death costs, and the working
 agreement makes Claude's picks wait for Igor.
 
-**Guarded by**: nothing yet — until S4 (meta loop skeleton) there is no `home`
-to carry currency to. Its check lands there.
+**Guarded by** (built in S4 (meta loop skeleton), 2026-09-30):
+`tests/meta.test.js` — death banks the dive's gems, a gem caught on the frame
+of death included.
 
 ## D68 — The layer end is a milestone; clearing the last layer wins the game · 2026-09-30
 Igor, 2026-09-30: "essentially, layer end becomes a milestone in the dive,
@@ -2121,8 +2125,10 @@ The boss's `value` is 10 today, a drifter's 1.
 **Glossary**: the **layer end** and **rank** rows, and the genre contract's
 "neither at the layer end", in `foundations.md`, in the same step.
 
-**Guarded by**: nothing yet — built with the second layer, wherever the plan
-puts it.
+**Guarded by** (built in S4 (meta loop skeleton), 2026-09-30):
+`tests/meta.test.js` — the layer end heals fully and pays a rank and the cards,
+the boss's haul is its `value` (30) and more than three times any other drop;
+`tests/descent.test.js` — the last layer's end pays neither and shows the win.
 
 ## D69 — Mods across a whole dive: every mod capped, an offer that never runs dry · 2026-09-30
 D66 (the dive runs on through the layers) carries rank through the whole dive,
@@ -2168,9 +2174,12 @@ D34 settled with Igor, to solve a pool that is simply too small); diminishing
 returns on repeats (arithmetic inside the pick, which D34 keeps out of the
 dive); caps that grow with depth (a second rule doing the first one's job).
 
-**Guarded by**: nothing yet. The caps and the fill order can be checked against
-`MODS` as soon as they are built; the pool-covers-a-dive check needs the
-layers. The plan places all three.
+**Guarded by** (built in S4 (meta loop skeleton), 2026-09-30):
+`tests/meta.test.js` — every mod has a cap; over forty picks no mod passes it,
+every offer holds three cards while any mod is under its cap and the gems and
+the heart otherwise; the gems card pays only when taken, and no filler is
+counted. The pool-covers-a-dive check waits for S5 (content), which grows the
+pool — six mods cannot cover thirty ranks.
 
 ## D70 — A dive can be saved at any point · 2026-09-30
 Igor, asked whether a dive can be put down at a layer end and picked up later:
@@ -2209,10 +2218,12 @@ last layer end with everything since rolled back.
 the text is `platform/`'s, rewritten on the port. The names cross with the
 rest of S4 (meta loop skeleton)'s save and are listed in `design.md` then.
 
-**Guarded by**, when built: the replay check extended — a dive saved and
-restored at a random tick plays on identically to one never interrupted, a
-property over seeds and ticks. A variable the snapshot forgets makes the two
-diverge, so that one check keeps save-anywhere true as the state grows.
+**Guarded by** (built in S4 (meta loop skeleton), 2026-09-30):
+`tests/meta.test.js` — a dive saved at a random tick (a property over seeds and
+ticks), restored in a fresh game through Continue, plays on 1500 ticks to the
+same whole save text as the one never interrupted; what persists round-trips;
+bad saves are refused; the v1 fixture loads. Verified by making `restore()`
+forget the RNG, and the current: both diverge.
 
 ## D71 — Batches are drawn from pools, never a fixed list · 2026-09-30
 The mechanism for a requirement settled from the start: `foundations.md`'s
@@ -2252,9 +2263,11 @@ is Claude's call, delegated.**
 only its mechanism was open — and a mechanism under a settled requirement is
 Claude's to fill. The 2026-09-27 exchange had already named it.
 
-**Guarded by**, when built: over seeds, two dives draw different batch
-sequences; every drawn batch comes from its stretch's pool; the same seed draws
-the same sequence (D41 (seeded RNG)).
+**Guarded by** (built in S4 (meta loop skeleton), 2026-09-30):
+`tests/meta.test.js` — the same seed draws the same plan, two seeds different
+ones; every drawn batch comes from its own stretch's pool, never twice; every
+ordinary pool holds more than it draws; `tests/boss.test.js` — every layer ends
+on its boss with two lone mini-bosses.
 
 ## D72 — Between layers there is no screen; the win has one · 2026-09-30
 The pass's last two questions: how the transition plays — Igor, 2026-09-28:
@@ -2285,9 +2298,11 @@ dive's one pause.
 it and document that it's going to be modified later": the colour change and
 the name are the cheapest way to say "a new layer" until art exists.
 
-**Guarded by**, when built: going on from a layer end opens no screen but the
-mod cards, and the next batch arrives within the usual travel; the win screen
-shows only at the last layer's end; depth never resets within a dive.
+**Guarded by** (built in S4 (meta loop skeleton), 2026-09-30):
+`tests/meta.test.js` — from a layer end, no screen but the cards, and the next
+layer's first batch within the usual travel; depth only grows; the win shows
+only at the last layer's end (`tests/descent.test.js`). The colour and the name
+are graphics, and not asserted.
 
 ## D73 — "Layer end" is the term · 2026-09-30
 D59 (no mods at the layer end) put it in the glossary under Igor's working
@@ -2298,3 +2313,197 @@ close of the layer-to-layer pass whether to keep it, Igor: "layer end is ok".
 glossary (D32 (fixed vocabulary)). The glossary row drops "working".
 
 **Guarded by**: nothing — it is a word. The glossary is what holds it.
+
+## D74 — Mods add on top of gear and attributes; dash improvements are attributes · 2026-09-30
+The first question S4 (meta loop skeleton) opened with, from `ideas.md`: can
+one stat be raised by both a mod and gear? Igor, 2026-09-30: "mods on top of
+gear/equipment/stats, havent we agreed on that?"
+
+**Decided, by Igor.** A persistent tier — gear or attribute — sets where a dive
+starts; mods add on top as they are picked. Everything is added, nothing
+multiplied (D36 (attributes)), and D69 (every mod capped) bounds what the mods
+can add. `reset()` builds the player as `PLAYER_START`, plus each gear tier,
+plus each attribute point, and `takeMod()` adds from there.
+
+**Permanent dash improvements are attributes**, not gear — Claude's reading of
+D36, which lists "dash" among the body stats, stated to Igor and not corrected.
+`Reflex` and `Impact` keep adding on top. Closes `ideas.md`'s dash-tier
+question, which D51 (the dash is bought) left open.
+
+**Why Claude asked, so it is not repeated**: the answer was never written down
+— `ideas.md` still listed the question as open, and D31 (two-tier progression)
+only implies it — but Igor had given it, and a settled answer is acted on.
+
+**Rejected** (the options `ideas.md` carried): gear and mods on disjoint stats —
+every current mod is a body stat, which is what attributes raise, so it would
+leave attributes nothing; mods offered only for a stat you own a tier of — a
+rule to explain, and mods hidden from a new player.
+
+**Guarded by**: nothing yet, honestly — no stat is raised by both today (the gun
+raises `fireRate`, reach `dashSpeed`, and no mod touches either). The first
+stat that is gets a check that the mod adds to the floor.
+
+## D75 — S4's content: the gun's tiers, dash reach, a clean batch · 2026-09-30
+`plan.md` asks S4 (meta loop skeleton) for one gear item, one attribute and one
+micro-task. Claude proposed; Igor: "agreed".
+
+**Decided.**
+- **Gear — the gun**: three bought tiers of +0.5 shots/s each (2.5 → 4.0), at
+  40 / 100 / 200 gems. A combat stat, as D36 (attributes) puts weapons in gear,
+  and one that helps against every enemy; damage would be wasted on the 1-hp
+  fish that make up most batches.
+- **Attribute — dash reach**: each point +150px/s of `dashSpeed`, 141 → 165 →
+  189px of dash. Igor: "some dash upgrades belong at home"; D56 (dash reach is
+  its own stat) made reach a field for this.
+- **Micro-task — untouched**: clear a batch without taking a hit — D36's own
+  first example. 1 point, once per layer, ever; two layers cap the attribute at
+  two points, the cap at the source D36 asks for.
+
+**Every number is Claude's pick**, marked in `game/content.js`, S6's (balance)
+to tune. Known and accepted: on layer 1 the task will usually pay on the first
+batch — nearer a gift than mastery; S5 (content) can make tasks harder.
+
+**Guarded by**: `tests/meta.test.js` — a tier is bought only with the gems for
+it, adds +0.5 to every later dive and stops at the top; a clean batch pays one
+point, once per layer, announced once; a batch that landed a hit pays nothing;
+the point raises reach on the next dive.
+
+## D76 — `home` exists only between dives · 2026-09-30
+Claude's design for S4 (meta loop skeleton), approved by Igor in the spec's
+part 2 ("approved").
+
+**Decided.** Title → Start goes to `home`; with a dive under way Start reads
+**Continue** and opens that dive's pause menu (D70 (a dive can be saved at any
+point)). A suspended dive cannot reach `home`, so the shop never meets one.
+Death and the win both lead `home`; R on either end screen dives again at once,
+since the gems are already banked (D67 (currency is kept on death)). Pause's
+"Quit to title" keeps the dive saved, and the title offers it back.
+
+**Why.** A shop reachable from a suspended dive is either a mid-dive shop —
+ruled out by the genre contract (6) — or a purchase that changes nothing until
+the dive after next, which reads as a bug. Keeping `home` between dives makes
+both impossible rather than handled.
+
+**Guarded by**: `tests/meta.test.js` — Start goes `home` between dives and reads
+Continue with one under way; death goes `home`, R dives again; `checks.js` —
+the same through real keys, and a click on the death screen goes `home`.
+
+## D77 — The save: one versioned document; `persist` is the seam's seventh name · 2026-09-30
+How S4 (meta loop skeleton) keeps D70 (a dive can be saved at any point) and
+the technical contract's "saves carry a `version` field from the first write".
+Claude's design, approved by Igor in the spec's part 3 ("approved").
+
+**Decided.**
+- **One JSON document**: `version`, `bank`, `gear`, `spent`, `tasks`,
+  `deepest`, `cleared`, and `dive` — the snapshot, or `null` between dives.
+  Points available are derived from `tasks` less `spent`, never stored.
+- **Written** on pause, on every purchase, when a dive ends, and when the page
+  is hidden or closed. A dive's gems are banked last in the tick it ends.
+- **Refused loudly**: a save that does not parse, or whose version this build
+  does not know, changes nothing; the title says why, and the text is copied
+  aside under `abyss-save-rejected` before anything can overwrite it.
+- **A fixture keeps it honest**: `tests/fixtures/save-v1.json`, written by the
+  first build of the format, must load in every later build — or be migrated.
+- **The seam grows by one name, `persist(text)`** (D18 (the port seam)).
+  `game/` decides when and builds the text; storing it is the platform's.
+  Loading runs the other way, so it needs no name. The seam is seven.
+- **A driven game neither reads nor writes the save** — `?test` and `?dev=`
+  would otherwise overwrite a player's save, or check the player's gear instead
+  of the game's.
+
+**Guarded by**: `tests/invariants.test.js` — the harness stubs exactly seven
+names; `tests/meta.test.js` — the D70 property, the round trip, the refusals,
+the fixture. Seen in a browser, 2026-09-30: pause, reload, Continue resumes the
+same dive at the same moment; a version-7 save is refused on the title and
+kept aside.
+
+## D78 — Gems are pulled to the player; whether an enemy drops is balance's · 2026-09-30
+Raised by Claude in S4 (meta loop skeleton)'s sweep: D35 (currency is
+auto-collected) sends gems to the *counter*, while the build pulls them to the
+player — the S4 spec had paraphrased D35 without reading it. Igor, asked to
+choose: "it is dropped by enemies (sometimes it should not - balance),
+autocollected by pulling towards a player, what else you want from me?"
+
+**Decided, by Igor. Amends D35 on two points:**
+- **Gems are pulled towards the player**, from wherever they drop — not flown
+  to the counter. `GEM_PULL` stays (600, Claude's pick), which D35 had deleted.
+  This is what S4 built.
+- **Whether an enemy drops at all is a balance lever** — "sometimes it should
+  not". D35's "a threatening enemy *always* drops; only the value is random" no
+  longer binds; which enemies drop, how often and how much is S6 (balance)'s.
+
+**Unchanged from D35**: collection is automatic, with no pickup radius and no
+expiry, and combat is the dive's only dynamic. D35's debounced `+N` popup still
+stands, unbuilt: it is feel, which `CLAUDE.md` puts in S7 (alpha polish), and
+its placement is still Igor's pick when it is built — Claude's reading of that
+rule, stated to Igor.
+
+**Guarded by**: `tests/meta.test.js` — every gem reaches the player from
+anywhere and none fades; `checks.js` — a far gem flies to you and pays. The
+drop rule has no check until S6 (balance) writes one.
+
+## D79 — A dive goes from easiest to hardest; what that means is balance's · 2026-09-30
+Raised by Claude in S4 (meta loop skeleton): since D71 (batches are drawn from
+pools) a dive can open on stretch 1's 14 darters, where the bot dies at once.
+Igor: "all dives go from easiest to hardest. what it means is a question of
+balance. right now the batches are hard coded and are shitty because of that -
+you know no level of difficulty, we havent settled how batches grow
+balance-wise."
+
+**Decided, by Igor**, and clarified the same day: threat rises **overall and
+gradually** through a dive — "difficulty growth is not linear, some later
+batches might be easier, but OVERALL gradual increase in threat happens anyway.
+roguelite, remember?" It grows "naturally, in numbers and in enemy types". No
+rule that every batch is harder than the one before it.
+
+**Claude over-read it first.** This entry's first version, and the design Claude
+then opened ("every ordinary batch at least as hard as the one before"), turned
+"easiest to hardest" into a strict per-batch rule — the strengthened-word
+failure `CLAUDE.md` records. Corrected here the same day.
+
+**The measure is S6 (balance)'s.** Igor chose its direction — approach A: a
+threat number on each enemy type, a batch's threat computed from its enemies,
+measurement correcting the numbers — and placed the work: "develop a complex
+mathematical system for enemies that impact the game and player feel - yes, of
+course. is it part of balance? yes." Until then D71 (batches are drawn from
+pools)'s hp bands stand in. Claude's further rules — a 1.25 spread per pool,
+bands that never overlap, easiest-first within a stretch — were not approved
+and are not decided.
+
+**Today is fine for this stage.** Igor: "it's very hard to assess the flow with
+three primitive enemies. if you ask if it's ok at current stage, yes it is."
+The second layer repeating the first is a placeholder S5 (content) replaces.
+
+**Guarded by**: nothing yet — the check comes with S6 (balance)'s measure.
+
+
+## D80 — Before S5: a doc for every game entity, and mods reworked into enemy drops · 2026-09-30
+Igor, 2026-09-30, closing S4 (meta loop skeleton): "write two big requirements
+before s5: 1. md docs for every game entity. the structure of docs is better
+and agents know exactly where to look for info. every entity doc has a
+sensible layout with tables & naming 2. mods rework from choice to enemy drops
+(from ideas) these are two big tasks, i'll do them in separate sessions".
+
+**Decided, by Igor.**
+- **Entity docs**: a markdown doc for every game entity — each enemy, gear
+  piece and mod at least ("a set of md files with strict documentation of each
+  enemy, each gear piece and each mod, so that there is always reference",
+  earlier the same day) — with a sensible layout, tables and naming, so an
+  agent knows exactly where to look.
+- **Mods from enemy drops**: mods stop being a choice and become drops from
+  enemies — the idea `ideas.md` carries as "Mods as drops, never offered".
+- **Both come before S5 (content)**, each in its own session. `plan.md` puts
+  them between S4 and S5 without renumbering.
+
+**Not decided**: everything inside each session — the docs' layout and where
+they live; how drops work, pseudo-random or not, permanent or temporary, and
+what becomes of rank, the caps and the fill cards. Until the rework session
+lands, the mod pick stands as `foundations.md` has it (the glossary's **mod**,
+**rank**, **gate** and **layer end** rows; the genre contract, 4–6), with D33
+(mod offers do not interrupt), D34 (mods), D49 (one rank per batch, mods at the
+gate), D68 (the layer end is a milestone) and D69 (every mod capped) — that
+session supersedes what it changes, in the same step as it edits
+`foundations.md`.
+
+**Guarded by**: nothing yet — both are work to come. Each session brings its
+own checks.

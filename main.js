@@ -20,8 +20,9 @@ function frame(now) {
 
 // ---------- boot ----------
 // Query params are platform business: game/ never reads a URL, so the seed is
-// passed in as an argument. ?seed=<n> replays an exact dive; without it, a
-// fresh random seed is chosen and recorded in currentSeed.
+// passed in as an argument. ?seed=<n> replays an exact dive, with a scenario
+// (?dev=); without it, a fresh random seed is chosen and recorded in
+// currentSeed. A dive begun from `home` always draws a fresh seed.
 const params = new URLSearchParams(location.search);
 const seedParam = params.get('seed');
 const seed = seedParam === null ? undefined : Number(seedParam) >>> 0;
@@ -42,7 +43,20 @@ if (params.has('damage')) damageOverride = Number(params.get('damage')) || 100;
 // `OfflineAudioContext` and measure its peak there (checks.js), which never
 // reaches the speakers and never touches this gain. The headless bot has no
 // audio at all -- `sound` is stubbed at the seam.
-if (params.has('test') || devScenario !== null) volume = 0;
+const driven = params.has('test') || devScenario !== null;
+if (driven) volume = 0;
+
+// ---------- the save ----------
+// The seam's seventh name (D70): game/ decides *when* to save and hands over
+// the text; keeping it is this layer's job, rewritten on the port. A driven
+// game never writes -- every ?test check and every scenario plays dives, and
+// not one of them may land on top of the player's real save.
+const SAVE_KEY = 'abyss-save';
+function persist(text) {
+  if (driven) return;
+  try { localStorage.setItem(SAVE_KEY, text); }
+  catch (e) { console.error('the save could not be written', e); }
+}
 
 // A stepped scenario deliberately does NOT start the frame loop: nothing moves
 // until step() asks it to. That is what makes a scenario inspectable -- read the
@@ -56,9 +70,27 @@ if (devScenario !== null) {
                   Object.keys(SCENARIOS).join(', '));
   }
 } else {
-  reset(seed);
-  screen = 'title';     // reset() leaves us playing; the game opens on the menu
+  // No reset(): the game opens on the title with no dive, which is simply the
+  // state's own starting values (game/state.js). Only Dive or Continue begin one.
+  // Loading runs the other way across the seam, so it needs no name. A save
+  // this build refuses is copied aside before anything can overwrite it, and
+  // the title says why -- loudly, never silently lost. A driven game reads no
+  // save either: ?test would otherwise check the player's gear, not the game's.
+  let stored = null;
+  if (!driven) {
+    try { stored = localStorage.getItem(SAVE_KEY); } catch (e) { /* no storage: a fresh start */ }
+  }
+  saveError = loadSave(stored);
+  if (saveError) {
+    console.error('save rejected: ' + saveError);
+    try { localStorage.setItem(SAVE_KEY + '-rejected', stored); } catch (e) { /* said on screen anyway */ }
+  }
 }
+
+// The other moments a dive is put down (D70): the tab hidden, the page closed.
+// game/ writes on pause, on a purchase and when a dive ends.
+window.addEventListener('pagehide', () => persist(saveText()));
+document.addEventListener('visibilitychange', () => { if (document.hidden) persist(saveText()); });
 
 // Advances the simulation by n fixed ticks, then draws once. The bot and the
 // checks use this instead of waiting for wall-clock time.

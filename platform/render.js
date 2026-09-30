@@ -127,10 +127,11 @@ function drawModCards() {
                    x + w / 2, y + 90 + n * 17);
     });
 
-    const held = modCounts[u.name] || 0;
-    ctx.fillStyle = on ? '#4d7a8a' : '#3d6270';
-    ctx.fillText('held ' + held + (u.max ? ' of ' + u.max : ''),
-                 x + w / 2, y + 132);
+    // A filler has no `max` and is never held (D69), so it has no stack.
+    if (u.max) {
+      ctx.fillStyle = on ? '#4d7a8a' : '#3d6270';
+      ctx.fillText('held ' + (modCounts[u.name] || 0) + ' of ' + u.max, x + w / 2, y + 132);
+    }
 
     ctx.fillStyle = on ? '#4ff0ff' : '#2b6b7d';
     ctx.font = '16px system-ui, sans-serif';
@@ -221,11 +222,8 @@ function drawField() {
 
   if (screen === 'playing') drawAimLine();
 
-  // Gems blink for their last two seconds, then they're gone.
-  for (const g of gems) {
-    if (g.life < 2 && Math.floor(g.life * 8) % 2 === 0) continue;
-    circle(g.x, g.y, g.r, '#a8ffd8', '#2affb0', 14);
-  }
+  // Gems fly to you and never fade (D35), so there is no blink to warn of it.
+  for (const g of gems) circle(g.x, g.y, g.r, '#a8ffd8', '#2affb0', 14);
 
   // A wounded enemy shrinks, so you can see a big one is nearly finished,
   // and flashes white for a frame or two when hit. A lunger winding up (D64)
@@ -336,6 +334,29 @@ function drawField() {
   ctx.fillText(PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   '),
                16, 50);
 
+  // The layer's name, while the current carries you into it (D72) -- derived:
+  // the next batch is a layer's first and has not arrived. PLACEHOLDER
+  // GRAPHICS, like the water's colour: the cheapest "a new layer" until art.
+  const next = plan[batchIndex];
+  if (screen === 'playing' && next && enemies.length === 0 &&
+      (batchIndex === 0 || plan[batchIndex - 1].end)) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#9ef7ff';
+    ctx.font = '30px system-ui, sans-serif';
+    ctx.fillText(LAYERS[next.layer].name, ARENA_W / 2, 200);
+    ctx.textAlign = 'left';
+  }
+  // A micro-task paying out: a line, never a stop (the genre contract, 6).
+  // Only in play: its clock runs only there, so under an end screen it would
+  // hang on forever.
+  if (screen === 'playing' && noticeTime > 0) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#a8ffd8';
+    ctx.font = '17px system-ui, sans-serif';
+    ctx.fillText(notice, ARENA_W / 2, 240);
+    ctx.textAlign = 'left';
+  }
+
   if (showFps) {
     ctx.fillStyle = '#3d6270';
     ctx.fillText('fps ' + Math.round(fps) + '    enemies ' + enemies.length +
@@ -344,12 +365,25 @@ function drawField() {
   }
 }
 
-// The end of a dive, either way it ends. The bottom is a stop, not a win (S2):
-// it reports the time and nothing else -- S3 owns endings.
+// The end of a dive, either way it ends. Since S4 the bottom of the last layer
+// is the win (D68, D72), and "LAYER CLEARED" became its screen. The wording is
+// Claude's placeholder, open to Igor (ideas.md -> friendlier end screens).
 const END_SCREENS = {
-  dead:   { heading: 'CONSUMED',   color: '#ff5c85' },
-  bottom: { heading: 'LAYER CLEARED', color: '#9ef7ff' },
+  dead: { heading: 'CONSUMED',      color: '#ff5c85' },
+  won:  { heading: 'ABYSS CLEARED', color: '#9ef7ff' },
 };
+
+// A refused save, said where the player will see it (the technical contract:
+// "rejected loudly"). main.js sets it at boot and keeps the refused text aside.
+let saveError = '';
+function drawSaveError() {
+  if (!saveError) return;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ff5c85';
+  ctx.font = '14px system-ui, sans-serif';
+  ctx.fillText('Your save was not loaded: ' + saveError + '. It is kept aside, not lost.',
+               ARENA_W / 2, HINT_Y - 30);
+}
 
 function drawEnd() {
   const end = END_SCREENS[screen];
@@ -368,7 +402,7 @@ function drawEnd() {
 
   ctx.fillStyle = '#2f5563';
   ctx.font = '13px system-ui, sans-serif';
-  ctx.fillText('R or click to go again,  Esc for the menu',
+  ctx.fillText('R to dive again,  Enter or click to go home',
                ARENA_W / 2, ARENA_H / 2 + 60);
 }
 
@@ -403,15 +437,29 @@ function drawMenu(menu) {
     ctx.fillText(menu.sub, ARENA_W / 2, 276);
   }
 
+  // A row that cannot be taken right now -- a tier you cannot afford -- is
+  // drawn dim, highlighted or not.
   menu.items.forEach((item, i) => {
     const on = i === menuIndex;
-    ctx.fillStyle = on ? '#bffcff' : '#547f8d';
+    ctx.fillStyle = item.dim ? (on ? '#5d8b99' : '#2f5563') : (on ? '#bffcff' : '#547f8d');
     ctx.font = (on ? '23px' : '20px') + ' system-ui, sans-serif';
     ctx.fillText(on ? '\u203a  ' + item.label + '  \u2039' : item.label,
-                 ARENA_W / 2, MENU_TOP + i * ROW_STEP);
+                 ARENA_W / 2, menu.top + i * ROW_STEP);
   });
 
   drawHint('\u2191 \u2193 or mouse,  Enter or click to pick');
+}
+
+// `home` (D38, D66): the menu, plus its layer lines -- which layers show, and
+// how, is `MENUS.home.lines` in game/; this only prints them.
+function drawHome() {
+  drawMenu(MENUS.home);
+  ctx.textAlign = 'center';
+  ctx.font = '15px system-ui, sans-serif';
+  MENUS.home.lines.forEach((line, i) => {
+    ctx.fillStyle = line.locked ? '#2f5563' : '#7fb0c0';
+    ctx.fillText(line.text, ARENA_W / 2, HOME_LAYERS_TOP + i * HOME_LINE);
+  });
 }
 
 function drawHelp() {
@@ -468,13 +516,23 @@ function drawOptions() {
   drawHint('\u2191 \u2193 or mouse,  \u2190 \u2192 or click to change,  Esc to go back');
 }
 
-// The water darkens with depth (S2): a dark navy at the top of the layer, the
-// old near-black at the bottom. The letterbox margin gets the same colour, so
-// it stays invisible.
+// The water darkens with depth (S2): each layer's own colour at its top (D72),
+// the old near-black at its bottom. The letterbox margin gets the same colour,
+// so it stays invisible. PLACEHOLDER GRAPHICS, as the layer's name is.
 function waterColor() {
-  const lit = 1 - Math.min(1, cameraY / gateDepth(BATCHES.length));
-  return 'rgb(' + Math.round(4 + 8 * lit) + ',' + Math.round(7 + 16 * lit) + ',' +
-         Math.round(13 + 26 * lit) + ')';
+  // No dive has been drawn yet -- the title at boot: the top of the first layer.
+  let color = LAYERS[0].color, lit = 1;
+  if (plan.length) {
+    const l = layerAt(cameraY);
+    const first = plan.findIndex(e => e.layer === l);
+    const last = plan.findLastIndex(e => e.layer === l);
+    const top = first ? gateDepth(first - 1) : 0;     // where the layer begins
+    lit = 1 - Math.min(1, Math.max(0, (cameraY - top) / (gateDepth(last) - top)));
+    color = LAYERS[l].color;
+  }
+  const [r, g, b] = color;
+  return 'rgb(' + Math.round(4 + (r - 4) * lit) + ',' + Math.round(7 + (g - 7) * lit) + ',' +
+         Math.round(13 + (b - 13) * lit) + ')';
 }
 
 function draw() {
@@ -493,7 +551,8 @@ function draw() {
     ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   }
 
-  if (screen === 'title')        drawMenu(MENUS.title);
+  if (screen === 'title')        { drawMenu(MENUS.title); drawSaveError(); }
+  else if (screen === 'home')    drawHome();
   else if (screen === 'help')    drawHelp();
   else if (screen === 'options') drawOptions();
   else {
@@ -501,7 +560,7 @@ function draw() {
     coverMargins();
     if (screen === 'mods')        drawModCards();
     else if (screen === 'paused') { dimArena(); drawMenu(MENUS.paused); }
-    else if (screen === 'dead' || screen === 'bottom') drawEnd();
+    else if (screen === 'dead' || screen === 'won') drawEnd();
   }
 
   ctx.restore();

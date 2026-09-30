@@ -19,7 +19,7 @@ window.addEventListener('keyup', e => keys.delete(e.code));
 
 // UP / DOWN / LEFT / RIGHT / GO / DASH / CLICK live in game/content.js: which
 // key means which action is content, not platform, and keeping them there is
-// what holds the port seam at six names. content.js loads first, so they are
+// what holds the port seam at seven names. content.js loads first, so they are
 // available here.
 const tapped = codes => codes.some(c => justPressed.has(c));
 

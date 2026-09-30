@@ -10,11 +10,38 @@ must stay true while doing it.
 
 ## Active stage
 
-**None. The layer-to-layer design pass closed 2026-09-30** — Igor: "layer
-end is ok, wrap up and commit". S4 — Meta loop skeleton is next, and its entry
-is met; it opens with its own questions (`ideas.md`: can one stat be raised by
-both a mod and gear, and are dash improvements gear or mods) and a
-task-by-task plan, as S3 did.
+**None. S4 — Meta loop skeleton closed 2026-09-30** — Igor: "yes, close s4 and
+commit after cleanup". **Next: the two requirements before S5** (D80), each in
+a session of its own — a doc per game entity, and mods reworked from a choice
+into enemy drops; see "Before S5" below. Then S5 — Content to the DoD numbers,
+whose entry has one more gap, raised with Igor 2026-09-30: it asks for "the
+data shapes for enemy, weapon, gear and mod … settled and will not change", and
+there is no weapon record yet — the one gun is `PLAYER_START` fields plus the
+Gun's tiers — while S6 — Balance's threat number (D79) will add a field to
+every enemy.
+
+### S4 — Meta loop skeleton · closed 2026-09-30
+
+Done in S4: the dive runs on through two layers drawn from pools (D66, D71,
+D72); the layer end is a milestone and the last one the win (D68); every mod is
+capped (D69); gems are pulled to the player and banked however a dive ends
+(D67, D78); `home` exists between dives only (D76), with the gun's tiers, dash
+reach and the "untouched" micro-task (D74, D75); and a versioned save holds the
+dive in progress, with `persist` as the seam's seventh name (D70, D77). Design:
+`superpowers/specs/2026-09-30-s4-meta-loop-design.md`; plan:
+`superpowers/plans/2026-09-30-s4-meta-loop.md` — both history now.
+
+**Closed 2026-09-30 by Igor: "yes, close s4 and commit after cleanup"**, with
+the playable exit his call: "if you ask if it's ok at current stage, yes it
+is" — the game "is still like the first alpha iteration", and three primitive
+enemies cannot show the flow.
+
+Carried out of S4, none of it blocking: the threat system for enemies and how
+batches grow (S6 — Balance, D79); which enemies drop gems (S6, D78); D35's
+`+N` popup (S7 — Alpha polish); layer 2's own content (S5); every number marked
+Claude's pick in `design.md` → What persists; and two comments in
+`game/logic.js` the build made false — the `ponytail:` note on `BATCHES` and
+`clearBatch`'s D59 paragraph — left until Igor says.
 
 ### The layer-to-layer design pass · closed 2026-09-30
 
@@ -254,7 +281,7 @@ plan" —
   given an owner;
 - a ready plan.
 
-## S4 — Meta loop skeleton
+## S4 — Meta loop skeleton · closed 2026-09-30
 
 **Entry:** S3 exits **and** the layer-to-layer design pass above is done
 (D60) — S4 builds `home` and the first save format, which that pass's
@@ -280,30 +307,60 @@ produces:
    any point (D70) — all from its first version.
 
 **Exit (DoD):**
-- A dive goes on from the first layer into the second with rank and mods
+- ~~A dive goes on from the first layer into the second with rank and mods
   intact; the layer end heals and pays; death returns you `home` with your
-  gems; clearing the last layer shows the win.
-- Two seeds draw different batches, and one seed the same ones (D71).
-- No mod passes its cap, and an offer holds three cards while any mod is under
-  its cap (D69).
-- A dive saved and restored at a random tick plays on identically (D70).
-- The loop closes: dive → earn → buy → dive again, **measurably** stronger.
-- Survives a reload. A save written by the previous build still loads, or
-  migrates, or is rejected loudly — never silently corrupts.
-- Measured: currency earned per dive, and dives needed for the first purchase
-  (target ≤ 3, per `foundations.md`).
-- At least one micro-task pays an attribute point, and the counter survives a
-  reload.
-- Playable: the roguelite loop exists with one item in it, across two
-  layers.
+  gems; clearing the last layer shows the win.~~ Checked: D66, D67, D68, D72.
+- ~~Two seeds draw different batches, and one seed the same ones (D71).~~
+  Checked, a property over seeds.
+- ~~No mod passes its cap, and an offer holds three cards while any mod is under
+  its cap (D69).~~ Checked.
+- ~~A dive saved and restored at a random tick plays on identically (D70).~~
+  Checked, a property over seeds and ticks.
+- ~~The loop closes: dive → earn → buy → dive again, **measurably** stronger.~~
+  Measured: the bot on the same five seeds clears 2.0 gates a dive at the
+  starting gun and 6.6 at tier 1 (`roadmap.md` → Health).
+- ~~Survives a reload. A save written by the previous build still loads, or
+  migrates, or is rejected loudly — never silently corrupts.~~ The previous
+  build wrote no save; from here on the v1 fixture must load, and an unknown
+  version is refused on screen and kept aside (D77).
+- ~~Measured: currency earned per dive, and dives needed for the first purchase
+  (target ≤ 3, per `foundations.md`).~~ Two dives; figures in `roadmap.md` →
+  Health.
+- ~~At least one micro-task pays an attribute point, and the counter survives a
+  reload.~~ Checked (D75).
+- ~~Playable: the roguelite loop exists with one item in it, across two
+  layers.~~ Igor, closing the stage: "if you ask if it's ok at current stage,
+  yes it is."
 
 **Note:** the `mod` pool stays entirely generic through here (D31). One
 progression system is balanced at a time.
 
+## Before S5 — two requirements · after S4
+
+Not a numbered stage, like the layer-to-layer pass: it sits between S4 and S5
+without renumbering. Igor, 2026-09-30: "write two big requirements before s5 …
+these are two big tasks, i'll do them in separate sessions" (D80).
+
+**Entry:** S4 exits. Met 2026-09-30.
+
+1. **A doc for every game entity.** Igor: "md docs for every game entity. the
+   structure of docs is better and agents know exactly where to look for info.
+   every entity doc has a sensible layout with tables & naming." Earlier the
+   same day: "a set of md files with strict documentation of each enemy, each
+   gear piece and each mod, so that there is always reference."
+2. **Mods reworked from a choice into enemy drops.** Igor: "mods rework from
+   choice to enemy drops (from ideas)" — the idea is in `ideas.md` → Open —
+   raised during S4 ("Mods as drops, never offered"), with what it touches.
+   How drops work — pseudo-random or not, permanent or temporary — is that
+   session's design. It will supersede the mod pick where `foundations.md`,
+   `decisions.md` and the code have it, and edits them in its own step.
+
+**Exit:** each is Igor's to set when its session opens.
+
 ## S5 — Content to the DoD numbers
 
-**Entry:** S4 exits. The data shapes for enemy, weapon, gear and mod are
-settled and will not change.
+**Entry:** S4 exits, and both requirements above are done (D80). The data
+shapes for enemy, weapon, gear and mod are settled and will not change.
 
 **Work:** 5–7 enemy behaviours, 2–3 weapons, 2–3 gear items, 3–5 layers —
 each with its own pools of batches (D71) — and 3–4 tiers each. Weapon-scoped
@@ -328,9 +385,17 @@ because the shapes do not exist until S4 exits.
 **Entry:** S5 exits.
 
 **Work:** Paired seeded bot dives per weapon, per layer, per gear level. Every
-numeric pillar in `foundations.md` measured and met or revised. Every batch
-measured against its stretch's band (D71), and each layer against the kit
-expected there — the mods from the layers above included (D66).
+numeric pillar in `foundations.md` measured and met or revised. **The threat
+system for enemies** — Igor, 2026-09-30: "develop a complex mathematical system
+for enemies that impact the game and player feel … is it part of balance? yes"
+— in the direction he chose: a threat number per enemy type, a batch's threat
+computed from its enemies, measurement correcting the numbers, and threat
+rising overall and gradually through a dive (D79 (a dive goes from easiest to
+hardest)); it replaces the hp bands D71 (batches are drawn from pools) sized
+stretches by. Every batch measured against its stretch, and each layer against
+the kit expected there — the mods from the layers above included (D66). Which
+enemies drop gems, and how many, is a lever here too (D78 (gems are pulled to
+the player)).
 
 **Exit (DoD):**
 - No unbeatable batch. No batch cleared without moving.

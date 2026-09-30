@@ -161,7 +161,7 @@ function killEnemy(e) {
   kills += 1;
   for (let n = 0; n < e.value; n++) {
     gems.push({ x: e.x + (rng() - 0.5) * 18,
-                y: e.y + (rng() - 0.5) * 18, r: 4, life: GEM_LIFE });
+                y: e.y + (rng() - 0.5) * 18, r: 4 });
   }
   burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
   sound('kill', 1 - Math.min(0.4, e.maxHp * 0.04));  // bigger things pop lower
@@ -208,7 +208,30 @@ function clearBatch() {
   // gate, so it pays nothing -- no rank ("let it stay on 11"), no mods, no Mend.
   // Mods come back only if the player goes on to the next layer, which does not
   // exist yet; how that works is open (ideas.md -> the layer end).
-  if (batchIndex >= BATCHES.length) return;
+  // Enemies placed by hand -- a scenario's (D37), a check's -- belong to no
+  // batch of the plan: they pay a gate's rank and cards, and nothing that
+  // belongs to a layer.
+  const entry = plan[batchIndex - 1];
+  if (entry) {
+    // Micro-tasks first, so the layer end's heal cannot read as a clean batch.
+    // Each pays once per layer, ever (D36): kept in what persists, not the dive.
+    const layer = LAYERS[entry.layer].name;
+    for (const t of TASKS) {
+      if (meta.tasks[layer]?.[t.name] || !t.met()) continue;
+      meta.tasks[layer] = { ...meta.tasks[layer], [t.name]: 1 };
+      notice = t.desc + ': ' + t.points + (t.points === 1 ? ' point' : ' points');
+      noticeTime = NOTICE_TIME;
+    }
+    // The layer end is a milestone (D68): a full heal, and the layer counts as
+    // cleared at `home` from now on, whatever the rest of the dive does.
+    if (entry.end) {
+      player.hp = player.maxHp;
+      meta.cleared = Math.max(meta.cleared, entry.layer + 1);
+    }
+  }
+  // The last layer's end pays no rank and no mods -- nothing to go on to
+  // (D68). The current carries you to the bottom, which is the win.
+  if (batchIndex >= plan.length) return;
   rank += 1;
   // A comfort mod is a standing effect rather than a stat, so it acts here.
   if (player.mendOnClear) {
@@ -226,6 +249,9 @@ function clearBatch() {
 // written on the record, so a card can never advertise a number the mod does
 // not deliver, and adding a mod still costs exactly one line.
 function modPreview(mod) {
+  // A filler -- no `max` -- is not a mod (D69): the gems card pays into the
+  // dive, not the player, so "applying it to a copy" would pay for real.
+  if (!mod.max) return [];
   const after = { ...player };
   mod.apply(after);
   return Object.keys(after)
@@ -235,14 +261,65 @@ function modPreview(mod) {
 
 // The beat is over: roll the mods and hand them over.
 function openModOffer() {
-  choices = rollMods();
-  // Every mod maxed: the gate simply passes. A card-less offer screen would be
-  // a lock with no way out of it.
-  if (!choices.length) return;
+  choices = rollMods();     // never empty: the fillers take any card (D69)
   choiceIndex = Math.floor(choices.length / 2);   // start on the middle card
   screen = 'mods';
   sound('rankA');
   sound('rankB');
+}
+
+// A mod taken -- from the cards, or from a scenario's kit. Counted, so the
+// next roll can refuse it once it is at its max; a filler has no max, is not a
+// mod and is never counted (D69).
+function takeMod(mod) {
+  mod.apply(player);
+  if (mod.max) modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
+}
+
+// ---------- home ----------
+// Attribute points to spend: what the micro-tasks paid, less what is spent.
+// Derived every time, so the two can never disagree (D36).
+function points() {
+  let earned = 0;
+  for (const done of Object.values(meta.tasks)) {
+    for (const t of TASKS) if (done[t.name]) earned += t.points;
+  }
+  return earned - Object.values(meta.spent).reduce((a, b) => a + b, 0);
+}
+
+// The next tier's cost, or undefined at the top -- where `canBuy` is false,
+// since no bank is `>= undefined`. `home` dims the row by the same test.
+const nextCost = g => g.tiers[meta.gear[g.name] || 0];
+const canBuy = g => meta.bank >= nextCost(g);
+
+// Both write the save at once: a purchase is never undone by a closed tab.
+function buy(g) {
+  if (!canBuy(g)) return;
+  meta.bank -= nextCost(g);
+  meta.gear[g.name] = (meta.gear[g.name] || 0) + 1;
+  persist(saveText());
+}
+
+function raise(a) {
+  if (points() <= 0) return;
+  meta.spent[a.name] = (meta.spent[a.name] || 0) + 1;
+  persist(saveText());
+}
+
+// Death or the win: the dive's gems are banked however it ended (D67), the
+// depth it reached is kept, and the dive is gone from the save (D70).
+function endDive() {
+  meta.bank += currency;
+  meta.deepest = Math.max(meta.deepest, cameraY);
+  diveLive = false;
+  persist(saveText());
+}
+
+// Every way onto a menu screen, so none can leave the cursor past the end of
+// a shorter menu than the one before.
+function openMenu(name) {
+  screen = name;
+  menuIndex = 0;
 }
 
 // ---------- the clock ----------
@@ -275,11 +352,33 @@ function advanceBy(elapsed) {
 }
 
 // ---------- the descent ----------
-// Batch `k` waits at this depth (D58); `k = BATCHES.length` is the layer end.
-// One place, because a layer owning its own batch list -- once there is a
-// second layer -- changes it.
+// Batch `k` waits at this depth (D58); `k = plan.length` is the bottom of the
+// last layer. The layers stack in one tall strip (D72), so depth keeps adding
+// up across them and this needs no layer at all.
 function gateDepth(k) {
   return k * GATE_SPACING;
+}
+
+// The dive's batches, drawn from its seed (D71): each stretch of each layer
+// draws its count from its pool, never the same batch twice. The layer's last
+// entry is its end. Called by reset() before anything else draws, so the plan
+// is the first thing a seed decides.
+function drawPlan() {
+  const out = [];
+  LAYERS.forEach((layer, l) => {
+    for (const s of layer.stretches) {
+      for (const batch of drawDistinct(s.pool, s.draw)) out.push({ layer: l, batch });
+    }
+    out[out.length - 1].end = true;
+  });
+  return out;
+}
+
+// Which layer a depth is in: that of the next batch waiting at or below it,
+// or the last layer past the bottom. The renderer asks, for the water's colour
+// (D72). Here rather than there, because it is the dive's geometry and ports.
+function layerAt(y) {
+  return (plan.find((_, k) => gateDepth(k) >= y) ?? plan[plan.length - 1]).layer;
 }
 
 // ---------- update ----------
@@ -301,7 +400,7 @@ function update(dt) {
   // screens. The menus alone freeze it -- pause is the player stepping out.
   // Its speed eases up while the camera travels and down to a drift otherwise,
   // on a time base, and the background scrolls by `waterY`.
-  if (!['title', 'paused', 'help', 'options'].includes(screen)) {
+  if (!MENUS[screen] && screen !== 'help' && screen !== 'options') {
     const target = cameraY > cameraFrom ? CURRENT_SPEED : CURRENT_CRAWL;
     current += (target - current) * (1 - Math.pow(CURRENT_EASE, dt));
     waterY += current * dt;
@@ -319,15 +418,16 @@ function update(dt) {
 }
 
 function step(dt) {
-  if (screen === 'title' || screen === 'paused') {
-    const items = MENUS[screen].items;
-    const hovered = rowUnder(aim.x, aim.y, items.length, MENU_TOP);
+  const menu = MENUS[screen];
+  if (menu) {
+    const items = menu.items;
+    const hovered = rowUnder(aim.x, aim.y, items.length, menu.top);
     if (mouseMoved() && hovered >= 0) menuIndex = hovered;
     menuIndex = moveCursor(menuIndex, items.length);
 
     if (tapped(GO)) items[menuIndex].run();
     else if (tapped(CLICK) && hovered >= 0) items[hovered].run();
-    else if (justPressed.has('Escape') && screen === 'paused') screen = resumeTo;
+    else if (justPressed.has('Escape') && menu.back) menu.back();
     return;
   }
 
@@ -348,16 +448,24 @@ function step(dt) {
     return;
   }
 
-  // Both ends of a dive take the same keys: eaten, or the bottom reached.
-  if (screen === 'dead' || screen === 'bottom') {
-    if (justPressed.has('KeyR') || tapped(CLICK)) reset();
-    if (justPressed.has('Escape')) { screen = 'title'; menuIndex = 0; }
+  // Both ends of a dive take the same keys: eaten, or the last layer won.
+  // Either way the gems are already banked (D67), so R diving again at once
+  // skips nothing but the shop; everything else goes `home` (D66).
+  if (screen === 'dead' || screen === 'won') {
+    if (justPressed.has('KeyR')) reset();
+    else if (justPressed.has('Escape') || tapped(GO) || tapped(CLICK)) openMenu('home');
     return;
   }
 
   // Esc pauses from play and from the mod cards alike -- the only two screens
-  // that reach this line -- and Resume goes back to whichever it was.
-  if (justPressed.has('Escape')) { resumeTo = screen; screen = 'paused'; menuIndex = 0; return; }
+  // that reach this line -- and Resume goes back to whichever it was. Pausing
+  // writes the save: it is the moment a dive is most likely put down (D70).
+  if (justPressed.has('Escape')) {
+    resumeTo = screen;
+    openMenu('paused');
+    persist(saveText());
+    return;
+  }
 
   // Picking a mod. The arena is empty -- this only opens on a cleared batch --
   // so freezing until you choose interrupts nothing (D33).
@@ -378,10 +486,7 @@ function step(dt) {
     }
 
     if (taken >= 0) {
-      const mod = choices[taken];
-      mod.apply(player);
-      // Counted, so the next roll can refuse it once it is at its max.
-      modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
+      takeMod(choices[taken]);
       choices = [];
       screen = 'playing';
     }
@@ -390,6 +495,7 @@ function step(dt) {
 
   elapsed += dt;
   if (player.hurt > 0) player.hurt -= dt;
+  if (noticeTime > 0) noticeTime -= dt;
 
   // --- the gate: one batch at a time, and nothing arrives until it is clear ---
   // This replaces the prototype's spawn director (D27). That director grew
@@ -405,7 +511,7 @@ function step(dt) {
     if (offerTimer <= 0) openModOffer();
   } else if (!queuePaused && enemies.length === 0) {
     // Each batch waits at its own depth. Once the last one is cleared, the same
-    // arithmetic points one gate further: the bottom of the layer.
+    // arithmetic points one gate further: the bottom of the last layer.
     const target = gateDepth(batchIndex);
     // Only a dive's opening beat counts down now; every later batch waits on
     // the descent instead, which is a beat of its own.
@@ -419,16 +525,17 @@ function step(dt) {
       player.y += current * dt;
     }
     else if (breathTimer <= 0) {
-      // Past the last batch the target is the bottom of the layer. The last
-      // batch is the boss (D62), so reaching it means the layer is finished;
-      // what that earns, and what follows, is the layer-to-layer pass (D60).
-      if (batchIndex >= BATCHES.length) screen = 'bottom';
+      // Past the last batch the target is the bottom of the last layer. The
+      // last batch is its boss (D62), so reaching the bottom is the win (D68);
+      // the dive is banked at the end of this tick.
+      if (batchIndex >= plan.length) screen = 'won';
       else {
         // ponytail: one flat list is one layer, the boss last (D62). A second
         // layer needs not a longer list but the *layer* -- a layer owns its own
         // batch list. So do not grow BATCHES into a tuned multi-layer list;
         // that shape will not exist.
-        spawnBatch(BATCHES[batchIndex]);
+        spawnBatch(plan[batchIndex].batch);
+        batchHit = false;
         batchIndex += 1;
       }
     }
@@ -595,6 +702,7 @@ function step(dt) {
     if (d < e.r + player.r && player.hurt <= 0 && !immortal) {
       player.hp -= 1;
       player.hurt = player.iframes;
+      batchHit = true;
       shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;
       burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
       sound('hurt');
@@ -652,24 +760,21 @@ function step(dt) {
     }
   }
 
-  // --- gems drift to you when close, fade out if you never come ---
+  // --- gems fly to you, from anywhere, and never fade (D35) ---
+  // Nothing can be stranded, so nothing expires: not by the edge of a ring,
+  // and not by the descent carrying you away from where they dropped.
   for (const g of gems) {
-    g.life -= dt;
-    if (g.life <= 0) { g.gone = true; continue; }
-
     const gx = player.x - g.x;
     const gy = player.y - g.y;
     const d = Math.sqrt(gx * gx + gy * gy) || 1;
 
-    if (d < player.pickupRange) {
-      g.x += (gx / d) * GEM_PULL * dt;
-      g.y += (gy / d) * GEM_PULL * dt;
-    }
+    g.x += (gx / d) * GEM_PULL * dt;
+    g.y += (gy / d) * GEM_PULL * dt;
     if (d < player.r + g.r + 4) {
       g.gone = true;
       sound('gem');
-      // Money, not XP (D34). It buys nothing yet -- `home` and the shop are S4
-      // — but the counter has to exist for the drop to mean anything.
+      // Money, not XP (D34). The dive's takings, banked at `home` when the
+      // dive ends however it ends (D67).
       currency += 1;
     }
   }
@@ -699,4 +804,8 @@ function step(dt) {
   bullets = bullets.filter(b => !b.gone);
   gems    = gems.filter(g => !g.gone);
   particles = particles.filter(p => p.life > 0);
+  // A dive that ended this tick is banked last, after every gem the tick paid
+  // -- a gem caught on the frame you die is yours (D67). Every later tick on
+  // the end screen returns early above, so this runs once.
+  if (screen === 'dead' || screen === 'won') endDive();
 }

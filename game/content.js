@@ -26,7 +26,6 @@ const PLAYER_START = {
   damage: 1,
   range: 250,        // how far a shot travels before it dies
   pierce: 0,         // extra enemies a shot passes through
-  pickupRange: 75,
   iframes: 1,        // seconds of invulnerability after a hit
   dashCooldown: 2.2, // seconds before you can dash again
   dashSpeed: 884,    // px/s while dashing -- its OWN number, not a multiple of
@@ -53,8 +52,11 @@ const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
 const PUSH_DRAG      = 0.02;  // ...bleeding to 2% per second, so about 80px
 
 const BULLET_SPEED   = 430;   // pixels per second
-const GEM_PULL       = 300;   // how fast gems fly to you once in range
-const GEM_LIFE       = 8;     // seconds before an uncollected coin fades out
+// Gems fly to you from wherever they drop, and never fade (D35): currency is
+// collected automatically and never chased. 600 rather than the old 300, which
+// was a pull *inside* a 75px pickup ring -- from across the view it has to
+// outrun a swimming player (260px/s, more with Fins). Claude's pick.
+const GEM_PULL       = 600;   // px/s a gem flies toward you
 const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
 const GATE_PAUSE     = 1.2;   // seconds of quiet before a dive's FIRST batch, so
                               // a dive opens calm. Every later batch waits on the
@@ -83,6 +85,7 @@ const FIXED_DT       = 1 / 120;
 // bound: at most MAX_FRAME_DT / FIXED_DT = 6 ticks per frame, so a slow frame
 // cannot spiral into simulating forever.
 const MAX_FRAME_DT   = 0.05;
+const NOTICE_TIME    = 2.5;   // seconds a micro-task's line stays up. Claude's pick
 const MOD_OFFER_DELAY = 0.6;  // seconds between the last enemy dying and the
                               // cards appearing. The kill burst lives 0.5s, so
                               // anything shorter drops the offer on top of the
@@ -135,19 +138,22 @@ const SOUNDS = {
 // not degree**, because arithmetic is the heavy thinking a dive must not
 // contain. That is why the descriptions read as sentences and not as stat lines.
 //
-// `max` is how many times one mod can be taken; absent means no limit. It exists
-// so the roll can refuse a mod that is already maxed, which is the only way a
-// bounded stat (a cooldown has a floor of zero) stays honest.
+// `max` is how many times one mod can be taken. It exists so the roll can
+// refuse a mod that is already maxed, which is the only way a bounded stat (a
+// cooldown has a floor of zero) stays honest. Since D69 every mod has one -- a
+// switch caps at 1, anything that stacks at 3 -- so a dive's power has a
+// ceiling that deep layers can be tuned against.
 //
 // Two mods D34 named are deliberately absent: pickup radius and a currency
 // magnet. D35 was recorded hours later and auto-collects currency, which leaves
 // both of them with nothing to do — building either now would be building a
-// husk. Two mods can max out, so a late dive may be offered fewer than three
-// cards; more mods is S5 — Content, not a reason to pad the pool here.
+// husk. Every mod can max out, so a long dive runs the pool short; FILLERS
+// below take the empty cards (D69), and more mods is S5 — Content, not a
+// reason to pad the pool here.
 const MODS = [
-  { name: 'Fins',     scope: 'body',    desc: 'you swim faster',
+  { name: 'Fins',     scope: 'body',    desc: 'you swim faster', max: 3,
     apply: p => p.speed += 45 },
-  { name: 'Vitality', scope: 'body',    desc: 'one more heart, it comes full',
+  { name: 'Vitality', scope: 'body',    desc: 'one more heart, it comes full', max: 3,
     apply: p => { p.maxHp += 1; p.hp += 1; } },
   { name: 'Reflex',   scope: 'body',    desc: 'the dash comes back sooner', max: 3,
     apply: p => p.dashCooldown -= 0.4 },
@@ -157,6 +163,54 @@ const MODS = [
     apply: p => p.dashDamage += 1 },
   { name: 'Mend',     scope: 'comfort', desc: 'a heart back each batch', max: 1,
     apply: p => p.mendOnClear = 1 },
+];
+
+// What fills a card the pool cannot (D69): a handful of gems, then a heart
+// back. Neither is a mod -- no cap, not counted, nothing carried -- so a card
+// is never empty and momentum with nowhere to go becomes money or health.
+// Having no `max` is what marks one: every mod has a cap (D69), so the card
+// shows no "held", nothing counts it, and the stat preview skips it --
+// previewing applies to a copy of the player, and the gems do not live on it.
+const FILLER_GEMS = 10;       // Claude's pick; S6 owns it
+const FILLERS = [
+  { name: 'Gems',  desc: 'a handful of gems',
+    apply: () => { currency += FILLER_GEMS; } },
+  { name: 'Heart', desc: 'a heart back',
+    apply: p => { p.hp = Math.min(p.maxHp, p.hp + 1); } },
+];
+
+// ---------- gear, attributes, micro-tasks ----------
+// What persists between dives, spent at `home` (D31, D36). Each is a line of
+// data in the mod's own shape -- `apply` raises the player once per tier or
+// point held -- so the second item costs what the first did. All three sum
+// with each other and with mods, which add on top during a dive; nothing
+// multiplies (D36, and Igor, 2026-09-30: "mods on top of gear/equipment/stats").
+//
+// The save keys them by `name`, so renaming one orphans what players own.
+//
+// Every number here is Claude's pick, S6's to tune: the gun's +0.5 shots/s and
+// 40 / 100 / 200 gems, dash reach's +150px/s (141 -> 165 -> 189px of dash),
+// one point per task.
+
+// `gear` -- bought with gems, combat stats. `tiers` are the costs, in order.
+const GEAR = [
+  { name: 'Gun', tiers: [40, 100, 200], apply: p => p.fireRate += 0.5 },
+];
+
+// `attribute` -- body stats, raised by points that only micro-tasks pay.
+// Uncapped at the spending end: a layer holds a finite set of tasks, so the
+// cap is at the source (D36). Dash improvements live here, not in gear -- D36
+// names "dash" a body stat.
+const ATTRIBUTES = [
+  { name: 'Dash reach', apply: p => p.dashSpeed += 150 },
+];
+
+// `micro-task` -- mastery, never a quota (D36). Judged when a batch clears;
+// each pays its `points` once per layer, ever. `met()` reads the dive's state
+// at that moment.
+const TASKS = [
+  { name: 'untouched', desc: 'clear a batch without taking a hit', points: 1,
+    met: () => !batchHit },
 ];
 
 // ---------- the development readout ----------
@@ -177,7 +231,6 @@ const PLAYER_STATS = [
   { stat: 'dashDamage',   label: 'dashdmg', read: p => p.dashDamage },
   { stat: 'dashCooldown', label: 'dashcd',  read: p => p.dashCooldown.toFixed(1) + 's' },
   { stat: 'iframes',      label: 'ifr',     read: p => p.iframes.toFixed(2) + 's' },
-  { stat: 'pickupRange',  label: 'pickup',  read: p => Math.round(p.pickupRange) },
   { stat: 'mendOnClear',  label: 'mend',    read: p => p.mendOnClear },
 ];
 
@@ -207,22 +260,20 @@ function cardRect(i, n) {
            y: ARENA_H / 2 - CARD_H / 2, w: CARD_W, h: CARD_H };
 }
 
-// Three distinct mods, never one that is already maxed (D34). A copy, so the
-// splicing doesn't wreck the table. Offers fewer than three rather than
-// repeating itself if the pool has run short -- a duplicate card is not a choice.
+// Three distinct mods, never one that is already maxed (D34), drawn by
+// `drawDistinct()`. Never repeats itself if the pool has run short -- a
+// duplicate card is not a choice -- the fillers take the empty cards instead,
+// gems first (D69). With every mod capped that is two cards.
 function rollMods() {
-  const pool = MODS.filter(m => (modCounts[m.name] || 0) < (m.max || Infinity));
-  const out = [];
-  while (out.length < 3 && pool.length) {
-    out.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
-  }
+  const out = drawDistinct(MODS.filter(m => (modCounts[m.name] || 0) < m.max), 3);
+  for (const f of FILLERS) if (out.length < 3) out.push(f);
   return out;
 }
 
 // ---------- key bindings ----------
 // Which physical key means which action. Content, not platform: the game decides
 // that dashing is Space, while reading the keyboard is platform's job. Keeping
-// them here is what holds the port seam at exactly six names -- `game/` used to
+// them here is what holds the port seam at exactly seven names -- `game/` used to
 // reach across for these as well, which a headless load in Node caught.
 //
 // Always `e.code` (the physical key), never `e.key` (the character it types) --
@@ -278,22 +329,60 @@ const CLICK = ['Mouse0'];
 // S3 added the rows marked `-`: a mini-boss after batches 4 and 8, and the
 // boss as the layer's last batch (D62, D65) -- fifteen in all. Where the
 // mini-bosses sit is Claude's pick.
-const BATCHES = [
+//
+// S4 (D71): the table above is now three **pools**, one per stretch between
+// the mini-bosses, and a dive draws four of each from its seed. Each pool got
+// one batch more than it draws, sized into its stretch's hp band -- Claude's
+// picks, marked `new` below: 14, 26 and 42 hp. S5 fills the pools out.
+const STRETCH_1 = [
   { enemies: [['drifter', 10]] },
   { enemies: [['drifter', 16]] },
   { enemies: [['drifter', 12], ['darter', 6]] },
   { enemies: [['darter', 14]] },
-  { enemies: [['mini-boss', 1]] },
+  { enemies: [['drifter', 8], ['darter', 6]] },                  // new, 14 hp
+];
+const STRETCH_2 = [
   { enemies: [['bulwark', 2], ['drifter', 12]] },
   { enemies: [['drifter', 18], ['darter', 8]] },
   { enemies: [['bulwark', 3], ['darter', 10]] },
   { enemies: [['drifter', 20], ['darter', 12]] },
-  { enemies: [['mini-boss', 1]] },
+  { enemies: [['bulwark', 1], ['drifter', 14], ['darter', 6]] }, // new, 26 hp
+];
+const STRETCH_3 = [
   { enemies: [['bulwark', 4], ['drifter', 16]] },
   { enemies: [['darter', 18], ['drifter', 16]] },
   { enemies: [['bulwark', 5], ['drifter', 18], ['darter', 8]] },
   { enemies: [['bulwark', 6], ['drifter', 20], ['darter', 12]] },
-  { enemies: [['boss', 1]] },
+  { enemies: [['bulwark', 3], ['darter', 14], ['drifter', 10]] }, // new, 42 hp
+];
+const MINI_BOSS = { enemies: [['mini-boss', 1]] };
+const BOSS      = { enemies: [['boss', 1]] };
+
+// ---------- layers ----------
+// A layer is a record that owns its batches (D71): a run of **stretches**,
+// each a pool and how many to `draw` from it. One shape for all of them -- a
+// mini-boss or the boss is a stretch whose pool holds one batch and draws one,
+// so their fixed places need no special case. The last stretch's batch is the
+// layer end (D68).
+//
+// `color` is the water at the top of the layer, darkening to the same
+// near-black at its bottom. PLACEHOLDER GRAPHICS (D72): the colour and the
+// name are the cheapest way to say "a new layer" until art exists.
+//
+// The second layer is the first one's stretches under its own name and colour
+// -- a placeholder until S5 gives it content of its own. Names and colours are
+// Claude's picks.
+const SHELF = [
+  { draw: 4, pool: STRETCH_1 },
+  { draw: 1, pool: [MINI_BOSS] },
+  { draw: 4, pool: STRETCH_2 },
+  { draw: 1, pool: [MINI_BOSS] },
+  { draw: 4, pool: STRETCH_3 },
+  { draw: 1, pool: [BOSS] },
+];
+const LAYERS = [
+  { name: 'The Shelf', color: [12, 23, 39], stretches: SHELF },
+  { name: 'The Drop',  color: [24, 12, 40], stretches: SHELF },
 ];
 
 // ---------- scenarios ----------
@@ -314,11 +403,22 @@ const SCENARIOS = {
   // batch now, so a later batch is the only way to be deeper in.
   'late-swarm':  { batch: 5 },
   // The last batch, then the bottom of the layer -- for seeing how a layer
-  // ends without playing all of it. Derived, so it follows BATCHES' length.
-  // Since S3 the last batch is the boss (D62).
-  'last-batch':  { batch: BATCHES.length - 1 },
+  // ends without playing all of it. Derived, so it follows the dive's length.
+  // Since S3 the last batch is the boss (D62); since S4 it is the last layer's,
+  // so reaching the bottom is the win. `batch` may be a function of the dive's
+  // drawn plan (D71), since where things sit is only known once it is drawn.
+  'last-batch':  { batch: plan => plan.length - 1 },
   // The first mini-boss (D65), alone. Derived the same way.
-  'mini-boss':   { batch: BATCHES.findIndex(b => b.enemies.some(([n]) => n === 'mini-boss')) },
+  'mini-boss':   { batch: plan => plan.findIndex(e => e.batch === MINI_BOSS) },
+  // The top of the second layer, with the kit a dive would carry there: one
+  // pick per gate of the first layer, its end included -- fifteen. Which picks
+  // is Claude's choice, stated so the bot measures layer 2 against a known kit
+  // without fighting down the first (friction point 4 of the layer-to-layer
+  // spec).
+  'layer-2':     { batch: plan => plan.findIndex(e => e.layer === 1),
+                   kit: ['Fins', 'Fins', 'Fins', 'Vitality', 'Vitality', 'Vitality',
+                         'Reflex', 'Reflex', 'Reflex', 'Nerve', 'Nerve', 'Nerve',
+                         'Impact', 'Impact', 'Mend'] },
 };
 
 // ---------- enemy types ----------
@@ -346,20 +446,37 @@ const ENEMY_TYPES = [
   { name: 'mini-boss', r: 26, hp: 24, speed: 70, value: 5,
     color: '#e2ff8a', glow: '#c6ff3c',
     lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
-  { name: 'boss',      r: 42, hp: 60, speed: 60, value: 10,
+  // The boss's `value` is the layer end's haul (D68): "a big haul of gems".
+  // 30 is Claude's pick; S6 owns it.
+  { name: 'boss',      r: 42, hp: 60, speed: 60, value: 30,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
     lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 } },
 ];
 
+// `home` (D38): its layer list sits between the heading and the rows, one
+// line per layer at most, so where the rows start is derived from how many
+// layers there are -- a fixed top would let a fifth layer run into them.
+const HOME_LAYERS_TOP = 326, HOME_LINE = 26;
+const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
+
 // ---------- menus ----------
 // Same trick as mods and enemy types: a list of entries, so adding one
-// is a line and nothing else changes.
+// is a line and nothing else changes. Anything that depends on state -- a
+// label, a sub-line, `dim` (a row that cannot be taken right now), `home`'s
+// `lines` -- is a getter, so the renderer reads every one the same way. `top`
+// is where the rows start, which the renderer and the hit-test share; `back`
+// is what Esc does, on a menu that has one. A screen is a menu exactly when it
+// has an entry here -- `step()` and the water both ask `MENUS[screen]`.
 const MENUS = {
   title: {
     heading: 'ABYSS',
     sub: 'something small, in very deep water',
+    top: MENU_TOP,
     items: [
-      { label: 'Start',   run: () => reset() },          // reset() starts the dive
+      // `home` lives between dives only (D76): with a dive under way, Start is
+      // Continue and goes back into it, onto the pause menu (D70).
+      { get label() { return diveLive ? 'Continue' : 'Start'; },
+        run: () => openMenu(diveLive ? 'paused' : 'home') },
       { label: 'Help',    run: () => openScreen('help') },
       { label: 'Options', run: () => openScreen('options') },
     ],
@@ -367,11 +484,57 @@ const MENUS = {
   paused: {
     heading: 'PAUSED',
     sub: '',
+    top: MENU_TOP,
+    back: () => { screen = resumeTo; },
     items: [
       { label: 'Resume',        run: () => { screen = resumeTo; } },
       { label: 'Help',          run: () => openScreen('help') },
       { label: 'Options',       run: () => openScreen('options') },
-      { label: 'Quit to title', run: () => { screen = 'title'; menuIndex = 0; } },
+      // The dive stays saved -- pausing wrote it -- and the title offers it back.
+      { label: 'Quit to title', run: () => openMenu('title') },
+    ],
+  },
+  home: {
+    heading: 'HOME',
+    // Depth in metres: 10 world px to the metre, so a gate is 40m down.
+    // Flavour, and Claude's pick -- the world has no unit of its own.
+    get sub() {
+      const p = points();
+      return meta.bank + ' gems      ' + p + (p === 1 ? ' point' : ' points') +
+             '      deepest ' + Math.round(meta.deepest / 10) + 'm';
+    },
+    // The layers, one line each (D66): an unlocked one by name, with whether
+    // it has been cleared and which micro-tasks it has paid; the next locked
+    // one as ???; the rest hidden -- "levels are hidden until unlocked", the
+    // source design. Unlocked means the one before it was cleared.
+    get lines() {
+      return LAYERS.slice(0, meta.cleared + 2).map((layer, l) => l > meta.cleared
+        ? { text: '???', locked: true }
+        : { text: layer.name + (l < meta.cleared ? '   cleared' : '') + '   ' +
+                  TASKS.map(t => t.name + (meta.tasks[layer.name]?.[t.name] ? ' \u2713' : ' \u2013'))
+                       .join('   ') });
+    },
+    top: HOME_TOP,
+    back: () => openMenu('title'),
+    items: [
+      { label: 'Dive', run: () => reset() },             // every dive from the top (D66)
+      ...GEAR.map(g => ({
+        get label() {
+          const t = meta.gear[g.name] || 0, cost = g.tiers[t];
+          return g.name + '   tier ' + t + (cost === undefined ? ', the top'
+            : ' \u2192 ' + (t + 1) + '   ' + cost + ' gems');
+        },
+        get dim() { return !canBuy(g); },
+        run: () => buy(g) })),
+      ...ATTRIBUTES.map(a => ({
+        get label() {
+          const n = meta.spent[a.name] || 0;
+          return a.name + '   ' + n + ' \u2192 ' + (n + 1) + '   1 point';
+        },
+        get dim() { return points() <= 0; },
+        run: () => raise(a) })),
+      { label: 'Help',    run: () => openScreen('help') },
+      { label: 'Options', run: () => openScreen('options') },
     ],
   },
 };
@@ -411,6 +574,6 @@ const HELP_BLURB = [
   'Shots die at the edge of the ring, so range is a real range.',
   'Space dashes: you pass through the swarm unharmed, and shove it aside.',
   'One batch at a time; clear it and the current takes you down to the next.',
-  'Things you kill drop gems. They are money, and they fade in eight seconds.',
-  'Every batch cleared is a rank and a pick of three mods, until the layer ends.',
+  'Things you kill drop gems. They come to you on their own, and are yours to keep.',
+  'Every batch cleared is a rank and a pick of three mods. A boss also heals you.',
 ];

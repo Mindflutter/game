@@ -81,7 +81,7 @@ export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false
   let ticks = 0, seen = 0, startTick = 0;
 
   while (times.length < batches && ticks < tickCap && g.screen !== 'dead' &&
-         g.screen !== 'bottom') {
+         g.screen !== 'won') {
     if (g.batchIndex !== seen) { seen = g.batchIndex; startTick = ticks; }
     botInput(g);
     g.update(TICK);                      // update() clears justPressed itself
@@ -90,6 +90,6 @@ export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false
       times.push(+((ticks - startTick) * TICK).toFixed(2));
     }
   }
-  return { seed, alive: g.screen !== 'dead', reachedBottom: g.screen === 'bottom', ranFor: +(ticks * TICK).toFixed(1),
+  return { seed, alive: g.screen !== 'dead', won: g.screen === 'won', ranFor: +(ticks * TICK).toFixed(1),
            hpLeft: g.player.hp, clearTimes: times };
 }

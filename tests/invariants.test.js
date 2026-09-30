@@ -52,10 +52,11 @@ function allNumbers(g) {
 }
 
 describe('the port seam', () => {
-  it('game/ loads with nothing but the six seam names (D18)', () => {
-    // Executable version of design.md's grep. If game/ ever reaches for a
-    // seventh name, or any browser API, this throws.
-    expect(SEAM).toHaveLength(6);
+  it('game/ loads with nothing but the seven seam names (D18)', () => {
+    // Executable version of design.md's grep. If game/ ever reaches for an
+    // eighth name, or any browser API, this throws. The seventh, `persist`,
+    // is S4's save: storing text is platform's, deciding when is game's.
+    expect(SEAM).toHaveLength(7);
     const g = loadGame();
     expect(typeof g.update).toBe('function');
     expect(typeof g.reset).toBe('function');
@@ -90,13 +91,13 @@ describe('the bot', () => {
   });
 
   it('starts from a scenario and records only the fights it plays (D63)', () => {
-    // From the boss's batch: one clear, then the layer end. A report that
+    // From the last boss's batch: one clear, then the win. A report that
     // started from the top instead, or logged a zero-second "clear" at tick
     // one because the scenario's batchIndex did not start at 0, fails one of
     // the two.
     const r = diveReport(4471, 2, 300, true, 'last-batch');
     expect(r.clearTimes.length).toBe(1);
-    expect(r.reachedBottom).toBe(true);
+    expect(r.won).toBe(true);
   });
 });
 

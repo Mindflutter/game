@@ -54,11 +54,12 @@ draft, which is why they are banned (D32).
   never ES modules (blocked over `file://`). Load order matters.
 - `game/` contains **zero** browser API. It reaches into `platform/` for a
   deliberately short list of names — currently `sound`, `keys`, `justPressed`,
-  `tapped`, `moveCursor`, `aim`. That seam is the port; keep it clean. It may
-  grow (save); every addition is deliberate and listed in `design.md`, never
-  incidental. The camera did **not** grow it: `cameraY` lives in `game/`, `aim`
+  `tapped`, `moveCursor`, `aim`, `persist`. That seam is the port; keep it
+  clean. It grew once, for the save: `persist` (D77 (the save; the seam's
+  seventh name)) — `game/` decides when, the platform stores the text. Every
+  addition is deliberate and listed in `design.md`, never incidental. The camera did **not** grow it: `cameraY` lives in `game/`, `aim`
   stays in view coordinates, and `game/` adds the offset itself (D58). **`npm test` enforces this**: `tests/harness.js` loads
-  `game/` with only those six stubbed, so a seventh name breaks the build. That
+  `game/` with only those seven stubbed, so an eighth name breaks the build. That
   is how D44 found the seam had quietly become eleven.
 - **Key bindings live in `game/content.js`, not `platform/`.** Which key means
   which action is content (D6); reading the keyboard is platform's job.
@@ -186,7 +187,7 @@ draft, which is why they are banned (D32).
      `plan.md` if a stage moved; `ideas.md` if an open question closed.
   3. **`foundations.md`** — if a rule changed, it is a decision: edit here and
      record it in `decisions.md` in the same step, never quietly.
-  4. **`CLAUDE.md`** — it makes factual claims (the seam is six names, the
+  4. **`CLAUDE.md`** — it makes factual claims (the seam is seven names, the
      suites, the constraints) and they go stale. *Missed: it claimed six seam
      names while the code used eleven.*
   5. **In-game text** — `HELP_KEYS`, `HELP_BLURB`, menu labels, option names,
