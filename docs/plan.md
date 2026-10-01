@@ -13,9 +13,8 @@ must stay true while doing it.
 **None — between S4 (meta loop skeleton), closed 2026-09-30, and S5 (content).**
 Next: the two requirements before S5 (D80), each in a session of its own —
 see "Before S5" below. The first, a doc for every kind of game entity, is
-built; the weapon record it was also to settle is open, and designed next —
-Igor, 2026-10-01: "design weapon record". Then the mods-from-drops rework,
-then S5 — Content to the DoD numbers.
+built, and so is the weapon record it was also to settle (D83). Then the
+mods-from-drops rework, then S5 — Content to the DoD numbers.
 
 ## Closed stages
 
@@ -55,8 +54,10 @@ these are two big tasks, i'll do them in separate sessions" (D80).
    **Built 2026-10-01** (D81, D82; Igor: "ok, commit"): the docs are in
    `entities/` — enemies, mods, weapons, equipment, as Igor listed them —
    held to the code by `npm test`, and `threat` is reserved. Micro-tasks were
-   left out by Igor ("i'll see how that works out"). **Still open: the weapon
-   record** — `entities/weapons.md` documents the Gun as it stands.
+   left out by Igor ("i'll see how that works out"). The weapon record
+   followed the same day (D83; Igor: "approved"): a weapon is a line in
+   `WEAPONS`, a dive carries one, each has tiers of its own; owning one and
+   choosing which to carry come with the second weapon, in S5.
 2. **Mods reworked from a choice into enemy drops.** Igor: "mods rework from
    choice to enemy drops (from ideas)" — the idea is in `ideas.md` → Open —
    raised during S4 ("Mods as drops, never offered"), with what it touches.
@@ -74,7 +75,9 @@ shapes for enemy, weapon, gear and mod are settled and will not change.
 **Work:** 5–7 enemy behaviours, 2–3 weapons, 2–3 pieces of equipment, 3–5 layers —
 each with its own pools of batches (D71) — and 3–4 tiers each. Weapon-scoped
 mods arrive here if they arrive (D31). The mod pool grows until its caps cover
-a full dive (D69).
+a full dive (D69). The second weapon brings owning one and choosing which to
+carry at `home`, and a scenario that names the weapon carried, so S6 (balance)
+can measure each (D83).
 
 **Exit (DoD):**
 - The DoD counts from the draft are met.

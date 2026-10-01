@@ -277,9 +277,12 @@ built.
   to certain weapon types. The draft itself calls this too much for the initial
   stage and records it only as an opportunity. Listed in `foundations.md` as a
   non-goal before alpha.
-- **RMB secondary attack.** Possible per the draft, not committed.
-- **Weapon-scoped mods** — the #3 half of D31. Reachable without a rewrite by
-  design; arrives at S5 or not at all.
+- **RMB secondary attack.** Possible per the draft, not committed. If it
+  comes, it needs numbers of its own: D83 (the weapon record) puts one
+  weapon's on the player.
+- **Weapon-scoped mods** — the #3 half of D31. They attach as D83 (the weapon
+  record) says — a mod naming the weapons it fits, changing their numbers on
+  the player — and arrive at S5 or not at all.
 - **Timed fast clears of completed layers** rewarding the player, so easy
   layers do not go obsolete. In `foundations.md` as a pillar, unimplemented.
   Since D66 (the dive runs on through the layers) every dive passes through

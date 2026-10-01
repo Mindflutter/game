@@ -6,6 +6,23 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-01
 
+**The weapon record: a line of data, one carried per dive** (D83)
+Igor: "design weapon record", then "approved" — the rest of the first
+requirement before S5 (content). The Gun is the first line of `WEAPONS`: its
+rate, damage, range and pierce left `PLAYER_START`, `BULLET_SPEED` became its
+`shotSpeed` and the shot radius hard-coded in `game/logic.js` its
+`shotRadius`. A dive copies the carried weapon's numbers onto the player, then
+its tiers — each now its own `{ cost, apply }` — and the equipment's;
+`GEAR`, left with the equipment, is `EQUIPMENT`. The save is version 2: a v1
+dive's player gains the Gun's shot as it was, 430 and 4, as it loads — the
+first migration — and `tests/fixtures/save-v2.json` joins the v1 fixture.
+Owning a weapon and choosing which to carry come with the second, in S5
+(content); weapon mods name the weapons they fit, superseding D31 (two-tier
+progression)'s second argument to `apply`. Design and its check against
+`foundations.md`: `superpowers/specs/2026-10-01-weapon-record-design.md`.
+`entities/weapons.md` is now an ordinary entity doc, its tiers a table.
+Nothing changes in play.
+
 **Entity docs, and the docs reorganised around a map** (D81, D82)
 Igor, having read it: "ok, commit". The first requirement before S5
 (content) (D80 (entity docs and mods from drops come first)). Igor's goal:

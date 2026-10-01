@@ -56,7 +56,7 @@ export function loadGame() {
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
                   'MOD_OFFER_DELAY', 'MOD_ROWS',
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
-                  'FILLERS', 'FILLER_GEMS', 'GEAR', 'ATTRIBUTES',
+                  'FILLERS', 'FILLER_GEMS', 'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES',
                   'MENUS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [

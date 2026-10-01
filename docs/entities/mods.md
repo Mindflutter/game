@@ -25,7 +25,8 @@ this is the pick as built.
 | Mend | comfort | a heart back each batch | 1 | mendOnClear +1 | mendOnClear 1 |
 
 **per pick** is what one pick changes; **at max** is the stat after `max`
-picks, from the starting kit — `PLAYER_START`, before any gear or attribute.
+picks, from the starting kit — the diver carrying the Gun, before any tier or
+attribute.
 Both are worked out from `apply` by the check, so they cannot advertise a
 number the mod does not deliver. Every number is S6 (balance)'s to tune.
 
@@ -34,9 +35,10 @@ number the mod does not deliver. Every number is S6 (balance)'s to tune.
 | Field | Unit | Meaning |
 |---|---|---|
 | `name` | — | The key and the card's title. A saved dive keeps its picks and the cards on offer by name, and a scenario's kit names them, so renaming one breaks both. |
-| `scope` | — | `body`: a stat of the diver, worth the same whatever weapon is carried. `comfort`: feel and friction, near-zero balance risk. A third, `weapon`, is **reserved** (D31 (two-tier progression), D34 (mods)): a mod that changes the equipped weapon, which needs a weapon record first (`weapons.md`). A check holds the pool to `body` and `comfort` until then. |
+| `scope` | — | `body`: a stat of the diver, worth the same whatever weapon is carried. `comfort`: feel and friction, near-zero balance risk. A third, `weapon`, waits for S5 (content) (D31 (two-tier progression), D34 (mods)): a mod that fits only some weapons. It changes the carried weapon's numbers on the player like any mod, and names the weapons it fits in `weapons` (D83 (the weapon record)). A check holds the pool to `body` and `comfort` until then. |
 | `desc` | — | The card's one line. A kind, not a degree: nothing a player has to compare across cards (D34 (mods)). A check holds it inside the card's width. |
 | `max` | picks | How many times one dive can take it (D69 (every mod capped)): a switch caps at 1, anything that stacks at 3. An offer never shows a mod at its max. |
+| `weapons` | — | **Reserved** (D83 (the weapon record)): the weapons a `weapon`-scoped mod fits, by name; it appears only while one of them is carried. Lands with the first weapon mod, in S5 (content). |
 | `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The card's "from → to" rows are worked out from it, at most `MOD_ROWS 2` of them. |
 
 ## Fins

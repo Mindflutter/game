@@ -201,7 +201,7 @@ describe('gems (D35, D67)', () => {
 });
 
 describe('home: gear, points, micro-tasks (D31, D36)', () => {
-  const gun = g => g.GEAR.find(x => x.name === 'Gun');
+  const gun = g => g.WEAPONS.find(x => x.name === 'Gun');
   const reach = g => g.ATTRIBUTES.find(x => x.name === 'Dash reach');
 
   it('buys a tier only with the gems for it, adds it to every dive, and stops at the top', () => {
@@ -210,12 +210,12 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     expect(g.meta.gear).toEqual({});             // 0 gems buys nothing
     g.meta.bank = 1000;
     g.buy(gun(g));
-    expect(g.meta.bank).toBe(1000 - gun(g).tiers[0]);
+    expect(g.meta.bank).toBe(1000 - gun(g).tiers[0].cost);
     g.reset(1);
-    expect(g.player.fireRate).toBeCloseTo(g.PLAYER_START.fireRate + 0.5);
+    expect(g.player.fireRate).toBeCloseTo(gun(g).fireRate + 0.5);
     for (let i = 0; i < 5; i++) g.buy(gun(g));
     expect(g.meta.gear.Gun).toBe(gun(g).tiers.length);
-    expect(g.meta.bank).toBe(1000 - gun(g).tiers.reduce((a, b) => a + b, 0));
+    expect(g.meta.bank).toBe(1000 - gun(g).tiers.reduce((a, t) => a + t.cost, 0));
     expect(JSON.parse(g.saved).gear.Gun).toBe(gun(g).tiers.length);   // written at once
   });
 
@@ -324,6 +324,20 @@ describe('the save (D70)', () => {
     expect(loadGame().loadSave(null)).toBe('');  // nothing saved is not an error
   });
 
+  // Plays on as the bot, and returns every shot seen in flight. A shot with no
+  // speed flies off as NaN while the player stays finite, so the shots are
+  // what show a save that came back wrong (D83).
+  const shotsSeen = (g, n) => {
+    const seen = new Set();
+    for (let i = 0; i < n; i++) {
+      botInput(g);
+      g.update(g.FIXED_DT);
+      for (const b of g.bullets) seen.add(b);
+    }
+    return [...seen];
+  };
+  const finite = b => Number.isFinite(b.x + b.y + b.vx + b.vy + b.r);
+
   it('loads a save written by the first build of the format, and plays it on', () => {
     // A fixture, committed: every later build must load it or migrate it --
     // "never silently corrupts" is only a check if an old save is on hand.
@@ -332,10 +346,77 @@ describe('the save (D70)', () => {
     expect(g.loadSave(text)).toBe('');
     expect(g.meta.bank).toBeGreaterThan(0);
     expect(g.diveLive).toBe(true);
+    // v1 kept the shot in constants (D83): its dive comes back with the Gun's
+    // shot as it was then, and is written back as the current version.
+    expect([g.player.shotSpeed, g.player.shotRadius]).toEqual([430, 4]);
+    expect(JSON.parse(g.saveText()).version).toBe(2);
     g.screen = g.resumeTo;
     g.immortal = true;
-    play(g, 600);
+    const shots = shotsSeen(g, 600);
     expect(Number.isFinite(g.player.x) && Number.isFinite(g.cameraY)).toBe(true);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it('loads a save written by the first build of version 2, and plays it on', () => {
+    const text = readFileSync(new URL('./fixtures/save-v2.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect(g.meta.bank).toBeGreaterThan(0);
+    expect(g.diveLive).toBe(true);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+});
+
+describe('the weapon record (D83)', () => {
+  // Fires one shot to the right, as the player would: the trigger arms on a
+  // released button, then the held button fires.
+  const fire = g => {
+    g.update(g.FIXED_DT);
+    g.aim.x = g.player.x + 100;
+    g.aim.y = g.player.y - g.cameraY;
+    g.keys.add('Mouse0');
+    g.update(g.FIXED_DT);
+    g.keys.delete('Mouse0');
+    return g.bullets[g.bullets.length - 1];
+  };
+
+  it('puts the carried weapon on the player, and fires every shot on its numbers', () => {
+    // A railgun is a line of data only if nothing about a shot is a constant.
+    const g = loadGame();
+    const w = g.WEAPONS[0];
+    Object.assign(w, { fireRate: 7, damage: 3, range: 120, shotSpeed: 900, shotRadius: 9, pierce: 2 });
+    g.reset(1);
+    for (const k of ['fireRate', 'damage', 'range', 'shotSpeed', 'shotRadius', 'pierce']) {
+      expect(g.player[k]).toBe(w[k]);
+    }
+    const b = fire(g);
+    expect([b.speed, b.r, b.maxTravel, b.pierce]).toEqual([900, 9, 120, 2]);
+    expect(Math.hypot(b.vx, b.vy)).toBeCloseTo(900);
+  });
+
+  it('gives each tier its own cost and effect, and counts only the carried weapon\'s', () => {
+    const g = loadGame();
+    const w = g.WEAPONS[0];
+    w.tiers = [{ cost: 10, apply: p => { p.pierce += 1; } },
+               { cost: 20, apply: p => { p.damage += 2; } }];
+    g.meta.bank = 25;
+    g.buy(w);
+    g.buy(w);                                    // 15 left, the second costs 20
+    expect([g.meta.gear[w.name], g.meta.bank]).toEqual([1, 15]);
+    // A second weapon, upgraded but left at home, adds nothing to the dive;
+    // equipment, worn by its owner whatever is carried, does.
+    g.WEAPONS.push({ ...w, name: 'Spear', tiers: [{ cost: 0, apply: p => { p.range += 1000; } }] });
+    g.meta.gear.Spear = 1;
+    g.EQUIPMENT.push({ name: 'Mask', tiers: [{ cost: 0, apply: p => { p.iframes += 1; } }] });
+    g.meta.gear.Mask = 1;
+    g.reset(1);
+    expect([g.player.pierce, g.player.damage, g.player.range]).toEqual([w.pierce + 1, w.damage, w.range]);
+    expect(g.player.iframes).toBe(g.PLAYER_START.iframes + 1);
   });
 });
 

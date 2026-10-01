@@ -121,8 +121,15 @@ function reset(seed) {
   seedRng(seed === undefined ? (Math.random() * 0x100000000) >>> 0 : seed);
   // First, before anything else draws: the whole dive's batches (D71).
   plan = drawPlan();
+  // The diver, carrying a weapon: its numbers go onto the player, where mods,
+  // attributes and the readout find them (D83).
+  // ponytail: the first weapon is always the one carried -- with one there is
+  // nothing to choose; the second (S5) brings `meta`'s choice, made at `home`.
+  const carried = WEAPONS[0];
+  const { name, tiers, ...shot } = carried;
   player = {
     ...PLAYER_START,
+    ...shot,
     x: ARENA_W / 2,
     y: ARENA_H / 2,
     hurt: 0,           // seconds of invulnerability left
@@ -135,9 +142,12 @@ function reset(seed) {
     dashDy: 0,         // so letting go of the keys can't spin it
     dashEnd: 0,        // seconds of the closing ring left
   };
-  // What persists, added to the start (D36): each gear tier and each point
-  // applied once. Mods add on top as they are picked; nothing multiplies.
-  for (const g of GEAR) for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.apply(player);
+  // What persists, added to the start (D36): each tier of the carried weapon
+  // and of the equipment, and each point, applied once. A weapon left at home
+  // adds nothing. Mods add on top as they are picked; nothing multiplies.
+  for (const g of [carried, ...EQUIPMENT]) {
+    for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.tiers[i].apply(player);
+  }
   for (const a of ATTRIBUTES) for (let i = 0; i < (meta.spent[a.name] || 0); i++) a.apply(player);
   if (damageOverride > 0) player.damage = damageOverride;   // a dev flag
   enemies = [];
@@ -207,7 +217,7 @@ function applyScenario(name, seed) {
 //
 // `version` from the first write (foundations.md -> The technical contract). A
 // save this build does not know is rejected loudly, never guessed at.
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, spent: {}, tasks: {},
            deepest: 0, cleared: 0 };
@@ -249,6 +259,17 @@ function saveText() {
   return JSON.stringify({ ...meta, dive: diveLive ? snapshot() : null });
 }
 
+// Brings an older save up to this version, or leaves it alone. v1 kept the
+// shot in constants, so a v1 dive's player has no shot speed or radius: it
+// gets the Gun's as they were then, 430 and 4 (D83).
+function migrate(s) {
+  if (s && s.version === 1) {
+    if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
+    s.version = 2;
+  }
+  return s;
+}
+
 // Reads a save back. Returns '' when it loaded -- or when there was nothing
 // to load -- and otherwise why it was refused, having changed nothing: the
 // caller keeps the refused text aside and says so on screen, so a save is
@@ -256,7 +277,7 @@ function saveText() {
 function loadSave(text) {
   if (text === null || text === undefined) return '';
   let s;
-  try { s = JSON.parse(text); } catch { return 'the save could not be read'; }
+  try { s = migrate(JSON.parse(text)); } catch { return 'the save could not be read'; }
   if (!s || s.version !== SAVE_VERSION) {
     return 'the save is version ' + (s && s.version) + ', this build reads ' + SAVE_VERSION;
   }

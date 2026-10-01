@@ -136,15 +136,12 @@ describe('numbers the docs quote about the code', () => {
   });
 
   it('quotes the diver at the start in full, at its real values', () => {
-    // `PLAYER_START` (k v, k v, ...) in design.md: the player's own fields,
-    // every one of them, and none of the Gun's -- those are entities/weapons.md's.
+    // `PLAYER_START` (k v, k v, ...) in design.md: every field, in order. The
+    // weapon's numbers are not among them -- they are entities/weapons.md's.
     const section = design.slice(design.indexOf('## Balance constants'));
     const listed = section.match(/`PLAYER_START`[^(]*\(([^)]*)\)/)[1]
       .split(',').map(pair => pair.trim().split(/\s+/));
-    const gun = ['fireRate', 'damage', 'range', 'pierce'];
-    const g = loadGame();
-    const want = Object.entries(g.PLAYER_START).filter(([k]) => !gun.includes(k))
-      .map(([k, v]) => [k, String(v)]);
+    const want = Object.entries(loadGame().PLAYER_START).map(([k, v]) => [k, String(v)]);
     expect(listed).toEqual(want);
   });
 
@@ -188,24 +185,32 @@ describe('the entity docs', () => {
   const keysOf = records => [...new Set(records.flatMap(Object.keys))];
   const plain = records => keysOf(records)
     .filter(k => records.every(r => r[k] === undefined || typeof r[k] !== 'object' && typeof r[k] !== 'function'));
-  // What `apply` does to the starting kit, `n` times over: the stats it moved,
-  // by how much ("speed +45") or to what ("speed 395").
+  // The player a dive starts with: the diver carrying the first weapon, before
+  // any tier or attribute -- what every "at max" and "at top" is counted from.
+  g.reset(1);
+  const START = { ...g.player };
+  // The same player carrying weapon `w` instead -- its numbers, as reset() puts them.
+  const kit = ({ name, tiers, ...numbers }) => ({ ...START, ...numbers });
+  // What `applies` do to `base`, in order: the stats they moved, by how much
+  // ("speed +45") or to what ("speed 395").
   const r3 = x => Number(x.toFixed(3));
-  const moved = (apply, n, by) => {
-    const from = { ...g.PLAYER_START }, to = { ...from };
-    for (let i = 0; i < n; i++) apply(to);
-    return Object.keys(to).filter(k => to[k] !== from[k]).map(k => k + ' ' + (by
-      ? (to[k] < from[k] ? '-' : '+') + r3(Math.abs(to[k] - from[k]))
+  const moved = (applies, by, base = START) => {
+    const to = { ...base };
+    for (const apply of applies) apply(to);
+    return Object.keys(to).filter(k => to[k] !== base[k]).map(k => k + ' ' + (by
+      ? (to[k] < base[k] ? '-' : '+') + r3(Math.abs(to[k] - base[k]))
       : r3(to[k]))).join(', ');
   };
-  // ponytail: the Gun is pieced together from PLAYER_START, BULLET_SPEED and
-  // its GEAR record, because there is no weapon record yet (weapons.md); read
-  // the record instead once it exists, and these two lists go.
-  const WEAPONS = ['Gun'];
-  const WEAPON_FIELDS = ['fireRate', 'damage', 'range', 'pierce'];
-  const weapons = g.GEAR.filter(x => WEAPONS.includes(x.name));
-  const equipment = g.GEAR.filter(x => !WEAPONS.includes(x.name));
-  const tiered = x => [x.tiers, moved(x.apply, 1, true), moved(x.apply, x.tiers.length)];
+  // A piece of gear's roster and its tiers, one row a tier.
+  const gear = records => {
+    const cols = ['name', ...plain(records).filter(k => k !== 'name')];
+    return [
+      table([...cols, 'at top'], records.map(x =>
+        [...cols.map(k => x[k]), moved(x.tiers.map(t => t.apply), false, kit(x))])),
+      table(['name', 'tier', 'cost', 'adds'], records.flatMap(x => x.tiers.map((t, i) =>
+        [x.name, i + 1, t.cost, moved([t.apply], true, kit(x))]))),
+    ];
+  };
 
   it('lists every enemy type at its real numbers', () => {
     const cols = plain(g.ENEMY_TYPES);
@@ -219,7 +224,7 @@ describe('the entity docs', () => {
   it('lists every mod and filler with what it does and its card text', () => {
     const cols = plain(g.MODS);
     expect(doc('mods.md')).toContain(table([...cols, 'per pick', 'at max'],
-      g.MODS.map(m => [...cols.map(k => m[k]), moved(m.apply, 1, true), moved(m.apply, m.max)])));
+      g.MODS.map(m => [...cols.map(k => m[k]), moved([m.apply], true), moved(Array(m.max).fill(m.apply))])));
     // A filler pays into the dive as well as the player, so it is worked out
     // on a dive in progress, short of a heart, rather than on the kit.
     const pays = f => {
@@ -236,22 +241,22 @@ describe('the entity docs', () => {
   });
 
   it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
-    expect(doc('weapons.md')).toContain(table(['name', ...WEAPON_FIELDS, 'tiers', 'per tier', 'at top'],
-      weapons.map(x => [x.name, ...WEAPON_FIELDS.map(k => g.PLAYER_START[k]), ...tiered(x)])));
-    expect(doc('equipment.md')).toContain(table(['name', 'tiers', 'per tier', 'at top'],
-      equipment.map(x => [x.name, ...tiered(x)])));
+    for (const t of gear(g.WEAPONS)) expect(doc('weapons.md')).toContain(t);
+    for (const t of gear(g.EQUIPMENT)) expect(doc('equipment.md')).toContain(t);
   });
 
   it('documents every field the code has, and only those or reserved ones', () => {
     // The record's shape is what S5 (content) writes its content on, so a
     // field nobody documented -- or a documented one the code dropped -- is
     // the shape drifting. A field the code does not have yet is allowed only
-    // marked **Reserved**, for the stage that adds it.
+    // marked **Reserved**, for the stage that adds it. Every piece of gear has
+    // a name and tiers, which is all the shop reads -- equipment too, before
+    // any exists.
     const shapes = {
       'enemies.md': keysOf(g.ENEMY_TYPES),
       'mods.md': keysOf(g.MODS),
-      'weapons.md': [...keysOf(g.GEAR), ...WEAPON_FIELDS, 'BULLET_SPEED'],
-      'equipment.md': keysOf(g.GEAR),
+      'weapons.md': keysOf(g.WEAPONS),
+      'equipment.md': [...new Set(['name', 'tiers', ...keysOf(g.EQUIPMENT)])],
     };
     const wrong = [];
     for (const [file, keys] of Object.entries(shapes)) {
@@ -271,7 +276,7 @@ describe('the entity docs', () => {
     // Any other heading has to be one of the layout's own.
     const LAYOUT = ['Roster', 'Fields', 'Behaviours', 'Fillers — not mods', 'Adding one'];
     const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS,
-                    'weapons.md': weapons, 'equipment.md': equipment };
+                    'weapons.md': g.WEAPONS, 'equipment.md': g.EQUIPMENT };
     const wrong = [];
     for (const [file, records] of Object.entries(items)) {
       const names = records.map(r => r.name);

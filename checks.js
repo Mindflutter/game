@@ -45,8 +45,8 @@ if (location.search === '?test') {
   // literal; when bullets gained `speed` (D53) every one of them would have
   // computed NaN travel and flown forever, because `NaN >= maxTravel` is false.
   const shot = (over = {}) => {
-    const b = Object.assign({ id: ++bulletId, x: player.x, y: player.y, r: 4,
-                              vx: BULLET_SPEED, vy: 0, pierce: 0,
+    const b = Object.assign({ id: ++bulletId, x: player.x, y: player.y, r: player.shotRadius,
+                              vx: player.shotSpeed, vy: 0, pierce: 0,
                               travelled: 0, maxTravel: 300 }, over);
     b.speed = Math.hypot(b.vx, b.vy);
     bullets.push(b);
@@ -269,8 +269,8 @@ if (location.search === '?test') {
   holdFire();
   aim.x = player.x + 300; aim.y = player.y;
   for (let i = 0; i < 60; i++) update(1 / 60);
-  check(Math.abs(bulletId - PLAYER_START.fireRate) <= 1,
-    'one second held must fire about ' + PLAYER_START.fireRate + ' shots, got ' + bulletId);
+  check(Math.abs(bulletId - player.fireRate) <= 1,
+    'one second held must fire about ' + player.fireRate + ' shots, got ' + bulletId);
   ceaseFire();
 
   // The dash starts as pure movement (D51): it throws what it passes through
@@ -947,7 +947,7 @@ if (location.search === '?test') {
   screen = 'title';
 
   // `home` stacks its layer list above its rows and its rows above the hint,
-  // both from tables (LAYERS, GEAR, ATTRIBUTES). Drawn with every layer shown
+  // both from tables (LAYERS, WEAPONS, EQUIPMENT, ATTRIBUTES). Drawn with every layer shown
   // -- the tallest the list gets -- so a sixth layer or a third gear item fails
   // here rather than running text through text.
   // Read from the layout's own owners: the lines from `MENUS.home.lines`, drawn
@@ -1005,14 +1005,14 @@ if (location.search === '?test') {
   for (let i = 0; i < 20 && thin.hp === 5; i++) update(FIXED_DT);
   check(thin.hp === 4, 'a railgun-speed shot must not tunnel a thin enemy, hp=' + thin.hp);
 
-  // A shot's range is the distance it actually covered, not BULLET_SPEED x time.
-  // Identical today, wrong the moment a weapon fires at another speed.
+  // A shot's range is the distance it actually covered, at its own speed --
+  // not the carried weapon's speed x time, which a faster shot outruns.
   reset();
   queuePaused = true;
   shot({ x: 100, y: 400, vx: 2000, maxTravel: 200 });
   for (let i = 0; i < 40 && bullets.length; i++) update(FIXED_DT);
   check(bullets.length === 0,
-    'a fast shot must still die at its own range, not at BULLET_SPEED\'s');
+    'a fast shot must still die at its own range, not at its weapon\'s speed');
 
   // The clock banks leftover time rather than stretching a tick to fit the
   // frame. A 60Hz frame is two ticks at 1/120, a 144Hz frame is one or none,

@@ -31,7 +31,7 @@ game/       content.js  every tuning number + all content tables
                         snapshot and the save text
             logic.js    step() — arrivals, the gate, the descent, movement,
                         collision; the plan; home's buying and banking
-                        ── 1669 lines. Survives the port.
+                        ── 1703 lines. Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
@@ -46,13 +46,14 @@ Line counts are as of 2026-10-01. Regenerate rather than trust them:
 `wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
 *reports*, never a grep — some call sites sit inside loops.
 
-The platform share is **32%** (772 of 2441). D17 measured 23% on 2026-09-12 and
+The platform share is **31%** (772 of 2475). D17 measured 23% on 2026-09-12 and
 it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
 while `platform/` did not, and S2 held it level — the camera is one translate
 and the specks, depth tint and margin cover are a few dozen lines. S3 took it
 down a point: the lunge is logic, and its tell is a few lines of drawing. S4
 took it down three more: the layers, the economy and the save are logic, and
-`home` is one more menu plus a list. This is the number to watch — CLAUDE.md says not to
+`home` is one more menu plus a list. The weapon record, one more: a table and a
+migration, all logic. This is the number to watch — CLAUDE.md says not to
 invest in the canvas layer, and this is what that rule looks like when it slips.
 
 Plain `<script>` tags, not modules, so `file://` works. **Load order matters**
@@ -183,7 +184,8 @@ the weapon reads it as a held state, so one click was being read twice. While `M
 elapsed, a shot leaves along the cursor and dies at `player.range` (D8). The
 cooldown is clamped at zero rather than allowed to run negative, so holding the
 button gives an honest `fireRate` while the first click after a pause is always
-instant. The Gun's own numbers are `entities/weapons.md`.
+instant. Every number of the shot — rate, damage, range, speed, hitbox,
+pierce — is the carried weapon's, on the player (D83): `entities/weapons.md`.
 
 **Arrivals: the batch queue and the gate** (D27, D48, D54). Enemies come one
 **batch** at a time — a record naming counts per type — and nothing new arrives
@@ -343,12 +345,14 @@ because what it is called is still open in `ideas.md`.
 camera depth reached, shown in metres at 10px each) and `cleared` (layers
 cleared, which is what unlocks the next at `home`). Points available are
 **derived** — `points()`, earned from `tasks` less `spent` — never stored.
-`reset()` builds the player as `PLAYER_START`, plus each gear tier's `apply`,
-plus each attribute point's `apply`; mods then add on top as picked. All sums.
+`reset()` builds the player as `PLAYER_START` carrying the first weapon — its
+numbers copied on (D83) — plus each tier of that weapon and of the equipment,
+plus each attribute point; mods then add on top as picked. All sums. A weapon
+left at `home` adds nothing.
 
-- `GEAR`: the gear for sale, by name — today the Gun's tiers
-  (`entities/weapons.md`). `buy()` refuses what the bank cannot pay, and past
-  the top tier.
+- `WEAPONS` and `EQUIPMENT`: the gear for sale, a tier at a time, by name
+  (`entities/`). `buy()` refuses what the bank cannot pay, and past the top
+  tier.
 - `ATTRIBUTES`: **Dash reach**, each point +150px/s of `dashSpeed`, 141 → 165 →
   189px of dash. `raise()` refuses without a point.
 - `TASKS`: **untouched** — a batch cleared with `batchHit` still false pays 1
@@ -369,8 +373,11 @@ pause menu (D70). `loadSave(text)` returns `''` when it loaded or found nothing,
 and otherwise a reason, having changed nothing; `main.js` then copies the text
 aside under `abyss-save-rejected` and the title says why. Written by `persist`
 on pause, on a purchase, when a dive ends, and — from `main.js` — when the page
-is hidden or closed. `SAVE_VERSION` is 1; `tests/fixtures/save-v1.json` is a
-save from the first build of the format, which every later build must load.
+is hidden or closed. `SAVE_VERSION` is 2. `migrate()` brings a v1 save up as
+it loads — its dive's player gains the Gun's shot speed and radius as they were
+then (D83) — so `tests/fixtures/save-v1.json`, from the format's first build,
+still loads, and `save-v2.json` is the first of version 2. Every later build
+must load both, or migrate them.
 
 **Damage.** Contact costs 1 HP behind 1s of invulnerability, during which the
 player blinks — without the i-frames a touching enemy drains 3 HP in 50ms.
@@ -491,7 +498,7 @@ Two suites (D39, D44).
 
 | | Command | Covers |
 |---|---|---|
-| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, the layer end offers no mods, the water flows behind the mod cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the layer ends at the bottom), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss's clear pays a rank and mods), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal, a rank and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap and three cards while any is under it; the gems card paying only when taken; every gem reaching the player; death banking the gems; `home`, buying, points and the micro-task; a hand-placed enemy paying no task; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 fixture loading), the bot starting from a scenario, the dev flags, and the docs (D57) — among them the entity docs' tables against `game/content.js` (D81) and the map in `docs/README.md` (D82). Vitest + fast-check, dev-only. |
+| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, the layer end offers no mods, the water flows behind the mod cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the layer ends at the bottom), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss's clear pays a rank and mods), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal, a rank and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap and three cards while any is under it; the gems card paying only when taken; every gem reaching the player; death banking the gems; `home`, buying, points and the micro-task; a hand-placed enemy paying no task; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 and v2 fixtures loading and firing finite shots), the weapon record (`tests/meta.test.js`: the carried weapon's numbers on the player and on every shot, tiers of their own, a weapon left at home adding nothing — D83), the bot starting from a scenario, the dev flags, and the docs (D57) — among them the entity docs' tables against `game/content.js` (D81) and the map in `docs/README.md` (D82). Vitest + fast-check, dev-only. |
 | **Browser** | `index.html?test` | The scripted checks (count under Verification), plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`, and the same seed played to the bottom of the dive at three window sizes through real `MouseEvent`s (D29). |
 
 `tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
@@ -529,8 +536,8 @@ is not usable here. Double-clicking `index.html` still needs no server at all.
 
 All in `game/content.js` under `// balance`. These are the real product of the
 prototype — they transfer to any port verbatim. The entities' numbers — the
-Gun's fields of `PLAYER_START` and `BULLET_SPEED` among them — are in their
-docs in `entities/`; the rest are here, and `npm test` holds them to the code.
+weapons' among them — are in their docs in `entities/`; the rest are here, and
+`npm test` holds them to the code.
 
 `PLAYER_START`, the diver (r 10, speed 260, hp 3, maxHp 3, iframes 1,
 dashCooldown 2.2, dashSpeed 884, mendOnClear 0, dashDamage 0) ·

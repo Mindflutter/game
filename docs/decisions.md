@@ -2592,3 +2592,54 @@ it or `CLAUDE.md` names exists; every `NAME value` quote in a doc that
 describes the code is the constant's real value; `design.md`'s list of the
 diver's starting numbers is complete and true; the root `README.md` lists
 every scenario.
+
+## D83 — The weapon record: a line of data, one carried per dive · 2026-10-01
+The rest of the first requirement before S5 (content) (D80 (entity docs and
+mods from drops come first)): what a weapon is as data, how one is owned and
+equipped, its tiers, and where weapon-scoped mods attach. Igor: "design weapon
+record"; Claude proposed seven points, and Igor: "approved". The design and its
+check against `foundations.md`:
+`superpowers/specs/2026-10-01-weapon-record-design.md`.
+
+**Taken as settled**: weapons are gear (the glossary); each has upgrades of
+its own, and the player invests in the one that suits them
+(`high level design.md`); nothing is managed mid-dive (the genre contract, 6).
+
+**Decided — Claude's design, approved by Igor.**
+- **A weapon is a line in `WEAPONS`**: `name`; the shot — `fireRate`,
+  `damage`, `range`, `shotSpeed`, `shotRadius`, `pierce`; its own `tiers`. The
+  Gun is the first line: `BULLET_SPEED` became its `shotSpeed`, and the shot
+  radius hard-coded in `game/logic.js` its `shotRadius`. `GEAR`, left with the
+  equipment, is `EQUIPMENT`.
+- **Owned and carried**: any number owned, one carried per dive, chosen at
+  `home` between dives, never switched mid-dive. Built with the second weapon,
+  in S5 (content) — a `cost` to own one, the carried weapon's name in the save
+  — and reserved in `entities/weapons.md` until then. Today the first line is
+  carried.
+- **Tiers of their own**: each `{ cost, apply }`, so one tier can add rate and
+  the next pierce. Equipment shares the shape.
+- **The carried weapon's numbers sit on the player** for the dive: copied when
+  it starts, then its tiers and the equipment's, the attribute points, and the
+  mods on top — all adding. A weapon left at `home` adds nothing.
+- **Weapon mods are ordinary mods** with `scope: 'weapon'` and a list of the
+  weapons they fit, `weapons` — reserved until S5 (content) writes one.
+  **Supersedes the mechanism of D31 (two-tier progression)**: `apply` does not
+  receive the weapon, since with its numbers on the player there is nothing to
+  pass. D31's `scope` stands.
+- **Melee is first tried as data**: a very short, wide, piercing shot. A
+  behaviour of its own only if that does not read as melee — Igor's call, in
+  S5 (content).
+- **The save is version 2**, its first migration: a v1 dive's player gains the
+  Gun's shot as it was then, 430 and 4, as it loads. The v1 fixture still
+  loads, and a v2 fixture joins it.
+
+**Left open, with owners**: an RMB secondary would need numbers of its own
+(`ideas.md`). A scenario that names the weapon carried, for S6 (balance)'s
+per-weapon measurement, and `home` with several weapons both come with the
+second weapon, in S5 (content).
+
+**Guarded by**: `tests/meta.test.js` — the carried weapon's numbers reach the
+player and every shot; each tier its own cost and effect, and a weapon left at
+home adds nothing; the v1 fixture migrated and the v2 fixture loaded, both
+firing finite shots. `tests/docs.test.js` — `entities/weapons.md` and
+`equipment.md` rebuilt from the tables.

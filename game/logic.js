@@ -285,7 +285,7 @@ function points() {
 
 // The next tier's cost, or undefined at the top -- where `canBuy` is false,
 // since no bank is `>= undefined`. `home` dims the row by the same test.
-const nextCost = g => g.tiers[meta.gear[g.name] || 0];
+const nextCost = g => g.tiers[meta.gear[g.name] || 0]?.cost;
 const canBuy = g => meta.bank >= nextCost(g);
 
 // Both write the save at once: a purchase is never undone by a closed tab.
@@ -613,10 +613,10 @@ function step(dt) {
     const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
     bullets.push({
       id: ++bulletId,
-      x: player.x, y: player.y, r: 4,
-      vx: (tx / d) * BULLET_SPEED,
-      vy: (ty / d) * BULLET_SPEED,
-      speed: BULLET_SPEED,           // its own speed, so range is measured at
+      x: player.x, y: player.y, r: player.shotRadius,
+      vx: (tx / d) * player.shotSpeed,
+      vy: (ty / d) * player.shotSpeed,
+      speed: player.shotSpeed,       // its own speed, so range is measured at
                                      // the speed it actually flies (D53)
       pierce: player.pierce,
       travelled: 0,
@@ -710,10 +710,9 @@ function step(dt) {
   for (const b of bullets) {
     b.x += b.vx * dt;
     b.y += b.vy * dt;
-    // The bullet's own speed, not BULLET_SPEED. The same today because every
-    // bullet flies at BULLET_SPEED, and the DoD's "railgun-speed projectile"
-    // is one that will not -- a range counted at the wrong speed gives it the
-    // wrong range.
+    // The bullet's own speed, set by the weapon that fired it (D83): the
+    // DoD's "railgun-speed projectile" and a jab fly at different speeds, and
+    // a range counted at the wrong speed gives it the wrong range.
     b.travelled += b.speed * dt;
     if (b.travelled >= b.maxTravel) b.gone = true;
   }

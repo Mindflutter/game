@@ -17,16 +17,13 @@ const ARENA_H = 800;
 // Anything a mod can raise has to be a field here rather than a bare constant,
 // which is why the dash cooldown and the i-frames moved in (D34): a mod is a
 // line of data, and a line of data cannot edit a `const`.
-// fireRate, damage, range and pierce are the Gun's: docs/entities/weapons.md.
+// The diver alone: the weapon's numbers join these when a dive starts, from
+// the one it carries (`WEAPONS`, D83).
 const PLAYER_START = {
   r: 10,             // radius, in pixels
   speed: 260,        // pixels per second
   hp: 3,
   maxHp: 3,
-  fireRate: 2.5,     // shots per second
-  damage: 1,
-  range: 250,        // how far a shot travels before it dies
-  pierce: 0,         // extra enemies a shot passes through
   iframes: 1,        // seconds of invulnerability after a hit
   dashCooldown: 2.2, // seconds before you can dash again
   dashSpeed: 884,    // px/s while dashing -- its OWN number, not a multiple of
@@ -52,7 +49,6 @@ const DASH_END       = 0.18;  // seconds of the ring that closes the dash
 const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
 const PUSH_DRAG      = 0.02;  // ...bleeding to 2% per second, so about 80px
 
-const BULLET_SPEED   = 430;   // pixels per second
 // Gems fly to you from wherever they drop, and never fade (D35): currency is
 // collected automatically and never chased. 600 rather than the old 300, which
 // was a pull *inside* a 75px pickup ring -- from across the view it has to
@@ -183,10 +179,11 @@ const FILLERS = [
 
 // ---------- gear, attributes, micro-tasks ----------
 // What persists between dives, spent at `home` (D31, D36). Each is a line of
-// data in the mod's own shape -- `apply` raises the player once per tier or
-// point held -- so the second item costs what the first did. All three sum
-// with each other and with mods, which add on top during a dive; nothing
-// multiplies (D36, and Igor, 2026-09-30: "mods on top of gear/equipment/stats").
+// data whose `apply` raises the player -- once per point held, or once per
+// tier, each tier its own (D83) -- so the second item costs what the first
+// did. All three sum with each other and with mods, which add on top during a
+// dive; nothing multiplies (D36, and Igor, 2026-09-30: "mods on top of
+// gear/equipment/stats").
 //
 // The save keys them by `name`, so renaming one orphans what players own.
 //
@@ -194,11 +191,25 @@ const FILLERS = [
 // 40 / 100 / 200 gems, dash reach's +150px/s (141 -> 165 -> 189px of dash),
 // one point per task.
 
-// `gear` -- bought with gems, combat stats. `tiers` are the costs, in order.
-// Documented in docs/entities/: the Gun in weapons.md, the rest in equipment.md.
-const GEAR = [
-  { name: 'Gun', tiers: [40, 100, 200], apply: p => p.fireRate += 0.5 },
+// `gear` -- bought with gems, combat stats: the weapons, then the equipment.
+// Each tier is `{ cost, apply }`, in the order they are bought.
+//
+// A weapon is the shot a dive fires (D83): `fireRate` shots per second,
+// `damage` a hit, gone after `range` px, flying at `shotSpeed` px/s with a
+// `shotRadius` hitbox, through `pierce` extra enemies. A dive carries one and
+// copies these onto the player, where mods, attributes and the readout find
+// them -- so a railgun, or a jab that is a short fat shot, is a line here.
+// Documented in docs/entities/weapons.md -- `npm test` holds it here.
+const WEAPONS = [
+  { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0,
+    tiers: [{ cost: 40,  apply: p => p.fireRate += 0.5 },
+            { cost: 100, apply: p => p.fireRate += 0.5 },
+            { cost: 200, apply: p => p.fireRate += 0.5 }] },
 ];
+
+// Equipment: gear that is not a weapon (D81). None yet -- S5 (content)'s.
+// Documented in docs/entities/equipment.md -- `npm test` holds it here.
+const EQUIPMENT = [];
 
 // `attribute` -- body stats, raised by points that only micro-tasks pay.
 // Uncapped at the spending end: a layer holds a finite set of tasks, so the
@@ -522,9 +533,12 @@ const MENUS = {
     back: () => openMenu('title'),
     items: [
       { label: 'Dive', run: () => reset() },             // every dive from the top (D66)
-      ...GEAR.map(g => ({
+      // Every weapon's tiers, then every piece of equipment's.
+      // ponytail: every weapon listed and upgradable; owning one first, and
+      // choosing which to carry, come with the second weapon (S5, D83).
+      ...[...WEAPONS, ...EQUIPMENT].map(g => ({
         get label() {
-          const t = meta.gear[g.name] || 0, cost = g.tiers[t];
+          const t = meta.gear[g.name] || 0, cost = nextCost(g);
           return g.name + '   tier ' + t + (cost === undefined ? ', the top'
             : ' \u2192 ' + (t + 1) + '   ' + cost + ' gems');
         },

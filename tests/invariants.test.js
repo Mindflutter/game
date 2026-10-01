@@ -129,7 +129,7 @@ describe('dev flags', () => {
     expect(g.player.damage).toBe(100);
     g.damageOverride = 0;
     g.reset(3);
-    expect(g.player.damage).toBe(g.PLAYER_START.damage);
+    expect(g.player.damage).toBe(g.WEAPONS[0].damage);
   });
 });
 
