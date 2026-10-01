@@ -10,330 +10,30 @@ must stay true while doing it.
 
 ## Active stage
 
-**None. S4 — Meta loop skeleton closed 2026-09-30** — Igor: "yes, close s4 and
-commit after cleanup". **Next: the two requirements before S5** (D80), each in
-a session of its own — a doc per game entity, and mods reworked from a choice
-into enemy drops; see "Before S5" below. Then S5 — Content to the DoD numbers.
-Its entry asks for "the data shapes for enemy, weapon, gear and mod … settled
-and will not change"; there is no weapon record yet — the one gun is
-`PLAYER_START` fields plus the Gun's tiers — and S6 — Balance's threat number
-(D79) will add a field to every enemy. Both go to the entity-docs session
-(Igor, 2026-09-30: "yes").
+**None — between S4 (meta loop skeleton), closed 2026-09-30, and S5 (content).**
+Next: the two requirements before S5 (D80), each in a session of its own —
+see "Before S5" below. The first, a doc for every kind of game entity, is
+built; the weapon record it was also to settle is open, and designed next —
+Igor, 2026-10-01: "design weapon record". Then the mods-from-drops rework,
+then S5 — Content to the DoD numbers.
 
-### S4 — Meta loop skeleton · closed 2026-09-30
+## Closed stages
 
-Done in S4: the dive runs on through two layers drawn from pools (D66, D71,
-D72); the layer end is a milestone and the last one the win (D68); every mod is
-capped (D69); gems are pulled to the player and banked however a dive ends
-(D67, D78); `home` exists between dives only (D76), with the gun's tiers, dash
-reach and the "untouched" micro-task (D74, D75); and a versioned save holds the
-dive in progress, with `persist` as the seam's seventh name (D70, D77). Design:
-`superpowers/specs/2026-09-30-s4-meta-loop-design.md`; plan:
-`superpowers/plans/2026-09-30-s4-meta-loop.md` — both history now.
+What each delivered, in one line. How each was closed — its definition of
+done, met, and Igor's word on it — is `changelog.md` on the closing date, and
+the decisions listed say why.
 
-**Closed 2026-09-30 by Igor: "yes, close s4 and commit after cleanup"**, with
-the playable exit his call: "if you ask if it's ok at current stage, yes it
-is" — the game "is still like the first alpha iteration", and three primitive
-enemies cannot show the flow.
+| Stage | Closed | Delivered | Decisions |
+|---|---|---|---|
+| S0 — Foundations & spike | 2026-09-27 | These docs, the check harness, seeded RNG, scenarios, the entity budget measured, the Node test stack | D27–D44 |
+| S1 — Combat core | 2026-09-28 | Manual fire, the batch queue and gate, one rank per batch with mods at the gate, the swept and bought dash, the fixed timestep | D45–D57 |
+| S2 — The dive: camera and descent | 2026-09-28 | A layer that scrolls under a camera, a current between gate depths that never stops | D58–D61 |
+| S3 — One boss, one complete layer | 2026-09-29 | The boss as the layer's last batch, two mini-bosses, the lunge — a layer that can be finished | D62–D65 |
+| The layer-to-layer design pass | 2026-09-30 | How a dive runs on through the layers — decided, checked against `foundations.md`, planned | D66–D73 |
+| S4 — Meta loop skeleton | 2026-09-30 | Two layers drawn from pools, the layer end and the win, every mod capped, `home` with the gun's tiers and dash reach, a micro-task, the versioned save | D74–D79 |
 
-Carried out of S4, none of it blocking: the threat system for enemies and how
-batches grow (S6 — Balance, D79); which enemies drop gems (S6, D78); D35's
-`+N` popup (S7 — Alpha polish); layer 2's own content (S5); and every number
-marked Claude's pick in `design.md` → What persists. Two comments the build
-made false — the `ponytail:` note on `BATCHES`, whose debt S4 paid, and
-`clearBatch`'s D59 paragraph — were removed at Igor's word after the close.
-
-### The layer-to-layer design pass · closed 2026-09-30
-
-Decided: the dive runs on through the layers and death restarts it from the
-top (D66), currency is kept on death (D67), the layer end is a milestone and
-clearing the last layer wins the game (D68), every mod is capped across a dive
-(D69), a dive can be saved at any point (D70), batches are drawn from pools
-(D71), between layers there is no screen (D72), and "layer end" is the term
-(D73). The design and its check against `foundations.md`:
-`superpowers/specs/2026-09-30-layer-to-layer-design.md` — history now. The
-ready plan is S4, S5 and S6 below, re-planned from it.
-
-### S3 — One boss, one complete layer · closed 2026-09-29
-
-Done in S3: the boss is the layer's last batch (D62) and lunges (D64); a
-mini-boss is a smaller boss (D65); the win rate is the boss fight's (D63).
-Plan, with the design at its head: `superpowers/plans/2026-09-29-s3-boss.md` —
-history now.
-
-**Closed 2026-09-29 by Igor: "wrap up s3"**, having played it: "right now it's
-very easy for me. but: i suggest we leave all balance fine-tuning for later.
-let's just focus on what the stage DoD says."
-
-Carried out of S3, none of it blocking: balance (S6 — Balance), the kiting bot
-that backs out of its own range, normal enemies alongside the boss and more
-boss attacks (all three in `ideas.md`), and every number of the lunge —
-Claude's picks.
-
-### S2 — The dive: camera and descent · closed 2026-09-28
-
-Done in S2: the descent — a current between gate depths that never stops and
-is independent of the player (D58); no rank and no mods at the layer end,
-which is not a gate (D59); the layer-to-layer logic given a design pass of its
-own after S3 (D60); and "dive", not "run" (D61). Design:
-`superpowers/specs/2026-09-28-s2-descent-design.md`; plan:
-`superpowers/plans/2026-09-28-s2-descent.md` — both history now; where they
-disagree with D58, D58 wins.
-
-**Closed 2026-09-28 by Igor: "commit and finalize s2".** The checks closed
-three exit conditions; the fourth, playable, was Igor's call.
-
-Carried out of S2, none of it blocking: the gems lost to the descent (S4 —
-Meta loop skeleton, with D35), the layer end and everything between layers
-(the design pass after S3), a lively background (post-alpha, in `ideas.md`),
-and the four current numbers — Claude's picks, still open to Igor's feel.
-
-### S1 — Combat core · closed 2026-09-28
-
-Done in S1: the weapon is manual (D45), the batch queue and gate (D48), one
-rank per batch with mods at the gate (D49), the dash sweeps its path (D50), the
-dash is bought (D51), the development readout (D52), the fixed timestep with
-swept bullets (D53), and the batches re-derived (D54).
-
-**Closed 2026-09-28 by Igor: "close s1, s2 coming in a different session".**
-Every DoD bullet was met and Igor confirmed the fight (2026-09-27, on D54's
-batches: "the fight feel better now") — the one thing the bot could not judge.
-
-Carried out of S1, none of it blocking: the dash economy rebalance (S6 —
-Balance owns it), the `home`-vs-`mod` tier question for dash upgrades (S4 —
-Meta loop skeleton), Igor's fish-from-behind-the-screen arrival idea, and the
-gate beat running 1.8s rather than 1.2s — Igor, asked, said leave it.
-
-### S0 — Foundations & spike · closed 2026-09-27
-
-Delivered: docs (`foundations.md`, `plan.md`, D27–D44), the check harness
-(D39), `docs/` tracked in git (D40), seeded RNG + `serve.py` (D41), scenarios +
-stepped mode (D42), measured performance which cancelled the glow cache (D43),
-and the Node test stack with six property-based invariants (D44).
-Done also: the entity-budget spike, which **cancelled** the glow cache (D43),
-and the Node test stack with six property-based invariants (D44).
-**Every S0 exit condition is met.** Next session opens S1 — Combat core, which
-is where the genre actually changes: manual LMB fire, the batch queue and gate,
-and the `// balance` block re-derived from scratch.
-Dropped: a Playwright real-keypress check. `checks.js` already dispatches
-`KeyboardEvent`s through `platform/input.js` with Cyrillic and AZERTY character
-values against correct physical codes — a stronger test of D12 than a real
-keypress on a US layout could be.
-
-## The loop between every stage
-
-Not optional, and not a habit — an explicit step:
-
-1. Decide one thing.
-2. Re-read `foundations.md`.
-3. List what the decision **interferes with** — constraints it breaks, earlier
-   decisions it supersedes, sentences in `design.md` it makes false.
-4. Fix those, in the same step.
-5. **Validate** the decision: a check that fails without it, a measured number,
-   or an explicit "this is feel, Igor's call".
-6. Only then continue.
-
-A stage is not finished while the next one has already started.
-
-## Rules for every stage's DoD
-
-Every stage exits on all four:
-
-- **A check that fails without the work.** Verified by breaking the rule it
-  guards. A check that can only pass proves nothing.
-- **A measured number**, not an impression.
-- **Docs updated in the same step** — `changelog.md`, `decisions.md` for
-  anything decided, `design.md` for anything whose behaviour changed, and
-  whatever this stage made false.
-- **Playable.** Every stage ends with something that can be launched and
-  played. No stage delivers only infrastructure.
-
----
-
-## S0 — Foundations & spike
-
-**Entry:** the design draft exists and its load-bearing questions are answered.
-
-**Work:** `foundations.md`, `plan.md`, D27–D37 written. Seeded RNG landed and
-routed through every `Math.random()` in `game/`. Offscreen glow cache built and
-measured. A throwaway spike driving the entity budget to failure. The
-`SCENARIOS` table and `?dev=<name>` loader (D37 — Scenarios), which the bot and
-Igor both drive. The test harness fixed and the stack installed (D39 — Test
-stack): `check()` replaces `console.assert`, each check resets state, Vitest and
-fast-check land as dev dependencies.
-
-**Exit (DoD):**
-- The entity budget is a measured fact, not the guess in `foundations.md`:
-  done 2026-09-27, D43 — under 1ms per frame at 500 entities, ~4000 of headroom.
-- The same seed replays the same dive, proven by a check.
-- Glow via cached blit is measured against `shadowBlur` per frame; the number
-  is recorded. **Done, and the answer was to cancel the cache** (D43).
-- At least two scenarios load and play in isolation, and the bot selects one by
-  name — same mechanism, not a parallel harness (D37).
-- The suite **reports pass/fail** and a deliberately broken check makes it say
-  so — verified by breaking one (D39).
-- The existing 79 checks pass under the new harness, in any order.
-- At least one invariant runs as a property test over generated seeds. **Done:
-  six** (D44), each verified by breaking it.
-- **Zero gameplay change.** The game plays exactly as it did.
-
-**Why first:** the seeded RNG is what makes every later balance claim mean
-something, and the glow measurement is what decides whether D30 holds.
-
-## S1 — Combat core: manual fire and the batch gate · closed 2026-09-28
-
-**Entry:** S0 exits.
-
-**Work:** In the **existing fixed arena** — no scrolling yet, no camera, no
-home. LMB fires. The spawn director is deleted and replaced by a batch queue
-with a gate. The `// balance` block is re-derived from scratch (D28 — Manual
-fire). The XP curve is deleted and rank becomes one per batch cleared; the mod
-pool is **body and comfort only** (D34 — Mods), so mods and manual fire are not
-being balanced against each other at the same time.
-
-**Exit (DoD):**
-- ~~Three batches clear in sequence; the gate provably blocks progress while a
-  batch is non-empty, and provably releases when it empties.~~ Done, D48.
-- ~~Fixed timestep in place; a railgun-speed projectile cannot tunnel a thin
-  enemy at any `dt` the frame cap allows.~~ Done, D53 — and the tunneling half
-  needed swept collision, not just a bounded `dt`.
-- ~~Bot reports time-to-clear per batch, paired across seeds.~~ Done, D49 — the
-  bot takes a mod now, so it no longer stalls at the offer. The numbers are in
-  `roadmap.md` → Health, and they are what says the balance block is next.
-- ~~A mod is offered only at a gate, never mid-batch — checked, not assumed.~~
-  Done, D49, and verified by ranking up per kill instead: 5 failures.
-- ~~Playable: you fight batches with a mouse and it is recognisably a game.~~
-  Igor has been playing it since D49.
-- ~~**Igor confirms the fight.**~~ Done, 2026-09-27: "the fight feel better
-  now", on D54's batches.
-
-**The hard part:** this is the genre change. Everything about the prototype's
-tuning is void here. Expect this stage to take longer than it looks.
-
-## S2 — The dive: camera and descent · closed 2026-09-28
-
-**Entry:** S1 exits.
-
-**Work:** One layer scrolls. Camera follows the descent. Batches gate it
-(D27): smooth between, locked during. Built as D58 (the descent): a current
-between gate depths that never stops and is independent of the player. The
-layer ends on a "LAYER CLEARED" screen that is **a stop, not a win** — no reward, no unlock — so S3
-below is still the first stage with an ending.
-
-**Exit (DoD):**
-- ~~One layer traversable top to bottom, gated the whole way.~~ Done, D58.
-- ~~Difficulty invariant to window size, **checked** at three window sizes
-  (D29).~~ Done, D58 — a `?test` check plays one seed at all three sizes.
-- ~~Bot reports time to traverse one layer.~~ Done, with an immortal bot — the
-  mortal one dies before the bottom. Figures in `roadmap.md` → Health.
-- ~~Playable: you descend, you are stopped, you fight, you continue.~~ Igor's
-  call, made 2026-09-28: "commit and finalize s2".
-
-## S3 — One boss, one complete layer · closed 2026-09-29
-
-**Entry:** S2 exits. Met 2026-09-28.
-
-**Work:** A boss at the bottom with a telegraphed, readable pattern. 2–3
-mini-bosses along the way. Layer completion. Built as D62–D65: two mini-bosses
-and the boss, each alone in its batch, all lunging.
-
-**Exit (DoD):**
-- ~~The layer can be **finished**, not just survived. First stage that produces
-  a game with an ending.~~ Built, D62: killing the boss is the layer end, and
-  "LAYER CLEARED" the ending.
-- ~~The boss's tell is readable: a check on telegraph duration, and Igor's
-  judgement on whether it reads.~~ The check is D64's; Igor played it and
-  closed the stage.
-- ~~Bot reports win rate per seed at a stated gear level. Measured on the boss
-  fight, from the `last-batch` scenario, at the starting kit — plus how far the
-  bot gets from the top — per D63 (the win rate is the boss fight's).~~ Done;
-  figures in `roadmap.md` → Health.
-- ~~Playable: a complete, winnable layer.~~ Igor, having played it: "right now
-  it's very easy for me".
-
-## Design pass — layer to layer · after S3
-
-Not a numbered stage: it sits between S3 and S4 without renumbering, so no
-stage citation changes (D60).
-
-**Entry:** S3 exits — the first layer with an ending exists, so there is
-something to go on from. Met 2026-09-29.
-
-**Claude opens it.** When S3 closes, Claude reminds Igor to start this
-conversation, before anything of S4 begins. Igor, 2026-09-28: "remind me to
-open a conversation about it after s3 / before s4". Opened 2026-09-29,
-closed 2026-09-30: D66–D73 decided, the design checked in
-`superpowers/specs/2026-09-30-layer-to-layer-design.md`, and S4, S5 and S6
-below re-planned from it.
-
-**Work:** the layer-to-layer logic, in detail. Igor, 2026-09-28: "we must work
-thru layer-to-layer logic in detail out of s2", then "a design pass of its own
-after S3". The questions wait in `ideas.md`: what happens at the layer end —
-its term, what the player sees and does, where mods come from when the player
-goes on (D59 settles only that it pays no rank and offers no mods otherwise);
-what follows a layer — home, the next layer, or a choice (Igor inclines to
-choose); and how the transition itself plays.
-
-**Exit:** Igor, 2026-09-28: "decision, checks against foundations, ready
-plan" —
-- the answers recorded as decisions in `decisions.md`;
-- the design checked against `foundations.md`, every friction point resolved or
-  given an owner;
-- a ready plan.
-
-## S4 — Meta loop skeleton · closed 2026-09-30
-
-**Entry:** S3 exits **and** the layer-to-layer design pass above is done
-(D60) — S4 builds `home` and the first save format, which that pass's
-answers shape. **Met 2026-09-30.** (The attribute question that used to gate this stage was
-answered by D36 — Attributes.)
-
-**Work**, in this order — the dive's loop first, because `home` shows what it
-produces:
-1. **The dive through the layers.** A layer becomes a record of stretches with
-   pools of batches, drawn per dive from its seed (D71). A second layer — the
-   first one's content under its own colour, a placeholder until S5 — so a
-   dive can go on (D66). The layer end as a milestone: a gate's rank and mods,
-   a full heal, the boss's haul of gems (D68); no screen between layers, and
-   the win screen at the last layer's end (D72). Every mod capped, and gems
-   and a heart fill an offer the pool cannot (D69). Scenarios that start at a
-   layer with a stated kit, for the bot.
-2. **The meta loop.** `home` screen: shop, the layers unlocked and the depth
-   reached, launch — no layer select, every dive starts at the top (D66).
-   Currency drops, auto-collected (D35) and kept on death (D67). One piece of
-   gear, buyable, with tiers. One attribute, raisable by spending points.
-   Persistence with a `version` field, holding owned gear + tiers + points
-   spent + **micro-task counters** (D36) and the dive in progress, resumable at
-   any point (D70) — all from its first version.
-
-**Exit (DoD):**
-- ~~A dive goes on from the first layer into the second with rank and mods
-  intact; the layer end heals and pays; death returns you `home` with your
-  gems; clearing the last layer shows the win.~~ Checked: D66, D67, D68, D72.
-- ~~Two seeds draw different batches, and one seed the same ones (D71).~~
-  Checked, a property over seeds.
-- ~~No mod passes its cap, and an offer holds three cards while any mod is under
-  its cap (D69).~~ Checked.
-- ~~A dive saved and restored at a random tick plays on identically (D70).~~
-  Checked, a property over seeds and ticks.
-- ~~The loop closes: dive → earn → buy → dive again, **measurably** stronger.~~
-  Measured: the bot on the same five seeds clears 2.0 gates a dive at the
-  starting gun and 6.6 at tier 1 (`roadmap.md` → Health).
-- ~~Survives a reload. A save written by the previous build still loads, or
-  migrates, or is rejected loudly — never silently corrupts.~~ The previous
-  build wrote no save; from here on the v1 fixture must load, and an unknown
-  version is refused on screen and kept aside (D77).
-- ~~Measured: currency earned per dive, and dives needed for the first purchase
-  (target ≤ 3, per `foundations.md`).~~ Two dives; figures in `roadmap.md` →
-  Health.
-- ~~At least one micro-task pays an attribute point, and the counter survives a
-  reload.~~ Checked (D75).
-- ~~Playable: the roguelite loop exists with one item in it, across two
-  layers.~~ Igor, closing the stage: "if you ask if it's ok at current stage,
-  yes it is."
-
-**Note:** the `mod` pool stays entirely generic through here (D31). One
-progression system is balanced at a time.
+Their specs and plans, where a stage had them, are in `superpowers/` — history,
+and where one disagrees with a decision, the decision wins.
 
 ## Before S5 — two requirements · after S4
 
@@ -352,6 +52,11 @@ these are two big tasks, i'll do them in separate sessions" (D80).
    equipped, its tiers, where weapon-scoped mods attach (D31) — **and reserves
    the enemy `threat` field** S6 fills (D79), so S5's shapes are final before
    its content is written. Asked and answered, 2026-09-30: "yes".
+   **Built 2026-10-01** (D81, D82; Igor: "ok, commit"): the docs are in
+   `entities/` — enemies, mods, weapons, equipment, as Igor listed them —
+   held to the code by `npm test`, and `threat` is reserved. Micro-tasks were
+   left out by Igor ("i'll see how that works out"). **Still open: the weapon
+   record** — `entities/weapons.md` documents the Gun as it stands.
 2. **Mods reworked from a choice into enemy drops.** Igor: "mods rework from
    choice to enemy drops (from ideas)" — the idea is in `ideas.md` → Open —
    raised during S4 ("Mods as drops, never offered"), with what it touches.
@@ -366,7 +71,7 @@ these are two big tasks, i'll do them in separate sessions" (D80).
 **Entry:** S4 exits, and both requirements above are done (D80). The data
 shapes for enemy, weapon, gear and mod are settled and will not change.
 
-**Work:** 5–7 enemy behaviours, 2–3 weapons, 2–3 gear items, 3–5 layers —
+**Work:** 5–7 enemy behaviours, 2–3 weapons, 2–3 pieces of equipment, 3–5 layers —
 each with its own pools of batches (D71) — and 3–4 tiers each. Weapon-scoped
 mods arrive here if they arrive (D31). The mod pool grows until its caps cover
 a full dive (D69).
@@ -414,6 +119,8 @@ the player)).
 
 **Work:** Game feel. Sound. Assets **only if** the condition is hit —
 indistinguishable enemies, indistinguishable layers, or visual clumsiness.
+D35's `+N` popup over collected gems is feel, and waits here, unbuilt (D78
+(gems are pulled to the player)).
 
 **Exit (DoD):** Igor says it is alpha. This is the one stage whose DoD is a
 judgement, and that is correct.

@@ -17,6 +17,7 @@ const ARENA_H = 800;
 // Anything a mod can raise has to be a field here rather than a bare constant,
 // which is why the dash cooldown and the i-frames moved in (D34): a mod is a
 // line of data, and a line of data cannot edit a `const`.
+// fireRate, damage, range and pierce are the Gun's: docs/entities/weapons.md.
 const PLAYER_START = {
   r: 10,             // radius, in pixels
   speed: 260,        // pixels per second
@@ -124,6 +125,7 @@ const SOUNDS = {
 // ---------- mods ----------
 // A dive-scoped pick, offered as one of three at a gate and gone at the end of
 // the dive (D34). Just data: adding one is a line here and nothing else.
+// Documented, fillers too, in docs/entities/mods.md -- `npm test` holds it here.
 //
 // `scope` is **body** or **comfort**, and nothing else until S5 — Content.
 // Weapon-scoped mods are deliberately absent: "+35% fire rate" is meaningless on
@@ -193,6 +195,7 @@ const FILLERS = [
 // one point per task.
 
 // `gear` -- bought with gems, combat stats. `tiers` are the costs, in order.
+// Documented in docs/entities/: the Gun in weapons.md, the rest in equipment.md.
 const GEAR = [
   { name: 'Gun', tiers: [40, 100, 200], apply: p => p.fireRate += 0.5 },
 ];
@@ -422,6 +425,7 @@ const SCENARIOS = {
 };
 
 // ---------- enemy types ----------
+// Documented in docs/entities/enemies.md -- `npm test` holds it to this table.
 // Also just data. Which types appear, and how many, is now named per batch
 // (D48) -- the `weight` and `from` fields that let the deleted spawn director
 // roll a type by unlock time went with it.

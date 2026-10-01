@@ -10,13 +10,23 @@
 // sweep is a habit and habits fail quietly. These are the parts of it a machine
 // can do.
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { loadGame } from './harness.js';
 
 // One reader for the whole repo; `read` is the docs/ view of it.
 const ROOT = new URL('../', import.meta.url);
 const src = f => readFileSync(new URL(f, ROOT), 'utf8');
 const read = f => src('docs/' + f);
-const docNames = readdirSync(new URL('docs/', ROOT)).filter(f => f.endsWith('.md'));
+// Every doc, `entities/` included, except `superpowers/`: its specs and plans
+// are a log of past stages, kept as they were written.
+const docNames = readdirSync(new URL('docs/', ROOT), { recursive: true })
+  .filter(f => f.endsWith('.md') && !f.startsWith('superpowers/'));
+const ENTITY_DOCS = docNames.filter(f => f.startsWith('entities/'));
+// The docs that describe the code, and so may only quote it as it is. Not
+// ideas.md, nor the logs -- decisions.md and changelog.md are history and may
+// name what a later change removed.
+const DESCRIBE_CODE = ['design.md', 'roadmap.md', 'plan.md', 'foundations.md',
+                       'README.md', ...ENTITY_DOCS];
 
 const decisions = read('decisions.md');
 
@@ -73,11 +83,14 @@ describe('docs/', () => {
     // The read order is load-bearing: a cold session is told to open these in
     // sequence, so a renamed or deleted file sends it somewhere that is not
     // there. `high level design.md` is Igor's frozen source, never edited.
-    for (const f of ['foundations.md', 'plan.md', 'roadmap.md', 'decisions.md',
-                     'ideas.md', 'design.md', 'changelog.md',
-                     'high level design.md']) {
-      expect(docNames).toContain(f);
-    }
+    // The map in docs/README.md is held to the same rule, and the other way
+    // too: a doc it does not name is a doc nobody looks up.
+    const named = text => [...text.matchAll(/`([^`\n]+\.md)`/g)].map(m => m[1]);
+    const map = named(read('README.md'));
+    const missing = [...map, ...named(src('CLAUDE.md'))]
+      .filter(f => !docNames.includes(f) && !existsSync(new URL(f, ROOT)));
+    expect(missing).toEqual([]);
+    expect(docNames.filter(f => f !== 'README.md' && !map.includes(f))).toEqual([]);
   });
 });
 
@@ -105,28 +118,169 @@ describe('numbers the docs quote about the code', () => {
   });
 
   it('quotes the balance constants at their real values', () => {
-    // `NAME value` pairs from the Balance constants section, against
-    // `const NAME = value` in content.js. Spaces are ignored: 1 / 120 == 1/120.
-    const section = design.slice(design.indexOf('## Balance constants'));
+    // `NAME value` pairs, wherever a doc that describes the code writes one,
+    // against `const NAME = value` in content.js. Spaces are ignored:
+    // 1 / 120 == 1/120. Only numbers count as values, so `ARENA_W × ARENA_H`
+    // is prose, not a quote.
     const content = src('game/content.js');
     const wrong = [];
-    for (const [, name, value] of section.split('\n## ')[0].matchAll(/`([A-Z][A-Z_]+) ([^`]+)`/g)) {
-      const m = content.match(new RegExp('const ' + name + '\\s*=\\s*([^;]+);'));
-      if (!m || m[1].replace(/\s/g, '') !== value.replace(/\s/g, '')) {
-        wrong.push(name + ': doc ' + value + ', code ' + (m ? m[1].trim() : 'missing'));
+    for (const f of DESCRIBE_CODE) {
+      for (const [, name, value] of read(f).matchAll(/`([A-Z][A-Z0-9_]+) (-?[\d.]+(?: ?\/ ?[\d.]+)?)`/g)) {
+        const m = content.match(new RegExp('const ' + name + '\\s*=\\s*([^;]+);'));
+        if (!m || m[1].replace(/\s/g, '') !== value.replace(/\s/g, '')) {
+          wrong.push(f + ': ' + name + ': doc ' + value + ', code ' + (m ? m[1].trim() : 'missing'));
+        }
       }
     }
     expect(wrong).toEqual([]);
+  });
+
+  it('quotes the diver at the start in full, at its real values', () => {
+    // `PLAYER_START` (k v, k v, ...) in design.md: the player's own fields,
+    // every one of them, and none of the Gun's -- those are entities/weapons.md's.
+    const section = design.slice(design.indexOf('## Balance constants'));
+    const listed = section.match(/`PLAYER_START`[^(]*\(([^)]*)\)/)[1]
+      .split(',').map(pair => pair.trim().split(/\s+/));
+    const gun = ['fireRate', 'damage', 'range', 'pierce'];
+    const g = loadGame();
+    const want = Object.entries(g.PLAYER_START).filter(([k]) => !gun.includes(k))
+      .map(([k, v]) => [k, String(v)]);
+    expect(listed).toEqual(want);
+  });
+
+  it('lists every scenario in the README', () => {
+    // The README's table is where Igor finds the URLs; it had lost `layer-2`
+    // a stage after the scenario was added.
+    const readme = src('README.md');
+    expect(Object.keys(loadGame().SCENARIOS).filter(n => !readme.includes('?dev=' + n + '&')))
+      .toEqual([]);
   });
 
   it('names no constant that the code does not have', () => {
     // The living docs only; decisions.md and changelog.md are history and may
     // name what a later change removed.
     const words = new Set([...GAME, ...PLATFORM].map(src).join('\n').match(/\w+/g));
-    const live = ['design.md', 'roadmap.md', 'plan.md', 'foundations.md'].map(read)
+    const live = DESCRIBE_CODE.map(read)
       .concat(src('CLAUDE.md'), src('README.md')).join('\n');
     const gone = [...new Set([...live.matchAll(/`([A-Z][A-Z0-9]*_[A-Z0-9_]+)\b/g)].map(m => m[1]))]
       .filter(name => !words.has(name));
     expect(gone).toEqual([]);
+  });
+});
+
+// ---------- the entity docs ----------
+// One doc per kind of entity in docs/entities/ (D81): every item, its numbers
+// and what it is for. The numbers are copies of game/content.js, and a copy is
+// a number that will disagree with itself -- so every table is rebuilt here
+// from the code and must appear in its doc verbatim. When one fails, the table
+// it wanted is in the diff: paste it in.
+describe('the entity docs', () => {
+  const g = loadGame();
+  const doc = f => read('entities/' + f);
+  const cell = v => v === undefined ? '—' : Array.isArray(v) ? v.join(' / ') : String(v);
+  const table = (head, rows) => [
+    '| ' + head.join(' | ') + ' |',
+    '|' + head.map(() => '---').join('|') + '|',
+    ...rows.map(r => '| ' + r.map(cell).join(' | ') + ' |'),
+  ].join('\n');
+  // A table's fields in the order the code first uses them, so a field the
+  // code gains is a column the doc must gain.
+  const keysOf = records => [...new Set(records.flatMap(Object.keys))];
+  const plain = records => keysOf(records)
+    .filter(k => records.every(r => r[k] === undefined || typeof r[k] !== 'object' && typeof r[k] !== 'function'));
+  // What `apply` does to the starting kit, `n` times over: the stats it moved,
+  // by how much ("speed +45") or to what ("speed 395").
+  const r3 = x => Number(x.toFixed(3));
+  const moved = (apply, n, by) => {
+    const from = { ...g.PLAYER_START }, to = { ...from };
+    for (let i = 0; i < n; i++) apply(to);
+    return Object.keys(to).filter(k => to[k] !== from[k]).map(k => k + ' ' + (by
+      ? (to[k] < from[k] ? '-' : '+') + r3(Math.abs(to[k] - from[k]))
+      : r3(to[k]))).join(', ');
+  };
+  // ponytail: the Gun is pieced together from PLAYER_START, BULLET_SPEED and
+  // its GEAR record, because there is no weapon record yet (weapons.md); read
+  // the record instead once it exists, and these two lists go.
+  const WEAPONS = ['Gun'];
+  const WEAPON_FIELDS = ['fireRate', 'damage', 'range', 'pierce'];
+  const weapons = g.GEAR.filter(x => WEAPONS.includes(x.name));
+  const equipment = g.GEAR.filter(x => !WEAPONS.includes(x.name));
+  const tiered = x => [x.tiers, moved(x.apply, 1, true), moved(x.apply, x.tiers.length)];
+
+  it('lists every enemy type at its real numbers', () => {
+    const cols = plain(g.ENEMY_TYPES);
+    expect(doc('enemies.md')).toContain(table(cols, g.ENEMY_TYPES.map(t => cols.map(k => t[k]))));
+    const lungers = g.ENEMY_TYPES.filter(t => t.lunge);
+    const timing = keysOf(lungers.map(t => t.lunge));
+    expect(doc('enemies.md')).toContain(table(['name', ...timing],
+      lungers.map(t => [t.name, ...timing.map(k => t.lunge[k])])));
+  });
+
+  it('lists every mod and filler with what it does and its card text', () => {
+    const cols = plain(g.MODS);
+    expect(doc('mods.md')).toContain(table([...cols, 'per pick', 'at max'],
+      g.MODS.map(m => [...cols.map(k => m[k]), moved(m.apply, 1, true), moved(m.apply, m.max)])));
+    // A filler pays into the dive as well as the player, so it is worked out
+    // on a dive in progress, short of a heart, rather than on the kit.
+    const pays = f => {
+      g.reset(1);
+      g.player.hp = 1;
+      const before = { ...g.player, currency: g.currency };
+      f.apply(g.player);
+      const after = { ...g.player, currency: g.currency };
+      return Object.keys(after).filter(k => after[k] !== before[k])
+        .map(k => k + ' +' + r3(after[k] - before[k])).join(', ');
+    };
+    expect(doc('mods.md')).toContain(table(['name', 'pays', 'desc'],
+      g.FILLERS.map(f => [f.name, pays(f), f.desc])));
+  });
+
+  it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
+    expect(doc('weapons.md')).toContain(table(['name', ...WEAPON_FIELDS, 'tiers', 'per tier', 'at top'],
+      weapons.map(x => [x.name, ...WEAPON_FIELDS.map(k => g.PLAYER_START[k]), ...tiered(x)])));
+    expect(doc('equipment.md')).toContain(table(['name', 'tiers', 'per tier', 'at top'],
+      equipment.map(x => [x.name, ...tiered(x)])));
+  });
+
+  it('documents every field the code has, and only those or reserved ones', () => {
+    // The record's shape is what S5 (content) writes its content on, so a
+    // field nobody documented -- or a documented one the code dropped -- is
+    // the shape drifting. A field the code does not have yet is allowed only
+    // marked **Reserved**, for the stage that adds it.
+    const shapes = {
+      'enemies.md': keysOf(g.ENEMY_TYPES),
+      'mods.md': keysOf(g.MODS),
+      'weapons.md': [...keysOf(g.GEAR), ...WEAPON_FIELDS, 'BULLET_SPEED'],
+      'equipment.md': keysOf(g.GEAR),
+    };
+    const wrong = [];
+    for (const [file, keys] of Object.entries(shapes)) {
+      const fields = doc(file).split('\n## Fields\n')[1].split('\n## ')[0];
+      const rows = [...fields.matchAll(/^\| `([^`]+)` \|(.*)$/gm)];
+      for (const k of keys) {
+        if (!rows.some(r => r[1] === k)) wrong.push(file + ': `' + k + '` is not documented');
+      }
+      for (const [, k, rest] of rows) {
+        if (!keys.includes(k) && !rest.includes('**Reserved**')) wrong.push(file + ': `' + k + '` is not in the code');
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it('gives every item a section, and no section to an item the code lacks', () => {
+    // Any other heading has to be one of the layout's own.
+    const LAYOUT = ['Roster', 'Fields', 'Behaviours', 'Fillers — not mods', 'Adding one'];
+    const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS,
+                    'weapons.md': weapons, 'equipment.md': equipment };
+    const wrong = [];
+    for (const [file, records] of Object.entries(items)) {
+      const names = records.map(r => r.name);
+      const heads = [...doc(file).matchAll(/^## (.+)$/gm)].map(m => m[1]);
+      for (const n of names) if (!heads.includes(n)) wrong.push(file + ': no section for ' + n);
+      for (const h of heads) {
+        if (!names.includes(h) && !LAYOUT.includes(h)) wrong.push(file + ': a section for ' + h + ', which the code does not have');
+      }
+    }
+    expect(wrong).toEqual([]);
   });
 });

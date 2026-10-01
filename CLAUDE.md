@@ -18,20 +18,20 @@ canvas layer, a sprite pipeline, or browser-specific polish.
 ## Read before proposing work
 
 `docs/` is the source of truth, and is **tracked in git** since 2026-09-27
-(D40 — Docs are tracked). Read in this order:
+(D40 — Docs are tracked). Every session, first:
 
 1. **`foundations.md`** — the layer that does not change before alpha. The
    binding glossary, the genre contract, the pillars as checkable statements,
    the technical contract, the non-goals. **Read it first, every session.**
-2. **`plan.md`** — the stages S0–S7 (plus the layer-to-layer design pass
-   after S3), their definitions of done, and which one is active. The only
-   doc that says "we are here".
-3. `roadmap.md` — near-term work inside the active stage, and build health.
-4. `decisions.md` — what was decided and why, incl. rejected options.
-5. `ideas.md` — backlog: open / parked / declined.
-6. `design.md` — how the code works today.
-7. `changelog.md` — what shipped.
+2. **`plan.md`** — the stages S0–S7 (plus the passes between them), their
+   definitions of done, and which one is active. The only doc that says "we
+   are here".
 
+Then look the rest up by question, not front to back: **`docs/README.md`** is
+the map (D82 — The docs map). Next steps and bot figures are `roadmap.md`; how
+the code works, `design.md`; every enemy, mod, weapon and piece of equipment,
+`docs/entities/`; why something was decided, `decisions.md`, found by its
+heading; what is undecided, `ideas.md`; what shipped, `changelog.md`.
 `high level design.md` is Igor's source description. Frozen input, not a
 working doc.
 
@@ -72,8 +72,10 @@ draft, which is why they are banned (D32).
 
 - **Content is data.** Enemies, weapons, gear, tiers, mods, batches, sounds,
   menus and options are flat lists of records. Adding one is a line and touches
-  nothing else. The alpha's content counts are only reachable if adding the
-  fifteenth enemy costs what adding the second did.
+  no other code. The alpha's content counts are only reachable if adding the
+  fifteenth enemy costs what adding the second did. An enemy, mod, weapon or
+  piece of equipment also gets its row and section in `docs/entities/` —
+  `npm test` fails until they match the code (D81 — Entity docs).
 - **Plain objects in flat arrays.** No classes, no inheritance, no ECS.
 - **Input matches `e.code`, never `e.key`** — `e.key` is the character a key
   types, which depends on the keyboard layout.
@@ -184,7 +186,10 @@ draft, which is why they are banned (D32).
      asserted a scenario's old definition a full change after it was redefined.*
   2. **`docs/`** — `changelog.md` always; `decisions.md` for anything decided,
      reopened or superseded; `design.md` for anything whose behaviour changed;
-     `plan.md` if a stage moved; `ideas.md` if an open question closed.
+     `docs/entities/` for any enemy, mod, weapon or piece of equipment that
+     changed — the check holds its numbers, never its prose; `plan.md` if a
+     stage moved; `ideas.md` if an open question closed — the answered item
+     leaves it. A living doc keeps no history (`docs/README.md`).
   3. **`foundations.md`** — if a rule changed, it is a decision: edit here and
      record it in `decisions.md` in the same step, never quietly.
   4. **`CLAUDE.md`** — it makes factual claims (the seam is seven names, the
@@ -216,7 +221,8 @@ draft, which is why they are banned (D32).
   counts, bot survival times, the port share. A number copied into a second
   file is a number that will disagree with itself — every stale figure found
   so far was a copy. Cite the owning doc instead: survival times are
-  `roadmap.md` → Health, and nowhere else.
+  `roadmap.md` → Health, and nowhere else. The same holds for every fact —
+  `docs/README.md` → One home per fact lists the owners.
 - After a squash or rebase, re-check the changelog: it cites commits, and
   rewriting history turns its entries into fiction.
 

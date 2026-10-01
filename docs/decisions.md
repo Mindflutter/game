@@ -2512,3 +2512,83 @@ session supersedes what it changes, in the same step as it edits
 
 **Guarded by**: nothing yet — both are work to come. Each session brings its
 own checks.
+
+## D81 — Entity docs: one per kind, held to the code · 2026-10-01
+The first requirement before S5 (content) (D80 (entity docs and mods from drops
+come first)). Igor set the session's goal: "create doc files for: weapons,
+mods, enemies, equipment - includes currently implemented, easily scalable for
+more - contains all the relevant meta for each item: naming, numbers,
+descriptions - documenting special tasks - i'll see how that works out, lets
+leave them out of scope now". Mid-session: "layout and location for the entity
+docs - do without review".
+
+**Decided — Claude's call, delegated by that answer.**
+- **Where**: `docs/entities/`, a doc per kind — `enemies.md`, `mods.md`,
+  `weapons.md`, `equipment.md`. A kind per doc rather than an item per doc:
+  at the alpha's counts each kind stays one readable table, and a table is
+  where items get compared.
+- **The layout**, the same in every one (`docs/README.md` → The entity docs):
+  what the kind is; a roster holding every number; the record's fields, a
+  reserved one marked; a section per item; how to add one.
+- **Held to the code, not trusted.** `tests/docs.test.js` rebuilds each roster
+  from `game/content.js` and requires it word for word, requires every field
+  of a record to be documented and every documented one to exist or be marked
+  reserved, and requires a section for every item and none for an item that
+  is gone.
+- **An entity's behaviour lives in its doc**: the chase and the lunge are in
+  `enemies.md`. `design.md` keeps the systems around the entities — the gate,
+  the offer, the descent, the save — and gave up its enemy table, its mod
+  list, the lunge and the Gun's numbers.
+- **`threat` is reserved** in `enemies.md`, as D80 asked: S6 (balance) fills
+  it, on every type at once.
+- **"Equipment" joins the glossary**: gear that is not a weapon. It is Igor's
+  word in the goal and the draft's ("2-3 weapons, 2-3 equipment items"); the
+  glossary had no word for it, and `plan.md`'s "2–3 gear items" beside "2–3
+  weapons" read two ways, since gear includes weapons.
+
+**Left out, by Igor**: micro-tasks, "special tasks". Not asked for, so not
+written either: attributes, layers and batches — `design.md` and
+`game/content.js` hold them.
+
+**Not decided**: the weapon record — what a weapon is as data, how one is
+owned and equipped, its tiers, where weapon-scoped mods attach — which D80
+also gave this session. `weapons.md` documents the Gun as it stands, spread
+over `PLAYER_START`, `BULLET_SPEED` and a `GEAR` record, and says so.
+
+**Guarded by**: `tests/docs.test.js` → the entity docs, five checks, each seen
+to fail on a broken doc before it passed.
+
+## D82 — The docs map: living docs and logs, one home per fact · 2026-10-01
+Igor's goal for the same session: "organize docs/ structure for me and yourself
+so that everything can be easily found, files arent bloated with obsolete or
+excessive info, and files are always in sync and consistency with each other
+and the codebase".
+
+**Decided — Claude's call, under that goal.**
+- **`docs/README.md` is the map**: a table from a question to the doc that
+  answers it. A session reads `foundations.md` and `plan.md`, then looks the
+  rest up — `CLAUDE.md`'s seven-doc reading order goes, since no session reads
+  `decisions.md` whole to start work.
+- **Living docs and logs.** `foundations.md`, `plan.md`, `roadmap.md`,
+  `design.md`, `entities/` and `ideas.md` say what is true now and carry no
+  history. `decisions.md`, `changelog.md` and `superpowers/` are logs, only
+  ever appended to.
+- **One home per fact**; the map lists the homes.
+- **Applied now.** `ideas.md` lost every item a decision had answered — the
+  decision is its record — and `Lull` and the void "finished standalone"
+  question moved under Declined. `plan.md`'s closed stages became one table;
+  their definitions of done stay in the changelog, and the one item they still
+  carried, D35's `+N` popup, went to S7 (alpha polish). `roadmap.md` lost the
+  superseded phases and the standing-constraints pointer. `design.md` lost
+  what `entities/` now owns, a history of the dash, and four stale statements:
+  bullets "still open in S1", dash reach "fixed at 141px", `Fins` "uncapped",
+  and `segDistance()`, since renamed. The root `README.md` had lost the
+  `layer-2` scenario.
+- **Not changed**: `decisions.md` and `changelog.md`, however long. They are
+  logs; rewriting them would make them fiction.
+
+**Guarded by**: `tests/docs.test.js` — the map names every doc, and every doc
+it or `CLAUDE.md` names exists; every `NAME value` quote in a doc that
+describes the code is the constant's real value; `design.md`'s list of the
+diver's starting numbers is complete and true; the root `README.md` lists
+every scenario.

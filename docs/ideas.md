@@ -1,34 +1,15 @@
 # Ideas, wishes, proposals
 
-The inbox. Nothing here is committed to. Status is one of:
-**open** (live, undecided) · **parked** (agreed direction, not now) ·
+The inbox: everything undecided, and nothing here is committed to. Status is
+one of: **open** (live, undecided) · **parked** (agreed direction, not now) ·
 **declined** (decided against — kept so we don't re-litigate it).
+
+An item leaves this file in the same step as a decision answers it, or when it
+is built: the decision, or the changelog, is its record from then on.
 
 ---
 
 ## Open — needs a decision before work continues
-
-### What does "finished standalone" mean?
-**Status: VOID, 2026-09-26.** Not answered — dissolved. `high level design.md`
-replaced the standalone with a full roguelite, so all four options below are
-answers to a question nobody is asking. Kept only so the reasoning is not
-re-derived. See `plan.md` for what replaced it.
-
-Original text follows, for the record:
-
-Options put forward:
-- **(a)** Win condition at ~3 minutes, plus title screen and saved best time.
-  Turns it from an endless demo into a game with a beginning, middle and end.
-- **(b)** Only soften the difficulty curve so dives last 2–3 minutes, giving the
-  upgrade system room to compound. Smallest change; a few constants.
-- **(c)** Call it done at its current state and go straight to sprites.
-- **(d)** Title screen + persistent best score only, no rebalancing.
-
-Igor's read at the time: ~70s dives ending in inevitable death are "bad for a
-standalone map, but really promising for a rogue-like experience". Part of (d)
-has since shipped (title screen) — the best-score half has not.
-
-~~**Do not pick one of these unilaterally.**~~ Moot.
 
 ### Should the dash go where you aim, instead of where you move?
 **Status: open, and the reasoning changed under D28.** The whole "it re-couples
@@ -62,62 +43,27 @@ Offered and not taken up yet: putting all three (movement / aim / hybrid)
 behind a constant in the balance block so the choice can be played rather than
 argued. Feel is Igor's call (D16).
 
-### Seeded RNG for the bot, so balance comparisons are paired
-**Status: DONE 2026-09-27, D41.** Landed in S0. The cost estimate below was
-right about the scattered call sites — 14 of them — and wrong to call it "not
-free": the whole change took one pass. Raised 2026-09-20 while evaluating the
-`procedural-gen` skill, which is where the gap surfaced.
-
-Today every bot dive draws its own spawn sequence, so comparing two builds
-compares two *different games* and the spawn noise has to be averaged out with
-volume — 21 dives per configuration, and the three force-dash policies still
-landed within a couple of seconds of each other (figures in `roadmap.md` →
-Health). That is the honest reading of an **unpaired** comparison, not
-evidence that the policies are equivalent.
-
-With one seeded RNG per dive, the same seed replays the same spawn sequence, so
-two policies can be run against **identical** conditions and compared pairwise.
-Same effort, far more statistical power: differences under a second become
-detectable instead of drowning. It also makes a bug reproducible, which today
-it is not.
-
-Cost: a small LCG or xorshift plus routing every `Math.random()` in `logic.js`
-through it. Not free — the call sites are scattered — but it is the one change
-that makes every future balance claim sharper, so it pays back per measurement.
-Affects D16.
-
 ---
 
 ## Parked — agreed direction, deliberately not now
 
-### Roguelite meta-progression
-**Absorbed — this is the game now, 2026-09-26.** No longer a parked item; it is
-the subject of `high level design.md` and S4. Kept for Igor's original framing.
-Persistent unlocks between dives, mod synergies, a reason to replay.
-Igor: "not designing the big strategy here yet, but take a note, I'll probably
-go there at some point." Explicitly a later *phase*, after the standalone ships
-and after the sprite work. See `decisions.md` → "Browser build is a throwaway
-prototype".
-
 ### Enemy behaviours, not just enemy stats
-**Absorbed into S5, 2026-09-26** — this is now scheduled work, not a backlog
-item, and the draft expands it from 2 behaviours to 5–7. Kept for the reasoning
-and the two worked examples. **Agreed 2026-09-19.** Igor: "good idea... we're gonna go with more enemy types
-and perks definitely." Supersedes the old "more enemy types is one line" bullet,
-which was true of the table and misleading about the game: every type runs the
-same chase loop in `logic.js`, so three types pose one question at three
-difficulties. The arena only ever asks "how far away are they".
+**S5 (content)'s work** — five to seven behaviours by alpha (`plan.md` → S5).
+**Agreed 2026-09-19.** Igor: "good idea... we're gonna go with more enemy types
+and perks definitely." Every type that does not lunge runs the same chase, so
+the ordinary types pose one question at three difficulties: the arena only
+ever asks "how far away are they". The draft lists more to start from
+(`high level design.md` → enemies and enemy ai).
 
-Two behaviours that each ask something new, one branch each in the enemy loop:
-- **Charger** — stops, telegraphs ~0.5s, then lunges in a straight line.
-  Punishes standing still, rewards reading the tell. Adds a *timing* decision.
+The worked example still waiting, one branch in the enemy loop (the charger
+was the other; it became the lunge, D64 (the boss lunges)):
 - **Ranged drifter** — stops at range and fires a slow projectile. Punishes
   kiting in a straight line, which is the dominant strategy today. Adds a
   *cover and angle* decision.
 
-Cost: a `behavior` field on the type record plus a branch in the movement loop.
-Enemy projectiles reuse the existing `bullets[]` shape with an `evil` flag —
-not a second array.
+Cost: a field on the type record plus a branch in the movement loop, as the
+lunge did. Enemy projectiles reuse the existing `bullets[]` shape with an
+`evil` flag — not a second array.
 
 ### Trade-off mods
 **Still parked, and now cheaper.** D31's `scope`/`apply(player, weapon)` shape
@@ -192,45 +138,12 @@ Recorded here so they are not silently decided by accident.
 
 - **The lost item.** What you dropped in the pool. Trivial, per the humorous
   vibe. Drives the title, which is also subject to change.
-- ~~**Screen-by-screen descent vs. smooth motion.**~~ **Answered, 2026-09-28**
-  — Igor: "at this point it's answered and settled". Smooth: a current carries
-  the camera down the layer; there are no discrete screens. Recorded as D58
-  (the descent).
-- ~~**After a layer completes:** home, next layer immediately, or choose.~~
-  **Answered 2026-09-30: the next layer, every time** — D66 (the dive runs on
-  through the layers). Igor: "let's make it a proper roguelite for alpha. yes,
-  you go on." The draft inclined to choose; the choice went, and so did layer
-  select — every dive starts at the top.
-  **How the transition itself plays** — Igor, 2026-09-28: "an open
-  discussion on how to transition between layers - later" — **answered by
-  D72 (between layers there is no screen)**: over moving water, the mod pick
-  its one pause, the next layer's colour and name, then its first batch.
-- ~~**The layer end — design what happens there (todo).**~~ **Done,
-  2026-09-30.** Igor, 2026-09-28:
-  "the end of layer is not quite a gate. we need a term for layer end (or just
-  call it layer end). we need to design what happens there more thoroughly.
-  leave this point for todo." Decided so far: it is not a gate (D59 (no mods
-  at the layer end)); it is a milestone, bigger than one — a gate's rank and
-  three mods, a full heal, and a big haul of gems from the boss — and the last
-  layer's end is the win (D68 (the layer end is a milestone)); it plays with
-  no screen (D72 (between layers there is no screen)). **Designed by the
-  layer-to-layer pass.** The term is final — Igor: "layer end is ok" (D73
-  ("layer end" is the term)).
-- ~~**Is reaching the bottom a win?**~~ **Answered 2026-09-28** — Igor: "ok,
-  yes, it's a stop and not a win." The "LAYER CLEARED" screen earns nothing,
-  as D58 (the descent) and `plan.md` say, so S3 (one boss, one complete layer)
-  is still the first stage with an ending. The heading's wording is the
-  friendlier-messages item below. Since D68 (the layer end is a milestone) the
-  *last* layer's end is the win, and "LAYER CLEARED" becomes its screen (D72).
 - **Friendlier end-of-dive messages.** Igor, 2026-09-28, renaming the bottom
   screen to "LAYER CLEARED": "more user-friendy messages we'll do later". The
   end screens show a heading plus a raw stats line today.
 - **Collectibles found in a dive:** feed player stats, the story, or both.
-- ~~**Do attributes exist at all?**~~ **Answered by D36 (Attributes),
-  2026-09-27.** They exist as a second persistent tier: micro-tasks pay points,
-  spent freely at home on body stats. Non-fungibility is what justified keeping
-  the tier. Still open downstream: *which* attributes exist, and what each
-  micro-task is — both are S5 (Content) work.
+- **Which attributes exist, and what each micro-task is.** That the tier
+  exists is D36 (attributes); its content is S5 (content) work.
 - **What the currency is called** — shells, coloured stones, coins.
 - **Whether weapons stay inside the sea theme** or are free to be weird.
 - **Terrain beyond a vertical shaft** — cliffs and caverns are left possible,
@@ -280,29 +193,17 @@ experience. All three bots drive scenarios via D37, never their own harness.
 Open collection, Igor invited more (2026-09-27). Nothing here is committed. Per
 D34 (Mods) each must be readable in one line and differ in **kind** from its
 neighbours, not in degree. Comfort mods carry the width of the pool (D35).
-
-**body** — weapon-agnostic stats, identical value whatever you brought:
-- move speed
-- max HP
-- dash cooldown
-- i-frame duration
+The mods that exist are `entities/mods.md`; an idea moves there when it is
+built.
 
 **comfort** — feel and friction, near-zero balance risk:
 - **more valuable enemy loot** — Igor, 2026-09-27. See the balance note in D35:
   this is the one family whose effect outlives the dive, so it must be measured
   per campaign, not per dive.
-- heal on batch clear
-- brief invulnerability when a gate opens
 
 **weapon** — waits for S5 (Content), per D31's `scope` field.
 
 ## Recorded future opportunities, explicitly not now
-
-- ~~**`home` screen in HTML/CSS rather than canvas.**~~ **Decided by D38 (The
-  `home` screen is canvas), 2026-09-27** — canvas, because its UI is checkable by
-  `?test` where HTML's is not, and because two-technology integration fails
-  invisibly where hand-rolled layout fails visibly. Layout becomes data via one
-  small helper. Revisit only if the gear list needs scrolling and tooltips.
 
 - **Multiplicative interaction between `gear` and `attribute`.** Parked by D36,
   not declined. Igor's framing is right — one character, every progression feeds
@@ -321,91 +222,36 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   without slowing rank-ups. Not now: it needs the generic mod pool balanced
   first (S1 — Combat core through S4 — Meta loop skeleton), because a cost
   curve on top of an unbalanced pool is two unknowns multiplied.
-- ~~**What happens when a gate owes several mod picks at once.**~~
-  **Resolved by D34 (Mods), 2026-09-27** — one rank per batch cleared means
-  rank-ups happen only at gates, so a gate can never owe more than one pick.
-  The question was an artefact of the XP bar and died with it.
-- ~~**Do gems still expire, now that they are currency?**~~ **Closed by D35
-  (Currency is auto-collected), 2026-09-27** — auto-collection means nothing can
-  be stranded, so nothing needs to expire. The question dissolved rather than
-  being answered. **Built by S4 (meta loop skeleton), 2026-09-30** — nothing
-  expires and nothing is walked over; gems are pulled to the player, which D78
-  (gems are pulled to the player) made the rule.
 
-- **The mod pool runs short late in a dive, and comfort is down to one.**
-  **The pool half is answered by D69 (mods across a whole dive),
-  2026-09-30, and built in S4** — every mod capped, gems and a heart fill an offer the pool
-  cannot, and S5 (content) grows the pool to cover a whole dive. Comfort being
-  down to one is still true. The original note: four
-  of six mods cap (D49, D51, D55) — only Fins and Vitality are unbounded — and
-  Mend is the last comfort mod standing, the other two candidates D34 named
-  having been killed by D35 and D55 respectively. so a long dive can be offered
-  two cards instead of three, and eventually the same two every time. Not a design problem yet — a layer is fifteen batches and S5
-  (Content) adds mods — but if a fix is ever wanted before then, the mod-points
-  idea below prices repeats instead of banning them.
-
-- ~~**The dash starts harmless and is bought — built as a mod, tier not settled.**~~
-  **Tier settled by D74 (mods on top; dash improvements are attributes),
-  2026-09-30**: permanent dash improvements are attributes — D36 names dash a
-  body stat — and the mods keep adding on top; S4 built dash reach as the first
-  attribute (D75). The original note:
-  Igor, 2026-09-27: "land the dash idea, i'm inclined to mod thing, but in some
-  aspects can be home screen upgrade too". A lean plus an instruction to ship,
-  **not** a decision between `mod` and `gear` — so D51 built the mod (`Impact`,
-  `dashDamage` starts at 0) and the tier question stays open here. The
-  objection recorded earlier — that this would stop diving into a crowd being a
-  play — was answered by keeping the *shove* free and pricing only the wound.
-  D56 then made `dashSpeed` a field too, so reach is sellable as `gear`
-  whenever that is decided.
-
-- ~~**Can one stat be raised by both a mod and gear?**~~ **Answered by D74,
-  2026-09-30** — Igor: "mods on top of gear/equipment/stats, havent we agreed
-  on that?" Gear and attributes set the floor; mods add on top; nothing
-  multiplies. The original note: Opened by D51: `Impact` is
-  the first mod with an obvious `gear` twin, per Igor's "in some aspects can be
-  home screen upgrade too". If dash damage is buyable at `home` *and* droppable
-  as a mod, the two stack within a dive, which is the compounding `foundations.md`
-  keeps out of the gear/attribute pair. Options: gear sets the floor and mods
-  add to it, gear and mods own disjoint stats, or mods only appear for stats you
-  already own a tier of. S4 — Meta loop skeleton has to answer this before the
-  shop exists.
+- **Comfort is down to one mod.** `Mend` is the last comfort mod standing: of
+  the three D34 (mods) named, D35 (currency is auto-collected) left the
+  currency magnet nothing to do and `Lull` is declined (below). Not a design
+  problem yet — S5 (content) grows the pool to cover a whole dive (D69 (every
+  mod capped)) — but comfort is meant to carry the pool's width.
 
 - **The dash economy: two of six mods feed one verb.** Igor, 2026-09-27,
   playing D54: "once the dash becomes long, it feels way easier" and "dash
   length + dash damage is the cool build, might want to rebalance". Measured
-  numbers live in `roadmap.md` -> Health.
-
-  **Partly fixed by D56.** `Fins` no longer feeds the dash at all — dash reach
-  is its own stat and is fixed at 141px — so what remains pointed at the dash
-  is `Reflex` (cooldown) and `Impact` (damage), both capped at 3. Peak escape
-  power fell from 386 to 141 invulnerable px/s, and the free-invulnerability
-  exploit (tap and release) is gone.
+  numbers live in `roadmap.md` -> Health. `Fins` does not feed the dash
+  (D56 (the dash is a fixed, committed lunge)), so what points at it is
+  `Reflex` (cooldown) and `Impact` (damage), both capped at 3, and the Dash
+  reach attribute at `home` (D75 (the gun's tiers, dash reach, a clean batch)).
 
   What is still open:
-  - **`Reflex` is the real multiplier.** Cooldown 2.2s -> 1.0s doubles dash
-    kills/s *and* invulnerability uptime (14% -> 31%). It was never the mod
-    Igor named, and it is the one doing the work.
+  - **`Reflex` is the real multiplier.** At its max it roughly doubles both
+    dash kills per second and invulnerable uptime (`roadmap.md` → Health, the
+    dash build). It was never the mod Igor named, and it is the one doing the
+    work.
   - **`Impact` beyond x1 is nearly dead.** Drifters and darters have 1hp and
     are the bulk of every batch, so x1 kills as many as x3. Only bulwarks see
     the rest. Dropping its max to 1 until enemies with real hp exist is the
     obvious move and is not taken.
-  - **Igor's direction: some dash upgrades belong at `home`** ("for later
-    think-thru"). **Built in S4** as the attribute dash reach (D75). D56 made this *possible* — `dashSpeed` is a field that can be
-    sold as `gear` — without deciding it. Dash power is the compounding,
-    strategic growth D31 puts in `gear` and keeps out of `mod`s.
   - Caveat on all of it: the probe dashes once, in a fixed direction, from a
     standstill. A human lines the dash up along a crowd, which is where reach
     pays. The D50 lesson applies — where the measurement and Igor's feel
     disagree, his feel wins.
 
   **S6 — Balance owns the tuning.**
-
-- ~~**Should `Lull` come back?**~~ **Closed by Igor, 2026-09-28: "Lull leave
-  out".** D55 removed it, which was Claude's overreach at the time — Igor had
-  said "useless *at this point*", a "not yet" rather than a deletion — but the
-  outcome is now his. It stays out. The measurement behind it holds: nothing
-  reaches a centred player inside a 1.2s window, so an arrival guard has
-  nothing to guard against while every enemy walks in from an edge.
 
 - **Fish that arrive from behind the screen.** Igor, 2026-09-27: "make some
   fish appear slowly from 'behind the screen' - still 2d, but adds to the
@@ -418,7 +264,7 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   generate once you learn the edges — measured, nothing reaches a centred
   player inside 2.04s. It makes the arena read as water with a volume rather
   than a box with four doors. And it is the only thing that would give an
-  arrival-guard mod a reason to exist — `Lull` is out for good (above), but
+  arrival-guard mod a reason to exist — `Lull` is out for good (Declined), but
   the *slot* reopens if arrivals ever start near the player.
 
   The risk is the obvious one — something materialising on top of you is
@@ -450,35 +296,6 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   waiting if replaying the top layers every dive (D66) turns out boring.
 - **A second currency** — a fancy shell worth a lot. After alpha.
 
-## Open — from the batch work
-
-- **Answered by D71 (batches are drawn from pools), 2026-09-30** — the
-  requirement was settled from the start; the mechanism is hand-made batches of
-  comparable threat, in pools per stretch of a layer, drawn from the dive's
-  seed. **The shape is built** (S4, 2026-09-30); content in S5; by alpha no
-  layer is a fixed list. The
-  original note:
-  **Every dive draws the same batches.** `BATCHES` is a fixed list, so two dives
-  of the same layer are identical — which contradicts the `foundations.md`
-  pillar "two dives of the same layer draw different batches". The deleted
-  `weight`/`from` fields solved this for *types*; the batch-level version is a
-  different mechanism (pick from a pool of batches of comparable threat, per the
-  draft's Hades reference). Needed before S6 (Balance) means anything, since
-  measuring one fixed sequence is not measuring the game.
-  **Load-bearing since D66 (the dive runs on through the layers)**: every dive
-  starts at the top, so this list is replayed every dive, and mods are a
-  one-second pick by design (D34), so batches carry the variety. What a layer
-  is — a fixed list or a pool it draws from — is a question for the
-  layer-to-layer pass.
-- ~~**Nothing ends a dive.**~~ **Partly answered, D58 (the descent),
-  2026-09-28.** The list no longer cycles: a dive ends at the bottom of the
-  layer, on a screen that is a stop, not a win. Layer *completion* — the boss,
-  and what finishing earns — is still S3. **The boss is in, 2026-09-29** (D62 —
-  the boss is the layer's last batch): killing it finishes the layer. What
-  finishing earns is D68 (the layer end is a milestone): a gate's rank and
-  mods, a full heal and the boss's haul of gems — and the last layer's end is
-  the win.
-
 ## Open — from the descent (S2)
 
 - **A lively background during batches.** While the camera is locked at a gate
@@ -488,13 +305,6 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   moving through a fight. Those specks and the depth tint are **placeholder
   graphics, to be replaced** — Igor: "if it's a graphics matter, state it and
   document that it's going to be modified later". What stays open is the art.
-- ~~**Gems left behind by the descent.**~~ **Closed by S4 (meta loop
-  skeleton), 2026-09-30**: every gem now flies to the player from anywhere and
-  never fades, so the descent strands nothing. The original note: In S2 gems stay where they drop and
-  scroll off with the world, so uncollected ones are lost. Igor, 2026-09-28:
-  left for the currency stage (S4 — Meta loop skeleton), "it will be reworked
-  anyways". D35 (currency is auto-collected) is decided but not implemented;
-  implementing it is where this closes.
 
 ## Open — from the boss (S3)
 
@@ -511,26 +321,12 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   spit needs enemy projectiles first — see the ranged drifter under "Enemy
   behaviours, not just enemy stats".
 
-## Open — from the layer-to-layer pass
-
-- ~~**The session pillar.**~~ **Answered 2026-09-30 by D70 (a dive can be
-  saved at any point).** Igor: "ideally, you could save at any point. if
-  difficult, leave for later". It is not difficult here — a dive is plain data
-  and its randomness one number — so it resumes exactly, with no rollback. The
-  pillar keeps its name. Claude's two proposals, quitting as death and resuming
-  from the last layer end, are superseded.
-- ~~**What follows the win.**~~ **Answered by D72 (between layers there is
-  no screen), 2026-09-30** — the win screen with the dive's numbers, then
-  `home`, which shows every layer cleared; diving again works as always.
-  Nothing new unlocks at alpha. What might come after alpha — harder dives,
-  more layers — is not designed.
-
 ## Open — raised during S4 (meta loop skeleton)
 
 - **Mods as drops, never offered — a requirement before S5 since D80 (before
   S5: entity docs, mods from drops).** Igor, 2026-09-30, closing S4: "mods
   rework from choice to enemy drops (from ideas)", its own session. How drops
-  work stays open until then. The original note: Igor, 2026-09-30, a "wild idea" for
+  work stays open until then. The idea as first raised: Igor, 2026-09-30, a "wild idea" for
   discussion after S4: "mods become random (most likely pseudo-random) drops
   from enemies, never offered, smooth part of the dive, some of them permanent,
   some temporary. would this help with mod vs gear resolution? would it allow
@@ -542,26 +338,6 @@ neighbours, not in degree. Comfort mods carry the width of the pool (D35).
   because an offer can run dry; D35 (currency is auto-collected), which a drop
   would ride on; and "permanent" mods, which would cross into what `gear` and
   `attribute` own (D31 (two-tier progression), D36 (attributes)).
-- ~~**D35 as written, against what S4 built.**~~ **Answered by D78 (gems are
-  pulled to the player), 2026-09-30** — Igor: "autocollected by pulling towards
-  a player"; whether an enemy drops is balance's. The original note: Raised by Claude, 2026-09-30,
-  during the build's sweep. D35 (currency is auto-collected) says gems "fly to
-  the counter on their own, and show a `+N`" — debounced, one aggregated `+7`
-  rather than seven `+1`s, placed at the corner counter or at the kill, both
-  built for Igor to pick — that only the drop's *value* is random, and that
-  `GEM_PULL` goes. The S4 spec paraphrased it as "every gem flies to you", Igor
-  approved that paraphrase, and that is what was built: gems fly to the player
-  at `GEM_PULL` 600, a fixed value per type, no `+N`. Claude's mistake — D35 was
-  not re-read. Asked of Igor: build D35 as written, or keep what was built.
-- ~~**A dive can now open on its fastest batch.**~~ **Answered by D79 (a dive
-  goes from easiest to hardest), 2026-09-30** — what "hardest" means is
-  balance's, and open below. The original note: Measured 2026-09-30: stretch
-  1's pool includes 14 darters, and a dive draws its opener from that pool
-  (D71), so seeds 1 and 42 open on it and the mortal bot dies before a clear;
-  every dive used to open on 10 drifters. Within D71's rule — the stretch's
-  batches share an hp band — but darters are fast. Not a human difficulty
-  reading (D50); S6 (balance) owns it, or a fixed gentle opener if Igor wants
-  one.
 - **How batches grow, balance-wise — S6 (balance)'s.** Igor, 2026-09-30:
   "right now the batches are hard coded and are shitty because of that - you
   know no level of difficulty, we havent settled how batches grow
@@ -619,3 +395,19 @@ No itch.io page, no favicon, no meta tags, no "make it shippable" polish. The
 browser build is scaffolding. (Worth knowing anyway: Vampire Survivors was
 originally an HTML5/Phaser game and sold millions before its Unity port — the
 browser *can* be a shipping target. It just isn't this project's target.)
+
+### `Lull` — invulnerability as a batch arrives
+Igor, 2026-09-28: "Lull leave out". D55 (`Lull` is removed) had taken it out —
+Claude's overreach at the time, since Igor had said "useless *at this point*",
+a "not yet" rather than a deletion — and the outcome is now his. The
+measurement behind it holds: nothing reaches a centred player inside its 1.2s
+window, so an arrival guard has nothing to guard against while every enemy
+walks in from an edge. The slot reopens only if arrivals ever start near the
+player (the fish from behind the screen, above).
+
+### A "finished standalone"
+Void since 2026-09-26, not answered: the question of what would finish the
+survivors-like prototype dissolved when `high level design.md` replaced it with
+a full roguelite (`plan.md`). Its four options — a win at three minutes, a
+softer curve, straight to sprites, a best score — answered a question nobody
+asks any more.

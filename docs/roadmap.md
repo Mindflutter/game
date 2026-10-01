@@ -3,56 +3,27 @@
 Near-term work **inside the active stage**, plus the health of the build.
 
 The stages themselves live in `plan.md`; the rules that outlive them live in
-`foundations.md`. This doc no longer owns the future — it owns *this week*.
+`foundations.md`. This doc owns *this week*, not the future.
 
 ---
 
-## Superseded, 2026-09-26
-
-Everything this doc used to say about phases is gone, not archived. The
-"finished standalone" question that blocked it since 2026-09-08 **is void**:
-`high level design.md` replaced the standalone with a full roguelite, so the
-four options in `ideas.md` are answering a question nobody is asking any more.
-D27–D32 record what replaced them.
-
-The old Phase 1–4 list is superseded by `plan.md` → S0–S7. The old "Phase 4 —
-roguelite, its own brainstorm when the time comes" is the brainstorm that
-happened.
-
 ## Next
 
-**S4 — Meta loop skeleton closed 2026-09-30** (D74–D79). Next come the two
-requirements below, then **S5 — Content**, whose entry also asks for the
-enemy, weapon, gear and mod data shapes to be final — and there is no weapon
-record yet; the entity-docs session settles it, and reserves the enemies'
-`threat` field (`plan.md` → Before S5). Raised during S4 and answered: gems are pulled to the player (D78), and threat
-rises overall and gradually through a dive (D79); the threat system that
-measures it is S6 — Balance's, and not done now.
-
-**Before S5, two requirements, each its own session** (D80, `plan.md` →
-Before S5): a markdown doc for every game entity — "every entity doc has a
-sensible layout with tables & naming" — and mods reworked from a choice into
-enemy drops.
+No stage is active: what comes next, and where each requirement before S5
+(content) stands, is `plan.md` → Active stage and Before S5.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
-`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's (`design.md`
-→ The lunge), and S4's — prices, tier steps, the haul, the gems card,
-`GEM_PULL` (`design.md` → What persists) — all Claude's picks.
-`?dev=mini-boss&play` and `?dev=last-batch&play` start at a lunger,
-`?dev=layer-2&play` at the second layer with a kit; `&immortal` and `&damage`
-ride on any URL. A scenario never touches the save.
+`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's
+haul (`entities/enemies.md`), and S4's — the Gun's prices and tier step
+(`entities/weapons.md`), the gems card (`entities/mods.md`), dash reach and
+`GEM_PULL` (`design.md`) — all Claude's picks. The scenarios that start
+next to each — a lunger, the second layer with a kit — are in the root
+`README.md` → Scenarios.
 
 Deliberately not yet: balance fine-tuning — Igor, closing S3: "i suggest we
 leave all balance fine-tuning for later"; S6 — Balance owns it, the threat
 system for enemies included (Igor, 2026-09-30: "is it part of balance? yes").
 A lively background (post-alpha, in `ideas.md`).
-
-## Standing constraints
-
-Now in `foundations.md` → The technical contract, and not duplicated here.
-Two changes worth flagging since they reverse what this section used to say:
-dependencies are *permitted* but declined on measurement grounds (D30), and
-the arena stopped being fixed at S2 (D29, D58).
 
 ## Health of the thing right now
 
@@ -72,24 +43,18 @@ This section owns the measured bot figures. Nothing else quotes them.
   batch; Igor clears the same batches easily. These figures are a **regression
   signal** — comparable to themselves across builds and seeds, and silent on
   whether a human is challenged.
-- ~~**Bullet tunneling**~~ **fixed, D53.** It was measured at 9% of shots
-  passing through a darter at the old 20fps `dt` cap. Bullets now sweep their
-  path, so tunneling is impossible at any bullet speed — checked at 6000px/s,
-  which is 50px per tick against a darter's 10px reach.
 - **Simulation rate**: `FIXED_DT` 1/120 since D53, banked by the frame loop.
   Doubling the tick rate costs ~1.1ms of a 16.7ms frame at the 500-entity
   budget, from D43's 0.55ms measurement of `update()`.
 - **The bot is blind to the dash.** `kiteAndShoot` never presses Space, so
   D51's change (dash damage now bought, not free) moved its clear times by
   exactly zero. A bot only measures the mechanics it uses.
-- **Bot survival: it dies again — and did before S2.** Corrected 2026-09-28.
-  This line used to say all five seeds finish eight batches; re-run on the
-  pre-S2 commit (`04fac4c`) the mortal bot dies on every seed, after 3, 7, 3, 3
-  and 3 clears (seeds 1, 7, 42, 4471, 90210). The claim went stale somewhere
-  after D49, most likely with D54's hp-sized batches. On the S2 build it dies
-  after 3, 3, 5, 5 and 3 clears; on the S3 build after 4, 3, 4, 6 and 3 — seed
-  1 does not die but sits at the first mini-boss until the 1800s cap (the boss
-  fight, below). Not a difficulty reading (D50) — Igor still
+- **Bot survival: the mortal bot dies on every seed.** Seeds 1, 7, 42, 4471,
+  90210: on the pre-S2 commit (`04fac4c`) after 3, 7, 3, 3 and 3 clears — most
+  likely since D54's hp-sized batches; on the S2 build after 3, 3, 5, 5 and 3;
+  on the S3 build after 4, 3, 4, 6 and 3 — seed 1 does not die but sits at the
+  first mini-boss until the 1800s cap (the boss fight, below). The S4 figures
+  are the meta loop's, below. Not a difficulty reading (D50) — Igor still
   finds batches easy — but it means **the mortal bot cannot reach the bottom**.
 - **Time to traverse one layer** — S2 and S3 figures, **not re-measured on the
   S4 build**, where a dive is two layers drawn from pools (S2 DoD, D58), immortal bot — `diveReport(seed,
@@ -100,8 +65,6 @@ This section owns the measured bot figures. Nothing else quotes them.
   lone slow enemy it backs out of its own range (the boss fight, below). Igor
   clears batches far faster, so a human layer is likely well under the 4–8 min
   pillar — which is S6's problem.
-- The 38.7 / 37.8 / 36.6s survival figures (2026-09-19) are **gone, not stale**:
-  they measured an auto-firing weapon with an XP curve, neither of which exists.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
   4471 reaches the bottom of the dive — both layers since S4 — in 578.00 /
   578.00 / 578.00s at 1280×800, 1920×1080 and 3440×1440 (stationary, immortal,
@@ -160,13 +123,12 @@ This section owns the measured bot figures. Nothing else quotes them.
   | Reflex ×3 | 141 | 1.0s | 141 | 31% |
   | Fins ×10 + Reflex ×3 | 141 | 1.0s | 141 | 31% |
 
-  Dash reach is flat since D56 — it used to ride on `player.speed`, so the
-  bottom row was 386px and 386 invulnerable px/s. `Reflex` is now the only mod
-  that raises escape power, and it caps at 3. **The Fins ×10 rows are no longer
-  reachable**: every mod caps at 3 since D69 (every mod capped). They stay as
-  measured, as the proof that `Fins` does not feed the dash. Dash reach is now
-  also an attribute (D75), 165 and 189px at one and two points — not measured
-  in these tables.
+  Dash reach does not ride on `player.speed` (D56), so `Reflex` is the only
+  mod that raises escape power, and it caps at 3. **The Fins ×10 rows cannot be
+  reached** — every mod caps at 3 (D69 (every mod capped)) — and stay as
+  measured, as the proof that `Fins` does not feed the dash. The Dash reach
+  attribute (D75), 165 and 189px at one and two points, is not measured in
+  these tables.
 
   Caveat as ever: the probe dashes once from a standstill in a fixed direction,
   so it cannot see a human lining the dash up along a crowd. It is a weak

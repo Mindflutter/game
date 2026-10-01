@@ -1,20 +1,9 @@
 # Design — how Abyss works today
 
-Describes the **present**, not the plan. Update it when reality changes.
-
-**The present is partway to the design.** S1 — Combat core is closed: the
-weapon is manual (D45), the batch queue and gate are in (D48), rank and mods
-are in (D49), and the simulation runs on a fixed timestep (D53). S2 — The dive
-is closed: one layer scrolls under a camera, a current carries you between gate
-depths, and the layer ends at the bottom (D58). S3 — One boss, one complete
-layer is closed: two mini-bosses along the way and the boss as the layer's last
-batch, both lunging (D62, D64, D65), so the layer can be finished. S4 — Meta
-loop skeleton is closed: the dive runs on through two
-layers drawn from pools (D66, D71), the layer end is a milestone and the last
-one the win (D68), every mod is capped (D69), gems fly to you (D35), and `home`,
-one gear item, one attribute, one micro-task and a versioned save that holds
-the dive in progress exist (D70, D74–D77). Nothing here is a statement of
-intent.
+Describes the **present**, not the plan: how the systems work. Update it when
+reality changes. Nothing here is a statement of intent. What each stage built
+is `plan.md` → Closed stages; each enemy, mod, weapon and piece of equipment —
+its numbers and behaviour — is its doc in `entities/`.
 
 ## What it is
 
@@ -42,7 +31,7 @@ game/       content.js  every tuning number + all content tables
                         snapshot and the save text
             logic.js    step() — arrivals, the gate, the descent, movement,
                         collision; the plan; home's buying and banking
-                        ── 1665 lines. Survives the port.
+                        ── 1669 lines. Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
@@ -53,11 +42,11 @@ main.js                 frame loop, dt, fps, boot, the save's storage
 checks.js               the ?test suite → the port's regression tests
 ```
 
-Line counts are as of 2026-09-30. Regenerate rather than trust them:
+Line counts are as of 2026-10-01. Regenerate rather than trust them:
 `wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
 *reports*, never a grep — some call sites sit inside loops.
 
-The platform share is **32%** (772 of 2437). D17 measured 23% on 2026-09-12 and
+The platform share is **32%** (772 of 2441). D17 measured 23% on 2026-09-12 and
 it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
 while `platform/` did not, and S2 held it level — the camera is one translate
 and the specks, depth tint and margin cover are a few dozen lines. S3 took it
@@ -194,16 +183,14 @@ the weapon reads it as a held state, so one click was being read twice. While `M
 elapsed, a shot leaves along the cursor and dies at `player.range` (D8). The
 cooldown is clamped at zero rather than allowed to run negative, so holding the
 button gives an honest `fireRate` while the first click after a pause is always
-instant. There is no longer any "hold the shot unless something is in range"
-rule — that existed only to stop an automatic weapon emptying itself into open
-water, and `enemyInRange()` was deleted with it.
+instant. The Gun's own numbers are `entities/weapons.md`.
 
 **Arrivals: the batch queue and the gate** (D27, D48, D54). Enemies come one
 **batch** at a time — a record naming counts per type — and nothing new arrives
-until the batch is dead. D54 sized the batches on total hp, ramping 10 to 68 —
-the weapon does 2.5 hp/s and no mod raises damage, so hp *is* the clock. The
-boss rises from below the view, centred; everything else arrives at a random
-edge. Batch `k` of the dive waits at depth `k × GATE_SPACING`; a dive opens with
+until the batch is dead. D54 sized the batches on total hp: nothing a dive
+picks up raises damage, so hp *is* the clock. Each type arrives where its
+`enters` says (`entities/enemies.md`) — the boss from below the view, centred,
+everything else at a random edge. Batch `k` of the dive waits at depth `k × GATE_SPACING`; a dive opens with
 `GATE_PAUSE` (1.2s) of quiet before the first, and every later batch arrives the
 moment the camera reaches its depth. `batchIndex` counts batches begun. The
 list does not cycle: past the last batch the same arithmetic points at the
@@ -225,7 +212,7 @@ cards use too — into the flat `plan` of `{ layer, batch }`,
 the last of each layer marked `end`. The abyss is one tall strip (D72), so
 entry `k` waits at `gateDepth(k)` whatever layer it is in, depth adds up across
 layers, and the bottom is `plan.length`. The layer end pays a rank and the
-cards like a gate, heals fully, and drops the boss's haul (its `value`, 30);
+cards like a gate, heals fully, and drops the boss's haul (its `value`);
 the last layer's end pays neither rank nor cards and the current carries you
 to the bottom, which is `won` (D68). `layerAt(y)` tells the renderer which
 layer a depth is in: the water takes that layer's `color` at its top and
@@ -250,34 +237,15 @@ of the player: swimming moves you within the view, never the view. Reaching dept
 `plan.length × GATE_SPACING` opens the `won` screen. The gate block runs
 before the player moves, so the clamp always sees this tick's camera.
 
-Enemies still enter 40px outside the **view** so they fade in from the dark, with
-±15% speed jitter. What is gone: the time-based spawn director, and with it the
-speed ramp and the weighted type-unlock roll. **Difficulty is authored per
-batch now, not ramped by the clock.**
+Enemies enter just outside the **view**, so they fade in from the dark, each at
+its type's speed spread by `ENEMY_JITTER`. Difficulty is authored per batch,
+not ramped by the clock.
 
-**Enemy types** (`ENEMY_TYPES`). No unlock times any more — which types appear
-is named per batch (D48):
-
-| | radius | hp | speed | value | role |
-|---|---|---|---|---|---|
-| drifter | 9 | 1 | 85 | 1 | the baseline swarm |
-| darter | 6 | 1 | 190 | 1 | fast enough to punish lazy kiting |
-| bulwark | 17 | 6 | 52 | 3 | soaks shots, blocks escape routes |
-| mini-boss | 26 | 24 | 70 | 5 | a lunger that rehearses the boss (D65) |
-| boss | 42 | 60 | 60 | 30 | a lunger, alone in the layer's last batch (D62); its drop is the layer end's haul (D68) |
-
-`value` is how much currency it drops. It was `xp` until D49.
-
-**The lunge** (D64), in `lungeStep()`: the boss's and the mini-boss's. Chase;
-then — after `lunge.chase` seconds, within `reach` and wholly inside the view —
-wind up for `windup` seconds with the line locked at where the player was;
-charge along it at `lunge.speed` for `reach` px or to the view's edge; rest for
-`rest` seconds, the opening; chase again. From the wind-up on, the view holds
-the lunger. The timings are the type's `lunge` field, whose presence is the
-behaviour: boss wind-up 1.0s, mini-boss 1.5s; charge 780px/s, reach 450px, rest
-1.2s — all Claude's picks. Contact costs a heart as with any enemy. Drawn:
-during the wind-up the body swells ×1.25 and glows harder, and a lane as wide
-as its radius lies along the line — placeholder graphics.
+**Enemies** (`ENEMY_TYPES`). Every type — its numbers, its role and its
+behaviour, a chase or the lunge — is `entities/enemies.md`; which types a batch
+holds is named per batch (D48). Each tick the enemy loop moves every enemy
+toward the player, or steps a lunger (`lungeStep()`), adds the dash's shove,
+and costs the player a heart on contact.
 
 **Bullets** store velocity once at birth and fly straight — that's why shots can
 be dodged and why yours sail past into the dark. Each carries an `id`; enemies
@@ -296,18 +264,9 @@ this frame** that the dash is facing (`DASH_ARC`, a 156-degree front) is shoved
 away at `DASH_PUSH`, bleeding off per second, and takes `player.dashDamage` —
 which is **0 until bought** (D51).
 The facing is frozen at the dash's start in `dashDx/dashDy`, so releasing the
-keys mid-lunge cannot spin the wave.
-
-**Swept, not sampled** (D50). The wave used to be a circle at wherever the
-player landed that frame, and a dash covers `speed × 3.4 × dt` — which grows,
-because `Fins` raises speed with no cap and `dt` stretches on a slow frame. At 8
-Fins on a 20fps frame the dash stepped 105px against a 49px reach and flew
-through what it should have hit, connecting on 27% of the positions an enemy
-could occupy. `segDistance()` measures the enemy against the segment travelled
-instead, and facing is judged from where the frame started — otherwise something
-the dash swept through reads as "behind me" purely because the step overshot it.
-Bullets have the same hole and do not have this fix; that is the fixed timestep,
-still open in S1.
+keys mid-lunge cannot spin the wave, and it is judged from where the frame
+started — otherwise something the dash swept through would read as "behind me"
+purely because the step overshot it (D50).
 
 **The shove is free; the wound is bought** (D51). `dashDamage` starts at 0 and
 the `Impact` mod buys it a point at a time. The push is never gated: scattering
@@ -315,11 +274,10 @@ a crowd is what makes diving into one a play rather than a mistake, and that has
 to work at tier 0. The white hit flash *is* gated, because a flash reads as
 "that hurt" and firing it on a harmless push is a lie.
 
-Dash reach is **fixed at 141px** and does not grow (D56). It used to be
-`player.speed × 3.4`, so every `Fins` lengthened it — 141px at none, 402px at
-ten, a third of the arena crossed untouchable. `dashSpeed` being its own field
-is what makes reach a stat that can be *sold* at `home` later rather than a
-side effect of a movement mod. It takes
+Dash reach is `dashSpeed × DASH_TIME` — 141px at the start — and nothing a
+dive picks up lengthens it: `dashSpeed` is its own field, not a multiple of
+`speed`, so `Fins` does not feed it (D56). Only the Dash reach attribute does,
+at `home` (D75). The dash takes
 its id from the bullet id space, so `lastHitBy` stops it hitting the same enemy
 twice — the same trick as pierce. Enemies carry `pushX/pushY` for the shove,
 their only velocity; everything else about them is a fixed walk toward you,
@@ -336,11 +294,9 @@ step.
 
 Both fast hitboxes are **swept**, not sampled: `segDistanceSq()` measures an
 enemy against the segment the bullet or the dash crossed this frame, rather
-than the point it ended on. A point test misses whatever it stepped over, which
-is a function of speed, and speed is not bounded — `Fins` is uncapped and a
-railgun is named in S1's own definition of done. Measured before the fix: the
-dash connected on 27% of positions at 8 Fins on a 20fps frame (D50), and
-bullets tunneled a darter on 9% (D53). The squared form is used because these
+than the point it ended on (D50, D53). A point test misses whatever it stepped
+over, which is a function of speed, and speed is not bounded — a railgun is
+named in S1's own definition of done. The squared form is used because these
 are the per-frame loops and that rule does not lapse because the shape became a
 capsule.
 
@@ -358,27 +314,15 @@ the descent cannot start before the offer has been taken. Nothing is offered for
 for a batch. If the same frame kills the last enemy *and* the player, the death
 screen wins: `clearBatch()` is guarded by `screen === 'playing'`.
 
-The pool is six, **body and comfort only** until S5 — Content, because a
-weapon mod cannot be balanced before the weapons exist. Body: Fins (speed,
-max 3), Vitality (+1 max HP, filled, max 3), Reflex (dash cooldown, max 3),
-Nerve (i-frames, max 3), Impact (dash damage, max 3). Comfort: Mend (a heart
-per batch cleared, max 1). **Every mod is capped** (D69). `Impact` is `body` rather than `weapon` because the dash is
-weapon-agnostic.
-
-Comfort is down to one on purpose. D34 named three candidates; a currency
-magnet has nothing to do since D35 auto-collects, and `Lull` — invulnerability
-as a batch arrived — was removed by D55 once measurement showed nothing can
-reach a centred player inside its 1.2s window, so it only ever paid out to a
-cornered one. `modCounts` tracks what has been taken and the roll skips
-anything at its `max`; a card the pool cannot fill takes a **filler** from
-`FILLERS` — a handful of gems (`FILLER_GEMS`, 10), then a heart back. A filler
-is a record without `max`, which is what makes it not a mod: it is not
-counted, shows no "held", and is never previewed (the gems do not live on the
-player, so previewing by applying to a copy would pay out). With every mod
-capped the offer is those two cards (D69). `takeMod()` is the one place a mod
-is applied and counted — the cards and a scenario's kit both go through it.
-Mods are dive-scoped: `reset()` clears them. They add on top of gear and
-attributes, never multiplying (D74).
+The pool — every mod, its cap and its card — is `entities/mods.md`. It is
+**body and comfort only** until S5 (content), because a weapon mod cannot be
+balanced before the weapons exist, and **every mod is capped** (D69).
+`modCounts` tracks what has been taken and the roll skips anything at its
+`max`; a card the pool cannot fill takes a **filler** — the gems card, then the
+heart — so with every mod capped the offer is those two cards (D69).
+`takeMod()` is the one place a mod is applied and counted — the cards and a
+scenario's kit both go through it. Mods are dive-scoped: `reset()` clears
+them. They add on top of gear and attributes, never multiplying (D74).
 
 Anything a mod raises is a field on `player` rather than a `const` — that is why
 `iframes` and `dashCooldown` live in `PLAYER_START`.
@@ -402,8 +346,9 @@ cleared, which is what unlocks the next at `home`). Points available are
 `reset()` builds the player as `PLAYER_START`, plus each gear tier's `apply`,
 plus each attribute point's `apply`; mods then add on top as picked. All sums.
 
-- `GEAR`: the **Gun**, `tiers: [40, 100, 200]` gems, each +0.5 shots/s
-  (2.5 → 4.0). `buy()` refuses what the bank cannot pay and past the top tier.
+- `GEAR`: the gear for sale, by name — today the Gun's tiers
+  (`entities/weapons.md`). `buy()` refuses what the bank cannot pay, and past
+  the top tier.
 - `ATTRIBUTES`: **Dash reach**, each point +150px/s of `dashSpeed`, 141 → 165 →
   189px of dash. `raise()` refuses without a point.
 - `TASKS`: **untouched** — a batch cleared with `batchHit` still false pays 1
@@ -500,16 +445,10 @@ menus stack rows the same way and are not.
 
 ## Scenarios
 
-Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42):
-
-| URL | Does |
-|---|---|
-| `?dev=one-drifter` | Loads it **frozen**. Nothing advances until `advance(n)`. |
-| `?dev=three-types&play` | Loads it **running**, for watching. |
-| `?dev=late-swarm&seed=4471` | Any scenario, on a fixed seed. |
-| `?dev=last-batch&play` | The last layer's boss, then the bottom: the win without the whole dive. |
-| `?dev=mini-boss&play` | The first mini-boss, alone. |
-| `?dev=layer-2&play` | The top of the second layer, with a stated kit of fifteen mods. |
+Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42).
+Every scenario and the URL for it, the dev flags, and how to combine them are
+in the root `README.md` → Scenarios. `?dev=<name>` loads one **frozen** —
+nothing advances until `advance(n)` — and `&play` runs it live.
 
 `applyScenario(name, seed)` resets, then applies the record: `batch` to start
 at that batch's depth — a number, or a function of the drawn plan where the
@@ -519,18 +458,9 @@ with no jitter, and a `kit` of mod names taken as picks, a rank each. An
 unknown name logs the known ones and does not throw. A scenario never reads or
 writes the save.
 
-Two dev flags ride on any URL, with a scenario or without, and survive R:
-`main.js` sets them, and `reset()` leaves them alone and re-applies the damage.
-
-| Flag | Does |
-|---|---|
-| `&immortal` | Nothing hurts the player. |
-| `&damage=<n>` | Every shot does `n`. A bare `&damage` is 100, one shot for anything. |
-
-A URL's first argument follows `?` and every later one `&`, in any order:
-`?dev=last-batch&play&immortal&damage`, or without a scenario
-`?immortal&damage=5`. `?test` is the exception — it runs only as the whole
-query.
+The two dev flags, `&immortal` and `&damage=<n>`, survive R: `main.js` sets
+them, and `reset()` leaves them alone and re-applies the damage. `?test` runs
+only as the whole query.
 
 `advance(n)` runs exactly n fixed ticks and draws once — no wall clock involved.
 This is what the bot drives, and the same entries it selects by name, so there
@@ -561,7 +491,7 @@ Two suites (D39, D44).
 
 | | Command | Covers |
 |---|---|---|
-| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, the layer end offers no mods, the water flows behind the mod cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the layer ends at the bottom), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss's clear pays a rank and mods), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal, a rank and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap and three cards while any is under it; the gems card paying only when taken; every gem reaching the player; death banking the gems; `home`, buying, points and the micro-task; a hand-placed enemy paying no task; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 fixture loading), the bot starting from a scenario, the dev flags, and the docs (D57). Vitest + fast-check, dev-only. |
+| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, the layer end offers no mods, the water flows behind the mod cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the layer ends at the bottom), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss's clear pays a rank and mods), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal, a rank and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap and three cards while any is under it; the gems card paying only when taken; every gem reaching the player; death banking the gems; `home`, buying, points and the micro-task; a hand-placed enemy paying no task; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 fixture loading), the bot starting from a scenario, the dev flags, and the docs (D57) — among them the entity docs' tables against `game/content.js` (D81) and the map in `docs/README.md` (D82). Vitest + fast-check, dev-only. |
 | **Browser** | `index.html?test` | The scripted checks (count under Verification), plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`, and the same seed played to the bottom of the dive at three window sizes through real `MouseEvent`s (D29). |
 
 `tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
@@ -598,28 +528,28 @@ is not usable here. Double-clicking `index.html` still needs no server at all.
 ## Balance constants
 
 All in `game/content.js` under `// balance`. These are the real product of the
-prototype — they transfer to any port verbatim.
+prototype — they transfer to any port verbatim. The entities' numbers — the
+Gun's fields of `PLAYER_START` and `BULLET_SPEED` among them — are in their
+docs in `entities/`; the rest are here, and `npm test` holds them to the code.
 
-`PLAYER_START` (r 10, speed 260, hp 3, fireRate 2.5, damage 1, range 250,
-pierce 0, iframes 1, dashCooldown 2.2, dashSpeed 884,
-mendOnClear 0, dashDamage 0) · `BULLET_SPEED 430` · `GEM_PULL 600` ·
-`FILLER_GEMS 10` · `NOTICE_TIME 2.5` · `ENEMY_JITTER 0.3` ·
+`PLAYER_START`, the diver (r 10, speed 260, hp 3, maxHp 3, iframes 1,
+dashCooldown 2.2, dashSpeed 884, mendOnClear 0, dashDamage 0) ·
+`GEM_PULL 600` · `NOTICE_TIME 2.5` · `ENEMY_JITTER 0.3` ·
 `GATE_PAUSE 1.2` · `GATE_SPACING 400` · `CURRENT_SPEED 200` ·
 `CURRENT_CRAWL 30` · `CURRENT_EASE 0.05` · `MOD_OFFER_DELAY 0.6` · `FIXED_DT 1/120` ·
 `MAX_FRAME_DT 0.05` · `DASH_TIME 0.16` ·
 `DASH_GRACE 0.15` · `DASH_REACH 40` · `DASH_ARC 0.2` ·
 `DASH_END 0.18` · `DASH_PUSH 320` · `PUSH_DRAG 0.02` · `SHAKE_FADE 0.02` ·
-`SHAKE_FLOOR 0.15` · `SHAKE_HURT 7` · `SHAKE_DEATH 38` · and the tables:
-`GEAR` (Gun: 40 / 100 / 200 gems, +0.5 shots/s a tier) · `ATTRIBUTES` (Dash
-reach: +150px/s a point) · `TASKS` (untouched: 1 point a layer) · the boss's
-`value` 30.
+`SHAKE_FLOOR 0.15` · `SHAKE_HURT 7` · `SHAKE_DEATH 38` · and the tables
+the entity docs do not cover: `ATTRIBUTES` (Dash reach: +150px/s a point) ·
+`TASKS` (untouched: 1 point a layer).
 
 ## Verification
 
 **`index.html?test`** runs the suite in the console (currently **178** checks —
-this doc owns that count; `roadmap.md` cites it). The old figure of 79 was
-`grep -c`, i.e. *lines containing an assertion*; the suite reports what actually
-**executed**, which is higher because some call sites sit inside loops.
+this doc owns that count; `roadmap.md` cites it). It is what actually
+**executed** — more than `grep -c` finds, because some call sites sit inside
+loops.
 Covering: arrivals and the gate, collision, i-frames, bullet range, piercing,
 gems flying to you from anywhere, every screen transition, cursor wrapping, each option, non-Latin
 keyboard layouts, shake settling, frame-rate independence, that every sound is

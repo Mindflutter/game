@@ -60,10 +60,11 @@ Named setups for looking at one thing at a time, on the same server:
 | URL | What you get |
 |---|---|
 | `index.html?dev=one-drifter&play` | One enemy, nothing else arriving |
-| `index.html?dev=three-types&play` | All three enemy types, at known spots |
+| `index.html?dev=three-types&play` | The three ordinary enemy types, at known spots |
 | `index.html?dev=late-swarm&play` | Several batches into the dive |
 | `index.html?dev=mini-boss&play` | The first mini-boss, alone |
-| `index.html?dev=last-batch&play` | The boss — the layer's last batch — then the layer end |
+| `index.html?dev=last-batch&play` | The last layer's boss, then the bottom — the win |
+| `index.html?dev=layer-2&play` | The top of the second layer, carrying a kit of fifteen mods |
 | `…&seed=4471` | Any of the above as an exact, repeatable dive |
 
 Two dev flags work on any URL, with a scenario or without, and stay on after
@@ -83,7 +84,8 @@ Drop `&play` and the scenario loads **frozen** — nothing advances until you ca
 `advance(30)` in the console. That is how the tests and the bot drive the game
 faster than real time.
 
-Scenarios are data in `game/content.js`; adding one is a line.
+Scenarios are data in `game/content.js`; adding one is a line, and its row
+here — `npm test` fails on a scenario this table does not list.
 
 ## Layout
 
@@ -95,7 +97,9 @@ main.js        frame loop and boot
 checks.js      the browser suite
 tests/         the Node suite
 serve.py       local dev server: no caching, threaded
-docs/          design, decisions, plan -- start at foundations.md
+docs/          design, decisions, plan, every enemy, mod, weapon and piece
+               of equipment -- start at foundations.md; docs/README.md
+               says where everything else is
 ```
 
 `game/` reaches into `platform/` for exactly seven names — the seventh,

@@ -4,6 +4,40 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-01
+
+**Entity docs, and the docs reorganised around a map** (D81, D82)
+Igor, having read it: "ok, commit". The first requirement before S5
+(content) (D80 (entity docs and mods from drops come first)). Igor's goal:
+docs for weapons, mods, enemies and equipment — "includes currently
+implemented, easily scalable for more", "all the relevant meta for each item:
+naming, numbers, descriptions" — micro-tasks left out, and `docs/` organised so
+"everything can be easily found, files arent bloated with obsolete or
+excessive info, and files are always in sync". On the layout: "do without
+review".
+
+New: `docs/entities/` — `enemies.md`, `mods.md`, `weapons.md`, `equipment.md`,
+each a roster with every number, the record's fields, a section per item and
+how to add one; `threat` reserved for S6 (balance); "equipment" in the
+glossary (D81 (entity docs, one per kind)). `docs/README.md` rewritten as the
+map — living docs and logs, one home per fact — and `CLAUDE.md` now reads
+`foundations.md` and `plan.md`, then looks the rest up (D82 (the docs map)).
+
+Trimmed: `ideas.md` from 621 lines to 413, answered items out; `plan.md` from
+426 to 133, the closed stages one table and D35's `+N` popup carried to S7
+(alpha polish); `roadmap.md`, the superseded phases and the constraints
+pointer; `design.md`, what the entity docs own, the dash's history and four
+stale statements. The root `README.md` regained the `layer-2` scenario and
+fixed two stale rows. `game/content.js`: four comment lines pointing at the
+docs.
+
+Checks: `tests/docs.test.js` gains the entity docs — rosters rebuilt from the
+code, fields, sections — the map, every `NAME value` quote in a doc that
+describes the code, the diver's starting numbers in `design.md`, and the
+README's scenarios. 21 deliberate breaks, each caught by the check meant to
+catch it. **Not done**: the weapon record — the Gun is not a record yet, so a
+second weapon is not a line.
+
 ## 2026-09-30
 
 **Two false comments removed** — Igor: "fix them already". In `game/logic.js`:

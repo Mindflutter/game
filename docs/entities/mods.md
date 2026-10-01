@@ -1,0 +1,101 @@
+# Mods
+
+Every mod, and the two fillers that share their cards: what each does, its
+numbers and its card text. The tables mirror `MODS` and `FILLERS` in
+`game/content.js`, and `npm test` fails when the two disagree.
+
+A mod is a dive-scoped pick, offered as one of three at a gate or a layer end
+and gone at the end of the dive. Momentum, not strategy (`foundations.md` →
+the glossary). How the offer works — when it comes, what it rolls, how a card
+is taken — is `design.md` → Rank and mods.
+
+**About to change**: D80 (entity docs and mods from drops come first) turns
+mods from a pick into enemy drops, in a session of its own. Until it lands,
+this is the pick as built.
+
+## Roster
+
+| name | scope | desc | max | per pick | at max |
+|---|---|---|---|---|---|
+| Fins | body | you swim faster | 3 | speed +45 | speed 395 |
+| Vitality | body | one more heart, it comes full | 3 | hp +1, maxHp +1 | hp 6, maxHp 6 |
+| Reflex | body | the dash comes back sooner | 3 | dashCooldown -0.4 | dashCooldown 1 |
+| Nerve | body | hits leave you safe longer | 3 | iframes +0.3 | iframes 1.9 |
+| Impact | body | the dash wounds what it throws | 3 | dashDamage +1 | dashDamage 3 |
+| Mend | comfort | a heart back each batch | 1 | mendOnClear +1 | mendOnClear 1 |
+
+**per pick** is what one pick changes; **at max** is the stat after `max`
+picks, from the starting kit — `PLAYER_START`, before any gear or attribute.
+Both are worked out from `apply` by the check, so they cannot advertise a
+number the mod does not deliver. Every number is S6 (balance)'s to tune.
+
+## Fields
+
+| Field | Unit | Meaning |
+|---|---|---|
+| `name` | — | The key and the card's title. A saved dive keeps its picks and the cards on offer by name, and a scenario's kit names them, so renaming one breaks both. |
+| `scope` | — | `body`: a stat of the diver, worth the same whatever weapon is carried. `comfort`: feel and friction, near-zero balance risk. A third, `weapon`, is **reserved** (D31 (two-tier progression), D34 (mods)): a mod that changes the equipped weapon, which needs a weapon record first (`weapons.md`). A check holds the pool to `body` and `comfort` until then. |
+| `desc` | — | The card's one line. A kind, not a degree: nothing a player has to compare across cards (D34 (mods)). A check holds it inside the card's width. |
+| `max` | picks | How many times one dive can take it (D69 (every mod capped)): a switch caps at 1, anything that stacks at 3. An offer never shows a mod at its max. |
+| `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The card's "from → to" rows are worked out from it, at most `MOD_ROWS 2` of them. |
+
+## Fins
+
+Swim speed. It does not lengthen the dash: dash reach has been its own stat
+since D56 (the dash is a fixed, committed lunge).
+
+## Vitality
+
+One more heart, and it arrives full.
+
+## Reflex
+
+The dash comes back sooner. The real multiplier on the dash — both its kills
+and its invulnerable uptime grow with it (measured in `roadmap.md` → Health,
+the dash build; the analysis is `ideas.md` → the dash economy).
+
+## Nerve
+
+Longer invulnerability after a hit.
+
+## Impact
+
+The dash wounds what it throws. The dash always shoves; hurting what it shoves
+is bought, a point of `dashDamage` a pick (D51 (the dash is bought)). `body`
+rather than `weapon`, because the dash is weapon-agnostic. Past its first pick
+it matters only against enemies with more than one hit point.
+
+## Mend
+
+Comfort: a heart back each time a batch is cleared, never past full. A standing
+effect rather than a stat — `clearBatch()` reads `mendOnClear`. The last
+layer's end pays nothing, Mend included (D68 (the layer end is a milestone)).
+
+## Fillers — not mods
+
+What takes a card the pool cannot fill, so an offer always has three (D69
+(every mod capped)): the gems card first, then the heart. A filler has no
+`max`, and that is what marks one: it is not counted, shows no "held", and its
+card previews nothing.
+
+| name | pays | desc |
+|---|---|---|
+| Gems | currency +10 | a handful of gems |
+| Heart | hp +1 | a heart back |
+
+**Gems** pays `FILLER_GEMS 10` into the dive's takings — Claude's pick, S6
+(balance)'s to tune. **Heart** heals one, never past full.
+
+## Adding one
+
+1. A line in `MODS`: `name`, `scope`, `desc`, `max`, `apply`. Anything a mod
+   raises must be a field of `PLAYER_START`, not a bare constant — a line of
+   data cannot edit a `const` (D34 (mods)).
+2. A row in the roster and a section here under its `name`. `npm test` fails
+   until both match the code.
+3. The checks that then hold it: a unique name, `scope` body or comfort, `max`
+   an integer of at least 1, the card text inside the card, at most `MOD_ROWS`
+   stats moved — and every stat it moves shown on the development readout
+   (`PLAYER_STATS`), so a new stat needs its line there.
+
+Ideas for more wait in `ideas.md` → Mod ideas.
