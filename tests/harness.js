@@ -58,7 +58,7 @@ export function loadGame() {
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
                   'BOOSTS', 'BOOST_C', 'BOOST_LIFE', 'END_STEP',
                   'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES',
-                  'MENUS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
+                  'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [
     ...STATE.map(n => `${n}: { get: () => ${n}, set: v => { ${n} = v; }, configurable: true }`),

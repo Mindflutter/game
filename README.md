@@ -29,7 +29,8 @@ npm run test:watch
 Property-based invariants over generated seeds: no `NaN` ever, hp stays in
 bounds, the player stays in the view, a dive replays exactly from its seed, and
 decay is time-based rather than frame-based. It also loads `game/` with only the
-seven port-seam names stubbed, so reaching for an eighth fails the build.
+seven port-seam names stubbed, so reaching for an eighth fails the build on any
+path a test drives.
 
 `test:watch` is the one to leave open while editing `game/`.
 

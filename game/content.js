@@ -246,9 +246,16 @@ function continueRect() {
   return { x: ARENA_W / 2 - CARD_W / 2, y: c.y + c.h + 20, w: CARD_W, h: ROW_H };
 }
 
+// How many of a mod are yours: taken, or dropped and still flying to you.
+// Nothing stops a mod in flight reaching you, so every draw counts it, or the
+// last slot under a cap is dealt again before it lands.
+function held(m) {
+  return (modCounts[m.name] || 0) + drops.filter(d => d.mod === m.name).length;
+}
+
 // The ordinary mods still under their caps: what a fish can carry (D84).
 function carriable() {
-  return MODS.filter(m => !m.end && (modCounts[m.name] || 0) < m.max);
+  return MODS.filter(m => !m.end && held(m) < m.max);
 }
 
 // The mod a glowing fish carries: every ordinary mod once before any comes
@@ -277,7 +284,7 @@ const cardStep = m => (m.end ? 1 : END_STEP);
 // what the card gives. Fewer when the pool runs short; none at all leaves only
 // Continue.
 function rollValuable() {
-  return drawDistinct(MODS.filter(m => (modCounts[m.name] || 0) + cardStep(m) <= m.max), 3);
+  return drawDistinct(MODS.filter(m => held(m) + cardStep(m) <= m.max), 3);
 }
 
 // ---------- key bindings ----------
@@ -512,7 +519,6 @@ const OPTIONS = [
     show: () => Math.round(volume * 100) + '%',
     change: d => {
       volume = Math.max(0, Math.min(1, Math.round((volume + d * 0.1) * 10) / 10));
-      if (master) master.gain.value = volume;
       sound('gem');                       // so you hear what you just set
     } },
   { label: 'Screen shake',

@@ -59,8 +59,9 @@ draft, which is why they are banned (D32).
   seventh name)) — `game/` decides when, the platform stores the text. Every
   addition is deliberate and listed in `design.md`, never incidental. The camera did **not** grow it: `cameraY` lives in `game/`, `aim`
   stays in view coordinates, and `game/` adds the offset itself (D58). **`npm test` enforces this**: `tests/harness.js` loads
-  `game/` with only those seven stubbed, so an eighth name breaks the build. That
-  is how D44 found the seam had quietly become eleven.
+  `game/` with only those seven stubbed, so an eighth name breaks the build on
+  any path a test drives — a path none drives can still hide one. That is how
+  D44 found the seam had quietly become eleven.
 - **Key bindings live in `game/content.js`, not `platform/`.** Which key means
   which action is content (D6); reading the keyboard is platform's job.
 - Do not invest in the canvas layer. The offscreen glow cache that used to be
@@ -111,9 +112,9 @@ draft, which is why they are banned (D32).
 - **Game feel is Igor's call and is never asserted.**
 - Hard-refresh (Cmd+Shift+R) after edits. Several script files mean a partial
   cache serves a mix of old and new, which produces baffling bugs.
-- Every number the docs quote about the code is regenerable. Line counts:
-  `wc -l game/*.js platform/*.js main.js`. **The check count is whatever the
-  suite reports**, not a grep — `grep -c` counts lines containing an assertion,
+- Every number the docs quote about the code is regenerable, and they quote no
+  line counts (D92). **The check count is whatever the suite reports**, not a
+  grep — `grep -c` counts lines containing an assertion,
   which undercounts because some call sites sit inside loops.
 
 ## Working agreement
@@ -221,8 +222,8 @@ draft, which is why they are banned (D32).
   **Then look at it.** State checks are blind to a blank screen and to
   overlapping text — both have happened. If a change touches anything drawn,
   screenshot it before claiming done.
-- **Every measured number lives in exactly one doc.** Check counts, line
-  counts, bot survival times, the port share. A number copied into a second
+- **Every measured number lives in exactly one doc.** Check counts, bot
+  survival times. A number copied into a second
   file is a number that will disagree with itself — every stale figure found
   so far was a copy. Cite the owning doc instead: survival times are
   `roadmap.md` → Health, and nowhere else. The same holds for every fact —

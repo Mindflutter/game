@@ -33,34 +33,16 @@ game/       content.js  every tuning number + all content tables
                         snapshot and the save text
             logic.js    step() — arrivals, the gate, the descent, movement,
                         collision; the plan; home's buying and banking
-                        ── 1715 lines. Survives the port.
+                        ── Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
             render.js   canvas, view scaling, the camera, every draw function
 main.js                 frame loop, dt, fps, boot, the save's storage
-                        ── 831 lines. Rewritten on the port.
+                        ── Rewritten on the port.
 
 checks.js               the ?test suite → the port's regression tests
 ```
-
-Line counts are as of 2026-10-12. Regenerate rather than trust them:
-`wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
-*reports*, never a grep — some call sites sit inside loops.
-
-The platform share is **33%** (831 of 2546). D17 measured 23% on 2026-09-12 and
-it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
-while `platform/` did not, and S2 held it level — the camera is one translate
-and the specks, depth tint and margin cover are a few dozen lines. S3 took it
-down a point: the lunge is logic, and its tell is a few lines of drawing. S4
-took it down three more: the layers, the economy and the save are logic, and
-`home` is one more menu plus a list. The weapon record, one more: a table and a
-migration, all logic. Mods from drops held it level: the drops, the glow and
-the boosts are logic, and their placeholder drawing about sixty lines. The
-comments pass of 2026-10-12 took it up two points without a line of drawing:
-it cut history out of `game/`'s comments far more than out of `platform/`'s.
-This is the number to watch — CLAUDE.md says not to invest in the canvas
-layer, and this is what that rule looks like when it slips.
 
 Plain `<script>` tags, not modules, so `file://` works. **Load order matters**
 and is documented in `index.html`.
@@ -89,7 +71,9 @@ loaded either, so no check ever reads or overwrites a player's save.
 
 Exactly seven, and **enforced rather than claimed**: `npm test` loads `game/`
 into a Node `vm` with only these seven stubbed, so reaching for an eighth fails
-the build. That check found the seam had quietly grown to eleven — `LEFT`, `RIGHT`,
+the build — on any path a test drives. A path none drives can still hide one:
+the Volume option reached for platform's gain node until a test drove every
+option. That check found the seam had quietly grown to eleven — `LEFT`, `RIGHT`,
 `GO`, `DASH` and `CLICK` were being read from `platform/input.js`. They now live
 in `game/content.js`, because which key means which action is content (D44).
 
@@ -330,7 +314,9 @@ of its own, so it never writes over a micro-task's `notice`.
 Which mod a fish carries is `drawCarried()`'s: an ordinary mod — not one of the
 layer end's own, `end` — still under its cap, every one once before any comes
 again. `modRound` holds the round, which refills once every mod still open has
-come in it. With every ordinary mod capped it returns nothing and no fish
+come in it. Both draws, this and the layer end's, measure the cap with
+`held()`, which counts a mod still flying to you: nothing stops it landing, so
+its slot is taken the moment it drops. With every ordinary mod capped it returns nothing and no fish
 lights: the easiest answer while caps are balance's question (Igor,
 2026-10-12).
 

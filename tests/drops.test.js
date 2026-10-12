@@ -179,6 +179,59 @@ describe('which mod a fish carries (D84)', () => {
   it('deals the same mods from the same seed', () => {
     fc.assert(fc.property(seed, s => { expect(deal(s)).toEqual(deal(s)); }), { numRuns: 10 });
   });
+
+  // One slot left in the whole pool: every ordinary mod at its cap but the
+  // last, one short. A batch is killed at once, so its fish's mod drops.
+  const lastSlot = () => {
+    const g = loadGame();
+    g.reset(1);
+    g.immortal = true;
+    for (const m of ordinary(g)) g.modCounts[m.name] = m.max;
+    const last = ordinary(g).at(-1);
+    g.modCounts[last.name] = last.max - 1;
+    return g;
+  };
+  const killAll = g => { for (const e of [...g.enemies]) g.killEnemy(e); g.update(g.FIXED_DT); };
+
+  it('counts a mod still in the air as held: no fish lights for a slot it has taken', () => {
+    // Lit, that fish would die with nothing left to draw.
+    const g = lastSlot();
+    ride(g);
+    killAll(g);
+    const inAir = g.drops.find(d => d.mod);
+    inAir.x = -5000;                             // a long flight: still in the air
+    ride(g);                                     // when the next batch arrives
+    expect(g.drops).toContain(inAir);
+    expect(g.enemies.some(e => e.carrier)).toBe(false);
+    inAir.x = g.player.x;
+    inAir.y = g.player.y;
+    g.update(g.FIXED_DT);                        // it lands
+    expect(() => killAll(g)).not.toThrow();
+  });
+
+  it('never hands the last slot of a mod out twice', () => {
+    const g = lastSlot();
+    ride(g);
+    killAll(g);
+    const inAir = g.drops.find(d => d.mod);
+    inAir.x = -5000;                             // still in the air...
+    ride(g);
+    expect(g.drops).toContain(inAir);
+    killAll(g);                                  // ...as the next batch dies
+    for (const d of g.drops) { d.x = g.player.x; d.y = g.player.y; }
+    g.update(g.FIXED_DT);
+    for (const m of g.MODS) expect(g.modCounts[m.name] || 0).toBeLessThanOrEqual(m.max);
+  });
+
+  it('counts a mod still in the air when the layer end deals its cards', () => {
+    const g = loadGame();
+    g.reset(1);
+    const x = ordinary(g)[0];
+    for (const m of g.MODS) g.modCounts[m.name] = m.max;
+    g.modCounts[x.name] = x.max - g.END_STEP;    // room for one card of it...
+    g.drops.push({ x: 0, y: 0, r: 7, mod: x.name });   // ...but one is on its way
+    expect(g.rollValuable().map(c => c.name)).not.toContain(x.name);
+  });
 });
 
 describe('the layer end\'s pick (D85)', () => {

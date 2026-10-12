@@ -6,6 +6,22 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-12
 
+**No line counts in the docs** (D92)
+Igor: "remove line count from docs, updates frequently and no one needs this
+info". Gone from `design.md` → Files with the platform share, their ratio, and
+its history; the test that held them to the code went too.
+
+**Two fixes from the cloud review** (D84, D18)
+A mod still flying to you was not counted against its cap, so its last slot
+could be dealt again before it landed: the next batch lit a fish for it, and
+that fish's death crashed the game with nothing left to draw — or, if it died
+first, the mod went one past its cap. Both draws now count a mod in the air as
+held (`held()`); three tests in `tests/drops.test.js`. And the Volume option
+reached for platform's gain node, `master` — an eighth name past the seam that
+no test drove. `sound()` now sets the gain from `volume` itself, and a test
+drives every option on the seam alone; the docs' "an eighth name breaks the
+build" now says it holds on paths a test drives.
+
 **Comments amend the code** (D91)
 Igor: "comments must not define or contradict the codebase, but amend it".
 Every comment in the code and the tests read against its code: history,

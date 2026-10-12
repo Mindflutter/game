@@ -88,9 +88,8 @@ describe('docs/', () => {
 
 // The numbers docs quote about the code, regenerated rather than trusted
 // (CLAUDE.md: "every number the docs quote about the code is regenerable").
-// The same files CLAUDE.md's `wc -l game/*.js platform/*.js main.js` counts,
-// read from the directories so a new file cannot be silently left out.
-const lineCount = files => files.reduce((n, f) => n + src(f).split('\n').length - 1, 0);
+// The game's scripts are read from the directories, so a new file cannot be
+// silently left out.
 const js = dir => readdirSync(new URL(dir + '/', ROOT)).filter(f => f.endsWith('.js')).map(f => dir + '/' + f);
 const GAME = js('game');
 const PLATFORM = [...js('platform'), 'main.js'];
@@ -98,14 +97,6 @@ const PLATFORM = [...js('platform'), 'main.js'];
 describe('numbers the docs quote about the code', () => {
   const design = read('design.md');
 
-  it('quotes the real line counts and platform share', () => {
-    const game = lineCount(GAME), platform = lineCount(PLATFORM);
-    expectIn(design, '── ' + game + ' lines. Survives the port.');
-    expectIn(design, '── ' + platform + ' lines. Rewritten on the port.');
-    const share = Math.round(100 * platform / (game + platform));
-    expectIn(design, 'The platform share is **' + share + '%** (' + platform +
-                             ' of ' + (game + platform) + ')');
-  });
 
   it('quotes the balance constants at their real values', () => {
     // `NAME value` pairs, wherever a doc that describes the code writes one,

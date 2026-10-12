@@ -67,6 +67,17 @@ describe('the port seam', () => {
     expect(typeof g.advanceBy).toBe('function');
   });
 
+  it('every option runs on the seam alone, both ways (D18)', () => {
+    // Loading proves only what runs at load. An option's change() runs on a
+    // key press, and nothing else in Node presses one.
+    const g = loadGame();
+    for (const o of g.OPTIONS) {
+      o.change(-1);
+      o.change(1);
+      o.show();
+    }
+  });
+
   it('banks real time into whole fixed steps, capped (D53)', () => {
     const g = loadGame();
     g.reset(1);

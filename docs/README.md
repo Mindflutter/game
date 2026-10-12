@@ -57,7 +57,6 @@ copy.
 | How a system works — the gate, the descent, the drops, the pick, the save | `design.md` |
 | Measured bot figures | `roadmap.md` → Health |
 | The check count | `design.md` → Verification |
-| Line counts and the platform share | `design.md` → Files |
 | A decision's reasons | its entry in `decisions.md` |
 
 ## What keeps them true
@@ -69,8 +68,7 @@ copy.
   its section;
 - every `` `NAME value` `` a doc quotes is the constant's real value, and no
   doc that describes the code names a constant the code has lost;
-- `design.md`'s list of the diver's starting numbers is complete and true, and
-  so are its line counts and platform share;
+- `design.md`'s list of the diver's starting numbers is complete and true;
 - the root `README.md` lists every scenario;
 - decisions are named, numbered without gaps, cited only if they exist, and the
   newest has a changelog entry;

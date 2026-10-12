@@ -872,7 +872,6 @@ if (location.search === '?test') {
   tap('ArrowRight'); tap('ArrowRight');
   check(Math.abs(volume - 0.7) < 1e-9, 'volume must go up, got ' + volume);
   volume = bootVolume;
-  if (master) master.gain.value = volume;
 
   screen = 'options'; optionIndex = 1; shakeLevel = 2;
   tap('ArrowLeft');

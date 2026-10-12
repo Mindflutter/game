@@ -33,7 +33,6 @@ window.addEventListener('keydown', e => {
     // compressor rides that down instead of letting it crackle.
     const comp = audio.createDynamicsCompressor();
     master = audio.createGain();
-    master.gain.value = volume;
     master.connect(comp).connect(audio.destination);
   } else if (audio.state === 'suspended') {
     audio.resume();
@@ -41,7 +40,10 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyM') muted = !muted;
 });
 
+// The gain follows game/'s `volume` here, before every voice, so game/ sets a
+// number and never reaches for the node (D18).
 function sound(name, pitch = 1) {
   if (!audio || muted) return;
+  master.gain.value = volume;
   voice(audio, master, SOUNDS[name], audio.currentTime, pitch);
 }

@@ -2717,7 +2717,10 @@ the same from the same seed; the v2 migration; a batch's point kept across a
 save. `tests/meta.test.js` — no mod past its cap, whatever the fish carry and
 the layer ends offer; the v3 fixture. `tests/boss.test.js`,
 `tests/descent.test.js` — a gate opens no cards. `checks.js` — the same, by
-real shots. 22 deliberate breaks, each caught.
+real shots. 22 deliberate breaks, each caught. Added after the cloud review of
+2026-10-12 found the last slot under a cap dealt twice — a mod still in the air
+was not counted: in `tests/drops.test.js`, a mod in the air counted as held —
+no fish lit for the slot it has taken, no slot handed out twice, no card for it.
 
 ## D85 — The layer end's pick: valuable mods, then Continue · 2026-10-12
 Igor, on Claude's "the dive has no pause": "not quite, layer end does have a
@@ -2931,3 +2934,16 @@ comment sitting above the wrong function.
 **Guarded by**: nothing mechanical can read whether prose is true — that stays
 the consistency sweep's (`CLAUDE.md`). The convention is in `CLAUDE.md` →
 Conventions.
+
+## D92 — No line counts in the docs · 2026-10-12
+Igor, 2026-10-12: "remove line count from docs, updates frequently and no one
+needs this info".
+
+**Decided, by Igor.** The docs quote no line counts, and no test holds them to
+the code.
+
+**Claude's reading**, open to Igor: the platform share in `design.md` → Files
+goes with them — it is the two counts' ratio, moved with every edit, and
+needed the same regenerating. D17 (the browser build is a throwaway
+prototype)'s one measurement stays, as its record. `CLAUDE.md`'s rule against
+investing in the canvas layer stands without a number to watch.
