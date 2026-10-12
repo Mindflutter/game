@@ -1,12 +1,12 @@
 // ===== input (platform) =====
-// Keyboard. Rewritten on a port.
+// Keyboard and mouse. Rewritten on a port.
 
 // ---------- input ----------
 // Remember which keys are held down right now, BY PHYSICAL POSITION.
 // e.code is the key itself ('KeyW'); e.key is the character that key types,
 // which depends on the keyboard layout -- on a Russian layout WASD type
-// ц/ф/ы/в, so matching on the character ignored them entirely. Position also
-// does the right thing on AZERTY, where those four keys are labelled ZQSD.
+// ц/ф/ы/в, so matching the character would miss them. Position also does the
+// right thing on AZERTY, where those four keys are labelled ZQSD.
 const keys = new Set();
 // Menus need to know a key *went down this frame*, not that it is held --
 // otherwise holding Down flies through the list. Cleared at the end of update().

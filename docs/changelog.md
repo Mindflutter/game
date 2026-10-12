@@ -6,6 +6,16 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-12
 
+**Comments amend the code** (D91)
+Igor: "comments must not define or contradict the codebase, but amend it".
+Every comment in the code and the tests read against its code: history,
+quotes, dates and copied numbers out, contradictions fixed — 16 files, 242
+lines fewer, no code changed (checked against the last commit with comments
+ignored). The convention is in `CLAUDE.md`. Also: a failed docs check now
+prints only the text it wanted, not the whole doc it searched (`expectIn` in
+`tests/docs.test.js`). The platform share in `design.md` rose two points, all
+of it `game/`'s comments.
+
 **Mods from drops: a glowing fish, the layer end's pick, boosts; rank retired**
 (D84–D90)
 The second requirement before S5 (content) (D80 (entity docs and mods from

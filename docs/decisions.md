@@ -2895,3 +2895,39 @@ play; after a death, Enter goes home, a click on Dive again dives, a click off
 the buttons does nothing; the D70 property, now resuming through Continue.
 `tests/descent.test.js` — the win's Dive again. `checks.js` — the same by real
 clicks and a Russian-layout W.
+
+## D91 — Comments amend the code; they never define or contradict it · 2026-10-12
+Igor, 2026-10-12: "go through comments in code and verify they only explain
+essential parts. comments must not define or contradict the codebase, but
+amend it. codebase is the source of truth for behaviour, md files are the docs
+and specs for what it must implement".
+
+**Decided, by Igor.** The code is the source of truth for behaviour; `docs/`
+is the spec for what it must implement; a comment amends the code — it never
+defines behaviour the code does not have, and never contradicts it.
+
+**Claude's reading of "only essential parts"**, applied in the pass the same
+day and open to Igor: a comment keeps the *why* — a constraint, a gotcha, a
+trade-off — and what the code cannot say for itself, pointing at the
+decision that owns the rest. It drops history ("used to", "since S2", what a
+past build measured), quotes and dates — `decisions.md` holds them — and
+numbers copied from elsewhere, which go stale. Units on a constant, `ponytail:`
+notes and Claude's-pick markers stay.
+
+**The pass.** Every comment in `game/`, `platform/`, `main.js`, `checks.js`,
+`tests/` and the citation hook was read against its code; 16 files changed,
+242 lines fewer. A checker compared each file with its last commit, comments
+ignored — oxc reprints both without them — so the pass changed no code. It
+found comments that contradicted the code: a cursor documented as the title
+and pause menus' that drives every menu; "they survive R" after R was gone; a
+header claiming "no browser" over a volume option that touches `master`; the
+save cited to D70 (a dive can be saved at any point) where `persist` is D77
+(the save; the seam's seventh name); "LAYER CLEARED" named as the win's
+heading, which is "ABYSS CLEARED"; a swept-dash check describing a dash speed
+of "speed x 3.4", gone since D56 (the dash is a fixed, committed lunge); a
+stepped scenario waiting on `step()` where it is `advance()`; and a function's
+comment sitting above the wrong function.
+
+**Guarded by**: nothing mechanical can read whether prose is true — that stays
+the consistency sweep's (`CLAUDE.md`). The convention is in `CLAUDE.md` →
+Conventions.

@@ -55,15 +55,15 @@ function allNumbers(g) {
 
 describe('the port seam', () => {
   it('game/ loads with nothing but the seven seam names (D18)', () => {
-    // Executable version of design.md's grep. If game/ ever reaches for an
-    // eighth name, or any browser API, this throws. The seventh, `persist`,
-    // is S4's save: storing text is platform's, deciding when is game's.
+    // If game/ reaches for an eighth name, or any browser API, at load, this
+    // throws. The seventh, `persist`, is the save's: storing text is
+    // platform's, deciding when is game's (D77).
     expect(SEAM).toHaveLength(7);
     const g = loadGame();
     expect(typeof g.update).toBe('function');
     expect(typeof g.reset).toBe('function');
-    // The fixed-step clock is game/'s now (D53), so Node can drive the same
-    // entry point the browser does instead of calling update() by hand.
+    // The fixed-step clock is game/'s (D53), so Node drives the same entry
+    // point the browser does instead of calling update() by hand.
     expect(typeof g.advanceBy).toBe('function');
   });
 
@@ -85,9 +85,8 @@ describe('the bot', () => {
     // needs a caller: without one it can rot silently and nothing would say so.
     const a = diveReport(4471, 3);
     // Not '=== 3': how many batches a seed reaches depends on the batch table,
-    // which D54 re-derived and S6 will move again. What must hold is that the
-    // bot clears *something* and does so deterministically. (The level-up
-    // screen that used to truncate this is gone -- D49.)
+    // which S6 will move. What must hold is that the bot clears *something*
+    // and does so deterministically.
     expect(a.clearTimes.length).toBeGreaterThan(0);
     expect(diveReport(4471, 3)).toEqual(a);
   });
@@ -103,7 +102,7 @@ describe('the bot', () => {
   });
 });
 
-// Igor's testing aids: `&immortal` and `&damage=<n>` in the URL. main.js reads
+// The dev flags: `&immortal` and `&damage=<n>` in the URL. main.js reads
 // the URL; what the flags *do* is game state, so it is checked here.
 describe('dev flags', () => {
   // hp after two seconds with a bulwark parked on the player.
@@ -127,7 +126,7 @@ describe('dev flags', () => {
     g.damageOverride = 100;
     g.reset(1);
     expect(g.player.damage).toBe(100);
-    g.reset(2);                                        // what R does
+    g.reset(2);                                        // what Dive again does
     expect(g.player.damage).toBe(100);
     g.damageOverride = 0;
     g.reset(3);

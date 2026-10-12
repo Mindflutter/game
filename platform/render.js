@@ -70,8 +70,8 @@ function drawAimLine() {
 // the layer that survives to Rust, and both of its readers are in this file.
 const CARD_DESC_FONT = '13px system-ui, sans-serif';
 
-// Seconds a boost on the floor blinks before it is gone (D86): the warning,
-// like the prototype's gems (D11). Drawing only, so it lives here.
+// Seconds a boost on the floor blinks before it is gone (D86): the warning.
+// Drawing only, so it lives here.
 const BOOST_BLINK = 2;
 
 // Whole numbers stay whole; anything fractional gets two places at most, so a
@@ -79,10 +79,9 @@ const BOOST_BLINK = 2;
 const fmtStat = n => (Number.isInteger(n) ? n : +n.toFixed(2));
 
 // The widest mod description, in pixels, at the font the cards draw it in.
-// A mod is a line of prose in a fixed-width box and nothing in the game state
-// can see it running off the edge -- two of them did. The check calls this;
-// `measureText` is canvas, so the rule can only be enforced in the browser
-// suite, which is exactly what that suite is for.
+// A mod is a line of prose in a fixed-width box, and nothing in the game state
+// can see it running off the edge. The check calls this; `measureText` is
+// canvas, so the rule lives in the browser suite.
 function widestModDesc() {
   ctx.font = CARD_DESC_FONT;
   return Math.max(...MODS.map(m => ctx.measureText(m.desc).width));
@@ -123,10 +122,8 @@ function drawModCards() {
     ctx.font = CARD_DESC_FONT;
     ctx.fillText(u.desc, x + w / 2, y + 64);
 
-    // The numbers (D52). Both come from the mod itself: the change is computed
-    // by applying it to a copy of the player, and the stack from modCounts. A
-    // repeated card is no longer indistinguishable from a fresh one — which is
-    // what made Igor read a second `Impact` offer as a bug.
+    // The numbers (D52): the change worked out from the mod itself, the stack
+    // from modCounts, so a repeated card reads differently from a fresh one.
     ctx.font = '12px system-ui, sans-serif';
     ctx.fillStyle = on ? '#6fd8e8' : '#4d7a8a';
     // No slice: the card draws every row the mod moves, and a check holds the
@@ -163,9 +160,8 @@ function drawModCards() {
 }
 
 // Where the mod screen's bottom hint sits: under Continue, which sits under
-// the cards (`continueRect()` in content.js owns both boxes). The cards grew
-// from 140 to 186 tall when the numbers went on them (D52), and taller cards
-// push all of it down -- a check holds the hint inside the view.
+// the cards (`continueRect()` in content.js owns both boxes). Taller cards push
+// all of it down, so a check holds the hint inside the view.
 const MOD_HINT_Y = continueRect().y + continueRect().h + 34;
 
 // So a silent game can tell you why it is silent.
@@ -176,8 +172,8 @@ function audioStatus() {
   return '';
 }
 
-// Dims the whole window, margin included. The margin is painted the water's
-// colour since S2, so a dim limited to the view left it as bright bands.
+// Dims the whole window, margin included: the margin is painted the water's
+// colour, so a dim limited to the view would leave it as bright bands.
 function dimArena(alpha = 0.82) {
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -186,9 +182,9 @@ function dimArena(alpha = 0.82) {
   ctx.restore();
 }
 
-// Paints over whatever spilled past the view -- an arrival 40px outside it, a
-// spark, the shake -- in the water's colour. This replaced a clip, because the
-// clip also stopped the dim screens from reaching the margin.
+// Paints over whatever spilled past the view -- an arrival just outside it, a
+// spark, the shake -- in the water's colour. Not a clip: a clip would also
+// stop the dim screens from reaching the margin.
 function coverMargins() {
   const vw = ARENA_W * scale, vh = ARENA_H * scale;
   ctx.save();
@@ -226,7 +222,7 @@ function drawSpecks() {
 function drawField() {
   drawSpecks();                  // the water, in the view: it flows on its own
 
-  // World draws go through the camera (S2); the HUD below does not.
+  // World draws go through the camera; the HUD below does not.
   ctx.save();
   ctx.translate(0, -cameraY);
 
@@ -343,8 +339,8 @@ function drawField() {
     ctx.stroke();
   }
 
-  // ...and the ring it leaves when it lands: expands and fades, about a sixth
-  // of a second. Just enough to say the lunge finished rather than stopped.
+  // ...and the ring it leaves when it lands: it expands and fades, just enough
+  // to say the lunge finished rather than stopped.
   if (player.dashEnd > 0) {
     const t = player.dashEnd / DASH_END;            // 1 -> 0
     ctx.strokeStyle = 'rgba(159, 247, 255, ' + (0.5 * t).toFixed(3) + ')';
@@ -369,7 +365,6 @@ function drawField() {
   ctx.restore();
 
   // --- HUD ---
-  // No bar across the top: there is no XP (D34) and no rank (D87).
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '14px system-ui, sans-serif';
   ctx.textAlign = 'left';
@@ -428,9 +423,9 @@ function drawField() {
   }
 }
 
-// The end of a dive, either way it ends. Since S4 the bottom of the last layer
-// is the win (D68, D72), and "LAYER CLEARED" became its screen. The wording is
-// Claude's placeholder, open to Igor (ideas.md -> friendlier end screens).
+// The end of a dive, either way it ends: death, or the win at the bottom of the
+// last layer (D68, D72). The wording is Claude's placeholder, open to Igor
+// (ideas.md -> friendlier end-of-dive messages).
 const END_SCREENS = {
   dead: { heading: 'CONSUMED',      color: '#ff5c85' },
   won:  { heading: 'ABYSS CLEARED', color: '#9ef7ff' },
@@ -466,8 +461,8 @@ function drawEnd() {
 }
 
 // The y the hint sits on. Screens that stack rows from a data table must end
-// above it, and a check asserts they do -- adding a row used to push text
-// straight through whatever was below, invisibly to every state assertion.
+// above it, and a check asserts they do: no state check can see text running
+// through text.
 const HINT_Y = ARENA_H - 64;
 
 // Where the last line of the help screen ends. Set by drawHelp(), read by the
@@ -533,9 +528,8 @@ function drawHelp() {
   ctx.font = '34px system-ui, sans-serif';
   ctx.fillText('HELP', ARENA_W / 2, 150);
 
-  // The blurb starts below the key list rather than at a fixed y: adding a row
-  // to HELP_KEYS used to push the list straight through the text underneath,
-  // which every state check happily passed.
+  // The blurb starts below the key list rather than at a fixed y, so a new key
+  // row pushes the blurb down instead of running through it.
   const keyTop = 232, keyStep = 34;
   const blurbTop = keyTop + HELP_KEYS.length * keyStep + 30;
 
@@ -581,9 +575,9 @@ function drawOptions() {
   drawHint('\u2191 \u2193 or mouse,  \u2190 \u2192 or click to change,  Esc to go back');
 }
 
-// The water darkens with depth (S2): each layer's own colour at its top (D72),
-// the old near-black at its bottom. The letterbox margin gets the same colour,
-// so it stays invisible. PLACEHOLDER GRAPHICS, as the layer's name is.
+// The water darkens with depth: each layer's own colour at its top (D72),
+// near-black at its bottom. The letterbox margin gets the same colour, so it
+// stays invisible. PLACEHOLDER GRAPHICS, as the layer's name is.
 function waterColor() {
   // No dive has been drawn yet -- the title at boot: the top of the first layer.
   let color = LAYERS[0].color, lit = 1;

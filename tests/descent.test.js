@@ -1,5 +1,5 @@
-// The descent (S2): the camera, the current, the gate depths and the bottom.
-// Each test guards a line of docs/superpowers/specs/2026-09-28-s2-descent-design.md.
+// The descent (D58): the camera, the current, the gate depths and the bottom.
+// Designed in docs/superpowers/specs/2026-09-28-s2-descent-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { loadGame, ticks, ride, clearAndWait, atGate } from './harness.js';
@@ -61,7 +61,7 @@ describe('the descent', () => {
   });
 
   it('brings the next batch a couple of seconds after the last one is cleared', () => {
-    // Igor, 2026-09-28: "only a couple of seconds between batches".
+    // A couple of seconds between batches (D58).
     const g = atGate(1);
     expect(ride(g).length * g.FIXED_DT).toBeLessThanOrEqual(3);
   });
@@ -77,8 +77,7 @@ describe('the descent', () => {
   });
 
   it('runs the current independently of the player -- swimming does not hurry it', () => {
-    // Igor, 2026-09-28: "revert the player speeding up current ... current must
-    // be independent". Replaces the old "swimming down arrives sooner" test.
+    // The current is independent of the player (D58).
     const idle = ride(atGate(1)).length;
     const swim = ride(atGate(1), ['KeyS']).length;
     expect(swim).toBe(idle);
@@ -148,8 +147,7 @@ describe('the descent', () => {
   });
 
   it('keeps the water flowing behind the mod cards while play waits', () => {
-    // Igor, 2026-09-28: "The water freezes under the mod cards - it should not".
-    // The cards are the layer end's since D85.
+    // The water flows on behind the layer end's cards (D58, D85).
     const g = atGate(atGate(0).plan.findIndex(e => e.end));
     ride(g);                                    // the boss arrives
     expect(clearAndWait(g, 2)).toBe('mods');
@@ -161,9 +159,9 @@ describe('the descent', () => {
   });
 
   it('keeps the water flowing under the death screen and the layer end, at a drift', () => {
-    // Igor, 2026-09-28: "flow under death and the layer end, and freeze under
-    // pause, confirmed". Easing down to the fight-time drift is Claude's call:
-    // at the layer end the descent is over, so the water should not rush on.
+    // The water flows under death and the layer end and freezes under pause
+    // (D58). Easing down to the fight-time drift is Claude's call: the descent
+    // is over there, so the water should not rush on.
     const dead = loadGame();
     dead.reset(1);
     ride(dead);
@@ -193,8 +191,8 @@ describe('the descent', () => {
   });
 
   it('pauses from the mod cards, and resumes back to the same cards', () => {
-    // Igor: "cannot invoke pause from mod screen". Resume must return to the
-    // cards it was opened over -- by Esc or by the menu -- not to play.
+    // Pause works from the layer end's cards, and Resume returns to them -- by
+    // Esc or by the menu -- not to play.
     const g = atGate(atGate(0).plan.findIndex(e => e.end));
     ride(g);                                    // the layer end's boss (D85)
     expect(clearAndWait(g)).toBe('mods');

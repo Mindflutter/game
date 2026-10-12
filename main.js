@@ -47,7 +47,7 @@ const driven = params.has('test') || devScenario !== null;
 if (driven) volume = 0;
 
 // ---------- the save ----------
-// The seam's seventh name (D70): game/ decides *when* to save and hands over
+// The seam's seventh name (D77): game/ decides *when* to save and hands over
 // the text; keeping it is this layer's job, rewritten on the port. A driven
 // game never writes -- every ?test check and every scenario plays dives, and
 // not one of them may land on top of the player's real save.
@@ -59,7 +59,7 @@ function persist(text) {
 }
 
 // A stepped scenario deliberately does NOT start the frame loop: nothing moves
-// until step() asks it to. That is what makes a scenario inspectable -- read the
+// until advance() moves it. That is what makes a scenario inspectable -- read the
 // state and it is still the state you set up -- and it is how the bot drives the
 // game faster than real time. Add &play to watch it run live instead.
 const stepped = devScenario !== null && !params.has('play');
@@ -94,8 +94,8 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) persi
 
 // Advances the simulation by n fixed ticks, then draws once. The bot and the
 // checks use this instead of waiting for wall-clock time.
-// NOT named step(): game/logic.js already owns step(dt) as the simulation's own
-// per-frame function, and shadowing it from here recursed infinitely.
+// NOT named step(): that is game/logic.js's simulation step, and a second one
+// here would shadow it.
 function advance(n = 1) {
   for (let i = 0; i < n; i++) update(FIXED_DT);
   draw();

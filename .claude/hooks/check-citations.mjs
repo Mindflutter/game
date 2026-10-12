@@ -1,7 +1,6 @@
 // Stop hook: refuse a reply that cites a decision (D58) or a stage (S2) without
 // its short name in brackets right after it -- "D58 (the descent)". CLAUDE.md
-// asks for this; Igor had to repeat it four times, so it is enforced here
-// instead of remembered.
+// asks for this, and it is enforced here instead of remembered.
 //
 // Reads the hook payload on stdin, collects the assistant text written since
 // the last real user message, and exits 2 (block, with the reason on stderr)

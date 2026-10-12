@@ -33,13 +33,13 @@ game/       content.js  every tuning number + all content tables
                         snapshot and the save text
             logic.js    step() — arrivals, the gate, the descent, movement,
                         collision; the plan; home's buying and banking
-                        ── 1882 lines. Survives the port.
+                        ── 1715 lines. Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
             render.js   canvas, view scaling, the camera, every draw function
 main.js                 frame loop, dt, fps, boot, the save's storage
-                        ── 837 lines. Rewritten on the port.
+                        ── 831 lines. Rewritten on the port.
 
 checks.js               the ?test suite → the port's regression tests
 ```
@@ -48,7 +48,7 @@ Line counts are as of 2026-10-12. Regenerate rather than trust them:
 `wc -l game/*.js platform/*.js main.js`. The check count is whatever the suite
 *reports*, never a grep — some call sites sit inside loops.
 
-The platform share is **31%** (837 of 2719). D17 measured 23% on 2026-09-12 and
+The platform share is **33%** (831 of 2546). D17 measured 23% on 2026-09-12 and
 it was 42% on 2026-09-19; it fell because `game/` grew (the batch queue, mods)
 while `platform/` did not, and S2 held it level — the camera is one translate
 and the specks, depth tint and margin cover are a few dozen lines. S3 took it
@@ -56,8 +56,11 @@ down a point: the lunge is logic, and its tell is a few lines of drawing. S4
 took it down three more: the layers, the economy and the save are logic, and
 `home` is one more menu plus a list. The weapon record, one more: a table and a
 migration, all logic. Mods from drops held it level: the drops, the glow and
-the boosts are logic, and their placeholder drawing about sixty lines. This is the number to watch — CLAUDE.md says not to
-invest in the canvas layer, and this is what that rule looks like when it slips.
+the boosts are logic, and their placeholder drawing about sixty lines. The
+comments pass of 2026-10-12 took it up two points without a line of drawing:
+it cut history out of `game/`'s comments far more than out of `platform/`'s.
+This is the number to watch — CLAUDE.md says not to invest in the canvas
+layer, and this is what that rule looks like when it slips.
 
 Plain `<script>` tags, not modules, so `file://` works. **Load order matters**
 and is documented in `index.html`.

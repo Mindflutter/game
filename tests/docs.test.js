@@ -1,14 +1,5 @@
-// Checks on `docs/` itself.
-//
-// Everything else in this suite checks the game. Nothing checked the docs, and
-// on 2026-09-28 three separate corruptions had gone unnoticed: an idea of
-// Igor's deleted outright by a bad splice, a decision that never got its
-// changelog entry although it was reported as written, and decisions cited by
-// bare number so a reader could not tell what they said.
-//
-// The consistency sweep in CLAUDE.md is supposed to prevent all of this, but a
-// sweep is a habit and habits fail quietly. These are the parts of it a machine
-// can do.
+// Checks on `docs/` itself: the parts of CLAUDE.md's consistency sweep a
+// machine can do. A sweep is a habit, and habits fail quietly.
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { loadGame } from './harness.js';
@@ -29,6 +20,11 @@ const DESCRIBE_CODE = ['design.md', 'roadmap.md', 'plan.md', 'foundations.md',
                        'README.md', ...ENTITY_DOCS];
 
 const decisions = read('decisions.md');
+
+// The doc must contain `text`. A failed toContain prints the whole doc, which
+// buries the one line that matters; this prints only the text it wanted.
+const expectIn = (docText, text) =>
+  expect(docText.includes(text), 'missing from the doc:\n' + text).toBe(true);
 
 // `## D49 — One rank per batch, mods at the gate · 2026-09-27`
 const HEADING = /^## (D\d+) — (.+?)(?: ·|$)/gm;
@@ -72,19 +68,15 @@ describe('docs/', () => {
   });
 
   it('gives the newest decision a changelog entry', () => {
-    // D56 was written, reported as documented, and had no changelog entry at
-    // all -- a string replace that silently matched nothing. The newest
-    // decision is the one most likely to be missing its entry.
+    // The newest decision is the one most likely to be missing its entry.
     const newest = 'D' + Math.max(...[...declared.keys()].map(d => +d.slice(1)));
-    expect(read('changelog.md')).toContain(newest);
+    expectIn(read('changelog.md'), newest);
   });
 
   it('keeps the docs CLAUDE.md tells the reader to open', () => {
-    // The read order is load-bearing: a cold session is told to open these in
-    // sequence, so a renamed or deleted file sends it somewhere that is not
-    // there. `high level design.md` is Igor's frozen source, never edited.
-    // The map in docs/README.md is held to the same rule, and the other way
-    // too: a doc it does not name is a doc nobody looks up.
+    // A doc CLAUDE.md or the map in docs/README.md names must exist, or a cold
+    // session is sent somewhere that is not there -- and the other way: a doc
+    // the map does not name is a doc nobody looks up.
     const named = text => [...text.matchAll(/`([^`\n]+\.md)`/g)].map(m => m[1]);
     const map = named(read('README.md'));
     const missing = [...map, ...named(src('CLAUDE.md'))]
@@ -94,10 +86,8 @@ describe('docs/', () => {
   });
 });
 
-// The numbers docs quote about the code, regenerated rather than trusted.
-// CLAUDE.md says "every number the docs quote about the code is regenerable";
-// these regenerate them. Added 2026-09-28 after a sweep that only grepped for
-// what each change was *expected* to break left a stale count behind.
+// The numbers docs quote about the code, regenerated rather than trusted
+// (CLAUDE.md: "every number the docs quote about the code is regenerable").
 // The same files CLAUDE.md's `wc -l game/*.js platform/*.js main.js` counts,
 // read from the directories so a new file cannot be silently left out.
 const lineCount = files => files.reduce((n, f) => n + src(f).split('\n').length - 1, 0);
@@ -110,10 +100,10 @@ describe('numbers the docs quote about the code', () => {
 
   it('quotes the real line counts and platform share', () => {
     const game = lineCount(GAME), platform = lineCount(PLATFORM);
-    expect(design).toContain('── ' + game + ' lines. Survives the port.');
-    expect(design).toContain('── ' + platform + ' lines. Rewritten on the port.');
+    expectIn(design, '── ' + game + ' lines. Survives the port.');
+    expectIn(design, '── ' + platform + ' lines. Rewritten on the port.');
     const share = Math.round(100 * platform / (game + platform));
-    expect(design).toContain('The platform share is **' + share + '%** (' + platform +
+    expectIn(design, 'The platform share is **' + share + '%** (' + platform +
                              ' of ' + (game + platform) + ')');
   });
 
@@ -146,8 +136,7 @@ describe('numbers the docs quote about the code', () => {
   });
 
   it('lists every scenario in the README', () => {
-    // The README's table is where Igor finds the URLs; it had lost `layer-2`
-    // a stage after the scenario was added.
+    // The README's table is where the scenario URLs are looked up.
     const readme = src('README.md');
     expect(Object.keys(loadGame().SCENARIOS).filter(n => !readme.includes('?dev=' + n + '&')))
       .toEqual([]);
@@ -214,16 +203,16 @@ describe('the entity docs', () => {
 
   it('lists every enemy type at its real numbers', () => {
     const cols = plain(g.ENEMY_TYPES);
-    expect(doc('enemies.md')).toContain(table(cols, g.ENEMY_TYPES.map(t => cols.map(k => t[k]))));
+    expectIn(doc('enemies.md'), table(cols, g.ENEMY_TYPES.map(t => cols.map(k => t[k]))));
     const lungers = g.ENEMY_TYPES.filter(t => t.lunge);
     const timing = keysOf(lungers.map(t => t.lunge));
-    expect(doc('enemies.md')).toContain(table(['name', ...timing],
+    expectIn(doc('enemies.md'), table(['name', ...timing],
       lungers.map(t => [t.name, ...timing.map(k => t.lunge[k])])));
   });
 
   it('lists every mod with what it does and its card text', () => {
     const cols = plain(g.MODS);
-    expect(doc('mods.md')).toContain(table([...cols, 'per pick', 'at max'],
+    expectIn(doc('mods.md'), table([...cols, 'per pick', 'at max'],
       g.MODS.map(m => [...cols.map(k => m[k]), moved([m.apply], true), moved(Array(m.max).fill(m.apply))])));
   });
 
@@ -232,13 +221,13 @@ describe('the entity docs', () => {
     const cols = plain(g.BOOSTS);
     const adds = b => Object.entries(b.add)
       .map(([k, v]) => k + ' ' + (v < 0 ? '-' : '+') + r3(Math.abs(v))).join(', ');
-    expect(doc('boosts.md')).toContain(table([...cols, 'adds'],
+    expectIn(doc('boosts.md'), table([...cols, 'adds'],
       g.BOOSTS.map(b => [...cols.map(k => b[k]), adds(b)])));
   });
 
   it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
-    for (const t of gear(g.WEAPONS)) expect(doc('weapons.md')).toContain(t);
-    for (const t of gear(g.EQUIPMENT)) expect(doc('equipment.md')).toContain(t);
+    for (const t of gear(g.WEAPONS)) expectIn(doc('weapons.md'), t);
+    for (const t of gear(g.EQUIPMENT)) expectIn(doc('equipment.md'), t);
   });
 
   it('documents every field the code has, and only those or reserved ones', () => {

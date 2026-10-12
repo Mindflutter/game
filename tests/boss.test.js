@@ -1,5 +1,5 @@
-// The boss and the mini-bosses (S3): the lunge, the layer's shape, and what a
-// clear pays. Each test guards a line of D62-D65; the design is in
+// The boss and the mini-bosses: the lunge, the layer's shape, and what a
+// mini-boss's clear pays (D62, D63, D64, D65, D88). The design is in
 // docs/superpowers/plans/2026-09-29-s3-boss.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';

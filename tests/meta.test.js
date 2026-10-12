@@ -1,7 +1,7 @@
-// S4 (meta loop skeleton): the dive through the layers, `home`'s economy, and
-// the save. Each test guards a line of
-// docs/superpowers/specs/2026-09-30-s4-meta-loop-design.md and the decision
-// it names; each was verified by breaking the rule it guards.
+// The dive through the layers, `home`'s economy, and the save -- built in S4
+// (meta loop skeleton), designed in
+// docs/superpowers/specs/2026-09-30-s4-meta-loop-design.md. Each test names
+// the decision it guards.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';
@@ -176,9 +176,8 @@ describe('gems (D35, D67)', () => {
   });
 
   it('offers Dive again and Go home after a death, with Go home marked', () => {
-    // Igor, 2026-10-12: "make it dive again + go home buttons choice" (D90).
-    // Go home is marked, so a stray Enter or Space -- Space is the dash -- does
-    // what any key did before; diving again is a choice.
+    // Dive again and Go home (D90). Go home is marked, so a stray Enter or
+    // Space -- Space is the dash -- never starts a dive by accident.
     const dead = () => {
       const g = loadGame();
       g.reset(1);
@@ -467,7 +466,7 @@ describe('the weapon record (D83)', () => {
 describe('enemies placed by hand (D37)', () => {
   it('clears a scenario\'s lone enemy like a gate, with no layer to pay into', () => {
     // ?dev=one-drifter&play: no batch has arrived, so no plan entry is current.
-    // A gate opens no cards (D85), so play simply goes on.
+    // A gate opens no cards (D84), so play simply goes on.
     const g = loadGame();
     expect(g.applyScenario('one-drifter', 1)).toBe(true);
     expect(clearAndWait(g, 1)).toBe('playing');

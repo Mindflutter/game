@@ -1,24 +1,20 @@
 // ===== content =====
-// Every tuning number and every content table. No behaviour, no browser.
+// Every tuning number and content table, with the small helpers that read them.
 
 // ---------- the view ----------
-// The game always sees a 1280x800 window onto the world, whatever the window
-// size, so difficulty doesn't depend on your monitor (D29). Since S2 the world
-// is a tall strip and this is the camera's view of it, `cameraY` from the top.
-// We scale the view up to fill the window. Any leftover margin is painted the
-// same colour as the water, so the letterboxing is invisible.
+// The game sees a fixed 1280x800 view of the world whatever the window size, so
+// difficulty does not depend on the monitor (D29). The world is a tall strip;
+// the view is `cameraY` from its top.
 const ARENA_W = 1280;
 const ARENA_H = 800;
 
 // ---------- balance ----------
-// Every number that decides how the game plays, in one place. These are the
-// real product of this prototype: the rendering gets rewritten on any port,
-// these transfer as-is.
-// Anything a mod can raise has to be a field here rather than a bare constant,
-// which is why the dash cooldown and the i-frames moved in (D34): a mod is a
-// line of data, and a line of data cannot edit a `const`.
-// The diver alone: the weapon's numbers join these when a dive starts, from
-// the one it carries (`WEAPONS`, D83).
+// Every number that decides how the game plays, in one place: what transfers
+// to a port as-is.
+// Anything a mod, boost, tier or attribute raises is a field here, not a bare
+// `const`: a line of data cannot edit a `const` (D34).
+// The diver alone: the carried weapon's numbers join these when a dive starts
+// (`WEAPONS`, D83).
 const PLAYER_START = {
   r: 10,             // radius, in pixels
   speed: 260,        // pixels per second
@@ -26,72 +22,64 @@ const PLAYER_START = {
   maxHp: 3,
   iframes: 1,        // seconds of invulnerability after a hit
   dashCooldown: 2.2, // seconds before you can dash again
-  dashSpeed: 884,    // px/s while dashing -- its OWN number, not a multiple of
-                     // `speed`. It used to be speed x 3.4, which meant every
-                     // `Fins` lengthened the lunge and a late dive crossed a
-                     // third of the arena untouchable (D56)
+  dashSpeed: 884,    // px/s while dashing -- its own number, not a multiple of
+                     // `speed`, so swim speed never lengthens the dash (D56)
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
   dashDamage: 0,     // the dash starts as pure movement (D51). It always shoves;
                      // hurting what it shoves is bought, never free
 };
 
-// The dash. Short, offensive, and on a long enough leash that spending it is a
-// decision: you pass through the swarm unharmed and hurt everything you touch,
-// so diving into a crowd is a play rather than a mistake.
-const DASH_TIME      = 0.16;  // seconds of dash -- about 140px of travel
+// The dash: short, and on a long enough leash that spending it is a decision.
+// You pass through the swarm unharmed and shove it aside, so diving into a
+// crowd is a play rather than a mistake.
+const DASH_TIME      = 0.16;  // seconds of dash
 const DASH_GRACE     = 0.15;  // extra invulnerability after it, so you don't
                               // land inside the enemy you just flew through
 // The dash pushes a wave ahead of it rather than only hitting what it bumps
 // into: everything within reach AND in front of the direction of travel.
-const DASH_REACH     = 40;    // px past an enemy's own radius -- vs 10 for the body
+const DASH_REACH     = 40;    // px past an enemy's own radius
 const DASH_ARC       = 0.2;   // cos of the half-angle: 0.2 is a 156-degree front
 const DASH_END       = 0.18;  // seconds of the ring that closes the dash
 const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
-const PUSH_DRAG      = 0.02;  // ...bleeding to 2% per second, so about 80px
+const PUSH_DRAG      = 0.02;  // ...with this fraction of it left after a second
 
-// Gems fly to you from wherever they drop, and never fade (D35): currency is
-// collected automatically and never chased. 600 rather than the old 300, which
-// was a pull *inside* a 75px pickup ring -- from across the view it has to
-// outrun a swimming player (260px/s, more with Fins). Claude's pick.
+// Gems fly to you from wherever they drop and never fade (D35, D78) -- fast
+// enough to outrun a swimming player. Claude's pick.
 const GEM_PULL       = 600;   // px/s a gem flies toward you
 const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
 const GATE_PAUSE     = 1.2;   // seconds of quiet before a dive's FIRST batch, so
-                              // a dive opens calm. Every later batch waits on the
-                              // descent instead (S2), which is its own beat.
-// The descent (S2, D58). The world is a tall strip; each batch waits at its own
-// depth and a current carries the view from one to the next. The current never
-// stops -- it only slows while a batch is fought, when the camera holds and
-// only the water moves. All four are Claude's picks, not derived -- the bot
-// measures them, Igor's feel judges them.
-const GATE_SPACING   = 400;   // world px between gate depths: ~2s of travel.
-                              // Igor, 2026-09-28: "only a couple of seconds
-                              // between batches" (was 1600, ~12s)
+                              // a dive opens calm; every later batch waits on
+                              // the descent instead, which is its own beat
+// The descent (D58): each batch waits at its own depth and a current carries
+// the view from one to the next. The current never stops -- it only slows
+// while a batch is fought. Claude's picks.
+const GATE_SPACING   = 400;   // world px between gate depths: about two seconds
+                              // of travel at CURRENT_SPEED
 const CURRENT_SPEED  = 200;   // px/s between batches
 const CURRENT_CRAWL  = 30;    // px/s during a fight: the water still flows
 const CURRENT_EASE   = 0.05;  // fraction of the speed change still left after
                               // one second -- eases up after a clear, down on
                               // an arrival, never a jolt
-// The simulation's one and only step size (D53). Everything that drives
-// `update()` uses it: the frame loop's accumulator, `advance()`, and the bot.
-// 1/120 rather than 1/60 because there is no render interpolation — the picture
-// is drawn wherever the last tick left things, so the step size *is* the
-// smoothness, and 8ms of stale position is invisible where 17ms is not.
+// The simulation's one and only step size (D53): the frame loop's accumulator,
+// `advance()` and the bot all step by it. 1/120 rather than 1/60 because there
+// is no render interpolation -- the picture is drawn wherever the last tick
+// left things, so the step size *is* the smoothness.
 const FIXED_DT       = 1 / 120;
 // The longest real frame the simulation will believe in. Caps tab-switching
 // (a minute away must not teleport everything) and doubles as the catch-up
-// bound: at most MAX_FRAME_DT / FIXED_DT = 6 ticks per frame, so a slow frame
+// bound -- at most MAX_FRAME_DT / FIXED_DT ticks a frame -- so a slow frame
 // cannot spiral into simulating forever.
 const MAX_FRAME_DT   = 0.05;
-const NOTICE_TIME    = 2.5;   // seconds a micro-task's line stays up. Claude's pick
+const NOTICE_TIME    = 2.5;   // seconds a micro-task's or a pickup's line stays
+                              // up. Claude's pick
 const MOD_OFFER_DELAY = 0.6;  // seconds between the boss dying and the layer
-                              // end's cards appearing. The kill burst lives
-                              // 0.5s, so anything shorter drops the offer on top
-                              // of the death it is rewarding: a jump cut.
-// What a dive picks up (D84, D85, D86). Every number is Claude's pick, S6's.
+                              // end's cards appearing: the kill burst lives
+                              // 0.5s, and cards on top of it read as a jump cut
+// What a dive picks up (D84, D85, D86). Claude's picks, S6's to tune.
 const END_STEP       = 2;     // picks at once: an ordinary mod on a layer end's card
 // A boost's chance on the Nth kill since the last one is BOOST_C x N -- the
-// pseudo-random distribution Dota uses: about one boost every 8.5 kills, never
-// more than 50 apart, and seldom two in a row.
+// pseudo-random distribution Dota uses: never more than 1 / BOOST_C kills
+// apart, and seldom two in a row.
 const BOOST_C        = 0.02;
 const BOOST_LIFE     = 6;     // seconds a boost lies where it fell, then it is gone
 
@@ -127,39 +115,22 @@ const SOUNDS = {
 };
 
 // ---------- mods ----------
-// A dive-scoped power, gone at the end of the dive: carried by a glowing fish
-// in every batch (D84), or picked from valuable mods at a layer end (D85).
-// Just data: adding one is a line here and nothing else.
-// Documented in docs/entities/mods.md -- `npm test` holds it here.
+// A dive-scoped power: carried by a glowing fish (D84, D88), or picked at a
+// layer end (D85). Every field is documented in docs/entities/mods.md, and
+// `npm test` holds the two together.
 //
-// `scope` is **body** or **comfort**, and nothing else until S5 — Content.
-// Weapon-scoped mods are deliberately absent: "+35% fire rate" is meaningless on
-// a melee weapon and "+1 damage" is huge on a railgun and nothing on a spray
-// gun, so a weapon mod cannot be balanced before the weapons exist. Body and
-// comfort mods are weapon-agnostic by construction, which is what makes them
-// the safe starting pool — and it keeps S1 from balancing mods and manual fire
-// against each other at once. The prototype's Rapid Fire, Power, Reach and
-// Pierce were all weapon mods; they went here.
+// `scope` is body or comfort only until S5 (content): a weapon mod cannot be
+// balanced before the weapons exist -- "+1 damage" is huge on a railgun and
+// nothing on a spray gun.
 //
 // Mods differ in **kind, not degree**: a pickup has to be felt and recognised
-// in the middle of a fight, and the layer end's pick stays a gut read. That is
-// why the descriptions read as sentences and not as stat lines.
+// in the middle of a fight, and the layer end's pick stays a gut read -- so the
+// descriptions read as sentences, not stat lines.
 //
-// `max` is how many times one mod can be taken. It exists so the draws can
-// refuse a mod that is already maxed, which is the only way a bounded stat (a
-// cooldown has a floor of zero) stays honest. Since D69 every mod has one -- a
-// switch caps at 1, anything that stacks at 3 -- so a dive's power has a
-// ceiling that deep layers can be tuned against. Where the caps sit is S6's.
-//
-// `end` marks one of the layer end's own mods (D85): offered only on its cards,
-// never carried by a fish. An ordinary mod reaches those cards too, at the
-// bigger step, END_STEP picks at once.
-//
-// Two mods D34 named are deliberately absent: pickup radius and a currency
-// magnet. D35 was recorded hours later and auto-collects currency, which leaves
-// both of them with nothing to do — building either now would be building a
-// husk. Every mod can max out, so a long dive runs the pool short; then no fish
-// glows (D84), and more mods is S5 — Content, not a reason to pad the pool here.
+// `max` lets the draws refuse a mod already maxed: it keeps a bounded stat
+// honest (a cooldown has a floor of zero) and gives a dive's power a ceiling
+// (D69). `end` marks one of the layer end's own: offered only on its cards,
+// never carried by a fish.
 const MODS = [
   { name: 'Fins',     scope: 'body',    desc: 'you swim faster', max: 3,
     apply: p => p.speed += 45 },
@@ -176,13 +147,10 @@ const MODS = [
 ];
 
 // ---------- boosts ----------
-// A short power a kill drops (D86): switched on by touching it, gone after
-// `time` seconds, and gone from the floor after BOOST_LIFE if nobody touches
-// it. Not a mod -- not counted, no cap, nothing kept. `add` is numbers rather
-// than a function so it can be taken back when the time runs out; for the same
-// reason a boost never moves `hp`. Touching one already running restarts its
-// clock and adds nothing more.
-// Documented in docs/entities/boosts.md -- `npm test` holds it here.
+// A short power a kill drops (D86); documented in docs/entities/boosts.md, held
+// to this table by `npm test`. `add` is numbers rather than a function so it
+// can be taken back when the time runs out -- and for the same reason a boost
+// never moves `hp`.
 const BOOSTS = [
   { name: 'Rush', desc: 'you swim much faster, for a moment', time: 5, add: { speed: 200 } },
 ];
@@ -190,25 +158,17 @@ const BOOSTS = [
 // ---------- gear, attributes, micro-tasks ----------
 // What persists between dives, spent at `home` (D31, D36). Each is a line of
 // data whose `apply` raises the player -- once per point held, or once per
-// tier, each tier its own (D83) -- so the second item costs what the first
-// did. All three sum with each other and with mods, which add on top during a
-// dive; nothing multiplies (D36, and Igor, 2026-09-30: "mods on top of
-// gear/equipment/stats").
+// tier, each tier its own (D83). Everything sums, with mods on top; nothing
+// multiplies (D36, D74).
 //
 // The save keys them by `name`, so renaming one orphans what players own.
-//
-// Every number here is Claude's pick, S6's to tune: the gun's +0.5 shots/s and
-// 40 / 100 / 200 gems, dash reach's +150px/s (141 -> 165 -> 189px of dash),
-// one point per task.
+// Every number here is Claude's pick, S6's to tune.
 
 // `gear` -- bought with gems, combat stats: the weapons, then the equipment.
 // Each tier is `{ cost, apply }`, in the order they are bought.
 //
-// A weapon is the shot a dive fires (D83): `fireRate` shots per second,
-// `damage` a hit, gone after `range` px, flying at `shotSpeed` px/s with a
-// `shotRadius` hitbox, through `pierce` extra enemies. A dive carries one and
-// copies these onto the player, where mods, attributes and the readout find
-// them -- so a railgun, or a jab that is a short fat shot, is a line here.
+// A weapon is the shot a dive fires (D83). A dive copies the carried weapon's
+// numbers onto the player, where mods, attributes and the readout find them.
 // Documented in docs/entities/weapons.md -- `npm test` holds it here.
 const WEAPONS = [
   { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0,
@@ -223,8 +183,7 @@ const EQUIPMENT = [];
 
 // `attribute` -- body stats, raised by points that only micro-tasks pay.
 // Uncapped at the spending end: a layer holds a finite set of tasks, so the
-// cap is at the source (D36). Dash improvements live here, not in gear -- D36
-// names "dash" a body stat.
+// cap is at the source (D36). Dash improvements live here, not in gear (D74).
 const ATTRIBUTES = [
   { name: 'Dash reach', apply: p => p.dashSpeed += 150 },
 ];
@@ -238,14 +197,11 @@ const TASKS = [
 ];
 
 // ---------- the development readout ----------
-// Every player number worth watching while the game is being built, as a flat
-// list so adding a stat is a line (D52). These are *development* numbers: Igor
-// wants to see what his character actually is, and the whole block is expected
-// to be dropped or trimmed before alpha. `read` returns a string or a number.
-// `stat` names the player field, which is what lets a check prove the readout
-// is complete: anything a mod can change must be shown, or the number Igor is
-// watching silently stops covering the thing that moved. `hp` and `maxHp` are
-// the exception, drawn as `HP 3/4` on the line above; the check names them.
+// The player numbers worth watching while the game is being built (D52); to be
+// trimmed or dropped before alpha. `stat` names the player field, which is what
+// lets a check prove the readout complete: anything a mod or boost can change
+// must be shown. `hp` and `maxHp` are drawn as `HP 3/4` on the line above, and
+// the check names them.
 const PLAYER_STATS = [
   { stat: 'speed',        label: 'spd',     read: p => Math.round(p.speed) },
   { stat: 'range',        label: 'rng',     read: p => Math.round(p.range) },
@@ -267,12 +223,11 @@ function rowRect(i, top) {
   return { x: ARENA_W / 2 - ROW_W / 2, y: top + i * ROW_STEP - 26, w: ROW_W, h: ROW_H };
 }
 
-// Where the three mod cards sit, in arena coordinates. The renderer draws
-// these and the logic hit-tests the mouse against them, so the numbers belong
-// to neither of them.
-// `CARD_PAD` is the margin a description must leave on each side. The renderer
-// centres the text and so cannot notice it overflowing; the check measures
-// against this.
+// Where the layer end's cards sit, in arena coordinates. The renderer draws
+// them and the logic hit-tests the mouse against them, so the numbers belong
+// to neither. `CARD_PAD` is the margin a description must leave on each side:
+// the renderer centres the text and cannot notice it overflowing, so a check
+// measures against this.
 const CARD_W = 220, CARD_H = 186, CARD_GAP = 24, CARD_PAD = 12;
 // How many "stat from -> to" rows a card has room for. A check holds the mod
 // pool to this, so a mod that moves a third stat fails the suite rather than
@@ -297,10 +252,9 @@ function carriable() {
 }
 
 // The mod a glowing fish carries: every ordinary mod once before any comes
-// again -- a round, dealt from the seed and refilled when spent, the way
-// Tetris deals its pieces -- and none past its cap. `null` once every one is
-// capped, and then no fish lights up: caps are balance's question, and that is
-// the easiest answer until S6 (Igor, 2026-10-12).
+// again -- a round, dealt from the seed and refilled when spent -- and none
+// past its cap. `null` once every one is capped, and then no fish glows: the
+// easiest answer while caps are balance's question (D84).
 function drawCarried() {
   const open = carriable();
   if (!open.length) return null;
@@ -328,9 +282,7 @@ function rollValuable() {
 
 // ---------- key bindings ----------
 // Which physical key means which action. Content, not platform: the game decides
-// that dashing is Space, while reading the keyboard is platform's job. Keeping
-// them here is what holds the port seam at exactly seven names -- `game/` used to
-// reach across for these as well, which a headless load in Node caught.
+// that dashing is Space, while reading the keyboard is platform's job (D44).
 //
 // Always `e.code` (the physical key), never `e.key` (the character it types) --
 // see D12. On a Russian layout WASD type ц/ф/ы/в; on AZERTY they are ZQSD.
@@ -343,73 +295,30 @@ const DASH  = ['Space'];
 const CLICK = ['Mouse0'];
 
 // ---------- batches ----------
-// A batch is the gated unit (D27): it arrives, you clear it, and only then does
-// the next one come. Counts per enemy type; where they enter is the arena edge,
-// picked from the dive's seed. Adding a batch is a line.
-//
-// These sizes are NOT tuned. D28 invalidated every balance constant when the
-// weapon became manual, and there is no point deriving new ones until the queue
-// they feed exists -- which is what this is. Tuning is the next step.
-// **Re-derived from scratch, D54.** The first set was never tuned -- D48 said
-// so at the time -- and Igor playing it confirmed they were trivial. The
-// arithmetic says why: the weapon does `fireRate x damage` = 2.5 hp/s and
-// **nothing in the mod pool raises damage** (D34 -- the pool is body and
-// comfort), so a dive's kill rate is flat. To occupy the 10-45s a batch is
-// supposed to take, a batch has to hold 25-112 hp. The old ones held 3-15,
-// i.e. 1.2-6.0s of shooting: every one of them was under target, and no
-// amount of enemy *placement* was going to fix a factor of five.
-//
-// These are sized on hp first. Real clears run longer than the raw figure,
-// because approaching, missing and kiting are not shooting -- so the low end
-// is deliberately under 25.
-//
-//  #   composition                        hp   shooting time
-//  1   10 drifter                         10   4.0s
-//  2   16 drifter                         16   6.4s
-//  3   12 drifter + 6 darter              18   7.2s
-//  4   14 darter                          14   5.6s
-//  -   1 mini-boss                        24   9.6s
-//  5   2 bulwark + 12 drifter             24   9.6s
-//  6   18 drifter + 8 darter              26  10.4s
-//  7   3 bulwark + 10 darter              28  11.2s
-//  8   20 drifter + 12 darter             32  12.8s
-//  -   1 mini-boss                        24   9.6s
-//  9   4 bulwark + 16 drifter             40  16.0s
-// 10   18 darter + 16 drifter             34  13.6s
-// 11   5 bulwark + 18 drifter + 8 darter  56  22.4s
-// 12   6 bulwark + 20 drifter + 12 darter 68  27.2s
-//  -   1 boss                             60  24.0s
-//
-// Twelve, because D34 sizes a layer at about twelve gates and therefore twelve
-// mods. The peak is 38 simultaneous enemies, against a design budget of 500.
-// S3 added the rows marked `-`: a mini-boss after batches 4 and 8, and the
-// boss as the layer's last batch (D62, D65) -- fifteen in all. Where the
-// mini-bosses sit is Claude's pick.
-//
-// S4 (D71): the table above is now three **pools**, one per stretch between
-// the mini-bosses, and a dive draws four of each from its seed. Each pool got
-// one batch more than it draws, sized into its stretch's hp band -- Claude's
-// picks, marked `new` below: 14, 26 and 42 hp. S5 fills the pools out.
+// A batch is the gated unit (D27): counts per enemy type, arriving at the edges
+// of the view, and nothing else arrives until it is dead. Each stretch between
+// the mini-bosses is a pool a dive draws from (D71). They are sized on total hp
+// (D54) until S6's threat number replaces it (D79) -- untuned placeholders.
 const STRETCH_1 = [
   { enemies: [['drifter', 10]] },
   { enemies: [['drifter', 16]] },
   { enemies: [['drifter', 12], ['darter', 6]] },
   { enemies: [['darter', 14]] },
-  { enemies: [['drifter', 8], ['darter', 6]] },                  // new, 14 hp
+  { enemies: [['drifter', 8], ['darter', 6]] },
 ];
 const STRETCH_2 = [
   { enemies: [['bulwark', 2], ['drifter', 12]] },
   { enemies: [['drifter', 18], ['darter', 8]] },
   { enemies: [['bulwark', 3], ['darter', 10]] },
   { enemies: [['drifter', 20], ['darter', 12]] },
-  { enemies: [['bulwark', 1], ['drifter', 14], ['darter', 6]] }, // new, 26 hp
+  { enemies: [['bulwark', 1], ['drifter', 14], ['darter', 6]] },
 ];
 const STRETCH_3 = [
   { enemies: [['bulwark', 4], ['drifter', 16]] },
   { enemies: [['darter', 18], ['drifter', 16]] },
   { enemies: [['bulwark', 5], ['drifter', 18], ['darter', 8]] },
   { enemies: [['bulwark', 6], ['drifter', 20], ['darter', 12]] },
-  { enemies: [['bulwark', 3], ['darter', 14], ['drifter', 10]] }, // new, 42 hp
+  { enemies: [['bulwark', 3], ['darter', 14], ['drifter', 10]] },
 ];
 const MINI_BOSS = { enemies: [['mini-boss', 1]] };
 const BOSS      = { enemies: [['boss', 1]] };
@@ -425,10 +334,9 @@ const BOSS      = { enemies: [['boss', 1]] };
 // near-black at its bottom. PLACEHOLDER GRAPHICS (D72): the colour and the
 // name are the cheapest way to say "a new layer" until art exists.
 //
-// The second layer is the first one's stretches under its own name and colour
-// -- a placeholder until S5 gives it content of its own. The colours are
-// Claude's picks; the layers are numbered until they are named (D89) -- Igor,
-// 2026-10-12: "make it layer 1 & 2, we'll come up with namings later".
+// The second layer is the first one's stretches under its own name and colour,
+// a placeholder until S5 gives it content of its own. The colours are Claude's
+// picks; the layers are numbered until they are named (D89).
 const STRETCHES = [
   { draw: 4, pool: STRETCH_1 },
   { draw: 1, pool: [MINI_BOSS] },
@@ -454,25 +362,19 @@ const SCENARIOS = {
   'three-types': { spawn: false, enemies: [['drifter', 300, 260],
                                           ['darter',  980, 260],
                                           ['bulwark', 640, 660]] },
-  // The queue several batches in, for eyeballing density and pressure. It used
-  // to mean "a minute into the dive", which stopped meaning anything when the
-  // time-based spawn director was deleted (D48) -- density is authored per
-  // batch now, so a later batch is the only way to be deeper in.
+  // The queue several batches in, for eyeballing density and pressure.
   'late-swarm':  { batch: 5 },
-  // The last batch, then the bottom of the layer -- for seeing how a layer
-  // ends without playing all of it. Derived, so it follows the dive's length.
-  // Since S3 the last batch is the boss (D62); since S4 it is the last layer's,
-  // so reaching the bottom is the win. `batch` may be a function of the dive's
-  // drawn plan (D71), since where things sit is only known once it is drawn.
+  // The last batch -- the last layer's boss -- then the bottom, the win: how a
+  // dive ends, without playing all of it. `batch` may be a function of the
+  // drawn plan (D71), where a place is only known once it is drawn.
   'last-batch':  { batch: plan => plan.length - 1 },
   // The first mini-boss (D65), alone. Derived the same way.
   'mini-boss':   { batch: plan => plan.findIndex(e => e.batch === MINI_BOSS) },
-  // The top of the second layer, with the kit a dive would carry there:
-  // fourteen mods carried by the first layer's glowing fish -- every ordinary
-  // mod three times but one, whose third the round had not reached (D84); here
-  // Impact -- and the layer end's pick, Mend (D85). The picks are Claude's,
-  // stated so the bot measures layer 2 against a known kit without fighting
-  // down the first (friction point 4 of the layer-to-layer spec).
+  // The top of the second layer, with the kit a dive would carry there: what
+  // the first layer's glowing fish carried -- every ordinary mod three times
+  // but one, here Impact (D84) -- and its layer end's pick, Mend (D85). Claude's
+  // picks, so the bot measures layer 2 against a known kit without fighting
+  // down the first.
   'layer-2':     { batch: plan => plan.findIndex(e => e.layer === 1),
                    kit: ['Fins', 'Fins', 'Fins', 'Vitality', 'Vitality', 'Vitality',
                          'Reflex', 'Reflex', 'Reflex', 'Nerve', 'Nerve', 'Nerve',
@@ -481,13 +383,8 @@ const SCENARIOS = {
 
 // ---------- enemy types ----------
 // Documented in docs/entities/enemies.md -- `npm test` holds it to this table.
-// Also just data. Which types appear, and how many, is now named per batch
-// (D48) -- the `weight` and `from` fields that let the deleted spawn director
-// roll a type by unlock time went with it.
-// `value` is how much currency it drops. It was `xp` until D34 deleted the XP
-// curve -- the drop is money now, and money is spent at `home` (S4), not here.
-// What the currency is *called* is still open (`ideas.md`), which is why nothing
-// in the code names it.
+// What the currency `value` pays in is still unnamed (`ideas.md`), which is
+// why nothing in the code names it.
 const ENEMY_TYPES = [
   { name: 'drifter', r: 9,  hp: 1, speed: 85,  value: 1,
     color: '#e8446e', glow: '#ff1e5a' },
@@ -495,21 +392,13 @@ const ENEMY_TYPES = [
     color: '#ffb648', glow: '#ff8a00' },
   { name: 'bulwark', r: 17, hp: 6, speed: 52,  value: 3,
     color: '#a05cff', glow: '#7b2fff' },
-  // The lungers (S3): the boss, and the mini-boss that rehearses it (D62, D64,
-  // D65). They chase, then stop and wind up with their line showing, charge
-  // along it and rest. `lunge` holds the timings -- `chase` seconds before a
-  // wind-up may start, `windup` and `rest` in seconds, the charge's `speed`
-  // in px/s and its `reach` in px -- and its presence is the behaviour. Every
-  // number here is Claude's pick. The boss rises from below the view, centred:
-  // Igor, "The boss swims in from the bottom".
-  // Neither lunger ever glows (D88): `carries: false` keeps a batch's mod off
-  // them. Igor, 2026-10-12: "remove glow from mini-bosses" -- and the boss's
-  // batch is paid by the layer end's pick (D85).
+  // The lungers: the boss, and the mini-boss that rehearses it (D62, D64, D65).
+  // `lunge` holds the timings, and its presence is the behaviour. Neither ever
+  // glows (D88): `carries: false` keeps a batch's mod off them. Claude's picks.
   { name: 'mini-boss', r: 26, hp: 24, speed: 70, value: 5, carries: false,
     color: '#e2ff8a', glow: '#c6ff3c',
     lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
-  // The boss's `value` is the layer end's haul (D68): "a big haul of gems".
-  // 30 is Claude's pick; S6 owns it.
+  // The boss's `value` is the layer end's big haul of gems (D68).
   { name: 'boss',      r: 42, hp: 60, speed: 60, value: 30, carries: false,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
     lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 } },
@@ -522,20 +411,17 @@ const HOME_LAYERS_TOP = 326, HOME_LINE = 26;
 const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 
 // ---------- menus ----------
-// Same trick as mods and enemy types: a list of entries, so adding one
-// is a line and nothing else changes. Anything that depends on state -- a
-// label, a sub-line, `dim` (a row that cannot be taken right now), `home`'s
+// A list of entries, so adding one is a line. Anything that depends on state --
+// a label, a sub-line, `dim` (a row that cannot be taken right now), `home`'s
 // `lines` -- is a getter, so the renderer reads every one the same way. `top`
 // is where the rows start, which the renderer and the hit-test share; `back`
 // is what Esc does, on a menu that has one. A screen is a menu exactly when it
 // has an entry here -- `step()` asks `MENUS[screen]` -- and the water stops on
 // every menu but one that `flows`.
-// The end of a dive, either way it ends -- eaten, or the last layer won: Dive
-// again or Go home (D90). Igor, 2026-10-12: "make it dive again + go home
-// buttons choice". A menu like any other, except that the water keeps flowing
-// under it (`flows`, D58). Go home opens marked (`endDive()`): a stray Enter
-// or Space -- Space is the dash -- does what any key did before, and diving
-// again is a choice.
+//
+// The end of a dive, either way it ends: Dive again or Go home (D90). The water
+// keeps flowing under it (D58). Go home opens marked (`endDive()`), so a stray
+// Enter or Space -- Space is the dash -- never starts a dive by accident.
 const END_TOP = ARENA_H / 2 + 100;
 const GO_HOME = { label: 'Go home', run: () => openMenu('home') };
 const END_MENU = {
@@ -576,8 +462,8 @@ const MENUS = {
   },
   home: {
     heading: 'HOME',
-    // Depth in metres: 10 world px to the metre, so a gate is 40m down.
-    // Flavour, and Claude's pick -- the world has no unit of its own.
+    // Depth in metres, at 10 world px to the metre: flavour, Claude's pick --
+    // the world has no unit of its own.
     get sub() {
       const p = points();
       return meta.bank + ' gems      ' + p + (p === 1 ? ' point' : ' points') +
@@ -585,13 +471,12 @@ const MENUS = {
     },
     // The layers, one line each (D66): an unlocked one by name, with whether
     // it has been cleared and which micro-tasks it has paid; the next locked
-    // one as ???; the rest hidden -- "levels are hidden until unlocked", the
-    // source design. Unlocked means the one before it was cleared.
+    // one as ???; the rest hidden. Unlocked means the one before it was cleared.
     get lines() {
       return LAYERS.slice(0, meta.cleared + 2).map((layer, l) => l > meta.cleared
         ? { text: '???', locked: true }
         : { text: layer.name + (l < meta.cleared ? '   cleared' : '') + '   ' +
-                  TASKS.map(t => t.name + (meta.tasks[l]?.[t.name] ? ' \u2713' : ' \u2013'))
+                  TASKS.map(t => t.name + (meta.tasks[l]?.[t.name] ? ' ✓' : ' –'))
                        .join('   ') });
     },
     top: HOME_TOP,
@@ -605,14 +490,14 @@ const MENUS = {
         get label() {
           const t = meta.gear[g.name] || 0, cost = nextCost(g);
           return g.name + '   tier ' + t + (cost === undefined ? ', the top'
-            : ' \u2192 ' + (t + 1) + '   ' + cost + ' gems');
+            : ' → ' + (t + 1) + '   ' + cost + ' gems');
         },
         get dim() { return !canBuy(g); },
         run: () => buy(g) })),
       ...ATTRIBUTES.map(a => ({
         get label() {
           const n = meta.spent[a.name] || 0;
-          return a.name + '   ' + n + ' \u2192 ' + (n + 1) + '   1 point';
+          return a.name + '   ' + n + ' → ' + (n + 1) + '   1 point';
         },
         get dim() { return points() <= 0; },
         run: () => raise(a) })),

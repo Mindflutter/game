@@ -10,12 +10,10 @@ let queuePaused = false;    // a scenario can stop the batch queue (D37)
 // Where the batch queue stands (D27). `batchIndex` counts batches *begun* and
 // never resets within a dive, so it is also how many have been cleared.
 //
-// `breathTimer` is NOT a gate flag: a **gate** is the whole stretch where the
-// descent is stopped, fight included, so "at a gate" is `enemies.length > 0`.
-// Since S2 it counts only the quiet beat before a dive's *first* batch
-// (GATE_PAUSE); every later batch waits on the descent instead (D58). Naming it
-// `gateTimer` inverted the glossary and would have had S2's camera moving while
-// locked.
+// `breathTimer` counts only the quiet beat before a dive's *first* batch
+// (GATE_PAUSE); every later batch waits on the descent (D58). It is not a gate
+// flag: a gate is the whole stretch where the descent is stopped, fight
+// included, so "at a gate" is `enemies.length > 0`.
 let batchIndex = 0;
 let breathTimer = 0;
 
@@ -45,7 +43,7 @@ let bannerTime = 0;
 // into Continue.
 let diveLive = false;
 
-// The camera (S2): how far down the world the top of the view sits. Everything
+// The camera: how far down the world the top of the view sits. Everything
 // in a dive lives in world coordinates; only `aim` and the HUD are in the view.
 let cameraY = 0;
 // The current (D58): its speed, which is never zero, and how far the water has
@@ -56,15 +54,14 @@ let waterY = 0;
 
 // The trigger is armed only once the button has been seen released. A menu
 // reads a click as an edge (justPressed) while the weapon reads it as a held
-// state (keys), so without this one physical click is read twice -- clicking
-// Start fired a shot into the dive it had just begun.
+// state (keys), so without this one physical click is read twice: the click
+// that starts a dive would also fire into it (D47).
 let fireArmed = false;
 
-// In-dive progress, reset every dive. There is no rank and no XP bar: a mod
-// is carried by a glowing fish (D84, D87). `currency` is the dive's takings,
-// spent at `home`. `modCounts` is how many times each mod has been taken,
-// which is what lets the draws refuse one that is already maxed. `choices` is
-// the layer end's cards (D85).
+// In-dive progress, reset every dive. `currency` is the dive's takings, spent
+// at `home`. `modCounts` is how many times each mod has been taken, which is
+// what lets the draws refuse one that is already maxed. `choices` is the layer
+// end's cards (D85).
 let currency, choices, modCounts;
 
 // Seconds until the layer end's cards appear, counting from the boss dying.
@@ -80,17 +77,16 @@ let modRound = [];
 let boosts = [];
 let sinceBoost = 0;
 
-// Which screen we're on. Replaces the old `paused` and `dead` flags, which
-// could contradict each other; now there is exactly one answer at a time.
+// Which screen we're on: one variable, so there is exactly one answer at a time.
 // 'title' | 'home' | 'playing' | 'mods' | 'paused' | 'help' | 'options' | 'dead' | 'won'
 let screen = 'title';
-let menuIndex = 0;          // cursor in the title / pause menu
+let menuIndex = 0;          // cursor in whichever menu is up
 let choiceIndex = 0;        // the marked card at a layer end (D85)
 let lastAimX = 0, lastAimY = 0;   // so a still mouse doesn't fight the arrows
 let optionIndex = 0;        // cursor in the options list
 let returnTo = 'title';     // where Esc goes back to from help / options
-let resumeTo = 'playing';   // where the pause menu resumes: play, or the mod
-                            // cards it was opened over
+let resumeTo = 'playing';   // where the pause menu and the title's Continue
+                            // go back to: play, or the layer end's cards
 
 // ---------- randomness ----------
 // Every random number in a dive comes from here, seeded, so the same seed
@@ -118,7 +114,7 @@ function rng() {
 
 // `n` distinct picks from `pool`, in the order drawn -- fewer if it runs out.
 // A copy, so the splicing doesn't wreck the table. Every seeded draw without
-// repeats goes through here: the mod cards and the dive's plan (D71).
+// repeats goes through here.
 function drawDistinct(pool, n) {
   const left = [...pool], out = [];
   while (out.length < n && left.length) {
@@ -157,7 +153,7 @@ function reset(seed) {
   };
   // What persists, added to the start (D36): each tier of the carried weapon
   // and of the equipment, and each point, applied once. A weapon left at home
-  // adds nothing. Mods add on top as they are picked; nothing multiplies.
+  // adds nothing. Mods add on top during the dive; nothing multiplies.
   for (const g of [carried, ...EQUIPMENT]) {
     for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.tiers[i].apply(player);
   }
@@ -332,7 +328,7 @@ let showFps = false;
 
 // Dev flags, set from the URL by main.js: `&immortal` and `&damage=<n>`. Like
 // the settings above they are not part of a dive, so reset() leaves them alone
-// and they survive R. Nothing in the game itself ever turns them on.
+// and they survive Dive again. Nothing in the game itself ever turns them on.
 let immortal = false;       // nothing can hurt the player
 let damageOverride = 0;     // above 0, every shot does this much
 

@@ -4,12 +4,9 @@
 // ---------- checks: open index.html?test and look at the console ----------
 if (location.search === '?test') {
   // ---------- harness ----------
-  // A check that cannot fail is not a check. check() logs and carries
-  // on, so this suite used to print "checks done" over real failures -- and it
-  // printed it before the async sound checks had even run. check() counts,
-  // report() is the only thing that says whether the suite passed, and it runs
-  // once, last, after the awaits. An uncaught throw is already loud in the
-  // console, so it needs no extra handling here.
+  // A check that cannot fail is not a check (D39). check() counts; report() is
+  // the only thing that says whether the suite passed, and it runs once, last,
+  // after the awaits.
   let passed = 0;
   const failures = [];
   const check = (cond, msg) => {
@@ -29,9 +26,8 @@ if (location.search === '?test') {
     }
   };
 
-  // A throw partway through used to mean no report at all: loud in the console,
-  // but silent about whether the suite passed. Caught here so report() always
-  // runs and the throw is counted as the failure it is.
+  // A throw partway through would end the suite without a report: caught here,
+  // so report() always runs and the throw counts as the failure it is.
   window.addEventListener('error', e => {
     failures.push('SUITE THREW: ' + (e.message || e));
     report();
@@ -41,9 +37,9 @@ if (location.search === '?test') {
     { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, value: 1, lastHitBy: 0,
       pushX: 0, pushY: 0 }, over);
 
-  // A bullet, built the way the weapon builds one. Five checks hand-rolled this
-  // literal; when bullets gained `speed` (D53) every one of them would have
-  // computed NaN travel and flown forever, because `NaN >= maxTravel` is false.
+  // A bullet, built the way the weapon builds one, so no check hand-rolls a
+  // literal that misses a field -- a bullet without `speed` would fly forever,
+  // since `NaN >= maxTravel` is false.
   const shot = (over = {}) => {
     const b = Object.assign({ id: ++bulletId, x: player.x, y: player.y, r: player.shotRadius,
                               vx: player.shotSpeed, vy: 0, pierce: 0,
@@ -53,9 +49,8 @@ if (location.search === '?test') {
     return b;
   };
 
-  // Hold right, tap Space, run the dash out, release. Six checks wrote this by
-  // hand and two of them had already forgotten the release, which is the drift
-  // a copy-pasted fixture always produces.
+  // Hold right, tap Space, run the dash out, release -- in one place, so no
+  // check forgets the release.
   const dashRight = (ticks = 20, dt = 1 / 60) => {
     keys.add('KeyD');
     justPressed.add('Space');
@@ -63,12 +58,10 @@ if (location.search === '?test') {
     keys.delete('KeyD');
   };
 
-  // The weapon fires along the cursor now, so every check that expects a shot
-  // to land has to say where the cursor is. Inheriting whatever the previous
-  // check left behind is how a few of these used to pass by luck.
-  // Point at something and pull the trigger. Since D28 the weapon is manual, so
-  // aiming alone fires nothing -- every check that wants a shot must hold
-  // 'Mouse0', which is how a mouse button reaches the game (D22).
+  // Point at something and pull the trigger. The weapon fires along the cursor,
+  // so a check that expects a shot to land says where the cursor is rather than
+  // inheriting it; and it is manual (D28), so the check holds 'Mouse0', which
+  // is how a mouse button reaches the game (D22).
   // A real press is always preceded by a frame with the button up, which is
   // what arms the trigger (D47). These helpers start mid-press, so they assert
   // that precondition instead of simulating it. The arming logic itself is
@@ -79,16 +72,12 @@ if (location.search === '?test') {
 
   // Runs the simulation with the player kept invulnerable. An unattended player
   // dies in seconds, and step() returns early on the death screen -- so any
-  // check that lets time pass is otherwise liable to measure a *stopped* game
-  // and pass for the wrong reason. That happened to the gate checks below.
-  // `until` stops it early -- a batch arriving, say -- and still ends on the
-  // same oracle, so a caller that waits cannot skip it.
+  // check that lets time pass would otherwise measure a *stopped* game and pass
+  // for the wrong reason. `until` stops it early -- a batch arriving, say -- and
+  // still ends on the same oracle, so a caller that waits cannot skip it.
   const runAlive = (n, until = () => false) => {
     for (let i = 0; i < n && !until(); i++) { player.hurt = player.iframes; update(1 / 60); }
-    // The oracle lives here, not at the call sites. A check that lets time pass
-    // while the sim has quietly stopped passes for the wrong reason -- that
-    // happened once already (D48), and relying on each caller to remember the
-    // assertion is the same discipline that failed then.
+    // The oracle lives here, not at the call sites, so no caller can forget it.
     check(screen === 'playing',
       'runAlive: the simulation stopped (screen ' + screen + ') -- anything measured after this is meaningless');
   };
@@ -96,7 +85,7 @@ if (location.search === '?test') {
   // longer -- a hardcoded frame count both wastes ticks and goes quietly wrong
   // the first time that constant moves.
   const pastGate = () => runAlive(Math.ceil(GATE_PAUSE * 60) + 3);
-  // Later gates wait on the descent (S2), not GATE_PAUSE: ride the current until
+  // Later gates wait on the descent, not GATE_PAUSE: ride the current until
   // something arrives. Bounded, so a camera that never arrives fails instead of
   // hanging the suite.
   const arrived = () => enemies.length > 0;
@@ -121,8 +110,7 @@ if (location.search === '?test') {
     'every batch count must be a positive integer');
 
   // --- the gate (D27) ---
-  // The whole point: nothing new arrives until the current batch is dead. An
-  // endless spawn director passes none of this.
+  // The whole point: nothing new arrives until the current batch is dead.
   reset(1);
   check(enemies.length === 0 && breathTimer > 0, 'a dive must open on the beat, not mid-fight');
   pastGate();                                      // wait out the opening gate
@@ -141,9 +129,8 @@ if (location.search === '?test') {
   runAlive(60 * 30, arrived);
   check(batchIndex === 2 && enemies.length > 0, 'the gate must release the next batch');
 
-  // A third in a row, which is S1's definition of done. Continues the sequence
-  // above rather than restarting it -- the only new information is one more
-  // clear, and re-walking the whole path costs ~250 sim ticks to learn nothing.
+  // A third in a row. Continues the sequence above rather than restarting it:
+  // one more clear is the only new information.
   enemies = [];
   runAlive(1);
   runAlive(60 * 30, arrived);
@@ -154,14 +141,12 @@ if (location.search === '?test') {
   // must reach the bottom of the dive in the same time. The window reaches the
   // game only through `aim`, so aim arrives as mousemove events in *client*
   // pixels -- the letterbox conversion, and the camera on top of it, are what is
-  // under test. The whole dive -- S2's DoD said "one layer", and since S4
-  // (D66) a dive runs on through every layer, so that is the whole of it.
+  // under test. The whole dive: it runs on through every layer (D66).
   const traverse = (w, h) => {
     resize(w, h);
     reset(4471);
-    // The cap grows with the dive: a layer takes ~290s here, so 450s each is
-    // headroom, and a third layer does not fail this for a reason that has
-    // nothing to do with window size.
+    // The cap grows with the dive -- 450s a layer is headroom -- so another layer
+    // does not fail this for a reason that has nothing to do with window size.
     for (let i = 0; i < LAYERS.length * 450 / FIXED_DT && screen !== 'won'; i++) {
       player.hurt = player.iframes;
       if (screen === 'mods') { justPressed.add('Digit1'); justPressed.add('Enter'); }
@@ -190,8 +175,8 @@ if (location.search === '?test') {
 
   // --- the dim reaches the letterbox (D58) ---
   // The water tint paints the margin too, so a dim screen has to cover it as
-  // well -- a dim clipped to the view left bright bands down the sides of the
-  // mod screen. A window wider than 16:10, so there is a side margin to read.
+  // well, or it leaves bright bands down the sides. A window wider than 16:10,
+  // so there is a side margin to read.
   resize(1800, 800);
   reset(1);
   screen = 'mods';
@@ -209,13 +194,9 @@ if (location.search === '?test') {
   for (let i = 0; i < 150; i++) update(0.016);   // 2.4s: touches once, not twice
   check(player.hp === 2, 'one touch = one hp, got ' + player.hp);
 
-  // The two "hold fire unless something is in range" checks were deleted with
-  // D28: that rule existed only because the weapon fired itself. Firing at open
-  // water is now allowed and costs the player a cooldown, which is the point.
-
   // Shots go where the mouse points, NOT at the nearest enemy. The enemy is
-  // planted to the left and the cursor put to the right, so the old
-  // nearest-enemy weapon fails this with vx < 0.
+  // planted to the left and the cursor put to the right, so a weapon aiming at
+  // the nearest enemy fails this with vx < 0.
   reset();
   enemies.push(mob(player.x - 60, player.y));
   aim.x = player.x + 500;
@@ -239,8 +220,7 @@ if (location.search === '?test') {
   check(bullets.length === 0 && kills === 0,
     'no trigger, no shot -- got ' + bullets.length + ' bullets, ' + kills + ' kills');
 
-  // Firing into open water is allowed now: the old "hold the shot unless
-  // something is in range" rule was a crutch for a weapon that fired itself.
+  // Firing into open water is allowed: nothing need be in range.
   reset(1);
   queuePaused = true;
   enemies.length = 0;
@@ -255,7 +235,7 @@ if (location.search === '?test') {
   // bank shots, and a fresh click never feels sticky.
   reset(1);
   queuePaused = true;            // or the idle player dies mid-wait and step()
-                                 // returns early -- which made this check flaky
+                                 // returns early
   for (let i = 0; i < 300; i++) update(1 / 60);   // five seconds, trigger up
   check(player.fireTimer === 0, 'fireTimer must not run negative while idle, got ' + player.fireTimer);
   holdFire();
@@ -344,8 +324,8 @@ if (location.search === '?test') {
     'a dash must leave an afterimage trail');
 
   // ...and it cannot be spent again until the cooldown has run. The movement
-  // key has to be held: a dash also needs a direction, so without one this
-  // passed because `len === 0` blocked it, never testing the cooldown at all.
+  // key has to be held: a dash also needs a direction, and without one it
+  // would be refused for that instead of for the cooldown.
   keys.add('KeyD');
   justPressed.add('Space');
   update(1 / 60);
@@ -353,13 +333,10 @@ if (location.search === '?test') {
     'no second dash inside the cooldown, cd=' + player.dashCd.toFixed(2));
   keys.delete('KeyD');
 
-  // A fast dash must not step over its own hitbox. The wave reaches 40px past
-  // an enemy's radius, but the dash covers speed x 3.4 x dt in a frame and
-  // `Fins` raises speed with no cap -- so a point test taken once a frame
-  // teleports past whatever it crossed. Eight Fins on a 20fps frame steps 105px
-  // against a 49px reach, and this enemy is in front before the step and behind
-  // after it, which is why the old test never saw it at all. Igor hit this:
-  // "dash ... sometimes doesnt deal damage".
+  // A fast dash must not step over its own hitbox (D50): on the slowest frame
+  // dt allows, a step covers nearly the wave's whole reach, and this enemy is
+  // in front before the step and behind after it -- a point test taken once a
+  // frame never sees it in range.
   reset();
   impact.apply(player);
   player.fireTimer = 999;
@@ -373,10 +350,6 @@ if (location.search === '?test') {
     swept.hp + ' after passing through it at speed ' + player.speed);
 
   // Dash length is its own stat and does not ride on `player.speed` (D56).
-  // Igor, twice: "once the dash becomes long, it feels way easier" and then
-  // "dash length still increases over time or mod upgrades". It did: the dash
-  // moved at speed x 3.4, `Fins` raises speed with no cap, so ten of them took
-  // the lunge from 141px to 402px -- a third of the arena, untouchable.
   // Exactly the dash's own length in ticks, derived: one tick more and the
   // measurement picks up ordinary walking after the lunge ends.
   const DASH_TICKS = Math.floor(DASH_TIME / FIXED_DT);
@@ -399,13 +372,9 @@ if (location.search === '?test') {
     finned.toFixed(1) + 'px with eight');
   check(bare > 100, 'a dash must still cover ground, ' + bare.toFixed(1) + 'px');
 
-  // A dash is a committed lunge. The direction is taken when it starts and live
-  // input cannot steer it -- Igor: "it's possible to change direction during
-  // the dash". Three ways it was steerable, all from travel following the keys
-  // while only the *wave* was frozen: switching keys turned the lunge, holding
-  // the opposite key reversed it (and then the wave faced the way you came, so
-  // it hit nothing), and releasing everything stopped you dead while dashTime
-  // ran on -- a free 0.31s of invulnerability for standing still.
+  // A dash is a committed lunge (D56): the direction is taken when it starts,
+  // and live input must not turn it, reverse it, or stop it by letting go --
+  // the last would be free invulnerability for standing still.
   const dashAndSwitch = to => {
     reset();
     queuePaused = true;
@@ -445,7 +414,7 @@ if (location.search === '?test') {
   reset();
   const tank = mob(player.x + 100, player.y, { hp: 3, maxHp: 3 });
   enemies.push(tank);
-  player.fireTimer = 999;                        // silence the auto-weapon
+  player.fireTimer = 999;                        // silence the weapon
   shot({ pierce: 2 });
   for (let i = 0; i < 30; i++) update(1 / 60);
   check(tank.hp === 2, 'a piercing shot must hit once, hp=' + tank.hp);
@@ -481,8 +450,7 @@ if (location.search === '?test') {
   ceaseFire();
 
   // A gem nowhere near you still reaches you: it flies to you from anywhere
-  // and never fades (D35). This replaced "uncollected gems must expire" --
-  // there is nothing uncollected any more.
+  // and never fades (D35, D78).
   reset();
   queuePaused = true;
   gems.push({ x: 40, y: cameraY + 40, r: 4 });
@@ -515,8 +483,7 @@ if (location.search === '?test') {
     'clearing a gate must open no cards: screen ' + screen + ', offerTimer ' + offerTimer);
 
   // The same clear as the layer's last batch: the boss's, the layer end. The
-  // cards wait for the death to finish playing (D51). Igor: "batch cleared
-  // comes too fast, last enemy just eliminated ... feels unnatural".
+  // cards wait for the death to finish playing (D51).
   reset();
   batchIndex = plan.findIndex(e => e.end) + 1;   // the boss's batch is the one fought
   const boss = mob(player.x + 150, player.y);
@@ -577,8 +544,8 @@ if (location.search === '?test') {
   check(modCounts.Mend === 1, 'taking a mod must count it, got ' + modCounts.Mend);
   check(player.mendOnClear === 1, 'Mend must grant its effect');
 
-  // The two comfort mods are standing effects, not stat bumps, so each needs a
-  // check of its own: that the card was taken proves nothing about what it does.
+  // Mend is a standing effect, not a stat bump, so it needs a check of its own:
+  // that the card was taken proves nothing about what it does.
   reset();
   player.mendOnClear = 1;
   player.hp = 1;
@@ -599,10 +566,8 @@ if (location.search === '?test') {
   check(player.hp === player.maxHp,
     'Mend must not heal past the maximum, hp ' + player.hp + '/' + player.maxHp);
 
-  // A batch arrives with no grace period. This used to be half of a pair
-  // checking the `Lull` mod; the mod is gone (D55) but the default it contrasted
-  // with is still the rule, and it is what a re-added arrival guard would have
-  // to break deliberately.
+  // A batch arrives with no grace period: an arrival guard would have to break
+  // this deliberately (D55).
   reset();
   for (let i = 0; i < Math.ceil(GATE_PAUSE / FIXED_DT) + 3; i++) update(FIXED_DT);
   check(enemies.length > 0 && player.hurt <= 0,
@@ -637,9 +602,8 @@ if (location.search === '?test') {
   justPressed.add('ArrowRight');
   update(0.016);
   check(choiceIndex === 2, 'right arrow must move the highlight');
-  // D and A steer the cards as well as the arrows do -- the hand is already on
-  // WASD, and reaching for the arrows to pick a mod is the whole
-  // complaint that put the mouse and Enter here.
+  // D and A steer the cards as well as the arrows do: the hand is already on
+  // WASD.
   justPressed.add('KeyD');
   update(0.016);
   check(choiceIndex === 0, 'D must move the highlight, and wrap');
@@ -897,10 +861,10 @@ if (location.search === '?test') {
   check(menuIndex === 0, 'key auto-repeat must not move the cursor');
 
   // Each option changes the thing it claims to. The volume is put back to what
-  // the run started with, not to 0.6 -- `?test` boots muted, and restoring a
-  // hardcoded 0.6 un-muted the rest of the suite, which is the noise Igor asked
-  // to stop. `change()` also plays a sound to preview the new level, so this
-  // check is itself a speaker if it leaves the volume up.
+  // the run started with, not to 0.6 -- `?test` boots muted, and a hardcoded
+  // 0.6 would un-mute the rest of the suite. `change()` also plays a sound to
+  // preview the new level, so this check is itself a speaker if it leaves the
+  // volume up.
   const bootVolume = volume;
   screen = 'options'; optionIndex = 0; volume = 0.6;
   tap('ArrowLeft');
@@ -921,7 +885,7 @@ if (location.search === '?test') {
   check(showFps === false, 'fps readout must toggle off');
 
   // Dying shakes the screen, and that shake must settle even though the game
-  // has stopped updating. The check above never died, so it missed this.
+  // has stopped updating.
   reset();
   player.hp = 1;
   enemies.push(mob(player.x + 15, player.y, { speed: 0, hp: 999, maxHp: 999 }));
@@ -950,10 +914,9 @@ if (location.search === '?test') {
   check(shake === 0, 'shake "off" must not shake at all, got ' + shake);
   shakeLevel = 2;
 
-  // A click the menu consumed must not also reach the weapon. The menu reads
-  // the edge (justPressed) while the weapon reads the held state (keys), so one
-  // physical click was being read twice: clicking Start fired a shot into the
-  // dive it had just begun. Since S4 the click is on `home`'s Dive row.
+  // A click the menu consumed must not also reach the weapon (D47): the menu
+  // reads the edge (justPressed) while the weapon reads the held state (keys),
+  // so one physical click could be read twice. The click is on `home`'s Dive row.
   reset(1);
   screen = 'home';
   menuIndex = 0;
@@ -975,9 +938,8 @@ if (location.search === '?test') {
   ceaseFire();
 
   // ---------- screens fit ----------
-  // Adding a row to HELP_KEYS once pushed the list straight through the blurb
-  // below it, and all 107 checks passed while the screen was unreadable. Layout
-  // is derived from the data now; this is the guard that keeps it that way.
+  // Help's layout is derived from the data; this guard keeps it so. No state
+  // check can see text running through text.
   openScreen('help');
   draw();
   check(helpBottom < HINT_Y - 10,
@@ -1004,16 +966,14 @@ if (location.search === '?test') {
     ', hint at ' + HINT_Y);
 
   // The same rule sideways: a mod description is prose in a fixed-width box, and
-  // the renderer centres it, so it cannot notice one running off the edge. Two
-  // of them did, and every check passed while the cards were unreadable.
+  // the renderer centres it, so it cannot notice one running off the edge.
   const widest = widestModDesc();
   check(widest <= CARD_W - CARD_PAD * 2,
     'a mod description must fit its card: widest is ' + Math.round(widest) +
     'px, the card allows ' + (CARD_W - CARD_PAD * 2) + 'px');
 
-  // ...and downwards. The cards grew from 140 to 186 tall when the numbers went
-  // on them (D52); Continue and the hint sit under them (D85), derived from
-  // their box, so a taller card pushes both down -- out of the view, if far
+  // ...and downwards. Continue and the hint sit under the cards (D85), derived
+  // from their box, so a taller card pushes both down -- out of the view, if far
   // enough. Read from the owners, cardRect() and continueRect().
   const cardsEnd = cardRect(0, 3).y + CARD_H;
   const contEnd = continueRect().y + continueRect().h;
@@ -1029,10 +989,10 @@ if (location.search === '?test') {
     tooTall.map(m => m.name + ' (' + modPreview(m).length + ')').join(','));
 
   // --- the fixed timestep (D53) ---
-  // S1's DoD: "a railgun-speed projectile cannot tunnel a thin enemy at any dt
-  // the frame cap allows". A fixed step bounds dt but not bullet *speed*, so
-  // the shot is swept like the dash. 6000px/s is 50px per tick against a
-  // darter's 10px reach -- a point test flies straight through.
+  // A railgun-speed shot must not tunnel a thin enemy. A fixed step bounds dt
+  // but not bullet *speed*, so the shot is swept like the dash. 6000px/s is
+  // 50px per tick against a darter's 10px reach -- a point test flies straight
+  // through.
   // +325, not +300: at 6000px/s the bullet samples every 50px from the player,
   // so an enemy at +300 sits *exactly* on a sample and a point test hits it by
   // arithmetic luck. Placed mid-step, halfway between two samples, it is the
@@ -1063,7 +1023,7 @@ if (location.search === '?test') {
   check(advanceBy(FIXED_DT * 2) === 2, 'a 60Hz frame must run two ticks at 1/120');
   check(advanceBy(FIXED_DT * 0.6) === 0, 'a part-tick must run nothing yet...');
   check(advanceBy(FIXED_DT * 0.6) === 1, '...and the banked remainder must then fire');
-  // The cap is inside advanceBy now, so it is reachable: a frame that claims a
+  // The cap is inside advanceBy, so it is reachable: a frame that claims a
   // whole minute passed must still simulate only MAX_FRAME_DT of it, or coming
   // back to a tab would run the dive forward all at once.
   reset();
@@ -1138,9 +1098,8 @@ if (location.search === '?test') {
   applyScenario('one-drifter');
   const steppedFrom = elapsed;
   advance(30);
-  // Derived from FIXED_DT, not from a hardcoded 1/60: this check asserted the
-  // old step size and failed the moment D53 changed it, which is the right
-  // failure but the wrong reason to have to edit a test.
+  // Derived from FIXED_DT, not a hardcoded step, so the step can change without
+  // editing this.
   check(Math.abs(elapsed - steppedFrom - 30 * FIXED_DT) < 1e-9,
     'advance(30) must move exactly 30 fixed ticks, moved ' + (elapsed - steppedFrom));
 
@@ -1148,11 +1107,9 @@ if (location.search === '?test') {
   check(stepped === false, '?test must not be stepped');
 
   // ---------- determinism ----------
-  // The same seed must replay the same dive. Every balance number from here on
-  // rests on this: without it, comparing two builds compares two different
-  // games, which is why the old measurements needed 21 dives per configuration
-  // to see through the spawn noise. This fails the moment a Math.random()
-  // survives anywhere in game/.
+  // The same seed must replay the same dive. Every balance number rests on
+  // this: without it, comparing two builds compares two different games. This
+  // fails the moment a Math.random() survives anywhere in game/'s dive.
   const trace = seed => {
     reset(seed);
     const out = [];
@@ -1178,8 +1135,7 @@ if (location.search === '?test') {
   reset();
 
   // Every sound must actually be loud enough to hear. Render each one offline
-  // through the real voice() and measure its peak. This is the check that was
-  // missing when every sound shipped 20-30dB too quiet to notice.
+  // through the real voice() and measure its peak.
   (async () => {
     for (const [name, spec] of Object.entries(SOUNDS)) {
       const off = new OfflineAudioContext(1, 44100, Math.ceil(44100 * (spec.dur + 0.05)));
@@ -1196,5 +1152,5 @@ if (location.search === '?test') {
 }
 
 // A stepped scenario never starts the loop (D37 -- Scenarios): the whole point
-// is that nothing advances until step() asks it to.
+// is that nothing advances until advance() moves it.
 if (!stepped) requestAnimationFrame(frame);

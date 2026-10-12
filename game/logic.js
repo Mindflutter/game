@@ -22,8 +22,8 @@ function makeEnemy(t, x, y, speed) {
 
 // Somewhere just outside the view, so arrivals fade in from the dark rather
 // than popping into view. In view coordinates; the caller adds the camera.
-// The boss rises from below, centred -- Igor, "The boss swims in from the
-// bottom" -- before any draw from the seed, so no other arrival moves.
+// The boss rises from below, centred, before any draw from the seed, so no
+// other arrival moves.
 function edgeSpawnPoint(t) {
   const m = 40;
   if (t.enters === 'bottom') return { x: ARENA_W / 2, y: ARENA_H + m + t.r };
@@ -106,16 +106,10 @@ function lungeStep(e, ux, uy, d, dt) {
   e.y = y;
 }
 
-// How far a point is from a line segment. Needed because a fast-moving hitbox
-// tested only where it *landed* skips whatever it crossed on the way: the dash
-// covers `player.dashSpeed * dt` in a frame, and a bullet `b.speed * dt` —
-// neither of which the reach knows about.
-// Bullets had the same hole (430px/s is 21.5px on a 20fps frame against a
-// darter's 10px reach), and have swept their path too since D53.
-// **Squared**, because both callers are per-frame collision loops and the
-// bullet one is the hot one -- `dx*dx + dy*dy < r*r` measured 8.3x faster than
-// `Math.hypot` over 3.2M pairs, and that rule does not stop applying because
-// the shape became a capsule.
+// How far a point is from a line segment, squared. A fast hitbox tested only
+// where it *landed* skips whatever it crossed on the way, so the dash and
+// bullets test the segment they swept this frame (D50, D53). Squared, because
+// both callers are per-frame collision loops: no square root.
 function segDistanceSq(px, py, ax, ay, bx, by) {
   const sx = bx - ax, sy = by - ay;
   const len2 = sx * sx + sy * sy;
@@ -238,8 +232,8 @@ function rowUnder(x, y, n, top) {
 }
 
 // Has the mouse actually moved since the last frame? A cursor left resting on
-// a row must not overrule the keys every frame. Called once per frame -- every
-// screen below returns early, so exactly one caller runs.
+// a row must not overrule the keys every frame. Every screen with a cursor --
+// the menus, options, the layer end's cards -- calls it once a frame.
 function mouseMoved() {
   const moved = aim.x !== lastAimX || aim.y !== lastAimY;
   lastAimX = aim.x;
@@ -247,14 +241,13 @@ function mouseMoved() {
   return moved;
 }
 
-// A batch just died. A gate pays no rank and opens no cards: its mod rode in on
-// a glowing fish (D84, D87). What is left to pay here is the micro-tasks, Mend,
-// and at a layer end the heal and the pick of valuable mods (D85) -- the
-// dive's one pause, held for the end of the layer rather than every batch.
+// A batch just died: pay the micro-tasks and Mend, and at a layer end the heal
+// and the pick of valuable mods (D85) -- the dive's one pause. A gate's own mod
+// rode in on its glowing fish (D84).
 function clearBatch() {
-  // Enemies placed by hand -- a scenario's (D37), a check's -- belong to no
-  // batch of the plan: they pay what a gate pays, Mend, and nothing that
-  // belongs to a layer.
+  // The batch just cleared is the plan's entry before `batchIndex`. Enemies
+  // placed by hand before the first batch -- a scenario's (D37) -- have none:
+  // they pay Mend, and nothing that belongs to a layer.
   const entry = plan[batchIndex - 1];
   if (entry) {
     // Micro-tasks first, so the layer end's heal cannot read as a clean batch.
@@ -368,18 +361,11 @@ function openMenu(name) {
 
 // ---------- the clock ----------
 // The simulation advances in whole FIXED_DT steps and nothing else, whatever
-// the display is doing (D53). Leftover time is banked, so a 60Hz screen runs
-// two ticks a frame and a 144Hz screen runs one or none, and both simulate the
-// same game at the same rate.
-//
-// Why it matters beyond smoothness: with a variable `dt` every collision test
-// samples at a distance that depends on the player's frame rate, so the same
-// dive is a different game on a slow machine.
-//
-// This lives in `game/` rather than in the frame loop because it is a property
-// of the *simulation*, not of the browser: `main.js` is rewritten on the port
-// and would have to re-derive it, and a check of it there would be a check of
-// a throwaway file. Returns the tick count so a check can prove the banking.
+// the display is doing (D53): leftover time is banked, so every machine
+// simulates the same game -- with a variable `dt`, every collision test would
+// sample at a distance set by the frame rate. In `game/` rather than the frame
+// loop because it is the simulation's, and ports. Returns the tick count so a
+// check can prove the banking.
 let accumulator = 0;
 
 function advanceBy(elapsed) {
@@ -430,30 +416,27 @@ function layerAt(y) {
 // way step() returned.
 function update(dt) {
   // Arm the trigger only on a button the player has actually released since
-  // gameplay began. Every menu screen disarms it, which covers every route into
-  // 'playing' -- the title menu, resuming from pause, backing out of options,
-  // taking a mod card -- rather than only the ones we remember to patch.
+  // gameplay began. Every non-playing screen disarms it, which covers every
+  // route into 'playing' rather than only the ones we remember to patch.
   if (screen !== 'playing') fireArmed = false;
   else if (!CLICK.some(c => keys.has(c))) fireArmed = true;
 
   const cameraFrom = cameraY;
   step(dt);
-  // The water never stops (D58). Outside step() for the same reason as the
-  // shake below: step() returns early on every screen but play, and the water
-  // must keep flowing behind the mod cards and under the death and layer-end
-  // screens. The menus alone freeze it -- pause is the player stepping out.
-  // Its speed eases up while the camera travels and down to a drift otherwise,
-  // on a time base, and the background scrolls by `waterY`.
+  // The water never stops (D58). Outside step(), which returns early on every
+  // screen but play: the water keeps flowing behind the layer end's cards and
+  // under the end screens. Menus freeze it, except a menu that `flows` -- pause
+  // is the player stepping out. Its speed eases up while the camera travels and
+  // down to a drift otherwise, and the background scrolls by `waterY`.
   if ((!MENUS[screen] || MENUS[screen].flows) && screen !== 'help' && screen !== 'options') {
     const target = cameraY > cameraFrom ? CURRENT_SPEED : CURRENT_CRAWL;
     current += (target - current) * (1 - Math.pow(CURRENT_EASE, dt));
     waterY += current * dt;
   }
-  // Outside step(), because step() returns early on every non-playing screen.
-  // Dying sets screen = 'dead' in the same frame it sets shake, so decaying
-  // inside the gameplay path left the menus rattling forever.
-  // Math.pow(_, dt) rather than a per-frame factor, so the fade takes the same
-  // time on a 144Hz screen as on a 60Hz one.
+  // Outside step() for the same reason: a death sets the shake on its last
+  // playing tick, and it must still settle on the screens after. Math.pow(_, dt)
+  // rather than a per-frame factor, so the fade takes the same time at any
+  // frame rate.
   if (shake > 0) {
     shake *= Math.pow(SHAKE_FADE, dt);
     if (shake < SHAKE_FLOOR) shake = 0;      // otherwise it jitters forever
@@ -545,14 +528,9 @@ function step(dt) {
   boosts = boosts.filter(a => !a.gone);
 
   // --- the gate: one batch at a time, and nothing arrives until it is clear ---
-  // This replaces the prototype's spawn director (D27). That director grew
-  // arrivals as 1/(1.2 - 0.02t) -- hyperbolic -- against power that grew
-  // logarithmically, so the queue diverged and death was arithmetically
-  // certain. A batch is a *bounded* queue, so that cannot happen.
-  // An empty arena *is* the cleared state, so the beat needs no separate flag:
-  // the timer simply runs while nothing is alive.
-  // `else if`, so a pending offer holding the queue is structural rather than a
-  // condition someone can drop: the two phases of the beat cannot both run.
+  // (D27). An empty arena *is* the cleared state, so the beat needs no flag of
+  // its own. `else if`, so a pending offer holding the queue is structural
+  // rather than a condition someone can drop.
   if (offerTimer > 0) {
     offerTimer -= dt;
     if (offerTimer <= 0) openModOffer();
@@ -560,8 +538,8 @@ function step(dt) {
     // Each batch waits at its own depth. Once the last one is cleared, the same
     // arithmetic points one gate further: the bottom of the last layer.
     const target = gateDepth(batchIndex);
-    // Only a dive's opening beat counts down now; every later batch waits on
-    // the descent instead, which is a beat of its own.
+    // Only a dive's opening beat counts down; every later batch waits on the
+    // descent instead, which is a beat of its own.
     if (breathTimer > 0) breathTimer -= dt;
     if (cameraY < target) {
       // The current carries the camera down, clamped at the next depth so a
@@ -616,12 +594,11 @@ function step(dt) {
     player.hurt = Math.max(player.hurt, DASH_TIME + DASH_GRACE);
     sound('dash');
   }
-  // A dash is committed. Travel follows the direction frozen when it started,
-  // not the keys held right now -- otherwise mid-dash input steers the lunge,
+  // A dash is committed (D56). Travel follows the direction frozen when it
+  // started, not the keys held now -- otherwise mid-dash input steers it,
   // holding the opposite key reverses it (and the wave then faces the way you
-  // came, so it hits nothing), and *releasing* the keys stops you dead while
-  // `dashTime` runs on, which is a free 0.31s of invulnerability for standing
-  // still. Only `dashDx/dashDy` used to be frozen; now the movement is too.
+  // came), and *releasing* the keys stops you dead while `dashTime` runs on:
+  // free invulnerability for standing still.
   const dashing = player.dashTime > 0;
   const speed = dashing ? player.dashSpeed : player.speed;
   const mx = dashing ? player.dashDx : dx;
@@ -643,15 +620,9 @@ function step(dt) {
     spark(player.x, player.y, 0, 0, 0.22, player.r * 0.85, '#bffcff', '#4ff0ff');
   }
 
-  // --- the weapon fires while you hold the button, along the cursor ---
-  // Manual now (D28): the weapon no longer fires itself. The old "hold the shot
-  // unless something is inside the ring" rule went with it -- it existed because
-  // an automatic weapon would otherwise empty itself into open water, and with a
-  // trigger that is the player's call. The ring is still a real range (D8): a
-  // shot still dies at `maxTravel`, so firing at nothing still costs you nothing
-  // but the cooldown.
-  //
-  // Clamped at zero rather than run negative, so holding the button gives an
+  // --- the weapon fires while you hold the button, along the cursor (D28) ---
+  // A shot dies at `maxTravel`: the ring is a real range (D8). The cooldown is
+  // clamped at zero rather than run negative, so holding the button gives an
   // honest rate while the *first* click is always instant.
   player.fireTimer = Math.max(player.fireTimer - dt, 0);
   if (player.fireTimer <= 0 && fireArmed && CLICK.some(c => keys.has(c))) {
@@ -678,10 +649,8 @@ function step(dt) {
     sound('shoot');
   }
 
-  // --- move enemies toward the player, and hurt him on contact ---
-  // Both of these are the same for every enemy this frame, so they are worked
-  // out once rather than per entity -- `pd` the same way the particle drag
-  // below already does it.
+  // --- move enemies toward the diver, and hurt the diver on contact ---
+  // The drag is the same for every enemy this frame, so it is worked out once.
   const pd = Math.pow(PUSH_DRAG, dt);   // per second, not per frame: a flat
                                         // factor would shove 2.4x further on a
                                         // 144Hz screen
@@ -700,30 +669,18 @@ function step(dt) {
     e.pushY *= pd;
 
     // The dash's wave: anything within reach of the line the dash swept this
-    // frame, in the direction it is facing.
-    //
-    // Swept, not sampled at the landing point: a dash moves
-    // `player.dashSpeed * dt` per frame, which on a 20fps frame is 44px against
-    // a 49px reach — and was 105px back when `Fins` still fed dash speed, so it
-    // stepped clean over its own hitbox and connected on 27% of the positions
-    // an enemy could occupy. The worst case was an enemy *right next to you*,
-    // in front before the step and behind after, so the facing test never saw
-    // it in range at all.
-    //
-    // Facing is judged from where the frame started, for the same reason: an
-    // enemy the dash swept through must not count as "behind me" merely because
-    // the step overshot it.
-    // Everything below is inside the guard on purpose: a dash lasts DASH_TIME
-    // out of every `dashCooldown`, so computing the wave for every enemy on
-    // every tick throws ~93% of it away -- and `Math.hypot` in this loop is
-    // banned outright, which the pre-guard version quietly reintroduced.
+    // frame, in the direction it is facing (D50). Swept, not sampled at the
+    // landing point, so a fast step cannot carry the dash past an enemy; facing
+    // is judged from where the frame started, so an enemy the step overshot does
+    // not count as "behind". All of it inside the guard: a dash is up a small
+    // share of the time, and this loop runs every tick.
     if (dashing && e.lastHitBy !== player.dashId) {
       const dashReach = e.r + DASH_REACH;
       const fx = e.x - fromX, fy = e.y - fromY;
       const dot = fx * player.dashDx + fy * player.dashDy;
       // The facing cone, squared: `dot / |f| > DASH_ARC` is the same question
       // as `dot > 0 && dot^2 > DASH_ARC^2 * |f|^2`, without the square root or
-      // the divide. Same 156-degree front, no sqrt in a per-frame loop.
+      // the divide.
       if (segDistanceSq(e.x, e.y, fromX, fromY, player.x, player.y) < dashReach * dashReach &&
           dot > 0 && dot * dot > DASH_ARC * DASH_ARC * (fx * fx + fy * fy)) {
         e.lastHitBy = player.dashId;
@@ -782,13 +739,8 @@ function step(dt) {
     for (const e of enemies) {
       if (e.gone) continue;
       // Swept against the segment the bullet crossed this frame, not the point
-      // it reached — the same defect D50 found in the dash. A fixed timestep
-      // bounds the step but does not bound bullet *speed*, and the DoD names a
-      // railgun: at 6000px/s a shot covers 50px per tick against a darter's
-      // 10px reach and would pass clean through it.
-      //
-      // Still squared: skipping the square root is 8x faster in the one loop
-      // that runs bullets x enemies every frame.
+      // it reached (D53): a fixed step bounds the step, not a bullet's speed.
+      // Squared: this is the loop that runs bullets x enemies every tick.
       const reach = e.r + b.r;
       if (segDistanceSq(e.x, e.y, ax, ay, b.x, b.y) < reach * reach) {
         if (e.lastHitBy === b.id) continue;   // a shot hits each enemy at most once
@@ -803,7 +755,7 @@ function step(dt) {
     }
   }
 
-  // --- gems fly to you, from anywhere, and never fade (D35) ---
+  // --- gems fly to you, from anywhere, and never fade (D35, D78) ---
   // Nothing can be stranded, so nothing expires: not by the edge of a ring,
   // and not by the descent carrying you away from where they dropped.
   for (const g of gems) {
@@ -816,8 +768,8 @@ function step(dt) {
     if (d < player.r + g.r + 4) {
       g.gone = true;
       sound('gem');
-      // Money, not XP (D34). The dive's takings, banked at `home` when the
-      // dive ends however it ends (D67).
+      // The dive's takings, banked at `home` when the dive ends however it
+      // ends (D67).
       currency += 1;
     }
   }

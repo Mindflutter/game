@@ -16,8 +16,8 @@ import { loadGame } from './harness.js';
 export function kiteAndShoot(g) {
   const p = g.player;
   const px = p.x, py = p.y;
-  // The middle of the *view*, in world space: the camera moves (S2), and a
-  // centre fixed at 400 would drag the bot to the top of the layer.
+  // The middle of the *view*, in world space: the camera moves, and a centre
+  // fixed at 400 would drag the bot to the top of the layer.
   const cx = g.ARENA_W / 2, cy = g.cameraY + g.ARENA_H / 2;
 
   let near = null, best = Infinity;
@@ -41,20 +41,6 @@ export function kiteAndShoot(g) {
   if (vy < -20) g.keys.add(g.UP[1]);   else if (vy > 20) g.keys.add(g.DOWN[1]);
 }
 
-// Plays one dive and reports how long each batch took to clear.
-//
-// `batchIndex > times.length` is the "a begun batch is still unrecorded" test,
-// so no separate timing flag is needed: once a clear is pushed the condition is
-// false, which is what stops the timer re-arming during the quiet beat when the
-// arena is legitimately empty.
-// `secondsCap` is wall-clock *game* time, not ticks: a tick budget silently
-// halved every dive when D53 moved the step from 1/60 to 1/120.
-//
-// `immortal` keeps the bot alive, which is how the S2 traverse time is taken:
-// the mortal bot dies on every seed before the bottom, and a layer it cannot
-// finish has no traverse time to report. `scenario` starts it from a named
-// setup instead of the top (D37) -- how the boss fight is measured alone (D63).
-// A scenario can start deep in the list, so batches count from where it began.
 // One tick of the bot's input, without the update: shared by `diveReport` and
 // by tests that assert on every tick, so both play the same bot.
 export function botInput(g) {
@@ -70,6 +56,19 @@ export function botInput(g) {
   } else kiteAndShoot(g);
 }
 
+// Plays one dive and reports how long each batch took to clear.
+//
+// `batchIndex > times.length` is the "a begun batch is still unrecorded" test,
+// so no separate timing flag is needed: once a clear is pushed the condition is
+// false, which is what stops the timer re-arming during the quiet beat when the
+// arena is legitimately empty.
+// `secondsCap` is *game* time, not ticks, so it survives a change of step size.
+//
+// `immortal` keeps the bot alive, which is how a traverse time is taken: the
+// mortal bot dies before the bottom, and a dive it cannot finish has no
+// traverse time to report. `scenario` starts it from a named setup instead of
+// the top (D37) -- how the boss fight is measured alone (D63). A scenario can
+// start deep in the list, so batches count from where it began.
 export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false, scenario) {
   const g = loadGame();
   if (scenario) g.applyScenario(scenario, seed);

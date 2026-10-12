@@ -2,9 +2,8 @@
 // dropped)), glowing from the moment it arrives and never a boss or a
 // mini-boss (D88 (the fish glows from the start)), the layer end offers a pick
 // of valuable mods (D85 (the layer end's pick)), kills drop boosts (D86
-// (boosts)), and rank is gone (D87 (rank is retired)). Each test guards a line of
-// docs/superpowers/specs/2026-10-12-mods-from-drops-design.md, and each was
-// seen to fail before the code it guards was written.
+// (boosts)), and rank is gone (D87 (rank is retired)). Designed in
+// docs/superpowers/specs/2026-10-12-mods-from-drops-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';
@@ -45,8 +44,7 @@ function boostAt(g, x, y) {
 
 describe('a glowing fish carries the batch\'s mod (D84)', () => {
   it('lights one fish of every ordinary batch, from the moment it arrives', () => {
-    // Igor, 2026-10-12: "glow must appear on the enemy from the start, not in
-    // the middle of a fight".
+    // From the moment the batch arrives, not partway through the fight (D88).
     fc.assert(fc.property(seed, s => {
       const g = loadGame();
       g.reset(s);
@@ -61,7 +59,7 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
   });
 
   it('never lights a mini-boss: its gate pays no mod', () => {
-    // Igor, 2026-10-12: "remove glow from mini-bosses".
+    // A mini-boss never glows, so its gate pays no mod (D88).
     const g = loadGame();
     g.immortal = true;
     expect(g.applyScenario('mini-boss', 1)).toBe(true);
@@ -201,7 +199,7 @@ describe('the layer end\'s pick (D85)', () => {
       expect(new Set(cards.map(c => c.name)).size).toBe(3);
       for (const c of cards) pool.add(c.name);
     }
-    // A mix of both kinds (Igor: "go with a mix of both").
+    // A mix of both kinds (D85).
     expect([...pool].some(n => g.MODS.find(m => m.name === n).end)).toBe(true);
     expect([...pool].some(n => !g.MODS.find(m => m.name === n).end)).toBe(true);
   });

@@ -76,6 +76,10 @@ draft, which is why they are banned (D32).
   fifteenth enemy costs what adding the second did. An enemy, mod, boost, weapon
   or piece of equipment also gets its row and section in `docs/entities/` —
   `npm test` fails until they match the code (D81 — Entity docs).
+- **Comments amend the code; they never define or contradict it** (D91). The
+  code is the source of truth for behaviour, `docs/` the spec for what it must
+  do. A comment says why, or what the code cannot say for itself. History,
+  quotes and copied numbers belong in `docs/`, cited by decision.
 - **Plain objects in flat arrays.** No classes, no inheritance, no ECS.
 - **Input matches `e.code`, never `e.key`** — `e.key` is the character a key
   types, which depends on the keyboard layout.

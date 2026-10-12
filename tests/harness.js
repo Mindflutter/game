@@ -2,18 +2,17 @@
 //
 // This is not a convenience: it is the seam check, executable. `game/` is
 // supposed to contain zero browser API and reach into platform/ for exactly
-// seven names (D18) -- the seventh, `persist`, is S4's save. If that ever stops being true, this throws -- which is a stronger
-// guarantee than the grep design.md used to rely on.
+// seven names (D18) -- the seventh, `persist`, is the save's (D77). Reaching
+// for an eighth throws -- at load, or on any path a test drives; a path no
+// test drives can still hide one.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 // The seven names, and only the seven.
 export const SEAM = ['sound', 'keys', 'justPressed', 'tapped', 'moveCursor', 'aim', 'persist'];
 
-// No TICK constant here on purpose. It used to be a copy of the game's
-// FIXED_DT with a test to notice when the two disagreed, but every caller
-// already has a loaded game in hand -- so the deeper answer was to delete the
-// copy, not to guard it. Read `g.FIXED_DT`.
+// No TICK constant: every caller has a loaded game in hand, and a copy of
+// FIXED_DT is a number that can disagree with itself. Read `g.FIXED_DT`.
 
 export function loadGame() {
   const src = ['game/content.js', 'game/state.js', 'game/logic.js']
@@ -72,8 +71,8 @@ export function loadGame() {
 
 // ---------- shared by the test files ----------
 
-// Ticks for `seconds` of game time, in the game's own step: a hardcoded 120
-// is exactly the budget D53 once halved without anyone noticing.
+// Ticks for `seconds` of game time, in the game's own step, so a test's budget
+// survives a change of FIXED_DT.
 export const ticks = (g, seconds) => Math.round(seconds / g.FIXED_DT);
 
 // Ticks until a batch arrives or the screen changes, holding `hold` the whole
