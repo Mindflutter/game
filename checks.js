@@ -164,7 +164,7 @@ if (location.search === '?test') {
     // nothing to do with window size.
     for (let i = 0; i < LAYERS.length * 450 / FIXED_DT && screen !== 'won'; i++) {
       player.hurt = player.iframes;
-      if (screen === 'mods') justPressed.add('Digit1');
+      if (screen === 'mods') { justPressed.add('Digit1'); justPressed.add('Enter'); }
       else if (enemies.length) {
         const e = enemies[0];
         window.dispatchEvent(new MouseEvent('mousemove', {
@@ -489,52 +489,54 @@ if (location.search === '?test') {
   runAlive(180);
   check(gems.length === 0 && currency === 1, 'a far gem must fly to you and pay, currency ' + currency);
 
-  // A gem is money now, not XP (D34). Collecting one must pay the purse and
-  // must not rank you up -- the XP bar that did is deleted.
+  // A gem is money, not XP (D34), and has nothing to do with mods: collecting
+  // one pays the purse and opens nothing.
   reset();
   gems.push({ x: player.x, y: player.y, r: 4 });
   update(0.016);
   check(currency === 1, 'a collected gem must pay currency, got ' + currency);
-  check(rank === 0 && choices.length === 0 && screen === 'playing',
-    'money must not rank you up: rank ' + rank + ', screen ' + screen);
+  check(choices.length === 0 && screen === 'playing',
+    'money must not open the cards: screen ' + screen);
 
-  // --- one rank per batch, and the offer lands at the gate (D33, D34) ---
-  // Two enemies killed one at a time, so this can see that the offer waits for
-  // the *batch* and not for a kill. That is the rule D33 exists for: the
-  // prototype threw the cards up the instant the bar filled, mid-fight.
+  // --- a gate opens nothing; a layer end opens the pick (D84, D85) ---
+  // Two enemies killed one at a time, by real shots, in open water: the clear
+  // is a gate's, and a gate's mod rides on a glowing fish, so nothing opens.
   reset();
   const pair = [mob(player.x + 150, player.y), mob(player.x - 150, player.y)];
   enemies.push(...pair);
   fireAt(pair[0]);
   for (let i = 0; i < 60; i++) update(1 / 60);
   check(kills === 1 && enemies.length === 1, 'the first of the two must die');
-  check(rank === 0 && screen === 'playing' && choices.length === 0,
-    'a kill mid-batch must not rank you up or offer a mod (D33)');
-
   fireAt(pair[1]);
   for (let i = 0; i < 60 && enemies.length; i++) update(1 / 60);
+  for (let i = 0; i < Math.ceil(MOD_OFFER_DELAY * 60) + 3; i++) update(1 / 60);
   ceaseFire();
-  check(enemies.length === 0 && rank === 1,
-    'clearing the batch must rank you up exactly once, rank ' + rank);
+  check(enemies.length === 0 && screen === 'playing' && offerTimer <= 0 && choices.length === 0,
+    'clearing a gate must open no cards: screen ' + screen + ', offerTimer ' + offerTimer);
 
-  // The rank is banked on the kill, but the cards wait for the death to finish
-  // playing (D51). Igor: "batch cleared comes too fast, last enemy just
-  // eliminated ... feels unnatural". The kill burst lives 0.5s.
-  check(screen === 'playing' && offerTimer > 0,
-    'the offer must not land on the frame of the kill: screen ' + screen +
+  // The same clear as the layer's last batch: the boss's, the layer end. The
+  // cards wait for the death to finish playing (D51). Igor: "batch cleared
+  // comes too fast, last enemy just eliminated ... feels unnatural".
+  reset();
+  batchIndex = plan.findIndex(e => e.end) + 1;   // the boss's batch is the one fought
+  const boss = mob(player.x + 150, player.y);
+  enemies.push(boss);
+  fireAt(boss);
+  for (let i = 0; i < 60 && enemies.length; i++) update(1 / 60);
+  ceaseFire();
+  check(enemies.length === 0 && screen === 'playing' && offerTimer > 0,
+    'the layer end\'s offer must not land on the frame of the kill: screen ' + screen +
     ', offerTimer ' + offerTimer);
   check(choices.length === 0, 'no cards exist yet during the beat');
 
-  // Then it opens. Stops the tick it does: the cursor is still parked on the
-  // enemy it just shot, which is over a card, and one more frame of hover would
-  // move the highlight before the check below could read where it opened.
+  // Then it opens.
   for (let i = 0; i < Math.ceil(MOD_OFFER_DELAY * 60) + 3 && screen === 'playing'; i++) {
     update(1 / 60);
   }
   check(screen === 'mods', 'the beat must then offer mods, screen ' + screen);
-  check(choices.length === 3, 'a gate offers 3 mods, got ' + choices.length);
+  check(choices.length === 3, 'a layer end offers 3 mods, got ' + choices.length);
   check(new Set(choices).size === 3, 'the 3 mods must be different');
-  check(choiceIndex === 1, 'the offer opens on the middle card');
+  check(choiceIndex === 1, 'the offer opens on the middle card marked');
 
   // Nothing arrives behind the cards. The offer sits inside the beat, so an
   // offer that let the clock run would hand the next batch a free approach.
@@ -553,21 +555,24 @@ if (location.search === '?test') {
   check(new Set(MODS.map(m => m.name)).size === MODS.length,
     'two mods must not share a name');
 
-  // A mod already maxed is never offered (D34). Max out every capped mod and it
-  // must drop out of the roll -- 40 rolls, because one proves nothing.
+  // A mod already maxed is never offered (D34), nor an ordinary one without
+  // room for the bigger step (D85). Every mod one short of its cap: only the
+  // layer end's own, the switches, still fit -- 40 rolls, because one proves
+  // nothing.
   reset();
-  for (const m of MODS) if (m.max) modCounts[m.name] = m.max;
+  for (const m of MODS) modCounts[m.name] = m.max - 1;
   const rolled = [];
-  for (let i = 0; i < 40; i++) rolled.push(...rollMods());
-  check(rolled.length > 0 && rolled.every(m => !m.max),
-    'a maxed mod must not be offered: ' +
-    [...new Set(rolled.filter(m => m.max).map(m => m.name))].join(','));
+  for (let i = 0; i < 40; i++) rolled.push(...rollValuable());
+  check(rolled.length > 0 && rolled.every(m => m.end),
+    'a mod without room for its card must not be offered: ' +
+    [...new Set(rolled.filter(m => !m.end).map(m => m.name))].join(','));
 
   // ...and taking one is what counts it, which is what the roll above reads.
   reset();
   screen = 'mods';
   choices = [MODS.find(m => m.name === 'Mend')];
-  justPressed.add('Digit1');
+  choiceIndex = 0;
+  justPressed.add('Enter');
   update(0.016);
   check(modCounts.Mend === 1, 'taking a mod must count it, got ' + modCounts.Mend);
   check(player.mendOnClear === 1, 'Mend must grant its effect');
@@ -581,7 +586,7 @@ if (location.search === '?test') {
   enemies.push(wounded);
   fireAt(wounded);
   for (let i = 0; i < 60; i++) update(1 / 60);
-  check(rank === 1 && player.hp === 2, 'Mend must heal on the clear, hp ' + player.hp);
+  check(player.hp === 2, 'Mend must heal on the clear, hp ' + player.hp);
 
   // ...and not past the maximum, which is the guard a bare `hp += 1` misses.
   screen = 'playing';
@@ -603,9 +608,11 @@ if (location.search === '?test') {
   check(enemies.length > 0 && player.hurt <= 0,
     'a batch must arrive with no grace, hurt ' + player.hurt);
 
-  // A frame that kills the last enemy *and* the player is a death, not a
-  // rank-up. Without the guard the mod cards bury the death screen.
+  // A frame that kills the layer's boss *and* the player is a death, not a
+  // layer end. Without the guard the layer end heals you and its cards bury
+  // the death screen.
   reset();
+  batchIndex = plan.findIndex(e => e.end) + 1;
   player.hp = 1;
   player.hurt = 0;
   const fatal = mob(player.x, player.y, { speed: 0 });
@@ -614,13 +621,14 @@ if (location.search === '?test') {
   update(1 / 60);
   check(kills === 1 && enemies.length === 0, 'the last enemy must still have died');
   check(screen === 'dead', 'dying on the last kill must show death, not a card: ' + screen);
-  check(rank === 0, 'a dive that ends on its last kill grants no rank, rank ' + rank);
+  check(player.hp <= 0 && offerTimer <= 0,
+    'a dive that ends on its boss\'s last hit is not healed or offered cards, hp ' + player.hp);
 
-  // Arrows move the highlight and wrap; Enter takes the highlighted card.
+  // Arrows move the mark and wrap; Enter takes the marked card (D85).
   // The stubs record which one was applied, so taking the wrong card fails.
   let picked = -1;
   const stubs = () => [0, 1, 2].map(i =>
-    ({ name: 'c' + i, desc: '', apply: () => { picked = i; } }));
+    ({ name: 'c' + i, desc: '', max: 9, end: true, apply: () => { picked = i; } }));
   screen = 'mods';
   choices = stubs();
   choiceIndex = 1;
@@ -645,7 +653,8 @@ if (location.search === '?test') {
   check(picked === 2 && screen === 'playing',
     'Enter must take the highlighted card, took ' + picked);
 
-  // Clicking a card takes that card, whatever the arrows had highlighted.
+  // Clicking a card marks it, whatever the arrows had marked, and takes
+  // nothing yet: you can still switch. A click on Continue takes it.
   screen = 'mods';
   picked = -1;
   choices = stubs();
@@ -655,25 +664,38 @@ if (location.search === '?test') {
   aim.y = c2.y + c2.h / 2;
   justPressed.add('Mouse0');
   update(0.016);
+  check(choiceIndex === 2 && picked === -1 && screen === 'mods',
+    'a click must mark the card under the cursor and take nothing, marked ' + choiceIndex);
+  const cont = continueRect();
+  aim.x = cont.x + cont.w / 2;
+  aim.y = cont.y + cont.h / 2;
+  justPressed.add('Mouse0');
+  update(0.016);
   check(picked === 2 && screen === 'playing',
-    'a click must take the card under the cursor, took ' + picked);
+    'a click on Continue must take the marked card, took ' + picked);
 
-  // A still mouse must not overrule the arrows -- the cursor is left sitting
-  // on card 2 from the click above.
+  // A cursor passing over a card must not mark it: on its way down to
+  // Continue it crosses the cards.
   screen = 'mods';
   choices = stubs();
   choiceIndex = 0;
+  aim.x = c2.x + c2.w / 2;
+  aim.y = c2.y + c2.h / 2;
   update(0.016);
-  check(choiceIndex === 0, 'a still cursor must not move the highlight');
+  check(choiceIndex === 0, 'a cursor over a card must not mark it');
   // ...and the offer is left open, for the number-key check below.
 
-  // Pressing its number applies the mod and resumes play.
+  // Pressing its number marks the mod; Enter applies it and resumes play.
   const before = player.speed;
-  choices = [MODS.find(u => u.name === 'Fins')];
+  choices = [MODS.find(u => u.name === 'Fins'), MODS.find(u => u.name === 'Nerve')];
+  choiceIndex = 1;
   justPressed.add('Digit1');
   update(0.016);
+  check(screen === 'mods' && choiceIndex === 0, 'a number must mark its card');
+  justPressed.add('Enter');
+  update(0.016);
   check(screen === 'playing' && player.speed > before,
-    'picking must apply the mod and resume');
+    'taking the marked card must apply the mod and resume');
 
   // --- menus take the mouse as well as the keys ---
   // Hovering a row moves the cursor to it, and a click runs that row. The
@@ -707,7 +729,8 @@ if (location.search === '?test') {
   check(showFps !== fpsWas, 'clicking an options row must change it');
   showFps = fpsWas;
 
-  // Click dismisses the help screen, and goes home from the death screen (D66).
+  // Click dismisses the help screen; on the death screen a click takes the
+  // button under it -- Go home -- and nowhere else (D90).
   screen = 'help';
   returnTo = 'title';
   justPressed.add('Mouse0');
@@ -715,9 +738,17 @@ if (location.search === '?test') {
   check(screen === 'title', 'a click must leave the help screen');
 
   screen = 'dead';
+  aim.x = 5;
+  aim.y = 5;
   justPressed.add('Mouse0');
   update(0.016);
-  check(screen === 'home', 'a click must go home from the death screen, got ' + screen);
+  check(screen === 'dead', 'a click off the buttons must not leave the death screen, got ' + screen);
+  const homeRow = rowRect(1, MENUS.dead.top);
+  aim.x = homeRow.x + homeRow.w / 2;
+  aim.y = homeRow.y + homeRow.h / 2;
+  justPressed.add('Mouse0');
+  update(0.016);
+  check(screen === 'home', 'a click on Go home must go home from the death screen, got ' + screen);
 
   // Sparks appear on a kill, then clean themselves up.
   reset();
@@ -794,24 +825,32 @@ if (location.search === '?test') {
   window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ц', code: 'KeyW' }));
   check(!keys.has('KeyW'), 'releasing it must stop the player');
 
+  // The death screen opens on Go home (D90); a Russian-layout W steps up to
+  // Dive again, and Enter takes it.
   reset();
   screen = 'dead';
-  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'к', code: 'KeyR' }));
+  menuIndex = 1;
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: '\u0446', code: 'KeyW' }));
   update(1 / 60);
-  check(screen === 'playing', 'a Russian-layout R must restart the game');
-  window.dispatchEvent(new KeyboardEvent('keyup', { key: 'к', code: 'KeyR' }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { key: '\u0446', code: 'KeyW' }));
+  check(menuIndex === 0, 'a Russian-layout W must move the death screen\'s cursor, at ' + menuIndex);
+  justPressed.add('Enter');
+  update(1 / 60);
+  check(screen === 'playing', 'Dive again must begin a dive, got ' + screen);
 
   reset();
   screen = 'mods';
-  choices = [MODS.find(u => u.name === 'Fins')];
-  const speedBefore = player.speed;
+  choices = [MODS.find(u => u.name === 'Fins'), MODS.find(u => u.name === 'Nerve')];
+  choiceIndex = 1;
   // '&' is what an unshifted 1 types on a French AZERTY keyboard.
   window.dispatchEvent(new KeyboardEvent('keydown', { key: '&', code: 'Digit1' }));
   update(1 / 60);
-  check(screen === 'playing' && player.speed > speedBefore,
-    'an AZERTY-layout 1 must pick the first mod');
+  check(screen === 'mods' && choiceIndex === 0,
+    'an AZERTY-layout 1 must mark the first mod, marked ' + choiceIndex);
   window.dispatchEvent(new KeyboardEvent('keyup', { key: '&', code: 'Digit1' }));
   keys.clear();
+  screen = 'playing';
+  choices = [];
 
   // --- screens, menus and options ---
   // tap() presses a key for exactly one frame, the way a real press arrives.
@@ -973,13 +1012,14 @@ if (location.search === '?test') {
     'px, the card allows ' + (CARD_W - CARD_PAD * 2) + 'px');
 
   // ...and downwards. The cards grew from 140 to 186 tall when the numbers went
-  // on them (D52); another row would put them through the hint below.
-  // Read from cardRect(), which owns the card's box, so moving the cards moves
-  // this check with them instead of leaving it measuring the old place.
+  // on them (D52); Continue and the hint sit under them (D85), derived from
+  // their box, so a taller card pushes both down -- out of the view, if far
+  // enough. Read from the owners, cardRect() and continueRect().
   const cardsEnd = cardRect(0, 3).y + CARD_H;
-  check(cardsEnd < MOD_HINT_Y - 10,
-    'the mod cards must end above the hint: cards end at ' + cardsEnd +
-    ', hint sits at ' + MOD_HINT_Y);
+  const contEnd = continueRect().y + continueRect().h;
+  check(cardsEnd < continueRect().y && contEnd < MOD_HINT_Y - 10 && MOD_HINT_Y < ARENA_H - 20,
+    'the cards, Continue and the hint must stack inside the view: cards end at ' + cardsEnd +
+    ', Continue at ' + contEnd + ', the hint sits at ' + MOD_HINT_Y);
 
   // ...and sideways is not the only way a card overflows. Every mod must fit
   // inside the rows the card draws, or a number silently falls off the bottom.

@@ -2643,3 +2643,255 @@ player and every shot; each tier its own cost and effect, and a weapon left at
 home adds nothing; the v1 fixture migrated and the v2 fixture loaded, both
 firing finite shots. `tests/docs.test.js` — `entities/weapons.md` and
 `equipment.md` rebuilt from the tables.
+
+## D84 — Mods are dropped: a glowing fish carries each batch's mod · 2026-10-12
+The second requirement before S5 (content) (D80 (entity docs and mods from drops
+come first)): "mods rework from choice to enemy drops". Opened 2026-10-01 as a
+discussion — Igor: "throw your ideas about mods becoming drop-pickable instead
+of chosen … look up in the web for similar mechanics, evaluate possible
+transition from our current state". Claude researched how a dozen games hand
+out power mid-run and offered three shapes: A, the pick becomes a drop; B, A
+plus temporary boosts; C, a stream from every kill, Risk of Rain 2's. Igor,
+2026-10-12: "go with B". The design, the research and its check against
+`foundations.md`: `superpowers/specs/2026-10-12-mods-from-drops-design.md`.
+
+**Decided.**
+- **A glowing fish carries each batch's mod.** When a batch of the plan
+  arrives, a point between a third and two thirds of its total health is drawn
+  (`GLOW_FROM`, `GLOW_TO`); the first time what is left of the batch falls to
+  it, one living fish lights up. Igor: "ok for glow, comes randomly in the
+  middle" — Claude's reading, stated in the spec and not corrected: a fish
+  already in the batch lights up, no extra fish arrives. A batch of one — the
+  mini-boss — lights up partway through its own health. If everything left dies
+  in one tick, one of those carries it anyway: a batch's mod is never lost.
+- **No carrier in a layer end's batch**: the layer end's pick pays it (D85 (the
+  layer end's pick)). Enemies placed by hand belong to no batch and carry
+  nothing.
+- **The mod flies to you like a gem and never expires** — it lasts the rest of
+  the dive. Igor, on "some of them permanent": "yes i meant exactly this" — for
+  the rest of the dive, never past it.
+- **Which mod**: an ordinary mod still under its cap, every one once before any
+  comes again — a round, dealt from the seed. Claude's call, delegated.
+- **Caps**: unchanged, every mod still capped (D69 (every mod capped)). Igor:
+  "cap is a question of balance. we are shifting towards a game where caps are
+  hard to decide at this point. make the easiest implementation now." So when
+  nothing is left to draw, no fish glows.
+- **The fill cards are deleted**, the gems card and the heart. Igor: "currency
+  is a spendable entity, used on home screen. not related to mods or boosts."
+  Drops live in an array of their own, apart from `gems`, for the same reason.
+- **A pickup is named on a line of its own**, `banner`, under the micro-tasks'
+  `notice`. The spec said `notice`; the build found a clean batch's task and
+  its mod land together, and one would overwrite the other.
+- **The save is version 3**, its second migration: a v2 dive loses its rank,
+  starts with nothing dropped or running and no fish left to light in the batch
+  it was in, and — saved with the cards up — takes the card it had marked.
+  `tests/fixtures/save-v3.json` joins the other two.
+
+**Supersedes** the pick at every gate: D33 (mod offers do not interrupt) keeps
+its rule — nothing interrupts combat — and loses its gate; D34 (mods) loses
+"one per gate" and the choice; D49 (one rank per batch, mods at the gate)
+entire; rules 1 and 3 of D69 (every mod capped) — one rank per batch, and the
+offer that never runs dry. D51 (the dash is bought, and the offer waits for the
+death)'s delay now waits only for the boss's death. D69's rule 4 — the pool
+grows so its caps cover a full dive — stands, now counting the fish of a dive
+and the layer ends' cards.
+
+**Why.** Igor's original questions, 2026-09-30: "would it allow more variety to
+mod system? would it make the game feel more dynamic and more understandable?"
+Drops take "momentum, not strategy" (D34 (mods)) all the way: no reading at a
+gate, power arriving mid-fight, and the gate's pause gone — Igor's "something is
+always happening during a layer pass". The count stays one per batch, so a
+layer still pays a known number of mods and balance stays arithmetic; only
+which mod arrives is random.
+
+**Chosen over**: A, the pick become a drop with nothing else (no temporary
+power, the frequent layer missing); C, a stream of small drops from every kill
+(single pickups too small to feel, and every rate re-derived).
+
+**Guarded by**: `tests/drops.test.js` — one fish lit per batch between a third
+and two thirds of its health; a mini-boss partway through its own; none in a
+layer end's batch; the mod dropped when the batch dies at once; flown in,
+counted, applied and named on its own line; nothing lit once every ordinary mod
+is capped, or when a batch is emptied by hand; every ordinary mod once a round,
+the same from the same seed; the v2 migration; a batch's point kept across a
+save. `tests/meta.test.js` — no mod past its cap, whatever the fish carry and
+the layer ends offer; the v3 fixture. `tests/boss.test.js`,
+`tests/descent.test.js` — a gate opens no cards. `checks.js` — the same, by
+real shots. 22 deliberate breaks, each caught.
+
+## D85 — The layer end's pick: valuable mods, then Continue · 2026-10-12
+Igor, on Claude's "the dive has no pause": "not quite, layer end does have a
+pause". What fills it: "make it a choice of valuable mods, with a continue
+button after being chosen". What makes one valuable — its own mods, or
+ordinary ones at a bigger step: "both good. for a player, they must be
+somewhat similar. go with a mix of both." And: "clicking a card only marks it,
+so you can switch until you press Continue, yes to that".
+
+**Decided.**
+- **Up to three cards, from one pool**: the layer end's own mods (`end`), once
+  a card, and the ordinary ones at a bigger step, `END_STEP` picks at once —
+  2, Claude's pick. Each only with room under its cap for what its card gives;
+  fewer cards when the pool runs short, and none leaves only Continue.
+- **"Somewhat similar"**, in Claude's reading: the same card and the same look,
+  and about the same worth — one of the layer end's own is written to be worth
+  about a double step.
+- **The first of its own is `Mend`** — Claude's pick: the one switch in the
+  pool, and "a heart back each batch" reads as valuable. It no longer rides on a
+  fish.
+- **A card is marked, then taken on Continue.** A click, its number or the
+  arrows mark one, and you can switch; Continue — a button under the cards — or
+  Enter takes the marked one, and the current carries you on. It opens with
+  the middle card marked, so Enter alone is still a one-second pick. A cursor
+  passing over a card marks nothing: the build found that on its way down to
+  Continue it crosses the cards, and would switch the mark.
+- **The last layer's end has no pick** — the win, as D68 (the layer end is a
+  milestone) has it.
+
+**Amends** D68 (the layer end is a milestone) — "a gate's rank and three mods"
+becomes the pick of valuable mods — and D72 (between layers there is no
+screen): the pick, ended by Continue, is still the only thing between layers.
+
+**Guarded by**: `tests/drops.test.js` — three valuable cards on a fresh dive,
+of both kinds; none without room for its step; none of its own past its cap,
+none at all with everything capped; a passing cursor marks nothing, a click
+and a number mark, the current waits, Continue and Enter take, an ordinary mod
+at the bigger step. `checks.js` — the offer waits out the boss's death, three
+cards, the middle marked, a click marks and Continue takes, by real input.
+
+## D86 — Boosts: short powers dropped by kills · 2026-10-12
+Igor, 2026-10-01, opening the discussion: "some can be temporary boosts", and
+"the may behave like gems used to in the prototype - disappear after a while".
+Shape B (D84 (mods are dropped)) has them; "boost" is his word, and the
+glossary's from now on. On whether D35 (currency is auto-collected) — "never
+chased" — binds them: "currency is a spendable entity, used on home screen. not
+related to mods or boosts."
+
+**Decided.**
+- **A boost is not a mod**: not counted, no cap, nothing kept. It lasts
+  seconds, so it is no progression tier.
+- **When one drops**: the chance on the Nth kill since the last boost is
+  `BOOST_C` × N — the pseudo-random distribution Dota uses. 0.02, Claude's pick:
+  about one every 8.5 kills, never more than 50 apart, seldom two in a row.
+  Never from the kill that empties the arena — it would fade behind you while
+  the current carried you on; that kill still counts toward the next.
+- **On the floor** it is not pulled to you: it lies where it fell for
+  `BOOST_LIFE` (6s, Claude's pick), blinking at the end, then it is gone — the
+  prototype's gems (D11 (gems expire after 8 seconds)).
+- **Touched**, it switches on at once — never held for later, which the genre
+  contract (6) rules out — and adds its numbers for its `time`. Touched again
+  while it runs, its clock restarts and nothing stacks. The pause and the layer
+  end's pick hold its clock. Its effect is numbers, `add`, not a function, so
+  it can be taken back; for the same reason it never moves `hp`.
+- **The first boost is `Rush`**: speed +200 for 5s. Claude's pick; S5 (content)
+  writes more.
+- **The bot never seeks one**; it touches one only by swimming over it, so its
+  figures stay a floor (D50 (the dash sweeps its path; the bot is not a
+  difficulty instrument)).
+
+**Glossary**: the **boost** row, in `foundations.md`, with the genre contract's
+point 6 — grabbing one is positioning inside a fight, not gathering.
+
+**Guarded by**: `tests/drops.test.js` — never 1/C kills apart and seldom back to
+back, over 30 seeds; never from the arena's last kill; left where it fell and
+gone after its life; its numbers on with a touch and off after its time; a
+second touch restarting, not stacking; held while paused. `tests/invariants.test.js`
+— no NaN in drops or boosts.
+
+## D87 — Rank is retired · 2026-10-12
+Igor, 2026-10-01: "ranks dont make sense anymore? just a number of completed
+batches or waves? could it be something more or just leave em?" Claude's
+answer: a rank was one batch cleared, every batch must be cleared, so it only
+repeated the depth; its one job was paying for the pick, which D84 (mods are
+dropped) ends. Igor, 2026-10-12, asked whether it retires: "yes".
+
+**Decided.** `rank` leaves the state, the HUD — `BATCH n` already shows the
+same count — the cards' heading, the end screens, the save (version 3 drops it)
+and the glossary. A scenario's kit is taken as picks, with no rank.
+
+**Not taken**: a rank that only play can earn — a meter that climbs with clean,
+fast clears, drops when you are hit and raises the drop odds, as Isaac's devil
+rooms reward a floor without damage. A system of its own, and it snowballs:
+good players get stronger still. Filed in `ideas.md`, Claude's suggestion, not
+discussed.
+
+**Guarded by**: `tests/drops.test.js` — no rank in the dive's save.
+
+## D88 — The fish glows from the start, and never a boss or a mini-boss · 2026-10-12
+Igor, playing D84 (mods are dropped): "glow must appear on the enemy from the
+start, not in the middle of a fight", and "remove glow from mini-bosses".
+
+**Decided.**
+- **One fish of each batch glows from the moment the batch arrives** and carries
+  its mod; killing it drops the mod, as before. The health point a fish lit up
+  at, `GLOW_FROM` and `GLOW_TO`, is gone, and with it the per-tick check and the
+  save's `glowAt`.
+- **A boss or a mini-boss never glows**: their types carry `carries: false`, so
+  a mini-boss's gate pays no mod, and the boss's batch stays paid by the layer
+  end's pick (D85 (the layer end's pick)). The layer end's own rule for its
+  batch went with it: the boss is that batch.
+- Which fish, and which mod it carries, is still drawn from the dive's seed.
+
+**Supersedes** D84 (mods are dropped)'s "partway through" — the lighting point
+and the batch of one lighting up partway through its own health — and its
+"no carrier in a layer end's batch", now the boss's own `carries: false`.
+
+**Claude misread it first.** Igor's earlier "ok for glow, comes randomly in the
+middle" was read as *the glow* coming in the middle of the fight; the spec
+stated the reading and Igor approved the spec, but it was the reading, not
+his intent, that got built. The same shape as the strengthened-word failure
+`CLAUDE.md` records: a reading stated in passing is not a question asked.
+
+**Guarded by**: `tests/drops.test.js` — one fish lit as every ordinary batch
+arrives, never a type that does not carry; no glow on a mini-boss and no mod
+from its gate; none on the boss; the glowing fish kept across a save.
+`tests/boss.test.js` — a mini-boss's clear pays no mod and opens no cards.
+
+## D89 — Layers are numbered until they are named · 2026-10-12
+Igor: "what's "the shelf" and "the drop"? make it layer 1 & 2, we'll come up
+with namings later".
+
+**Decided.**
+- The layers are **Layer 1** and **Layer 2** until they get names.
+- **A layer's micro-tasks are kept by its number, not its name** — Claude's
+  call, under "we'll come up with namings later": kept by name, every renaming
+  would forget what a layer had paid, or need a migration of its own. The save
+  stays version 3 — not yet committed when this changed — and its migration
+  moves a v2 save's tasks from the old names to their numbers. Supersedes
+  D77 (the save)'s "`tasks` per layer name".
+- The stretches both layers share are `STRETCHES`, no longer named after the
+  first layer.
+
+**Guarded by**: `tests/meta.test.js` — a layer renamed keeps the task it paid,
+on the save and on `home`; the v1 and v2 fixtures come back with their task
+under layer 1's number.
+
+## D90 — Continue goes straight back in; a dive ends on Dive again or Go home · 2026-10-12
+Igor, playing: "esc -> quit to title -> resume -> stays in paused. works but
+is unnatural." And: "on death, restart a dive wording is obsolete i think.
+make it dive again + go home buttons choice".
+
+**Decided.**
+- **The title's Continue resumes the dive where it was** — in play, or on the
+  layer end's cards — not on its pause menu. Supersedes Claude's pick in D70
+  (a dive can be saved at any point), "a resumed dive opens on the pause
+  screen", and D76 (`home` exists only between dives)'s "opens that dive's
+  pause menu".
+- **Both end screens offer two buttons, Dive again and Go home**, answering the
+  keys and the mouse like any menu; a click anywhere else does nothing. R is
+  gone, with the help's "Restart a dive" row. Death and the win share the
+  screen, so the win gets the buttons too — Claude's call.
+- **Go home opens marked** — Claude's call: Space is also the dash, and a stray
+  Enter or Space now does what any key did before, so diving again is always a
+  choice, never an accident.
+- The water keeps flowing under them (D58 (the descent)): they are menus that
+  `flows`.
+
+**Not now** — Igor, the same message: "no new game, just continue - leave that
+for ux fixing, pick a later stage that fits most". A New game beside Continue,
+to abandon a saved dive, is in `plan.md` → S7 (alpha polish).
+
+**Guarded by**: `tests/meta.test.js` — Continue puts the dive straight back in
+play; after a death, Enter goes home, a click on Dive again dives, a click off
+the buttons does nothing; the D70 property, now resuming through Continue.
+`tests/descent.test.js` — the win's Dive again. `checks.js` — the same by real
+clicks and a Russian-layout W.

@@ -29,15 +29,15 @@ canvas layer, a sprite pipeline, or browser-specific polish.
 
 Then look the rest up by question, not front to back: **`docs/README.md`** is
 the map (D82 — The docs map). Next steps and bot figures are `roadmap.md`; how
-the code works, `design.md`; every enemy, mod, weapon and piece of equipment,
-`docs/entities/`; why something was decided, `decisions.md`, found by its
+the code works, `design.md`; every enemy, mod, boost, weapon and piece of
+equipment, `docs/entities/`; why something was decided, `decisions.md`, found by its
 heading; what is undecided, `ideas.md`; what shipped, `changelog.md`.
 `high level design.md` is Igor's source description. Frozen input, not a
 working doc.
 
 Check `decisions.md` and `ideas.md` before suggesting anything "new" — it is
 probably already there, possibly already declined with a reason. Use the
-glossary's words exactly: **layer, dive, rank, mod, gear, tier, batch, wave,
+glossary's words exactly: **layer, dive, mod, boost, gear, tier, batch, wave,
 home, attribute**. Never "level" or "upgrade" — each meant two things in the
 draft, which is why they are banned (D32).
 
@@ -70,11 +70,11 @@ draft, which is why they are banned (D32).
 
 ## Conventions
 
-- **Content is data.** Enemies, weapons, gear, tiers, mods, batches, sounds,
+- **Content is data.** Enemies, weapons, gear, tiers, mods, boosts, batches, sounds,
   menus and options are flat lists of records. Adding one is a line and touches
   no other code. The alpha's content counts are only reachable if adding the
-  fifteenth enemy costs what adding the second did. An enemy, mod, weapon or
-  piece of equipment also gets its row and section in `docs/entities/` —
+  fifteenth enemy costs what adding the second did. An enemy, mod, boost, weapon
+  or piece of equipment also gets its row and section in `docs/entities/` —
   `npm test` fails until they match the code (D81 — Entity docs).
 - **Plain objects in flat arrays.** No classes, no inheritance, no ECS.
 - **Input matches `e.code`, never `e.key`** — `e.key` is the character a key
@@ -186,8 +186,8 @@ draft, which is why they are banned (D32).
      asserted a scenario's old definition a full change after it was redefined.*
   2. **`docs/`** — `changelog.md` always; `decisions.md` for anything decided,
      reopened or superseded; `design.md` for anything whose behaviour changed;
-     `docs/entities/` for any enemy, mod, weapon or piece of equipment that
-     changed — the check holds its numbers, never its prose; `plan.md` if a
+     `docs/entities/` for any enemy, mod, boost, weapon or piece of equipment
+     that changed — the check holds its numbers, never its prose; `plan.md` if a
      stage moved; `ideas.md` if an open question closed — the answered item
      leaves it. A living doc keeps no history (`docs/README.md`).
   3. **`foundations.md`** — if a rule changed, it is a decision: edit here and

@@ -1,0 +1,398 @@
+// Mods from drops: a glowing fish carries each batch's mod (D84 (mods are
+// dropped)), glowing from the moment it arrives and never a boss or a
+// mini-boss (D88 (the fish glows from the start)), the layer end offers a pick
+// of valuable mods (D85 (the layer end's pick)), kills drop boosts (D86
+// (boosts)), and rank is gone (D87 (rank is retired)). Each test guards a line of
+// docs/superpowers/specs/2026-10-12-mods-from-drops-design.md, and each was
+// seen to fail before the code it guards was written.
+import { describe, it, expect } from 'vitest';
+import fc from 'fast-check';
+import { readFileSync } from 'node:fs';
+import { loadGame, ticks, ride, clearAndWait, atGate } from './harness.js';
+
+const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
+
+const held = g => Object.values(g.modCounts).reduce((a, b) => a + b, 0);
+// Every mod a batch has paid so far: taken, or still flying in.
+const paid = g => held(g) + g.drops.filter(d => d.mod).length;
+const ordinary = g => g.MODS.filter(m => !m.end);
+// The six numbers a mod can move, for comparing two players.
+const STATS = ['speed', 'maxHp', 'dashCooldown', 'iframes', 'dashDamage', 'mendOnClear'];
+const stats = p => STATS.map(k => p[k]);
+
+// The dive's first layer end, its boss arrived, the diver kept alive.
+function atLayerEnd() {
+  const end = atGate(0).plan.findIndex(e => e.end);
+  const g = atGate(end);
+  g.immortal = true;
+  ride(g);
+  return g;
+}
+
+// A drifter at (x, y) killed with the boost chance forced to certainty, so a
+// boost drops where it died. A second drifter is left alive in the corner,
+// because the kill that empties the arena never drops one.
+function boostAt(g, x, y) {
+  g.queuePaused = true;
+  g.immortal = true;
+  g.placeEnemy('drifter', x, y);
+  const victim = g.enemies.at(-1);
+  g.placeEnemy('drifter', 60, g.cameraY + 60);
+  g.sinceBoost = Math.ceil(1 / g.BOOST_C) - 1;
+  g.killEnemy(victim);
+  return g.drops.at(-1);
+}
+
+describe('a glowing fish carries the batch\'s mod (D84)', () => {
+  it('lights one fish of every ordinary batch, from the moment it arrives', () => {
+    // Igor, 2026-10-12: "glow must appear on the enemy from the start, not in
+    // the middle of a fight".
+    fc.assert(fc.property(seed, s => {
+      const g = loadGame();
+      g.reset(s);
+      g.immortal = true;
+      ride(g);                                     // the dive's first batch, just arrived
+      const lit = g.enemies.filter(e => e.carrier);
+      expect(lit).toHaveLength(1);
+      expect(g.enemyType(lit[0].name).carries).not.toBe(false);
+      while (g.enemies.length) { g.killEnemy(g.enemies[0]); g.update(g.FIXED_DT); }
+      expect(paid(g)).toBe(1);                     // one mod, the batch's
+    }), { numRuns: 25 });
+  });
+
+  it('never lights a mini-boss: its gate pays no mod', () => {
+    // Igor, 2026-10-12: "remove glow from mini-bosses".
+    const g = loadGame();
+    g.immortal = true;
+    expect(g.applyScenario('mini-boss', 1)).toBe(true);
+    ride(g);
+    expect(g.enemies.some(e => e.carrier)).toBe(false);
+    expect(clearAndWait(g, 1)).toBe('playing');
+    expect(paid(g)).toBe(0);
+  });
+
+  it('never lights the boss: the layer end\'s pick pays it', () => {
+    const g = atLayerEnd();
+    const boss = g.enemies[0];
+    expect(boss.carrier).toBeFalsy();
+    expect(clearAndWait(g)).toBe('mods');
+    expect(paid(g)).toBe(0);
+  });
+
+  it('drops the batch\'s mod even when everything left dies in one tick', () => {
+    fc.assert(fc.property(seed, s => {
+      const g = loadGame();
+      g.reset(s);
+      ride(g);
+      for (const e of [...g.enemies]) g.killEnemy(e);
+      g.update(g.FIXED_DT);
+      expect(g.drops.filter(d => d.mod)).toHaveLength(1);
+    }), { numRuns: 15 });
+  });
+
+  it('flies the mod to you from wherever it fell, then counts it, applies it and names it', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.immortal = true;
+    ride(g);
+    for (const e of [...g.enemies]) g.killEnemy(e);   // where they arrived: outside the view
+    for (let i = 0, n = ticks(g, 3); i < n && !held(g); i++) g.update(g.FIXED_DT);
+    expect(held(g)).toBe(1);
+    const [name] = Object.keys(g.modCounts);
+    expect(g.banner).toContain(name);
+    // The same diver with the mod's own step applied by hand.
+    const fresh = loadGame();
+    fresh.reset(1);
+    fresh.MODS.find(m => m.name === name).apply(fresh.player);
+    expect(stats(g.player)).toEqual(stats(fresh.player));
+  });
+
+  it('names a pickup on its own line, never over a micro-task\'s', () => {
+    // A clean first batch pays the "untouched" task as it clears (D36), while
+    // its mod is still flying in: the two lines must not overwrite each other.
+    const g = loadGame();
+    g.reset(1);
+    g.immortal = true;
+    ride(g);
+    for (const e of [...g.enemies]) g.killEnemy(e);
+    g.update(g.FIXED_DT);                          // the clear: the task pays
+    const task = g.notice;
+    expect(task).not.toBe('');
+    for (let i = 0, n = ticks(g, 3); i < n && !held(g); i++) g.update(g.FIXED_DT);
+    expect(held(g)).toBe(1);
+    expect(g.notice).toBe(task);
+    expect(g.banner).toContain(Object.keys(g.modCounts)[0]);
+  });
+
+  it('lights no fish once every ordinary mod is at its cap', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.immortal = true;
+    for (const m of ordinary(g)) g.modCounts[m.name] = m.max;
+    const before = held(g);
+    ride(g);
+    expect(g.enemies.some(e => e.carrier)).toBe(false);
+    while (g.enemies.length) { g.killEnemy(g.enemies[0]); g.update(g.FIXED_DT); }
+    expect(paid(g)).toBe(before);
+  });
+
+  it('carries nothing on a fish placed by hand', () => {
+    // A scenario's lone drifter belongs to no batch (D37).
+    const g = loadGame();
+    expect(g.applyScenario('one-drifter', 1)).toBe(true);
+    expect(clearAndWait(g, 1)).toBe('playing');
+    expect(paid(g)).toBe(0);
+  });
+});
+
+describe('which mod a fish carries (D84)', () => {
+  // Every mod a dive's fish would carry, drawn and taken until none is left.
+  const deal = s => {
+    const g = loadGame();
+    g.reset(s);
+    const out = [];
+    for (let m = g.drawCarried(); m; m = g.drawCarried()) {
+      out.push(m.name);
+      g.takeMod(m);
+    }
+    return out;
+  };
+
+  it('deals every ordinary mod once before any comes again, up to the caps', () => {
+    const g = loadGame();
+    const ord = ordinary(g);
+    fc.assert(fc.property(seed, s => {
+      const names = deal(s);
+      expect(names).toHaveLength(ord.reduce((n, m) => n + m.max, 0));
+      // A round is spent once every mod still under its cap has come in it.
+      const counts = {};
+      let round = new Set();
+      for (const n of names) {
+        const open = ord.filter(m => (counts[m.name] || 0) < m.max).map(m => m.name);
+        if (open.every(x => round.has(x))) round = new Set();
+        expect(round.has(n)).toBe(false);
+        round.add(n);
+        counts[n] = (counts[n] || 0) + 1;
+      }
+      expect(names.some(n => g.MODS.find(m => m.name === n).end)).toBe(false);
+    }), { numRuns: 20 });
+  });
+
+  it('deals the same mods from the same seed', () => {
+    fc.assert(fc.property(seed, s => { expect(deal(s)).toEqual(deal(s)); }), { numRuns: 10 });
+  });
+});
+
+describe('the layer end\'s pick (D85)', () => {
+  const cardsWith = setup => {
+    const g = loadGame();
+    g.reset(7);
+    setup(g);
+    return g.rollValuable();
+  };
+
+  it('offers three valuable mods on a fresh dive, its own and the ordinary ones', () => {
+    const g = loadGame();
+    const pool = new Set();
+    for (let s = 1; s <= 40; s++) {
+      g.reset(s);
+      const cards = g.rollValuable();
+      expect(cards).toHaveLength(3);
+      expect(new Set(cards.map(c => c.name)).size).toBe(3);
+      for (const c of cards) pool.add(c.name);
+    }
+    // A mix of both kinds (Igor: "go with a mix of both").
+    expect([...pool].some(n => g.MODS.find(m => m.name === n).end)).toBe(true);
+    expect([...pool].some(n => !g.MODS.find(m => m.name === n).end)).toBe(true);
+  });
+
+  it('never offers an ordinary mod without room for the bigger step', () => {
+    const cards = cardsWith(g => {
+      for (const m of ordinary(g)) g.modCounts[m.name] = m.max - 1;   // one short of the cap
+    });
+    expect(cards.every(c => c.end)).toBe(true);
+  });
+
+  it('never offers one of its own past its cap, and offers nothing with everything capped', () => {
+    const own = cardsWith(g => {
+      for (const m of g.MODS.filter(m => m.end)) g.modCounts[m.name] = m.max;
+    });
+    expect(own.some(c => c.end)).toBe(false);
+    expect(cardsWith(g => { for (const m of g.MODS) g.modCounts[m.name] = m.max; })).toEqual([]);
+  });
+
+  it('marks a card on a click or a number, and takes the marked one on Continue', () => {
+    const g = atLayerEnd();
+    expect(clearAndWait(g)).toBe('mods');
+    expect(g.choices).toHaveLength(3);
+    expect(g.choiceIndex).toBe(1);                          // opens on the middle card
+    const at = r => { g.aim.x = r.x + r.w / 2; g.aim.y = r.y + r.h / 2; };
+    at(g.cardRect(0, 3));
+    g.update(g.FIXED_DT);
+    expect(g.choiceIndex).toBe(1);                          // passing over a card marks nothing
+    g.justPressed.add('Mouse0');
+    g.update(g.FIXED_DT);
+    expect([g.screen, g.choiceIndex]).toEqual(['mods', 0]); // a click marks
+    g.justPressed.add('Digit3');
+    g.update(g.FIXED_DT);
+    expect([g.screen, g.choiceIndex]).toEqual(['mods', 2]); // and so does a number
+    const chosen = g.choices[2], had = g.modCounts[chosen.name] || 0, cam = g.cameraY;
+    for (let i = 0, n = ticks(g, 3); i < n; i++) g.update(g.FIXED_DT);
+    expect([g.screen, g.cameraY]).toEqual(['mods', cam]);   // the current waits for Continue
+    at(g.continueRect());
+    g.justPressed.add('Mouse0');
+    g.update(g.FIXED_DT);
+    expect(g.screen).toBe('playing');
+    // The layer end's own mods come once, an ordinary one at the bigger step.
+    expect(g.modCounts[chosen.name]).toBe(had + (chosen.end ? 1 : g.END_STEP));
+  });
+
+  it('takes the marked card on Enter, and Continue alone when nothing is left', () => {
+    const g = atLayerEnd();
+    expect(clearAndWait(g)).toBe('mods');
+    const chosen = g.choices[1];
+    g.justPressed.add('Enter');
+    g.update(g.FIXED_DT);
+    expect(g.screen).toBe('playing');
+    expect(g.modCounts[chosen.name]).toBe(chosen.end ? 1 : g.END_STEP);
+    const h = atLayerEnd();
+    for (const m of h.MODS) h.modCounts[m.name] = m.max;
+    expect(clearAndWait(h)).toBe('mods');
+    expect(h.choices).toEqual([]);
+    h.justPressed.add('Enter');
+    h.update(h.FIXED_DT);
+    expect(h.screen).toBe('playing');
+  });
+});
+
+describe('boosts (D86)', () => {
+  it('grows the chance with every kill: never 1/C kills apart, and seldom two in a row', () => {
+    const gaps = [];
+    for (let s = 1; s <= 30; s++) {
+      const g = loadGame();
+      g.reset(s);
+      g.queuePaused = true;
+      for (let i = 0; i < 201; i++) {
+        g.placeEnemy('drifter', 100 + (i % 20) * 50, g.cameraY + 100 + Math.floor(i / 20) * 50);
+      }
+      let last = 0;
+      for (let k = 1; k <= 200; k++) {                       // the 201st is never killed
+        const n = g.drops.length;
+        g.killEnemy(g.enemies[k - 1]);
+        if (g.drops.length > n) { gaps.push(k - last); last = k; }
+      }
+    }
+    expect(gaps.length).toBeGreaterThan(100);
+    expect(Math.max(...gaps)).toBeLessThanOrEqual(Math.ceil(1 / loadGame().BOOST_C));
+    // A flat chance at the same rate drops back to back about one time in
+    // eight; a chance that starts small and grows, about one in fifty.
+    expect(gaps.filter(x => x === 1).length / gaps.length).toBeLessThan(0.06);
+  });
+
+  it('never drops one from the kill that empties the arena', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;
+    g.placeEnemy('drifter', 100, g.cameraY + 100);
+    g.sinceBoost = Math.ceil(1 / g.BOOST_C);                 // certain, but for the rule
+    g.killEnemy(g.enemies[0]);
+    expect(g.drops).toHaveLength(0);
+    const h = loadGame();
+    h.reset(1);
+    expect(boostAt(h, 100, h.cameraY + 100).boost).toBeTruthy();   // with a fish left, it drops
+  });
+
+  it('leaves a boost where it fell, and lets it go after its life', () => {
+    const g = loadGame();
+    g.reset(1);
+    const b = boostAt(g, 1100, g.cameraY + 700);
+    const where = [b.x, b.y], base = stats(g.player);
+    for (let i = 0, n = ticks(g, g.BOOST_LIFE - 0.1); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.drops.filter(d => d.boost).map(d => [d.x, d.y])).toEqual([where]);
+    for (let i = 0, n = ticks(g, 0.2); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.drops.filter(d => d.boost)).toHaveLength(0);
+    expect(stats(g.player)).toEqual(base);
+  });
+
+  it('adds its numbers on a touch, takes them back after its time, and restarts on a second', () => {
+    const g = loadGame();
+    g.reset(1);
+    const base = { ...g.player };
+    const name = boostAt(g, g.player.x, g.player.y).boost;
+    const b = g.BOOSTS.find(x => x.name === name);
+    const on = () => Object.keys(b.add).map(k => g.player[k] - base[k]);
+    g.update(g.FIXED_DT);                                    // touched where it fell
+    expect(on()).toEqual(Object.values(b.add));
+    expect(g.banner).toContain(name);
+    for (let i = 0, n = ticks(g, b.time / 2); i < n; i++) g.update(g.FIXED_DT);
+    boostAt(g, g.player.x, g.player.y);                      // the same boost again
+    g.update(g.FIXED_DT);
+    expect(on()).toEqual(Object.values(b.add));              // added once, not twice
+    for (let i = 0, n = ticks(g, b.time * 0.75); i < n; i++) g.update(g.FIXED_DT);
+    expect(on()).toEqual(Object.values(b.add));              // past the first's end: restarted
+    for (let i = 0, n = ticks(g, b.time * 0.5); i < n; i++) g.update(g.FIXED_DT);
+    expect(on().every(v => Math.abs(v) < 1e-9)).toBe(true); // and gone
+  });
+
+  it('holds a boost\'s time while the game is paused', () => {
+    const g = loadGame();
+    g.reset(1);
+    const base = g.player.speed;
+    const b = g.BOOSTS.find(x => x.name === boostAt(g, g.player.x, g.player.y).boost);
+    g.update(g.FIXED_DT);
+    const boosted = g.player.speed;
+    g.justPressed.add('Escape');
+    g.update(g.FIXED_DT);
+    expect(g.screen).toBe('paused');
+    for (let i = 0, n = ticks(g, b.time * 2); i < n; i++) g.update(g.FIXED_DT);
+    g.justPressed.add('Escape');                             // resume
+    g.update(g.FIXED_DT);
+    expect(g.player.speed).toBe(boosted);
+    for (let i = 0, n = ticks(g, b.time); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.player.speed).toBe(base);
+  });
+});
+
+describe('rank is retired (D87)', () => {
+  it('keeps no rank in the dive or in the save', () => {
+    const g = loadGame();
+    g.reset(1);
+    ride(g);
+    clearAndWait(g, 0.5);
+    expect(JSON.parse(g.saveText()).dive).not.toHaveProperty('rank');
+  });
+});
+
+describe('the save, version 3 (D84)', () => {
+  it('keeps the glowing fish across a save, and it still drops its mod', () => {
+    const a = loadGame();
+    a.reset(3);
+    a.immortal = true;
+    ride(a);                                     // arrived, its fish lit
+    const b = loadGame();
+    b.immortal = true;
+    expect(b.loadSave(a.saveText())).toBe('');
+    b.screen = b.resumeTo;
+    const which = b.enemies.findIndex(e => e.carrier);
+    expect(which).toBe(a.enemies.findIndex(e => e.carrier));
+    expect(which).toBeGreaterThanOrEqual(0);
+    b.killEnemy(b.enemies[which]);
+    b.update(b.FIXED_DT);
+    expect(paid(b)).toBe(1);
+  });
+
+  const fixture = v => JSON.parse(readFileSync(new URL('./fixtures/save-v' + v + '.json', import.meta.url), 'utf8'));
+
+  it('brings a v2 dive saved with the cards up back with the marked card taken', () => {
+    const v2 = fixture(2);
+    Object.assign(v2.dive, { at: 'mods', choices: ['Fins', 'Reflex', 'Nerve'], choiceIndex: 1 });
+    const g = loadGame();
+    expect(g.loadSave(JSON.stringify(v2))).toBe('');
+    expect(g.modCounts.Reflex).toBe(1);
+    expect(g.player.dashCooldown).toBeCloseTo(v2.dive.player.dashCooldown - 0.4);
+    expect(g.resumeTo).toBe('playing');
+    const saved = JSON.parse(g.saveText());
+    expect(saved.version).toBe(3);
+    expect(saved.dive).not.toHaveProperty('rank');
+  });
+});

@@ -70,6 +70,10 @@ function drawAimLine() {
 // the layer that survives to Rust, and both of its readers are in this file.
 const CARD_DESC_FONT = '13px system-ui, sans-serif';
 
+// Seconds a boost on the floor blinks before it is gone (D86): the warning,
+// like the prototype's gems (D11). Drawing only, so it lives here.
+const BOOST_BLINK = 2;
+
 // Whole numbers stay whole; anything fractional gets two places at most, so a
 // 0.30000000000000004 cannot reach the screen.
 const fmtStat = n => (Number.isInteger(n) ? n : +n.toFixed(2));
@@ -84,16 +88,21 @@ function widestModDesc() {
   return Math.max(...MODS.map(m => ctx.measureText(m.desc).width));
 }
 
+// The layer end's pick (D85): the cards, a card marked, and Continue. The
+// wording is Claude's placeholder (ideas.md -> friendlier end-of-dive messages).
 function drawModCards() {
   dimArena();
 
+  // The layer just cleared. A check can open the cards with no plan behind them.
+  const entry = plan[batchIndex - 1];
   ctx.textAlign = 'center';
   ctx.fillStyle = '#9ef7ff';
   ctx.font = '30px system-ui, sans-serif';
-  ctx.fillText('BATCH CLEARED', ARENA_W / 2, ARENA_H / 2 - 130);
+  ctx.fillText(entry ? LAYERS[entry.layer].name.toUpperCase() + ' CLEARED' : 'LAYER END',
+               ARENA_W / 2, ARENA_H / 2 - 130);
   ctx.fillStyle = '#5d8b99';
   ctx.font = '15px system-ui, sans-serif';
-  ctx.fillText('rank ' + rank, ARENA_W / 2, ARENA_H / 2 - 105);
+  ctx.fillText('a valuable mod, for the rest of the dive', ARENA_W / 2, ARENA_H / 2 - 105);
 
   choices.forEach((u, i) => {
     const { x, y, w, h } = cardRect(i, choices.length);
@@ -105,9 +114,10 @@ function drawModCards() {
     ctx.lineWidth = on ? 2 : 1;
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 
+    // An ordinary mod comes at the bigger step here, and says so.
     ctx.fillStyle = '#bffcff';
     ctx.font = '19px system-ui, sans-serif';
-    ctx.fillText(u.name, x + w / 2, y + 38);
+    ctx.fillText(u.end ? u.name : u.name + ' \u00d7' + END_STEP, x + w / 2, y + 38);
 
     ctx.fillStyle = on ? '#9ef7ff' : '#7fb0c0';
     ctx.font = CARD_DESC_FONT;
@@ -122,34 +132,41 @@ function drawModCards() {
     // No slice: the card draws every row the mod moves, and a check holds the
     // pool to MOD_ROWS, so a mod that moved a third stat fails the suite rather
     // than quietly losing a number off the bottom of the card.
-    modPreview(u).forEach((c, n) => {
+    modPreview(u, cardStep(u)).forEach((c, n) => {
       ctx.fillText(c.stat + '  ' + fmtStat(c.from) + ' → ' + fmtStat(c.to),
                    x + w / 2, y + 90 + n * 17);
     });
 
-    // A filler has no `max` and is never held (D69), so it has no stack.
-    if (u.max) {
-      ctx.fillStyle = on ? '#4d7a8a' : '#3d6270';
-      ctx.fillText('held ' + (modCounts[u.name] || 0) + ' of ' + u.max, x + w / 2, y + 132);
-    }
+    ctx.fillStyle = on ? '#4d7a8a' : '#3d6270';
+    ctx.fillText('held ' + (modCounts[u.name] || 0) + ' of ' + u.max, x + w / 2, y + 132);
 
     ctx.fillStyle = on ? '#4ff0ff' : '#2b6b7d';
     ctx.font = '16px system-ui, sans-serif';
-    ctx.fillText(on ? '[ ENTER ]' : '[ ' + (i + 1) + ' ]', x + w / 2, y + 160);
+    ctx.fillText(on ? '[ MARKED ]' : '[ ' + (i + 1) + ' ]', x + w / 2, y + 160);
   });
+
+  const c = continueRect();
+  ctx.fillStyle = 'rgba(28, 74, 92, 0.96)';
+  ctx.fillRect(c.x, c.y, c.w, c.h);
+  ctx.strokeStyle = '#4ff0ff';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(c.x + 0.5, c.y + 0.5, c.w - 1, c.h - 1);
+  ctx.fillStyle = '#bffcff';
+  ctx.font = '17px system-ui, sans-serif';
+  ctx.fillText('CONTINUE', ARENA_W / 2, c.y + c.h / 2 + 6);
 
   ctx.fillStyle = '#5d8b99';
   ctx.font = '14px system-ui, sans-serif';
-  ctx.fillText('arrows or mouse to choose, Enter or click to take it',
-               ARENA_W / 2, MOD_HINT_Y);
+  ctx.fillText(choices.length
+    ? 'arrows, click or 1 2 3 to mark a card,  Enter or Continue to take it'
+    : 'nothing left to choose:  Enter or Continue to go on', ARENA_W / 2, MOD_HINT_Y);
 }
 
-// Where the mod screen's bottom hint sits. Exposed so a check can hold the
-// cards above it: they grew from 140 to 186 tall when the numbers went on them
-// (D52), and a taller card silently runs into this line. Same guard as the
-// help screen's (D46). Where the cards *end* is not restated here --
-// `cardRect()` in content.js already owns that.
-const MOD_HINT_Y = ARENA_H / 2 + 120;
+// Where the mod screen's bottom hint sits: under Continue, which sits under
+// the cards (`continueRect()` in content.js owns both boxes). The cards grew
+// from 140 to 186 tall when the numbers went on them (D52), and taller cards
+// push all of it down -- a check holds the hint inside the view.
+const MOD_HINT_Y = continueRect().y + continueRect().h + 34;
 
 // So a silent game can tell you why it is silent.
 function audioStatus() {
@@ -225,6 +242,28 @@ function drawField() {
   // Gems fly to you and never fade (D35), so there is no blink to warn of it.
   for (const g of gems) circle(g.x, g.y, g.r, '#a8ffd8', '#2affb0', 14);
 
+  // What kills drop besides gems (D84, D86). PLACEHOLDER GRAPHICS: a mod is a
+  // gold coin flying in; a boost a magenta diamond where it fell, blinking out
+  // over its last BOOST_BLINK seconds.
+  for (const d of drops) {
+    if (d.mod) circle(d.x, d.y, d.r, '#fff1b8', '#ffc400', 24);
+    else if (d.life > BOOST_BLINK || Math.floor(d.life * 8) % 2 === 0) {
+      const k = d.r * 1.7;
+      ctx.save();
+      ctx.fillStyle = '#ffd1fb';
+      ctx.shadowColor = '#ff3df2';
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y - k);
+      ctx.lineTo(d.x + k, d.y);
+      ctx.lineTo(d.x, d.y + k);
+      ctx.lineTo(d.x - k, d.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
   // A wounded enemy shrinks, so you can see a big one is nearly finished,
   // and flashes white for a frame or two when hit. A lunger winding up (D64)
   // swells, glows harder and lays its lane down ahead of it -- the tell --
@@ -247,6 +286,20 @@ function drawField() {
     }
     circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + 0.25 * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
+    // The glowing fish that carries the batch's mod (D84): a gold ring that
+    // pulses. PLACEHOLDER GRAPHICS.
+    if (e.carrier) {
+      ctx.save();
+      ctx.globalAlpha = 0.8 + 0.2 * Math.sin(elapsed * 8);
+      ctx.strokeStyle = '#ffe680';
+      ctx.shadowColor = '#ffc400';
+      ctx.shadowBlur = 24;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r + 6, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 
   // Sparks shrink as they die.
@@ -316,12 +369,11 @@ function drawField() {
   ctx.restore();
 
   // --- HUD ---
-  // No bar across the top any more: rank arrives one per batch cleared, so
-  // there is no partial progress to draw and D34 deletes the bar outright.
+  // No bar across the top: there is no XP (D34) and no rank (D87).
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '14px system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '   RANK ' + rank +
+  ctx.fillText('HP ' + player.hp + '/' + player.maxHp +
                '   BATCH ' + batchIndex + '   GEMS ' + currency + '   ' +
                elapsed.toFixed(1) + 's   ' + kills + ' killed' +
                audioStatus(), 16, 30);
@@ -331,7 +383,9 @@ function drawField() {
   // rows below shift on their own rather than needing a new hardcoded y.
   ctx.fillStyle = '#4d7a8a';
   ctx.font = '13px system-ui, sans-serif';
-  ctx.fillText(PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   '),
+  // The boosts running, with their seconds left, ride on the end of it (D86).
+  ctx.fillText(PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') +
+               boosts.map(b => '   ' + b.name + ' ' + b.left.toFixed(1) + 's').join(''),
                16, 50);
 
   // The layer's name, while the current carries you into it (D72) -- derived:
@@ -356,11 +410,20 @@ function drawField() {
     ctx.fillText(notice, ARENA_W / 2, 240);
     ctx.textAlign = 'left';
   }
+  // A pickup, named as it lands (D84, D86), on its own line under the task's.
+  if (screen === 'playing' && bannerTime > 0) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffe9a8';
+    ctx.font = '17px system-ui, sans-serif';
+    ctx.fillText(banner, ARENA_W / 2, 270);
+    ctx.textAlign = 'left';
+  }
 
   if (showFps) {
     ctx.fillStyle = '#3d6270';
     ctx.fillText('fps ' + Math.round(fps) + '    enemies ' + enemies.length +
                  '   shots ' + bullets.length + '   gems ' + gems.length +
+                 '   drops ' + drops.length +
                  '   sparks ' + particles.length, 16, 70);
   }
 }
@@ -396,14 +459,10 @@ function drawEnd() {
 
   ctx.fillStyle = '#7fb0c0';
   ctx.font = '16px system-ui, sans-serif';
-  ctx.fillText('rank ' + rank + ', ' + currency + ' gems, ' +
-               elapsed.toFixed(1) + 's, killed ' + kills,
+  ctx.fillText(currency + ' gems, ' + elapsed.toFixed(1) + 's, killed ' + kills,
                ARENA_W / 2, ARENA_H / 2 + 26);
 
-  ctx.fillStyle = '#2f5563';
-  ctx.font = '13px system-ui, sans-serif';
-  ctx.fillText('R to dive again,  Enter or click to go home',
-               ARENA_W / 2, ARENA_H / 2 + 60);
+  drawRows(MENUS[screen]);       // Dive again, Go home (D90)
 }
 
 // The y the hint sits on. Screens that stack rows from a data table must end
@@ -437,6 +496,12 @@ function drawMenu(menu) {
     ctx.fillText(menu.sub, ARENA_W / 2, 276);
   }
 
+  drawRows(menu);
+}
+
+// A menu's rows and its hint -- the menus' and the end screens' alike.
+function drawRows(menu) {
+  ctx.textAlign = 'center';
   // A row that cannot be taken right now -- a tier you cannot afford -- is
   // drawn dim, highlighted or not.
   menu.items.forEach((item, i) => {

@@ -10,9 +10,10 @@ import { botInput } from './bot.js';
 
 const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
 
-// Takes the first card, whatever it is, and plays on one tick.
+// Marks the first card, whatever it is, and presses Continue (D85).
 function pick(g) {
   g.justPressed.add('Digit1');
+  g.justPressed.add('Enter');
   g.update(g.FIXED_DT);
 }
 
@@ -69,17 +70,15 @@ describe('batches drawn from pools (D71)', () => {
 });
 
 describe('on through the layers (D66, D68, D72)', () => {
-  it('goes on from a layer end: a full heal, a rank, the cards, then the next layer\'s batch', () => {
+  it('goes on from a layer end: a full heal, the cards, then the next layer\'s batch', () => {
     const end = atGate(0).plan.findIndex(e => e.end);
     const g = atGate(end);
-    g.rank = end;
     g.modCounts = { Fins: 1 };
     ride(g);                                  // the boss arrives
     expect(g.plan[g.batchIndex - 1].end).toBe(true);
     g.player.hp = 1;
-    expect(clearAndWait(g)).toBe('mods');     // the cards, as at any gate
+    expect(clearAndWait(g)).toBe('mods');     // the cards: the layer end's pick
     expect(g.player.hp).toBe(g.player.maxHp); // the heal
-    expect(g.rank).toBe(end + 1);             // and the rank
     expect(g.meta.cleared).toBe(1);           // the layer counts as cleared
     pick(g);
     const cam = g.cameraY;
@@ -110,24 +109,26 @@ describe('on through the layers (D66, D68, D72)', () => {
     expect(g.plan[g.batchIndex].layer).toBe(1);
     expect(g.plan[g.batchIndex - 1].end).toBe(true);
     expect(Object.values(g.modCounts).reduce((a, b) => a + b, 0)).toBe(kit.length);
-    expect(g.rank).toBe(kit.length);
     expect(g.player.speed).toBeGreaterThan(g.PLAYER_START.speed);
   });
 });
 
 describe('mods across a whole dive (D69)', () => {
-  it('never passes a cap, and offers three cards while any mod is under its cap', () => {
+  it('never passes a cap, whatever the fish carry and the layer ends offer', () => {
+    // Both ways a mod arrives (D84, D85), mixed, for more mods than every cap
+    // allows: a fish's mod, and now and then a layer end's card at its step.
     const g = loadGame();
     fc.assert(fc.property(seed, s => {
       g.reset(s);
-      g.player.hp = 1;
-      for (let i = 0; i < 40; i++) {           // more picks than every cap allows
-        const cards = g.rollMods();
-        const open = g.MODS.some(m => (g.modCounts[m.name] || 0) < m.max);
-        if (open) expect(cards).toHaveLength(3);
-        else expect(cards.map(c => c.name)).toEqual(['Gems', 'Heart']);
-        expect(new Set(cards.map(c => c.name)).size).toBe(cards.length);
-        g.takeMod(cards[Math.floor(i * 7919 % cards.length)]);
+      for (let i = 0; i < 40; i++) {
+        if (i % 4 === 3) {
+          const cards = g.rollValuable();
+          const c = cards[i % Math.max(1, cards.length)];
+          if (c) for (let k = 0; k < (c.end ? 1 : g.END_STEP); k++) g.takeMod(c);
+        } else {
+          const m = g.drawCarried();
+          if (m) g.takeMod(m);
+        }
         for (const m of g.MODS) expect(g.modCounts[m.name] || 0).toBeLessThanOrEqual(m.max);
       }
     }), { numRuns: 20 });
@@ -137,19 +138,6 @@ describe('mods across a whole dive (D69)', () => {
     expect(loadGame().MODS.every(m => Number.isInteger(m.max) && m.max >= 1)).toBe(true);
   });
 
-  it('pays the gems card when taken, never when previewed, and counts no filler', () => {
-    const g = loadGame();
-    g.reset(1);
-    const gems = g.FILLERS.find(f => f.name === 'Gems');
-    expect(g.modPreview(gems)).toEqual([]);
-    expect(g.currency).toBe(0);
-    g.takeMod(gems);
-    expect(g.currency).toBe(g.FILLER_GEMS);
-    g.player.hp = 1;
-    g.takeMod(g.FILLERS.find(f => f.name === 'Heart'));
-    expect(g.player.hp).toBe(2);
-    expect(g.modCounts).toEqual({});
-  });
 });
 
 describe('gems (D35, D67)', () => {
@@ -187,16 +175,33 @@ describe('gems (D35, D67)', () => {
     expect(JSON.parse(g.saved).dive).toBeNull();
   });
 
-  it('goes home from the death screen, and R dives again at once', () => {
-    for (const [key, to] of [['Enter', 'home'], ['KeyR', 'playing']]) {
+  it('offers Dive again and Go home after a death, with Go home marked', () => {
+    // Igor, 2026-10-12: "make it dive again + go home buttons choice" (D90).
+    // Go home is marked, so a stray Enter or Space -- Space is the dash -- does
+    // what any key did before; diving again is a choice.
+    const dead = () => {
       const g = loadGame();
       g.reset(1);
       g.queuePaused = true;
       die(g);
-      g.justPressed.add(key);
+      return g;
+    };
+    const enter = dead();
+    enter.justPressed.add('Enter');
+    enter.update(enter.FIXED_DT);
+    expect(enter.screen).toBe('home');
+    const click = (g, x, y) => {
+      g.aim.x = x;
+      g.aim.y = y;
+      g.justPressed.add('Mouse0');
       g.update(g.FIXED_DT);
-      expect(g.screen).toBe(to);
-    }
+      return g.screen;
+    };
+    const again = g => g.rowRect(0, g.MENUS.dead.top);
+    const g = dead();
+    expect(click(g, 10, 10)).toBe('dead');       // a click off the buttons does nothing
+    const r = again(g);
+    expect(click(g, r.x + r.w / 2, r.y + r.h / 2)).toBe('playing');
   });
 });
 
@@ -223,13 +228,12 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     const g = loadGame();
     g.reset(1);
     ride(g);
-    expect(clearAndWait(g)).toBe('mods');        // the first batch, untouched
+    clearAndWait(g, 0.1);                        // the first batch, untouched
     expect(g.points()).toBe(1);
     expect(g.notice).not.toBe('');
-    pick(g);
     ride(g);
     g.notice = '';
-    clearAndWait(g);                             // a second clean batch, same layer
+    clearAndWait(g, 0.1);                        // a second clean batch, same layer
     expect(g.points()).toBe(1);
     expect(g.notice).toBe('');                   // and nothing announced twice
     g.raise(reach(g));
@@ -247,7 +251,7 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     g.placeEnemy('bulwark', g.player.x, g.player.y);   // a real touch
     g.update(g.FIXED_DT);
     expect(g.player.hp).toBe(g.player.maxHp - 1);
-    expect(clearAndWait(g)).toBe('mods');
+    clearAndWait(g, 0.1);
     expect(g.points()).toBe(0);
   });
 
@@ -268,6 +272,28 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     expect(g.screen).toBe('playing');
     g.screen = 'title';
     expect(g.MENUS.title.items[0].label).toBe('Continue');
+    g.justPressed.add('Enter');                  // Continue: straight back into the dive,
+    g.update(g.FIXED_DT);                        // not onto its pause menu (D90)
+    expect(g.screen).toBe('playing');
+  });
+
+  it('keeps a layer\'s micro-tasks by its number, whatever it is called', () => {
+    // Layers are numbered until they are named (D89): renaming one must not
+    // forget what it has already paid, on the save or on `home`.
+    const g = loadGame();
+    g.reset(1);
+    ride(g);
+    clearAndWait(g, 0.1);                        // a clean first batch: the task pays
+    expect(g.points()).toBe(1);
+    g.LAYERS[0].name = 'Somewhere Else';
+    g.reset(2);
+    ride(g);
+    g.notice = '';
+    clearAndWait(g, 0.1);                        // a clean batch of the renamed layer
+    expect(g.points()).toBe(1);                  // pays nothing: the task is still done
+    expect(g.notice).toBe('');
+    expect(g.MENUS.home.lines[0].text).toContain('Somewhere Else');
+    expect(g.MENUS.home.lines[0].text).toContain('\u2713');
   });
 });
 
@@ -288,13 +314,11 @@ describe('the save (D70)', () => {
       b.immortal = true;
       expect(b.loadSave(a.saved)).toBe('');
       b.screen = 'title';
-      b.justPressed.add('Enter');                // Continue
+      b.justPressed.add('Enter');                // Continue: straight back in (D90)
       b.update(b.FIXED_DT);
-      for (const g of [a, b]) {                  // resume, and play on
-        g.justPressed.add('Escape');
-        g.update(g.FIXED_DT);
-        play(g, 1500);
-      }
+      a.justPressed.add('Escape');               // the one that paused resumes
+      a.update(a.FIXED_DT);
+      for (const g of [a, b]) play(g, 1500);
       // The whole dive, not a summary: a variable the snapshot forgets shows
       // up here as a difference.
       expect(b.saveText()).toBe(a.saveText());
@@ -305,7 +329,7 @@ describe('the save (D70)', () => {
     const g = loadGame();
     g.meta.bank = 123;
     g.meta.gear.Gun = 2;
-    g.meta.tasks['The Shelf'] = { untouched: 1 };
+    g.meta.tasks[0] = { untouched: 1 };
     g.meta.deepest = 4000;
     g.diveLive = false;
     const h = loadGame();
@@ -349,11 +373,30 @@ describe('the save (D70)', () => {
     // v1 kept the shot in constants (D83): its dive comes back with the Gun's
     // shot as it was then, and is written back as the current version.
     expect([g.player.shotSpeed, g.player.shotRadius]).toEqual([430, 4]);
-    expect(JSON.parse(g.saveText()).version).toBe(2);
+    expect(JSON.parse(g.saveText()).version).toBe(3);
+    // Its micro-tasks were kept by layer name; they come back by number (D89).
+    expect(g.meta.tasks).toEqual({ 0: { untouched: 1 } });
+    expect(g.points()).toBe(1);
     g.screen = g.resumeTo;
     g.immortal = true;
     const shots = shotsSeen(g, 600);
     expect(Number.isFinite(g.player.x) && Number.isFinite(g.cameraY)).toBe(true);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it('loads a save written by the first build of version 3, and plays it on', () => {
+    // Saved mid-batch with its fish lit and a boost on the floor (D84, D86).
+    const text = readFileSync(new URL('./fixtures/save-v3.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect(g.meta.bank).toBeGreaterThan(0);
+    expect(g.diveLive).toBe(true);
+    expect(g.enemies.filter(e => e.carrier)).toHaveLength(1);
+    expect(g.drops.some(d => d.boost)).toBe(true);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
     expect(shots.length).toBeGreaterThan(0);
     expect(shots.every(finite)).toBe(true);
   });
@@ -363,6 +406,7 @@ describe('the save (D70)', () => {
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
     expect(g.meta.bank).toBeGreaterThan(0);
+    expect(g.meta.tasks).toEqual({ 0: { untouched: 1 } });   // by number now (D89)
     expect(g.diveLive).toBe(true);
     g.screen = g.resumeTo;
     g.immortal = true;
@@ -423,10 +467,10 @@ describe('the weapon record (D83)', () => {
 describe('enemies placed by hand (D37)', () => {
   it('clears a scenario\'s lone enemy like a gate, with no layer to pay into', () => {
     // ?dev=one-drifter&play: no batch has arrived, so no plan entry is current.
+    // A gate opens no cards (D85), so play simply goes on.
     const g = loadGame();
     expect(g.applyScenario('one-drifter', 1)).toBe(true);
-    expect(clearAndWait(g)).toBe('mods');
-    expect(g.rank).toBe(1);
+    expect(clearAndWait(g, 1)).toBe('playing');
     expect(g.meta.tasks).toEqual({});
   });
 });

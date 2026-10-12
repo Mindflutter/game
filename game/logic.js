@@ -11,7 +11,7 @@ function enemyType(name) {
 // Builds the record. Speed is passed in rather than derived, because a batch
 // arrival wants jitter while a scenario wants one predictable enemy.
 function makeEnemy(t, x, y, speed) {
-  enemies.push({ x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
+  enemies.push({ name: t.name, x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
                  color: t.color, glow: t.glow, lastHitBy: 0,
                  pushX: 0, pushY: 0,
                  // A lunger's step (D64) and how long it has been on it; the
@@ -163,8 +163,61 @@ function killEnemy(e) {
     gems.push({ x: e.x + (rng() - 0.5) * 18,
                 y: e.y + (rng() - 0.5) * 18, r: 4 });
   }
+  if (e.carrier) dropMod(e);
+  // A boost, perhaps (D86): the chance is BOOST_C for every kill since the last
+  // one dropped, so it grows until it is certain. Never from the kill that
+  // empties the arena -- it would only fade behind you while the current
+  // carried you on -- though that kill still counts toward the next.
+  sinceBoost += 1;
+  if (enemies.some(x => !x.gone) && rng() < BOOST_C * sinceBoost) {
+    drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS, 1)[0].name, life: BOOST_LIFE });
+    sinceBoost = 0;
+  }
   burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
   sound('kill', 1 - Math.min(0.4, e.maxHp * 0.04));  // bigger things pop lower
+}
+
+// ---------- what kills drop besides gems (D84, D86) ----------
+// The batch's mod, where its glowing fish died. It flies to you like a gem and
+// never fades: it is yours for the dive.
+function dropMod(e) {
+  drops.push({ x: e.x, y: e.y, r: 7, mod: drawCarried().name });
+}
+
+// A batch of the plan has just arrived: one of its fish glows from the start
+// and carries the batch's mod (D84, D88) -- never a boss or a mini-boss, whose
+// type says `carries: false`, and none once every ordinary mod is capped.
+function light() {
+  const can = enemies.filter(e => enemyType(e.name).carries !== false);
+  if (can.length && carriable().length) drawDistinct(can, 1)[0].carrier = true;
+}
+
+// A mod reaching you: taken, and named on the pickup line with what it
+// changed -- the numbers stay in sight, as on the cards (D52).
+function collectMod(name) {
+  const m = MODS.find(x => x.name === name);
+  const moved = modPreview(m);
+  takeMod(m);
+  banner = m.name + ' \u2014 ' + m.desc + moved.map(c =>
+    '   ' + c.stat + ' ' + +c.from.toFixed(2) + ' \u2192 ' + +c.to.toFixed(2)).join('');
+  bannerTime = NOTICE_TIME;
+  sound('modA');
+  sound('modB');
+}
+
+// A boost touched: its numbers go on, and come off when its time runs out.
+// Touched again while it runs, its clock restarts and nothing more is added.
+function startBoost(name) {
+  const b = BOOSTS.find(x => x.name === name);
+  const on = boosts.find(x => x.name === name);
+  if (on) on.left = b.time;
+  else {
+    for (const k in b.add) player[k] += b.add[k];
+    boosts.push({ name, left: b.time });
+  }
+  banner = b.name + ' \u2014 ' + b.desc;
+  bannerTime = NOTICE_TIME;
+  sound('boost');
 }
 
 // Mouse hit-testing. The rectangles come from content.js, so the renderer and
@@ -194,24 +247,20 @@ function mouseMoved() {
   return moved;
 }
 
-// A batch just died. This is the whole of in-dive progression (D34): one rank
-// per batch cleared, and the mod offer lands here and nowhere else.
-//
-// Why here rather than on an XP bar filling: the bar filled mid-fight, which
-// meant the offer interrupted combat -- forbidden by D33, and Igor's stated
-// requirement rather than a preference. The gate is already a non-combat beat
-// that the player earned, so nothing has to be paused to make room for it. It
-// also deletes the curve: the tunable is "how many mods per layer", which is
-// arithmetic, instead of an income integral.
+// A batch just died. A gate pays no rank and opens no cards: its mod rode in on
+// a glowing fish (D84, D87). What is left to pay here is the micro-tasks, Mend,
+// and at a layer end the heal and the pick of valuable mods (D85) -- the
+// dive's one pause, held for the end of the layer rather than every batch.
 function clearBatch() {
   // Enemies placed by hand -- a scenario's (D37), a check's -- belong to no
-  // batch of the plan: they pay a gate's rank and cards, and nothing that
+  // batch of the plan: they pay what a gate pays, Mend, and nothing that
   // belongs to a layer.
   const entry = plan[batchIndex - 1];
   if (entry) {
     // Micro-tasks first, so the layer end's heal cannot read as a clean batch.
-    // Each pays once per layer, ever (D36): kept in what persists, not the dive.
-    const layer = LAYERS[entry.layer].name;
+    // Each pays once per layer, ever (D36): kept in what persists, not the
+    // dive, under the layer's number -- its name is a placeholder (D89).
+    const layer = entry.layer;
     for (const t of TASKS) {
       if (meta.tasks[layer]?.[t.name] || !t.met()) continue;
       meta.tasks[layer] = { ...meta.tasks[layer], [t.name]: 1 };
@@ -225,51 +274,49 @@ function clearBatch() {
       meta.cleared = Math.max(meta.cleared, entry.layer + 1);
     }
   }
-  // The last layer's end pays no rank and no mods -- nothing to go on to
+  // The last layer's end pays no pick and no Mend -- nothing to go on to
   // (D59, narrowed by D68). The current carries you to the bottom, the win.
   if (batchIndex >= plan.length) return;
-  rank += 1;
   // A comfort mod is a standing effect rather than a stat, so it acts here.
   if (player.mendOnClear) {
     player.hp = Math.min(player.maxHp, player.hp + player.mendOnClear);
   }
-  // The cards do not come up on the same frame as the kill. The last enemy is
-  // still bursting -- `killEnemy` throws sparks that live 0.5s -- and dimming
-  // the arena over them reads as a jump cut rather than as a reward. The rank
-  // is banked now; the offer arrives once the death has played.
-  offerTimer = MOD_OFFER_DELAY;
+  // The layer end's cards do not come up on the same frame as the kill. The
+  // boss is still bursting -- `killEnemy` throws sparks that live 0.5s -- and
+  // dimming the arena over them reads as a jump cut rather than as a reward;
+  // the offer arrives once the death has played (D51).
+  if (entry && entry.end) offerTimer = MOD_OFFER_DELAY;
 }
 
 // What a mod would actually change, worked out by applying it to a copy of the
 // player and diffing the numbers (D52). Derived from `apply` itself rather than
 // written on the record, so a card can never advertise a number the mod does
 // not deliver, and adding a mod still costs exactly one line.
-function modPreview(mod) {
-  // A filler -- no `max` -- is not a mod (D69): the gems card pays into the
-  // dive, not the player, so "applying it to a copy" would pay for real.
-  if (!mod.max) return [];
+// `n` picks of it at once: a layer end's card gives an ordinary mod at the
+// bigger step (D85), and its numbers say so.
+function modPreview(mod, n = 1) {
   const after = { ...player };
-  mod.apply(after);
+  for (let i = 0; i < n; i++) mod.apply(after);
   return Object.keys(after)
     .filter(k => typeof after[k] === 'number' && after[k] !== player[k])
     .map(k => ({ stat: k, from: player[k], to: after[k] }));
 }
 
-// The beat is over: roll the mods and hand them over.
+// The beat is over: deal the layer end's cards (D85), the middle one marked.
+// With every mod capped there are none, and Continue alone goes on.
 function openModOffer() {
-  choices = rollMods();     // never empty: the fillers take any card (D69)
-  choiceIndex = Math.floor(choices.length / 2);   // start on the middle card
+  choices = rollValuable();
+  choiceIndex = Math.floor(choices.length / 2);
   screen = 'mods';
-  sound('rankA');
-  sound('rankB');
+  sound('modA');
+  sound('modB');
 }
 
-// A mod taken -- from the cards, or from a scenario's kit. Counted, so the
-// next roll can refuse it once it is at its max; a filler has no max, is not a
-// mod and is never counted (D69).
+// A mod taken -- carried in by a fish, from a layer end's card, or from a
+// scenario's kit. Counted, so the draws can refuse it once it is at its max.
 function takeMod(mod) {
   mod.apply(player);
-  if (mod.max) modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
+  modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
 }
 
 // ---------- home ----------
@@ -308,6 +355,7 @@ function endDive() {
   meta.bank += currency;
   meta.deepest = Math.max(meta.deepest, cameraY);
   diveLive = false;
+  menuIndex = END_MENU.items.indexOf(GO_HOME);   // the end screen opens on Go home (D90)
   persist(saveText());
 }
 
@@ -396,7 +444,7 @@ function update(dt) {
   // screens. The menus alone freeze it -- pause is the player stepping out.
   // Its speed eases up while the camera travels and down to a drift otherwise,
   // on a time base, and the background scrolls by `waterY`.
-  if (!MENUS[screen] && screen !== 'help' && screen !== 'options') {
+  if ((!MENUS[screen] || MENUS[screen].flows) && screen !== 'help' && screen !== 'options') {
     const target = cameraY > cameraFrom ? CURRENT_SPEED : CURRENT_CRAWL;
     current += (target - current) * (1 - Math.pow(CURRENT_EASE, dt));
     waterY += current * dt;
@@ -444,15 +492,6 @@ function step(dt) {
     return;
   }
 
-  // Both ends of a dive take the same keys: eaten, or the last layer won.
-  // Either way the gems are already banked (D67), so R diving again at once
-  // skips nothing but the shop; everything else goes `home` (D66).
-  if (screen === 'dead' || screen === 'won') {
-    if (justPressed.has('KeyR')) reset();
-    else if (justPressed.has('Escape') || tapped(GO) || tapped(CLICK)) openMenu('home');
-    return;
-  }
-
   // Esc pauses from play and from the mod cards alike -- the only two screens
   // that reach this line -- and Resume goes back to whichever it was. Pausing
   // writes the save: it is the moment a dive is most likely put down (D70).
@@ -463,26 +502,27 @@ function step(dt) {
     return;
   }
 
-  // Picking a mod. The arena is empty -- this only opens on a cleared batch --
-  // so freezing until you choose interrupts nothing (D33).
+  // The layer end's pick (D85). The arena is empty -- the boss is dead -- so
+  // holding play until you choose interrupts nothing (D33). A card is marked by
+  // a click, its number or the arrows, and you can switch; Continue, or Enter,
+  // takes the marked one and the current carries you on. A cursor passing over
+  // a card marks nothing: on its way down to Continue it crosses the cards.
   if (screen === 'mods') {
+    const n = choices.length;
+    if (n && tapped(LEFT))  choiceIndex = (choiceIndex + n - 1) % n;
+    if (n && tapped(RIGHT)) choiceIndex = (choiceIndex + 1) % n;
+    // Read every frame though it marks nothing here: a cursor resting where
+    // the pick left it must not read as moved on the next menu's first frame.
+    mouseMoved();
+    const clicked = tapped(CLICK);
     const hovered = cardUnder(aim.x, aim.y);
-    if (mouseMoved() && hovered >= 0) choiceIndex = hovered;
-
-    if (tapped(LEFT))  choiceIndex = (choiceIndex + choices.length - 1) % choices.length;
-    if (tapped(RIGHT)) choiceIndex = (choiceIndex + 1) % choices.length;
-
-    // Confirm: Enter takes the highlighted card, a click takes the one under
-    // the cursor, and the number keys still take theirs outright.
-    let taken = -1;
-    if (tapped(GO)) taken = choiceIndex;
-    if (tapped(CLICK) && hovered >= 0) taken = hovered;
-    for (let i = 0; i < choices.length; i++) {
-      if (justPressed.has('Digit' + (i + 1)) || justPressed.has('Numpad' + (i + 1))) taken = i;
+    if (clicked && hovered >= 0) choiceIndex = hovered;
+    for (let i = 0; i < n; i++) {
+      if (justPressed.has('Digit' + (i + 1)) || justPressed.has('Numpad' + (i + 1))) choiceIndex = i;
     }
-
-    if (taken >= 0) {
-      takeMod(choices[taken]);
+    if (tapped(GO) || (clicked && inRect(continueRect(), aim.x, aim.y))) {
+      const m = choices[choiceIndex];
+      if (m) for (let k = 0; k < cardStep(m); k++) takeMod(m);
       choices = [];
       screen = 'playing';
     }
@@ -492,6 +532,17 @@ function step(dt) {
   elapsed += dt;
   if (player.hurt > 0) player.hurt -= dt;
   if (noticeTime > 0) noticeTime -= dt;
+  if (bannerTime > 0) bannerTime -= dt;
+  // Boosts run on play's clock: the pause and the layer end's pick hold them,
+  // since every other screen returns above (D86).
+  for (const a of boosts) {
+    a.left -= dt;
+    if (a.left > 0) continue;
+    const add = BOOSTS.find(x => x.name === a.name).add;
+    for (const k in add) player[k] -= add[k];
+    a.gone = true;
+  }
+  boosts = boosts.filter(a => !a.gone);
 
   // --- the gate: one batch at a time, and nothing arrives until it is clear ---
   // This replaces the prototype's spawn director (D27). That director grew
@@ -527,6 +578,7 @@ function step(dt) {
       if (batchIndex >= plan.length) screen = 'won';
       else {
         spawnBatch(plan[batchIndex].batch);
+        light();
         batchHit = false;
         batchIndex += 1;
       }
@@ -770,6 +822,28 @@ function step(dt) {
     }
   }
 
+  // --- what kills drop besides gems (D84, D86) ---
+  // A mod flies to you like a gem, from anywhere, and never fades: it is yours
+  // for the dive. A boost lies where it fell, and is gone unless touched
+  // before its life runs out.
+  for (const d of drops) {
+    const dx = player.x - d.x;
+    const dy = player.y - d.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    if (d.mod) {
+      d.x += (dx / dist) * GEM_PULL * dt;
+      d.y += (dy / dist) * GEM_PULL * dt;
+    } else if ((d.life -= dt) <= 0) {
+      d.gone = true;
+      continue;
+    }
+    if (dist < player.r + d.r + 4) {
+      d.gone = true;
+      if (d.mod) collectMod(d.mod);
+      else startBoost(d.boost);
+    }
+  }
+
   // --- sparks fly out, slow down and fade ---
   // Drag has to be per second, not per frame: `vx *= 0.92` every frame would
   // slow sparks 2.4x faster on a 144Hz screen than on a 60Hz one.
@@ -789,11 +863,13 @@ function step(dt) {
   const wasFighting = enemies.length > 0;
   enemies = enemies.filter(e => !e.gone);
   // The batch died this frame. `screen === 'playing'` because a frame can both
-  // kill the last enemy and kill the player, and the death screen outranks a
-  // rank-up -- without it, dying on the final shot hands you a mod card.
+  // kill the last enemy and kill the player, and the death screen outranks the
+  // clear -- without it, dying on the boss's last hit heals you and hands you
+  // the layer end's cards.
   if (wasFighting && enemies.length === 0 && screen === 'playing') clearBatch();
   bullets = bullets.filter(b => !b.gone);
   gems    = gems.filter(g => !g.gone);
+  drops   = drops.filter(d => !d.gone);
   particles = particles.filter(p => p.life > 0);
   // A dive that ended this tick is banked last, after every gem the tick paid
   // -- a gem caught on the frame you die is yours (D67). Every later tick on

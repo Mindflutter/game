@@ -97,7 +97,7 @@ main.js        frame loop and boot
 checks.js      the browser suite
 tests/         the Node suite
 serve.py       local dev server: no caching, threaded
-docs/          design, decisions, plan, every enemy, mod, weapon and piece
+docs/          design, decisions, plan, every enemy, mod, boost, weapon and piece
                of equipment -- start at foundations.md; docs/README.md
                says where everything else is
 ```

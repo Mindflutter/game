@@ -101,7 +101,7 @@ describe('the descent', () => {
     expect(Math.abs(g.bullets[0].vy)).toBeLessThan(1e-9);
   });
 
-  it('ends the dive at the bottom of the last layer, not in another batch -- and R dives again', () => {
+  it('ends the dive at the bottom of the last layer, not in another batch -- and dives again', () => {
     const n = atGate(0).plan.length;            // drawn at reset; one length for all
     const g = atGate(n);
     ride(g);
@@ -109,8 +109,11 @@ describe('the descent', () => {
     expect(g.enemies).toHaveLength(0);
     expect(g.cameraY).toBe(g.gateDepth(n));
     // Reaching the bottom pays nothing of its own.
-    expect(g.rank).toBe(0);
-    g.justPressed.add('KeyR');
+    expect(g.modCounts).toEqual({});
+    const again = g.rowRect(0, g.MENUS.won.top);  // the Dive again button (D90)
+    g.aim.x = again.x + again.w / 2;
+    g.aim.y = again.y + again.h / 2;
+    g.justPressed.add('Mouse0');
     g.update(g.FIXED_DT);
     expect(g.screen).toBe('playing');
     expect(g.cameraY).toBe(0);
@@ -126,15 +129,15 @@ describe('the descent', () => {
     expect(g.player.y).toBeLessThanOrEqual(g.cameraY + g.ARENA_H);
   });
 
-  it('pays a rank and mods between batches, but neither at the last layer end', () => {
-    // Igor, 2026-09-28: "no mods should be offered at layer's end, unless a
-    // player goes on to the next one" -- D68 keeps that for the last layer
-    // only: "you clear the last layer - you won the game".
+  it('opens no cards between batches, nor at the last layer end', () => {
+    // Mods are dropped, never offered at a gate (D84); the layer end keeps its
+    // pick (D85) -- but not the last one: "you clear the last layer - you won
+    // the game" (D68).
     const mid = loadGame();
     mid.reset(1);
     ride(mid);                                  // the first batch arrives
-    expect(clearAndWait(mid)).toBe('mods');
-    expect(mid.rank).toBe(1);
+    expect(clearAndWait(mid, 1)).toBe('playing');
+    expect(mid.choices).toEqual([]);
     // ?dev=last-batch&play -- the scenario for seeing the dive's end without
     // playing all of it -- is the way in.
     const last = loadGame();
@@ -142,14 +145,13 @@ describe('the descent', () => {
     ride(last);                                 // the last batch arrives
     expect(last.batchIndex).toBe(last.plan.length);
     expect(clearAndWait(last)).toBe('won');     // straight on, no cards
-    expect(last.rank).toBe(0);                  // and no rank for it
   });
 
   it('keeps the water flowing behind the mod cards while play waits', () => {
     // Igor, 2026-09-28: "The water freezes under the mod cards - it should not".
-    const g = loadGame();
-    g.reset(1);
-    ride(g);                                    // the first batch arrives
+    // The cards are the layer end's since D85.
+    const g = atGate(atGate(0).plan.findIndex(e => e.end));
+    ride(g);                                    // the boss arrives
     expect(clearAndWait(g, 2)).toBe('mods');
     const cam = g.cameraY, px = g.player.x, py = g.player.y;
     const flow = flowFrom(g, 0);                // one second, no pick
@@ -193,9 +195,8 @@ describe('the descent', () => {
   it('pauses from the mod cards, and resumes back to the same cards', () => {
     // Igor: "cannot invoke pause from mod screen". Resume must return to the
     // cards it was opened over -- by Esc or by the menu -- not to play.
-    const g = loadGame();
-    g.applyScenario('late-swarm', 1);
-    ride(g);
+    const g = atGate(atGate(0).plan.findIndex(e => e.end));
+    ride(g);                                    // the layer end's boss (D85)
     expect(clearAndWait(g)).toBe('mods');
     const cards = g.choices.map(m => m.name).join();
     for (const resume of ['Escape', 'Enter']) {        // Esc, and the menu's Resume

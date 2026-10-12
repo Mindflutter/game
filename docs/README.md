@@ -15,7 +15,8 @@ A change to them belongs in the same commit as the code it describes.
 | The next steps inside the stage, and the measured bot figures | `roadmap.md` |
 | How the code works — systems, screens, the save, the tests | `design.md` |
 | An enemy: its numbers, role and behaviour | `entities/enemies.md` |
-| A mod, or a card that fills in for one | `entities/mods.md` |
+| A mod | `entities/mods.md` |
+| A boost | `entities/boosts.md` |
 | A weapon: its numbers and tiers | `entities/weapons.md` |
 | A piece of equipment | `entities/equipment.md` |
 | Why something was decided, and what was rejected | `decisions.md` |
@@ -53,7 +54,7 @@ copy.
 | A term | `foundations.md` → the glossary |
 | Which stage is active, and what is next | `plan.md` |
 | An entity's numbers, role and behaviour | its doc in `entities/` |
-| How a system works — the gate, the descent, the offer, the save | `design.md` |
+| How a system works — the gate, the descent, the drops, the pick, the save | `design.md` |
 | Measured bot figures | `roadmap.md` → Health |
 | The check count | `design.md` → Verification |
 | Line counts and the platform share | `design.md` → Files |

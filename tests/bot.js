@@ -58,13 +58,16 @@ export function kiteAndShoot(g) {
 // One tick of the bot's input, without the update: shared by `diveReport` and
 // by tests that assert on every tick, so both play the same bot.
 export function botInput(g) {
-  // Every cleared batch offers three mods (D34), and the dive does not resume
-  // until one is taken -- so the bot has to pick. It always takes the first
-  // card rather than rolling: a bot that chose at random would build itself
-  // differently every dive, and two dives that are not the same dive cannot
-  // be compared.
-  if (g.screen === 'mods') g.justPressed.add('Digit1');
-  else kiteAndShoot(g);
+  // A layer end offers valuable mods (D85), and the dive does not go on until
+  // one is marked and Continue pressed -- so the bot has to pick. It always
+  // takes the first card rather than rolling: a bot that chose at random would
+  // build itself differently every dive, and two dives that are not the same
+  // dive cannot be compared. Boosts it never seeks (D86): it touches one only
+  // by swimming over it, so its numbers stay a floor.
+  if (g.screen === 'mods') {
+    g.justPressed.add('Digit1');
+    g.justPressed.add('Enter');
+  } else kiteAndShoot(g);
 }
 
 export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false, scenario) {

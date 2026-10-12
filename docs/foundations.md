@@ -24,20 +24,21 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 |---|---|---|
 | **layer** | One section of the abyss you dive into. 3–5 of them at alpha. Unlocked by completing the previous one. | never "level" |
 | **dive** | One attempt, start to death or completion. It starts at the top of the first layer and runs on through the layers; completion is clearing the last one — the win (D66, D68). | "run" is its synonym; prefer **dive** |
-| **rank** | In-dive progress, carried through every layer of a dive and reset when it ends (D66). **One rank per batch cleared** — there is no XP bar and no curve (D34 — Mods) — each layer's boss included (D68), except the last layer's: its clear wins the game and pays none. | never "level" |
-| **mod** | A dive-scoped pick, offered as one of three at a gate or a layer end, gone at the end of the dive. Every mod has a cap (D69). Momentum, not strategy. | never "upgrade" |
+| **mod** | A dive-scoped power, gone at the end of the dive. A glowing fish carries one in every batch but a boss's or a mini-boss's — kill it and the mod flies to you (D84, D88) — and a layer end offers a pick of **valuable** mods: its own, or an ordinary one at a bigger step (D85). Every mod has a cap (D69). Momentum, not strategy. | never "upgrade" |
+| **boost** | A short power a kill drops (D86): switched on by touching it, gone after a few seconds, and gone from the floor if left lying. Not a mod — not counted, no cap, nothing kept. Igor's word. | not a "mod" |
 | **gear** | A persistent item bought with currency on the home screen. Weapons, suit, mask, flippers, trinkets. | never "upgrade" |
 | **equipment** | Gear that is not a weapon: the suit, mask, flippers and trinkets (D81). Igor's word, and the draft's. | not a weapon — **gear** is both |
 | **tier** | One of the 3–4 purchasable steps a piece of gear advances through. | never "level", never "upgrade" |
-| **gate** | The depth where a batch waits. The descent stops there — no further in enemies until the batch is cleared, though the water keeps flowing (D27, D58). Clearing it pays one rank and offers three mods (D33, D34): the dive's one pause, since play waits on the pick. The layer's last batch is the exception — its clear is the layer end. Then the current carries you on to the next gate. | not a "wave", not a "batch", not the **layer end** |
-| **layer end** | The clear of a layer's last batch — the boss's (D62) — and the bottom the current then carries you to. **Not a gate but a milestone, bigger than one** (D68): it pays a gate's rank and three mods, heals you fully, and the boss drops a big haul of gems — then the current carries you on into the next layer (D66). The last layer's end pays no rank and no mods — there is nothing to go on to — and is the win; its boss still drops its haul. It plays with no screen — the mod pick is its one pause, then the current carries you into the next layer (D72). The term is Igor's: "or just call it layer end", kept as final (D73). | not a "gate" |
+| **gate** | The depth where a batch waits. The descent stops there — no further in enemies until the batch is cleared, though the water keeps flowing (D27, D58). One of its fish glows from the moment it arrives and carries the batch's mod (D84, D88) — never a mini-boss. Clearing it opens nothing: the current carries you straight on to the next gate. The layer's last batch is the exception — its clear is the layer end. | not a "wave", not a "batch", not the **layer end** |
+| **layer end** | The clear of a layer's last batch — the boss's (D62) — and the bottom the current then carries you to. **Not a gate but a milestone, bigger than one** (D68): it heals you fully, the boss drops a big haul of gems, and it offers a pick of valuable mods — the dive's one pause, ended by Continue (D85) — then the current carries you on into the next layer (D66). The last layer's end offers no pick — there is nothing to go on to — and is the win; its boss still drops its haul. Between layers there is no screen but the pick (D72). The term is Igor's: "or just call it layer end", kept as final (D73). | not a "gate" |
 | **boss** | A special enemy type, met in a layer's last batch — a normal batch in every other way (D62). It lunges (D64). Clearing its batch is the **layer end**. | not a "mini-boss" |
-| **mini-boss** | A smaller boss: one tougher enemy in a batch of its own at an ordinary gate along the layer. It lunges like the boss, weaker and slower to wind up, so it teaches the boss's tell; its gate pays a rank and mods like any other (D65). | not the "boss" |
+| **mini-boss** | A smaller boss: one tougher enemy in a batch of its own at an ordinary gate along the layer. It lunges like the boss, weaker and slower to wind up, so it teaches the boss's tell; it never glows, so its gate pays no mod (D65, D88). | not the "boss" |
 | **batch** | The gated unit. Cleared before the descent resumes. Contains 1–N enemies of comparable threat. | not a "wave" |
 | **wave** | A spawn group *inside* a batch. **Default: one batch is one wave.** Multi-wave batches are permitted but are a UX risk — Igor's concern, 2026-09-26: a batch that keeps refilling reads as "the gate is broken" rather than as a second wave. Any multi-wave batch must telegraph that more is coming. | not a "batch" |
 | **prototype** | The survivors-like auto-shooter this grew out of. A closed phase, not a version of the current game. | not "the game" |
 | **home** | The surface screen: shop, the layers unlocked and the depth reached, launch. Every dive starts at the top — there is no layer select (D66). | "base", "backyard" are flavour, not terms |
 | **attribute** | A **body** stat raised by spending attribute points at home. Points are earned by in-dive micro-tasks, never bought, and are capped at the source — a layer holds a finite set of tasks (D36). | not "gear", not a "mod" |
+| **point** | An attribute point (D36): paid by a micro-task, once per layer, ever, and spent at `home` to raise an attribute. Never bought, and it buys no gear. | not currency, not a "mod point" (declined) |
 | **micro-task** | An in-dive objective that pays attribute points, rewarding **mastery not quotas** — "clear a batch undamaged", never "kill 50 darters" (D36). | not an "achievement" |
 
 ## The genre contract
@@ -54,20 +55,25 @@ What this game *is*, stated so a branching session cannot drift off it.
    - `gear` — bought with currency, persists, **combat** stats.
    - `attribute` — earned as points by in-dive micro-tasks, spent freely at
      home, persists, **body** stats.
-   - `mod` — picked at a gate or a layer end, gone at the end of the dive.
+   - `mod` — carried by a glowing fish in every batch, or picked at a layer
+     end; gone at the end of the dive (D84, D85). A `boost` lasts seconds and
+     is no tier at all (D86).
 
    `gear` and `attribute` **sum; they never multiply** (D36). Gear may *require*
    an attribute threshold — that is scheduling, not scaling, and is allowed.
    Attribute points are non-fungible: money cannot buy them and they cannot buy
    gear. That non-fungibility is the entire reason the tier exists.
-5. **Nothing interrupts combat** (D33 — Mod offers do not interrupt, D34 —
-   Mods). One rank per batch cleared and three mods offered at the gate —
-   and at every layer end but the last (D68); chosen in about a second. Mods differ in **kind, not degree** — comparing numbers is
-   the heavy thinking the dive must not contain. No modal pop-up mid-fight, and
-   no XP bar.
+5. **Nothing interrupts combat** (D33 — Mod offers do not interrupt, D84 —
+   Mods are dropped). Mods arrive mid-fight, carried by a glowing fish; the
+   one pick sits at a layer end, between layers, never mid-fight — every layer
+   end but the last (D85). Mods differ in **kind, not degree** — a pickup has to
+   be felt and recognised mid-fight, and the pick must stay a gut read. No modal
+   pop-up mid-fight, no XP bar, and no rank (D87).
 6. **Combat is the dive's only dynamic system** (D35 — Currency is
-   auto-collected). A dive contains fighting, descending, and one one-second mod
-   pick. Nothing else. Currency is collected automatically and never chased.
+   auto-collected). A dive contains fighting, descending, and a pick at each
+   layer end. Nothing else. Currency is collected automatically and never
+   chased. A boost switches on when touched and cannot be held or stored, so
+   grabbing one is positioning inside a fight, not gathering (D86).
    This rules out — without needing a fresh discussion — resource gathering
    mid-dive, mid-dive shops, puzzle or traversal segments, and inventory
    management while diving.

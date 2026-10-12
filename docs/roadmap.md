@@ -14,9 +14,11 @@ No stage is active: what comes next, and where each requirement before S5
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's
-haul (`entities/enemies.md`), and S4's — the Gun's prices and tier step
-(`entities/weapons.md`), the gems card (`entities/mods.md`), dash reach and
-`GEM_PULL` (`design.md`) — all Claude's picks. The scenarios that start
+haul (`entities/enemies.md`), S4's — the Gun's prices and tier step
+(`entities/weapons.md`), dash reach and `GEM_PULL` (`design.md`) — and the
+mods rework's: the layer end's bigger step (`design.md`), `Mend` as the layer end's own (`entities/mods.md`), the boost
+chance, a boost's life on the floor and `Rush` (`entities/boosts.md`) — all
+Claude's picks. The scenarios that start
 next to each — a lunger, the second layer with a kit — are in the root
 `README.md` → Scenarios.
 
@@ -66,10 +68,11 @@ This section owns the measured bot figures. Nothing else quotes them.
   clears batches far faster, so a human layer is likely well under the 4–8 min
   pillar — which is S6's problem.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
-  4471 reaches the bottom of the dive — both layers since S4 — in 578.00 /
-  578.00 / 578.00s at 1280×800, 1920×1080 and 3440×1440 (stationary, immortal,
-  aiming at the first enemy), driven through real mouse events. On the S3
-  build, one layer: 296.34s at all three. A `?test` check
+  4471 reaches the bottom of the dive — both layers since S4 — in 562.24 /
+  562.24 / 562.24s at 1280×800, 1920×1080 and 3440×1440 (stationary, immortal,
+  aiming at the first enemy), driven through real mouse events — measured
+  2026-10-12, on the build with mods from drops (D84, D88). On the S3 build, one
+  layer: 296.34s at all three. A `?test` check
   holds it within 2%; on the S2 layer, dropping the input's `/ scale` failed it
   at 217.03 / 228.71 / 227.51.
 - **The boss fight** (S3 DoD, D63), mortal bot at the starting kit — no gear,
@@ -82,23 +85,28 @@ This section owns the measured bot figures. Nothing else quotes them.
   backs out of range, so its shots never land, and backs straight along the
   lunge's line, so the charges do. A measure of the bot's policy, not of the
   boss (D50); Igor's playthrough decides whether the layer is winnable.
-- **The meta loop** (S4 DoD), measured 2026-09-30 — mortal bot, seeds 1, 7, 42,
-  4471, 90210, from the top, each a whole dive:
+- **The meta loop** (S4 DoD), re-measured 2026-10-12 on the build with mods
+  from drops (D84–D88) — mortal bot, seeds 1, 7, 42, 4471, 90210, from the top,
+  each a whole dive or 1800s of one:
 
-  | | gates cleared | gems banked | mean gates | mean gems |
+  | | gates cleared | gems | mean gates | mean gems |
   |---|---|---|---|---|
-  | starting gun | 0 / 4 / 0 / 5 / 1 | 10 / 54 / 11 / 79 / 29 | 2.0 | 36.6 |
-  | gun tier 1 | 0 / 5 / 7 / 12 / 9 | 11 / 72 / 133 / 266 / 145 | 6.6 | 125.4 |
+  | starting gun | 0 / 4 / 2 / 5 / 4 | 10 / 54 / 36 / 84 / 54* | 3.0 | 47.6 |
+  | gun tier 1 | 0 / 4 / 4 / 6 / 10 | 11 / 54 / 62* / 105 / 156 | 4.8 | 77.6 |
 
-  **Dives to the first purchase: 2** (target ≤ 3) — seeds 1 then 7 bank 64
-  against the first tier's 40. **Measurably stronger**: the same seeds, tier 1
-  against the starting gun, clear 3.3× the gates. Seeds 1 and 42 die in their
-  first batch because their dive opens on 14 darters (D71 draws the opener
-  from stretch 1's pool; `ideas.md` → Open — raised during S4) — before S4 every
-  dive opened on 10 drifters and the bot died after 3–7 clears. **Layer 2**,
-  from `layer-2` (a kit of fifteen mods, the starting gun): dies after 8 / 10 /
-  11 / 10 / 10 clears, banking 215–312 gems — it never reaches layer 2's boss.
-  Bot policy as ever (D50): Igor finds batches easy.
+  \* Alive at the 1800s cap, stuck at a mini-boss (below): the dive's takings,
+  not banked. **Dives to the first purchase: 2** (target ≤ 3) — seeds 1 then 7
+  bank 64 against the first tier's 40. **Measurably stronger**: the same seeds,
+  tier 1 against the starting gun, clear 1.6× the gates — 3.3× on the S4 build,
+  where every gate's card was the same first card; now which fish glows and
+  which mod it carries are drawn, and a mini-boss pays none. Seed 1 dies in its
+  first batch, the 14 darters D71 can draw as an opener (`ideas.md` → Open —
+  raised during S4). **Layer 2**, from `layer-2` (a kit of fifteen mods, the
+  starting gun): dies after 8 / 10 / 11 / 6 / 10 clears, banking 114–209 gems
+  — it never reaches layer 2's boss. It banked 215–312 on the S4 build: there
+  every gate past the capped pool offered the gems card, ten gems a gate, and
+  the bot took it; the card is gone (D84). The bot never seeks a boost (D86) — it takes one only by
+  swimming over it — so these figures are a floor. Bot policy as ever (D50): Igor finds batches easy.
 - **Arrival timing** (D55): from a batch spawning, the first enemy reaches a
   centred player in 2.04s at the earliest, 3.21s on average. Edged, 0.27s;
   cornered, 0.22s. This is what killed the `Lull` mod and what Igor's

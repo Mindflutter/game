@@ -69,7 +69,10 @@ lunge did. Enemy projectiles reuse the existing `bullets[]` shape with an
 **Still parked, and now cheaper.** D31's `scope`/`apply(player, weapon)` shape
 makes a trade-off mod the same one-line record it always was. Revisit at S5.
 Originally: **Parked 2026-09-19** — Igor: "reject now, save for the future ideas." Not
-declined, deliberately not next.
+declined, deliberately not next. Kept parked through the mods rework (Igor,
+2026-10-12: "ok"): since D84 (mods are dropped) nobody chooses a fish's mod, so
+a trade-off it carried would be a curse you cannot refuse. A boost is the shape
+that fits — touched or left alone, the choice is the player's (D86 (boosts)).
 
 All seven upgrades are strictly good, so the level-up screen is "pick the
 biggest number" rather than a choice. `apply` already supports the fix with no
@@ -214,20 +217,13 @@ built.
   and making ordinary builds feel weak. Revisit only after S6 (Balance) has the
   additive version measured, so there is a baseline to compare against.
 
-- **Mod points — better mods cost more.** Igor, 2026-09-26: "let's make mods
-  shine by adding mod points later on". Instead of three free picks, a rank-up
-  grants points and each mod has a cost, so a strong mod is a real trade
-  against two weak ones. This is the cleanest answer to two of Igor's own
-  pitfalls at once — it prices stacking, and it slows effective power growth
-  without slowing rank-ups. Not now: it needs the generic mod pool balanced
-  first (S1 — Combat core through S4 — Meta loop skeleton), because a cost
-  curve on top of an unbalanced pool is two unknowns multiplied.
-
 - **Comfort is down to one mod.** `Mend` is the last comfort mod standing: of
   the three D34 (mods) named, D35 (currency is auto-collected) left the
-  currency magnet nothing to do and `Lull` is declined (below). Not a design
-  problem yet — S5 (content) grows the pool to cover a whole dive (D69 (every
-  mod capped)) — but comfort is meant to carry the pool's width.
+  currency magnet nothing to do and `Lull` is declined (below). Since D85 (the
+  layer end's pick) it is one of the layer end's own, so no fish carries a
+  comfort mod at all. Not a design problem yet — S5 (content) grows the pool to
+  cover a whole dive (D69 (every mod capped)) — but comfort is meant to carry
+  the pool's width.
 
 - **The dash economy: two of six mods feed one verb.** Igor, 2026-09-27,
   playing D54: "once the dash becomes long, it feels way easier" and "dash
@@ -326,21 +322,6 @@ built.
 
 ## Open — raised during S4 (meta loop skeleton)
 
-- **Mods as drops, never offered — a requirement before S5 since D80 (before
-  S5: entity docs, mods from drops).** Igor, 2026-09-30, closing S4: "mods
-  rework from choice to enemy drops (from ideas)", its own session. How drops
-  work stays open until then. The idea as first raised: Igor, 2026-09-30, a "wild idea" for
-  discussion after S4: "mods become random (most likely pseudo-random) drops
-  from enemies, never offered, smooth part of the dive, some of them permanent,
-  some temporary. would this help with mod vs gear resolution? would it allow
-  more variety to mod system? would it make the game feel more dynamic and
-  more understandable?" Undecided — a question, not a lean. What it touches,
-  so the discussion starts from the docs: D33 (mod offers do not interrupt)
-  and D34 (mods), which put the pick at the gate; the genre contract's "one
-  one-second mod pick" (4, 5); D69 (every mod capped), whose fill cards exist
-  because an offer can run dry; D35 (currency is auto-collected), which a drop
-  would ride on; and "permanent" mods, which would cross into what `gear` and
-  `attribute` own (D31 (two-tier progression), D36 (attributes)).
 - **How batches grow, balance-wise — S6 (balance)'s.** Igor, 2026-09-30:
   "right now the batches are hard coded and are shitty because of that - you
   know no level of difficulty, we havent settled how batches grow
@@ -356,6 +337,14 @@ built.
   against 10 drifters shows hp is not it.
 
 ## Suggested but not yet discussed
+
+- **A rank only play can earn.** Claude, 2026-10-01, in the mods rework, when
+  Igor asked whether rank "could be something more": a meter that climbs with
+  clean, fast clears, drops when you are hit, and raises the odds or the worth
+  of what fish and kills drop — as Isaac's devil rooms reward a floor without
+  damage. Not taken with D87 (rank is retired): it is a system of its own, and
+  it snowballs — good players get stronger still. If it comes, it is the place
+  the "easy layers stay relevant" pillar's fast clears could pay into.
 
 - **Guard the other screens against overflow.** D46 gave the help screen a check
   that its content ends above the hint. Options and the menus stack rows from
@@ -407,6 +396,13 @@ measurement behind it holds: nothing reaches a centred player inside its 1.2s
 window, so an arrival guard has nothing to guard against while every enemy
 walks in from an edge. The slot reopens only if arrivals ever start near the
 player (the fish from behind the screen, above).
+
+### Mod points — better mods cost more
+Igor, 2026-09-26: "let's make mods shine by adding mod points later on" —
+instead of three free picks, a rank-up granting points and each mod a cost, so
+a strong mod is a real trade against two weak ones. **Moot since D84 (mods are
+dropped) and D87 (rank is retired)**: no rank pays points, and a fish's mod is
+not chosen. Declined in the mods rework, Igor, 2026-10-12: "ok".
 
 ### A "finished standalone"
 Void since 2026-09-26, not answered: the question of what would finish the

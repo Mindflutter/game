@@ -221,23 +221,19 @@ describe('the entity docs', () => {
       lungers.map(t => [t.name, ...timing.map(k => t.lunge[k])])));
   });
 
-  it('lists every mod and filler with what it does and its card text', () => {
+  it('lists every mod with what it does and its card text', () => {
     const cols = plain(g.MODS);
     expect(doc('mods.md')).toContain(table([...cols, 'per pick', 'at max'],
       g.MODS.map(m => [...cols.map(k => m[k]), moved([m.apply], true), moved(Array(m.max).fill(m.apply))])));
-    // A filler pays into the dive as well as the player, so it is worked out
-    // on a dive in progress, short of a heart, rather than on the kit.
-    const pays = f => {
-      g.reset(1);
-      g.player.hp = 1;
-      const before = { ...g.player, currency: g.currency };
-      f.apply(g.player);
-      const after = { ...g.player, currency: g.currency };
-      return Object.keys(after).filter(k => after[k] !== before[k])
-        .map(k => k + ' +' + r3(after[k] - before[k])).join(', ');
-    };
-    expect(doc('mods.md')).toContain(table(['name', 'pays', 'desc'],
-      g.FILLERS.map(f => [f.name, pays(f), f.desc])));
+  });
+
+  it('lists every boost with what it adds, for how long, and its line', () => {
+    // `add` is numbers, so it is read straight off the record (D86).
+    const cols = plain(g.BOOSTS);
+    const adds = b => Object.entries(b.add)
+      .map(([k, v]) => k + ' ' + (v < 0 ? '-' : '+') + r3(Math.abs(v))).join(', ');
+    expect(doc('boosts.md')).toContain(table([...cols, 'adds'],
+      g.BOOSTS.map(b => [...cols.map(k => b[k]), adds(b)])));
   });
 
   it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
@@ -255,6 +251,7 @@ describe('the entity docs', () => {
     const shapes = {
       'enemies.md': keysOf(g.ENEMY_TYPES),
       'mods.md': keysOf(g.MODS),
+      'boosts.md': keysOf(g.BOOSTS),
       'weapons.md': keysOf(g.WEAPONS),
       'equipment.md': [...new Set(['name', 'tiers', ...keysOf(g.EQUIPMENT)])],
     };
@@ -274,8 +271,8 @@ describe('the entity docs', () => {
 
   it('gives every item a section, and no section to an item the code lacks', () => {
     // Any other heading has to be one of the layout's own.
-    const LAYOUT = ['Roster', 'Fields', 'Behaviours', 'Fillers — not mods', 'Adding one'];
-    const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS,
+    const LAYOUT = ['Roster', 'Fields', 'Behaviours', 'Adding one'];
+    const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS, 'boosts.md': g.BOOSTS,
                     'weapons.md': g.WEAPONS, 'equipment.md': g.EQUIPMENT };
     const wrong = [];
     for (const [file, records] of Object.entries(items)) {

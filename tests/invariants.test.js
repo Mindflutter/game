@@ -45,9 +45,11 @@ function allNumbers(g) {
   const out = [];
   const take = o => { for (const k in o) if (typeof o[k] === 'number') out.push([k, o[k]]); };
   take(g.player);
-  for (const arr of [g.enemies, g.bullets, g.gems, g.particles]) for (const e of arr) take(e);
+  for (const arr of [g.enemies, g.bullets, g.gems, g.drops, g.boosts, g.particles]) {
+    for (const e of arr) take(e);
+  }
   out.push(['elapsed', g.elapsed], ['shake', g.shake],
-           ['rank', g.rank], ['currency', g.currency], ['kills', g.kills]);
+           ['currency', g.currency], ['kills', g.kills], ['sinceBoost', g.sinceBoost]);
   return out;
 }
 

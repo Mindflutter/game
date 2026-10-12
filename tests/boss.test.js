@@ -97,12 +97,13 @@ describe('the layer (D62, D65)', () => {
     });
   });
 
-  it('pays a rank and the mod cards when a mini-boss dies', () => {
+  it('carries no mod on a mini-boss, and opens no cards when it dies (D88)', () => {
     const g = loadGame();
     expect(g.applyScenario('mini-boss', 1)).toBe(true);
     ride(g);
     expect(g.enemies.map(e => e.maxHp)).toEqual([g.enemyType('mini-boss').hp]);
-    expect(clearAndWait(g)).toBe('mods');
-    expect(g.rank).toBe(1);
+    expect(clearAndWait(g, 1)).toBe('playing');
+    const held = Object.values(g.modCounts).reduce((a, b) => a + b, 0);
+    expect(held + g.drops.filter(d => d.mod).length).toBe(0);
   });
 });

@@ -83,10 +83,17 @@ const FIXED_DT       = 1 / 120;
 // cannot spiral into simulating forever.
 const MAX_FRAME_DT   = 0.05;
 const NOTICE_TIME    = 2.5;   // seconds a micro-task's line stays up. Claude's pick
-const MOD_OFFER_DELAY = 0.6;  // seconds between the last enemy dying and the
-                              // cards appearing. The kill burst lives 0.5s, so
-                              // anything shorter drops the offer on top of the
-                              // death it is rewarding and reads as a jump cut.
+const MOD_OFFER_DELAY = 0.6;  // seconds between the boss dying and the layer
+                              // end's cards appearing. The kill burst lives
+                              // 0.5s, so anything shorter drops the offer on top
+                              // of the death it is rewarding: a jump cut.
+// What a dive picks up (D84, D85, D86). Every number is Claude's pick, S6's.
+const END_STEP       = 2;     // picks at once: an ordinary mod on a layer end's card
+// A boost's chance on the Nth kill since the last one is BOOST_C x N -- the
+// pseudo-random distribution Dota uses: about one boost every 8.5 kills, never
+// more than 50 apart, and seldom two in a row.
+const BOOST_C        = 0.02;
+const BOOST_LIFE     = 6;     // seconds a boost lies where it fell, then it is gone
 
 let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
@@ -114,14 +121,16 @@ const SOUNDS = {
   gem:    { freq: 1150, dur: 0.05, type: 'sine',     vol: 0.22, slide: 1.3  },
   hurt:   { freq: 110,  dur: 0.28, type: 'sawtooth', vol: 0.55, slide: 0.4  },
   death:  { freq: 70,   dur: 0.90, type: 'sawtooth', vol: 0.60, slide: 0.3  },
-  rankA:  { freq: 520,  dur: 0.09, type: 'triangle', vol: 0.40, slide: 1    },
-  rankB:  { freq: 780,  dur: 0.16, type: 'triangle', vol: 0.35, slide: 1.25 },
+  modA:   { freq: 520,  dur: 0.09, type: 'triangle', vol: 0.40, slide: 1    },
+  modB:   { freq: 780,  dur: 0.16, type: 'triangle', vol: 0.35, slide: 1.25 },
+  boost:  { freq: 440,  dur: 0.14, type: 'square',   vol: 0.25, slide: 1.8  },
 };
 
 // ---------- mods ----------
-// A dive-scoped pick, offered as one of three at a gate and gone at the end of
-// the dive (D34). Just data: adding one is a line here and nothing else.
-// Documented, fillers too, in docs/entities/mods.md -- `npm test` holds it here.
+// A dive-scoped power, gone at the end of the dive: carried by a glowing fish
+// in every batch (D84), or picked from valuable mods at a layer end (D85).
+// Just data: adding one is a line here and nothing else.
+// Documented in docs/entities/mods.md -- `npm test` holds it here.
 //
 // `scope` is **body** or **comfort**, and nothing else until S5 — Content.
 // Weapon-scoped mods are deliberately absent: "+35% fire rate" is meaningless on
@@ -132,22 +141,25 @@ const SOUNDS = {
 // against each other at once. The prototype's Rapid Fire, Power, Reach and
 // Pierce were all weapon mods; they went here.
 //
-// No number the player has to compare across categories: mods differ in **kind,
-// not degree**, because arithmetic is the heavy thinking a dive must not
-// contain. That is why the descriptions read as sentences and not as stat lines.
+// Mods differ in **kind, not degree**: a pickup has to be felt and recognised
+// in the middle of a fight, and the layer end's pick stays a gut read. That is
+// why the descriptions read as sentences and not as stat lines.
 //
-// `max` is how many times one mod can be taken. It exists so the roll can
+// `max` is how many times one mod can be taken. It exists so the draws can
 // refuse a mod that is already maxed, which is the only way a bounded stat (a
 // cooldown has a floor of zero) stays honest. Since D69 every mod has one -- a
 // switch caps at 1, anything that stacks at 3 -- so a dive's power has a
-// ceiling that deep layers can be tuned against.
+// ceiling that deep layers can be tuned against. Where the caps sit is S6's.
+//
+// `end` marks one of the layer end's own mods (D85): offered only on its cards,
+// never carried by a fish. An ordinary mod reaches those cards too, at the
+// bigger step, END_STEP picks at once.
 //
 // Two mods D34 named are deliberately absent: pickup radius and a currency
 // magnet. D35 was recorded hours later and auto-collects currency, which leaves
 // both of them with nothing to do — building either now would be building a
-// husk. Every mod can max out, so a long dive runs the pool short; FILLERS
-// below take the empty cards (D69), and more mods is S5 — Content, not a
-// reason to pad the pool here.
+// husk. Every mod can max out, so a long dive runs the pool short; then no fish
+// glows (D84), and more mods is S5 — Content, not a reason to pad the pool here.
 const MODS = [
   { name: 'Fins',     scope: 'body',    desc: 'you swim faster', max: 3,
     apply: p => p.speed += 45 },
@@ -160,21 +172,19 @@ const MODS = [
   { name: 'Impact',   scope: 'body',    desc: 'the dash wounds what it throws', max: 3,
     apply: p => p.dashDamage += 1 },
   { name: 'Mend',     scope: 'comfort', desc: 'a heart back each batch', max: 1,
-    apply: p => p.mendOnClear = 1 },
+    end: true, apply: p => p.mendOnClear = 1 },
 ];
 
-// What fills a card the pool cannot (D69): a handful of gems, then a heart
-// back. Neither is a mod -- no cap, not counted, nothing carried -- so a card
-// is never empty and momentum with nowhere to go becomes money or health.
-// Having no `max` is what marks one: every mod has a cap (D69), so the card
-// shows no "held", nothing counts it, and the stat preview skips it --
-// previewing applies to a copy of the player, and the gems do not live on it.
-const FILLER_GEMS = 10;       // Claude's pick; S6 owns it
-const FILLERS = [
-  { name: 'Gems',  desc: 'a handful of gems',
-    apply: () => { currency += FILLER_GEMS; } },
-  { name: 'Heart', desc: 'a heart back',
-    apply: p => { p.hp = Math.min(p.maxHp, p.hp + 1); } },
+// ---------- boosts ----------
+// A short power a kill drops (D86): switched on by touching it, gone after
+// `time` seconds, and gone from the floor after BOOST_LIFE if nobody touches
+// it. Not a mod -- not counted, no cap, nothing kept. `add` is numbers rather
+// than a function so it can be taken back when the time runs out; for the same
+// reason a boost never moves `hp`. Touching one already running restarts its
+// clock and adds nothing more.
+// Documented in docs/entities/boosts.md -- `npm test` holds it here.
+const BOOSTS = [
+  { name: 'Rush', desc: 'you swim much faster, for a moment', time: 5, add: { speed: 200 } },
 ];
 
 // ---------- gear, attributes, micro-tasks ----------
@@ -274,14 +284,46 @@ function cardRect(i, n) {
            y: ARENA_H / 2 - CARD_H / 2, w: CARD_W, h: CARD_H };
 }
 
-// Three distinct mods, never one that is already maxed (D34), drawn by
-// `drawDistinct()`. Never repeats itself if the pool has run short -- a
-// duplicate card is not a choice -- the fillers take the empty cards instead,
-// gems first (D69). With every mod capped that is two cards.
-function rollMods() {
-  const out = drawDistinct(MODS.filter(m => (modCounts[m.name] || 0) < m.max), 3);
-  for (const f of FILLERS) if (out.length < 3) out.push(f);
-  return out;
+// The layer end's Continue (D85), under the cards: a card is marked, and taken
+// here. Derived from the cards' box, so moving them moves it.
+function continueRect() {
+  const c = cardRect(0, 1);
+  return { x: ARENA_W / 2 - CARD_W / 2, y: c.y + c.h + 20, w: CARD_W, h: ROW_H };
+}
+
+// The ordinary mods still under their caps: what a fish can carry (D84).
+function carriable() {
+  return MODS.filter(m => !m.end && (modCounts[m.name] || 0) < m.max);
+}
+
+// The mod a glowing fish carries: every ordinary mod once before any comes
+// again -- a round, dealt from the seed and refilled when spent, the way
+// Tetris deals its pieces -- and none past its cap. `null` once every one is
+// capped, and then no fish lights up: caps are balance's question, and that is
+// the easiest answer until S6 (Igor, 2026-10-12).
+function drawCarried() {
+  const open = carriable();
+  if (!open.length) return null;
+  let fresh = open.filter(m => !modRound.includes(m.name));
+  if (!fresh.length) {
+    modRound = [];
+    fresh = open;
+  }
+  const m = drawDistinct(fresh, 1)[0];
+  modRound.push(m.name);
+  return m;
+}
+
+// How many picks a layer end's card gives (D85): one of its own mods once, an
+// ordinary one at the bigger step.
+const cardStep = m => (m.end ? 1 : END_STEP);
+
+// The layer end's cards: up to three valuable mods, distinct, from one pool --
+// its own mods and the ordinary ones, each only with room under its cap for
+// what the card gives. Fewer when the pool runs short; none at all leaves only
+// Continue.
+function rollValuable() {
+  return drawDistinct(MODS.filter(m => (modCounts[m.name] || 0) + cardStep(m) <= m.max), 3);
 }
 
 // ---------- key bindings ----------
@@ -384,9 +426,10 @@ const BOSS      = { enemies: [['boss', 1]] };
 // name are the cheapest way to say "a new layer" until art exists.
 //
 // The second layer is the first one's stretches under its own name and colour
-// -- a placeholder until S5 gives it content of its own. Names and colours are
-// Claude's picks.
-const SHELF = [
+// -- a placeholder until S5 gives it content of its own. The colours are
+// Claude's picks; the layers are numbered until they are named (D89) -- Igor,
+// 2026-10-12: "make it layer 1 & 2, we'll come up with namings later".
+const STRETCHES = [
   { draw: 4, pool: STRETCH_1 },
   { draw: 1, pool: [MINI_BOSS] },
   { draw: 4, pool: STRETCH_2 },
@@ -395,8 +438,8 @@ const SHELF = [
   { draw: 1, pool: [BOSS] },
 ];
 const LAYERS = [
-  { name: 'The Shelf', color: [12, 23, 39], stretches: SHELF },
-  { name: 'The Drop',  color: [24, 12, 40], stretches: SHELF },
+  { name: 'Layer 1', color: [12, 23, 39], stretches: STRETCHES },
+  { name: 'Layer 2', color: [24, 12, 40], stretches: STRETCHES },
 ];
 
 // ---------- scenarios ----------
@@ -424,11 +467,12 @@ const SCENARIOS = {
   'last-batch':  { batch: plan => plan.length - 1 },
   // The first mini-boss (D65), alone. Derived the same way.
   'mini-boss':   { batch: plan => plan.findIndex(e => e.batch === MINI_BOSS) },
-  // The top of the second layer, with the kit a dive would carry there: one
-  // pick per gate of the first layer, its end included -- fifteen. Which picks
-  // is Claude's choice, stated so the bot measures layer 2 against a known kit
-  // without fighting down the first (friction point 4 of the layer-to-layer
-  // spec).
+  // The top of the second layer, with the kit a dive would carry there:
+  // fourteen mods carried by the first layer's glowing fish -- every ordinary
+  // mod three times but one, whose third the round had not reached (D84); here
+  // Impact -- and the layer end's pick, Mend (D85). The picks are Claude's,
+  // stated so the bot measures layer 2 against a known kit without fighting
+  // down the first (friction point 4 of the layer-to-layer spec).
   'layer-2':     { batch: plan => plan.findIndex(e => e.layer === 1),
                    kit: ['Fins', 'Fins', 'Fins', 'Vitality', 'Vitality', 'Vitality',
                          'Reflex', 'Reflex', 'Reflex', 'Nerve', 'Nerve', 'Nerve',
@@ -458,12 +502,15 @@ const ENEMY_TYPES = [
   // in px/s and its `reach` in px -- and its presence is the behaviour. Every
   // number here is Claude's pick. The boss rises from below the view, centred:
   // Igor, "The boss swims in from the bottom".
-  { name: 'mini-boss', r: 26, hp: 24, speed: 70, value: 5,
+  // Neither lunger ever glows (D88): `carries: false` keeps a batch's mod off
+  // them. Igor, 2026-10-12: "remove glow from mini-bosses" -- and the boss's
+  // batch is paid by the layer end's pick (D85).
+  { name: 'mini-boss', r: 26, hp: 24, speed: 70, value: 5, carries: false,
     color: '#e2ff8a', glow: '#c6ff3c',
     lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
   // The boss's `value` is the layer end's haul (D68): "a big haul of gems".
   // 30 is Claude's pick; S6 owns it.
-  { name: 'boss',      r: 42, hp: 60, speed: 60, value: 30,
+  { name: 'boss',      r: 42, hp: 60, speed: 60, value: 30, carries: false,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
     lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 } },
 ];
@@ -481,7 +528,23 @@ const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 // `lines` -- is a getter, so the renderer reads every one the same way. `top`
 // is where the rows start, which the renderer and the hit-test share; `back`
 // is what Esc does, on a menu that has one. A screen is a menu exactly when it
-// has an entry here -- `step()` and the water both ask `MENUS[screen]`.
+// has an entry here -- `step()` asks `MENUS[screen]` -- and the water stops on
+// every menu but one that `flows`.
+// The end of a dive, either way it ends -- eaten, or the last layer won: Dive
+// again or Go home (D90). Igor, 2026-10-12: "make it dive again + go home
+// buttons choice". A menu like any other, except that the water keeps flowing
+// under it (`flows`, D58). Go home opens marked (`endDive()`): a stray Enter
+// or Space -- Space is the dash -- does what any key did before, and diving
+// again is a choice.
+const END_TOP = ARENA_H / 2 + 100;
+const GO_HOME = { label: 'Go home', run: () => openMenu('home') };
+const END_MENU = {
+  top: END_TOP,
+  flows: true,
+  back: GO_HOME.run,
+  items: [{ label: 'Dive again', run: () => reset() }, GO_HOME],
+};
+
 const MENUS = {
   title: {
     heading: 'ABYSS',
@@ -489,13 +552,15 @@ const MENUS = {
     top: MENU_TOP,
     items: [
       // `home` lives between dives only (D76): with a dive under way, Start is
-      // Continue and goes back into it, onto the pause menu (D70).
+      // Continue and goes straight back into it, where it was (D90).
       { get label() { return diveLive ? 'Continue' : 'Start'; },
-        run: () => openMenu(diveLive ? 'paused' : 'home') },
+        run: () => { if (diveLive) screen = resumeTo; else openMenu('home'); } },
       { label: 'Help',    run: () => openScreen('help') },
       { label: 'Options', run: () => openScreen('options') },
     ],
   },
+  dead: END_MENU,
+  won: END_MENU,
   paused: {
     heading: 'PAUSED',
     sub: '',
@@ -526,7 +591,7 @@ const MENUS = {
       return LAYERS.slice(0, meta.cleared + 2).map((layer, l) => l > meta.cleared
         ? { text: '???', locked: true }
         : { text: layer.name + (l < meta.cleared ? '   cleared' : '') + '   ' +
-                  TASKS.map(t => t.name + (meta.tasks[layer.name]?.[t.name] ? ' \u2713' : ' \u2013'))
+                  TASKS.map(t => t.name + (meta.tasks[l]?.[t.name] ? ' \u2713' : ' \u2013'))
                        .join('   ') });
     },
     top: HOME_TOP,
@@ -580,8 +645,7 @@ const HELP_KEYS = [
   ['Aim',            'mouse'],
   ['Shoot',          'hold left mouse button'],
   ['Dash',           'Space'],
-  ['Choose a mod',   'arrows + Enter,  click,  or 1 2 3'],
-  ['Restart a dive', 'R'],
+  ['Choose a mod',   'arrows, click or 1 2 3,  then Enter or Continue'],
   ['Mute sound',     'M'],
   ['Menu / back',    'Esc'],
   ['Menus',          'mouse, or arrows + Enter'],
@@ -593,5 +657,5 @@ const HELP_BLURB = [
   'Space dashes: you pass through the swarm unharmed, and shove it aside.',
   'One batch at a time; clear it and the current takes you down to the next.',
   'Things you kill drop gems. They come to you on their own, and are yours to keep.',
-  'Every batch cleared is a rank and a pick of three mods. A boss also heals you.',
+  'Kill the glowing fish for a mod. Grab boosts before they fade. A boss heals, then offers a pick.',
 ];

@@ -12,13 +12,13 @@ pulled to the player (D78 (gems are pulled to the player)).
 
 ## Roster
 
-| name | r | hp | speed | value | color | glow | enters |
-|---|---|---|---|---|---|---|---|
-| drifter | 9 | 1 | 85 | 1 | #e8446e | #ff1e5a | — |
-| darter | 6 | 1 | 190 | 1 | #ffb648 | #ff8a00 | — |
-| bulwark | 17 | 6 | 52 | 3 | #a05cff | #7b2fff | — |
-| mini-boss | 26 | 24 | 70 | 5 | #e2ff8a | #c6ff3c | — |
-| boss | 42 | 60 | 60 | 30 | #c8ff3c | #9dff00 | bottom |
+| name | r | hp | speed | value | color | glow | carries | enters |
+|---|---|---|---|---|---|---|---|---|
+| drifter | 9 | 1 | 85 | 1 | #e8446e | #ff1e5a | — | — |
+| darter | 6 | 1 | 190 | 1 | #ffb648 | #ff8a00 | — | — |
+| bulwark | 17 | 6 | 52 | 3 | #a05cff | #7b2fff | — | — |
+| mini-boss | 26 | 24 | 70 | 5 | #e2ff8a | #c6ff3c | false | — |
+| boss | 42 | 60 | 60 | 30 | #c8ff3c | #9dff00 | false | bottom |
 
 The lungers' `lunge`:
 
@@ -43,6 +43,7 @@ layer end is a milestone)).
 | `enters` | — | Where a batch brings it in. Absent: just outside a random edge of the view. `bottom`: below the view, centred. |
 | `color` | hex | Body colour. Placeholder graphics (D4 (no assets, ever)). |
 | `glow` | hex | Glow colour, the same placeholder. |
+| `carries` | — | `false`: never the glowing fish that carries its batch's mod (D88 (the fish glows from the start)) — the boss and the mini-boss. Absent: it can be. |
 | `lunge` | — | Its presence is the behaviour: the type lunges instead of only chasing (D64 (the boss lunges)). Holds the timings in the table above: `chase` seconds before a wind-up may start, `windup` and `rest` in seconds, the charge's `speed` in px/s and its `reach` in px. |
 | `threat` | — | **Reserved** for S6 (balance): the type's threat number, from which a batch's threat is computed (D79 (a dive goes from easiest to hardest)). Not in the code; S6 adds it to every type at once, so S5 (content) writes its enemies on a shape that will not change (D80 (entity docs and mods from drops come first)). |
 
@@ -82,8 +83,9 @@ Big, slow and tough: soaks shots and blocks escape routes. Chases.
 
 A smaller boss (D65 (a mini-boss is a smaller boss)): it lunges like the boss,
 weaker and slower to wind up, so it teaches the boss's tell where the stakes
-are low. Always alone, in a batch of its own at an ordinary gate; its gate pays
-a rank and mods like any other. It arrives from a random edge like any batch —
+are low. Always alone, in a batch of its own at an ordinary gate. It never
+glows, so its gate pays no mod (D88 (the fish glows from the start)) — Igor:
+"remove glow from mini-bosses". It arrives from a random edge like any batch —
 how a mini-boss arrives was left unsettled by D65 (a mini-boss is a smaller
 boss).
 
@@ -93,7 +95,9 @@ Alone in the layer's last batch, which is otherwise a normal batch (D62 (the
 boss is the layer's last batch)); clearing it is the layer end. It rises from
 below the view, centred — Igor: "The boss swims in from the bottom". Lunges,
 with a shorter wind-up than the mini-boss. Its `value` is the layer end's big
-haul of gems (D68 (the layer end is a milestone)). Normal enemies alongside it,
+haul of gems (D68 (the layer end is a milestone)). It never glows: the layer
+end's pick pays its batch (D85 (the layer end's pick), D88 (the fish glows
+from the start)). Normal enemies alongside it,
 and more attacks, wait in `ideas.md`.
 
 ## Adding one

@@ -4,6 +4,62 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-12
+
+**Mods from drops: a glowing fish, the layer end's pick, boosts; rank retired**
+(D84–D90)
+The second requirement before S5 (content) (D80 (entity docs and mods from
+drops come first)). Opened 2026-10-01 as a discussion — research into how a
+dozen games hand out power mid-run, three shapes — and Igor chose: "go with
+B". Then, building it: "good to go … implement with no interruption"; and,
+having played it, a round of corrections (D88–D90). Design, research and its
+check against `foundations.md`:
+`superpowers/specs/2026-10-12-mods-from-drops-design.md` — its fish lighting
+up partway through a fight is superseded (D88).
+
+- **Gates**: no pick and no pause. One fish of each batch glows from the moment
+  it arrives — a gold ring — never a boss or a mini-boss, and carries the
+  batch's mod, drawn from a round of the ordinary mods under their caps;
+  killed, it drops the mod, which flies to you and is named on a pickup line of
+  its own (D84 (mods are dropped), D88 (the fish glows from the start)). A
+  mini-boss's gate pays no mod. With every ordinary mod capped, no fish glows.
+  The gems and heart fill cards are gone.
+- **The layer end**: the one pause. Up to three valuable cards — `Mend`, now
+  the layer end's own, or an ordinary mod at ×2 — one marked by a click, its
+  number or the arrows, taken by Continue or Enter (D85 (the layer end's pick)).
+- **Boosts**: kills drop them, more likely with every kill since the last,
+  never from the arena's last. One lies where it fell for 6s, blinking out;
+  touched, it adds its numbers for its time — `Rush`, speed +200 for 5s
+  (D86 (boosts)). New entity doc: `entities/boosts.md`.
+- **Rank** is gone from the state, the HUD, the cards and the end screens
+  (D87 (rank is retired)).
+- **The layers are Layer 1 and Layer 2** until they are named, and a layer's
+  micro-tasks are kept by its number (D89 (layers are numbered until they are
+  named)).
+- **Continue goes straight back into a saved dive**, and **a dive ends on two
+  buttons, Dive again and Go home** — Go home marked, R gone (D90 (Continue
+  goes straight back in)). A New game beside Continue waits for S7 (alpha
+  polish). **point** joins the glossary: an attribute point.
+- **The save is version 3**: a v2 dive loses its rank and, saved with the cards
+  up, takes the card it had marked; its micro-tasks move from layer names to
+  numbers. `tests/fixtures/save-v3.json` joins the other two.
+
+Found while building, and fixed: a pickup and a clean batch's micro-task wrote
+over each other on one line — the pickup got a line of its own; the cards'
+screen stopped reading the mouse, so the next menu took a still cursor for a
+moved one — it reads it again, marking nothing. The help blurb's new line ran
+4px into its hint — two lines became one.
+
+Docs: the glossary (**rank** gone, **boost** and **point** new; mod, gate,
+layer end, mini-boss rewritten) and the genre contract's points 4–6; `design.md`;
+`entities/mods.md` (the `end` field, no fill cards); the docs map; `plan.md`;
+`ideas.md` (the answered item out, mod points declined, a rank only play can
+earn suggested); `roadmap.md`'s bot figures re-measured; `CLAUDE.md`'s glossary
+words; `entities/enemies.md`'s `carries`. Checks: `tests/drops.test.js`, new;
+the offer checks in `tests/` and `checks.js` rewritten for a gate that opens
+nothing, a layer end that marks and continues and an end screen of two
+buttons; 31 deliberate breaks, each caught.
+
 ## 2026-10-01
 
 **The weapon record: a line of data, one carried per dive** (D83)

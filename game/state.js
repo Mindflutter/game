@@ -3,7 +3,7 @@
 
 // ---------- game state ----------
 // Everything a dive owns lives here, so restarting is one call.
-let player, enemies, bullets, gems, particles;
+let player, enemies, bullets, gems, drops, particles;
 let elapsed, kills, shake;
 let queuePaused = false;    // a scenario can stop the batch queue (D37)
 
@@ -34,6 +34,11 @@ let batchHit = false;
 // derived from the plan and the camera.
 let notice = '';
 let noticeTime = 0;
+// The same for a pickup -- a mod or a boost, named as it lands (D84, D86) --
+// on a line of its own, so a batch's mod flying in cannot write over the
+// micro-task its clear just paid.
+let banner = '';
+let bannerTime = 0;
 
 // A dive is under way: begun, and not yet ended by death or the win. What the
 // save writes as the dive in progress (D70), and what turns the title's Start
@@ -55,24 +60,32 @@ let waterY = 0;
 // Start fired a shot into the dive it had just begun.
 let fireArmed = false;
 
-// In-dive progress, reset every dive (D34). One rank per batch cleared -- there
-// is no XP bar and no curve, so `rank` is simply how many batches you have put
-// down. `currency` is the dive's takings; spending them at `home` is S4.
-// `modCounts` is how many times each mod has been taken, which is what lets the
-// roll refuse one that is already maxed.
-let rank, currency, choices, modCounts;
+// In-dive progress, reset every dive. There is no rank and no XP bar: a mod
+// is carried by a glowing fish (D84, D87). `currency` is the dive's takings,
+// spent at `home`. `modCounts` is how many times each mod has been taken,
+// which is what lets the draws refuse one that is already maxed. `choices` is
+// the layer end's cards (D85).
+let currency, choices, modCounts;
 
-// Seconds until the mod cards appear, counting from the last enemy dying.
-// `> 0` means "a batch is cleared and the offer is coming" -- the death gets to
-// finish playing before the game asks you to read three cards.
+// Seconds until the layer end's cards appear, counting from the boss dying.
+// `> 0` means "the layer is cleared and the offer is coming" -- the death gets
+// to finish playing before the game asks you to read three cards.
 let offerTimer = 0;
+
+// The ordinary mods dealt in the current round, by name: none comes again until
+// every one still under its cap has come once (`drawCarried()`).
+let modRound = [];
+// The boosts running, `{ name, left }` with `left` in seconds, and the kills
+// since a boost last dropped -- the chance of the next grows with it (D86).
+let boosts = [];
+let sinceBoost = 0;
 
 // Which screen we're on. Replaces the old `paused` and `dead` flags, which
 // could contradict each other; now there is exactly one answer at a time.
 // 'title' | 'home' | 'playing' | 'mods' | 'paused' | 'help' | 'options' | 'dead' | 'won'
 let screen = 'title';
 let menuIndex = 0;          // cursor in the title / pause menu
-let choiceIndex = 0;        // highlighted mod card
+let choiceIndex = 0;        // the marked card at a layer end (D85)
 let lastAimX = 0, lastAimY = 0;   // so a still mouse doesn't fight the arrows
 let optionIndex = 0;        // cursor in the options list
 let returnTo = 'title';     // where Esc goes back to from help / options
@@ -153,6 +166,7 @@ function reset(seed) {
   enemies = [];
   bullets = [];
   gems = [];
+  drops = [];
   particles = [];
   elapsed = 0;         // seconds survived
   kills = 0;
@@ -167,9 +181,11 @@ function reset(seed) {
   shake = 0;           // pixels of screen shake left
   screen = 'playing';  // a reset dive is a running dive
 
-  rank = 0;            // one per batch cleared, so a fresh dive has none
   currency = 0;
   offerTimer = 0;      // no offer pending on a fresh dive
+  modRound = [];
+  boosts = [];
+  sinceBoost = 0;
   accumulator = 0;     // no banked time carried into a new dive
   choices = [];
   modCounts = {};      // mods are dive-scoped: last dive's picks do not carry
@@ -177,6 +193,8 @@ function reset(seed) {
   batchHit = false;
   notice = '';
   noticeTime = 0;
+  banner = '';
+  bannerTime = 0;
   diveLive = true;
 }
 
@@ -197,11 +215,8 @@ function applyScenario(name, seed) {
     cameraY = gateDepth(b);
     player.y = cameraY + ARENA_H / 2;
   }
-  // A stated kit: taken as picks, one rank each, as if earned on the way down.
-  for (const name of s.kit || []) {
-    takeMod(MODS.find(m => m.name === name));
-    rank += 1;
-  }
+  // A stated kit: taken as picks, as if picked up on the way down.
+  for (const name of s.kit || []) takeMod(MODS.find(m => m.name === name));
   if (s.spawn === false) queuePaused = true;
   // Scenario positions are in the view, so they hold at any depth.
   for (const [type, x, y] of s.enemies || []) placeEnemy(type, x, cameraY + y);
@@ -217,7 +232,7 @@ function applyScenario(name, seed) {
 //
 // `version` from the first write (foundations.md -> The technical contract). A
 // save this build does not know is rejected loudly, never guessed at.
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, spent: {}, tasks: {},
            deepest: 0, cleared: 0 };
@@ -233,23 +248,24 @@ let meta = freshMeta();
 // The mod cards on offer hold functions, so they are saved by name; `at` is
 // the screen play resumes to, since the pause menu may be what is showing.
 function snapshot() {
-  return { player, enemies, bullets, gems, particles, elapsed, kills, shake,
+  return { player, enemies, bullets, gems, drops, particles, elapsed, kills, shake,
            queuePaused, batchIndex, breathTimer, cameraY, current, waterY,
-           fireArmed, rank, currency, modCounts, offerTimer, choiceIndex,
+           fireArmed, currency, modCounts, offerTimer, choiceIndex,
            choices: choices.map(c => c.name), accumulator, rngState,
            currentSeed, bulletId, plan, batchHit, notice, noticeTime,
+           banner, bannerTime, modRound, boosts, sinceBoost,
            at: screen === 'playing' || screen === 'mods' ? screen : resumeTo };
 }
 
-// The reverse. The dive comes back paused -- a resumed dive opens on the
-// pause screen, not mid-swing (D70) -- so Continue lands on the menu.
+// The reverse. The dive comes back to `resumeTo`, the screen it was on, and
+// the title's Continue goes straight there (D90).
 function restore(d) {
-  ({ player, enemies, bullets, gems, particles, elapsed, kills, shake,
+  ({ player, enemies, bullets, gems, drops, particles, elapsed, kills, shake,
      queuePaused, batchIndex, breathTimer, cameraY, current, waterY,
-     fireArmed, rank, currency, modCounts, offerTimer, choiceIndex,
+     fireArmed, currency, modCounts, offerTimer, choiceIndex,
      accumulator, rngState, currentSeed, bulletId, plan, batchHit, notice,
-     noticeTime } = d);
-  choices = d.choices.map(n => [...MODS, ...FILLERS].find(m => m.name === n));
+     noticeTime, banner, bannerTime, modRound, boosts, sinceBoost } = d);
+  choices = d.choices.map(n => MODS.find(m => m.name === n));
   resumeTo = d.at;
   diveLive = true;
 }
@@ -259,13 +275,36 @@ function saveText() {
   return JSON.stringify({ ...meta, dive: diveLive ? snapshot() : null });
 }
 
-// Brings an older save up to this version, or leaves it alone. v1 kept the
-// shot in constants, so a v1 dive's player has no shot speed or radius: it
-// gets the Gun's as they were then, 430 and 4 (D83).
+// Brings an older save up to this version, or leaves it alone, one version at
+// a time. v1 kept the shot in constants, so a v1 dive's player has no shot
+// speed or radius: it gets the Gun's as they were then, 430 and 4 (D83).
+// v2 picked a mod at every gate and counted a rank (D84, D87): a v2 dive comes
+// back with its rank dropped, and with nothing dropped or running yet; the
+// batch it was in has no fish lit. Saved with the cards up, it takes the card
+// it had marked -- a gems or heart card, gone since, gives nothing -- and an
+// offer still on its way is dropped. v2 kept a layer's micro-tasks by its
+// name, v3 by its number (D89): these were the names then.
 function migrate(s) {
   if (s && s.version === 1) {
     if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
     s.version = 2;
+  }
+  if (s && s.version === 2) {
+    const d = s.dive;
+    if (d) {
+      const marked = d.at === 'mods' && MODS.find(m => m.name === d.choices[d.choiceIndex]);
+      if (marked) {
+        marked.apply(d.player);
+        d.modCounts[marked.name] = (d.modCounts[marked.name] || 0) + 1;
+      }
+      delete d.rank;
+      Object.assign(d, { at: 'playing', choices: [], offerTimer: 0, drops: [], boosts: [],
+                         sinceBoost: 0, modRound: [], banner: '', bannerTime: 0 });
+    }
+    const was = ['The Shelf', 'The Drop'];
+    s.tasks = Object.fromEntries(Object.entries(s.tasks || {})
+      .map(([k, v]) => [was.includes(k) ? was.indexOf(k) : k, v]));
+    s.version = 3;
   }
   return s;
 }
