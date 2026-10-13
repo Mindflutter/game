@@ -6,6 +6,14 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-13
 
+**Superpowers dropped** (D94 (superpowers dropped))
+Igor: "yes drop it". The superpowers plugin is switched off for this project in
+`.claude/settings.json`, and a docs check keeps it so. What it gave that the
+rules did not already say is now in `CLAUDE.md`: failure cases listed before
+building, the whole change reviewed at the end, a root cause before any fix,
+and a spec, plan and log for stage-sized work. Its collision list is gone from
+"Skills and plugins", which keeps ponytail, disciplines and the global rules.
+
 **S5 (content) gets counts: mods, boosts, micro-tasks, attributes** (D93 (the
 content stage's counts))
 Igor, after asking whether S5 was ready: "include in s5: design and add 5-7

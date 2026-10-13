@@ -107,6 +107,16 @@ draft, which is why they are banned (D32).
   enemy, one batch, one layer, in isolation. The bot drives the same mechanism.
 - Every behavioural change lands with a check **that fails without it**. A check
   that can only pass proves nothing — verify it by breaking the rule it guards.
+- **A bug gets its root cause before its fix**: reproduce it with a failing
+  check, find why it happens, then fix it there — never patch the symptom.
+- **Before building anything that touches more than one system, list the
+  failure cases it could meet** — a save taken partway, a record renamed or
+  missing, invulnerability against a new kind of hurt, two new pieces meeting
+  on one tick — and pin each with a check in the same change.
+- **At the end of a change with several parts, review the whole diff for how
+  the parts meet** before calling it done. Per-part checks cannot see two new
+  pieces interacting: S5 (content)'s review found a puffer that burst on the
+  tick a dash killed it, and paid for both.
 - Balance is measured by driving `update()` faster than real time with a
   scripted bot, and reported as numbers, not impressions.
 - **Game feel is Igor's call and is never asserted.**
@@ -170,6 +180,12 @@ draft, which is why they are banned (D32).
   wired in `.claude/settings.json`) refuses any reply with a bare `D<n>` or
   `S<n>` — added 2026-09-28 after Igor asked for this a fourth time.
 - Small steps: one playable change, then stop and explain what changed.
+- **Stage-sized work gets a spec, a plan and a progress log.** The spec says
+  what gets built and checks it against `foundations.md` and `plan.md`; the
+  plan orders the tasks, each with its checks; the log, in the session's
+  scratch space, records each task as it is done, so the work survives a
+  compacted context. Specs and plans live in `docs/superpowers/` — the folder
+  keeps its old name.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
 - **Stop before every commit and say so.** Stage nothing, commit nothing, until
@@ -234,22 +250,23 @@ draft, which is why they are banned (D32).
 ## Skills and plugins
 
 This file, `foundations.md` and `plan.md` outrank every skill and plugin that
-loads here — superpowers itself says user instructions take precedence. Igor,
-2026-09-28, after a skill's options-and-rulings style reopened a settled
-answer: "make it respect all the strict rules, foundations and plan". Where a
-step below collides with a rule here, the rule wins, and nothing needs asking:
+loads here. Igor, 2026-09-28, after a skill's options-and-rulings style
+reopened a settled answer: "make it respect all the strict rules, foundations
+and plan". Where a step below collides with a rule here, the rule wins, and
+nothing needs asking.
 
-- **superpowers — brainstorming.** Approaches are proposed only for what the
-  docs and Igor have not settled; a settled answer is acted on. Its spec
-  self-review says a requirement that reads two ways gets one reading picked —
-  here it gets *asked*. Picking is how "slows down" was built as a stop.
-- **superpowers — writing-plans, executing-plans, subagent-driven-development.**
-  Nothing is committed before Igor's `/simplify` — not the spec, not a task —
-  so plans carry no commit steps. "Do not pause between tasks" yields to small
-  steps; "make a ruling and keep going" yields to asking. Subagents only when
-  Igor picks them.
-- **superpowers — using-git-worktrees, finishing-a-development-branch.** Not
-  used. Work happens in place, in this checkout; there is no branch or PR menu.
+**superpowers is not used here** — switched off for this project in
+`.claude/settings.json` (D94 — Superpowers dropped). What it gave that this
+file did not already say is now in it: failure cases listed before building,
+the whole change reviewed at the end, a root cause before a fix
+(Verification), and a spec, plan and log for stage-sized work (Working
+agreement). The user-level CLAUDE.md in `~/.claude/` has a trigger table
+naming two of its skills; here they mean this file's rules — a bug gets its
+root cause and a failing check before any fix, and a new design gets
+`foundations.md` and `plan.md` checked first and its open questions asked, one
+at a time. Subagents only when Igor picks them; work happens in place, in this
+checkout.
+
 - **ponytail.** Its lone `assert` self-check and "trivial one-liners need no
   test" yield to *every behavioural change lands with a check that fails
   without it*, in `tests/` or `checks.js`. "Code first, three lines" and
@@ -261,6 +278,3 @@ step below collides with a rule here, the rule wins, and nothing needs asking:
 - **Global rules** in `~/.claude/rules/` are written for a Python backend.
   Where one collides with this file — "a constant lives next to its one
   consumer" against the single `// balance` block — this file wins.
-
-Test-driven development, systematic debugging and verification before
-completion agree with the rules here and apply as written.

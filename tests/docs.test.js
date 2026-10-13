@@ -73,6 +73,11 @@ describe('docs/', () => {
     expectIn(read('changelog.md'), newest);
   });
 
+  it('keeps superpowers switched off for this project (D94)', () => {
+    const settings = JSON.parse(src('.claude/settings.json'));
+    expect(settings.enabledPlugins?.['superpowers@claude-plugins-official']).toBe(false);
+  });
+
   it('keeps the docs CLAUDE.md tells the reader to open', () => {
     // A doc CLAUDE.md or the map in docs/README.md names must exist, or a cold
     // session is sent somewhere that is not there -- and the other way: a doc

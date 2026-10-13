@@ -2976,3 +2976,29 @@ yes. dont really matter at this point" — a lean, so the caps stand as D69
 
 **Guarded by**: nothing yet — the counts are S5 (content)'s work, and its exit
 counts them.
+
+## D94 — Superpowers dropped · 2026-10-13
+Igor, after S5 (content) was built: "would you perform better or worse if we
+dump superpowers from this project completely? considering all md files that
+exist to guard the project rules". Claude's answer: slightly better, once the
+few habits it gave that the project's own rules did not say move into
+`CLAUDE.md` — four of the six of its skills loaded while building S5 (content)
+were mostly overridden, and every collision is a place the wrong side can win,
+as it had twice. Igor: "yes drop it".
+
+**Decided, by Igor.**
+- **The superpowers plugin is switched off for this project**, in
+  `.claude/settings.json` (`enabledPlugins`), and stays on wherever else Igor
+  uses it.
+- **What it gave moves into `CLAUDE.md`**: failure cases listed before
+  building anything that touches more than one system, the whole change
+  reviewed at the end for how its parts meet, a root cause and a failing check
+  before any fix (Verification), and a spec, a plan and a progress log for
+  stage-sized work (Working agreement). The "Skills and plugins" section keeps
+  ponytail, disciplines and the global rules, and says what the global trigger
+  table's two superpowers rows mean here.
+- **`docs/superpowers/` keeps its name**: the specs and plans in it are
+  history, and the next ones go beside them.
+
+**Guarded by**: `tests/docs.test.js` — `.claude/settings.json` keeps
+superpowers switched off.
