@@ -4,6 +4,19 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-13
+
+**S5 (content) gets counts: mods, boosts, micro-tasks, attributes** (D93 (the
+content stage's counts))
+Igor, after asking whether S5 was ready: "include in s5: design and add 5-7
+mods and 3-5 boosts", then "add total of 3 micro-tasks to the plan in s5" and
+"add 3 attributes along with micro-tasks". `plan.md` → S5, in its work and its
+exit: 5–7 mods in total, 3–5 new boosts beside `Rush`, three micro-tasks and
+three attributes in total. Its exit loses "the mod pool covers
+a full dive" — 5–7 mods at today's caps cannot — and whether the caps go or
+grow is open in `ideas.md`, S6 (balance)'s. `ideas.md`'s comfort note no
+longer has S5 growing the pool. Docs only; nothing in the code changed.
+
 ## 2026-10-12
 
 **No line counts in the docs** (D92)

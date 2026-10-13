@@ -2947,3 +2947,32 @@ goes with them — it is the two counts' ratio, moved with every edit, and
 needed the same regenerating. D17 (the browser build is a throwaway
 prototype)'s one measurement stays, as its record. `CLAUDE.md`'s rule against
 investing in the canvas layer stands without a number to watch.
+
+## D93 — The content stage's counts: mods, boosts, micro-tasks, attributes · 2026-10-13
+Igor, 2026-10-13, after asking whether S5 (content) was ready: "include in s5:
+design and add 5-7 mods and 3-5 boosts". Asked whether those are new or
+totals: "total 5–7 mods and 3–5 boosts new". Then: "mods & boosts go into the
+plan", "add total of 3 micro-tasks to the plan in s5", and "add 3 attributes
+along with micro-tasks".
+
+**Decided, by Igor.** S5 (content) designs and adds, to counts:
+- **5–7 mods in total.** Six exist today: five ordinary, and `Mend`.
+- **3–5 new boosts** beside `Rush` — four to six in all.
+- **Three micro-tasks in total.** One exists today, `untouched`.
+- **Three attributes in total.** One exists today, `Dash reach`. "In total"
+  is Claude's reading of "along with micro-tasks", open to Igor.
+
+Which ones, and what each does, is the stage's design work.
+
+**Supersedes** D69 (every mod capped)'s rule 4, as D84 (mods are dropped)
+restated it: the pool no longer grows until its caps cover a full dive, and
+the stage's exit no longer asks it to. A layer has twelve ordinary batches,
+so 3–5 layers light 36–60 fish, and 5–7 mods at today's caps hold at most 19
+picks. Shown that, Igor: "i dont feel like limiting mods is a problem now. we
+can remove the limit entirely and see how it affects balance. or bigger caps,
+yes. dont really matter at this point" — a lean, so the caps stand as D69
+(every mod capped) set them, and the question is open in `ideas.md`, S6
+(balance)'s.
+
+**Guarded by**: nothing yet — the counts are S5 (content)'s work, and its exit
+counts them.

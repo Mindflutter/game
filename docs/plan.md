@@ -75,20 +75,23 @@ these are two big tasks, i'll do them in separate sessions" (D80).
 shapes for enemy, weapon, gear and mod are settled and will not change.
 
 **Work:** 5–7 enemy behaviours, 2–3 weapons, 2–3 pieces of equipment, 3–5 layers —
-each with its own pools of batches (D71) — and 3–4 tiers each. Weapon-scoped
-mods arrive here if they arrive (D31). The mod pool grows until its caps cover
-a full dive — a glowing fish in every batch, three cards at every layer end
-(D69, D84, D85) — and boosts are written beyond the first (D86). The second weapon brings owning one and choosing which to
-carry at `home`, and a scenario that names the weapon carried, so S6 (balance)
-can measure each (D83).
+each with its own pools of batches (D71) — and 3–4 tiers each. Mods, boosts,
+micro-tasks and attributes are designed and added to counts of their own (D93
+(the content stage's counts)): 5–7 mods in total (six exist today), 3–5 new
+boosts beside `Rush`, and three micro-tasks and three attributes in total (one
+of each exists today).
+Weapon-scoped mods arrive here if they arrive (D31). The second weapon brings
+owning one and choosing which to carry at `home`, and a scenario that names
+the weapon carried, so S6 (balance) can measure each (D83).
 
 **Exit (DoD):**
-- The DoD counts from the draft are met.
+- The DoD counts from the draft are met, and Igor's own (D93 (the content
+  stage's counts)): 5–7 mods, 4–6 boosts with `Rush`, three micro-tasks, three
+  attributes.
 - Adding the last enemy cost what adding the second did. If it did not, the
   data shape was wrong and that is the finding.
 - Every enemy behaviour has a check on its state transitions.
-- No layer is a fixed list (D71), and the mod pool covers a full dive — every
-  batch's fish and every layer end's three cards — its check passes (D69, D85).
+- No layer is a fixed list (D71).
 - Playable: the alpha's content is in.
 
 **This stage is repetition of a settled procedure**, which is where the

@@ -221,8 +221,8 @@ built.
   the three D34 (mods) named, D35 (currency is auto-collected) left the
   currency magnet nothing to do and `Lull` is declined (below). Since D85 (the
   layer end's pick) it is one of the layer end's own, so no fish carries a
-  comfort mod at all. Not a design problem yet — S5 (content) grows the pool to
-  cover a whole dive (D69 (every mod capped)) — but comfort is meant to carry
+  comfort mod at all. Not a design problem yet — S5 (content) designs the pool,
+  5–7 mods (D93 (the content stage's counts)) — but comfort is meant to carry
   the pool's width.
 
 - **The dash economy: two of six mods feed one verb.** Igor, 2026-09-27,
@@ -335,6 +335,18 @@ built.
   batches are written against it. D54 (the batches, re-derived) and D71
   (batches are drawn from pools) size by total hp until then, and 14 darters
   against 10 drifters shows hp is not it.
+
+## Open — raised before S5 (content)
+
+- **Mod caps: removed, or bigger — S6 (balance)'s.** 5–7 mods (D93 (the
+  content stage's counts)) at today's caps hold at most 19 picks, and a dive of
+  3–5 layers lights 36–60 fish — twelve a layer — so the pool runs dry
+  by the second layer and every fish after that stays dark. Igor, 2026-10-13:
+  "i dont feel like limiting mods is a problem now. we can remove the limit
+  entirely and see how it affects balance. or bigger caps, yes. dont really
+  matter at this point". Until then the caps stand (D69 (every mod capped)).
+  Removing them would reopen the glossary's "every mod has a cap" in
+  `foundations.md`.
 
 ## Suggested but not yet discussed
 
