@@ -181,11 +181,12 @@ draft, which is why they are banned (D32).
   `S<n>` — added 2026-09-28 after Igor asked for this a fourth time.
 - Small steps: one playable change, then stop and explain what changed.
 - **Stage-sized work gets a spec, a plan and a progress log.** The spec says
-  what gets built and checks it against `foundations.md` and `plan.md`; the
-  plan orders the tasks, each with its checks; the log, in the session's
-  scratch space, records each task as it is done, so the work survives a
-  compacted context. Specs and plans live in `docs/superpowers/` — the folder
-  keeps its old name.
+  what gets built and checks it against `foundations.md` and `plan.md`; it is
+  kept, in `docs/specs/`, as the design record decisions point to. The plan
+  orders the tasks, each with its checks, and the log records each task as it
+  is done; both are scaffolding, kept in the session's scratch space so the
+  work survives a compacted context, and never in the repo — once built, the
+  code, its checks, the changelog and the decisions say it all.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
 - **Stop before every commit and say so.** Stage nothing, commit nothing, until

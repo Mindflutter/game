@@ -1,6 +1,6 @@
 // The dive through the layers, `home`'s economy, and the save -- built in S4
 // (meta loop skeleton), designed in
-// docs/superpowers/specs/2026-09-30-s4-meta-loop-design.md. Each test names
+// docs/specs/2026-09-30-s4-meta-loop-design.md. Each test names
 // the decision it guards.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';

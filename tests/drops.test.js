@@ -3,7 +3,7 @@
 // mini-boss (D88 (the fish glows from the start)), the layer end offers a pick
 // of valuable mods (D85 (the layer end's pick)), kills drop boosts (D86
 // (boosts)), and rank is gone (D87 (rank is retired)). Designed in
-// docs/superpowers/specs/2026-10-12-mods-from-drops-design.md.
+// docs/specs/2026-10-12-mods-from-drops-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';

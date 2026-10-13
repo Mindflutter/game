@@ -1718,7 +1718,7 @@ That stays the sweep's job, and the sweep stays a habit.
 
 ## D58 — The descent: a current between gate depths · 2026-09-28
 Agreed with Igor in the S2 brainstorm; design in
-`superpowers/specs/2026-09-28-s2-descent-design.md`.
+`specs/2026-09-28-s2-descent-design.md`.
 
 **The current moves the dive, on its own, and never stops.** After a batch is
 cleared and a mod is taken, the current speeds up and carries the camera — and
@@ -2571,7 +2571,7 @@ and the codebase".
   `decisions.md` whole to start work.
 - **Living docs and logs.** `foundations.md`, `plan.md`, `roadmap.md`,
   `design.md`, `entities/` and `ideas.md` say what is true now and carry no
-  history. `decisions.md`, `changelog.md` and `superpowers/` are logs, only
+  history. `decisions.md`, `changelog.md` and `specs/` are logs, only
   ever appended to.
 - **One home per fact**; the map lists the homes.
 - **Applied now.** `ideas.md` lost every item a decision had answered — the
@@ -2599,7 +2599,7 @@ mods from drops come first)): what a weapon is as data, how one is owned and
 equipped, its tiers, and where weapon-scoped mods attach. Igor: "design weapon
 record"; Claude proposed seven points, and Igor: "approved". The design and its
 check against `foundations.md`:
-`superpowers/specs/2026-10-01-weapon-record-design.md`.
+`specs/2026-10-01-weapon-record-design.md`.
 
 **Taken as settled**: weapons are gear (the glossary); each has upgrades of
 its own, and the player invests in the one that suits them
@@ -2653,7 +2653,7 @@ transition from our current state". Claude researched how a dozen games hand
 out power mid-run and offered three shapes: A, the pick becomes a drop; B, A
 plus temporary boosts; C, a stream from every kill, Risk of Rain 2's. Igor,
 2026-10-12: "go with B". The design, the research and its check against
-`foundations.md`: `superpowers/specs/2026-10-12-mods-from-drops-design.md`.
+`foundations.md`: `specs/2026-10-12-mods-from-drops-design.md`.
 
 **Decided.**
 - **A glowing fish carries each batch's mod.** When a batch of the plan
@@ -2997,8 +2997,16 @@ as it had twice. Igor: "yes drop it".
   stage-sized work (Working agreement). The "Skills and plugins" section keeps
   ponytail, disciplines and the global rules, and says what the global trigger
   table's two superpowers rows mean here.
-- **`docs/superpowers/` keeps its name**: the specs and plans in it are
-  history, and the next ones go beside them.
+- **Specs are kept, in `docs/specs/`; plans are not kept.** Amended the same
+  day — Igor: "do something with superpowers dir. you find its specs and plans
+  useful or overengineered?" Claude's answer: the specs are useful — the
+  decisions and the tests point to them for a stage's design and its check
+  against `foundations.md` — and the plans over-engineered: build scaffolding
+  that goes stale the moment it is built, one of them mostly code since
+  rewritten. So the specs moved to `docs/specs/`, the plans went (git keeps
+  them), and S3 (one boss, one complete layer), which had no spec, kept its
+  plan's design part as one. A stage's plan and log live in the session's
+  scratch space from now on.
 
 **Guarded by**: `tests/docs.test.js` — `.claude/settings.json` keeps
 superpowers switched off.

@@ -31,8 +31,8 @@ the decisions listed say why.
 | The layer-to-layer design pass | 2026-09-30 | How a dive runs on through the layers — decided, checked against `foundations.md`, planned | D66–D73 |
 | S4 — Meta loop skeleton | 2026-09-30 | Two layers drawn from pools, the layer end and the win, every mod capped, `home` with the gun's tiers and dash reach, a micro-task, the versioned save | D74–D79 |
 
-Their specs and plans, where a stage had them, are in `superpowers/` — history,
-and where one disagrees with a decision, the decision wins.
+Their designs, where a stage had one, are in `specs/` — history; where one
+disagrees with a decision, the decision wins.
 
 ## Before S5 — two requirements · after S4
 
@@ -65,7 +65,7 @@ these are two big tasks, i'll do them in separate sessions" (D80).
    batch's mod, never a boss's or a mini-boss's; the layer end offers a pick of
    valuable mods, then Continue; kills drop boosts, which fade if left lying;
    rank is retired. The design and its check against `foundations.md`:
-   `superpowers/specs/2026-10-12-mods-from-drops-design.md`.
+   `specs/2026-10-12-mods-from-drops-design.md`.
 
 **Exit:** each is Igor's to set when its session opens.
 

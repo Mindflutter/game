@@ -6,6 +6,14 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-13
 
+**Specs to `docs/specs/`, plans dropped** (D94 (superpowers dropped))
+Igor: "do something with superpowers dir". The specs are kept — decisions and
+tests point to them for a stage's design and its check against
+`foundations.md` — and moved to `docs/specs/`. The plans went: build
+scaffolding, stale once built (git keeps them). S3 (one boss, one complete
+layer) had no spec, so its plan's design part is kept as one. `CLAUDE.md` now
+keeps a stage's plan and log in the session's scratch space, never the repo.
+
 **Superpowers dropped** (D94 (superpowers dropped))
 Igor: "yes drop it". The superpowers plugin is switched off for this project in
 `.claude/settings.json`, and a docs check keeps it so. What it gave that the
@@ -61,7 +69,7 @@ dozen games hand out power mid-run, three shapes — and Igor chose: "go with
 B". Then, building it: "good to go … implement with no interruption"; and,
 having played it, a round of corrections (D88–D90). Design, research and its
 check against `foundations.md`:
-`superpowers/specs/2026-10-12-mods-from-drops-design.md` — its fish lighting
+`specs/2026-10-12-mods-from-drops-design.md` — its fish lighting
 up partway through a fight is superseded (D88).
 
 - **Gates**: no pick and no pause. One fish of each batch glows from the moment
@@ -122,7 +130,7 @@ first migration — and `tests/fixtures/save-v2.json` joins the v1 fixture.
 Owning a weapon and choosing which to carry come with the second, in S5
 (content); weapon mods name the weapons they fit, superseding D31 (two-tier
 progression)'s second argument to `apply`. Design and its check against
-`foundations.md`: `superpowers/specs/2026-10-01-weapon-record-design.md`.
+`foundations.md`: `specs/2026-10-01-weapon-record-design.md`.
 `entities/weapons.md` is now an ordinary entity doc, its tiers a table.
 Nothing changes in play.
 
@@ -212,8 +220,7 @@ add on top of gear and attributes, which he had already answered (D74 (mods on
 top; dash improvements are attributes)) — agreed the content (D75 (the gun's
 tiers, dash reach, a clean batch)), approved the design in three parts, and
 said "just plan for yourself and implement". Design:
-`superpowers/specs/2026-09-30-s4-meta-loop-design.md`; plan:
-`superpowers/plans/2026-09-30-s4-meta-loop.md`.
+`specs/2026-09-30-s4-meta-loop-design.md`.
 
 Built: a layer is a record of stretches with pools, and a dive draws its whole
 `plan` from its seed (D71); a second layer, the first one's content under its
@@ -256,7 +263,7 @@ layer, from the dive's seed; by alpha no layer is a fixed list (D71 (batches
 are drawn from pools)). Between layers there is no screen: the mod pick is the
 layer end's one pause, and "LAYER CLEARED" becomes the win screen (D72
 (between layers there is no screen)). The design and its check against
-`foundations.md`: `superpowers/specs/2026-09-30-layer-to-layer-design.md`.
+`foundations.md`: `specs/2026-09-30-layer-to-layer-design.md`.
 `plan.md`'s S4 (meta loop skeleton) now carries the dive's loop across two
 layers as well as the meta loop, and S5 (content) the pools and a mod pool
 that covers a full dive. `foundations.md`, `ideas.md` and `roadmap.md` follow.
@@ -347,8 +354,8 @@ which this build made false ("a stop, not a win … S3 owns endings").
 
 Measured (`roadmap.md` → Health): the bot wins 0 of 5 boss fights and 1 of 5
 mini-boss fights at the starting kit. That is the bot: against a lone slow
-enemy it backs out of its own range. The plan, with the design at its head:
-`superpowers/plans/2026-09-29-s3-boss.md`.
+enemy it backs out of its own range. The design:
+`specs/2026-09-29-s3-boss-design.md`.
 
 **The TL;DR drops its standing "not committed" line** — Igor: "no need to
 state "not committed" section every time in tldr. other sections are very

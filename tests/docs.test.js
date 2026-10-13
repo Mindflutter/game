@@ -8,10 +8,10 @@ import { loadGame } from './harness.js';
 const ROOT = new URL('../', import.meta.url);
 const src = f => readFileSync(new URL(f, ROOT), 'utf8');
 const read = f => src('docs/' + f);
-// Every doc, `entities/` included, except `superpowers/`: its specs and plans
-// are a log of past stages, kept as they were written.
+// Every doc, `entities/` included, except `specs/`: a log of designs, kept as
+// they were written.
 const docNames = readdirSync(new URL('docs/', ROOT), { recursive: true })
-  .filter(f => f.endsWith('.md') && !f.startsWith('superpowers/'));
+  .filter(f => f.endsWith('.md') && !f.startsWith('specs/'));
 const ENTITY_DOCS = docNames.filter(f => f.startsWith('entities/'));
 // The docs that describe the code, and so may only quote it as it is. Not
 // ideas.md, nor the logs -- decisions.md and changelog.md are history and may

@@ -23,7 +23,7 @@ A change to them belongs in the same commit as the code it describes.
 | Anything undecided: open questions, parked and declined ideas | `ideas.md` |
 | What shipped, and when | `changelog.md` |
 | Igor's description of the whole game | `high level design.md` |
-| The design and plan of a past stage | `superpowers/` |
+| A stage's design, and its check against `foundations.md` | `specs/` |
 
 `decisions.md` is long. Find an entry by its heading — `grep '^## D'
 docs/decisions.md` lists them all — and read that one. D1–D26 describe the
@@ -39,7 +39,7 @@ something stops being true it is rewritten or deleted, and what happened goes
 to a log.
 
 **Logs** record what happened, and are only ever appended to: `decisions.md`,
-`changelog.md` and `superpowers/`. To reverse a decision, add one that
+`changelog.md` and `specs/`. To reverse a decision, add one that
 supersedes it. `high level design.md` is neither — Igor's frozen input, never
 edited.
 

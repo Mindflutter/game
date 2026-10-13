@@ -1,6 +1,6 @@
 // The boss and the mini-bosses: the lunge, the layer's shape, and what a
 // mini-boss's clear pays (D62, D63, D64, D65, D88). The design is in
-// docs/superpowers/plans/2026-09-29-s3-boss.md.
+// docs/specs/2026-09-29-s3-boss-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { loadGame, ticks, ride, clearAndWait } from './harness.js';
