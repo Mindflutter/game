@@ -57,6 +57,23 @@ describe('batches drawn from pools (D71)', () => {
     }), { numRuns: 30 });
   });
 
+  it('gives every layer pools and batches of its own, and meets every type in one (D101)', () => {
+    const g = loadGame();
+    const owner = new Map();
+    for (const [l, layer] of g.LAYERS.entries()) {
+      for (const st of layer.stretches) {
+        if (st.pool.length === 1) continue;      // a mini-boss's or the boss's
+        for (const x of [st.pool, ...st.pool]) {
+          expect(owner.get(x) ?? l).toBe(l);
+          owner.set(x, l);
+        }
+      }
+    }
+    const met = new Set(g.LAYERS.flatMap(layer => layer.stretches.flatMap(st =>
+      st.pool.flatMap(b => b.enemies.map(([name]) => name)))));
+    expect(g.ENEMY_TYPES.filter(t => !met.has(t.name)).map(t => t.name)).toEqual([]);
+  });
+
   it('holds more batches in every ordinary pool than it draws', () => {
     // A pool the size of its draw only reshuffles the same batches -- the
     // same batches every dive, which is what D71 exists to end.
@@ -100,6 +117,14 @@ describe('on through the layers (D66, D68, D72)', () => {
     const others = g.ENEMY_TYPES.filter(t => t.name !== 'boss').map(t => t.value);
     expect(haul).toBe(g.enemyType('boss').value);
     expect(haul).toBeGreaterThan(3 * Math.max(...others));
+  });
+
+  it('starts layer 3 from its scenario with the kit it names', () => {
+    const g = loadGame();
+    expect(g.applyScenario('layer-3', 1)).toBe(true);
+    expect(g.plan[g.batchIndex].layer).toBe(2);
+    expect(g.plan[g.batchIndex - 1].end).toBe(true);
+    expect(Object.values(g.modCounts).reduce((a, b) => a + b, 0)).toBe(g.SCENARIOS['layer-3'].kit.length);
   });
 
   it('starts layer 2 from its scenario with the kit it names', () => {
@@ -223,15 +248,20 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     expect(JSON.parse(g.saved).gear.Gun).toBe(gun(g).tiers.length);   // written at once
   });
 
+  // `slow` puts a batch past `swift`'s time, so these clears pay `untouched` alone.
+  const slow = g => { g.batchTime = 1e6; };
+
   it('pays a point for a clean batch, once per layer, and spends it on reach', () => {
     const g = loadGame();
     g.reset(1);
     ride(g);
+    slow(g);
     clearAndWait(g, 0.1);                        // the first batch, untouched
     expect(g.points()).toBe(1);
     expect(g.notice).not.toBe('');
     ride(g);
     g.notice = '';
+    slow(g);
     clearAndWait(g, 0.1);                        // a second clean batch, same layer
     expect(g.points()).toBe(1);
     expect(g.notice).toBe('');                   // and nothing announced twice
@@ -250,6 +280,7 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     g.placeEnemy('bulwark', g.player.x, g.player.y);   // a real touch
     g.update(g.FIXED_DT);
     expect(g.player.hp).toBe(g.player.maxHp - 1);
+    slow(g);
     clearAndWait(g, 0.1);
     expect(g.points()).toBe(0);
   });
@@ -276,18 +307,38 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     expect(g.screen).toBe('playing');
   });
 
+  it('keeps gear and attributes on screens of their own, left by Back or Esc (D96)', () => {
+    const g = loadGame();
+    g.openMenu('home');
+    const row = (menu, label) => g.MENUS[menu].items.find(i => i.label === label);
+    expect(g.MENUS.home.items.map(i => i.label)).toEqual(['Dive', 'Gear', 'Attributes', 'Help', 'Options']);
+    row('home', 'Gear').run();
+    expect(g.screen).toBe('gear');
+    expect(g.MENUS.gear.items.some(i => i.label.startsWith('Gun'))).toBe(true);
+    g.justPressed.add('Escape');
+    g.update(g.FIXED_DT);
+    expect(g.screen).toBe('home');
+    row('home', 'Attributes').run();
+    expect(g.screen).toBe('attributes');
+    expect(g.MENUS.attributes.items.some(i => i.label.startsWith('Dash reach'))).toBe(true);
+    row('attributes', 'Back').run();
+    expect(g.screen).toBe('home');
+  });
+
   it('keeps a layer\'s micro-tasks by its number, whatever it is called', () => {
     // Layers are numbered until they are named (D89): renaming one must not
     // forget what it has already paid, on the save or on `home`.
     const g = loadGame();
     g.reset(1);
     ride(g);
+    slow(g);
     clearAndWait(g, 0.1);                        // a clean first batch: the task pays
     expect(g.points()).toBe(1);
     g.LAYERS[0].name = 'Somewhere Else';
     g.reset(2);
     ride(g);
     g.notice = '';
+    slow(g);
     clearAndWait(g, 0.1);                        // a clean batch of the renamed layer
     expect(g.points()).toBe(1);                  // pays nothing: the task is still done
     expect(g.notice).toBe('');
@@ -322,6 +373,23 @@ describe('the save (D70)', () => {
       // up here as a difference.
       expect(b.saveText()).toBe(a.saveText());
     }), { numRuns: 12 });
+  });
+
+  it('restores a dive saved with a shot in flight and a puffer swelling, which plays on identically', () => {
+    const a = loadGame();
+    a.reset(7);
+    a.queuePaused = true;
+    a.placeEnemy('archer', a.player.x + 200, a.player.y);
+    a.placeEnemy('puffer', a.player.x - 80, a.player.y);
+    a.enemies[0].phaseTime = 2;                  // the archer spits on the first tick
+    for (let i = 0; i < 30; i++) a.update(a.FIXED_DT);
+    expect(a.bullets.some(b => b.evil)).toBe(true);
+    expect(a.enemies[1].phase).toBe('fuse');
+    const b = loadGame();
+    expect(b.loadSave(a.saveText())).toBe('');
+    b.screen = b.resumeTo;
+    for (const g of [a, b]) for (let i = 0; i < 300; i++) g.update(g.FIXED_DT);
+    expect(b.saveText()).toBe(a.saveText());
   });
 
   it('keeps what persists across a reload, micro-task counters included', () => {
@@ -372,7 +440,7 @@ describe('the save (D70)', () => {
     // v1 kept the shot in constants (D83): its dive comes back with the Gun's
     // shot as it was then, and is written back as the current version.
     expect([g.player.shotSpeed, g.player.shotRadius]).toEqual([430, 4]);
-    expect(JSON.parse(g.saveText()).version).toBe(3);
+    expect(JSON.parse(g.saveText()).version).toBe(g.freshMeta().version);
     // Its micro-tasks were kept by layer name; they come back by number (D89).
     expect(g.meta.tasks).toEqual({ 0: { untouched: 1 } });
     expect(g.points()).toBe(1);
@@ -380,6 +448,22 @@ describe('the save (D70)', () => {
     g.immortal = true;
     const shots = shotsSeen(g, 600);
     expect(Number.isFinite(g.player.x) && Number.isFinite(g.cameraY)).toBe(true);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it('loads a save written by the first build of version 4, and plays it on', () => {
+    // Saved mid-batch in layer 2 carrying the Harpoon, with a spit shot in
+    // flight, a puffer swelling and the suit's guard up (D95, D97, D100).
+    const text = readFileSync(new URL('./fixtures/save-v4.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect([g.meta.carried, g.weaponName, g.guardLeft]).toEqual(['Harpoon', 'Harpoon', 1]);
+    expect(g.bullets.some(b => b.evil)).toBe(true);
+    expect(g.enemies.some(e => e.phase === 'fuse')).toBe(true);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
     expect(shots.length).toBeGreaterThan(0);
     expect(shots.every(finite)).toBe(true);
   });
@@ -455,11 +539,310 @@ describe('the weapon record (D83)', () => {
     // equipment, worn by its owner whatever is carried, does.
     g.WEAPONS.push({ ...w, name: 'Spear', tiers: [{ cost: 0, apply: p => { p.range += 1000; } }] });
     g.meta.gear.Spear = 1;
-    g.EQUIPMENT.push({ name: 'Mask', tiers: [{ cost: 0, apply: p => { p.iframes += 1; } }] });
-    g.meta.gear.Mask = 1;
+    g.EQUIPMENT.push({ name: 'Charm', tiers: [{ cost: 0, apply: p => { p.iframes += 1; } }] });
+    g.meta.gear.Charm = 1;
     g.reset(1);
     expect([g.player.pierce, g.player.damage, g.player.range]).toEqual([w.pierce + 1, w.damage, w.range]);
     expect(g.player.iframes).toBe(g.PLAYER_START.iframes + 1);
+  });
+});
+
+describe('owning and carrying weapons (D97)', () => {
+  // A second weapon for the test alone, with a tier of its own.
+  const spear = g => {
+    const w = { ...g.WEAPONS[0], name: 'Spear', fireRate: 9, cost: 50,
+                tiers: [{ cost: 10, apply: p => { p.damage += 5; } }] };
+    g.WEAPONS.push(w);
+    return w;
+  };
+  const gun = g => g.WEAPONS.find(w => w.name === 'Gun');
+
+  it('starts owning and carrying the Gun, which a dive then carries', () => {
+    const g = loadGame();
+    expect([g.meta.owned, g.meta.carried]).toEqual([['Gun'], 'Gun']);
+    g.reset(1);
+    expect(g.weaponName).toBe('Gun');
+    expect(g.player.fireRate).toBe(gun(g).fireRate);
+  });
+
+  it('owns a weapon for its gems and carries it at once; carrying an owned one is free', () => {
+    const g = loadGame();
+    const w = spear(g);
+    g.pickWeapon(w);                             // 0 gems owns nothing
+    expect([g.meta.owned, g.meta.carried]).toEqual([['Gun'], 'Gun']);
+    g.meta.bank = 80;
+    g.pickWeapon(w);
+    expect([g.meta.owned, g.meta.carried, g.meta.bank]).toEqual([['Gun', 'Spear'], 'Spear', 30]);
+    g.pickWeapon(gun(g));
+    expect([g.meta.carried, g.meta.bank]).toEqual(['Gun', 30]);
+    expect(JSON.parse(g.saved).carried).toBe('Gun');   // written at once
+  });
+
+  it('raises the carried weapon\'s tier from its row, and a dive carries its numbers alone', () => {
+    const g = loadGame();
+    const w = spear(g);
+    g.meta.bank = 60;
+    g.pickWeapon(w);                             // owned and carried
+    g.pickWeapon(w);                             // its first tier
+    expect([g.meta.gear.Spear, g.meta.bank]).toEqual([1, 0]);
+    g.reset(1);
+    expect([g.weaponName, g.player.fireRate, g.player.damage]).toEqual(['Spear', 9, gun(g).damage + 5]);
+    g.pickWeapon(gun(g));
+    g.reset(2);                                  // the Spear left at home adds nothing
+    expect([g.weaponName, g.player.fireRate, g.player.damage]).toEqual(['Gun', gun(g).fireRate, gun(g).damage]);
+  });
+
+  it('carries the Gun when the save names a weapon that is not there', () => {
+    const g = loadGame();
+    g.meta.carried = 'Trident';
+    g.reset(1);
+    expect(g.weaponName).toBe('Gun');
+    expect(g.player.fireRate).toBe(gun(g).fireRate);
+  });
+
+  it('lets a scenario name the weapon carried, whatever home chose', () => {
+    const g = loadGame();
+    spear(g);
+    g.SCENARIOS.probe = { weapon: 'Spear', spawn: false };
+    g.applyScenario('probe', 1);
+    expect([g.weaponName, g.player.fireRate, g.meta.carried]).toEqual(['Spear', 9, 'Gun']);
+  });
+
+  it('keeps the weapon carried with a saved dive', () => {
+    const a = loadGame();
+    spear(a);
+    a.meta.owned.push('Spear');
+    a.meta.carried = 'Spear';
+    a.reset(1);
+    const b = loadGame();
+    spear(b);
+    expect(b.loadSave(a.saveText())).toBe('');
+    expect([b.weaponName, b.meta.carried, b.meta.owned]).toEqual(['Spear', 'Spear', ['Gun', 'Spear']]);
+  });
+
+  it('migrates a version 3 save to owning and carrying the Gun', () => {
+    const g = loadGame();
+    const text = readFileSync(new URL('./fixtures/save-v3.json', import.meta.url), 'utf8');
+    expect(g.loadSave(text)).toBe('');
+    expect([g.meta.version, g.meta.owned, g.meta.carried, g.weaponName]).toEqual([4, ['Gun'], 'Gun', 'Gun']);
+  });
+});
+
+describe('the weapons (D97)', () => {
+  const row = (g, name) => g.MENUS.gear.items.find(i => i.label.startsWith(name + ' '));
+  // Fishes in a line to the diver's right, `gap` px apart, and one shot fired
+  // at them: the trigger arms on a released button, then the held one fires.
+  const lineAndFire = (g, n, gap) => {
+    g.queuePaused = true;
+    for (let i = 1; i <= n; i++) g.placeEnemy('drifter', g.player.x + 60 + i * gap, g.player.y);
+    g.update(g.FIXED_DT);
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    g.keys.add('Mouse0');
+    g.update(g.FIXED_DT);
+    g.keys.delete('Mouse0');
+    return g.bullets.find(b => !b.evil);
+  };
+
+  it('the Knife slashes: one short, wide swing cuts a cluster and reaches no further', () => {
+    const g = loadGame();
+    expect(g.applyScenario('knife', 1)).toBe(true);
+    expect(g.weaponName).toBe('Knife');
+    g.queuePaused = true;
+    for (const dy of [-14, 0, 14]) g.placeEnemy('drifter', g.player.x + 50, g.player.y + dy);
+    g.placeEnemy('bulwark', g.player.x + 200, g.player.y);   // out of its reach
+    g.update(g.FIXED_DT);
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    g.keys.add('Mouse0');
+    g.update(g.FIXED_DT);
+    g.keys.delete('Mouse0');
+    for (let i = 0; i < 24; i++) g.update(g.FIXED_DT);
+    expect(g.kills).toBe(3);
+    expect(g.enemies.map(e => [e.name, e.hp])).toEqual([['bulwark', g.enemyType('bulwark').hp]]);
+  });
+
+  it('the Harpoon waits for a point of Strength, and its row says so', () => {
+    const g = loadGame();
+    g.meta.bank = 1000;
+    expect(row(g, 'Harpoon').label).toContain('needs Strength 1');
+    expect(row(g, 'Harpoon').dim).toBe(true);
+    row(g, 'Harpoon').run();
+    expect(g.meta.owned).toEqual(['Gun']);
+    g.meta.tasks[0] = { untouched: 1 };
+    g.raise(g.ATTRIBUTES.find(a => a.name === 'Strength'));
+    expect(row(g, 'Harpoon').label).not.toContain('needs');
+    expect(row(g, 'Harpoon').dim).toBe(false);
+    row(g, 'Harpoon').run();
+    expect([g.meta.owned, g.meta.carried]).toEqual([['Gun', 'Harpoon'], 'Harpoon']);
+  });
+
+  it('the Harpoon fires a slow, long shot that goes through two fish into a third', () => {
+    const g = loadGame();
+    expect(g.applyScenario('harpoon', 1)).toBe(true);
+    expect(g.weaponName).toBe('Harpoon');
+    const w = g.WEAPONS.find(x => x.name === 'Harpoon');
+    const b = lineAndFire(g, 4, 30);
+    expect([b.speed, b.maxTravel, b.pierce]).toEqual([w.shotSpeed, w.range, w.pierce]);
+    for (let i = 0; i < 60; i++) g.update(g.FIXED_DT);
+    expect(g.kills).toBe(w.pierce + 1);
+  });
+});
+
+describe('equipment (D100)', () => {
+  // A dive with `tiers` of each named piece bought, nothing arriving.
+  const wearing = (pieces, seed = 1) => {
+    const g = loadGame();
+    Object.assign(g.meta.gear, pieces);
+    g.reset(seed);
+    g.queuePaused = true;
+    return g;
+  };
+
+  it('puts each piece\'s tiers on the diver: the mask\'s reach, the weights\' damage, the suit\'s guard', () => {
+    const g = wearing({ Mask: 2, Weights: 3, Suit: 1 });
+    const gun = g.WEAPONS[0];
+    expect([g.player.range, g.player.damage, g.player.guard]).toEqual([gun.range + 60, gun.damage + 1.5, 1]);
+  });
+
+  it('takes the first hit of a batch on the suit: no heart, the i-frames, the batch marked hit', () => {
+    const g = wearing({ Suit: 1 });
+    expect(g.guardLeft).toBe(1);
+    g.placeEnemy('bulwark', g.player.x, g.player.y);
+    g.update(g.FIXED_DT);
+    expect([g.player.hp, g.guardLeft, g.batchHit]).toEqual([g.player.maxHp, 0, true]);
+    expect(g.player.hurt).toBeGreaterThan(0);
+    for (let i = 0, n = ticks(g, g.player.iframes + 0.1); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.player.hp).toBe(g.player.maxHp - 1);   // the next one is a heart
+  });
+
+  it('guards a spit shot like a bite, and spends the shot', () => {
+    const g = wearing({ Suit: 1 });
+    g.placeEnemy('archer', g.player.x + 200, g.player.y);
+    g.enemies[0].phaseTime = 2;
+    for (let i = 0, n = ticks(g, 1.1); i < n; i++) g.update(g.FIXED_DT);
+    expect([g.player.hp, g.guardLeft]).toEqual([g.player.maxHp, 0]);
+    expect(g.bullets.filter(b => b.evil)).toHaveLength(0);
+  });
+
+  it('refills the guard as each batch arrives', () => {
+    const g = loadGame();
+    g.meta.gear.Suit = 2;
+    g.reset(1);
+    g.guardLeft = 0;
+    ride(g);                                     // the first batch arrives
+    expect(g.enemies.length).toBeGreaterThan(0);
+    expect(g.guardLeft).toBe(2);
+  });
+
+  it('keeps the guard left with a saved dive', () => {
+    const a = wearing({ Suit: 3 });
+    a.guardLeft = 1;
+    const b = loadGame();
+    expect(b.loadSave(a.saveText())).toBe('');
+    expect([b.guardLeft, b.player.guard]).toEqual([1, 3]);
+  });
+});
+
+describe('attributes and requirements (D98)', () => {
+  const mini = g => g.plan.findIndex(e => e.batch.enemies.some(([n]) => n === 'mini-boss'));
+  // The first batch of gate `k` arrived, the diver kept alive.
+  const fighting = k => { const g = atGate(k); g.immortal = true; ride(g); return g; };
+
+  it('pays swift for a batch cleared inside its time, and not after', () => {
+    const quick = fighting(0);
+    quick.batchHit = true;                       // so only swift can pay
+    for (let i = 0, n = ticks(quick, 1); i < n; i++) quick.update(quick.FIXED_DT);
+    clearAndWait(quick, 0.1);
+    expect(quick.meta.tasks[0]).toEqual({ swift: 1 });
+    const late = fighting(0);
+    late.batchHit = true;
+    for (let i = 0, n = ticks(late, 10.5); i < n; i++) late.update(late.FIXED_DT);
+    clearAndWait(late, 0.1);
+    expect(late.meta.tasks[0]).toBe(undefined);
+  });
+
+  it('pays footwork for a mini-boss beaten without a dash, and not with one, or for any other batch', () => {
+    const k = mini(atGate(0));
+    const clean = fighting(k);
+    clean.batchHit = true;
+    clean.batchTime = 1e6;                       // so only footwork can pay
+    clearAndWait(clean, 0.1);
+    expect(clean.meta.tasks[0]).toEqual({ footwork: 1 });
+    const dashed = fighting(k);
+    dashed.keys.add('KeyD');
+    dashed.justPressed.add('Space');
+    dashed.update(dashed.FIXED_DT);
+    expect(dashed.batchDashed).toBe(true);
+    dashed.batchHit = true;
+    dashed.batchTime = 1e6;
+    clearAndWait(dashed, 0.1);
+    expect(dashed.meta.tasks[0]).toBe(undefined);
+    const ordinary = fighting(1);
+    ordinary.batchHit = true;
+    ordinary.batchTime = 1e6;
+    clearAndWait(ordinary, 0.1);
+    expect(ordinary.meta.tasks[0]).toBe(undefined);
+  });
+
+  it('keeps a batch\'s clock and its dash with a saved dive', () => {
+    const a = fighting(0);
+    Object.assign(a, { batchTime: 4.5, batchDashed: true });
+    const b = loadGame();
+    expect(b.loadSave(a.saveText())).toBe('');
+    expect([b.batchTime, b.batchDashed]).toEqual([4.5, true]);
+  });
+
+  const attr = (g, name) => g.ATTRIBUTES.find(a => a.name === name);
+  const earn = (g, n) => { for (let l = 0; l < n; l++) g.meta.tasks[l] = { untouched: 1 }; };
+
+  it('raises a heart with Heart, full, and the dash\'s wound with Strength', () => {
+    const g = loadGame();
+    earn(g, 2);
+    g.raise(attr(g, 'Heart'));
+    g.raise(attr(g, 'Strength'));
+    g.reset(1);
+    expect([g.player.maxHp, g.player.hp]).toEqual([g.PLAYER_START.maxHp + 1, g.PLAYER_START.hp + 1]);
+    expect(g.player.dashDamage).toBe(g.PLAYER_START.dashDamage + 1);
+  });
+
+  it('owns or buys nothing that requires more points than are spent, and takes no gems', () => {
+    const g = loadGame();
+    const w = { ...g.WEAPONS[0], name: 'Spear', cost: 10, requires: { Strength: 1 }, tiers: [] };
+    const piece = { name: 'Belt', requires: { Heart: 2 }, tiers: [{ cost: 10, apply: p => { p.damage += 1; } }] };
+    g.WEAPONS.push(w);
+    g.EQUIPMENT.push(piece);
+    g.meta.bank = 100;
+    g.pickWeapon(w);
+    g.buy(piece);
+    expect([g.meta.owned, g.meta.gear.Belt, g.meta.bank]).toEqual([['Gun'], undefined, 100]);
+    earn(g, 3);
+    g.raise(attr(g, 'Strength'));
+    g.raise(attr(g, 'Heart'));
+    g.buy(piece);                                // Heart 1 of the 2 it needs
+    expect(g.meta.gear.Belt).toBe(undefined);
+    g.raise(attr(g, 'Heart'));
+    g.pickWeapon(w);
+    g.buy(piece);
+    expect([g.meta.owned, g.meta.gear.Belt, g.meta.bank]).toEqual([['Gun', 'Spear'], 1, 80]);
+  });
+});
+
+describe('the content stage\'s counts (D93)', () => {
+  it('holds the counts S5 (content) asks for', () => {
+    const g = loadGame();
+    const within = (what, n, lo, hi) => expect([what, n >= lo && n <= hi]).toEqual([what, true]);
+    const behaviour = t => Object.keys(t).find(k => typeof t[k] === 'object') ?? 'chase';
+    within('behaviours', new Set(g.ENEMY_TYPES.map(behaviour)).size, 5, 7);
+    within('ordinary types', g.ENEMY_TYPES.filter(t => t.carries !== false).length, 5, 7);
+    within('weapons', g.WEAPONS.length, 2, 3);
+    within('equipment', g.EQUIPMENT.length, 2, 3);
+    within('layers', g.LAYERS.length, 3, 5);
+    for (const x of [...g.WEAPONS, ...g.EQUIPMENT]) within(x.name + ' tiers', x.tiers.length, 3, 4);
+    within('mods', g.MODS.length, 5, 7);
+    within('boosts', g.BOOSTS.length, 4, 6);     // Rush and 3-5 new
+    within('micro-tasks', g.TASKS.length, 3, 3);
+    within('attributes', g.ATTRIBUTES.length, 3, 3);
   });
 });
 

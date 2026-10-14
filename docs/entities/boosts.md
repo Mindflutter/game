@@ -14,6 +14,9 @@ end's pick, its **Boosts** paragraph.
 | name | desc | time | adds |
 |---|---|---|---|
 | Rush | you swim much faster, for a moment | 5 | speed +200 |
+| Frenzy | you fire much faster, for a moment | 5 | fireRate +3 |
+| Lance | your shots go through, for a moment | 5 | pierce +4 |
+| Bloom | your shots swell, for a moment | 6 | shotRadius +6 |
 
 **adds** is read straight off `add`. Every number is Claude's pick, S6
 (balance)'s to tune.
@@ -30,8 +33,24 @@ end's pick, its **Boosts** paragraph.
 ## Rush
 
 Swim much faster, for five seconds. The first boost, Claude's pick: a body
-stat, so it fits every weapon, and one that is felt at once — +200 on a base of
-260.
+stat, so it fits every weapon, and one that is felt at once. The new ones'
+numbers are Claude's picks too (D99 (weapon mods, and more boosts)).
+
+## Frenzy
+
+Fire much faster, for five seconds (D99 (weapon mods, and more boosts)). The
+weapon's own number, so it helps every weapon, the slow Harpoon most of all.
+
+## Lance
+
+Your shots go through four more fish, for five seconds (D99 (weapon mods, and
+more boosts)): a crowd turns into a line to shoot down.
+
+## Bloom
+
+Your shots swell, for six seconds (D99 (weapon mods, and more boosts)): a wider
+shot is an easier hit, and the readout shows it as `size`. A shot keeps the
+size it was fired at.
 
 ## Adding one
 

@@ -177,6 +177,6 @@ Named so they stop being re-proposed.
 
 Tracked in `ideas.md`, not here. The draft's own `(?)` markers plus what this
 contract does not decide: the lost item, what currency is called, whether
-collectibles feed stats or story or both, **which** attributes exist and what each
-micro-task is (the tier itself is settled by D36; its content is S5 work),
-terrain complexity beyond a vertical shaft.
+collectibles feed stats or story or both, terrain complexity beyond a vertical
+shaft. Which attributes exist and what each micro-task is was S5 (content)'s,
+and is D98.

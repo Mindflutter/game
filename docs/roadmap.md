@@ -9,18 +9,31 @@ The stages themselves live in `plan.md`; the rules that outlive them live in
 
 ## Next
 
-No stage is active: what comes next, and where each requirement before S5
-(content) stands, is `plan.md` → Active stage and Before S5.
+S5 (content) is active (`plan.md` → S5), and its work is built, 2026-10-13, to
+the `abyss-content` skill (`.claude/skills/abyss-content/`) and the design in
+`specs/2026-10-13-s5-content-design.md` (D95–D101): three enemy
+behaviours, the Harpoon and the Knife with owning and carrying, three pieces of
+equipment, Heart and Strength, swift and footwork, Barbs, three boosts, three
+layers. Every design call in it is Claude's, delegated, and open. Igor played
+it, 2026-10-14; his notes are in `ideas.md` → Open — from playing S5
+(content), each with the home Claude proposes for it. **Next: those notes,
+discussed one at a time; `/simplify`; the commit — then S5 (content)'s exit is
+Igor's to call.**
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's
 haul (`entities/enemies.md`), S4's — the Gun's prices and tier step
-(`entities/weapons.md`), dash reach and `GEM_PULL` (`design.md`) — and the
-mods rework's: the layer end's bigger step (`design.md`), `Mend` as the layer end's own (`entities/mods.md`), the boost
-chance, a boost's life on the floor and `Rush` (`entities/boosts.md`) — all
-Claude's picks. The scenarios that start
-next to each — a lunger, the second layer with a kit — are in the root
-`README.md` → Scenarios.
+(`entities/weapons.md`), dash reach and `GEM_PULL` (`design.md`) — the
+mods rework's: the layer end's bigger step (`design.md`), `Mend` as the layer
+end's own (`entities/mods.md`), the boost chance, a boost's life on the floor
+and `Rush` (`entities/boosts.md`) — and S5 (content)'s: every number of the
+archer, the puffer and the eel (`entities/enemies.md`), of the Harpoon and the
+Knife (`entities/weapons.md`), of the three pieces of equipment
+(`entities/equipment.md`), of Barbs and the three boosts, Heart, Strength and
+`SWIFT_TIME` (`design.md`), and the layers' pools — all Claude's picks. The
+scenarios that start next to each — one fish of each kind, every ordinary type
+in a row, a weapon carried from the top, the second and third layers with a
+kit — are in the root `README.md` → Scenarios.
 
 Deliberately not yet: balance fine-tuning — Igor, closing S3: "i suggest we
 leave all balance fine-tuning for later"; S6 — Balance owns it, the threat
@@ -68,45 +81,54 @@ This section owns the measured bot figures. Nothing else quotes them.
   clears batches far faster, so a human layer is likely well under the 4–8 min
   pillar — which is S6's problem.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
-  4471 reaches the bottom of the dive — both layers since S4 — in 562.24 /
-  562.24 / 562.24s at 1280×800, 1920×1080 and 3440×1440 (stationary, immortal,
-  aiming at the first enemy), driven through real mouse events — measured
-  2026-10-12, on the build with mods from drops (D84, D88). On the S3 build, one
-  layer: 296.34s at all three. A `?test` check
+  4471 reaches the bottom of the dive — three layers since S5 (content) — in
+  811.02 / 809.82 / 802.58s at 1280×800, 1920×1080 and 3440×1440 (stationary,
+  immortal, aiming at the first enemy), driven through real mouse events —
+  measured 2026-10-13. The spread, 1%, is the whole-pixel aim the check allows
+  for: the eels sway, so a pixel moves a kill. On the build with mods from
+  drops, two layers, it was 562.24s at all three; on the S3 build, one layer,
+  296.34s. A `?test` check
   holds it within 2%; on the S2 layer, dropping the input's `/ scale` failed it
   at 217.03 / 228.71 / 227.51.
 - **The boss fight** (S3 DoD, D63), mortal bot at the starting kit — no gear,
-  no mods — from `last-batch`, seeds 1, 7, 42, 4471, 90210: **0 of 5 won**; it
-  dies after 24.6 / 28.1 / 24.7 / 25.1 / 26.4s. Immortal, it kills the boss in
-  92.3 / 105.1 / 93.3 / 94.4 / 99.3s. **The mini-boss**, from `mini-boss`: 1 of
-  5 won (seed 1, 122.2s, 2 hp left); three seeds time out at 300s alive, one
-  dies at 22.5s. **Why**: against a lone slow enemy the kiting bot holds it
+  no mods — from `last-batch`, seeds 1, 7, 42, 4471, 90210, re-measured
+  2026-10-13 on the S5 (content) build: **0 of 5 won**; it dies after 27.3 /
+  25.6 / 23.6 / 23.7 / 27.6s. Immortal, it kills the boss in 105.8 / 99.4 /
+  91.6 / 92.0 / 106.5s. **The mini-boss**, from `mini-boss`: 1 of 5 won (seed
+  1, 143.6s); seed 7 times out at 300s alive, three die at 48.1 / 40.3 /
+  25.4s. **Why**: against a lone slow enemy the kiting bot holds it
   inside its own 250px range 1% (seed 7) to 18% (seed 4471) of the time — it
   backs out of range, so its shots never land, and backs straight along the
   lunge's line, so the charges do. A measure of the bot's policy, not of the
   boss (D50); Igor's playthrough decides whether the layer is winnable.
-- **The meta loop** (S4 DoD), re-measured 2026-10-12 on the build with mods
-  from drops (D84–D88) — mortal bot, seeds 1, 7, 42, 4471, 90210, from the top,
-  each a whole dive or 1800s of one:
+- **The meta loop** (S4 DoD), re-measured 2026-10-13 on the S5 (content)
+  build — three layers with pools of their own (D101), the new fish in them —
+  mortal bot, seeds 1, 7, 42, 4471, 90210, from the top, each a whole dive or
+  1800s of one:
 
   | | gates cleared | gems | mean gates | mean gems |
   |---|---|---|---|---|
-  | starting gun | 0 / 4 / 2 / 5 / 4 | 10 / 54 / 36 / 84 / 54* | 3.0 | 47.6 |
-  | gun tier 1 | 0 / 4 / 4 / 6 / 10 | 11 / 54 / 62* / 105 / 156 | 4.8 | 77.6 |
+  | starting gun | 5 / 5 / 0 / 5 / 1 | 72 / 65 / 13 / 79 / 27 | 3.2 | 51.2 |
+  | gun tier 1 | 6 / 5 / 7 / 12 / 10 | 95 / 69 / 131 / 258 / 164 | 8.0 | 143.4 |
 
-  \* Alive at the 1800s cap, stuck at a mini-boss (below): the dive's takings,
-  not banked. **Dives to the first purchase: 2** (target ≤ 3) — seeds 1 then 7
-  bank 64 against the first tier's 40. **Measurably stronger**: the same seeds,
-  tier 1 against the starting gun, clear 1.6× the gates — 3.3× on the S4 build,
-  where every gate's card was the same first card; now which fish glows and
-  which mod it carries are drawn, and a mini-boss pays none. Seed 1 dies in its
-  first batch, the 14 darters D71 can draw as an opener (`ideas.md` → Open —
-  raised during S4). **Layer 2**, from `layer-2` (a kit of fifteen mods, the
-  starting gun): dies after 8 / 10 / 11 / 6 / 10 clears, banking 114–209 gems
-  — it never reaches layer 2's boss. It banked 215–312 on the S4 build: there
-  every gate past the capped pool offered the gems card, ten gems a gate, and
-  the bot took it; the card is gone (D84). The bot never seeks a boost (D86) — it takes one only by
-  swimming over it — so these figures are a floor. Bot policy as ever (D50): Igor finds batches easy.
+  **Dives to the first purchase: 1** (target ≤ 3) — seed 1 alone banks 72
+  against the first tier's 40. **Measurably stronger**: the same seeds, tier 1
+  against the starting gun, clear 2.5× the gates. Seed 42 dies in its first
+  batch, the 14 darters D71 can draw as an opener (`ideas.md` → Open — raised
+  during S4). **Layer 2**, from `layer-2` (a kit of fifteen mods, the starting
+  gun): dies after 6 / 10 / 6 / 10 / 10 clears, banking 112–195 gems — it never
+  reaches layer 2's boss. **Layer 3**, from `layer-3` (sixteen mods): dies
+  after 1 / 5 / 1 / 1 / 1 clears, banking 35–125 — the eels, puffers and
+  archers mixed undo a bot that only backs away. The bot never seeks a boost
+  (D86) — it takes one only by swimming over it — so these figures are a floor.
+  Bot policy as ever (D50): Igor finds batches easy.
+- **Per weapon** (S5 (content), D97), mortal bot from the top through the
+  `harpoon` and `knife` scenarios, seeds as above: the **Harpoon** clears 0 / 3
+  / 0 / 0 / 1 gates, the **Knife** 2 at every seed. A floor that says more
+  about the bot than the weapons: it backs away from the nearest fish, so a
+  46px slash lands only on what reaches it, and a shot a second and a bit is
+  overkill on the one-hit swarm the bot aims at first. S6 (balance) measures
+  per weapon (`plan.md` → S6) and needs a bot that closes in for the Knife.
 - **Arrival timing** (D55): from a batch spawning, the first enemy reaches a
   centred player in 2.04s at the earliest, 3.21s on average. Edged, 0.27s;
   cornered, 0.22s. This is what killed the `Lull` mod and what Igor's

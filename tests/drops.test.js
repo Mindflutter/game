@@ -14,7 +14,9 @@ const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
 const held = g => Object.values(g.modCounts).reduce((a, b) => a + b, 0);
 // Every mod a batch has paid so far: taken, or still flying in.
 const paid = g => held(g) + g.drops.filter(d => d.mod).length;
-const ordinary = g => g.MODS.filter(m => !m.end);
+// The ordinary mods a fish can carry: not a layer end's own, and fitting the
+// weapon carried (D99).
+const ordinary = g => g.MODS.filter(m => !m.end && g.fits(m));
 // The six numbers a mod can move, for comparing two players.
 const STATS = ['speed', 'maxHp', 'dashCooldown', 'iframes', 'dashDamage', 'mendOnClear'];
 const stats = p => STATS.map(k => p[k]);
@@ -140,6 +142,32 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
     expect(g.applyScenario('one-drifter', 1)).toBe(true);
     expect(clearAndWait(g, 1)).toBe('playing');
     expect(paid(g)).toBe(0);
+  });
+});
+
+describe('weapon mods (D99)', () => {
+  const barbs = g => g.MODS.find(m => m.name === 'Barbs');
+
+  it('never deals one for a weapon not carried, by a fish or on a card', () => {
+    const g = loadGame();
+    g.reset(1);                                  // carrying the Gun
+    for (let m; (m = g.drawCarried()); ) {
+      expect(m.name).not.toBe('Barbs');
+      g.takeMod(m);
+    }
+    for (let s = 0; s < 30; s++) {
+      g.reset(s);
+      expect(g.rollValuable().map(m => m.name)).not.toContain('Barbs');
+    }
+  });
+
+  it('deals one like any mod, up to its cap, while a weapon it fits is carried', () => {
+    const g = loadGame();
+    g.applyScenario('harpoon', 1);
+    const names = [];
+    for (let m; (m = g.drawCarried()); ) { names.push(m.name); g.takeMod(m); }
+    expect(names.filter(n => n === 'Barbs')).toHaveLength(barbs(g).max);
+    expect(g.player.pierce).toBe(g.WEAPONS.find(w => w.name === 'Harpoon').pierce + barbs(g).max);
   });
 });
 
@@ -385,22 +413,38 @@ describe('boosts (D86)', () => {
     expect(on().every(v => Math.abs(v) < 1e-9)).toBe(true); // and gone
   });
 
+  it('puts every boost\'s numbers on with a touch and takes them back after its time', () => {
+    const g = loadGame();
+    for (const b of g.BOOSTS) {
+      g.reset(1);
+      g.queuePaused = true;
+      const base = { ...g.player };
+      g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: b.name, life: g.BOOST_LIFE });
+      g.update(g.FIXED_DT);
+      expect(Object.keys(b.add).map(k => g.player[k] - base[k])).toEqual(Object.values(b.add));
+      for (let i = 0, n = ticks(g, b.time + 0.05); i < n; i++) g.update(g.FIXED_DT);
+      expect(Object.keys(b.add).every(k => Math.abs(g.player[k] - base[k]) < 1e-9)).toBe(true);
+    }
+  });
+
   it('holds a boost\'s time while the game is paused', () => {
     const g = loadGame();
     g.reset(1);
-    const base = g.player.speed;
-    const b = g.BOOSTS.find(x => x.name === boostAt(g, g.player.x, g.player.y).boost);
+    const name = boostAt(g, g.player.x, g.player.y).boost;   // one drop, whichever it is
+    const b = g.BOOSTS.find(x => x.name === name);
+    const k = Object.keys(b.add)[0], base = g.player[k];
     g.update(g.FIXED_DT);
-    const boosted = g.player.speed;
+    const boosted = g.player[k];
+    expect(boosted).toBe(base + b.add[k]);
     g.justPressed.add('Escape');
     g.update(g.FIXED_DT);
     expect(g.screen).toBe('paused');
     for (let i = 0, n = ticks(g, b.time * 2); i < n; i++) g.update(g.FIXED_DT);
     g.justPressed.add('Escape');                             // resume
     g.update(g.FIXED_DT);
-    expect(g.player.speed).toBe(boosted);
+    expect(g.player[k]).toBe(boosted);
     for (let i = 0, n = ticks(g, b.time); i < n; i++) g.update(g.FIXED_DT);
-    expect(g.player.speed).toBe(base);
+    expect(g.player[k]).toBe(base);
   });
 });
 
@@ -443,7 +487,7 @@ describe('the save, version 3 (D84)', () => {
     expect(g.player.dashCooldown).toBeCloseTo(v2.dive.player.dashCooldown - 0.4);
     expect(g.resumeTo).toBe('playing');
     const saved = JSON.parse(g.saveText());
-    expect(saved.version).toBe(3);
+    expect(saved.version).toBe(g.freshMeta().version);
     expect(saved.dive).not.toHaveProperty('rank');
   });
 });

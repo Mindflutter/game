@@ -61,11 +61,17 @@ Named setups for looking at one thing at a time, on the same server:
 | URL | What you get |
 |---|---|
 | `index.html?dev=one-drifter&play` | One enemy, nothing else arriving |
-| `index.html?dev=three-types&play` | The three ordinary enemy types, at known spots |
+| `index.html?dev=one-archer&play` | One archer, nothing else arriving |
+| `index.html?dev=one-puffer&play` | One puffer, nothing else arriving |
+| `index.html?dev=one-eel&play` | One eel, nothing else arriving |
+| `index.html?dev=harpoon&play` | A dive from the top, carrying the Harpoon |
+| `index.html?dev=knife&play` | A dive from the top, carrying the Knife |
+| `index.html?dev=all-types&play` | Every ordinary enemy type, in a row |
 | `index.html?dev=late-swarm&play` | Several batches into the dive |
 | `index.html?dev=mini-boss&play` | The first mini-boss, alone |
 | `index.html?dev=last-batch&play` | The last layer's boss, then the bottom — the win |
 | `index.html?dev=layer-2&play` | The top of the second layer, carrying a kit of fifteen mods |
+| `index.html?dev=layer-3&play` | The top of the third layer, carrying a kit of sixteen mods |
 | `…&seed=4471` | Any of the above as an exact, repeatable dive |
 
 Two dev flags work on any URL, with a scenario or without, and stay on after

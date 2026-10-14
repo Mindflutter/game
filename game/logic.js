@@ -14,10 +14,13 @@ function makeEnemy(t, x, y, speed) {
   enemies.push({ name: t.name, x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
                  color: t.color, glow: t.glow, lastHitBy: 0,
                  pushX: 0, pushY: 0,
-                 // A lunger's step (D64) and how long it has been on it; the
-                 // line it locks, aimX/aimY, is set when it winds up. Chasers
-                 // carry these and never touch them.
-                 lunge: t.lunge, phase: 'chase', phaseTime: 0 });
+                 // Every behaviour field the type has -- `lunge`, `spit`, ...
+                 // -- whose presence is the behaviour (D26), so a new one costs
+                 // nothing here. Then the step it is on and for how long, which
+                 // each behaviour reads its own way -- a lunger also locks its
+                 // line, aimX/aimY, as it winds up; chasers never touch them.
+                 ...Object.fromEntries(Object.entries(t).filter(([, v]) => typeof v === 'object')),
+                 phase: 'chase', phaseTime: 0 });
 }
 
 // Somewhere just outside the view, so arrivals fade in from the dark rather
@@ -104,6 +107,92 @@ function lungeStep(e, ux, uy, d, dt) {
   }
   e.x = x;
   e.y = y;
+}
+
+// ---------- the spit ----------
+// The archer's (D95): it closes to its range, backs off inside `near`, and
+// holds between. While within range and wholly in the view it spits at where
+// the diver is, `every` seconds -- so a shot always comes from a fish you can
+// see, and one outside the view comes in first. Backing off never leaves the
+// view. `phaseTime` is the time since its last spit.
+function spitStep(e, ux, uy, d, dt) {
+  const S = e.spit;
+  const [cx, cy] = viewClamp(e);
+  const seen = cx === e.x && cy === e.y;
+  const way = !seen || d > S.range ? 1 : d < S.near ? -1 : 0;
+  e.x += ux * e.speed * way * dt + e.pushX * dt;
+  e.y += uy * e.speed * way * dt + e.pushY * dt;
+  if (way < 0) [e.x, e.y] = viewClamp(e);
+  e.phaseTime += dt;
+  if (seen && d <= S.range && e.phaseTime >= S.every) {
+    e.phaseTime = 0;
+    bullets.push({ evil: true, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
+                   speed: S.speed, travelled: 0, maxTravel: S.travel });
+    sound('spit');
+  }
+}
+
+// ---------- the fuse ----------
+// The puffer's (D95): it chases; within `trigger` of the diver and wholly in
+// the view -- so the tell is always seen -- it stops and swells for `time`
+// seconds, then bursts, costing a heart within `blast`. The dash's shove still
+// moves it, which is the answer to one. A burst is not a kill: no gems, no
+// boost, no mod, nothing counted -- only a fish you shoot pays.
+function fuseStep(e, ux, uy, d, dt) {
+  const F = e.fuse;
+  if (e.phase === 'chase') {
+    const [cx, cy] = viewClamp(e);
+    if (d < F.trigger && cx === e.x && cy === e.y) { e.phase = 'fuse'; e.phaseTime = 0; }
+    else { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
+  }
+  e.x += e.pushX * dt;
+  e.y += e.pushY * dt;
+  if (e.phase === 'fuse' && (e.phaseTime += dt) >= F.time) {
+    e.gone = true;
+    const bx = player.x - e.x, by = player.y - e.y, reach = F.blast + player.r;
+    if (bx * bx + by * by < reach * reach) hurtPlayer();
+    burst(e.x, e.y, e.color, e.glow, 24, 260, 0.45);
+    sound('pop');
+  }
+}
+
+// ---------- the weave ----------
+// The eel's (D95): it closes in like a chaser while swaying across its
+// heading, `width` px either side at `rate` sways a second -- so a shot aimed
+// where it is misses where it will be. `phaseTime` is the sway's clock, so a
+// batch's eels sway in step, as a school.
+function weaveStep(e, ux, uy, d, dt) {
+  const w = 2 * Math.PI * e.weave.rate;
+  const side = e.weave.width * w * Math.cos(w * (e.phaseTime += dt));   // the sway's speed
+  e.x += (ux * e.speed - uy * side + e.pushX) * dt;
+  e.y += (uy * e.speed + ux * side + e.pushY) * dt;
+}
+
+// The one way the diver is hurt -- a bite, a shot, a burst (D95). Nothing while
+// the i-frames or the dash's invulnerability run, or under &immortal;
+// otherwise the i-frames, the batch marked as hit for `untouched`, and a heart
+// -- or the suit's guard, while it has one left this batch (D100). Returns
+// whether it landed, so a shot that did not is not spent.
+function hurtPlayer() {
+  if (player.hurt > 0 || immortal) return false;
+  player.hurt = player.iframes;
+  batchHit = true;
+  if (guardLeft > 0) {
+    guardLeft -= 1;
+    burst(player.x, player.y, '#fff1b8', '#ffc400', 14, 170, 0.4);
+    sound('guard');
+    return true;
+  }
+  player.hp -= 1;
+  shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;
+  burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
+  sound('hurt');
+  if (player.hp <= 0) {
+    screen = 'dead';
+    shake = SHAKE_DEATH * SHAKE_LEVELS[shakeLevel].mul;
+    sound('death');
+  }
+  return true;
 }
 
 // How far a point is from a line segment, squared. A fast hitbox tested only
@@ -255,7 +344,7 @@ function clearBatch() {
     // dive, under the layer's number -- its name is a placeholder (D89).
     const layer = entry.layer;
     for (const t of TASKS) {
-      if (meta.tasks[layer]?.[t.name] || !t.met()) continue;
+      if (meta.tasks[layer]?.[t.name] || !t.met(entry)) continue;
       meta.tasks[layer] = { ...meta.tasks[layer], [t.name]: 1 };
       notice = t.desc + ': ' + t.points + (t.points === 1 ? ' point' : ' points');
       noticeTime = NOTICE_TIME;
@@ -326,9 +415,26 @@ function points() {
 // The next tier's cost, or undefined at the top -- where `canBuy` is false,
 // since no bank is `>= undefined`. `home` dims the row by the same test.
 const nextCost = g => g.tiers[meta.gear[g.name] || 0]?.cost;
-const canBuy = g => meta.bank >= nextCost(g);
+const canBuy = g => meets(g) && meta.bank >= nextCost(g);
+// Whether the points spent on each attribute a piece of gear requires reach
+// it (D36, D98): scheduling, not scaling -- it changes when, never how much.
+const meets = g => Object.entries(g.requires || {}).every(([a, n]) => (meta.spent[a] || 0) >= n);
 
-// Both write the save at once: a purchase is never undone by a closed tab.
+// A weapon's row at `home` (D97): owning one costs its gems and carries it at
+// once, one owned is carried for nothing, and the one carried raises its tier.
+// Every write saves at once: a purchase is never undone by a closed tab.
+const canOwn = w => meets(w) && meta.bank >= w.cost;
+function pickWeapon(w) {
+  if (meta.carried === w.name) return buy(w);
+  if (!meta.owned.includes(w.name)) {
+    if (!canOwn(w)) return;
+    meta.bank -= w.cost;
+    meta.owned.push(w.name);
+  }
+  meta.carried = w.name;
+  persist(saveText());
+}
+
 function buy(g) {
   if (!canBuy(g)) return;
   meta.bank -= nextCost(g);
@@ -513,6 +619,7 @@ function step(dt) {
   }
 
   elapsed += dt;
+  batchTime += dt;
   if (player.hurt > 0) player.hurt -= dt;
   if (noticeTime > 0) noticeTime -= dt;
   if (bannerTime > 0) bannerTime -= dt;
@@ -558,6 +665,9 @@ function step(dt) {
         spawnBatch(plan[batchIndex].batch);
         light();
         batchHit = false;
+        guardLeft = player.guard;
+        batchTime = 0;
+        batchDashed = false;
         batchIndex += 1;
       }
     }
@@ -592,6 +702,7 @@ function step(dt) {
     // Invulnerable for the dash plus a moment after, so finishing it inside
     // something you flew through doesn't cost an hp.
     player.hurt = Math.max(player.hurt, DASH_TIME + DASH_GRACE);
+    batchDashed = true;
     sound('dash');
   }
   // A dash is committed (D56). Travel follows the direction frozen when it
@@ -660,10 +771,14 @@ function step(dt) {
     const d = Math.sqrt(ex * ex + ey * ey) || 1;   // || 1 avoids dividing by zero
 
     if (e.lunge) lungeStep(e, ex / d, ey / d, d, dt);   // the boss's kind (D64)
+    else if (e.spit) spitStep(e, ex / d, ey / d, d, dt);
+    else if (e.fuse) fuseStep(e, ex / d, ey / d, d, dt);
+    else if (e.weave) weaveStep(e, ex / d, ey / d, d, dt);
     else {
       e.x += (ex / d) * e.speed * dt + e.pushX * dt;
       e.y += (ey / d) * e.speed * dt + e.pushY * dt;
     }
+    if (e.gone) continue;                  // burst on its own step: nothing more to meet
 
     e.pushX *= pd;
     e.pushY *= pd;
@@ -700,19 +815,7 @@ function step(dt) {
       }
     }
 
-    if (d < e.r + player.r && player.hurt <= 0 && !immortal) {
-      player.hp -= 1;
-      player.hurt = player.iframes;
-      batchHit = true;
-      shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;
-      burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
-      sound('hurt');
-      if (player.hp <= 0) {
-        screen = 'dead';
-        shake = SHAKE_DEATH * SHAKE_LEVELS[shakeLevel].mul;
-        sound('death');
-      }
-    }
+    if (d < e.r + player.r) hurtPlayer();
   }
 
   // --- move bullets; they die at the edge of your range ---
@@ -730,7 +833,7 @@ function step(dt) {
   // ponytail: every bullet against every enemy. Fine to a few hundred of each;
   // if it ever chugs, bucket entities into a grid and only compare neighbours.
   for (const b of bullets) {
-    if (b.gone) continue;
+    if (b.gone || b.evil) continue;              // an enemy's shot never hits a fish
     // Where this frame's flight began. Derived rather than stored: the bullet
     // is never clamped, so the start is exactly where the step came from --
     // unlike the player, who is clamped to the arena and therefore needs a
@@ -753,6 +856,16 @@ function step(dt) {
         else { b.gone = true; break; }
       }
     }
+  }
+
+  // --- enemy shots vs the diver (D95) ---
+  // Swept like every fast hitbox (D53). Spent only by a hit that lands, so the
+  // dash's invulnerability passes through them as it passes through fish.
+  for (const b of bullets) {
+    if (b.gone || !b.evil) continue;
+    const reach = player.r + b.r;
+    if (segDistanceSq(player.x, player.y, b.x - b.vx * dt, b.y - b.vy * dt, b.x, b.y) < reach * reach &&
+        hurtPlayer()) b.gone = true;
   }
 
   // --- gems fly to you, from anywhere, and never fade (D35, D78) ---

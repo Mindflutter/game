@@ -4,6 +4,16 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-14
+
+**Recorded: Igor's notes from playing S5 (content)**
+Each in `ideas.md` → Open — from playing S5 (content), in his words, with the
+home Claude proposes for it: a debug mode, the screens, the stage's fish and
+the Knife, graphics, and what micro-tasks pay. Unity is assessed for the port,
+beside the other candidates. The Knife does not read as melee to Igor, so by
+D83 (the weapon record) it needs a behaviour of its own (`entities/weapons.md`).
+`ideas.md` lost its last two line counts (D92 (no line counts in the docs)).
+
 ## 2026-10-13
 
 **Specs to `docs/specs/`, plans dropped** (D94 (superpowers dropped))
@@ -21,6 +31,116 @@ rules did not already say is now in `CLAUDE.md`: failure cases listed before
 building, the whole change reviewed at the end, a root cause before any fix,
 and a spec, plan and log for stage-sized work. Its collision list is gone from
 "Skills and plugins", which keeps ponytail, disciplines and the global rules.
+
+**Three layers, each with pools of its own** (D101 (three layers, each with
+pools of its own))
+A third layer, in deep teal, and every layer now draws from pools of its own:
+the first meets the archer in its last stretch, the second brings the puffer,
+the third the eel, with everything mixed by the end. Fifteen gates a layer, as
+before. A `layer-3` scenario starts its top. The counts S5 (content) asks for
+are now held by a check. A boost check that drew a fresh boost inside a
+`find()` — invisible while `Rush` was the only one — draws once now, and
+measures the boost it got.
+
+**Two micro-tasks: swift and footwork** (D98 (attributes, micro-tasks and what
+gear requires))
+Beside `untouched`: **swift** pays a point for a batch cleared within 10
+seconds of arriving, **footwork** for a mini-boss beaten without dashing — each
+once per layer, ever, like the first. `home`'s layer lines show all three. The
+dive keeps `batchTime` and `batchDashed`, saved.
+
+**Three boosts: Frenzy, Lance and Bloom** (D99 (weapon mods, and more boosts))
+Kills now drop four kinds of boost: `Rush` as before, **Frenzy** (fire much
+faster), **Lance** (your shots go through four more fish) and **Bloom** (your
+shots swell). The readout shows the shot's `size`, and its check now covers
+what boosts move as well as mods. The diver's shots are drawn as wide as they
+hit, so a swollen shot — and the Knife's slash — looks its size.
+
+**Equipment: the Mask, the Suit and the Weights** (D100 (equipment: the Mask,
+the Suit and the Weights))
+The first equipment, three tiers each on the Gear screen: the **Mask** reaches
+further, the **Weights** hit harder, and the **Suit** takes the first hit of
+every batch — one more a tier — shown as a gold ring around the diver. A
+guarded hit costs no heart but still counts against `untouched`. New sound,
+`guard`; the diver gains `guard`, and the dive `guardLeft`, saved.
+
+**Barbs, the first weapon mod** (D99 (weapon mods, and more boosts))
+The seventh mod: the Harpoon's shot goes through one more fish a pick. A weapon
+mod is dealt — by a fish or on a layer end's card — only while a weapon it fits
+is carried, so with the Gun or the Knife it never comes.
+
+**The Knife** (D97 (weapons are owned, and one is carried))
+The third weapon, melee tried as data: three slashes a second, each a very
+short, wide shot that cuts through everything in its arc — you have to be among
+the fish. 100 gems. Tiers: reach, damage, rate. Whether it reads as melee is
+Igor's call. The `knife` scenario dives carrying it.
+
+**The Harpoon** (D97 (weapons are owned, and one is carried))
+The second weapon: slow, long and heavy — a shot every second and a bit that
+flies fast and far, hits for three and passes through two fish into a third.
+It costs 150 gems and needs a point of Strength, so a fresh diver earns one
+first. Tiers: damage, rate, pierce. The `harpoon` scenario dives carrying it.
+
+**Heart and Strength; gear that requires an attribute** (D98 (attributes,
+micro-tasks and what gear requires))
+Two attributes join Dash reach: **Heart**, one more heart, and **Strength**,
+which makes the dash hurt what it shoves. Gear can now require points spent on
+an attribute — `requires: { Strength: 1 }` — and until they are, its row is dim,
+says what it needs, and takes no gems.
+
+**Weapons are owned, and one is carried** (D97 (weapons are owned, and one is
+carried))
+A weapon's row on the Gear screen now owns it for its gems — and carries it at
+once — carries an owned one for nothing, or raises the tier of the one you
+carry. The Gun costs nothing and is owned from the start. A scenario can name
+the weapon a dive carries (`weapon:`), for S6 (balance) to measure each. The
+save is version 4: a v3 save owns and carries the Gun. Two fixture checks that
+pinned the version as a literal 3 now read the build's own.
+
+**Gear and Attributes, a screen deeper** (D96 (gear and attributes on screens of
+their own))
+`home` is now Dive, Gear, Attributes, Help and Options: the weapons and the
+equipment sit on a Gear screen with your gems, the attributes on an Attributes
+screen with your points, each left by Back or Esc. A dozen rows on one screen
+would have run through the hint. The browser suite now holds every menu's rows
+above the hint, so `ideas.md`'s "guard the other screens against overflow" is
+done for the menus.
+
+**The archer, and enemy shots** (D95 (three enemy behaviours, and one way to be
+hurt))
+The first of S5 (content)'s behaviours: a blue fish that keeps its distance and
+spits a slow shot at you every two seconds, only while it is in range and in
+sight. Enemy shots are `bullets[]` entries marked `evil` — they cost a heart
+where they meet you and never touch a fish — and a bite and a shot now hurt
+through one function, `hurtPlayer()`. `makeEnemy()` copies every behaviour field
+a type has and the docs check builds a table per behaviour, so the next one
+costs neither. `all-types` replaces `three-types`. New: `tests/enemies.test.js`;
+`entities/enemies.md` gains the archer, the spit and a table per behaviour.
+
+**The puffer** (D95 (three enemy behaviours, and one way to be hurt))
+A yellow fish that swims at you, stops near you and swells for a second with
+its blast ring drawn, then bursts — a heart if you are inside the ring. Shoot
+it first, or shove it away with the dash. A burst pays nothing: no gems, no
+boost, and a glowing puffer's mod is lost. A new sound, `pop`, and a help
+line: "Some fish spit from afar; a puffer that swells is about to burst."
+
+**The eel** (D95 (three enemy behaviours, and one way to be hurt))
+A teal fish that closes in swaying side to side, so you have to lead your
+shots. Five behaviours now — chase, lunge, spit, fuse, weave — on six ordinary
+types and the two lungers.
+
+**S5 (content) opens; the `abyss-content` skill** (D80 (entity docs and mods
+from drops come first))
+Igor, both requirements before S5 built: "all ready, start working". The pass
+before it closes into `plan.md`'s table of closed stages, its section gone —
+its history is here, on 2026-10-01 and 2026-10-12. The stage's first step, as
+`plan.md` set it: `.claude/skills/abyss-content/SKILL.md`, the procedure every
+addition follows — what a piece is settled with Igor first, where each kind's
+record, doc and rules are, the build order from a red check to the stop
+before committing, one addition per commit so its cost can be read off
+`git show --stat`. `CLAUDE.md`'s "Content is data" points to it. Written
+without the subagent pressure tests `writing-skills` asks for — subagents are
+Igor's to pick — so the first addition under it is its test.
 
 **S5 (content) gets counts: mods, boosts, micro-tasks, attributes** (D93 (the
 content stage's counts))

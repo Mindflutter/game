@@ -264,10 +264,22 @@ function drawField() {
   // and flashes white for a frame or two when hit. A lunger winding up (D64)
   // swells, glows harder and lays its lane down ahead of it -- the tell --
   // all of it growing with `k`, 0 to 1 across the wind-up.
+  // A puffer swelling (D95) is the same tell, harder: it puffs up and draws the
+  // ring its burst will reach.
   for (const e of enemies) {
     const hit = e.flash > 0;
-    const winding = e.phase === 'windup';
-    const k = winding ? e.phaseTime / e.lunge.windup : 0;
+    const winding = e.phase === 'windup', fusing = e.phase === 'fuse';
+    const k = winding ? e.phaseTime / e.lunge.windup : fusing ? e.phaseTime / e.fuse.time : 0;
+    if (fusing) {
+      ctx.save();
+      ctx.globalAlpha = 0.15 + 0.45 * k;
+      ctx.strokeStyle = e.glow;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.fuse.blast, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
     if (winding) {
       ctx.save();
       ctx.globalAlpha = 0.1 + 0.25 * k;
@@ -280,7 +292,7 @@ function drawField() {
       ctx.stroke();
       ctx.restore();
     }
-    circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + 0.25 * k),
+    circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + (fusing ? 0.8 : 0.25) * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
     // The glowing fish that carries the batch's mod (D84): a gold ring that
     // pulses. PLACEHOLDER GRAPHICS.
@@ -308,15 +320,21 @@ function drawField() {
   ctx.shadowBlur = 12;
   ctx.shadowColor = '#9ef7ff';
   ctx.strokeStyle = '#eaffff';
-  ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   for (const b of bullets) {
+    if (b.evil) continue;
+    // As wide as the shot's hitbox, so a knife's slash and a swollen shot look
+    // as big as they hit (D97).
+    ctx.lineWidth = Math.max(3, b.r);
     ctx.beginPath();
     ctx.moveTo(b.x, b.y);
     ctx.lineTo(b.x - b.vx * 0.035, b.y - b.vy * 0.035);
     ctx.stroke();
   }
   ctx.shadowBlur = 0;
+  // An enemy's shot is a round blob in its spitter's blue, so it never reads
+  // as one of yours (D95). PLACEHOLDER GRAPHICS.
+  for (const b of bullets) if (b.evil) circle(b.x, b.y, b.r, '#cfe3ff', '#1f6fff', 16);
 
   // Blink while invulnerable, so getting hit is visible — but never during a
   // dash: blinking out mid-flight is exactly what made the dash read as a
@@ -324,6 +342,20 @@ function drawField() {
   const blinking = player.hurt > 0 && player.dashTime <= 0 &&
                    Math.floor(player.hurt * 10) % 2 === 0;
   if (!blinking) circle(player.x, player.y, player.r, '#bffcff', '#4ff0ff', 25);
+
+  // The suit's guard (D100): a gold ring while it has a hit left to take this
+  // batch. PLACEHOLDER GRAPHICS.
+  if (guardLeft > 0) {
+    ctx.save();
+    ctx.strokeStyle = '#ffe680';
+    ctx.shadowColor = '#ffc400';
+    ctx.shadowBlur = 14;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r + 9, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
 
   // The wave the dash pushes ahead of it: an arc at the edge of its reach,
   // facing the way the dash is going, brightest at the start of the lunge.
@@ -612,6 +644,7 @@ function draw() {
 
   if (screen === 'title')        { drawMenu(MENUS.title); drawSaveError(); }
   else if (screen === 'home')    drawHome();
+  else if (screen === 'gear' || screen === 'attributes') drawMenu(MENUS[screen]);
   else if (screen === 'help')    drawHelp();
   else if (screen === 'options') drawOptions();
   else {

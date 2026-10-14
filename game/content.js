@@ -27,6 +27,7 @@ const PLAYER_START = {
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
   dashDamage: 0,     // the dash starts as pure movement (D51). It always shoves;
                      // hurting what it shoves is bought, never free
+  guard: 0,          // hits a batch can take without a heart -- the suit's (D100)
 };
 
 // The dash: short, and on a long enough leash that spending it is a decision.
@@ -82,6 +83,8 @@ const END_STEP       = 2;     // picks at once: an ordinary mod on a layer end's
 // apart, and seldom two in a row.
 const BOOST_C        = 0.02;
 const BOOST_LIFE     = 6;     // seconds a boost lies where it fell, then it is gone
+const SWIFT_TIME     = 10;    // seconds within which a cleared batch pays `swift`
+                              // (D98). Claude's pick
 
 let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
@@ -112,6 +115,9 @@ const SOUNDS = {
   modA:   { freq: 520,  dur: 0.09, type: 'triangle', vol: 0.40, slide: 1    },
   modB:   { freq: 780,  dur: 0.16, type: 'triangle', vol: 0.35, slide: 1.25 },
   boost:  { freq: 440,  dur: 0.14, type: 'square',   vol: 0.25, slide: 1.8  },
+  spit:   { freq: 330,  dur: 0.08, type: 'triangle', vol: 0.30, slide: 1.5  },
+  pop:    { freq: 150,  dur: 0.22, type: 'square',   vol: 0.40, slide: 0.5  },
+  guard:  { freq: 880,  dur: 0.12, type: 'square',   vol: 0.30, slide: 0.6  },
 };
 
 // ---------- mods ----------
@@ -119,9 +125,9 @@ const SOUNDS = {
 // layer end (D85). Every field is documented in docs/entities/mods.md, and
 // `npm test` holds the two together.
 //
-// `scope` is body or comfort only until S5 (content): a weapon mod cannot be
-// balanced before the weapons exist -- "+1 damage" is huge on a railgun and
-// nothing on a spray gun.
+// `scope` is body, comfort or weapon. A weapon mod names the weapons it fits,
+// `weapons`, and is dealt only while one of them is carried (D99): "+1
+// damage" is huge on a railgun and nothing on a spray gun.
 //
 // Mods differ in **kind, not degree**: a pickup has to be felt and recognised
 // in the middle of a fight, and the layer end's pick stays a gut read -- so the
@@ -144,6 +150,8 @@ const MODS = [
     apply: p => p.dashDamage += 1 },
   { name: 'Mend',     scope: 'comfort', desc: 'a heart back each batch', max: 1,
     end: true, apply: p => p.mendOnClear = 1 },
+  { name: 'Barbs',    scope: 'weapon',  desc: 'harpoons go through one more', max: 3,
+    weapons: ['Harpoon'], apply: p => p.pierce += 1 },
 ];
 
 // ---------- boosts ----------
@@ -152,7 +160,10 @@ const MODS = [
 // can be taken back when the time runs out -- and for the same reason a boost
 // never moves `hp`.
 const BOOSTS = [
-  { name: 'Rush', desc: 'you swim much faster, for a moment', time: 5, add: { speed: 200 } },
+  { name: 'Rush',   desc: 'you swim much faster, for a moment',  time: 5, add: { speed: 200 } },
+  { name: 'Frenzy', desc: 'you fire much faster, for a moment',  time: 5, add: { fireRate: 3 } },
+  { name: 'Lance',  desc: 'your shots go through, for a moment', time: 5, add: { pierce: 4 } },
+  { name: 'Bloom',  desc: 'your shots swell, for a moment',      time: 6, add: { shotRadius: 6 } },
 ];
 
 // ---------- gear, attributes, micro-tasks ----------
@@ -171,29 +182,67 @@ const BOOSTS = [
 // numbers onto the player, where mods, attributes and the readout find them.
 // Documented in docs/entities/weapons.md -- `npm test` holds it here.
 const WEAPONS = [
-  { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0,
+  { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, cost: 0,
     tiers: [{ cost: 40,  apply: p => p.fireRate += 0.5 },
             { cost: 100, apply: p => p.fireRate += 0.5 },
             { cost: 200, apply: p => p.fireRate += 0.5 }] },
+  // Slow, long and heavy, through what it hits: the draft's railgun (D97). Heavy
+  // gear waits for a strong diver, so it needs a point of Strength (D98).
+  { name: 'Harpoon', fireRate: 0.8, damage: 3, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2,
+    cost: 150, requires: { Strength: 1 },
+    tiers: [{ cost: 80,  apply: p => p.damage += 1 },
+            { cost: 160, apply: p => p.fireRate += 0.2 },
+            { cost: 300, apply: p => p.pierce += 1 }] },
+  // Melee, tried as data first (D83): a very short, wide shot that passes
+  // through everything in its arc -- a slash.
+  { name: 'Knife', fireRate: 3, damage: 2, range: 46, shotSpeed: 520, shotRadius: 18, pierce: 6,
+    cost: 100,
+    tiers: [{ cost: 60,  apply: p => p.range += 12 },
+            { cost: 140, apply: p => p.damage += 1 },
+            { cost: 260, apply: p => p.fireRate += 0.75 }] },
 ];
 
-// Equipment: gear that is not a weapon (D81). None yet -- S5 (content)'s.
-// Documented in docs/entities/equipment.md -- `npm test` holds it here.
-const EQUIPMENT = [];
+// Equipment: gear that is not a weapon (D81), raising combat numbers only --
+// body stats are attributes' (D36). Documented in docs/entities/equipment.md
+// -- `npm test` holds it here.
+const EQUIPMENT = [
+  // You see further, so you shoot further.
+  { name: 'Mask',    tiers: [{ cost: 50,  apply: p => p.range += 30 },
+                             { cost: 120, apply: p => p.range += 30 },
+                             { cost: 240, apply: p => p.range += 30 }] },
+  // Takes the first hit of every batch, one more a tier: the defence D36
+  // gives gear.
+  { name: 'Suit',    tiers: [{ cost: 90,  apply: p => p.guard += 1 },
+                             { cost: 200, apply: p => p.guard += 1 },
+                             { cost: 380, apply: p => p.guard += 1 }] },
+  // Heavier shots hit harder.
+  { name: 'Weights', tiers: [{ cost: 70,  apply: p => p.damage += 0.5 },
+                             { cost: 150, apply: p => p.damage += 0.5 },
+                             { cost: 280, apply: p => p.damage += 0.5 }] },
+];
 
 // `attribute` -- body stats, raised by points that only micro-tasks pay.
 // Uncapped at the spending end: a layer holds a finite set of tasks, so the
 // cap is at the source (D36). Dash improvements live here, not in gear (D74).
+// Gear may require points spent on one (`requires`, D98).
 const ATTRIBUTES = [
   { name: 'Dash reach', apply: p => p.dashSpeed += 150 },
+  { name: 'Heart',      apply: p => { p.maxHp += 1; p.hp += 1; } },
+  { name: 'Strength',   apply: p => p.dashDamage += 1 },
 ];
 
 // `micro-task` -- mastery, never a quota (D36). Judged when a batch clears;
-// each pays its `points` once per layer, ever. `met()` reads the dive's state
-// at that moment.
+// each pays its `points` once per layer, ever. `met(entry)` reads the dive's
+// state at that moment, and the plan entry just cleared.
 const TASKS = [
   { name: 'untouched', desc: 'clear a batch without taking a hit', points: 1,
     met: () => !batchHit },
+  { name: 'swift',     desc: 'clear a batch within ' + SWIFT_TIME + ' seconds', points: 1,
+    met: () => batchTime <= SWIFT_TIME },
+  // A mini-boss's batch is known by its fish, not by identity, so a restored
+  // dive's copy of the plan still answers (D98).
+  { name: 'footwork',  desc: 'beat a mini-boss without dashing', points: 1,
+    met: entry => !batchDashed && entry.batch.enemies.some(([name]) => name === 'mini-boss') },
 ];
 
 // ---------- the development readout ----------
@@ -208,6 +257,7 @@ const PLAYER_STATS = [
   { stat: 'fireRate',     label: 'rate',    read: p => p.fireRate.toFixed(2) + '/s' },
   { stat: 'damage',       label: 'dmg',     read: p => p.damage },
   { stat: 'pierce',       label: 'pierce',  read: p => p.pierce },
+  { stat: 'shotRadius',   label: 'size',    read: p => p.shotRadius },
   { stat: 'dashDamage',   label: 'dashdmg', read: p => p.dashDamage },
   { stat: 'dashCooldown', label: 'dashcd',  read: p => p.dashCooldown.toFixed(1) + 's' },
   { stat: 'iframes',      label: 'ifr',     read: p => p.iframes.toFixed(2) + 's' },
@@ -253,9 +303,13 @@ function held(m) {
   return (modCounts[m.name] || 0) + drops.filter(d => d.mod === m.name).length;
 }
 
+// Whether a mod fits the weapon this dive carries (D99): a weapon mod only the
+// weapons it names, every other mod any.
+function fits(m) { return !m.weapons || m.weapons.includes(weaponName); }
+
 // The ordinary mods still under their caps: what a fish can carry (D84).
 function carriable() {
-  return MODS.filter(m => !m.end && held(m) < m.max);
+  return MODS.filter(m => !m.end && fits(m) && held(m) < m.max);
 }
 
 // The mod a glowing fish carries: every ordinary mod once before any comes
@@ -284,7 +338,7 @@ const cardStep = m => (m.end ? 1 : END_STEP);
 // what the card gives. Fewer when the pool runs short; none at all leaves only
 // Continue.
 function rollValuable() {
-  return drawDistinct(MODS.filter(m => held(m) + cardStep(m) <= m.max), 3);
+  return drawDistinct(MODS.filter(m => fits(m) && held(m) + cardStep(m) <= m.max), 3);
 }
 
 // ---------- key bindings ----------
@@ -304,29 +358,11 @@ const CLICK = ['Mouse0'];
 // ---------- batches ----------
 // A batch is the gated unit (D27): counts per enemy type, arriving at the edges
 // of the view, and nothing else arrives until it is dead. Each stretch between
-// the mini-bosses is a pool a dive draws from (D71). They are sized on total hp
-// (D54) until S6's threat number replaces it (D79) -- untuned placeholders.
-const STRETCH_1 = [
-  { enemies: [['drifter', 10]] },
-  { enemies: [['drifter', 16]] },
-  { enemies: [['drifter', 12], ['darter', 6]] },
-  { enemies: [['darter', 14]] },
-  { enemies: [['drifter', 8], ['darter', 6]] },
-];
-const STRETCH_2 = [
-  { enemies: [['bulwark', 2], ['drifter', 12]] },
-  { enemies: [['drifter', 18], ['darter', 8]] },
-  { enemies: [['bulwark', 3], ['darter', 10]] },
-  { enemies: [['drifter', 20], ['darter', 12]] },
-  { enemies: [['bulwark', 1], ['drifter', 14], ['darter', 6]] },
-];
-const STRETCH_3 = [
-  { enemies: [['bulwark', 4], ['drifter', 16]] },
-  { enemies: [['darter', 18], ['drifter', 16]] },
-  { enemies: [['bulwark', 5], ['drifter', 18], ['darter', 8]] },
-  { enemies: [['bulwark', 6], ['drifter', 20], ['darter', 12]] },
-  { enemies: [['bulwark', 3], ['darter', 14], ['drifter', 10]] },
-];
+// the mini-bosses is a pool a dive draws from (D71), and each layer has pools
+// of its own (D101), meeting the fish in turn: the archer at the end of the
+// first, the puffer in the second, the eel in the third. They are sized on
+// total hp (D54) until S6's threat number replaces it (D79) -- untuned
+// placeholders, Claude's picks.
 const MINI_BOSS = { enemies: [['mini-boss', 1]] };
 const BOSS      = { enemies: [['boss', 1]] };
 
@@ -339,22 +375,69 @@ const BOSS      = { enemies: [['boss', 1]] };
 //
 // `color` is the water at the top of the layer, darkening to the same
 // near-black at its bottom. PLACEHOLDER GRAPHICS (D72): the colour and the
-// name are the cheapest way to say "a new layer" until art exists.
+// name are the cheapest way to say "a new layer" until art exists. The
+// colours are Claude's picks; the layers are numbered until they are named
+// (D89).
 //
-// The second layer is the first one's stretches under its own name and colour,
-// a placeholder until S5 gives it content of its own. The colours are Claude's
-// picks; the layers are numbered until they are named (D89).
-const STRETCHES = [
-  { draw: 4, pool: STRETCH_1 },
-  { draw: 1, pool: [MINI_BOSS] },
-  { draw: 4, pool: STRETCH_2 },
-  { draw: 1, pool: [MINI_BOSS] },
-  { draw: 4, pool: STRETCH_3 },
-  { draw: 1, pool: [BOSS] },
-];
+// Every layer today has the same shape -- four from a pool, a mini-boss, four,
+// a mini-boss, four, the boss -- around its own three pools.
+const layer = (name, color, [a, b, c]) => ({ name, color, stretches: [
+  { draw: 4, pool: a }, { draw: 1, pool: [MINI_BOSS] },
+  { draw: 4, pool: b }, { draw: 1, pool: [MINI_BOSS] },
+  { draw: 4, pool: c }, { draw: 1, pool: [BOSS] },
+] });
 const LAYERS = [
-  { name: 'Layer 1', color: [12, 23, 39], stretches: STRETCHES },
-  { name: 'Layer 2', color: [24, 12, 40], stretches: STRETCHES },
+  layer('Layer 1', [12, 23, 39], [
+    [{ enemies: [['drifter', 10]] },
+     { enemies: [['drifter', 16]] },
+     { enemies: [['drifter', 12], ['darter', 6]] },
+     { enemies: [['darter', 14]] },
+     { enemies: [['drifter', 8], ['darter', 6]] }],
+    [{ enemies: [['bulwark', 2], ['drifter', 12]] },
+     { enemies: [['drifter', 18], ['darter', 8]] },
+     { enemies: [['bulwark', 3], ['darter', 10]] },
+     { enemies: [['drifter', 20], ['darter', 12]] },
+     { enemies: [['bulwark', 1], ['drifter', 14], ['darter', 6]] }],
+    [{ enemies: [['bulwark', 4], ['drifter', 16]] },
+     { enemies: [['archer', 4], ['drifter', 16], ['darter', 6]] },
+     { enemies: [['bulwark', 5], ['drifter', 18], ['darter', 8]] },
+     { enemies: [['archer', 5], ['bulwark', 3], ['drifter', 14]] },
+     { enemies: [['bulwark', 3], ['darter', 14], ['drifter', 10]] }],
+  ]),
+  layer('Layer 2', [24, 12, 40], [
+    [{ enemies: [['drifter', 14], ['archer', 3]] },
+     { enemies: [['darter', 12], ['archer', 4]] },
+     { enemies: [['puffer', 4], ['drifter', 12]] },
+     { enemies: [['drifter', 18], ['darter', 6]] },
+     { enemies: [['puffer', 3], ['darter', 10]] }],
+    [{ enemies: [['bulwark', 3], ['archer', 4], ['drifter', 10]] },
+     { enemies: [['puffer', 6], ['darter', 12]] },
+     { enemies: [['archer', 6], ['puffer', 4]] },
+     { enemies: [['bulwark', 2], ['puffer', 5], ['drifter', 14]] },
+     { enemies: [['drifter', 20], ['archer', 5]] }],
+    [{ enemies: [['bulwark', 5], ['puffer', 6], ['drifter', 12]] },
+     { enemies: [['archer', 8], ['darter', 16]] },
+     { enemies: [['puffer', 10], ['archer', 4]] },
+     { enemies: [['bulwark', 4], ['archer', 6], ['darter', 10]] },
+     { enemies: [['drifter', 24], ['puffer', 6], ['archer', 4]] }],
+  ]),
+  layer('Layer 3', [8, 32, 28], [
+    [{ enemies: [['eel', 8], ['drifter', 14]] },
+     { enemies: [['eel', 6], ['archer', 4], ['darter', 8]] },
+     { enemies: [['eel', 10], ['puffer', 3]] },
+     { enemies: [['puffer', 6], ['drifter', 16], ['eel', 4]] },
+     { enemies: [['eel', 12]] }],
+    [{ enemies: [['bulwark', 4], ['eel', 10], ['archer', 4]] },
+     { enemies: [['eel', 8], ['puffer', 6], ['darter', 10]] },
+     { enemies: [['archer', 8], ['eel', 8]] },
+     { enemies: [['bulwark', 3], ['puffer', 8], ['eel', 6]] },
+     { enemies: [['drifter', 20], ['eel', 10], ['archer', 4]] }],
+    [{ enemies: [['bulwark', 6], ['eel', 12], ['puffer', 6]] },
+     { enemies: [['archer', 10], ['eel', 10], ['darter', 10]] },
+     { enemies: [['puffer', 10], ['eel', 10], ['archer', 4]] },
+     { enemies: [['bulwark', 5], ['archer', 6], ['eel', 8], ['drifter', 12]] },
+     { enemies: [['drifter', 24], ['darter', 12], ['eel', 8], ['puffer', 4]] }],
+  ]),
 ];
 
 // ---------- scenarios ----------
@@ -365,10 +448,21 @@ const LAYERS = [
 const SCENARIOS = {
   // One enemy, nothing else arriving. For watching a single behaviour.
   'one-drifter': { spawn: false, enemies: [['drifter', 900, 400]] },
-  // All three types at once, at known spots, for telling them apart at a glance.
-  'three-types': { spawn: false, enemies: [['drifter', 300, 260],
-                                          ['darter',  980, 260],
-                                          ['bulwark', 640, 660]] },
+  'one-archer':  { spawn: false, enemies: [['archer', 1100, 400]] },
+  'one-puffer':  { spawn: false, enemies: [['puffer', 1000, 400]] },
+  'one-eel':     { spawn: false, enemies: [['eel', 1150, 400]] },
+  // A dive from the top carrying a weapon `home` did not choose (D97): how S6
+  // measures each weapon alone.
+  'harpoon':     { weapon: 'Harpoon' },
+  'knife':       { weapon: 'Knife' },
+  // Every ordinary type -- all but the boss and the mini-boss -- in a row,
+  // for telling them apart at a glance. Read from the table, so a new type
+  // joins it.
+  'all-types':   { spawn: false,
+                   get enemies() {
+                     const t = ENEMY_TYPES.filter(e => e.carries !== false);
+                     return t.map((e, i) => [e.name, ARENA_W * (i + 1) / (t.length + 1), 220]);
+                   } },
   // The queue several batches in, for eyeballing density and pressure.
   'late-swarm':  { batch: 5 },
   // The last batch -- the last layer's boss -- then the bottom, the win: how a
@@ -386,6 +480,13 @@ const SCENARIOS = {
                    kit: ['Fins', 'Fins', 'Fins', 'Vitality', 'Vitality', 'Vitality',
                          'Reflex', 'Reflex', 'Reflex', 'Nerve', 'Nerve', 'Nerve',
                          'Impact', 'Impact', 'Mend'] },
+  // The top of the third, carrying the Gun: every ordinary mod at its cap by
+  // then, and the first layer end's Mend; the second's had nothing left to
+  // offer. Claude's pick, as above.
+  'layer-3':     { batch: plan => plan.findIndex(e => e.layer === 2),
+                   kit: ['Fins', 'Fins', 'Fins', 'Vitality', 'Vitality', 'Vitality',
+                         'Reflex', 'Reflex', 'Reflex', 'Nerve', 'Nerve', 'Nerve',
+                         'Impact', 'Impact', 'Impact', 'Mend'] },
 };
 
 // ---------- enemy types ----------
@@ -399,6 +500,24 @@ const ENEMY_TYPES = [
     color: '#ffb648', glow: '#ff8a00' },
   { name: 'bulwark', r: 17, hp: 6, speed: 52,  value: 3,
     color: '#a05cff', glow: '#7b2fff' },
+  // The archer keeps its distance and spits (D95). `spit` holds its band --
+  // closer than `range`, no closer than `near` -- the seconds between spits,
+  // and its shot's speed, radius and `travel`. `range` sits under the Gun's,
+  // so the starting weapon can always answer it. Claude's picks.
+  { name: 'archer',  r: 8,  hp: 2, speed: 75,  value: 2,
+    color: '#5aa9ff', glow: '#1f6fff',
+    spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420 } },
+  // The puffer swells, then bursts (D95). `fuse` holds how near it must get to
+  // light it, the seconds it swells -- the tell -- and its blast's radius.
+  // Claude's picks.
+  { name: 'puffer',  r: 11, hp: 3, speed: 95,  value: 2,
+    color: '#ffee58', glow: '#ffc800',
+    fuse: { trigger: 90, time: 1.2, blast: 110 } },
+  // The eel sways as it comes (D95): `weave` holds how far either side, in px,
+  // and how many sways a second. Claude's picks.
+  { name: 'eel',     r: 7,  hp: 2, speed: 130, value: 2,
+    color: '#38f2c0', glow: '#00c896',
+    weave: { width: 50, rate: 0.9 } },
   // The lungers: the boss, and the mini-boss that rehearses it (D62, D64, D65).
   // `lunge` holds the timings, and its presence is the behaviour. Neither ever
   // glows (D88): `carries: false` keeps a batch's mod off them. Claude's picks.
@@ -431,6 +550,16 @@ const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 // Enter or Space -- Space is the dash -- never starts a dive by accident.
 const END_TOP = ARENA_H / 2 + 100;
 const GO_HOME = { label: 'Go home', run: () => openMenu('home') };
+// The gear and attribute screens' last row, and their Esc (D96).
+const BACK_HOME = { label: 'Back', run: () => openMenu('home') };
+// What a piece of gear requires and is not yet met (D98), on its row.
+const needs = g => (meets(g) ? '' : '   needs ' +
+  Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', '));
+// A piece of gear's tier, and what the next costs.
+const tierLabel = g => {
+  const t = meta.gear[g.name] || 0, cost = nextCost(g);
+  return 'tier ' + t + (cost === undefined ? ', the top' : ' → ' + (t + 1) + '   ' + cost + ' gems');
+};
 const END_MENU = {
   top: END_TOP,
   flows: true,
@@ -488,19 +617,49 @@ const MENUS = {
     },
     top: HOME_TOP,
     back: () => openMenu('title'),
+    // What it sells lives a screen deeper, gear and attributes each on its
+    // own (D96): three weapons, three pieces and three attributes on one
+    // screen would run through the hint.
     items: [
       { label: 'Dive', run: () => reset() },             // every dive from the top (D66)
-      // Every weapon's tiers, then every piece of equipment's.
-      // ponytail: every weapon listed and upgradable; owning one first, and
-      // choosing which to carry, come with the second weapon (S5, D83).
-      ...[...WEAPONS, ...EQUIPMENT].map(g => ({
+      { label: 'Gear',       run: () => openMenu('gear') },
+      { label: 'Attributes', run: () => openMenu('attributes') },
+      { label: 'Help',    run: () => openScreen('help') },
+      { label: 'Options', run: () => openScreen('options') },
+    ],
+  },
+  gear: {
+    heading: 'GEAR',
+    get sub() { return meta.bank + ' gems'; },
+    top: MENU_TOP,
+    back: BACK_HOME.run,
+    items: [
+      // Every weapon -- to own, to carry, or the carried one's tier (D97) --
+      // then every piece of equipment's tier.
+      ...WEAPONS.map(w => ({
         get label() {
-          const t = meta.gear[g.name] || 0, cost = nextCost(g);
-          return g.name + '   tier ' + t + (cost === undefined ? ', the top'
-            : ' → ' + (t + 1) + '   ' + cost + ' gems');
+          if (meta.carried === w.name) return w.name + '   carried   ' + tierLabel(w);
+          return w.name + (meta.owned.includes(w.name)
+            ? '   tier ' + (meta.gear[w.name] || 0) + '   carry it'
+            : '   own it   ' + w.cost + ' gems' + needs(w));
         },
+        get dim() {
+          return meta.carried === w.name ? !canBuy(w) : !meta.owned.includes(w.name) && !canOwn(w);
+        },
+        run: () => pickWeapon(w) })),
+      ...EQUIPMENT.map(g => ({
+        get label() { return g.name + '   ' + tierLabel(g) + needs(g); },
         get dim() { return !canBuy(g); },
         run: () => buy(g) })),
+      BACK_HOME,
+    ],
+  },
+  attributes: {
+    heading: 'ATTRIBUTES',
+    get sub() { const p = points(); return p + (p === 1 ? ' point' : ' points') + ' to spend'; },
+    top: MENU_TOP,
+    back: BACK_HOME.run,
+    items: [
       ...ATTRIBUTES.map(a => ({
         get label() {
           const n = meta.spent[a.name] || 0;
@@ -508,8 +667,7 @@ const MENUS = {
         },
         get dim() { return points() <= 0; },
         run: () => raise(a) })),
-      { label: 'Help',    run: () => openScreen('help') },
-      { label: 'Options', run: () => openScreen('options') },
+      BACK_HOME,
     ],
   },
 };
@@ -549,4 +707,5 @@ const HELP_BLURB = [
   'One batch at a time; clear it and the current takes you down to the next.',
   'Things you kill drop gems. They come to you on their own, and are yours to keep.',
   'Kill the glowing fish for a mod. Grab boosts before they fade. A boss heals, then offers a pick.',
+  'Some fish spit from afar; a puffer that swells is about to burst.',
 ];

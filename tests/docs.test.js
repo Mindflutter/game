@@ -175,7 +175,7 @@ describe('the entity docs', () => {
   g.reset(1);
   const START = { ...g.player };
   // The same player carrying weapon `w` instead -- its numbers, as reset() puts them.
-  const kit = ({ name, tiers, ...numbers }) => ({ ...START, ...numbers });
+  const kit = ({ name, tiers, cost, requires, ...numbers }) => ({ ...START, ...numbers });
   // What `applies` do to `base`, in order: the stats they moved, by how much
   // ("speed +45") or to what ("speed 395").
   const r3 = x => Number(x.toFixed(3));
@@ -200,16 +200,20 @@ describe('the entity docs', () => {
   it('lists every enemy type at its real numbers', () => {
     const cols = plain(g.ENEMY_TYPES);
     expectIn(doc('enemies.md'), table(cols, g.ENEMY_TYPES.map(t => cols.map(k => t[k]))));
-    const lungers = g.ENEMY_TYPES.filter(t => t.lunge);
-    const timing = keysOf(lungers.map(t => t.lunge));
-    expectIn(doc('enemies.md'), table(['name', ...timing],
-      lungers.map(t => [t.name, ...timing.map(k => t.lunge[k])])));
+    // A table per behaviour field -- `lunge`, `spit`, ... -- a row per type that has it.
+    for (const f of keysOf(g.ENEMY_TYPES).filter(k => !cols.includes(k))) {
+      const have = g.ENEMY_TYPES.filter(t => t[f]);
+      const sub = keysOf(have.map(t => t[f]));
+      expectIn(doc('enemies.md'), table(['name', ...sub], have.map(t => [t.name, ...sub.map(k => t[f][k])])));
+    }
   });
 
   it('lists every mod with what it does and its card text', () => {
     const cols = plain(g.MODS);
+    // A weapon mod is counted on the first weapon it fits (D99), the rest on the Gun.
+    const base = m => (m.weapons ? kit(g.WEAPONS.find(w => w.name === m.weapons[0])) : START);
     expectIn(doc('mods.md'), table([...cols, 'per pick', 'at max'],
-      g.MODS.map(m => [...cols.map(k => m[k]), moved([m.apply], true), moved(Array(m.max).fill(m.apply))])));
+      g.MODS.map(m => [...cols.map(k => m[k]), moved([m.apply], true), moved(Array(m.max).fill(m.apply), false, base(m))])));
   });
 
   it('lists every boost with what it adds, for how long, and its line', () => {

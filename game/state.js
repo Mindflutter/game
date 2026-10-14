@@ -26,6 +26,13 @@ let plan = [];
 // Whether the player has taken a hit since the current batch arrived -- what
 // the "untouched" micro-task reads when the batch clears (D36).
 let batchHit = false;
+// Hits the suit can still take this batch (D100): `player.guard`, refilled as
+// each batch arrives.
+let guardLeft = 0;
+// Seconds since the current batch arrived, and whether the diver has dashed
+// since: what `swift` and `footwork` read when it clears (D98).
+let batchTime = 0;
+let batchDashed = false;
 
 // A line of text shown for a moment over play, and how many seconds it has
 // left: a micro-task paying out. The layer's name needs no state -- it is
@@ -58,6 +65,10 @@ let waterY = 0;
 // that starts a dive would also fire into it (D47).
 let fireArmed = false;
 
+// The carried weapon's name: what the dive fires (D83), and which weapon mods
+// fit it (D97). Its numbers are on the player.
+let weaponName = '';
+
 // In-dive progress, reset every dive. `currency` is the dive's takings, spent
 // at `home`. `modCounts` is how many times each mod has been taken, which is
 // what lets the draws refuse one that is already maxed. `choices` is the layer
@@ -78,7 +89,8 @@ let boosts = [];
 let sinceBoost = 0;
 
 // Which screen we're on: one variable, so there is exactly one answer at a time.
-// 'title' | 'home' | 'playing' | 'mods' | 'paused' | 'help' | 'options' | 'dead' | 'won'
+// 'title' | 'home' | 'gear' | 'attributes' | 'playing' | 'mods' | 'paused' |
+// 'help' | 'options' | 'dead' | 'won'
 let screen = 'title';
 let menuIndex = 0;          // cursor in whichever menu is up
 let choiceIndex = 0;        // the marked card at a layer end (D85)
@@ -126,16 +138,16 @@ function drawDistinct(pool, n) {
 // The one deliberate exception: *choosing* a seed is not part of the
 // deterministic sequence, so an unseeded dive picks one at random. A port does
 // the same with whatever its language offers.
-function reset(seed) {
+// `weapon` is the one home chose (D97) -- or the first, when the save names
+// one that is gone -- unless a scenario names another.
+function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAPONS[0]) {
   seedRng(seed === undefined ? (Math.random() * 0x100000000) >>> 0 : seed);
   // First, before anything else draws: the whole dive's batches (D71).
   plan = drawPlan();
   // The diver, carrying a weapon: its numbers go onto the player, where mods,
   // attributes and the readout find them (D83).
-  // ponytail: the first weapon is always the one carried -- with one there is
-  // nothing to choose; the second (S5) brings `meta`'s choice, made at `home`.
-  const carried = WEAPONS[0];
-  const { name, tiers, ...shot } = carried;
+  const { name, tiers, cost, requires, ...shot } = weapon;
+  weaponName = name;
   player = {
     ...PLAYER_START,
     ...shot,
@@ -154,11 +166,12 @@ function reset(seed) {
   // What persists, added to the start (D36): each tier of the carried weapon
   // and of the equipment, and each point, applied once. A weapon left at home
   // adds nothing. Mods add on top during the dive; nothing multiplies.
-  for (const g of [carried, ...EQUIPMENT]) {
+  for (const g of [weapon, ...EQUIPMENT]) {
     for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.tiers[i].apply(player);
   }
   for (const a of ATTRIBUTES) for (let i = 0; i < (meta.spent[a.name] || 0); i++) a.apply(player);
   if (damageOverride > 0) player.damage = damageOverride;   // a dev flag
+  guardLeft = player.guard;
   enemies = [];
   bullets = [];
   gems = [];
@@ -187,6 +200,8 @@ function reset(seed) {
   modCounts = {};      // mods are dive-scoped: last dive's picks do not carry
   choiceIndex = 0;
   batchHit = false;
+  batchTime = 0;
+  batchDashed = false;
   notice = '';
   noticeTime = 0;
   banner = '';
@@ -200,7 +215,7 @@ function reset(seed) {
 function applyScenario(name, seed) {
   const s = SCENARIOS[name];
   if (!s) return false;
-  reset(seed);
+  reset(seed, WEAPONS.find(w => w.name === s.weapon));
   // `!== undefined`, or `batch: 0` would be unreachable. The camera starts at
   // that batch's depth, or a deep scenario would first descend the whole way.
   // The player moves with it, or a stepped scenario draws them off-screen.
@@ -228,10 +243,12 @@ function applyScenario(name, seed) {
 //
 // `version` from the first write (foundations.md -> The technical contract). A
 // save this build does not know is rejected loudly, never guessed at.
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
+// Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, spent: {}, tasks: {},
-           deepest: 0, cleared: 0 };
+           deepest: 0, cleared: 0,
+           owned: WEAPONS.filter(w => !w.cost).map(w => w.name), carried: WEAPONS[0].name };
 }
 let meta = freshMeta();
 
@@ -249,7 +266,8 @@ function snapshot() {
            fireArmed, currency, modCounts, offerTimer, choiceIndex,
            choices: choices.map(c => c.name), accumulator, rngState,
            currentSeed, bulletId, plan, batchHit, notice, noticeTime,
-           banner, bannerTime, modRound, boosts, sinceBoost,
+           banner, bannerTime, modRound, boosts, sinceBoost, weaponName, guardLeft,
+           batchTime, batchDashed,
            at: screen === 'playing' || screen === 'mods' ? screen : resumeTo };
 }
 
@@ -260,7 +278,8 @@ function restore(d) {
      queuePaused, batchIndex, breathTimer, cameraY, current, waterY,
      fireArmed, currency, modCounts, offerTimer, choiceIndex,
      accumulator, rngState, currentSeed, bulletId, plan, batchHit, notice,
-     noticeTime, banner, bannerTime, modRound, boosts, sinceBoost } = d);
+     noticeTime, banner, bannerTime, modRound, boosts, sinceBoost, weaponName,
+     guardLeft, batchTime, batchDashed } = d);
   choices = d.choices.map(n => MODS.find(m => m.name === n));
   resumeTo = d.at;
   diveLive = true;
@@ -279,7 +298,9 @@ function saveText() {
 // batch it was in has no fish lit. Saved with the cards up, it takes the card
 // it had marked -- a gems or heart card, gone since, gives nothing -- and an
 // offer still on its way is dropped. v2 kept a layer's micro-tasks by its
-// name, v3 by its number (D89): these were the names then.
+// name, v3 by its number (D89): these were the names then. v3 had one weapon,
+// carried by every dive: a v3 save owns and carries the Gun (D97), its diver
+// wears no suit (D100), and its batch's clock starts as it loads (D98).
 function migrate(s) {
   if (s && s.version === 1) {
     if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
@@ -301,6 +322,14 @@ function migrate(s) {
     s.tasks = Object.fromEntries(Object.entries(s.tasks || {})
       .map(([k, v]) => [was.includes(k) ? was.indexOf(k) : k, v]));
     s.version = 3;
+  }
+  if (s && s.version === 3) {
+    Object.assign(s, { owned: ['Gun'], carried: 'Gun' });
+    if (s.dive) {
+      Object.assign(s.dive, { weaponName: 'Gun', guardLeft: 0, batchTime: 0, batchDashed: false });
+      s.dive.player.guard = 0;
+    }
+    s.version = 4;
   }
   return s;
 }

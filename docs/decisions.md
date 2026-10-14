@@ -3010,3 +3010,225 @@ as it had twice. Igor: "yes drop it".
 
 **Guarded by**: `tests/docs.test.js` — `.claude/settings.json` keeps
 superpowers switched off.
+
+## D95 — Three enemy behaviours, and one way to be hurt · 2026-10-13
+Igor, opening S5 (content): "start S5, dont interrupt unless there are major
+contradictions with the plan". The stage asks for five to seven enemy
+behaviours, and two existed — the chase and the lunge. **Claude's call,
+delegated**, open to Igor to reopen. The design and its check against
+`foundations.md`: `specs/2026-10-13-s5-content-design.md`.
+
+**Decided, by Claude.**
+- **The archer spits** (`spit`): it closes to its range, backs off inside
+  `near` and holds between; while within range and wholly in the view it
+  spits a slow shot at where the player is, every `every` seconds. Its range
+  sits under the Gun's, so the starting weapon can always answer it. The
+  draft's "avoiding the player and shooting from a distance", and `ideas.md`'s
+  parked ranged fish.
+- **The puffer bursts** (`fuse`): it chases; within `trigger` and wholly in
+  the view it stops and swells for `time` seconds — the tell, its blast ring
+  drawn — then bursts, costing a heart within `blast`. The dash's shove still
+  moves it. Shot first, it dies like any fish. **A burst is not a kill**: no
+  gems, no boost, nothing counted, and a glowing puffer that bursts takes its
+  batch's mod with it — only a fish you shoot pays. The draft's "exploding
+  after a short time".
+- **The eel weaves** (`weave`): it closes in like a chaser while swaying
+  across its heading, `width` px either side at `rate` sways a second, so a
+  shot aimed where it is misses where it will be. The draft's "moving in a
+  peculiar way". A batch's eels sway in step, as a school — nothing drawn
+  from the seed.
+- **Enemy shots live in `bullets[]` with `evil: true`** — not a second array.
+  They fly and die at their `travel`, sweep their segment against the player
+  (D53 (fixed timestep, and bullets sweep too)), never touch a fish, and are
+  spent only by a hit that lands.
+- **One way to be hurt**: a bite, a shot and a burst all go through `hurtPlayer()` —
+  the i-frames and the dash's invulnerability, `&immortal`, `batchHit`, the
+  shake, death.
+- **What a behaviour costs**: `makeEnemy()` copies every behaviour field a
+  type has, and the docs check builds a table per behaviour field, so the next
+  behaviour costs its field, its step function, one branch, its checks, its
+  doc and a scenario.
+- **`all-types` replaces `three-types`**: every ordinary type in a row, read
+  from the table, so a new type joins it.
+
+**Answers** `ideas.md`'s parked "Enemy behaviours, not just enemy stats" — five
+behaviours by alpha, its ranged fish the archer — which leaves it.
+
+**Guarded by**: `tests/enemies.test.js` — the archer closes in, holds, backs
+off without leaving the view, comes into the view before it spits, and spits
+at its cadence at the player; a shot costs a heart and is spent, passes the
+dash's invulnerability and `&immortal` unspent, never hits a fish and dies at
+its travel; the puffer lights only near and in view, holds still but for the
+shove, bursts on time inside its ring and not outside, dies like any fish when
+shot, and pays nothing for a burst — not even when a wounding dash meets it on
+the tick it bursts; the eel sways out to one side and then the
+other, within its width, once a sway, while closing in. `tests/meta.test.js` — a dive saved with a
+shot in flight and a puffer swelling plays on identically. `tests/docs.test.js`
+— a table per behaviour field. `checks.js` —
+`all-types` places every ordinary type.
+
+## D96 — Gear and attributes on screens of their own · 2026-10-13
+S5 (content) brings three weapons, three pieces of equipment and three
+attributes (D93 (the content stage's counts)), and with Dive, Help and Options
+that is a dozen rows: on one `home` screen they run through the hint.
+**Claude's call, delegated** (Igor: "start S5, dont interrupt unless there are
+major contradictions with the plan"), open to Igor to reopen.
+
+**Decided, by Claude.**
+- **`home` holds Dive, Gear, Attributes, Help and Options.** Gear lists the
+  weapons and the equipment, with the gems to spend; Attributes lists the
+  attributes, with the points. Each ends on a Back row, and Esc goes `home`.
+- **They are `MENUS` entries**, so the screens stay data (D38 (the `home`
+  screen is canvas, with layout as data)) and reachable only from `home`, so
+  only between dives (D76 (`home` exists only between dives)).
+- **Every menu's rows are held above the hint** in the browser suite, not
+  `home`'s alone — the gear and attribute lists grow from tables. This answers
+  `ideas.md`'s "guard the other screens against overflow" for the menus.
+
+**Guarded by**: `tests/meta.test.js` — `home`'s rows, Gear and Attributes
+opened and left by Esc and by Back. `checks.js` — every menu's last row ends
+above the hint.
+
+## D97 — Weapons are owned, and one is carried · 2026-10-13
+D83 (the weapon record) settled the shape — any number owned, one carried per
+dive, chosen at `home` between dives and never switched mid-dive; a `cost` to
+own one and the carried weapon's name in the save — and left the building to
+the second weapon, in S5 (content). Where it left a choice, **Claude's call,
+delegated** (Igor: "start S5, dont interrupt unless there are major
+contradictions with the plan"), open to Igor to reopen.
+
+**Decided, by Claude.**
+- **A weapon's row on the Gear screen does one thing at a time**: not owned —
+  own it for its `cost`, and it is carried at once; owned — carry it, for
+  nothing; carried — raise its tier. One sentence: choose a weapon to carry
+  it, choose the one you carry to raise its tier.
+- **What costs nothing is owned from the start** — the Gun — and the first
+  weapon is carried. A save that names a weapon no longer there carries the
+  first.
+- **The dive keeps the carried weapon's name**, `weaponName`, beside its
+  numbers on the player, for the weapon mods to read.
+- **A scenario names the weapon it carries** with `weapon:`, whatever `home`
+  chose, so S6 (balance) can measure each weapon alone.
+- **The save is version 4**: a v3 save owns and carries the Gun.
+- **The second weapon is the Harpoon**: slow, long and heavy, through what it
+  hits — the draft's railgun — and it requires a point of Strength (D98
+  (attributes, micro-tasks and what gear requires)).
+- **The third is the Knife**: melee tried as data, as D83 (the weapon record)
+  has it — a very short, wide shot that passes through everything in its arc.
+  Whether it reads as melee is Igor's call.
+
+**Guarded by**: `tests/meta.test.js` — the Gun owned and carried from the
+start; owning for gems and carrying at once, carrying an owned one for free;
+the carried weapon's tier raised from its row, and a dive carrying its numbers
+alone; a missing weapon falling back to the first; a scenario's weapon; the
+weapon kept with a saved dive; a v3 save migrated; the Harpoon's row waiting
+for Strength, and its shot through two fish into a third; the Knife's one
+swing cutting a cluster and reaching no further.
+
+## D98 — Attributes, micro-tasks and what gear requires · 2026-10-13
+D93 (the content stage's counts) asks for three attributes and three
+micro-tasks in total, and D36 (attributes) adopted gear that requires an
+attribute threshold, to land with S5 (content)'s gear. Which ones, and how a
+requirement reads, is **Claude's call, delegated** (Igor: "start S5, dont
+interrupt unless there are major contradictions with the plan"), open to Igor
+to reopen.
+
+**Decided, by Claude.**
+- **The attributes**: `Dash reach` (kept), **Heart** — one more heart, full —
+  and **Strength** — the dash hurts what it shoves, +1 `dashDamage` a point.
+  Body stats, as D36 (attributes) has them: health and the dash; permanent
+  dash improvements are attributes (D74 (dash improvements are attributes)).
+- **`requires` is `{ attribute: points }`** on any piece of gear, met by the
+  points spent on each. Unmet, the piece cannot be owned or bought, its row is
+  dim and says what it needs, and nothing is taken.
+- **The micro-tasks**: `untouched` (kept), **swift** — clear a batch within
+  `SWIFT_TIME` seconds of its arrival — and **footwork** — beat a mini-boss
+  without dashing, D36 (attributes)'s own example. Mastery, never a quota; each
+  pays a point once per layer, ever. `met()` is handed the plan entry cleared,
+  and footwork knows a mini-boss's batch by its fish, so a restored dive's copy
+  of the plan still matches.
+
+**Settles** `foundations.md`'s open "which attributes exist and what each
+micro-task is", S5 (content)'s by its own words, in the same step.
+
+**Guarded by**: `tests/meta.test.js` — Heart and Strength reach the diver;
+nothing that requires more points than are spent is owned or bought, and no
+gems are taken until it is met; swift paid inside its time and not after;
+footwork paid for a mini-boss beaten without a dash, not with one and not for
+another batch; the batch's clock and dash kept with a saved dive. Three older
+checks of `untouched` put their batch past swift's time, so they still read
+`untouched` alone.
+
+## D99 — Weapon mods, and more boosts · 2026-10-13
+D93 (the content stage's counts) asks for 5–7 mods in total and 3–5 new
+boosts beside `Rush`; D83 (the weapon record) reserved weapon mods — ordinary
+mods with `scope: 'weapon'` and the `weapons` they fit — for when the weapons
+exist. Which, and how one is dealt, is **Claude's call, delegated** (Igor:
+"start S5, dont interrupt unless there are major contradictions with the
+plan"), open to Igor to reopen.
+
+**Decided, by Claude.**
+- **The seventh mod is the first weapon mod, Barbs**: the Harpoon's shot goes
+  through one more fish a pick, three at most. Six mods stand as they were.
+- **A weapon mod is dealt only while a weapon it fits is carried**, by a fish
+  and on a layer end's card alike — `fits()`, read by both draws. Carrying the
+  Gun or the Knife, Barbs never comes.
+- **Three boosts join `Rush`**, each a different kind on the weapon's own
+  numbers, so they serve every weapon: **Frenzy** — fire much faster —
+  **Lance** — your shots go through — and **Bloom** — your shots swell. The
+  readout gains the shot's size, since every stat a mod or a boost moves is
+  shown.
+
+**Guarded by**: `tests/drops.test.js` — carrying the Gun, no fish carries
+Barbs and no card offers it; carrying the Harpoon it is dealt up to its cap.
+`checks.js` — every mod is body, comfort, or a weapon mod naming real
+weapons, and every stat a mod or a boost moves is on the readout.
+`tests/drops.test.js` — every boost on with a touch and off after its time.
+`tests/docs.test.js` — a weapon mod's numbers counted on its weapon.
+
+## D100 — Equipment: the Mask, the Suit and the Weights · 2026-10-13
+S5 (content) asks for two or three pieces of equipment, three or four tiers
+each, and D36 (attributes) gives gear the combat stats — weapons, damage,
+defence — and attributes the body ones. Which pieces, and what defence is,
+is **Claude's call, delegated** (Igor: "start S5, dont interrupt unless there
+are major contradictions with the plan"), open to Igor to reopen.
+
+**Decided, by Claude.**
+- **Three pieces, three tiers each**: the **Mask** (range), the **Weights**
+  (damage) and the **Suit** (defence). Worn whatever weapon is carried.
+- **Defence is a guard**: the suit takes the first hit of every batch, one
+  more a tier — `player.guard`, and `guardLeft` refilled to it as each batch
+  arrives. A guarded hit costs no heart but gives the i-frames and counts as a
+  hit for `untouched`; bites, shots and bursts are guarded alike, inside
+  `hurtPlayer()`. A gold ring shows a guard left. Hearts stay body —
+  attributes' and mods' — so defence is a different thing from health.
+
+**Guarded by**: `tests/meta.test.js` — each piece's tiers on the diver; the
+suit taking a batch's first hit without a heart, with the i-frames and the hit
+marked; a shot guarded like a bite and spent; the guard refilled on arrival
+and kept with a saved dive. `tests/docs.test.js` — `entities/equipment.md`
+rebuilt from the table.
+
+## D101 — Three layers, each with pools of its own · 2026-10-13
+S5 (content) asks for 3–5 layers, each with its own pools of batches (D71
+(batches are drawn from pools, never a fixed list)); the second layer was the
+first's stretches under another name. How many, and what they hold, is
+**Claude's call, delegated** (Igor: "start S5, dont interrupt unless there are
+major contradictions with the plan"), open to Igor to reopen.
+
+**Decided, by Claude.**
+- **Three layers**, the count's floor: each keeps the one shape — four from a
+  pool, a mini-boss, four, a mini-boss, four, the boss — around three pools of
+  its own, so no batch is shared between layers.
+- **They meet the fish in turn**: the archer in the first layer's last
+  stretch, the puffer from the second, the eel in the third, every type mixed
+  by its end. The first layer's first two stretches are as they were.
+- **Sized by total hp**, growing down the dive, until S6 (balance)'s threat
+  number (D79 (a dive goes from easiest to hardest)). The same mini-boss and
+  boss end every layer; a boss per layer is not decided.
+- **Layer 3's water is a deep teal**, and a `layer-3` scenario starts its top
+  with the kit a dive would carry there.
+
+**Guarded by**: `tests/meta.test.js` — no pool or batch shared between
+layers, every enemy type met in one; the `layer-3` scenario; the counts S5
+(content) asks for, held from here on (D93 (the content stage's counts)).

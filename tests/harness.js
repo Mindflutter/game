@@ -50,14 +50,15 @@ export function loadGame() {
                  'drops', 'boosts', 'banner', 'sinceBoost',
                  'screen', 'currentSeed', 'bulletId', 'shakeLevel',
                  'immortal', 'damageOverride', 'plan', 'meta', 'diveLive',
-                 'notice', 'resumeTo'];
+                 'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
+                 'batchTime', 'batchDashed'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
                   'MOD_OFFER_DELAY', 'MOD_ROWS',
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
                   'BOOSTS', 'BOOST_C', 'BOOST_LIFE', 'END_STEP',
-                  'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES',
+                  'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'TASKS',
                   'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [

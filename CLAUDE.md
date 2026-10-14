@@ -76,7 +76,9 @@ draft, which is why they are banned (D32).
   no other code. The alpha's content counts are only reachable if adding the
   fifteenth enemy costs what adding the second did. An enemy, mod, boost, weapon
   or piece of equipment also gets its row and section in `docs/entities/` —
-  `npm test` fails until they match the code (D81 — Entity docs).
+  `npm test` fails until they match the code (D81 — Entity docs). Adding any
+  piece of content follows the `abyss-content` skill
+  (`.claude/skills/abyss-content/`).
 - **Comments amend the code; they never define or contradict it** (D91). The
   code is the source of truth for behaviour, `docs/` the spec for what it must
   do. A comment says why, or what the code cannot say for itself. History,

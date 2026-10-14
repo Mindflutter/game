@@ -47,27 +47,9 @@ argued. Feel is Igor's call (D16).
 
 ## Parked — agreed direction, deliberately not now
 
-### Enemy behaviours, not just enemy stats
-**S5 (content)'s work** — five to seven behaviours by alpha (`plan.md` → S5).
-**Agreed 2026-09-19.** Igor: "good idea... we're gonna go with more enemy types
-and perks definitely." Every type that does not lunge runs the same chase, so
-the ordinary types pose one question at three difficulties: the arena only
-ever asks "how far away are they". The draft lists more to start from
-(`high level design.md` → enemies and enemy ai).
-
-The worked example still waiting, one branch in the enemy loop (the charger
-was the other; it became the lunge, D64 (the boss lunges)):
-- **Ranged drifter** — stops at range and fires a slow projectile. Punishes
-  kiting in a straight line, which is the dominant strategy today. Adds a
-  *cover and angle* decision.
-
-Cost: a field on the type record plus a branch in the movement loop, as the
-lunge did. Enemy projectiles reuse the existing `bullets[]` shape with an
-`evil` flag — not a second array.
-
 ### Trade-off mods
 **Still parked, and now cheaper.** D31's `scope`/`apply(player, weapon)` shape
-makes a trade-off mod the same one-line record it always was. Revisit at S5.
+makes a trade-off mod the same one-line record it always was.
 Originally: **Parked 2026-09-19** — Igor: "reject now, save for the future ideas." Not
 declined, deliberately not next. Kept parked through the mods rework (Igor,
 2026-10-12: "ok"): since D84 (mods are dropped) nobody chooses a fish's mod, so
@@ -90,10 +72,10 @@ lever if the roguelite phase happens.
 ### Sprites and real art
 Deliberately deferred until **after** the port, not before. Graphics is
 precisely the part that does not survive a port — every line of canvas work is
-in the ~370 lines that get rewritten. Placeholder shapes already answer the
-question art has to answer here (can you tell a darter from a bulwark at a
-glance), and "does it look good" can only usefully be asked in the engine you
-are shipping in.
+rewritten. Placeholder shapes answer whether a darter can be told from a
+bulwark at a glance, but Igor finds them hard to follow (Open — from playing
+S5 (content) → Graphics, below), and "does it look good" can only usefully be
+asked in the engine you are shipping in.
 
 **For the record** — Igor, 2026-09-29: "keeping graphics in mind, enemies and
 the player will look significantly bigger with all assets. record for info."
@@ -110,13 +92,33 @@ are near 1:1 with the current canvas code; **Bevy** (Rust, ECS) is a redesign
 rather than a port; **Godot** is the pragmatic answer if "performant engine" is
 the real goal. See `decisions.md` for what makes the port cheap.
 
+**Unity, assessed 2026-10-14.** Igor: "i heard that unity is good for 2d games
+too, and it has a cli and you got the plugins, can you assess the tooling?"
+C#, so not the Rust or C++ above. Its agent tooling became real in 2026: the
+Unity CLI — in beta, `1.0.0-beta.10` on 2026-09-22, no release date — runs
+edit-mode and play-mode tests in batch mode, runs C# inside a running Editor
+without a recompile (`unity eval`), drives development builds, and has an MCP
+mode; Unity's own Claude Code plugin (2026-09-09, Unity 6 and later) installs
+it with Unity's skills, 2D and tilemaps among them. Rough edges, from third-party
+reports: a domain reload breaks the MCP session, a modal dialog stalls an
+agent, the Editor sometimes needs focus before it recompiles, and a call costs
+about 0.8s. Unity Personal is free under $200K of revenue and funding a year.
+What carries over would port well: `game/` to C# nearly line for line, the
+tables as plain C# data, the checks to the Unity Test Framework. What would
+not: scenes and prefabs are the Editor's files, worked through the Editor
+rather than as text. Against the list above, Godot keeps everything as text,
+runs headless and needs no account; macroquad and raylib are code alone and
+leave the art pipeline to be built. Claude's read: strong for real 2D graphics,
+weaker than Godot for an agent working in text, and moving fast — so assessed
+again at the port, after alpha.
+
 Known friction in Rust specifically: methods on `self` called while iterating
 `self.enemies` won't borrow-check. Fix by looping on indices or collecting
 events and applying them after the loop. `nearestEnemy()` returns
 `Option<usize>`, not a reference.
 
 ### Settings persistence (localStorage)
-~6 lines. Volume and screen shake currently reset on every reload. Igor:
+A few lines. Volume and screen shake currently reset on every reload. Igor:
 "no local storage yet" (2026-09-12) — not rejected, just not now.
 
 ### TypeScript
@@ -145,8 +147,6 @@ Recorded here so they are not silently decided by accident.
   screen to "LAYER CLEARED": "more user-friendy messages we'll do later". The
   end screens show a heading plus a raw stats line today.
 - **Collectibles found in a dive:** feed player stats, the story, or both.
-- **Which attributes exist, and what each micro-task is.** That the tier
-  exists is D36 (attributes); its content is S5 (content) work.
 - **What the currency is called** — shells, coloured stones, coins.
 - **Whether weapons stay inside the sea theme** or are free to be weird.
 - **Terrain beyond a vertical shaft** — cliffs and caverns are left possible,
@@ -204,7 +204,8 @@ built.
   this is the one family whose effect outlives the dive, so it must be measured
   per campaign, not per dive.
 
-**weapon** — waits for S5 (Content), per D31's `scope` field.
+**weapon** — fits only the weapons it names (D99 (weapon mods, and more
+boosts)); the first, Barbs, is built.
 
 ## Recorded future opportunities, explicitly not now
 
@@ -225,13 +226,14 @@ built.
   5–7 mods (D93 (the content stage's counts)) — but comfort is meant to carry
   the pool's width.
 
-- **The dash economy: two of six mods feed one verb.** Igor, 2026-09-27,
+- **The dash economy: two mods and an attribute feed one verb.** Igor, 2026-09-27,
   playing D54: "once the dash becomes long, it feels way easier" and "dash
   length + dash damage is the cool build, might want to rebalance". Measured
   numbers live in `roadmap.md` -> Health. `Fins` does not feed the dash
   (D56 (the dash is a fixed, committed lunge)), so what points at it is
   `Reflex` (cooldown) and `Impact` (damage), both capped at 3, and the Dash
-  reach attribute at `home` (D75 (the gun's tiers, dash reach, a clean batch)).
+  reach and Strength attributes at `home` (D75 (the gun's tiers, dash reach, a
+  clean batch), D98 (attributes, micro-tasks and what gear requires)).
 
   What is still open:
   - **`Reflex` is the real multiplier.** At its max it roughly doubles both
@@ -240,7 +242,8 @@ built.
     work.
   - **`Impact` beyond x1 is nearly dead.** Drifters and darters have 1hp and
     are the bulk of every batch, so x1 kills as many as x3. Only bulwarks see
-    the rest. Dropping its max to 1 until enemies with real hp exist is the
+    the rest — and since S5 (content), the archers, puffers and eels, with two
+    and three hit points. Dropping its max to 1 until enemies with real hp exist is the
     obvious move and is not taken.
   - Caveat on all of it: the probe dashes once, in a fixed direction, from a
     standstill. A human lines the dash up along a crowd, which is where reach
@@ -317,8 +320,8 @@ built.
   "spitting out dangerous toxins" and "shooting an arc" — and the lunge and
   the spit in turn. Offered alongside the lunge; Igor took the lunge alone
   (D64 — the boss lunges): "we will do enemy polishing later anyways". The
-  spit needs enemy projectiles first — see the ranged drifter under "Enemy
-  behaviours, not just enemy stats".
+  spit can use the enemy shots the archer brought (D95 (three enemy
+  behaviours, and one way to be hurt)).
 
 ## Open — raised during S4 (meta loop skeleton)
 
@@ -348,6 +351,138 @@ built.
   Removing them would reopen the glossary's "every mod has a cap" in
   `foundations.md`.
 
+## Open — from playing S5 (content)
+
+Igor, 2026-10-14, after playing the stage's build: "they dont necessarily need
+to be addressed within s5, so your job will be to also categorize them and
+record properly. we gotta discuss all the details within each comment ofc - not
+necessarily within s5 or this session." Each note keeps his words. **Home** is
+where Claude proposes it be built: a proposal, unconfirmed until the note is
+discussed.
+
+**Tooling**
+
+- **A debug mode, set up on screen.** "i need a debug mode better than url
+  params. like: launch with a single debug param, then a game in debug mode
+  opens. thru the ui, i can choose layer, number of enemies, types etc. (pretty
+  much everything that's in url params now + whatever you may come up with).
+  the point is to quickly choose a configuration where i can playtest
+  components isolated or combined, and create issues that concern only a
+  certain aspect of the game." Today's flags — `?dev=` and a scenario (D37
+  (scenarios)), `&seed`, `&play`, `&immortal`, `&damage` — become rows on a
+  screen. A driven dive plays silent and never writes the save; a debug dive is
+  played, so it wants its sound, and still must not touch the save. Open:
+  everything it offers, and whether it acts mid-dive too. **Home**: next,
+  before more playtesting — every note below is judged faster with it.
+- **Unity's tooling, assessed** — Port to a native executable, above.
+
+**Screens**
+
+- **`home` shows the character; gear and attributes stop being lists.** "gear
+  & attributes submenus are really hard to use. on home screen i want to see
+  the character - what's equipped, what weapon is on, attrs, tiers. submenus
+  could be dropdown on home screen for example. all with buttons and clear ux,
+  currently theres one row per item with an arrow. refer to classics for tier
+  up." Reopens D96 (gear and attributes on screens of their own), Claude's
+  delegated call. What `home` shows and how a tier is bought carry over to the
+  port; the drawing does not, and the canvas gets no investment (D17 (the
+  browser build is a throwaway prototype)), so how much is built here is part
+  of the question. **Home**: S7 (alpha polish)'s UX fixing.
+- **"Buy & equip".** "'carry it, own it' wording is just bad. simply 'buy &
+  equip' do the job". Owning and carrying stay as D97 (weapons are owned, and
+  one is carried) has them; the rows' words change. Open: what an owned
+  weapon's row and the carried one's tier row say. **Home**: S5 (content) — its
+  text.
+- **No "for a moment".** "'for a moment' wording is just bad and excessive. no
+  useful info for the player." It ends all four boosts' lines, read as each is
+  picked up. Open: cut it, or say the seconds. **Home**: S5 (content) — its
+  text.
+- **Everything on the status bar.** "missing info for the status bar during
+  dive, make sure to add everything. make it more readable with bold, italic or
+  colors - dont care how exactly". It shows hp, the batch counted from the
+  dive's top, gems, time and kills, and under them the development readout (D52
+  (the development readout)) with the boosts running. Missing: the layer (named
+  only as you enter it), the batch within it and the fish left, the weapon and
+  its tier, the guard left (a ring only), the mods held (on the layer end's
+  cards only) and the layer's micro-tasks (at `home` only). How it looks is
+  Claude's. **Home**: S5 (content) — its new pieces are judged by what the bar
+  shows.
+- **Home from the pause menu.** "ability to go home from pause". `home` exists
+  only between dives (D76 (`home` exists only between dives)), so this ends the
+  dive, its gems banked as at any end (D67 (currency is kept on death)). Kin to
+  the New game beside Continue that D90 (Continue goes straight back in) left
+  to S7 (alpha polish). Open: whether it asks first. **Home**: S7 (alpha
+  polish), beside that — or with the debug mode, if playtesting needs it sooner.
+- **Hints for every fish and pickup.** "no hints for entities at all - think
+  player perspective again". The help's one line on the fish covers the archer
+  and the puffer; a mod or boost is named with its line as it lands; nothing
+  says what a fish does when it is first met. Bound by the genre contract —
+  nothing modal mid-fight (5) — and by the pillar that no mechanic needs more
+  than a sentence. Open: where a hint shows — at a fish's first arrival, at
+  `home`, in the help. **Home**: S7 (alpha polish)'s UX fixing.
+
+**The stage's content**
+
+- **The Knife reads as short range, not melee.** "melee feels like a short
+  range. maybe make it an arc, like a swing". This answers D97 (weapons are
+  owned, and one is carried)'s "whether it reads as melee is Igor's call", and
+  D83 (the weapon record) already says what follows: melee gets a behaviour of
+  its own, in S5 (content). A swing would be a new kind of shot — a field on
+  the weapon record and a branch where shots hit. Open: what the behaviour is;
+  the swing is Igor's lean. **Home**: S5 (content).
+- **The puffer is easy to avoid, and it kills itself.** "the exploding enemy is
+  really easy to avoid and it kills itself". Swelling, it stands still, so
+  stepping out of the blast is easy, and the burst removes it — a batch of
+  puffers clears itself if waited out, costing only their gems. Its trigger,
+  fuse and blast are numbers, S6 (balance)'s; dying in its own burst is its
+  shape. Open: what makes it a threat. **Home**: S5 (content).
+- **The eel is hard to hit** — "a problem of schematic circles, not necessarily
+  a bad design." Its behaviour stands; it goes with the graphics, below.
+- **The archer works** — "shooting enemies are quite good atm. just a positive
+  commentary". Its behaviour stands; its numbers stay S6 (balance)'s.
+
+**Graphics**
+
+- **Shapes hard to follow, and everything small.** "start thinking towards
+  graphics. not saying we must go to assets now, but: 1 schematically circles
+  and squares are ok, but hard to follow 2 the sizes of all entities are small.
+  when we go to graphics, direct transition would be impossible (small fishes,
+  small guy, you get it)". Not the condition D4 (no assets, ever) waits on:
+  "not saying we must go to assets now". The sizes cannot wait for the art —
+  Sprites and real art, above, has why, from when he raised it on 2026-09-29 —
+  since every radius, range and speed S6 (balance) tunes moves with them. Open:
+  how big things are on screen, and when that is settled. **Home**: a pass
+  before S6 (balance), so it tunes numbers at the sizes they keep.
+- **References for each fish and entity.** "image or even gif references for
+  enemy types and other entities? too early?" Claude: not too early to collect,
+  since they feed the sizes and shapes above; kept as links in the docs, not
+  image files (D4 (no assets, ever)). Open: whether to start now.
+
+**The meta loop**
+
+- **Micro-tasks are unclear, and what they pay is open.** "micro-tasks are
+  absolutely unclear now. think player perspective: "i need to boost my attrs,
+  ok i need some points, what are those? ok, i just randomly completed some
+  task and for some reason i got a point. how do i earn more?". these tasks are
+  a good idea, but i am thinking maybe they could reward with something extra
+  that is really good for a player, but not attr points. thus, attr points to
+  be purchased via gems. or not. it could be a a second currency, like crates
+  or shells found separately. what is "something extra" then? just cosmetic
+  stuff like a badge or a look? gear+ items like carrying a single bomb? being
+  stroger against certain enemy type? this comment is a big discussion with a
+  lot of unknowns." Two parts. **What a player sees**: no task shows until it
+  pays. **What a task pays** reopens D36 (attributes) and D98 (attributes,
+  micro-tasks and what gear requires), and meets `foundations.md` at several
+  points. Points bought with gems undo the genre contract's fourth point —
+  "money cannot buy them … That non-fungibility is the entire reason the tier
+  exists". Shells keep that point only if they buy nothing but attributes;
+  dropped by kills, they can be farmed, which the glossary's cap at the source
+  stops; found apart from the fight, they are the gathering the sixth point
+  rules out. A bonus against one kind of fish sits beside a non-goal, elemental
+  weaknesses and resistances. **Home**: what a player sees, with the status
+  bar; what a task pays, a design pass of its own before S6 (balance), which
+  measures the economy it settles.
+
 ## Suggested but not yet discussed
 
 - **A rank only play can earn.** Claude, 2026-10-01, in the mods rework, when
@@ -357,12 +492,6 @@ built.
   damage. Not taken with D87 (rank is retired): it is a system of its own, and
   it snowballs — good players get stronger still. If it comes, it is the place
   the "easy layers stay relevant" pillar's fast clears could pay into.
-
-- **Guard the other screens against overflow.** D46 gave the help screen a check
-  that its content ends above the hint. Options and the menus stack rows from
-  tables the same way and have no such guard. Generalising means every screen
-  reporting its own extent, which is more machinery than one bug justifies —
-  worth doing when a second screen actually overflows, not before.
 
 - **Shake when enemies take damage** (currently only when *you* take damage).
   Offered 2026-09-12 when Igor asked for "slight shake on damage received";

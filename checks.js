@@ -512,13 +512,12 @@ if (location.search === '?test') {
   check(batchIndex === heldAt && enemies.length === 0 && screen === 'mods',
     'nothing may arrive while the offer is open: batch ' + batchIndex);
 
-  // The pool is body and comfort only until S5 -- Content (D34). A weapon mod
-  // cannot be balanced before the weapons exist: "+1 damage" is huge on a
-  // railgun and nothing on a spray gun.
-  check(MODS.every(m => m.scope === 'body' || m.scope === 'comfort'),
-    'every mod must be body or comfort, found: ' +
-    MODS.filter(m => m.scope !== 'body' && m.scope !== 'comfort')
-        .map(m => m.name + '/' + m.scope).join(','));
+  // A mod is body or comfort, or a weapon mod naming the weapons it fits
+  // (D99): "+1 damage" is huge on a railgun and nothing on a spray gun.
+  const scoped = m => m.scope === 'body' || m.scope === 'comfort' ||
+    m.scope === 'weapon' && m.weapons?.length > 0 && m.weapons.every(n => WEAPONS.some(w => w.name === n));
+  check(MODS.every(scoped), 'every mod must be body, comfort, or a weapon mod naming real weapons, found: ' +
+    MODS.filter(m => !scoped(m)).map(m => m.name + '/' + m.scope).join(','));
   check(new Set(MODS.map(m => m.name)).size === MODS.length,
     'two mods must not share a name');
 
@@ -963,6 +962,14 @@ if (location.search === '?test') {
   check(lastRow.y + lastRow.h < HINT_Y - 10,
     'home: the rows must end above the hint, rows end at ' + (lastRow.y + lastRow.h) +
     ', hint at ' + HINT_Y);
+  // Every menu's rows end above the hint too: the gear and attribute screens
+  // grow from tables, and a menu cannot notice its rows running into the hint.
+  for (const [name, menu] of Object.entries(MENUS)) {
+    const last = rowRect(menu.items.length - 1, menu.top);
+    check(last.y + last.h < HINT_Y - 10,
+      name + ': the rows must end above the hint, rows end at ' + (last.y + last.h) +
+      ', hint at ' + HINT_Y);
+  }
 
   // The same rule sideways: a mod description is prose in a fixed-width box, and
   // the renderer centres it, so it cannot notice one running off the edge.
@@ -1033,16 +1040,17 @@ if (location.search === '?test') {
     'a minute away from the tab must still only advance the capped budget');
 
   // --- the development readout (D52) ---
-  // Every stat a mod can move must be on screen, or the readout quietly stops
-  // covering the thing that changed. Derived from the mods themselves, so
-  // adding a mod that touches a new field fails here rather than going unseen.
+  // Every stat a mod or a boost can move must be on screen, or the readout
+  // quietly stops covering the thing that changed. Derived from the tables, so
+  // adding one that touches a new field fails here rather than going unseen.
   reset();
   // hp/maxHp are the exception: they are the `HP 3/4` on the line above.
   const shown = PLAYER_STATS.map(s => s.stat).concat(['hp', 'maxHp']);
-  const unshown = [...new Set(MODS.flatMap(m => modPreview(m).map(c => c.stat)))]
+  const unshown = [...new Set([...MODS.flatMap(m => modPreview(m).map(c => c.stat)),
+                               ...BOOSTS.flatMap(b => Object.keys(b.add))])]
     .filter(k => !shown.includes(k));
   check(unshown.length === 0,
-    'every stat a mod changes must be in PLAYER_STATS, missing: ' + unshown.join(','));
+    'every stat a mod or boost changes must be in PLAYER_STATS, missing: ' + unshown.join(','));
   check(PLAYER_STATS.every(s => s.stat in player),
     'every PLAYER_STATS entry must name a real player field: ' +
     PLAYER_STATS.filter(s => !(s.stat in player)).map(s => s.stat).join(','));
@@ -1081,9 +1089,10 @@ if (location.search === '?test') {
   for (let i = 0; i < 900; i++) { update(1 / 60); mostSeen = Math.max(mostSeen, enemies.length); }
   check(mostSeen === 1, 'a paused scenario must never gain an enemy, peaked at ' + mostSeen);
 
-  check(applyScenario('three-types'), 'three-types must load');
-  check(enemies.length === 3, 'three-types must place three enemies, got ' + enemies.length);
-  check(new Set(enemies.map(e => e.r)).size === 3, 'three-types must place three different types');
+  check(applyScenario('all-types'), 'all-types must load');
+  const ordinary = ENEMY_TYPES.filter(t => t.carries !== false).map(t => t.name).join();
+  check(enemies.map(e => e.name).join() === ordinary,
+    'all-types must place one of every ordinary type, got ' + enemies.map(e => e.name).join());
 
   check(applyScenario('late-swarm'), 'late-swarm must load');
   check(batchIndex === 5, 'late-swarm must start deep in the queue, got batch ' + batchIndex);
