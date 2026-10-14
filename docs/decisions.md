@@ -3387,3 +3387,39 @@ the cursor and hits what is in it at once.
 once and none behind; a body reaching into the blade's edge cut, one past it
 not; pierce + 1 at most, nearest first; another swing only after the cooldown.
 `tests/docs.test.js` — the `swing` table against `entities/weapons.md`.
+
+## D106 — The puffer bursts and comes on again · 2026-10-14
+Igor, playing S5 (content): "the exploding enemy is really easy to avoid and
+it kills itself". Swelling for 1.2s it was easy to step away from, and the
+burst removed it, so a batch of puffers cleared itself if waited out. Asked
+what makes it a threat: "chases, stops for a brief moment, explodes quickly,
+continues chasing. go".
+
+**Decided, by Igor.** The puffer chases, stops briefly, bursts quickly, and
+chases on: it outlives its burst. This supersedes the part of D95 (three enemy
+behaviours, and one way to be hurt) where the puffer dies in its burst, and
+with it "a glowing puffer that bursts takes its batch's mod with it". The rest
+of D95 stands: the tell, the trigger only wholly in the view, the shove, a
+burst through `hurtPlayer()`, and a burst paying nothing.
+
+**Claude's picks**, open to Igor:
+- **The stop is 0.5s**, from 1.2s: the brief moment, and the game's quickest
+  tell — the boss winds up for 1.0s. Out of the ring from inside the trigger
+  takes the diver about 0.15s at the starting speed, which leaves a human's
+  reaction time and little more.
+- **It chases at least 1.5s before it can light** — after it arrives and after
+  every burst — a new `chase` field, the lunge's word for the same rule. Without
+  it a diver inside the trigger takes a burst every half second.
+- `trigger` and `blast` stay as they were (D104 (bodies doubled)).
+
+**Found on the way**: a fish cut down by the Knife's swing (D105 (the Knife
+swings)) was still stepped that tick — the swing kills before the fish move —
+so a puffer cut on the tick its fuse ran out burst after its death. A dead fish
+now takes no step: the guard sits at the top of the enemy loop, not after the
+step.
+
+**Guarded by**: `tests/enemies.test.js` — bursting on time, inside the ring
+and not outside, and living on; swimming on after a burst and lighting again
+only after its chase; dying like any fish when shot; never bursting when cut
+down on the tick its fuse runs out; a dash that kills it as it bursts counting
+one kill; a burst paying nothing and the glowing puffer keeping its mod.

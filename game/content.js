@@ -550,12 +550,13 @@ const ENEMY_TYPES = [
   { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2,
     color: '#5aa9ff', glow: '#1f6fff',
     spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420 } },
-  // The puffer swells, then bursts (D95). `fuse` holds how near it must get to
-  // light it, the seconds it swells -- the tell -- and its blast's radius.
-  // Claude's picks.
+  // The puffer chases, stops, bursts and chases on (D95, D106). `fuse` holds
+  // the seconds it chases before it can light, how near it must get to light
+  // it, the seconds it swells -- the tell -- and its blast's radius. Claude's
+  // picks.
   { name: 'puffer',  r: 22, hp: 3, speed: 95,  value: 2,
     color: '#ffee58', glow: '#ffc800',
-    fuse: { trigger: 90, time: 1.2, blast: 110 } },
+    fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110 } },
   // The eel sways as it comes (D95): `weave` holds how far either side, in px,
   // and how many sways a second. Claude's picks.
   { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2,
@@ -593,7 +594,7 @@ const DEBUG_POINTS_MAX = 9;     // on one attribute: Claude's pick
 const DEBUG_BEHAVIOURS = {
   chase: 'swims straight at you',
   spit:  'keeps its distance and spits shots at you',
-  fuse:  'swells when you come close, then bursts \u2014 step out of its ring',
+  fuse:  'swells when you come close, bursts and comes on again \u2014 step out of its ring',
   weave: 'sways side to side as it comes \u2014 aim where it will be',
   lunge: 'winds up, then lunges along its line \u2014 step aside',
 };

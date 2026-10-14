@@ -121,10 +121,17 @@ describe('the archer (spit)', () => {
 
 describe('the puffer (fuse)', () => {
   const fuse = () => loadGame().enemyType('puffer').fuse;
+  // A puffer `dist` px from the diver that has already chased its fill, so it
+  // lights as soon as it is near enough.
+  const ready = dist => {
+    const g = alone('puffer', dist);
+    g.enemies[0].phaseTime = fuse().chase;
+    return g;
+  };
 
   it('chases until within its trigger and wholly in the view, then stops and swells', () => {
     const F = fuse();
-    const g = alone('puffer', F.trigger + 200);
+    const g = ready(F.trigger + 200);
     const e = g.enemies[0];
     let at = null;
     for (let i = 0, n = ticks(g, 6); i < n && e.phase !== 'fuse'; i++) {
@@ -142,22 +149,37 @@ describe('the puffer (fuse)', () => {
     expect(e.x).toBeGreaterThan(x);
   });
 
-  it('bursts after its time, costing a heart inside the blast and nothing outside it', () => {
+  it('bursts after its time, costing a heart inside the blast and nothing outside it, and lives on', () => {
     const F = fuse();
-    const near = alone('puffer', F.trigger - 10);
+    const near = ready(F.trigger - 10);
     play(near, F.time + 0.05);
-    expect(near.enemies.length).toBe(0);
+    expect(near.enemies.map(e => [e.phase, e.hp])).toEqual([['chase', near.enemies[0].maxHp]]);
     expect(near.player.hp).toBe(near.player.maxHp - 1);
-    const far = alone('puffer', F.trigger - 10);
+    const far = ready(F.trigger - 10);
     far.update(far.FIXED_DT);                    // the fuse is lit
     far.player.x -= F.blast;                     // and the diver steps out of the ring
     play(far, F.time);
-    expect(far.enemies.length).toBe(0);
+    expect(far.enemies[0].phase).toBe('chase');  // it burst
     expect(far.player.hp).toBe(far.player.maxHp);
   });
 
+  it('swims on after a burst, and lights again only once it has chased for its time', () => {
+    const F = fuse();
+    const g = ready(F.trigger - 10);
+    g.immortal = true;
+    play(g, F.time + 0.02);
+    const e = g.enemies[0];
+    expect(e.phase).toBe('chase');
+    const d0 = distance(g, e);
+    play(g, F.chase - 0.1);
+    expect(e.phase).toBe('chase');               // inside its trigger all along, and unlit
+    expect(distance(g, e)).toBeLessThan(d0);     // closing in
+    play(g, 0.2);
+    expect(e.phase).toBe('fuse');
+  });
+
   it('dies like any fish when shot while it swells, and never bursts', () => {
-    const g = alone('puffer', fuse().trigger - 10);
+    const g = ready(fuse().trigger - 10);
     g.update(g.FIXED_DT);                        // lit, and the trigger seen released
     g.player.damage = 100;
     const e = g.enemies[0];
@@ -170,9 +192,26 @@ describe('the puffer (fuse)', () => {
     expect(g.player.hp).toBe(g.player.maxHp);
   });
 
-  it('pays nothing for a burst, even on the tick a wounding dash reaches it', () => {
+  it('cut down by a swing on the tick its fuse runs out, it never bursts', () => {
     const F = fuse();
-    const g = alone('puffer', 40);               // inside the dash wave's reach
+    const g = loadGame();
+    expect(g.applyScenario('knife', 1)).toBe(true);
+    g.queuePaused = true;
+    g.placeEnemy('puffer', g.player.x + 50, g.player.y);
+    const e = g.enemies[0];
+    g.update(g.FIXED_DT);                        // the trigger seen released
+    Object.assign(e, { phase: 'fuse', phaseTime: F.time - g.FIXED_DT / 2, hp: 1 });
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    g.keys.add('Mouse0');
+    g.update(g.FIXED_DT);                        // the swing and the fuse's end, one tick
+    expect(g.kills).toBe(1);
+    expect(g.player.hp).toBe(g.player.maxHp);
+  });
+
+  it('a dash that kills it on the tick it bursts counts one kill, paid once', () => {
+    const F = fuse();
+    const g = ready(40);                         // inside the dash wave's reach
     g.update(g.FIXED_DT);                        // lit
     const e = g.enemies[0];
     e.phaseTime = F.time - g.FIXED_DT / 2;       // it bursts on the next tick
@@ -181,16 +220,17 @@ describe('the puffer (fuse)', () => {
     g.justPressed.add('Space');                  // and the dash's wave meets it then
     g.update(g.FIXED_DT);
     expect(g.enemies.length).toBe(0);
-    expect([g.kills, g.gems.length]).toEqual([0, 0]);
+    expect([g.kills, g.currency + g.gems.length]).toEqual([1, e.value]);
   });
 
-  it('pays nothing for a burst: no gems, no boost, no kill, no mod', () => {
-    const g = alone('puffer', fuse().trigger - 10);
+  it('pays nothing for a burst, and keeps the mod it carries', () => {
+    const g = ready(fuse().trigger - 10);
     g.placeEnemy('bulwark', 60, 60);            // so the burst is not the arena's last
     g.enemies[0].carrier = true;
     g.sinceBoost = 1 / g.BOOST_C;               // a kill now would be sure to drop one
     play(g, fuse().time + 0.05);
-    expect(g.enemies.map(e => e.name)).toEqual(['bulwark']);
+    expect(g.enemies.map(e => [e.name, e.phase, !!e.carrier]))
+      .toEqual([['puffer', 'chase', true], ['bulwark', 'chase', false]]);
     expect(g.kills).toBe(0);
     expect(g.gems.length + g.drops.length).toBe(0);
     expect(g.sinceBoost).toBe(1 / g.BOOST_C);

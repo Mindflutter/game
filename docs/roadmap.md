@@ -18,8 +18,8 @@ Every design call in it is Claude's, delegated, and open. **Next**, before
 S6 (balance), the notes from playing S5 (content) that move the numbers it
 tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
 status bar, the two wordings, the sizes (D104 (bodies doubled)) and the Knife's
-swing (D105 (the Knife swings)). Next: the puffer as a threat, then what
-micro-tasks pay (`ideas.md` →
+swing (D105 (the Knife swings)) and the puffer that comes on again (D106 (the
+puffer bursts and comes on again)). Next: what micro-tasks pay (`ideas.md` →
 Open — from playing S5 (content)). Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,

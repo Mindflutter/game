@@ -393,13 +393,6 @@ discussed.
 
 **The stage's content**
 
-- **The puffer is easy to avoid, and it kills itself.** "the exploding enemy is
-  really easy to avoid and it kills itself". Swelling, it stands still, so
-  stepping out of the blast is easy, and the burst removes it — a batch of
-  puffers clears itself if waited out, costing only their gems. Its trigger,
-  fuse and blast are numbers, S6 (balance)'s; dying in its own burst is its
-  shape. Open: what makes it a threat. **Home**: before S6 (balance), which tunes
-  its numbers — proposed for S5 (content), which closed first.
 - **The eel is hard to hit** — "a problem of schematic circles, not necessarily
   a bad design." Its behaviour stands; it goes with the graphics, below.
 - **The archer works** — "shooting enemies are quite good atm. just a positive

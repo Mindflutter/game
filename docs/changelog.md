@@ -6,6 +6,15 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**The puffer bursts and comes on again** (D106 (the puffer bursts and comes on
+again))
+It chases, stops for half a second, bursts, and chases on — it no longer dies
+in its own burst, so a batch of puffers has to be killed, not waited out. After
+arriving and after every burst it chases at least 1.5s before it can light
+again. Found on the way: a fish cut down by the Knife's swing was still stepped
+that tick, so a puffer cut as its fuse ran out burst after death; a dead fish
+now takes no step.
+
 **The Knife swings** (D105 (the Knife swings))
 No shot any more: each pull cuts an arc toward the cursor, 120° wide, and every
 fish whose body reaches into it is hit at once — nearest first, up to its

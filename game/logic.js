@@ -133,22 +133,30 @@ function spitStep(e, ux, uy, d, dt) {
 }
 
 // ---------- the fuse ----------
-// The puffer's (D95): it chases; within `trigger` of the diver and wholly in
-// the view -- so the tell is always seen -- it stops and swells for `time`
-// seconds, then bursts, costing a heart within `blast`. The dash's shove still
-// moves it, which is the answer to one. A burst is not a kill: no gems, no
-// boost, no mod, nothing counted -- only a fish you shoot pays.
+// The puffer's (D95, D106): it chases for at least `chase` seconds; then,
+// within `trigger` of the diver and wholly in the view -- so the tell is
+// always seen -- it stops and swells for `time` seconds and bursts, costing a
+// heart within `blast`, and chases on. The dash's shove still moves it, which
+// is the answer to one. It outlives its burst, so a burst pays nothing: only
+// a fish you kill does.
 function fuseStep(e, ux, uy, d, dt) {
   const F = e.fuse;
+  e.phaseTime += dt;
   if (e.phase === 'chase') {
     const [cx, cy] = viewClamp(e);
-    if (d < F.trigger && cx === e.x && cy === e.y) { e.phase = 'fuse'; e.phaseTime = 0; }
-    else { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
+    if (e.phaseTime >= F.chase && d < F.trigger && cx === e.x && cy === e.y) {
+      e.phase = 'fuse';
+      e.phaseTime = 0;
+    } else {
+      e.x += ux * e.speed * dt;
+      e.y += uy * e.speed * dt;
+    }
   }
   e.x += e.pushX * dt;
   e.y += e.pushY * dt;
-  if (e.phase === 'fuse' && (e.phaseTime += dt) >= F.time) {
-    e.gone = true;
+  if (e.phase === 'fuse' && e.phaseTime >= F.time) {
+    e.phase = 'chase';
+    e.phaseTime = 0;
     const bx = player.x - e.x, by = player.y - e.y, reach = F.blast + player.r;
     if (bx * bx + by * by < reach * reach) hurtPlayer();
     burst(e.x, e.y, e.color, e.glow, 24, 260, 0.45);
@@ -264,8 +272,9 @@ function hitSparks(e, b) {
   }
 }
 
-// One enemy's death, from whatever killed it -- a shot or a dash. Two callers,
-// and duplicating the gem drop is how the two paths quietly drift apart.
+// One enemy's death, from whatever killed it -- a shot, a swing or a dash.
+// Three callers, and duplicating the gem drop is how the paths quietly drift
+// apart.
 function killEnemy(e) {
   e.gone = true;
   kills += 1;
@@ -991,6 +1000,7 @@ function step(dt) {
                                         // factor would shove 2.4x further on a
                                         // 144Hz screen
   for (const e of enemies) {
+    if (e.gone) continue;                  // cut down by a swing this tick: no step, no bite
     const ex = player.x - e.x;
     const ey = player.y - e.y;
     const d = Math.sqrt(ex * ex + ey * ey) || 1;   // || 1 avoids dividing by zero
@@ -1003,7 +1013,6 @@ function step(dt) {
       e.x += (ex / d) * e.speed * dt + e.pushX * dt;
       e.y += (ey / d) * e.speed * dt + e.pushY * dt;
     }
-    if (e.gone) continue;                  // burst on its own step: nothing more to meet
 
     e.pushX *= pd;
     e.pushY *= pd;

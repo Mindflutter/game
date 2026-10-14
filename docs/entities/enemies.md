@@ -38,9 +38,9 @@ Each behaviour's numbers, a table per behaviour field. `lunge`:
 
 `fuse`:
 
-| name | trigger | time | blast |
-|---|---|---|---|
-| puffer | 90 | 1.2 | 110 |
+| name | chase | trigger | time | blast |
+|---|---|---|---|---|
+| puffer | 1.5 | 90 | 0.5 | 110 |
 
 `weave`:
 
@@ -68,7 +68,7 @@ enemy behaviours, and one way to be hurt)).
 | `carries` | — | `false`: never the glowing fish that carries its batch's mod (D88 (the fish glows from the start)) — the boss and the mini-boss. Absent: it can be. |
 | `lunge` | — | Its presence is the behaviour: the type lunges instead of only chasing (D64 (the boss lunges)). Holds the timings in the table above: `chase` seconds before a wind-up may start, `windup` and `rest` in seconds, the charge's `speed` in px/s and its `reach` in px. |
 | `spit` | — | Its presence is the behaviour: the type keeps its distance and spits (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: it closes to `range` px and backs off inside `near` px; it spits every `every` seconds, a shot of radius `r` px flying at `speed` px/s for `travel` px. |
-| `fuse` | — | Its presence is the behaviour: the type swells, then bursts (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: within `trigger` px it stops and swells for `time` seconds, then bursts, reaching `blast` px. |
+| `fuse` | — | Its presence is the behaviour: the type swells, bursts and chases on (D95 (three enemy behaviours, and one way to be hurt), D106 (the puffer bursts and comes on again)). Holds the numbers in its table above: after chasing for at least `chase` seconds, within `trigger` px it stops and swells for `time` seconds, then bursts, reaching `blast` px, and chases again. |
 | `weave` | — | Its presence is the behaviour: the type sways as it closes in (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: `width` px either side of its heading, `rate` sways a second. |
 | `threat` | — | **Reserved** for S6 (balance): the type's threat number, from which a batch's threat is computed (D79 (a dive goes from easiest to hardest)). Not in the code; S6 adds it to every type at once, so S5 (content) writes its enemies on a shape that will not change (D80 (entity docs and mods from drops come first)). |
 
@@ -101,14 +101,15 @@ bite, through `hurtPlayer()` — but never touches a fish, and the dash's
 invulnerability lets it through unspent. In one sentence: the blue ones spit,
 so keep moving.
 
-**Fuse** — chase, swell, burst (`fuseStep()`). Within `trigger` of the player
-and wholly inside the view, it stops and swells for `time` seconds — the tell:
-it puffs up and draws the ring its burst will reach — then bursts, costing a
-heart if the player is inside `blast`. The dash's shove still moves it, which
-is the answer to one. Shot before it bursts, it dies like any fish. A burst is
-not a kill: no gems, no boost and nothing counted toward one, and a glowing
-puffer that bursts takes its batch's mod with it. In one sentence: when it
-swells, shoot it or get out of its ring.
+**Fuse** — chase, swell, burst, chase again (`fuseStep()`, D106 (the puffer
+bursts and comes on again)). Once it has chased for `chase` seconds — since it
+arrived, or since its last burst — within `trigger` of the player and wholly
+inside the view, it stops and swells for `time` seconds — the tell: it puffs
+up and draws the ring its burst will reach — then bursts, costing a heart if
+the player is inside `blast`, and chases on. The dash's shove still moves it,
+which is the answer to one. It outlives every burst, so only killing it ends
+it, and pays like any fish; a burst pays nothing. In one sentence: when it
+swells, get out of its ring — and kill it before it comes back.
 
 **Weave** — chase, swaying (`weaveStep()`). It swims at the player like a
 chaser while swaying across its heading, `width` px either side at `rate`
@@ -140,10 +141,13 @@ at its prey.
 
 ## puffer
 
-Swims at you, swells, and bursts (D95 (three enemy behaviours, and one way
-to be hurt)): the draft's "exploding after a short time". It gives a batch a
-fish that must die first, and makes standing your ground in a crowd cost. Only
-a fish you shoot pays, so a burst is gems and a mod thrown away.
+Swims at you, stops for a moment, bursts, and comes on again (D95 (three
+enemy behaviours, and one way to be hurt), D106 (the puffer bursts and comes
+on again)): the draft's "exploding after a short time". Igor's shape: "chases,
+stops for a brief moment, explodes quickly, continues chasing". It gives a
+batch a fish that must die first, and makes standing your ground in a crowd
+cost; waiting one out no longer clears it. Every number is Claude's pick, S6
+(balance)'s to tune.
 
 ## eel
 

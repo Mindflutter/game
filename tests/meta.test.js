@@ -382,6 +382,7 @@ describe('the save (D70)', () => {
     a.placeEnemy('archer', a.player.x + 200, a.player.y);
     a.placeEnemy('puffer', a.player.x - 80, a.player.y);
     a.enemies[0].phaseTime = 2;                  // the archer spits on the first tick
+    a.enemies[1].phaseTime = a.enemyType('puffer').fuse.chase;   // the puffer lights at once
     for (let i = 0; i < 30; i++) a.update(a.FIXED_DT);
     expect(a.bullets.some(b => b.evil)).toBe(true);
     expect(a.enemies[1].phase).toBe('fuse');
