@@ -6,6 +6,14 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**New game, behind a warning** (D103 (new game erases the save, after a
+warning))
+The title's last row, New game, opens a warning in red — what it erases:
+gems, gear, attributes, micro-tasks, depth, and any dive in progress — with
+Cancel marked, so Enter and Esc erase nothing. Erase everything and start
+writes a fresh save and opens `home`. It brings forward the New game D90
+(Continue goes straight back in) left to S7 (alpha polish).
+
 **The URL flags `&immortal` and `&damage` are gone** (D102 (the debug mode))
 Igor: "yes, remove redundant". The debug mode's rows do their job, and the
 tests and the bot set immortality and the damage override directly. The

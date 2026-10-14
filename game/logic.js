@@ -473,6 +473,16 @@ function openMenu(name) {
   menuIndex = 0;
 }
 
+// A new game (D103): what persists and any dive under way, gone for good --
+// the save written fresh, which is what clearing it means here -- then
+// `home`, as on a first launch.
+function newGame() {
+  meta = freshMeta();
+  diveLive = false;
+  saveNow();
+  openMenu('home');
+}
+
 // ---------- the debug mode ----------
 // `?debug` (D102) opens its setup screen in place of the title, on a fresh
 // meta and muted until M: main.js reads no save for it, and `saveNow()` writes

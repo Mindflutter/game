@@ -90,7 +90,7 @@ let sinceBoost = 0;
 
 // Which screen we're on: one variable, so there is exactly one answer at a time.
 // 'title' | 'home' | 'gear' | 'attributes' | 'playing' | 'mods' | 'paused' |
-// 'help' | 'options' | 'dead' | 'won' | 'debug'
+// 'help' | 'options' | 'dead' | 'won' | 'newGame' | 'debug'
 let screen = 'title';
 let menuIndex = 0;          // cursor in whichever menu is up
 let choiceIndex = 0;        // the marked card at a layer end (D85)

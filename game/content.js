@@ -657,6 +657,24 @@ const MENUS = {
         run: () => { if (diveLive) screen = resumeTo; else openMenu('home'); } },
       { label: 'Help',    run: () => openScreen('help') },
       { label: 'Options', run: () => openScreen('options') },
+      // Last, away from the cursor, and behind a warning (D103).
+      { label: 'New game', run: () => openMenu('newGame') },
+    ],
+  },
+  // A new game erases the save for good, so it says so first, in red, and
+  // Cancel is the row a stray Enter takes (D103).
+  newGame: {
+    heading: 'NEW GAME',
+    get sub() {
+      return 'This erases your save for good: gems, gear, attributes, micro-tasks and depth' +
+             (diveLive ? ', and the dive in progress.' : '.');
+    },
+    warn: true,
+    top: MENU_TOP,
+    back: () => openMenu('title'),
+    items: [
+      { label: 'Cancel', run: () => openMenu('title') },
+      { label: 'Erase everything and start', run: () => newGame() },
     ],
   },
   dead: END_MENU,

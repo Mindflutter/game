@@ -3307,3 +3307,29 @@ what it cannot name and holding every value in range; R replaying the same
 dive and doing nothing outside the debug mode; every way out leading to the
 setup; the rows built from the tables, and moved by keys and clicks.
 `checks.js` — the setup's grid ends above the hint.
+
+## D103 — New game erases the save, after a warning · 2026-10-14
+Igor: "add the ability to clear cache and start a new game with a warning -
+this applies to main game screen". D90 (Continue goes straight back in) had
+left a New game beside Continue to S7 (alpha polish), as a way to abandon a
+saved dive; this brings it forward as a fresh start.
+
+**Decided, by Igor.** The title offers a new game, which clears the save and
+starts over, and warns before it does.
+
+**Claude's picks**, open to Igor:
+- **New game is the title's last row**, always there, away from where the
+  cursor starts.
+- **Its screen says what goes** — gems, gear, attributes, micro-tasks and
+  depth, and the dive in progress if there is one — in red, and offers Cancel,
+  marked, and Erase everything and start. Esc and a stray Enter cancel.
+- **Confirming writes a fresh save**, which is what clearing it means here:
+  the platform keeps one save, so the seam needs no new name. `home` follows,
+  as on a first launch.
+- A save once refused and kept aside stays aside: the one copy the game
+  promises never to lose.
+
+**Guarded by**: `tests/meta.test.js` — New game the title's last row, asking
+first with Cancel marked; Enter and Esc erasing nothing, the save on disk
+unchanged; confirming leaving a fresh meta, no dive, `home`, the title back to
+Start, and a save that loads fresh. `checks.js` — its rows above the hint.

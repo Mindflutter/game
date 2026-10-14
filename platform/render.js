@@ -527,7 +527,7 @@ function drawMenu(menu) {
   ctx.shadowBlur = 0;
 
   if (menu.sub) {
-    ctx.fillStyle = '#456b78';
+    ctx.fillStyle = menu.warn ? '#ff5c85' : '#456b78';   // a warning reads red (D103)
     ctx.font = '15px system-ui, sans-serif';
     ctx.fillText(menu.sub, ARENA_W / 2, 276);
   }
@@ -709,7 +709,7 @@ function draw() {
 
   if (screen === 'title')        { drawMenu(MENUS.title); drawSaveError(); }
   else if (screen === 'home')    drawHome();
-  else if (screen === 'gear' || screen === 'attributes') drawMenu(MENUS[screen]);
+  else if (screen === 'gear' || screen === 'attributes' || screen === 'newGame') drawMenu(MENUS[screen]);
   else if (screen === 'help')    drawHelp();
   else if (screen === 'options') drawOptions();
   else if (screen === 'debug')   drawDebug();

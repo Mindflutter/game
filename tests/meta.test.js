@@ -856,3 +856,56 @@ describe('enemies placed by hand (D37)', () => {
     expect(g.meta.tasks).toEqual({});
   });
 });
+
+describe('a new game (D103)', () => {
+  // A player with something to lose -- gems, gear, a point, a layer cleared --
+  // back on the title in the middle of a dive, all of it saved.
+  function invested() {
+    const g = loadGame();
+    Object.assign(g.meta, { bank: 300, gear: { Mask: 2 }, spent: { Heart: 1 },
+                            tasks: { 0: { untouched: 1 } }, cleared: 1, deepest: 4000 });
+    g.reset(5);
+    g.saveNow();
+    g.openMenu('title');
+    return g;
+  }
+  const press = (g, code) => { g.justPressed.add(code); g.update(g.FIXED_DT); };
+  const newGame = g => g.MENUS.title.items.at(-1);
+
+  it("is the title's last row, and asks first, Cancel marked", () => {
+    const g = invested();
+    expect(newGame(g).label).toBe('New game');
+    newGame(g).run();
+    expect(g.screen).toBe('newGame');
+    expect(g.MENUS.newGame.items[0].label).toBe('Cancel');
+  });
+
+  it('erases nothing on a stray Enter, nor on Esc', () => {
+    const g = invested();
+    const kept = JSON.stringify(g.meta), disk = g.saved;
+    newGame(g).run();
+    press(g, 'Enter');
+    expect(g.screen).toBe('title');
+    newGame(g).run();
+    press(g, 'Escape');
+    expect(g.screen).toBe('title');
+    expect(JSON.stringify(g.meta)).toBe(kept);
+    expect(g.diveLive).toBe(true);
+    expect(g.saved).toBe(disk);
+  });
+
+  it('erases everything once confirmed -- what persists, the dive and the save -- and starts at home', () => {
+    const g = invested();
+    newGame(g).run();
+    g.MENUS.newGame.items[1].run();
+    expect(g.screen).toBe('home');
+    expect(g.meta).toEqual(g.freshMeta());
+    expect(g.diveLive).toBe(false);
+    const reloaded = loadGame();
+    expect(reloaded.loadSave(g.saved)).toBe('');
+    expect(reloaded.meta).toEqual(reloaded.freshMeta());
+    expect(reloaded.diveLive).toBe(false);
+    g.openMenu('title');
+    expect(g.MENUS.title.items[0].label).toBe('Start');
+  });
+});

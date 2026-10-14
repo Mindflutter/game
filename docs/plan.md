@@ -94,10 +94,7 @@ the player)).
 
 **Work:** Game feel. Sound. Assets **only if** the condition is hit —
 indistinguishable enemies, indistinguishable layers, or visual clumsiness.
-UX fixing, the first item Igor's, 2026-10-12: "no new game, just continue -
-leave that for ux fixing, pick a later stage that fits most" — with a dive
-saved, the title offers only Continue, and a New game beside it would abandon
-that dive (D90 (Continue goes straight back in)).
+UX fixing.
 D35's `+N` popup over collected gems is feel, and waits here, unbuilt (D78
 (gems are pulled to the player)).
 
