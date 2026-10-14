@@ -397,23 +397,16 @@ function drawField() {
   ctx.restore();
 
   // --- HUD ---
-  ctx.fillStyle = '#7fb0c0';
-  ctx.font = '14px system-ui, sans-serif';
+  const STATUS_STEP = 20;
+  // The status bar: its lines are game/'s, their rows derived from the count.
+  // The sound's state rides on the first, since only the platform knows it.
   ctx.textAlign = 'left';
-  ctx.fillText('HP ' + player.hp + '/' + player.maxHp +
-               '   BATCH ' + batchIndex + '   GEMS ' + currency + '   ' +
-               elapsed.toFixed(1) + 's   ' + kills + ' killed' +
-               audioStatus(), 16, 30);
-
-  // The development readout (D52): what the character actually is, right now.
-  // Built from PLAYER_STATS, so adding a stat is a line in content.js and the
-  // rows below shift on their own rather than needing a new hardcoded y.
-  ctx.fillStyle = '#4d7a8a';
-  ctx.font = '13px system-ui, sans-serif';
-  // The boosts running, with their seconds left, ride on the end of it (D86).
-  ctx.fillText(PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') +
-               boosts.map(b => '   ' + b.name + ' ' + b.left.toFixed(1) + 's').join(''),
-               16, 50);
+  const status = statusLines();
+  status.forEach((line, i) => {
+    ctx.fillStyle = line.color;
+    ctx.font = (line.bold ? 'bold 15px' : line.small ? '13px' : '14px') + ' system-ui, sans-serif';
+    ctx.fillText(line.text + (i === 0 ? audioStatus() : ''), 16, 30 + i * STATUS_STEP);
+  });
 
   // The layer's name, while the current carries you into it (D72) -- derived:
   // the next batch is a layer's first and has not arrived. PLACEHOLDER
@@ -451,7 +444,7 @@ function drawField() {
     ctx.fillText('fps ' + Math.round(fps) + '    enemies ' + enemies.length +
                  '   shots ' + bullets.length + '   gems ' + gems.length +
                  '   drops ' + drops.length +
-                 '   sparks ' + particles.length, 16, 70);
+                 '   sparks ' + particles.length, 16, 30 + status.length * STATUS_STEP);
   }
 
   // A debug dive says so, with its setup and its two keys (D102), where a

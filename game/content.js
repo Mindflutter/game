@@ -160,10 +160,10 @@ const MODS = [
 // can be taken back when the time runs out -- and for the same reason a boost
 // never moves `hp`.
 const BOOSTS = [
-  { name: 'Rush',   desc: 'you swim much faster, for a moment',  time: 5, add: { speed: 200 } },
-  { name: 'Frenzy', desc: 'you fire much faster, for a moment',  time: 5, add: { fireRate: 3 } },
-  { name: 'Lance',  desc: 'your shots go through, for a moment', time: 5, add: { pierce: 4 } },
-  { name: 'Bloom',  desc: 'your shots swell, for a moment',      time: 6, add: { shotRadius: 6 } },
+  { name: 'Rush',   desc: 'you swim much faster',  time: 5, add: { speed: 200 } },
+  { name: 'Frenzy', desc: 'you fire much faster',  time: 5, add: { fireRate: 3 } },
+  { name: 'Lance',  desc: 'your shots go through', time: 5, add: { pierce: 4 } },
+  { name: 'Bloom',  desc: 'your shots swell',      time: 6, add: { shotRadius: 6 } },
 ];
 
 // ---------- gear, attributes, micro-tasks ----------
@@ -263,6 +263,37 @@ const PLAYER_STATS = [
   { stat: 'iframes',      label: 'ifr',     read: p => p.iframes.toFixed(2) + 's' },
   { stat: 'mendOnClear',  label: 'mend',    read: p => p.mendOnClear },
 ];
+
+// ---------- the status bar ----------
+// Everything a diver needs to read mid-fight, one line per kind, top-down: the
+// body and the kit, where in the abyss, the mods and boosts, the layer's
+// micro-tasks -- then the development readout, dimmed. The renderer draws
+// each line at its own colour and weight, one row per entry, so a line added
+// here moves the rest down on its own.
+// The batch shown is the one being fought, or between gates the one ahead.
+const statusEntry = () => plan[Math.max(0, enemies.length ? batchIndex - 1 : batchIndex)] || plan.at(-1);
+function statusLines() {
+  const entry = statusEntry(), layer = plan.filter(e => e.layer === entry.layer);
+  const mods = Object.entries(modCounts).map(([name, n]) => name + ' ×' + n);
+  return [
+    { bold: true, color: '#d8f6ff',
+      text: 'HP ' + player.hp + '/' + player.maxHp +
+            (player.guard ? '   GUARD ' + guardLeft + '/' + player.guard : '') +
+            '   GEMS ' + currency + '   ' + weaponName + ' tier ' + (meta.gear[weaponName] || 0) },
+    { color: '#9ef7ff',
+      text: LAYERS[entry.layer].name + '   batch ' + (layer.indexOf(entry) + 1) + '/' + layer.length +
+            (enemies.length ? '   ' + enemies.length + ' fish left' : '') +
+            '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed' },
+    { color: '#ffe9a8',
+      text: 'mods ' + (mods.join('  ') || 'none') +
+            boosts.map(b => '   ' + b.name + ' ' + b.left.toFixed(1) + 's').join('') },
+    { color: '#a8ffd8',
+      text: 'tasks ' + TASKS.map(t => t.name + (meta.tasks[entry.layer]?.[t.name] ? ' ✓' : ' –')).join('   ') },
+    // The development readout (D52): what the character actually is, right now.
+    { color: '#4d7a8a', small: true,
+      text: PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') },
+  ];
+}
 
 // Menu and options rows: one full-width band per entry, anchored on the text
 // baseline the renderer draws at, so the mouse can hit a row anywhere along it
@@ -736,10 +767,10 @@ const MENUS = {
       // then every piece of equipment's tier.
       ...WEAPONS.map(w => ({
         get label() {
-          if (meta.carried === w.name) return w.name + '   carried   ' + tierLabel(w);
+          if (meta.carried === w.name) return w.name + '   equipped   ' + tierLabel(w);
           return w.name + (meta.owned.includes(w.name)
-            ? '   tier ' + (meta.gear[w.name] || 0) + '   carry it'
-            : '   own it   ' + w.cost + ' gems' + needs(w));
+            ? '   tier ' + (meta.gear[w.name] || 0) + '   equip'
+            : '   buy & equip   ' + w.cost + ' gems' + needs(w));
         },
         get dim() {
           return meta.carried === w.name ? !canBuy(w) : !meta.owned.includes(w.name) && !canOwn(w);

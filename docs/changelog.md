@@ -6,6 +6,20 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**The status bar shows everything; two wordings fixed** (Igor's notes from
+playing S5 (content))
+The bar over a dive grows from one line to five, each its own colour: hp, the
+suit's guard, gems and the weapon carried with its tier, in bold; the layer,
+the batch within it, the fish left, time and kills; the mods held and the
+boosts running; the layer's micro-tasks; then the development readout (D52
+(the development readout)), dimmed. Its text is built in `game/`
+(`statusLines()`), so it ports and a check reads it. A weapon's row on the
+Gear screen says *buy & equip*, *equip* and *equipped* in place of *own it*,
+*carry it* and *carried* — what each does is unchanged (D97 (weapons are
+owned, and one is carried)). The boosts' lines lose ", for a moment" — cut,
+not replaced with the seconds: Claude's pick, since the bar now shows each
+boost's seconds left.
+
 **S5 (content) closes** (D93–D103)
 Igor: "close s5". Its definition of done, met: the counts — five behaviours,
 three weapons, three pieces of equipment, three layers with pools of their

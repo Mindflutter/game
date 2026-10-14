@@ -13,10 +13,10 @@ end's pick, its **Boosts** paragraph.
 
 | name | desc | time | adds |
 |---|---|---|---|
-| Rush | you swim much faster, for a moment | 5 | speed +200 |
-| Frenzy | you fire much faster, for a moment | 5 | fireRate +3 |
-| Lance | your shots go through, for a moment | 5 | pierce +4 |
-| Bloom | your shots swell, for a moment | 6 | shotRadius +6 |
+| Rush | you swim much faster | 5 | speed +200 |
+| Frenzy | you fire much faster | 5 | fireRate +3 |
+| Lance | your shots go through | 5 | pierce +4 |
+| Bloom | your shots swell | 6 | shotRadius +6 |
 
 **adds** is read straight off `add`. Every number is Claude's pick, S6
 (balance)'s to tune.

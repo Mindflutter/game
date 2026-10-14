@@ -376,25 +376,6 @@ discussed.
   port; the drawing does not, and the canvas gets no investment (D17 (the
   browser build is a throwaway prototype)), so how much is built here is part
   of the question. **Home**: S7 (alpha polish)'s UX fixing.
-- **"Buy & equip".** "'carry it, own it' wording is just bad. simply 'buy &
-  equip' do the job". Owning and carrying stay as D97 (weapons are owned, and
-  one is carried) has them; the rows' words change. Open: what an owned
-  weapon's row and the carried one's tier row say. **Home**: before S6 (balance) —
-  proposed for S5 (content), which closed first.
-- **No "for a moment".** "'for a moment' wording is just bad and excessive. no
-  useful info for the player." It ends all four boosts' lines, read as each is
-  picked up. Open: cut it, or say the seconds. **Home**: before S6 (balance) —
-  proposed for S5 (content), which closed first.
-- **Everything on the status bar.** "missing info for the status bar during
-  dive, make sure to add everything. make it more readable with bold, italic or
-  colors - dont care how exactly". It shows hp, the batch counted from the
-  dive's top, gems, time and kills, and under them the development readout (D52
-  (the development readout)) with the boosts running. Missing: the layer (named
-  only as you enter it), the batch within it and the fish left, the weapon and
-  its tier, the guard left (a ring only), the mods held (on the layer end's
-  cards only) and the layer's micro-tasks (at `home` only). How it looks is
-  Claude's. **Home**: before S6 (balance) — proposed for S5 (content), which
-  closed first; its new pieces are judged by what the bar shows.
 - **Home from the pause menu.** "ability to go home from pause". `home` exists
   only between dives (D76 (`home` exists only between dives)), so this ends the
   dive, its gems banked as at any end (D67 (currency is kept on death)). Kin to
@@ -460,8 +441,9 @@ discussed.
   or shells found separately. what is "something extra" then? just cosmetic
   stuff like a badge or a look? gear+ items like carrying a single bomb? being
   stroger against certain enemy type? this comment is a big discussion with a
-  lot of unknowns." Two parts. **What a player sees**: no task shows until it
-  pays. **What a task pays** reopens D36 (attributes) and D98 (attributes,
+  lot of unknowns." Two parts. **What a player sees**: the status bar names
+  the layer's tasks, ✓ once paid, but by name alone — what each asks shows
+  only on the line that says it paid. **What a task pays** reopens D36 (attributes) and D98 (attributes,
   micro-tasks and what gear requires), and meets `foundations.md` at several
   points. Points bought with gems undo the genre contract's fourth point —
   "money cannot buy them … That non-fungibility is the entire reason the tier
@@ -469,9 +451,9 @@ discussed.
   dropped by kills, they can be farmed, which the glossary's cap at the source
   stops; found apart from the fight, they are the gathering the sixth point
   rules out. A bonus against one kind of fish sits beside a non-goal, elemental
-  weaknesses and resistances. **Home**: what a player sees, with the status
-  bar; what a task pays, a design pass of its own before S6 (balance), which
-  measures the economy it settles.
+  weaknesses and resistances. **Home**: what a task asks, where a player can
+  read it — with the hints, above; what a task pays, a design pass of its own
+  before S6 (balance), which measures the economy it settles.
 
 ## Suggested but not yet discussed
 

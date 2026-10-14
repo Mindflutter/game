@@ -14,10 +14,11 @@ the Harpoon and the Knife, three pieces of equipment, Heart and Strength, swift
 and footwork, Barbs and three boosts, three layers (D93–D103), built to the
 `abyss-content` skill and `specs/2026-10-13-s5-content-design.md`; then, from
 Igor playing it, the debug mode (root `README.md` → Debug mode) and New game.
-Every design call in it is Claude's, delegated, and open. **Next: Igor's word
-on what opens** — S6 (balance), or first the notes from playing S5 (content)
-proposed for before it: entity sizes, what micro-tasks pay, the Knife's own
-behaviour, the puffer as a threat, the status bar, two wordings (`ideas.md` →
+Every design call in it is Claude's, delegated, and open. **Next**, before
+S6 (balance), the notes from playing S5 (content) that move the numbers it
+tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
+status bar and the two wordings. Next: entity sizes, then the Knife's own
+behaviour and the puffer as a threat, then what micro-tasks pay (`ideas.md` →
 Open — from playing S5 (content)). Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,

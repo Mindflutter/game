@@ -909,3 +909,34 @@ describe('a new game (D103)', () => {
     expect(g.MENUS.title.items[0].label).toBe('Start');
   });
 });
+
+describe('the status bar', () => {
+  const text = g => g.statusLines().map(l => l.text).join('\n');
+
+  it('names the layer, the batch within it and the fish left, while fighting and between gates', () => {
+    const k = atGate(0).plan.findIndex(e => e.layer === 1);
+    const g = atGate(k);
+    const inLayer = g.plan.filter(e => e.layer === 1).length;
+    expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);   // the one ahead
+    expect(text(g)).not.toContain('fish left');
+    ride(g);
+    expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);   // the one fought
+    expect(text(g)).toContain(g.enemies.length + ' fish left');
+  });
+
+  it('shows the weapon and its tier, the guard left, the mods held and the layer\'s tasks', () => {
+    const g = loadGame();
+    g.meta.gear.Gun = 2;
+    g.meta.tasks[0] = { swift: 1 };
+    g.reset(1);
+    g.player.guard = 2;
+    g.guardLeft = 1;
+    g.modCounts = { Impact: 2 };
+    const t = text(g);
+    expect(t).toContain('Gun tier 2');
+    expect(t).toContain('GUARD 1/2');
+    expect(t).toContain('Impact ×2');
+    expect(t).toContain('swift ✓');
+    expect(t).toContain('untouched –');
+  });
+});
