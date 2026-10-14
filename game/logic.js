@@ -223,6 +223,33 @@ function burst(x, y, color, glow, count, speed, life = 0.45) {
   }
 }
 
+// The Knife's cut (D105): everything in the arc toward (ux, uy) at once, no
+// shot. A fish counts if its body reaches into the blade's sweep -- out to
+// `range` plus the blade's own `shotRadius`, and past the arc's edge by as
+// much. Nearest first, pierce + 1 at most. Runs once per pull, so it has no
+// per-tick loop to keep squared.
+function swing(ux, uy) {
+  const half = player.swing.arc * Math.PI / 360;
+  const cut = enemies.filter(e => {
+    if (e.gone) return false;
+    const dx = e.x - player.x, dy = e.y - player.y, d = Math.hypot(dx, dy);
+    const body = e.r + player.shotRadius;
+    if (d > player.range + body) return false;
+    const off = Math.acos(Math.max(-1, Math.min(1, (dx * ux + dy * uy) / (d || 1))));
+    return d <= body || off <= half + Math.asin(Math.min(1, body / d));
+  }).sort((a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y))
+    .slice(0, player.pierce + 1);
+  for (const e of cut) {
+    e.hp -= player.damage;
+    e.flash = 0.07;
+    hitSparks(e, { vx: ux, vy: uy });
+    if (e.hp <= 0) killEnemy(e);
+  }
+  player.swingLeft = player.swing.time;      // what the renderer draws
+  player.swingX = ux;
+  player.swingY = uy;
+}
+
 // Sparks kicked back along the shot, so a hit that doesn't kill still looks
 // like it landed.
 function hitSparks(e, b) {
@@ -932,6 +959,7 @@ function step(dt) {
   // clamped at zero rather than run negative, so holding the button gives an
   // honest rate while the *first* click is always instant.
   player.fireTimer = Math.max(player.fireTimer - dt, 0);
+  if (player.swingLeft > 0) player.swingLeft -= dt;
   if (player.fireTimer <= 0 && fireArmed && CLICK.some(c => keys.has(c))) {
     const tx = aim.x - player.x;
     // `aim` is in the view (platform's job, D22); the world sits `cameraY`
@@ -941,7 +969,8 @@ function step(dt) {
     // and cards hit-test it in view space.
     const ty = aim.y + cameraY - player.y;
     const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
-    bullets.push({
+    if (player.swing) swing(tx / d, ty / d);
+    else bullets.push({
       id: ++bulletId,
       x: player.x, y: player.y, r: player.shotRadius,
       vx: (tx / d) * player.shotSpeed,

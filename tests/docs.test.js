@@ -227,6 +227,13 @@ describe('the entity docs', () => {
 
   it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
     for (const t of gear(g.WEAPONS)) expectIn(doc('weapons.md'), t);
+    // A table per behaviour field -- `swing`, ... -- as the enemies have.
+    for (const f of keysOf(g.WEAPONS).filter(k => k !== 'tiers' && k !== 'requires' &&
+                                               g.WEAPONS.some(w => typeof w[k] === 'object'))) {
+      const have = g.WEAPONS.filter(w => w[f]);
+      const sub = keysOf(have.map(w => w[f]));
+      expectIn(doc('weapons.md'), table(['name', ...sub], have.map(w => [w.name, ...sub.map(k => w[f][k])])));
+    }
     for (const t of gear(g.EQUIPMENT)) expectIn(doc('equipment.md'), t);
   });
 

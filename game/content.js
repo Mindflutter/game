@@ -193,10 +193,12 @@ const WEAPONS = [
     tiers: [{ cost: 80,  apply: p => p.damage += 1 },
             { cost: 160, apply: p => p.fireRate += 0.2 },
             { cost: 300, apply: p => p.pierce += 1 }] },
-  // Melee, tried as data first (D83): a very short, wide shot that passes
-  // through everything in its arc -- a slash.
-  { name: 'Knife', fireRate: 3, damage: 2, range: 46, shotSpeed: 520, shotRadius: 18, pierce: 6,
-    cost: 100,
+  // Melee (D105): `swing` makes it a blade, not a shot. Each pull cuts at once
+  // through the arc toward the cursor -- `arc` degrees wide, drawn for `time`
+  // seconds -- out to `range` plus the blade's `shotRadius`, as far as a shot
+  // that size would touch; `pierce` caps it at pierce + 1 fish, nearest first.
+  { name: 'Knife', fireRate: 3, damage: 2, range: 56, shotRadius: 18, pierce: 6,
+    swing: { arc: 120, time: 0.15 }, cost: 100,
     tiers: [{ cost: 60,  apply: p => p.range += 12 },
             { cost: 140, apply: p => p.damage += 1 },
             { cost: 260, apply: p => p.fireRate += 0.75 }] },
@@ -872,7 +874,7 @@ const OPTIONS = [
 const HELP_KEYS = [
   ['Move',           'W A S D   or   arrow keys'],
   ['Aim',            'mouse'],
-  ['Shoot',          'hold left mouse button'],
+  ['Shoot or swing', 'hold left mouse button'],
   ['Dash',           'Space'],
   ['Choose a mod',   'arrows, click or 1 2 3,  then Enter or Continue'],
   ['Mute sound',     'M'],
@@ -881,7 +883,7 @@ const HELP_KEYS = [
 ];
 
 const HELP_BLURB = [
-  'Hold the left mouse button to shoot, along whatever you point at.',
+  'Hold the left mouse button to shoot along whatever you point at; the Knife swings there.',
   'Shots die at the edge of the ring, so range is a real range.',
   'Space dashes: you pass through the swarm unharmed, and shove it aside.',
   'One batch at a time; clear it and the current takes you down to the next.',

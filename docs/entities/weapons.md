@@ -19,7 +19,7 @@ readout see them like any other stat, and everything adds, nothing multiplies
 |---|---|---|---|---|---|---|---|---|
 | Gun | 2.5 | 1 | 250 | 430 | 4 | 0 | 0 | fireRate 4 |
 | Harpoon | 0.8 | 3 | 420 | 950 | 3 | 2 | 150 | fireRate 1, damage 4, pierce 3 |
-| Knife | 3 | 2 | 46 | 520 | 18 | 6 | 100 | fireRate 3.75, damage 3, range 58 |
+| Knife | 3 | 2 | 56 | — | 18 | 6 | 100 | fireRate 3.75, damage 3, range 68 |
 
 Each weapon's tiers, in the order they are bought:
 
@@ -35,6 +35,13 @@ Each weapon's tiers, in the order they are bought:
 | Knife | 2 | 140 | damage +1 |
 | Knife | 3 | 260 | fireRate +0.75 |
 
+The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,
+in degrees and seconds.
+
+| name | arc | time |
+|---|---|---|
+| Knife | 120 | 0.15 |
+
 **at top** is the weapon with every tier bought; **adds** is what one tier
 adds. Both are worked out from the tiers' `apply` by the check.
 
@@ -45,20 +52,21 @@ adds. Both are worked out from the tiers' `apply` by the check.
 | `name` | — | The key. The save keeps the tiers owned by it, so renaming one orphans what players own. |
 | `fireRate` | shots/s | Holding the button fires at this rate; the first click after a pause is instant. |
 | `damage` | hp | Taken off an enemy's `hp` per hit. |
-| `range` | px | A shot that hits nothing dies after flying this far — a real range (D8 (the weapon has a bounded firing range)). |
-| `shotSpeed` | px/s | How fast a shot flies. Each shot carries its own speed, and its range is counted at it; shots are swept, so no speed tunnels through an enemy (D53 (fixed timestep, and bullets sweep too)). |
-| `shotRadius` | px | The shot's hitbox: a hit is the shot's radius plus the enemy's. |
-| `pierce` | enemies | Extra enemies a shot passes through. One shot hits any enemy at most once. |
+| `range` | px | A shot that hits nothing dies after flying this far — a real range (D8 (the weapon has a bounded firing range)). A swing's blade reaches this far from the diver's centre. |
+| `shotSpeed` | px/s | How fast a shot flies; a swinging weapon has none. Each shot carries its own speed, and its range is counted at it; shots are swept, so no speed tunnels through an enemy (D53 (fixed timestep, and bullets sweep too)). |
+| `shotRadius` | px | The shot's hitbox: a hit is the shot's radius plus the enemy's. A swing's blade is as wide, past `range` and past the arc's edges. |
+| `pierce` | enemies | Extra enemies a shot passes through. One shot hits any enemy at most once. A swing cuts `pierce` + 1 at most, nearest first. |
+| `swing` | — | Its presence is the behaviour: the weapon cuts instead of shooting (D105 (the Knife swings)). Each pull hits every fish whose body reaches into an arc toward the cursor, `arc` degrees wide, at once; the arc is drawn for `time` seconds. No shot, so nothing to miss with or to fly on. |
 | `tiers` | — | Three or four upgrades, each `{ cost, apply }`: the gems it costs, and what it adds to the player, `p => …`. Each tier may add something different (D83 (the weapon record)). |
 | `cost` | gems | What owning the weapon costs at `home`; 0 owns it from the start (D97 (weapons are owned, and one is carried)). Owned, it is carried for nothing, and the one carried raises its tiers. |
 | `requires` | — | `{ attribute: points }`: the points that must be spent on an attribute before the weapon can be owned (D36 (attributes), D98 (attributes, micro-tasks and what gear requires)) — "heavy gun needs strength 5". Unmet, its row is dim and says what it needs. Scheduling, not scaling. |
 
-Every field is a number every weapon has, so diversity is data: a railgun is a
-fast, piercing shot, a slow heavy one is slow and hits hard, and melee is first
-tried as a very short, wide, piercing shot — a jab. A weapon gets a behaviour
-of its own — a spray of several shots, a real swing — only when its numbers
+Diversity is data: a railgun is a fast, piercing shot, a slow heavy one is
+slow and hits hard. A weapon gets a behaviour of its own only when its numbers
 cannot say it: a field whose presence switches it on, as with the enemies
-(D83 (the weapon record)).
+(D83 (the weapon record)). The Knife's `swing` is the first — melee tried as a
+very short, wide shot read as short range, not melee (D105 (the Knife
+swings)).
 
 ## Gun
 
@@ -83,14 +91,12 @@ number is Claude's pick, S6 (balance)'s to tune.
 
 ## Knife
 
-Melee, tried as data first (D83 (the weapon record)): a very short, wide shot
-that passes through everything in its arc — a slash that cuts a whole
-cluster at once. It trades the
-Gun's reach for closeness: you have to be where the fish are. It does not read
-as melee — Igor, 2026-10-14: "melee feels like a short range" — so by D83 (the
-weapon record) it needs a behaviour of its own; which one is open (`ideas.md` →
-Open — from playing S5 (content)). Its tiers add reach, then damage, then rate.
-Every number is Claude's pick, S6 (balance)'s to tune.
+Melee (D105 (the Knife swings)): no shot — each pull of the trigger cuts an arc
+toward the cursor, and every fish whose body reaches into it is hit at once,
+nearest first, up to its `pierce` + 1. It trades the Gun's reach for closeness:
+you have to be where the fish are, and a crowd is where it pays. Bloom widens
+the blade and Lance lets it cut more, as they do a shot. Its tiers add reach,
+then damage, then rate. Every number is Claude's pick, S6 (balance)'s to tune.
 
 ## Adding one
 

@@ -357,6 +357,20 @@ function drawField() {
     ctx.restore();
   }
 
+  // The Knife's cut (D105): the swept wedge, fading as `swingLeft` runs out.
+  // PLACEHOLDER GRAPHICS.
+  if (player.swingLeft > 0) {
+    const face = Math.atan2(player.swingY, player.swingX);
+    const half = player.swing.arc * Math.PI / 360;
+    const t = player.swingLeft / player.swing.time;
+    ctx.fillStyle = 'rgba(191, 252, 255, ' + (0.35 * t).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y);
+    ctx.arc(player.x, player.y, player.range + player.shotRadius, face - half, face + half);
+    ctx.closePath();
+    ctx.fill();
+  }
+
   // The wave the dash pushes ahead of it: an arc at the edge of its reach,
   // facing the way the dash is going, brightest at the start of the lunge.
   if (player.dashTime > 0) {

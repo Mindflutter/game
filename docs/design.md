@@ -213,6 +213,9 @@ cooldown is clamped at zero rather than allowed to run negative, so holding the
 button gives an honest `fireRate` while the first click after a pause is always
 instant. Every number of the shot — rate, damage, range, speed, hitbox,
 pierce — is the carried weapon's, on the player (D83): `entities/weapons.md`.
+A weapon with a `swing` fires no shot (D105): `swing()` cuts, at once, every
+fish whose body reaches into the arc toward the cursor, nearest first, and
+leaves `swingLeft` on the player for the renderer to draw the wedge.
 
 **Arrivals: the batch queue and the gate** (D27, D48, D54). Enemies come one
 **batch** at a time — a record naming counts per type — and nothing new arrives

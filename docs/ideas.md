@@ -393,14 +393,6 @@ discussed.
 
 **The stage's content**
 
-- **The Knife reads as short range, not melee.** "melee feels like a short
-  range. maybe make it an arc, like a swing". This answers D97 (weapons are
-  owned, and one is carried)'s "whether it reads as melee is Igor's call", and
-  D83 (the weapon record) already says what follows: melee gets a behaviour of
-  its own, in S5 (content). A swing would be a new kind of shot — a field on
-  the weapon record and a branch where shots hit. Open: what the behaviour is;
-  the swing is Igor's lean. **Home**: before S6 (balance), which measures
-  each weapon — proposed for S5 (content), which closed first.
 - **The puffer is easy to avoid, and it kills itself.** "the exploding enemy is
   really easy to avoid and it kills itself". Swelling, it stands still, so
   stepping out of the blast is easy, and the burst removes it — a batch of

@@ -6,6 +6,13 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**The Knife swings** (D105 (the Knife swings))
+No shot any more: each pull cuts an arc toward the cursor, 120° wide, and every
+fish whose body reaches into it is hit at once — nearest first, up to its
+pierce + 1. The wedge is drawn as it cuts. Its reach is 56 plus the blade's
+width, so Bloom lengthens it and Lance lets it cut more. The help says the Knife
+swings.
+
 **Bodies doubled** (D104 (bodies doubled))
 The diver and every fish are twice the radius — a drifter 18, the boss 84 —
 from Igor's note that everything is small. The field, speeds and ranges are

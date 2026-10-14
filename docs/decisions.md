@@ -3358,3 +3358,32 @@ they keep (`ideas.md` → Sprites and real art). Igor, asked how: "just go on".
 **Guarded by**: `tests/enemies.test.js` — every fish arrives wholly outside the
 view. The radii themselves are held by `tests/docs.test.js` against
 `entities/enemies.md` and `design.md`'s diver.
+
+## D105 — The Knife swings · 2026-10-14
+Igor, playing S5 (content): "melee feels like a short range. maybe make it an
+arc, like a swing". D83 (the weapon record) had tried melee as data first — a
+very short, wide shot — and said a weapon gets a behaviour of its own once its
+numbers cannot say it. Igor, offered the swing: "do the Knife as a swing".
+
+**Decided, by Igor.** The Knife swings: no shot; each pull cuts an arc toward
+the cursor and hits what is in it at once.
+
+**Claude's picks**, open to Igor:
+- **`swing` is a field whose presence is the behaviour**, as with the
+  enemies: `{ arc, time }` — the arc's width in degrees, and how long it is
+  drawn. 120° and 0.15s.
+- **The Knife's other numbers keep a meaning**, so every boost still does
+  something on it: `range` is the blade's reach from the diver's centre and
+  `shotRadius` its width — a fish counts if its body reaches into the sweep, as
+  far as a shot that size would touch — so Bloom lengthens the blade; `pierce`
+  caps a swing at `pierce` + 1 fish, nearest first, so Lance cuts more. Its
+  `shotSpeed` is gone: nothing flies.
+- **`range` 56**, from 46: with D104 (bodies doubled) the blade reaches as far
+  past the diver's body as the old shot did past the old one.
+- The wedge is drawn, fading; no sound of its own — the shot's, until S7
+  (alpha polish).
+
+**Guarded by**: `tests/meta.test.js` — no shot, every fish in the arc cut at
+once and none behind; a body reaching into the blade's edge cut, one past it
+not; pierce + 1 at most, nearest first; another swing only after the cooldown.
+`tests/docs.test.js` — the `swing` table against `entities/weapons.md`.

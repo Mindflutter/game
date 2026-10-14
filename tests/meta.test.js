@@ -644,22 +644,68 @@ describe('the weapons (D97)', () => {
     return g.bullets.find(b => !b.evil);
   };
 
-  it('the Knife slashes: one short, wide swing cuts a cluster and reaches no further', () => {
-    const g = loadGame();
+  // The Knife's swing (D105): fish at `dist` px from the diver at `deg`
+  // degrees off the aim, then one swing aimed straight right.
+  const swingAt = (g, fish) => {
     expect(g.applyScenario('knife', 1)).toBe(true);
-    expect(g.weaponName).toBe('Knife');
     g.queuePaused = true;
-    for (const dy of [-14, 0, 14]) g.placeEnemy('drifter', g.player.x + 50, g.player.y + dy);
-    g.placeEnemy('bulwark', g.player.x + 200, g.player.y);   // out of its reach
+    g.immortal = true;
+    for (const [name, dist, deg] of fish) {
+      const a = deg * Math.PI / 180;
+      g.placeEnemy(name, g.player.x + Math.cos(a) * dist, g.player.y + Math.sin(a) * dist);
+    }
+    for (const e of g.enemies) e.speed = 0;                 // held where placed
     g.update(g.FIXED_DT);
     g.aim.x = g.player.x + 400;
     g.aim.y = g.player.y - g.cameraY;
     g.keys.add('Mouse0');
     g.update(g.FIXED_DT);
     g.keys.delete('Mouse0');
-    for (let i = 0; i < 24; i++) g.update(g.FIXED_DT);
+    return g;
+  };
+  const knife = g => g.WEAPONS.find(w => w.name === 'Knife');
+
+  it('the Knife swings: no shot, and every fish in its arc is cut at once', () => {
+    const g = loadGame();
+    const half = knife(g).swing.arc / 2;
+    swingAt(g, [['drifter', 50, 0], ['drifter', 50, half - 5], ['drifter', 50, -(half - 5)],
+                ['drifter', 50, 180]]);                       // behind: untouched
+    expect(g.bullets.filter(b => !b.evil)).toEqual([]);
     expect(g.kills).toBe(3);
-    expect(g.enemies.map(e => [e.name, e.hp])).toEqual([['bulwark', g.enemyType('bulwark').hp]]);
+    expect(g.enemies.map(e => Math.round(e.x - g.player.x))).toEqual([-50]);
+  });
+
+  it('cuts a fish its body reaches into, and none further', () => {
+    const g = loadGame();
+    const w = knife(g), r = g.enemyType('drifter').r;
+    const reach = w.range + w.shotRadius + r;
+    swingAt(g, [['drifter', reach - 1, 0], ['drifter', reach + 1, 40]]);
+    expect(g.kills).toBe(1);
+    const h = loadGame();
+    swingAt(h, [['drifter', 60, w.swing.arc / 2 + 10]]);       // its body overlaps the edge
+    expect(h.kills).toBe(1);
+  });
+
+  it('cuts pierce + 1 fish at most, nearest first', () => {
+    const g = loadGame();
+    const n = knife(g).pierce + 1;
+    const fish = Array.from({ length: n + 2 }, (_, i) => ['drifter', 30 + i * 6, i % 2 ? 20 : -20]);
+    swingAt(g, fish);
+    expect(g.kills).toBe(n);
+    const left = g.enemies.map(e => Math.round(Math.hypot(e.x - g.player.x, e.y - g.player.y)));
+    expect(left.sort()).toEqual(fish.slice(n).map(f => f[1]));
+  });
+
+  it('swings again only after its cooldown', () => {
+    const g = loadGame();
+    swingAt(g, [['bulwark', 50, 0]]);
+    const hp = g.enemies[0].hp;
+    expect(hp).toBe(g.enemyType('bulwark').hp - g.player.damage);
+    g.keys.add('Mouse0');
+    for (let i = 0, n = Math.floor(1 / g.player.fireRate / g.FIXED_DT) - 2; i < n; i++) g.update(g.FIXED_DT);
+    expect(g.enemies[0].hp).toBe(hp);
+    for (let i = 0; i < 4; i++) g.update(g.FIXED_DT);
+    expect(g.enemies[0].hp).toBe(hp - g.player.damage);
   });
 
   it('the Harpoon waits for a point of Strength, and its row says so', () => {

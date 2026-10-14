@@ -17,8 +17,9 @@ Igor playing it, the debug mode (root `README.md` → Debug mode) and New game.
 Every design call in it is Claude's, delegated, and open. **Next**, before
 S6 (balance), the notes from playing S5 (content) that move the numbers it
 tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
-status bar, the two wordings and the sizes (D104 (bodies doubled)). Next: the
-Knife's own behaviour and the puffer as a threat, then what micro-tasks pay (`ideas.md` →
+status bar, the two wordings, the sizes (D104 (bodies doubled)) and the Knife's
+swing (D105 (the Knife swings)). Next: the puffer as a threat, then what
+micro-tasks pay (`ideas.md` →
 Open — from playing S5 (content)). Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
@@ -128,9 +129,10 @@ it names, and S6 (balance) measures afresh.
   Bot policy as ever (D50): Igor finds batches easy.
 - **Per weapon** (S5 (content), D97), mortal bot from the top through the
   `harpoon` and `knife` scenarios, seeds as above: the **Harpoon** clears 0 / 3
-  / 0 / 0 / 1 gates, the **Knife** 2 at every seed. A floor that says more
-  about the bot than the weapons: it backs away from the nearest fish, so a
-  46px slash lands only on what reaches it, and a shot a second and a bit is
+  / 0 / 0 / 1 gates, the **Knife** 2 at every seed — the Knife as a short
+  shot, before D105 (the Knife swings). A floor that says more about the bot
+  than the weapons: it backs away from the nearest fish, so a melee weapon
+  lands only on what reaches it, and a shot a second and a bit is
   overkill on the one-hit swarm the bot aims at first. S6 (balance) measures
   per weapon (`plan.md` → S6) and needs a bot that closes in for the Knife.
 - **Arrival timing** (D55): from a batch spawning, the first enemy reaches a
