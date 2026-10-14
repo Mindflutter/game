@@ -342,6 +342,17 @@ function drawField() {
   const blinking = player.hurt > 0 && player.dashTime <= 0 &&
                    Math.floor(player.hurt * 10) % 2 === 0;
   if (!blinking) circle(player.x, player.y, player.r, '#bffcff', '#4ff0ff', 25);
+  // Where the body faces (D107) -- where a dash from a standstill goes.
+  // PLACEHOLDER GRAPHICS.
+  if (!blinking) {
+    const fx = Math.cos(player.facing), fy = Math.sin(player.facing);
+    ctx.strokeStyle = '#0d3b47';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(player.x + fx * player.r * 0.2, player.y + fy * player.r * 0.2);
+    ctx.lineTo(player.x + fx * player.r * 0.9, player.y + fy * player.r * 0.9);
+    ctx.stroke();
+  }
 
   // The suit's guard (D100): a gold ring while it has a hit left to take this
   // batch. PLACEHOLDER GRAPHICS.

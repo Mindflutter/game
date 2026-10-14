@@ -13,7 +13,7 @@ function enemyType(name) {
 function makeEnemy(t, x, y, speed) {
   enemies.push({ name: t.name, x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
                  color: t.color, glow: t.glow, lastHitBy: 0,
-                 pushX: 0, pushY: 0,
+                 pushX: 0, pushY: 0, ramp: t.ramp, vx: 0, vy: 0,
                  // Every behaviour field the type has -- `lunge`, `spit`, ...
                  // -- whose presence is the behaviour (D26), so a new one costs
                  // nothing here. Then the step it is on and for how long, which
@@ -63,6 +63,16 @@ function placeEnemy(name, x, y) {
 function viewClamp(o) {
   return [Math.max(o.r, Math.min(ARENA_W - o.r, o.x)),
           Math.max(cameraY + o.r, Math.min(cameraY + ARENA_H - o.r, o.y))];
+}
+
+// Water (D107): a body's velocity closes on the one it wants by the same share
+// every tick -- RAMP_LEFT of a change still to go after `ramp` seconds -- so a
+// start eases up, a release glides and a reversal swings through. Math.pow
+// keeps it the same at any tick length. No ramp, no easing: it turns at once.
+function ease(b, wantX, wantY, ramp, dt) {
+  const k = ramp ? Math.pow(RAMP_LEFT, dt / ramp) : 0;
+  b.vx = wantX + (b.vx - wantX) * k;
+  b.vy = wantY + (b.vy - wantY) * k;
 }
 
 // ---------- the lunge ----------
@@ -916,21 +926,32 @@ function step(dt) {
   const len = Math.hypot(dx, dy);
   if (len > 0) { dx /= len; dy /= len; }
 
+  // The body turns toward the keys held, the shorter way round, `turn`
+  // seconds a half circle, and holds its facing when they are let go (D107).
+  if (len > 0) {
+    const want = Math.atan2(dy, dx) - player.facing;
+    const gap = Math.atan2(Math.sin(want), Math.cos(want));
+    const step = Math.PI / player.turn * dt;
+    const f = player.facing + Math.max(-step, Math.min(step, gap));
+    player.facing = Math.atan2(Math.sin(f), Math.cos(f));
+  }
+
   // --- the dash ---
-  // Only along the keys you are holding: the mouse is where you shoot, which
-  // is usually the direction you least want to travel in.
+  // Along the facing (D107): where you swim, or from a standstill where you
+  // last faced -- never the mouse, which is where you shoot, usually the way
+  // you least want to travel.
   if (player.dashCd > 0)  player.dashCd -= dt;
   if (player.dashEnd > 0) player.dashEnd -= dt;
   if (player.dashTime > 0) {
     player.dashTime -= dt;
     if (player.dashTime <= 0) player.dashEnd = DASH_END;   // the wave closing
   }
-  if (tapped(DASH) && player.dashCd <= 0 && len > 0) {
+  if (tapped(DASH) && player.dashCd <= 0) {
     player.dashTime = DASH_TIME;
     player.dashCd = player.dashCooldown;
     player.dashId = ++bulletId;          // one dash hits each enemy once
-    player.dashDx = dx;                  // dx/dy are already normalised
-    player.dashDy = dy;
+    player.dashDx = Math.cos(player.facing);
+    player.dashDy = Math.sin(player.facing);
     // Invulnerable for the dash plus a moment after, so finishing it inside
     // something you flew through doesn't cost an hp.
     player.hurt = Math.max(player.hurt, DASH_TIME + DASH_GRACE);
@@ -942,20 +963,29 @@ function step(dt) {
   // holding the opposite key reverses it (and the wave then faces the way you
   // came), and *releasing* the keys stops you dead while `dashTime` runs on:
   // free invulnerability for standing still.
+  // Out of it, the swim carries on along it at full swim speed (D107).
   const dashing = player.dashTime > 0;
-  const speed = dashing ? player.dashSpeed : player.speed;
-  const mx = dashing ? player.dashDx : dx;
-  const my = dashing ? player.dashDy : dy;
+  if (dashing) {
+    player.vx = player.dashDx * player.speed;
+    player.vy = player.dashDy * player.speed;
+  } else {
+    ease(player, dx * player.speed, dy * player.speed, player.ramp, dt);
+  }
 
   // Where the dash's wave is measured from. Kept before the move and after the
   // clamp is applied below, so the segment is the distance actually travelled
   // rather than the distance asked for.
   const fromX = player.x, fromY = player.y;
 
-  player.x += mx * speed * dt;
-  player.y += my * speed * dt;
+  player.x += (dashing ? player.dashDx * player.dashSpeed : player.vx) * dt;
+  player.y += (dashing ? player.dashDy * player.dashSpeed : player.vy) * dt;
   // To the view, not the world: the world is a tall strip and the camera moves.
-  [player.x, player.y] = viewClamp(player);
+  // An edge stops the swim going into it, so no speed banks up against it
+  // (D107). No edge ever pushes: the current carries the diver with the view.
+  const [cx, cy] = viewClamp(player);
+  if (cx !== player.x) player.vx = 0;
+  if (cy !== player.y) player.vy = 0;
+  [player.x, player.y] = [cx, cy];
 
   // An afterimage every frame of the dash. Without it the eye sees the player
   // at one end and then the other, and reads a teleport instead of a move.
@@ -1010,8 +1040,9 @@ function step(dt) {
     else if (e.fuse) fuseStep(e, ex / d, ey / d, d, dt);
     else if (e.weave) weaveStep(e, ex / d, ey / d, d, dt);
     else {
-      e.x += (ex / d) * e.speed * dt + e.pushX * dt;
-      e.y += (ey / d) * e.speed * dt + e.pushY * dt;
+      ease(e, (ex / d) * e.speed, (ey / d) * e.speed, e.ramp, dt);   // D107
+      e.x += (e.vx + e.pushX) * dt;
+      e.y += (e.vy + e.pushY) * dt;
     }
 
     e.pushX *= pd;

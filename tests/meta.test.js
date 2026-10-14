@@ -625,7 +625,8 @@ describe('owning and carrying weapons (D97)', () => {
     const g = loadGame();
     const text = readFileSync(new URL('./fixtures/save-v3.json', import.meta.url), 'utf8');
     expect(g.loadSave(text)).toBe('');
-    expect([g.meta.version, g.meta.owned, g.meta.carried, g.weaponName]).toEqual([4, ['Gun'], 'Gun', 'Gun']);
+    expect([g.meta.version, g.meta.owned, g.meta.carried, g.weaponName])
+      .toEqual([g.freshMeta().version, ['Gun'], 'Gun', 'Gun']);   // migrated all the way
   });
 });
 

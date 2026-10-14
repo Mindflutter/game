@@ -12,16 +12,16 @@ pulled to the player (D78 (gems are pulled to the player)).
 
 ## Roster
 
-| name | r | hp | speed | value | color | glow | carries | enters |
-|---|---|---|---|---|---|---|---|---|
-| drifter | 18 | 1 | 85 | 1 | #e8446e | #ff1e5a | — | — |
-| darter | 12 | 1 | 190 | 1 | #ffb648 | #ff8a00 | — | — |
-| bulwark | 34 | 6 | 52 | 3 | #a05cff | #7b2fff | — | — |
-| archer | 16 | 2 | 75 | 2 | #5aa9ff | #1f6fff | — | — |
-| puffer | 22 | 3 | 95 | 2 | #ffee58 | #ffc800 | — | — |
-| eel | 14 | 2 | 130 | 2 | #38f2c0 | #00c896 | — | — |
-| mini-boss | 52 | 24 | 70 | 5 | #e2ff8a | #c6ff3c | false | — |
-| boss | 84 | 60 | 60 | 30 | #c8ff3c | #9dff00 | false | bottom |
+| name | r | hp | speed | ramp | value | color | glow | carries | enters |
+|---|---|---|---|---|---|---|---|---|---|
+| drifter | 18 | 1 | 85 | 0.6 | 1 | #e8446e | #ff1e5a | — | — |
+| darter | 12 | 1 | 190 | 0.9 | 1 | #ffb648 | #ff8a00 | — | — |
+| bulwark | 34 | 6 | 52 | 1.2 | 3 | #a05cff | #7b2fff | — | — |
+| archer | 16 | 2 | 75 | — | 2 | #5aa9ff | #1f6fff | — | — |
+| puffer | 22 | 3 | 95 | — | 2 | #ffee58 | #ffc800 | — | — |
+| eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | — | — |
+| mini-boss | 52 | 24 | 70 | — | 5 | #e2ff8a | #c6ff3c | false | — |
+| boss | 84 | 60 | 60 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
 
 Each behaviour's numbers, a table per behaviour field. `lunge`:
 
@@ -61,6 +61,7 @@ enemy behaviours, and one way to be hurt)).
 | `hp` | damage | What it takes to kill, against the weapon's `damage` per hit. A wounded enemy is drawn smaller. |
 | `speed` | px/s | How fast it swims at the player. A batch arrival spreads it by `ENEMY_JITTER 0.3` — ±15%; a scenario places it at exactly this. |
 | `r` | px | Body radius, and the hitbox: the circle drawn is what collides. |
+| `ramp` | s | Eases its chase as the diver's swim is eased (D107 (the diver swims and faces; fish with a ramp)): seconds to full speed, near enough, and to turn — so it overshoots a sidestep. Absent, it turns on the spot. Only the plain chase reads it; a behaviour that moves the fish its own way keeps its own movement. |
 | `value` | gems | Dropped on death. Whether an enemy drops at all is S6 (balance)'s lever (D78 (gems are pulled to the player)); today every kill drops its `value`. |
 | `enters` | — | Where a batch brings it in. Absent: just outside a random edge of the view. `bottom`: below the view, centred. |
 | `color` | hex | Body colour. Placeholder graphics (D4 (no assets, ever)). |

@@ -6,6 +6,17 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**The diver swims in water, and faces** (D107 (the diver swims and faces; fish
+with a ramp))
+Movement eases now: a quarter second to full speed, a glide to a stop when you
+let go, and a reversal that swings through. The diver has a facing, drawn as a
+mark, that turns toward the keys — a fifth of a second for half a circle — and
+the dash goes along it: at any angle, and from a standstill too. Out of a dash
+the swim carries on along it. Drifters, darters and bulwarks ease their chase
+the same way, each its own weight, so they overshoot a sidestep. The save goes
+to version 5. Found on the way: `design.md` quoted 191 browser checks where the
+suite runs 194.
+
 **The puffer bursts and comes on again** (D106 (the puffer bursts and comes on
 again))
 It chases, stops for half a second, bursts, and chases on — it no longer dies

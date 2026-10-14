@@ -11,37 +11,7 @@ is built: the decision, or the changelog, is its record from then on.
 
 ## Open — needs a decision before work continues
 
-### Should the dash go where you aim, instead of where you move?
-**Status: open, and the reasoning changed under D28.** The whole "it re-couples
-the two axes mouse aim exists to separate" argument assumed *auto*-fire — that
-the cursor was a lazy pointer you could leave anywhere. With manual fire the
-cursor is already where your attention is, every shot, so aiming the dash there
-costs much less than it did. Re-argue this at S1, not before. Raised by Igor
-2026-09-19 after the force dash landed. D20
-rejected aim-direction, but that was when the dash was pure escape; D23 gave it
-a directional damage wave, which weakens the original reasoning.
-
-**For:** the mouse is continuous where WASD is 8-way, so you could thread a gap
-at 30 degrees; the wave and the weapon would point the same way; and you could
-dash while standing still, which `len > 0` currently forbids outright.
-
-**Against:** it re-couples the two axes mouse aim exists to separate — escaping
-would mean first pointing the cursor away from what you are shooting, at the
-worst possible moment. Cursor position is often stale (wherever the last enemy
-died) whereas a held key is always deliberate. And a dash perpendicular to your
-travel reads as a jerk rather than as acceleration.
-
-**The argument that only appeared after D23:** two facings are coverage, not a
-flaw. The dash clears the path ahead while the gun covers the retreat, so you
-threaten two arcs instead of one. Unifying them narrows what you control.
-
-**Claude's recommendation:** keep movement-direction, and take only the cheap
-half — dash toward the cursor *when no movement key is held*. That kills the
-stationary dead case without touching the escape use. Two lines.
-
-Offered and not taken up yet: putting all three (movement / aim / hybrid)
-behind a constant in the balance block so the choice can be played rather than
-argued. Feel is Igor's call (D16).
+Nothing waits on a decision.
 
 ---
 

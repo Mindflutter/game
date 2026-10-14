@@ -35,7 +35,7 @@ if (location.search === '?test') {
 
   const mob = (x, y, over) => Object.assign(
     { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, value: 1, lastHitBy: 0,
-      pushX: 0, pushY: 0 }, over);
+      pushX: 0, pushY: 0, vx: 0, vy: 0 }, over);
 
   // A bullet, built the way the weapon builds one, so no check hand-rolls a
   // literal that misses a field -- a bullet without `speed` would fly forever,
@@ -49,9 +49,10 @@ if (location.search === '?test') {
     return b;
   };
 
-  // Hold right, tap Space, run the dash out, release -- in one place, so no
-  // check forgets the release.
+  // Face right, hold right, tap Space, run the dash out, release -- in one
+  // place, so no check forgets the release. A dash goes along the facing (D107).
   const dashRight = (ticks = 20, dt = 1 / 60) => {
+    player.facing = 0;
     keys.add('KeyD');
     justPressed.add('Space');
     for (let i = 0; i < ticks; i++) update(dt);
@@ -323,15 +324,12 @@ if (location.search === '?test') {
   check(particles.some(p => p.vx === 0 && p.vy === 0),
     'a dash must leave an afterimage trail');
 
-  // ...and it cannot be spent again until the cooldown has run. The movement
-  // key has to be held: a dash also needs a direction, and without one it
-  // would be refused for that instead of for the cooldown.
-  keys.add('KeyD');
+  // ...and it cannot be spent again until the cooldown has run. No key needs
+  // holding: a dash goes along the facing, from a standstill too (D107).
   justPressed.add('Space');
   update(1 / 60);
   check(player.dashCd > 0 && player.dashTime <= 0,
     'no second dash inside the cooldown, cd=' + player.dashCd.toFixed(2));
-  keys.delete('KeyD');
 
   // A fast dash must not step over its own hitbox (D50): on the slowest frame
   // dt allows, a step covers nearly the wave's whole reach, and this enemy is
@@ -360,6 +358,7 @@ if (location.search === '?test') {
     player.fireTimer = 999;
     for (let i = 0; i < extraFins; i++) fins.apply(player);
     const x0 = player.x;
+    player.facing = 0;                // a dash goes along the facing (D107)
     keys.add('KeyD');
     justPressed.add('Space');
     for (let i = 0; i < DASH_TICKS; i++) update(FIXED_DT);
@@ -381,6 +380,7 @@ if (location.search === '?test') {
     keys.clear();                     // or this case inherits the last one's key
     player.fireTimer = 999;
     const x0 = player.x, y0 = player.y;
+    player.facing = 0;                // a dash goes along the facing (D107)
     keys.add('KeyD');
     justPressed.add('Space');
     update(FIXED_DT);                 // committed to +x on this frame

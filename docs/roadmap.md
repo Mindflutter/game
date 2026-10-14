@@ -18,9 +18,12 @@ Every design call in it is Claude's, delegated, and open. **Next**, before
 S6 (balance), the notes from playing S5 (content) that move the numbers it
 tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
 status bar, the two wordings, the sizes (D104 (bodies doubled)) and the Knife's
-swing (D105 (the Knife swings)) and the puffer that comes on again (D106 (the
-puffer bursts and comes on again)). Next: what micro-tasks pay (`ideas.md` →
-Open — from playing S5 (content)). Each is discussed one at a time.
+swing (D105 (the Knife swings)), the puffer that comes on again (D106 (the
+puffer bursts and comes on again)) and the swim and the facing (D107 (the diver
+swims and faces; fish with a ramp)). Next: fish that bite
+(`specs/2026-10-14-movement-and-bites-design.md`), then the boss and the
+mini-boss made different and what micro-tasks pay (`plan.md` → Active stage).
+Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's

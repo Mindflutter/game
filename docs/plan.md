@@ -10,10 +10,25 @@ must stay true while doing it.
 
 ## Active stage
 
-None open. S5 (content) closed 2026-10-14 — Igor: "close s5". **S6 — Balance**
-is next, and its entry, S5 exiting, is met; it opens on Igor's word. Igor's
-notes from playing S5 (content) wait in `ideas.md` → Open — from playing S5
-(content), several proposed for before S6 (balance); `roadmap.md` → Next.
+**The pass before S6 (balance): from playing S5 (content).** S5 (content)
+closed 2026-10-14 — Igor: "close s5" — and his notes from playing it opened
+this pass the same day: "if no questions for me, start working". It holds
+what S6 (balance) would otherwise tune twice — what changes the meaning of a
+number before the numbers are tuned:
+
+- Igor's notes from playing S5 (content) proposed for before S6 (balance)
+  (`ideas.md` → Open — from playing S5 (content)), what micro-tasks pay among
+  them.
+- **Movement with acceleration and a facing, and fish that bite** — Igor,
+  2026-10-14: `specs/2026-10-14-movement-and-bites-design.md`.
+- **The boss and the mini-boss made different** — Igor, 2026-10-14:
+  "mini-boss and boss have one kind of behavior. we need to make them
+  different. this would belong to a completed s5, naturally we have to do it
+  outside of it, so plan that too." Kin to `ideas.md` → Open — from the boss
+  (S3).
+
+Where it stands is `roadmap.md` → Next. **S6 — Balance** follows; its entry,
+S5 exiting, is met, and it opens on Igor's word.
 
 ## Closed stages
 

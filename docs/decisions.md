@@ -3423,3 +3423,59 @@ and not outside, and living on; swimming on after a burst and lighting again
 only after its chase; dying like any fish when shot; never bursting when cut
 down on the tick its fuse runs out; a dash that kills it as it bursts counting
 one kill; a burst paying nothing and the glowing puffer keeping its mod.
+
+## D107 — The diver swims and faces; fish with a ramp · 2026-10-14
+Igor, after playing S5 (content): "we need to have acceleration in movements.
+right now there is none for player and enemies. player must definitely have it,
+fishes - at least some do need it. by acceleration i mean starting movement and
+reaching the full speed after a duration. reversing direction needs a slight
+amount of time. like natural in-water movement. as a bonus, this solves #15,
+the dash goes where you move, but becomes more than 8 discrete directions" —
+#15 being the open question of whether the dash should go where you aim. On a
+dash from a standstill: "a player wont be a circle. it's a person having a
+facing direction. it's rotation takes a little bit of time too (this relates
+to acceleration as well). so that's you answer for dashing from a stop." The
+design and its check against `foundations.md`:
+`specs/2026-10-14-movement-and-bites-design.md`.
+
+**Decided, by Igor.**
+- The diver accelerates: full speed after a moment, a reversal takes a little
+  time, as in water. Some fish too.
+- The diver has a facing, and turning it takes a little time; a dash from a
+  standstill goes along it.
+- The dash goes where you move, at any angle: D20 (mouse aim and an offensive
+  dash)'s movement over aim stands, no longer held to eight directions. The
+  open question in `ideas.md` closes.
+
+**Claude's picks**, open to Igor:
+- **Water**: a velocity eased toward the one wanted, `RAMP_LEFT` — 5% — of a
+  change still to go after `ramp` seconds, over `dt` with `Math.pow`. It is
+  drag: a release glides, and a reversal swings through zero in under a
+  quarter of `ramp`. The diver's `ramp` is 0.25s, and a raised speed is reached
+  in the same time.
+- **The facing** turns at 0.2s a half circle, the shorter way, and holds when
+  no key is; a dive starts facing down, into the abyss.
+- **The dash goes along the facing**, always: swimming steadily it is where you
+  swim, and mid-turn it is where the body points rather than where the drift
+  still carries. It fires from a standstill.
+- **A dash ends with the swim carrying on along it** at full swim speed; its
+  own reach is unchanged (D56 (the dash is a fixed, committed lunge)).
+- **A view edge stops the velocity going into it.** No edge pushes the diver:
+  the current carries it with the view.
+- **Fish ramps**: the drifter 0.6s, the darter 0.9s, the bulwark 1.2s — the
+  plain chasers, each its own weight. The archer, the puffer, the eel and the
+  lungers move their own way, without one.
+- **Drawn**: a mark from the diver's middle to its rim, where it faces.
+- **The save goes to version 5**: a v4 dive loads its diver and fish at rest,
+  the diver facing down.
+
+**Supersedes** the dash along the keys held, and its refusal with none held.
+
+**Guarded by**: `tests/movement.test.js` — moving on the first tick of a key
+but at full speed only after the ramp; a glide, and a reversal that swings
+through; the same swim at any tick length; a raised speed reached in the same
+ramp; no speed banked against an edge; the facing turning the shorter way and
+holding; a dash along the facing from a standstill, the swim carrying on after
+it; a fish with a ramp overshooting a sidestep, one without turning at once; a
+v4 save loading at rest, facing down. `checks.js` — the dash's checks face the
+diver before they dash.

@@ -18,6 +18,8 @@ const ARENA_H = 800;
 const PLAYER_START = {
   r: 20,             // radius, in pixels
   speed: 260,        // pixels per second
+  ramp: 0.25,        // seconds to swim up to full speed, or glide to a stop (D107)
+  turn: 0.2,         // seconds to turn round, half a circle (D107)
   hp: 3,
   maxHp: 3,
   iframes: 1,        // seconds of invulnerability after a hit
@@ -43,6 +45,9 @@ const DASH_ARC       = 0.2;   // cos of the half-angle: 0.2 is a 156-degree fron
 const DASH_END       = 0.18;  // seconds of the ring that closes the dash
 const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
 const PUSH_DRAG      = 0.02;  // ...with this fraction of it left after a second
+// Water (D107): the share of a change of speed still to go after a body's
+// `ramp` seconds -- so `ramp` is its time to full speed, near enough.
+const RAMP_LEFT      = 0.05;
 
 // Gems fly to you from wherever they drop and never fade (D35, D78) -- fast
 // enough to outrun a swimming player. Claude's pick.
@@ -535,13 +540,15 @@ const SCENARIOS = {
 // ---------- enemy types ----------
 // Documented in docs/entities/enemies.md -- `npm test` holds it to this table.
 // What the currency `value` pays in is still unnamed (`ideas.md`), which is
-// why nothing in the code names it.
+// why nothing in the code names it. A `ramp` eases the plain chase as the
+// diver's swim is eased (D107), so the fish overshoots a sidestep; without
+// one it turns on the spot.
 const ENEMY_TYPES = [
-  { name: 'drifter', r: 18, hp: 1, speed: 85,  value: 1,
+  { name: 'drifter', r: 18, hp: 1, speed: 85,  ramp: 0.6, value: 1,
     color: '#e8446e', glow: '#ff1e5a' },
-  { name: 'darter',  r: 12, hp: 1, speed: 190, value: 1,
+  { name: 'darter',  r: 12, hp: 1, speed: 190, ramp: 0.9, value: 1,
     color: '#ffb648', glow: '#ff8a00' },
-  { name: 'bulwark', r: 34, hp: 6, speed: 52,  value: 3,
+  { name: 'bulwark', r: 34, hp: 6, speed: 52,  ramp: 1.2, value: 3,
     color: '#a05cff', glow: '#7b2fff' },
   // The archer keeps its distance and spits (D95). `spit` holds its band --
   // closer than `range`, no closer than `near` -- the seconds between spits,
@@ -886,7 +893,7 @@ const HELP_KEYS = [
 const HELP_BLURB = [
   'Hold the left mouse button to shoot along whatever you point at; the Knife swings there.',
   'Shots die at the edge of the ring, so range is a real range.',
-  'Space dashes: you pass through the swarm unharmed, and shove it aside.',
+  'Space dashes where you face: through the swarm unharmed, shoving it aside.',
   'One batch at a time; clear it and the current takes you down to the next.',
   'Things you kill drop gems. They come to you on their own, and are yours to keep.',
   'Kill the glowing fish for a mod. Grab boosts before they fade. A boss heals, then offers a pick.',

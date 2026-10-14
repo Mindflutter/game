@@ -158,6 +158,9 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
     ...shot,
     x: ARENA_W / 2,
     y: ARENA_H / 2,
+    vx: 0,             // the swim's velocity, eased toward the keys (D107)
+    vy: 0,
+    facing: Math.PI / 2,   // where the body points, a dash's way; down, into the abyss
     hurt: 0,           // seconds of invulnerability left
     fireTimer: 0,      // seconds until the next shot
     dashTime: 0,       // seconds of dash left, 0 when not dashing
@@ -260,7 +263,7 @@ function startScenario(s, seed) {
 //
 // `version` from the first write (foundations.md -> The technical contract). A
 // save this build does not know is rejected loudly, never guessed at.
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 5;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, spent: {}, tasks: {},
@@ -317,7 +320,8 @@ function saveText() {
 // offer still on its way is dropped. v2 kept a layer's micro-tasks by its
 // name, v3 by its number (D89): these were the names then. v3 had one weapon,
 // carried by every dive: a v3 save owns and carries the Gun (D97), its diver
-// wears no suit (D100), and its batch's clock starts as it loads (D98).
+// wears no suit (D100), and its batch's clock starts as it loads (D98). v4 had
+// no water: its diver and fish load at rest, the diver facing down (D107).
 function migrate(s) {
   if (s && s.version === 1) {
     if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
@@ -347,6 +351,13 @@ function migrate(s) {
       s.dive.player.guard = 0;
     }
     s.version = 4;
+  }
+  if (s && s.version === 4) {
+    if (s.dive) {
+      Object.assign(s.dive.player, { vx: 0, vy: 0, facing: Math.PI / 2 });
+      for (const e of s.dive.enemies) Object.assign(e, { vx: 0, vy: 0 });
+    }
+    s.version = 5;
   }
   return s;
 }

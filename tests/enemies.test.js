@@ -215,8 +215,7 @@ describe('the puffer (fuse)', () => {
     g.update(g.FIXED_DT);                        // lit
     const e = g.enemies[0];
     e.phaseTime = F.time - g.FIXED_DT / 2;       // it bursts on the next tick
-    Object.assign(g.player, { dashDamage: 100, hurt: 1 });
-    g.keys.add('KeyD');
+    Object.assign(g.player, { dashDamage: 100, hurt: 1, facing: 0 });   // facing it (D107)
     g.justPressed.add('Space');                  // and the dash's wave meets it then
     g.update(g.FIXED_DT);
     expect(g.enemies.length).toBe(0);
