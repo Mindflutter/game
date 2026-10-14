@@ -84,8 +84,8 @@ number is Claude's pick, S6 (balance)'s to tune.
 ## Knife
 
 Melee, tried as data first (D83 (the weapon record)): a very short, wide shot
-that passes through everything in its arc — a slash that reaches about four
-times the diver's own radius and cuts a whole cluster at once. It trades the
+that passes through everything in its arc — a slash that cuts a whole
+cluster at once. It trades the
 Gun's reach for closeness: you have to be where the fish are. It does not read
 as melee — Igor, 2026-10-14: "melee feels like a short range" — so by D83 (the
 weapon record) it needs a behaviour of its own; which one is open (`ideas.md` →

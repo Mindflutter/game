@@ -28,8 +28,8 @@ function makeEnemy(t, x, y, speed) {
 // The boss rises from below, centred, before any draw from the seed, so no
 // other arrival moves.
 function edgeSpawnPoint(t) {
-  const m = 40;
-  if (t.enters === 'bottom') return { x: ARENA_W / 2, y: ARENA_H + m + t.r };
+  const m = 40 + t.r;                    // past the edge by the whole body
+  if (t.enters === 'bottom') return { x: ARENA_W / 2, y: ARENA_H + m };
   const edge = Math.floor(rng() * 4);    // 0 top, 1 right, 2 bottom, 3 left
   if (edge === 0) return { x: rng() * ARENA_W, y: -m };
   if (edge === 1) return { x: ARENA_W + m,     y: rng() * ARENA_H };

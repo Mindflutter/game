@@ -81,7 +81,8 @@ asked in the engine you are shipping in.
 the player will look significantly bigger with all assets. record for info."
 Today the drawn circle *is* the hitbox, so bigger art means either bigger
 hitboxes — every radius in the balance block moves — or art that overhangs
-what it collides with.
+what it collides with. D104 (bodies doubled) took the first, before S6
+(balance): the hitboxes grew with the circles.
 
 ### Port to a native executable
 **Reaffirmed as post-alpha by D30**, after the question was reopened on
@@ -414,16 +415,12 @@ discussed.
 
 **Graphics**
 
-- **Shapes hard to follow, and everything small.** "start thinking towards
-  graphics. not saying we must go to assets now, but: 1 schematically circles
-  and squares are ok, but hard to follow 2 the sizes of all entities are small.
-  when we go to graphics, direct transition would be impossible (small fishes,
-  small guy, you get it)". Not the condition D4 (no assets, ever) waits on:
-  "not saying we must go to assets now". The sizes cannot wait for the art —
-  Sprites and real art, above, has why, from when he raised it on 2026-09-29 —
-  since every radius, range and speed S6 (balance) tunes moves with them. Open:
-  how big things are on screen, and when that is settled. **Home**: a pass
-  before S6 (balance), so it tunes numbers at the sizes they keep.
+- **Shapes hard to follow.** "start thinking towards graphics. not saying we
+  must go to assets now, but: 1 schematically circles and squares are ok, but
+  hard to follow". Not the condition D4 (no assets, ever) waits on: "not saying
+  we must go to assets now". The sizes, his second point, were settled before
+  S6 (balance) by D104 (bodies doubled). Open: what makes the shapes easier to
+  follow, and when.
 - **References for each fish and entity.** "image or even gif references for
   enemy types and other entities? too early?" Claude: not too early to collect,
   since they feed the sizes and shapes above; kept as links in the docs, not

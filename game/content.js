@@ -16,7 +16,7 @@ const ARENA_H = 800;
 // The diver alone: the carried weapon's numbers join these when a dive starts
 // (`WEAPONS`, D83).
 const PLAYER_START = {
-  r: 10,             // radius, in pixels
+  r: 20,             // radius, in pixels
   speed: 260,        // pixels per second
   hp: 3,
   maxHp: 3,
@@ -535,38 +535,38 @@ const SCENARIOS = {
 // What the currency `value` pays in is still unnamed (`ideas.md`), which is
 // why nothing in the code names it.
 const ENEMY_TYPES = [
-  { name: 'drifter', r: 9,  hp: 1, speed: 85,  value: 1,
+  { name: 'drifter', r: 18, hp: 1, speed: 85,  value: 1,
     color: '#e8446e', glow: '#ff1e5a' },
-  { name: 'darter',  r: 6,  hp: 1, speed: 190, value: 1,
+  { name: 'darter',  r: 12, hp: 1, speed: 190, value: 1,
     color: '#ffb648', glow: '#ff8a00' },
-  { name: 'bulwark', r: 17, hp: 6, speed: 52,  value: 3,
+  { name: 'bulwark', r: 34, hp: 6, speed: 52,  value: 3,
     color: '#a05cff', glow: '#7b2fff' },
   // The archer keeps its distance and spits (D95). `spit` holds its band --
   // closer than `range`, no closer than `near` -- the seconds between spits,
   // and its shot's speed, radius and `travel`. `range` sits under the Gun's,
   // so the starting weapon can always answer it. Claude's picks.
-  { name: 'archer',  r: 8,  hp: 2, speed: 75,  value: 2,
+  { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2,
     color: '#5aa9ff', glow: '#1f6fff',
     spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420 } },
   // The puffer swells, then bursts (D95). `fuse` holds how near it must get to
   // light it, the seconds it swells -- the tell -- and its blast's radius.
   // Claude's picks.
-  { name: 'puffer',  r: 11, hp: 3, speed: 95,  value: 2,
+  { name: 'puffer',  r: 22, hp: 3, speed: 95,  value: 2,
     color: '#ffee58', glow: '#ffc800',
     fuse: { trigger: 90, time: 1.2, blast: 110 } },
   // The eel sways as it comes (D95): `weave` holds how far either side, in px,
   // and how many sways a second. Claude's picks.
-  { name: 'eel',     r: 7,  hp: 2, speed: 130, value: 2,
+  { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2,
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 } },
   // The lungers: the boss, and the mini-boss that rehearses it (D62, D64, D65).
   // `lunge` holds the timings, and its presence is the behaviour. Neither ever
   // glows (D88): `carries: false` keeps a batch's mod off them. Claude's picks.
-  { name: 'mini-boss', r: 26, hp: 24, speed: 70, value: 5, carries: false,
+  { name: 'mini-boss', r: 52, hp: 24, speed: 70, value: 5, carries: false,
     color: '#e2ff8a', glow: '#c6ff3c',
     lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
   // The boss's `value` is the layer end's big haul of gems (D68).
-  { name: 'boss',      r: 42, hp: 60, speed: 60, value: 30, carries: false,
+  { name: 'boss',      r: 84, hp: 60, speed: 60, value: 30, carries: false,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
     lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 } },
 ];

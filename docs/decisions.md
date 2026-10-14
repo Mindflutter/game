@@ -3333,3 +3333,28 @@ starts over, and warns before it does.
 first with Cancel marked; Enter and Esc erasing nothing, the save on disk
 unchanged; confirming leaving a fresh meta, no dive, `home`, the title back to
 Start, and a save that loads fresh. `checks.js` — its rows above the hint.
+
+## D104 — Bodies doubled · 2026-10-14
+Igor, playing S5 (content): "the sizes of all entities are small. when we go
+to graphics, direct transition would be impossible (small fishes, small guy,
+you get it)". Settled before S6 (balance), so it tunes numbers at the sizes
+they keep (`ideas.md` → Sprites and real art). Igor, asked how: "just go on".
+
+**Decided, by Claude**, open to Igor's feel:
+- **The bodies grow, the field does not.** The diver's and every fish's radius
+  doubles — the drawn circle is still the hitbox. The view stays 1280×800, and
+  speeds, ranges, the dash's reach past a body, the lunge, the archer's band,
+  the puffer's trigger and blast stay as they were. Scaling those too would
+  only zoom in: a smaller field, fish arriving sooner, a different game.
+- **×2** is Claude's pick, chosen by eye from screenshots: the diver 40px
+  across, a drifter 36, the boss 168.
+- **Shots, a fish's spit, gems and pickups keep their size**: they are not the
+  fish or the diver Igor named.
+- **A fish arrives past the edge by its whole body** on every side, as the
+  boss already did, so a big one never pops in half-visible.
+- A dive saved before this keeps the old sizes until it ends: a restored dive
+  is the dive as it was.
+
+**Guarded by**: `tests/enemies.test.js` — every fish arrives wholly outside the
+view. The radii themselves are held by `tests/docs.test.js` against
+`entities/enemies.md` and `design.md`'s diver.

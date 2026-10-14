@@ -6,6 +6,12 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**Bodies doubled** (D104 (bodies doubled))
+The diver and every fish are twice the radius — a drifter 18, the boss 84 —
+from Igor's note that everything is small. The field, speeds and ranges are
+unchanged; shots, gems and pickups keep their size. A fish now arrives past
+the edge by its whole body, so a mini-boss no longer pops in half-visible.
+
 **The status bar shows everything; two wordings fixed** (Igor's notes from
 playing S5 (content))
 The bar over a dive grows from one line to five, each its own colour: hp, the

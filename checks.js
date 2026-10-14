@@ -1104,7 +1104,7 @@ if (location.search === '?test') {
   // is just a normal dive with a head start.
   check(applyScenario('one-drifter'), 'a known scenario must load');
   check(enemies.length === 1, 'one-drifter must place exactly one enemy, got ' + enemies.length);
-  check(enemies[0].hp === 1 && enemies[0].r === 9, 'one-drifter must place a drifter');
+  check(enemies[0].name === 'drifter', 'one-drifter must place a drifter');
   check(queuePaused === true, 'a scenario with spawn:false must pause the queue');
   let mostSeen = enemies.length;
   for (let i = 0; i < 900; i++) { update(1 / 60); mostSeen = Math.max(mostSeen, enemies.length); }

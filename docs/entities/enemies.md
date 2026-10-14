@@ -14,14 +14,14 @@ pulled to the player (D78 (gems are pulled to the player)).
 
 | name | r | hp | speed | value | color | glow | carries | enters |
 |---|---|---|---|---|---|---|---|---|
-| drifter | 9 | 1 | 85 | 1 | #e8446e | #ff1e5a | — | — |
-| darter | 6 | 1 | 190 | 1 | #ffb648 | #ff8a00 | — | — |
-| bulwark | 17 | 6 | 52 | 3 | #a05cff | #7b2fff | — | — |
-| archer | 8 | 2 | 75 | 2 | #5aa9ff | #1f6fff | — | — |
-| puffer | 11 | 3 | 95 | 2 | #ffee58 | #ffc800 | — | — |
-| eel | 7 | 2 | 130 | 2 | #38f2c0 | #00c896 | — | — |
-| mini-boss | 26 | 24 | 70 | 5 | #e2ff8a | #c6ff3c | false | — |
-| boss | 42 | 60 | 60 | 30 | #c8ff3c | #9dff00 | false | bottom |
+| drifter | 18 | 1 | 85 | 1 | #e8446e | #ff1e5a | — | — |
+| darter | 12 | 1 | 190 | 1 | #ffb648 | #ff8a00 | — | — |
+| bulwark | 34 | 6 | 52 | 3 | #a05cff | #7b2fff | — | — |
+| archer | 16 | 2 | 75 | 2 | #5aa9ff | #1f6fff | — | — |
+| puffer | 22 | 3 | 95 | 2 | #ffee58 | #ffc800 | — | — |
+| eel | 14 | 2 | 130 | 2 | #38f2c0 | #00c896 | — | — |
+| mini-boss | 52 | 24 | 70 | 5 | #e2ff8a | #c6ff3c | false | — |
+| boss | 84 | 60 | 60 | 30 | #c8ff3c | #9dff00 | false | bottom |
 
 Each behaviour's numbers, a table per behaviour field. `lunge`:
 

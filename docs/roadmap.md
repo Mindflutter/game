@@ -17,8 +17,8 @@ Igor playing it, the debug mode (root `README.md` → Debug mode) and New game.
 Every design call in it is Claude's, delegated, and open. **Next**, before
 S6 (balance), the notes from playing S5 (content) that move the numbers it
 tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
-status bar and the two wordings. Next: entity sizes, then the Knife's own
-behaviour and the puffer as a threat, then what micro-tasks pay (`ideas.md` →
+status bar, the two wordings and the sizes (D104 (bodies doubled)). Next: the
+Knife's own behaviour and the puffer as a threat, then what micro-tasks pay (`ideas.md` →
 Open — from playing S5 (content)). Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
@@ -44,6 +44,9 @@ A lively background (post-alpha, in `ideas.md`).
 ## Health of the thing right now
 
 This section owns the measured bot figures. Nothing else quotes them.
+**Every bot figure below predates D104 (bodies doubled)**: the diver and the
+fish are twice the radius now, so each is a regression signal for the build
+it names, and S6 (balance) measures afresh.
 
 - All `?test` checks passing, and `npm test` green (count in `design.md` →
   Verification).

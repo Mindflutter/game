@@ -268,8 +268,9 @@ of the player: swimming moves you within the view, never the view. Reaching dept
 `plan.length × GATE_SPACING` opens the `won` screen. The gate block runs
 before the player moves, so the clamp always sees this tick's camera.
 
-Enemies enter just outside the **view**, so they fade in from the dark, each at
-its type's speed spread by `ENEMY_JITTER`. Difficulty is authored per batch,
+Enemies enter just outside the **view**, past its edge by the whole body
+(D104), so they fade in from the dark, each at its type's speed spread by
+`ENEMY_JITTER`. Difficulty is authored per batch,
 not ramped by the clock.
 
 **Enemies** (`ENEMY_TYPES`). Every type — its numbers, its role and its
@@ -688,7 +689,7 @@ prototype — they transfer to any port verbatim. The entities' numbers — the
 weapons' among them — are in their docs in `entities/`; the rest are here, and
 `npm test` holds them to the code.
 
-`PLAYER_START`, the diver (r 10, speed 260, hp 3, maxHp 3, iframes 1,
+`PLAYER_START`, the diver (r 20, speed 260, hp 3, maxHp 3, iframes 1,
 dashCooldown 2.2, dashSpeed 884, mendOnClear 0, dashDamage 0, guard 0) ·
 `GEM_PULL 600` · `NOTICE_TIME 2.5` · `ENEMY_JITTER 0.3` ·
 `GATE_PAUSE 1.2` · `GATE_SPACING 400` · `CURRENT_SPEED 200` ·

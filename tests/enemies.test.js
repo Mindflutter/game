@@ -215,3 +215,19 @@ describe('the eel (weave)', () => {
     expect(distance(g, e)).toBeLessThan(d0);
   });
 });
+
+describe('arrivals', () => {
+  it('every fish arrives wholly outside the view, whatever its size, on every edge', () => {
+    const g = loadGame();
+    g.reset(1);
+    const bad = [];
+    for (const t of g.ENEMY_TYPES) {
+      for (let i = 0; i < 40; i++) {
+        const p = g.edgeSpawnPoint(t);
+        const inside = p.x + t.r > 0 && p.x - t.r < g.ARENA_W && p.y + t.r > 0 && p.y - t.r < g.ARENA_H;
+        if (inside) bad.push([t.name, Math.round(p.x), Math.round(p.y)]);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+});
