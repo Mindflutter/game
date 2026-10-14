@@ -9,18 +9,16 @@ The stages themselves live in `plan.md`; the rules that outlive them live in
 
 ## Next
 
-S5 (content) is active (`plan.md` → S5), and its work is built, 2026-10-13, to
-the `abyss-content` skill (`.claude/skills/abyss-content/`) and the design in
-`specs/2026-10-13-s5-content-design.md` (D95–D101): three enemy
-behaviours, the Harpoon and the Knife with owning and carrying, three pieces of
-equipment, Heart and Strength, swift and footwork, Barbs, three boosts, three
-layers. Every design call in it is Claude's, delegated, and open. Igor played
-it, 2026-10-14; his notes are in `ideas.md` → Open — from playing S5
-(content), each with the home Claude proposes for it. The first, the debug
-mode, is built (D102 (the debug mode); root `README.md` → Debug mode), so a
-note can now be played alone. **Next: the rest of those notes,
-discussed one at a time; `/simplify`; the commit — then S5 (content)'s exit is
-Igor's to call.**
+S5 (content) closed 2026-10-14 (`plan.md`): the archer, the puffer and the eel,
+the Harpoon and the Knife, three pieces of equipment, Heart and Strength, swift
+and footwork, Barbs and three boosts, three layers (D93–D103), built to the
+`abyss-content` skill and `specs/2026-10-13-s5-content-design.md`; then, from
+Igor playing it, the debug mode (root `README.md` → Debug mode) and New game.
+Every design call in it is Claude's, delegated, and open. **Next: Igor's word
+on what opens** — S6 (balance), or first the notes from playing S5 (content)
+proposed for before it: entity sizes, what micro-tasks pay, the Knife's own
+behaviour, the puffer as a threat, the status bar, two wordings (`ideas.md` →
+Open — from playing S5 (content)). Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's

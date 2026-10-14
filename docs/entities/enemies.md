@@ -176,7 +176,7 @@ and more attacks, wait in `ideas.md`.
 
 1. A line in `ENEMY_TYPES`, with the fields above. A new behaviour is a new
    field plus its branch in the enemy loop, and a check on its state
-   transitions (`plan.md` → S5 (content)'s exit) — and its line in
+   transitions in `tests/enemies.test.js` — and its line in
    `DEBUG_BEHAVIOURS`, which says what it does on the debug setup's tip (D102
    (the debug mode)).
 2. A row in the roster — and in its behaviour's table, if it has one — and a

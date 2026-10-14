@@ -6,6 +6,19 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**S5 (content) closes** (D93–D103)
+Igor: "close s5". Its definition of done, met: the counts — five behaviours,
+three weapons, three pieces of equipment, three layers with pools of their
+own, three tiers each; seven mods, four boosts with `Rush`, three micro-tasks
+and three attributes (D93 (the content stage's counts)) — held by a check;
+adding the last enemy, the eel, cost less than the puffer before it; every
+behaviour checked on its state transitions; no layer a fixed list; playable —
+Igor played it, and his fourteen notes are in `ideas.md` → Open — from playing
+S5 (content). Two were built inside the stage: the debug mode (D102 (the debug
+mode)) and New game (D103 (new game erases the save, after a warning)). The
+five proposed for S5 (content) are now proposed for before S6 (balance), which
+opens on Igor's word.
+
 **New game, behind a warning** (D103 (new game erases the save, after a
 warning))
 The title's last row, New game, opens a warning in red — what it erases:

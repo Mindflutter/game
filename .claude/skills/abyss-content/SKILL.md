@@ -5,11 +5,11 @@ description: Use when adding or changing a piece of Abyss game content — an en
 
 # Adding content to Abyss
 
-S5 (content) is one procedure run many times, and its exit asks that **adding
-the last enemy cost what adding the second did** (`plan.md` → S5). If an
-addition needs code
-beyond its record and the places below, stop and say so: that is the stage's
-finding about the data shape, not something to work around.
+Adding content is one procedure run many times — S5 (content) built the
+alpha's this way — and **adding the last enemy must cost what adding the
+second did**. If an addition needs code beyond its record and the places
+below, stop and say so: that is a finding about the data shape, not something
+to work around.
 
 ## 1. Settle what it is — before any code
 
@@ -26,7 +26,8 @@ finding about the data shape, not something to work around.
 ## 2. Where each kind lives
 
 Its record is a line in `game/content.js`; its doc's **Adding one** lists
-the fields and the checks that will hold it. Counts to reach: `plan.md` → S5.
+the fields and the checks that will hold it. The alpha's counts were S5
+(content)'s, and are met (D93 (the content stage's counts)).
 
 | Kind | Table | Doc | Rules it must meet |
 |---|---|---|---|
@@ -62,7 +63,7 @@ the fields and the checks that will hold it. Counts to reach: `plan.md` → S5.
    `ideas.md` (`docs/README.md` → How an item moves); `roadmap.md` → Health if
    a bot figure moved.
 9. **Stop before committing** and say what the commit holds. One addition per
-   commit, so its cost is `git show --stat <commit>` — what the exit's
+   commit, so its cost is `git show --stat <commit>` — what the cost
    comparison reads.
 
 ## Mistakes that cost an addition

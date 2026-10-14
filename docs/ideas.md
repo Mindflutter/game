@@ -379,12 +379,12 @@ discussed.
 - **"Buy & equip".** "'carry it, own it' wording is just bad. simply 'buy &
   equip' do the job". Owning and carrying stay as D97 (weapons are owned, and
   one is carried) has them; the rows' words change. Open: what an owned
-  weapon's row and the carried one's tier row say. **Home**: S5 (content) — its
-  text.
+  weapon's row and the carried one's tier row say. **Home**: before S6 (balance) —
+  proposed for S5 (content), which closed first.
 - **No "for a moment".** "'for a moment' wording is just bad and excessive. no
   useful info for the player." It ends all four boosts' lines, read as each is
-  picked up. Open: cut it, or say the seconds. **Home**: S5 (content) — its
-  text.
+  picked up. Open: cut it, or say the seconds. **Home**: before S6 (balance) —
+  proposed for S5 (content), which closed first.
 - **Everything on the status bar.** "missing info for the status bar during
   dive, make sure to add everything. make it more readable with bold, italic or
   colors - dont care how exactly". It shows hp, the batch counted from the
@@ -393,8 +393,8 @@ discussed.
   only as you enter it), the batch within it and the fish left, the weapon and
   its tier, the guard left (a ring only), the mods held (on the layer end's
   cards only) and the layer's micro-tasks (at `home` only). How it looks is
-  Claude's. **Home**: S5 (content) — its new pieces are judged by what the bar
-  shows.
+  Claude's. **Home**: before S6 (balance) — proposed for S5 (content), which
+  closed first; its new pieces are judged by what the bar shows.
 - **Home from the pause menu.** "ability to go home from pause". `home` exists
   only between dives (D76 (`home` exists only between dives)), so this ends the
   dive, its gems banked as at any end (D67 (currency is kept on death)). Kin to
@@ -417,13 +417,15 @@ discussed.
   D83 (the weapon record) already says what follows: melee gets a behaviour of
   its own, in S5 (content). A swing would be a new kind of shot — a field on
   the weapon record and a branch where shots hit. Open: what the behaviour is;
-  the swing is Igor's lean. **Home**: S5 (content).
+  the swing is Igor's lean. **Home**: before S6 (balance), which measures
+  each weapon — proposed for S5 (content), which closed first.
 - **The puffer is easy to avoid, and it kills itself.** "the exploding enemy is
   really easy to avoid and it kills itself". Swelling, it stands still, so
   stepping out of the blast is easy, and the burst removes it — a batch of
   puffers clears itself if waited out, costing only their gems. Its trigger,
   fuse and blast are numbers, S6 (balance)'s; dying in its own burst is its
-  shape. Open: what makes it a threat. **Home**: S5 (content).
+  shape. Open: what makes it a threat. **Home**: before S6 (balance), which tunes
+  its numbers — proposed for S5 (content), which closed first.
 - **The eel is hard to hit** — "a problem of schematic circles, not necessarily
   a bad design." Its behaviour stands; it goes with the graphics, below.
 - **The archer works** — "shooting enemies are quite good atm. just a positive
