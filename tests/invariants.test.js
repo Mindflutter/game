@@ -113,8 +113,8 @@ describe('the bot', () => {
   });
 });
 
-// The dev flags: `&immortal` and `&damage=<n>` in the URL. main.js reads
-// the URL; what the flags *do* is game state, so it is checked here.
+// The dev flags, `immortal` and `damageOverride`: set by the debug mode's
+// setup (D102), the tests and the bot. What they do is game state, checked here.
 describe('dev flags', () => {
   // hp after two seconds with a bulwark parked on the player.
   function hpUnderBulwark(immortal) {
@@ -127,12 +127,12 @@ describe('dev flags', () => {
     return g.player.hp;
   }
 
-  it('&immortal: an enemy on the player does no harm', () => {
+  it('immortal: an enemy on the player does no harm', () => {
     expect(hpUnderBulwark(false)).toBeLessThan(3);   // the control: it does hurt
     expect(hpUnderBulwark(true)).toBe(3);
   });
 
-  it('&damage: replaces shot damage from the first dive on, and survives R', () => {
+  it('the damage override: replaces shot damage from the first dive on, and survives Dive again', () => {
     const g = loadGame();
     g.damageOverride = 100;
     g.reset(1);

@@ -963,12 +963,33 @@ if (location.search === '?test') {
     'home: the rows must end above the hint, rows end at ' + (lastRow.y + lastRow.h) +
     ', hint at ' + HINT_Y);
   // Every menu's rows end above the hint too: the gear and attribute screens
-  // grow from tables, and a menu cannot notice its rows running into the hint.
+  // and the debug setup's grid (D102) grow from tables, and a menu cannot
+  // notice its rows running into the hint. The lowest row, wherever its grid
+  // puts it.
   for (const [name, menu] of Object.entries(MENUS)) {
-    const last = rowRect(menu.items.length - 1, menu.top);
-    check(last.y + last.h < HINT_Y - 10,
-      name + ': the rows must end above the hint, rows end at ' + (last.y + last.h) +
-      ', hint at ' + HINT_Y);
+    const end = Math.max(...menu.items.map((_, i) => { const r = rectOf(menu, i); return r.y + r.h; }));
+    check(end < HINT_Y - 10,
+      name + ': the rows must end above the hint, rows end at ' + end + ', hint at ' + HINT_Y);
+  }
+
+  // The debug setup's tips sit on one line under its columns (D102), and the
+  // renderer cannot notice one running off the view: each must fit, with
+  // every weapon carried, since some tips change with it.
+  {
+    const was = debugSetup;
+    debugSetup = parseSetup('', 1);
+    ctx.font = DEBUG_TIP_FONT;
+    let widest = 0, which = '';
+    for (const w of WEAPONS) {
+      debugSetup.weapon = w.name;
+      for (const r of MENUS.debug.items) {
+        const width = ctx.measureText(r.tip).width;
+        if (width > widest) { widest = width; which = r.tip; }
+      }
+    }
+    debugSetup = was;
+    check(widest < ARENA_W - 32, 'debug: every tip must fit the view, the widest is ' +
+      Math.round(widest) + 'px: ' + which);
   }
 
   // The same rule sideways: a mod description is prose in a fixed-width box, and

@@ -3232,3 +3232,78 @@ major contradictions with the plan"), open to Igor to reopen.
 **Guarded by**: `tests/meta.test.js` — no pool or batch shared between
 layers, every enemy type met in one; the `layer-3` scenario; the counts S5
 (content) asks for, held from here on (D93 (the content stage's counts)).
+
+## D102 — The debug mode · 2026-10-14
+Igor, after playing S5 (content): "i need a debug mode better than url params.
+like: launch with a single debug param, then a game in debug mode opens. thru
+the ui, i can choose layer, number of enemies, types etc. (pretty much
+everything that's in url params now + whatever you may come up with). the
+point is to quickly choose a configuration where i can playtest components
+isolated or combined, and create issues that concern only a certain aspect of
+the game." Claude's default — a setup screen for the place, the fish and the
+diver's kit, played with sound, the save never touched, a key to restart and
+one to return, the setup as a short code for an issue — he took as offered:
+"do the debug mode".
+
+**Decided, by Igor**, as offered:
+- **`?debug` opens a setup screen in place of the title**: layer and gate,
+  which fish and how many; the weapon and its tier, the equipment, the
+  attributes and the mods; immortal, one-shot damage and the seed. Dive plays
+  it.
+- **The save is never read or written**: `main.js` loads none for it, and
+  every save — the platform's on a hidden tab or a closed page included — goes
+  through `saveNow()`, which writes nothing in the debug mode.
+- **It starts muted**, and M turns the sound on — Igor, once it was built:
+  "silence debug by default". The mute moved into `game/` state beside the
+  volume, so the debug mode can set it.
+- **The URL flags `&immortal` and `&damage` are gone** — Igor: "yes, remove
+  redundant". He was their only user, and the setup's rows now do their job;
+  the tests and the bot set immortality and the damage override directly.
+- **A value comes round at either end** — Igor: "arrow in debug setup must
+  rotate around all values (0, press left, gets max - and vice versa)". Claude's
+  reading of Shift's five: they stop at the end, and the next step comes round.
+- **One key plays the same setup again, from any screen, and one goes back to
+  the setup screen.**
+- **The setup is a short code**, `?debug=<code>`, so an issue that carries it
+  replays exactly, seed and all.
+
+**Claude's picks inside it**, open to Igor:
+- The keys: **R** again, **Backspace** back. Neither does anything outside the
+  debug mode.
+- The code: tokens of a name and a number, comma-separated — `L2,G7,S4471,
+  Harpoon2,puffer4,Dash_reach1,immortal` — the layer, gate, seed and weapon
+  always, the rest only when set. A token it cannot name is shown as ignored,
+  never guessed at, and every number is held in range. The address bar
+  follows the setup as it changes, so the URL is the code.
+- The screen: four columns — where, fish, diver, mods — built from the
+  tables, so a new fish, mod or piece of gear joins it with nothing to write.
+  The arrows move a value, Shift by five, and a click either side of it; a
+  line under the columns says what the chosen gate drew, and what replaces it.
+- **Every row has a tip**, on the line under that: what the marked row is and
+  what it moves. Igor, after Barbs sat dim with no reason given: "would it be
+  easy to add tooltips for each entity in debug? i havent learned what impacts
+  what just yet". A tip is worked out from the records — a fish's behaviour
+  and numbers, what each tier, point or pick moves, as the mod cards' numbers
+  are (D52 (the development readout)), what needs an attribute, which weapon a
+  weapon mod goes with — so it cannot state a number the game does not
+  deliver. The one hand-written part is a line per behaviour,
+  `DEBUG_BEHAVIOURS`, which a new behaviour must add; `npm test` says so.
+- The fish set replace the chosen gate's batch alone; the dive then runs on
+  as drawn. A weapon mod goes in only with a weapon it fits (D99 (weapon mods,
+  and more boosts)), as a fish would carry it.
+- Out of a debug dive, every way leads back to the setup: the pause menu's
+  quit, and the end screens' two buttons, read Again and Setup.
+- Up to 50 of one fish and 9 points on one attribute; the rest are the game's
+  own caps.
+
+**Guarded by**: `tests/debug.test.js` — a fresh kit whatever the save held,
+nothing written on pause, at a dive's end or when the platform asks, and
+`main.js` saving only through `saveNow()`; muted from the start, and only in
+the debug mode; a tip on every row, its numbers worked out from the game, a
+dim weapon mod saying why, a line for every behaviour; the kit, the place and the fish
+reaching the dive as set, the pool untouched; a weapon mod that does not fit
+left out; the flags switched by the setup; the code round-tripping, ignoring
+what it cannot name and holding every value in range; R replaying the same
+dive and doing nothing outside the debug mode; every way out leading to the
+setup; the rows built from the tables, and moved by keys and clicks.
+`checks.js` — the setup's grid ends above the hint.

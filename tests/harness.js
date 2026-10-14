@@ -51,7 +51,7 @@ export function loadGame() {
                  'screen', 'currentSeed', 'bulletId', 'shakeLevel',
                  'immortal', 'damageOverride', 'plan', 'meta', 'diveLive',
                  'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
-                 'batchTime', 'batchDashed'];
+                 'batchTime', 'batchDashed', 'debugSetup', 'menuIndex', 'muted'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
@@ -59,7 +59,8 @@ export function loadGame() {
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
                   'BOOSTS', 'BOOST_C', 'BOOST_LIFE', 'END_STEP',
                   'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'TASKS',
-                  'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK'];
+                  'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK',
+                  'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [
     ...STATE.map(n => `${n}: { get: () => ${n}, set: v => { ${n} = v; }, configurable: true }`),

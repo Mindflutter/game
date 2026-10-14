@@ -30,7 +30,7 @@ the fields and the checks that will hold it. Counts to reach: `plan.md` → S5.
 
 | Kind | Table | Doc | Rules it must meet |
 |---|---|---|---|
-| enemy | `ENEMY_TYPES` | `entities/enemies.md` | A behaviour is a field whose presence switches it on, plus one branch in `step()` (`game/logic.js`) — never a class (D26 (disciplines installed)). A boss or mini-boss has `carries: false` (D88 (the fish glows from the start)). `threat` stays unwritten: S6 adds it to every type at once (D79 (a dive goes from easiest to hardest)). |
+| enemy | `ENEMY_TYPES` | `entities/enemies.md` | A behaviour is a field whose presence switches it on, plus one branch in `step()` (`game/logic.js`) — never a class (D26 (disciplines installed)). A new behaviour also gets its line in `DEBUG_BEHAVIOURS`, the debug setup's words for it (D102 (the debug mode)). A boss or mini-boss has `carries: false` (D88 (the fish glows from the start)). `threat` stays unwritten: S6 adds it to every type at once (D79 (a dive goes from easiest to hardest)). |
 | mod | `MODS` | `entities/mods.md` | Differs in kind, not degree, readable in one line (`foundations.md` → genre contract 5). Raises only player fields. Capped (D69 (every mod capped)). |
 | boost | `BOOSTS` | `entities/boosts.md` | On when touched, off after `time`; no cap, nothing kept (D86 (boosts)). |
 | weapon | `WEAPONS` | `entities/weapons.md` | Three or four `tiers`; combat stats (D83 (the weapon record)). |

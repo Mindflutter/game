@@ -362,18 +362,6 @@ discussed.
 
 **Tooling**
 
-- **A debug mode, set up on screen.** "i need a debug mode better than url
-  params. like: launch with a single debug param, then a game in debug mode
-  opens. thru the ui, i can choose layer, number of enemies, types etc. (pretty
-  much everything that's in url params now + whatever you may come up with).
-  the point is to quickly choose a configuration where i can playtest
-  components isolated or combined, and create issues that concern only a
-  certain aspect of the game." Today's flags — `?dev=` and a scenario (D37
-  (scenarios)), `&seed`, `&play`, `&immortal`, `&damage` — become rows on a
-  screen. A driven dive plays silent and never writes the save; a debug dive is
-  played, so it wants its sound, and still must not touch the save. Open:
-  everything it offers, and whether it acts mid-dive too. **Home**: next,
-  before more playtesting — every note below is judged faster with it.
 - **Unity's tooling, assessed** — Port to a native executable, above.
 
 **Screens**
@@ -412,7 +400,7 @@ discussed.
   dive, its gems banked as at any end (D67 (currency is kept on death)). Kin to
   the New game beside Continue that D90 (Continue goes straight back in) left
   to S7 (alpha polish). Open: whether it asks first. **Home**: S7 (alpha
-  polish), beside that — or with the debug mode, if playtesting needs it sooner.
+  polish), beside that.
 - **Hints for every fish and pickup.** "no hints for entities at all - think
   player perspective again". The help's one line on the fish covers the archer
   and the puffer; a mod or boost is named with its line as it lands; nothing

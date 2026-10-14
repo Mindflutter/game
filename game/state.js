@@ -90,7 +90,7 @@ let sinceBoost = 0;
 
 // Which screen we're on: one variable, so there is exactly one answer at a time.
 // 'title' | 'home' | 'gear' | 'attributes' | 'playing' | 'mods' | 'paused' |
-// 'help' | 'options' | 'dead' | 'won'
+// 'help' | 'options' | 'dead' | 'won' | 'debug'
 let screen = 'title';
 let menuIndex = 0;          // cursor in whichever menu is up
 let choiceIndex = 0;        // the marked card at a layer end (D85)
@@ -116,6 +116,13 @@ function seedRng(seed) {
   rngState = currentSeed;
 }
 
+// The one deliberate exception: *choosing* a seed is not part of the
+// deterministic sequence, so an unseeded dive picks one at random. A port does
+// the same with whatever its language offers.
+function newSeed() {
+  return (Math.random() * 0x100000000) >>> 0;
+}
+
 function rng() {
   rngState = (rngState + 0x6D2B79F5) | 0;
   let t = rngState;
@@ -135,19 +142,17 @@ function drawDistinct(pool, n) {
   return out;
 }
 
-// The one deliberate exception: *choosing* a seed is not part of the
-// deterministic sequence, so an unseeded dive picks one at random. A port does
-// the same with whatever its language offers.
-// `weapon` is the one home chose (D97) -- or the first, when the save names
-// one that is gone -- unless a scenario names another.
+// An unseeded dive picks its seed (`newSeed()`). `weapon` is the one home
+// chose (D97) -- or the first, when the save names one that is gone -- unless
+// a scenario names another.
 function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAPONS[0]) {
-  seedRng(seed === undefined ? (Math.random() * 0x100000000) >>> 0 : seed);
+  seedRng(seed === undefined ? newSeed() : seed);
   // First, before anything else draws: the whole dive's batches (D71).
   plan = drawPlan();
   // The diver, carrying a weapon: its numbers go onto the player, where mods,
   // attributes and the readout find them (D83).
-  const { name, tiers, cost, requires, ...shot } = weapon;
-  weaponName = name;
+  const shot = shotOf(weapon);
+  weaponName = weapon.name;
   player = {
     ...PLAYER_START,
     ...shot,
@@ -209,12 +214,25 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   diveLive = true;
 }
 
-// Loads a named scenario from SCENARIOS (D37). Starts from a clean reset, so a
-// scenario is a dive like any other -- just one that was set up rather than
-// spawned into. Returns false for an unknown name so the caller can complain.
+// A weapon's shot: the numbers it puts on the diver (D83), without what the
+// shop reads.
+function shotOf({ name, tiers, cost, requires, ...shot }) {
+  return shot;
+}
+
+// Loads a named scenario from SCENARIOS (D37). Returns false for an unknown
+// name so the caller can complain.
 function applyScenario(name, seed) {
   const s = SCENARIOS[name];
   if (!s) return false;
+  startScenario(s, seed);
+  return true;
+}
+
+// Plays a scenario's record -- a named one, or the debug mode's setup (D102).
+// Starts from a clean reset, so a scenario is a dive like any other -- just
+// one that was set up rather than spawned into.
+function startScenario(s, seed) {
   reset(seed, WEAPONS.find(w => w.name === s.weapon));
   // `!== undefined`, or `batch: 0` would be unreachable. The camera starts at
   // that batch's depth, or a deep scenario would first descend the whole way.
@@ -231,7 +249,6 @@ function applyScenario(name, seed) {
   if (s.spawn === false) queuePaused = true;
   // Scenario positions are in the view, so they hold at any depth.
   for (const [type, x, y] of s.enemies || []) placeEnemy(type, x, cameraY + y);
-  return true;
 }
 
 // ---------- what persists ----------
@@ -352,14 +369,19 @@ function loadSave(text) {
 }
 
 let volume = 0.6;           // master gain, 0..1
+let muted = false;          // M flips it (platform/audio.js); the debug mode starts muted (D102)
 let shakeLevel = 2;         // index into SHAKE_LEVELS
 let showFps = false;
 
-// Dev flags, set from the URL by main.js: `&immortal` and `&damage=<n>`. Like
+// Dev flags, set by the debug mode's setup (D102), the tests and the bot. Like
 // the settings above they are not part of a dive, so reset() leaves them alone
-// and they survive Dive again. Nothing in the game itself ever turns them on.
+// and they survive Dive again. Normal play never turns them on.
 let immortal = false;       // nothing can hurt the player
 let damageOverride = 0;     // above 0, every shot does this much
+
+// The debug mode's setup (D102), or null outside it. `?debug` sets it at boot
+// and nothing unsets it; while it is set, nothing is saved (`saveNow()`).
+let debugSetup = null;
 
 function openScreen(name) {
   returnTo = screen;

@@ -272,6 +272,11 @@ const MENU_TOP = 380, OPTION_TOP = 300;
 function rowRect(i, top) {
   return { x: ARENA_W / 2 - ROW_W / 2, y: top + i * ROW_STEP - 26, w: ROW_W, h: ROW_H };
 }
+// Where a menu's row `i` sits: in the menu's own grid if it has one, `rect` --
+// the debug setup's -- else in the band from its `top`.
+function rectOf(menu, i) {
+  return menu.rect ? menu.rect(i) : rowRect(i, menu.top);
+}
 
 // Where the layer end's cards sit, in arena coordinates. The renderer draws
 // them and the logic hit-tests the mouse against them, so the numbers belong
@@ -354,6 +359,11 @@ const RIGHT = ['ArrowRight', 'KeyD'];
 const GO    = ['Enter', 'NumpadEnter', 'Space'];
 const DASH  = ['Space'];
 const CLICK = ['Mouse0'];
+const FAST  = ['ShiftLeft', 'ShiftRight'];   // held: a value row moves five at a time
+// The debug mode's own (D102), live only in it: the same setup again, from any
+// screen, and back to its setup screen.
+const DEBUG_AGAIN = ['KeyR'];
+const DEBUG_SETUP = ['Backspace'];
 
 // ---------- batches ----------
 // A batch is the gated unit (D27): counts per enemy type, arriving at the edges
@@ -536,6 +546,69 @@ const ENEMY_TYPES = [
 const HOME_LAYERS_TOP = 326, HOME_LINE = 26;
 const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 
+// ---------- the debug mode ----------
+// `?debug` (D102): a setup screen in place of the title, for playtesting a
+// piece alone or several together by hand -- where, which fish and how many,
+// and the diver's kit. Its rows are built from the tables, so a new fish, mod
+// or piece of gear joins it with nothing to write.
+const ONE_SHOT         = 100;   // damage that kills anything here in one shot
+const DEBUG_FISH_MAX   = 50;    // of one type in the setup's batch: Claude's pick
+const DEBUG_POINTS_MAX = 9;     // on one attribute: Claude's pick
+// What a fish does, in words, for its tip: one line per behaviour field --
+// a new behaviour needs its line, and `npm test` says so -- and `chase` for a
+// fish with none. Its numbers come from its record.
+const DEBUG_BEHAVIOURS = {
+  chase: 'swims straight at you',
+  spit:  'keeps its distance and spits shots at you',
+  fuse:  'swells when you come close, then bursts \u2014 step out of its ring',
+  weave: 'sways side to side as it comes \u2014 aim where it will be',
+  lunge: 'winds up, then lunges along its line \u2014 step aside',
+};
+// Every name a setup counts, with its cap, its column and its tip: the fish in
+// its batch, a piece of equipment's tier, an attribute's points, a mod's picks
+// -- and every weapon's tier, shown for the one carried. `of` marks a cap that
+// is the game's own, worth showing beside the count.
+const DEBUG_COUNTS = [
+  ...ENEMY_TYPES.map(e => ({ name: e.name, col: 1, max: DEBUG_FISH_MAX, tip: () => fishTip(e) })),
+  ...EQUIPMENT.map(g => ({ name: g.name, col: 2, max: g.tiers.length, of: true, tip: () => gearTip(g) })),
+  ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: DEBUG_POINTS_MAX, tip: () => pointTip(a) })),
+  ...MODS.map(m => ({ name: m.name, col: 3, max: m.max, of: true, tip: () => modTip(m) })),
+  ...WEAPONS.map(w => ({ name: w.name, max: w.tiers.length, of: true })),
+];
+// A counted row of the setup. A weapon mod goes into the dive only with a
+// weapon it fits (D99), so with another carried its row is dim.
+const countRow = c => ({
+  label: c.name,
+  col: c.col,
+  get value() { const n = debugSetup.counts[c.name] || 0; return c.of ? n + ' / ' + c.max : n; },
+  get dim() { const m = MODS.find(x => x.name === c.name); return !!m?.weapons && !m.weapons.includes(debugSetup.weapon); },
+  get tip() { return c.tip(); },
+  change: d => { debugSetup.counts[c.name] = wrapStep(debugSetup.counts[c.name] || 0, d, c.max); },
+});
+
+// The setup screen's grid: a column per heading, rows `DEBUG_STEP` apart, and
+// the Dive row under the tallest column with the gate's line and the marked
+// row's tip between -- so a new fish or mod pushes them down, and the browser
+// suite holds them above the hint.
+const DEBUG_COLS = ['WHERE', 'FISH', 'DIVER', 'MODS'];
+const DEBUG_TOP = 236, DEBUG_STEP = 32, DEBUG_COL_W = 280;
+const debugColX = c => ARENA_W * (2 * c + 1) / (2 * DEBUG_COLS.length);
+function debugBottom() {
+  const items = MENUS.debug.items;
+  return DEBUG_TOP + DEBUG_STEP * Math.max(...DEBUG_COLS.map((_, c) => items.filter(r => r.col === c).length));
+}
+function debugRect(i) {
+  const items = MENUS.debug.items, r = items[i];
+  if (r.col === undefined) return { x: ARENA_W / 2 - ROW_W / 2, y: debugBottom() + 70, w: ROW_W, h: 30 };
+  const k = items.slice(0, i).filter(x => x.col === r.col).length;
+  return { x: debugColX(r.col) - DEBUG_COL_W / 2, y: DEBUG_TOP + k * DEBUG_STEP - 22, w: DEBUG_COL_W, h: 30 };
+}
+// A click on a value row: its left half is the label and moves nothing, then
+// ‹ lowers and › raises, either side of the value at three quarters across.
+function clickStep(r, x) {
+  return x < r.x + r.w / 2 ? 0 : x < r.x + r.w * 3 / 4 ? -1 : 1;
+}
+
 // ---------- menus ----------
 // A list of entries, so adding one is a line. Anything that depends on state --
 // a label, a sub-line, `dim` (a row that cannot be taken right now), `home`'s
@@ -543,13 +616,17 @@ const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 // is where the rows start, which the renderer and the hit-test share; `back`
 // is what Esc does, on a menu that has one. A screen is a menu exactly when it
 // has an entry here -- `step()` asks `MENUS[screen]` -- and the water stops on
-// every menu but one that `flows`.
+// every menu but one that `flows`. A row with `change(d)` holds a value that
+// the arrows and a click move -- the debug setup's -- and `rect` lays a menu's
+// rows out in a grid of its own.
 //
 // The end of a dive, either way it ends: Dive again or Go home (D90). The water
 // keeps flowing under it (D58). Go home opens marked (`endDive()`), so a stray
-// Enter or Space -- Space is the dash -- never starts a dive by accident.
+// Enter or Space -- Space is the dash -- never starts a dive by accident. In
+// the debug mode they read Again and Setup, and go there (D102).
 const END_TOP = ARENA_H / 2 + 100;
-const GO_HOME = { label: 'Go home', run: () => openMenu('home') };
+const GO_HOME = { get label() { return debugSetup ? 'Setup' : 'Go home'; },
+                  run: () => openMenu(debugSetup ? 'debug' : 'home') };
 // The gear and attribute screens' last row, and their Esc (D96).
 const BACK_HOME = { label: 'Back', run: () => openMenu('home') };
 // What a piece of gear requires and is not yet met (D98), on its row.
@@ -564,7 +641,8 @@ const END_MENU = {
   top: END_TOP,
   flows: true,
   back: GO_HOME.run,
-  items: [{ label: 'Dive again', run: () => reset() }, GO_HOME],
+  items: [{ get label() { return debugSetup ? 'Again' : 'Dive again'; },
+            run: () => (debugSetup ? debugDive() : reset()) }, GO_HOME],
 };
 
 const MENUS = {
@@ -593,7 +671,9 @@ const MENUS = {
       { label: 'Help',          run: () => openScreen('help') },
       { label: 'Options',       run: () => openScreen('options') },
       // The dive stays saved -- pausing wrote it -- and the title offers it back.
-      { label: 'Quit to title', run: () => openMenu('title') },
+      // The debug mode saved nothing, and goes back to its setup (D102).
+      { get label() { return debugSetup ? 'Quit to setup' : 'Quit to title'; },
+        run: () => openMenu(debugSetup ? 'debug' : 'title') },
     ],
   },
   home: {
@@ -668,6 +748,57 @@ const MENUS = {
         get dim() { return points() <= 0; },
         run: () => raise(a) })),
       BACK_HOME,
+    ],
+  },
+  // The debug mode's setup (D102): its code is the sub-line, the gate's line
+  // says what the chosen gate drew -- or the fish set in its place -- and Dive
+  // sits under the four columns. Nothing to go back to: the title is not here.
+  debug: {
+    heading: 'DEBUG',
+    get sub() {
+      return setupCode() + (debugSetup.ignored.length ? '      ignored: ' + debugSetup.ignored.join(', ') : '');
+    },
+    get lines() { return [gateLine()]; },
+    rect: debugRect,
+    items: [
+      { label: 'Layer', col: 0, tip: 'Layer: where the dive starts; every layer draws from pools of its own',
+        get value() { return debugSetup.layer + 1 + ' / ' + LAYERS.length; },
+        change: d => {
+          debugSetup.layer = wrapStep(debugSetup.layer, d, LAYERS.length - 1);
+          clampSetup(debugSetup);                // its gate, held inside the new layer
+        } },
+      { label: 'Gate', col: 0, tip: "Gate: which of the layer's gates it starts at; the line above says what that gate drew",
+        get value() { return debugSetup.gate + 1 + ' / ' + gatesIn(debugSetup.layer); },
+        change: d => { debugSetup.gate = wrapStep(debugSetup.gate, d, gatesIn(debugSetup.layer) - 1); } },
+      { label: 'Seed', col: 0, tip: "Seed: the dive's dice; one seed draws the same dive every time, and a change draws a new one",
+        get value() { return debugSetup.seed; },
+        change: () => { debugSetup.seed = newSeed(); } },
+      { label: 'Immortal', col: 0, tip: 'Immortal: nothing can hurt you',
+        get value() { return debugSetup.immortal ? 'on' : 'off'; },
+        change: () => { debugSetup.immortal = !debugSetup.immortal; } },
+      { label: 'One-shot', col: 0, tip: 'One-shot: every shot does ' + ONE_SHOT + ' damage, enough for anything',
+        get value() { return debugSetup.oneShot ? 'on' : 'off'; },
+        change: () => { debugSetup.oneShot = !debugSetup.oneShot; } },
+      ...DEBUG_COUNTS.filter(c => c.col === 1).map(countRow),
+      { label: 'Weapon', col: 2, get value() { return debugSetup.weapon; },
+        get tip() { return weaponTip(WEAPONS.find(w => w.name === debugSetup.weapon)); },
+        change: d => {
+          const i = WEAPONS.findIndex(w => w.name === debugSetup.weapon);
+          debugSetup.weapon = WEAPONS[wrapStep(i, d, WEAPONS.length - 1)].name;
+        } },
+      { label: 'Tier', col: 2,
+        get tip() { return weaponTiersTip(WEAPONS.find(w => w.name === debugSetup.weapon)); },
+        get value() {
+          const w = DEBUG_COUNTS.find(c => c.name === debugSetup.weapon);
+          return (debugSetup.counts[w.name] || 0) + ' / ' + w.max;
+        },
+        change: d => {
+          const w = DEBUG_COUNTS.find(c => c.name === debugSetup.weapon);
+          debugSetup.counts[w.name] = wrapStep(debugSetup.counts[w.name] || 0, d, w.max);
+        } },
+      ...DEBUG_COUNTS.filter(c => c.col === 2).map(countRow),
+      ...DEBUG_COUNTS.filter(c => c.col === 3).map(countRow),
+      { label: 'Dive', tip: 'Dive: plays this setup; R plays it again from any screen', run: () => debugDive() },
     ],
   },
 };

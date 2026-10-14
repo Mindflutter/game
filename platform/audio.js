@@ -3,7 +3,6 @@
 
 let audio = null;
 let master = null;
-let muted = false;
 
 // One voice: an oscillator through its own volume envelope. Takes the context
 // as an argument so the checks can render it offline and measure how loud it is.

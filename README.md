@@ -54,6 +54,26 @@ keyboard events through the input layer, including non-Latin layouts.
 > several script tags mean a stale one serves a mix of old and new files, which
 > produces baffling bugs.
 
+## Debug mode
+
+For playtesting by hand: **`index.html?debug`** opens a setup screen in place
+of the title — the layer and gate, which fish and how many, the weapon and its
+tier, equipment, attributes and mods, immortal, one-shot and the seed. Pick
+with the arrows or the mouse (Shift moves a value by five, and past either end
+a value comes round to the other), then Dive.
+
+In a debug dive, **R** plays the same setup again and **Backspace** goes back
+to the setup screen; the pause menu and the end screens lead there too. It
+starts muted — **M** turns the sound on — and it never reads or writes your
+save.
+
+The address bar keeps the setup as a code — `index.html?debug=L2,G7,S4471,Harpoon2,puffer4`
+— so a URL pasted into an issue replays it exactly, seed and all. The fish set
+replace the chosen gate's batch; the dive then runs on as drawn. The bright line
+under the columns is the marked row's tip: what it is and what it changes —
+a fish's behaviour and numbers, what a tier, point or pick adds, and why a row
+is dim (Barbs goes only with the Harpoon).
+
 ## Scenarios
 
 Named setups for looking at one thing at a time, on the same server:
@@ -74,18 +94,10 @@ Named setups for looking at one thing at a time, on the same server:
 | `index.html?dev=layer-3&play` | The top of the third layer, carrying a kit of sixteen mods |
 | `…&seed=4471` | Any of the above as an exact, repeatable dive |
 
-Two dev flags work on any URL, with a scenario or without, and stay on after
-R:
-
-| Flag | What it does |
-|---|---|
-| `&immortal` | Nothing can hurt you |
-| `&damage=<n>` | Every shot does `n` damage; a bare `&damage` is 100, one shot for anything |
-
-To combine them, the first argument goes after `?` and every later one after
-`&`, in any order: `index.html?dev=last-batch&play&immortal&damage`. Without a
-scenario a flag leads: `index.html?immortal&damage=5`. `?test` is the one
-exception — it runs only when it is the whole query.
+To combine arguments, the first goes after `?` and every later one after `&`,
+in any order: `index.html?dev=last-batch&play&seed=4471`. `?test` is the one
+exception — it runs only when it is the whole query. Immortality and one-shot
+damage are rows of the debug mode's setup.
 
 Drop `&play` and the scenario loads **frozen** — nothing advances until you call
 `advance(30)` in the console. That is how the tests and the bot drive the game

@@ -176,7 +176,9 @@ and more attacks, wait in `ideas.md`.
 
 1. A line in `ENEMY_TYPES`, with the fields above. A new behaviour is a new
    field plus its branch in the enemy loop, and a check on its state
-   transitions (`plan.md` → S5 (content)'s exit).
+   transitions (`plan.md` → S5 (content)'s exit) — and its line in
+   `DEBUG_BEHAVIOURS`, which says what it does on the debug setup's tip (D102
+   (the debug mode)).
 2. A row in the roster — and in its behaviour's table, if it has one — and a
    section here under its `name`. `npm test` fails until both match the code.
 3. To meet it in a dive, a batch in a layer's pool names it

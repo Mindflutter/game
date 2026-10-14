@@ -453,6 +453,15 @@ function drawField() {
                  '   drops ' + drops.length +
                  '   sparks ' + particles.length, 16, 70);
   }
+
+  // A debug dive says so, with its setup and its two keys (D102), where a
+  // screenshot for an issue will carry them.
+  if (debugSetup) {
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#4d7a8a';
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.fillText('DEBUG  ' + setupCode() + '      R again   Backspace setup', 16, ARENA_H - 16);
+  }
 }
 
 // The end of a dive, either way it ends: death, or the win at the bottom of the
@@ -554,6 +563,62 @@ function drawHome() {
   });
 }
 
+// The marked row's tip on the debug setup (D102), one line: a check measures
+// every tip at this font against the view's width.
+const DEBUG_TIP_FONT = '15px system-ui, sans-serif';
+
+// The debug mode's setup (D102): which rows there are, where each sits and
+// what it holds are `MENUS.debug` and `debugRect()` in game/; this prints them.
+// A value row reads its label on the left and `‹ value ›` at three quarters
+// across, where a click on either side moves it (`clickStep()`).
+function drawDebug() {
+  const menu = MENUS.debug;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#bffcff';
+  ctx.font = '40px system-ui, sans-serif';
+  ctx.fillText(menu.heading, ARENA_W / 2, 100);
+  ctx.fillStyle = '#7fb0c0';
+  ctx.font = '15px system-ui, sans-serif';
+  ctx.fillText(menu.sub, ARENA_W / 2, 138);
+  ctx.fillStyle = '#456b78';
+  ctx.font = '13px system-ui, sans-serif';
+  DEBUG_COLS.forEach((name, c) => ctx.fillText(name, debugColX(c), DEBUG_TOP - 44));
+
+  menu.items.forEach((item, i) => {
+    const r = debugRect(i), on = i === menuIndex, y = r.y + 21;
+    if (on) {
+      ctx.fillStyle = 'rgba(79, 240, 255, 0.08)';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+    }
+    ctx.fillStyle = item.dim ? (on ? '#5d8b99' : '#2f5563') : (on ? '#bffcff' : '#7fb0c0');
+    ctx.font = (on ? '17px' : '16px') + ' system-ui, sans-serif';
+    if (!item.change) {
+      ctx.textAlign = 'center';
+      ctx.fillText(on ? '\u203a  ' + item.label + '  \u2039' : item.label, r.x + r.w / 2, y);
+      return;
+    }
+    const v = r.x + r.w * 3 / 4;
+    ctx.textAlign = 'left';
+    ctx.fillText(item.label, r.x + 12, y);
+    ctx.textAlign = 'center';
+    ctx.fillText(String(item.value), v, y);
+    ctx.fillStyle = on ? '#4ff0ff' : '#2f5563';
+    ctx.fillText('\u2039', v - r.w * 0.19, y);
+    ctx.fillText('\u203a', v + r.w * 0.19, y);
+  });
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#7fb0c0';
+  ctx.font = '15px system-ui, sans-serif';
+  menu.lines.forEach((line, k) => ctx.fillText(line, ARENA_W / 2, debugBottom() + 14 + k * 22));
+  ctx.fillStyle = '#bffcff';
+  ctx.font = DEBUG_TIP_FONT;
+  ctx.fillText(menu.items[menuIndex].tip, ARENA_W / 2, debugBottom() + 42);
+
+  drawHint('\u2191 \u2193 or mouse to choose,  \u2190 \u2192 or click \u2039 \u203a to change (Shift: by 5),' +
+           '  Enter on Dive or R to dive.  In a dive: R again, Backspace back here.  M: sound');
+}
+
 function drawHelp() {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#9ef7ff';
@@ -647,6 +712,7 @@ function draw() {
   else if (screen === 'gear' || screen === 'attributes') drawMenu(MENUS[screen]);
   else if (screen === 'help')    drawHelp();
   else if (screen === 'options') drawOptions();
+  else if (screen === 'debug')   drawDebug();
   else {
     drawField();
     coverMargins();

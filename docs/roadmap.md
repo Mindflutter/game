@@ -16,7 +16,9 @@ behaviours, the Harpoon and the Knife with owning and carrying, three pieces of
 equipment, Heart and Strength, swift and footwork, Barbs, three boosts, three
 layers. Every design call in it is Claude's, delegated, and open. Igor played
 it, 2026-10-14; his notes are in `ideas.md` → Open — from playing S5
-(content), each with the home Claude proposes for it. **Next: those notes,
+(content), each with the home Claude proposes for it. The first, the debug
+mode, is built (D102 (the debug mode); root `README.md` → Debug mode), so a
+note can now be played alone. **Next: the rest of those notes,
 discussed one at a time; `/simplify`; the commit — then S5 (content)'s exit is
 Igor's to call.**
 

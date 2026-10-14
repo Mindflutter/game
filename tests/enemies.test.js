@@ -93,7 +93,7 @@ describe('the archer (spit)', () => {
     expect(shots(g).length).toBe(0);
   });
 
-  it('lets a shot through the dash\'s invulnerability and &immortal, unspent', () => {
+  it('lets a shot through the dash\'s invulnerability and immortality, unspent', () => {
     const S = spit();
     for (const guard of ['hurt', 'immortal']) {
       const g = alone('archer', S.range - 20);

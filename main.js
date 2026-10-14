@@ -15,7 +15,18 @@ function frame(now) {
 
   advanceBy(elapsed);
   draw();
+  showSetup();
   requestAnimationFrame(frame);
+}
+
+// The debug mode's setup, kept in the address bar as it changes (D102): the
+// URL is the setup, so pasted into an issue it replays exactly. Some browsers
+// refuse to rewrite a file:// address; the code is on screen either way.
+let shownCode = '';
+function showSetup() {
+  if (!debugSetup || setupCode() === shownCode) return;
+  shownCode = setupCode();
+  try { history.replaceState(null, '', '?debug=' + shownCode); } catch (e) { /* on screen anyway */ }
 }
 
 // ---------- boot ----------
@@ -27,13 +38,9 @@ const params = new URLSearchParams(location.search);
 const seedParam = params.get('seed');
 const seed = seedParam === null ? undefined : Number(seedParam) >>> 0;
 const devScenario = params.get('dev');
-
-// Dev flags, combinable with everything above and with each other: &immortal
-// (nothing hurts you) and &damage=<n> (every shot does n; a bare &damage is
-// 100, one shot for anything in the game). Set before the first reset(), which
-// is what applies the damage, and every later reset() applies it again.
-immortal = params.has('immortal');
-if (params.has('damage')) damageOverride = Number(params.get('damage')) || 100;
+// `?debug`, bare or with a setup's code (D102): its setup screen, in place of
+// the title. It reads no save, and starts muted (`openDebug()`).
+const debugCode = params.get('debug');
 
 // Silent whenever the game is being *driven* rather than played: `?test` runs
 // unattended, and `?dev=` scenarios are what Playwright drives. Neither should
@@ -69,6 +76,10 @@ if (devScenario !== null) {
     console.error('no such scenario: "' + devScenario + '". Known: ' +
                   Object.keys(SCENARIOS).join(', '));
   }
+} else if (debugCode !== null) {
+  // The save is the player's: the debug mode neither reads it here nor, in
+  // game/, ever writes it.
+  openDebug(debugCode, seed);
 } else {
   // No reset(): the game opens on the title with no dive, which is simply the
   // state's own starting values (game/state.js). Only Dive or Continue begin one.
@@ -88,9 +99,10 @@ if (devScenario !== null) {
 }
 
 // The other moments a dive is put down (D70): the tab hidden, the page closed.
-// game/ writes on pause, on a purchase and when a dive ends.
-window.addEventListener('pagehide', () => persist(saveText()));
-document.addEventListener('visibilitychange', () => { if (document.hidden) persist(saveText()); });
+// game/ writes on pause, on a purchase and when a dive ends. These ask through
+// `saveNow()` too, which writes nothing in the debug mode (D102).
+window.addEventListener('pagehide', () => saveNow());
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });
 
 // Advances the simulation by n fixed ticks, then draws once. The bot and the
 // checks use this instead of waiting for wall-clock time.

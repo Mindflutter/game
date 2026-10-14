@@ -107,6 +107,9 @@ draft, which is why they are banned (D32).
   silently. See D39 for the list.
 - `?dev=<name>&seed=<n>` loads a named scenario from `SCENARIOS` (D37) — one
   enemy, one batch, one layer, in isolation. The bot drives the same mechanism.
+- `?debug` is the same idea for Igor's hands (D102): a setup screen for the
+  place, the fish and the kit, muted until M, never touching the save. An
+  issue that carries its `?debug=<code>` URL replays exactly, seed and all.
 - Every behavioural change lands with a check **that fails without it**. A check
   that can only pass proves nothing — verify it by breaking the rule it guards.
 - **A bug gets its root cause before its fix**: reproduce it with a failing

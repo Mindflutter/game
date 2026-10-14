@@ -19,7 +19,7 @@ describe('the lunge (D64)', () => {
   it('never charges without a full wind-up, holds its line through it, and stays in view without jumping', () => {
     fc.assert(fc.property(fc.constantFrom('boss', 'mini-boss'),
                           fc.integer({ min: 0, max: 2 ** 32 - 1 }), walk, (name, seed, steps) => {
-      // One lunger alone, and a player kept alive (&immortal) who walks and
+      // One lunger alone, and a player kept alive (`immortal`) who walks and
       // never fires, so the fight lasts as long as the test wants.
       const g = loadGame();
       g.immortal = true;

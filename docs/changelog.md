@@ -6,6 +6,27 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**The URL flags `&immortal` and `&damage` are gone** (D102 (the debug mode))
+Igor: "yes, remove redundant". The debug mode's rows do their job, and the
+tests and the bot set immortality and the damage override directly. The
+debug mode now starts muted — "silence debug by default" — and M turns the
+sound on: the mute moved into `game/` state, beside the volume.
+
+**The debug mode** (D102 (the debug mode))
+`?debug` opens a setup screen in place of the title: the layer and gate, which
+fish and how many, the weapon and its tier, equipment, attributes and mods,
+immortal, one-shot and the seed — four columns built from the tables. Dive
+plays it; R plays it again from any screen, Backspace goes back to it, and
+every way out of a debug dive leads there. A value comes round at either end.
+Every row has a tip under the columns — what it is and what it changes, worked
+out from the records, so Barbs, dim with the Gun, says it goes with the
+Harpoon. The save is never read or
+written: every save now asks `saveNow()`, the platform's included, and it
+writes nothing in the debug mode. The setup travels as a code the address bar
+keeps — `?debug=L2,G7,S4471,Harpoon2,puffer4` — so an issue carrying the URL
+replays exactly. Menus gained rows that hold a value, and grids of their own.
+The first of Igor's notes from playing S5 (content) to be built.
+
 **Recorded: Igor's notes from playing S5 (content)**
 Each in `ideas.md` → Open — from playing S5 (content), in his words, with the
 home Claude proposes for it: a debug mode, the screens, the stage's fish and

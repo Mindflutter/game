@@ -169,7 +169,7 @@ function weaveStep(e, ux, uy, d, dt) {
 }
 
 // The one way the diver is hurt -- a bite, a shot, a burst (D95). Nothing while
-// the i-frames or the dash's invulnerability run, or under &immortal;
+// the i-frames or the dash's invulnerability run, or while `immortal`;
 // otherwise the i-frames, the batch marked as hit for `untouched`, and a heart
 // -- or the suit's guard, while it has one left this batch (D100). Returns
 // whether it landed, so a shot that did not is not spent.
@@ -375,13 +375,14 @@ function clearBatch() {
 // written on the record, so a card can never advertise a number the mod does
 // not deliver, and adding a mod still costs exactly one line.
 // `n` picks of it at once: a layer end's card gives an ordinary mod at the
-// bigger step (D85), and its numbers say so.
-function modPreview(mod, n = 1) {
-  const after = { ...player };
+// bigger step (D85), and its numbers say so. `base` is the diver it is worked
+// out on: the one in play, or the debug setup's (D102) before any dive.
+function modPreview(mod, n = 1, base = player) {
+  const after = { ...base };
   for (let i = 0; i < n; i++) mod.apply(after);
   return Object.keys(after)
-    .filter(k => typeof after[k] === 'number' && after[k] !== player[k])
-    .map(k => ({ stat: k, from: player[k], to: after[k] }));
+    .filter(k => typeof after[k] === 'number' && after[k] !== base[k])
+    .map(k => ({ stat: k, from: base[k], to: after[k] }));
 }
 
 // The beat is over: deal the layer end's cards (D85), the middle one marked.
@@ -432,20 +433,20 @@ function pickWeapon(w) {
     meta.owned.push(w.name);
   }
   meta.carried = w.name;
-  persist(saveText());
+  saveNow();
 }
 
 function buy(g) {
   if (!canBuy(g)) return;
   meta.bank -= nextCost(g);
   meta.gear[g.name] = (meta.gear[g.name] || 0) + 1;
-  persist(saveText());
+  saveNow();
 }
 
 function raise(a) {
   if (points() <= 0) return;
   meta.spent[a.name] = (meta.spent[a.name] || 0) + 1;
-  persist(saveText());
+  saveNow();
 }
 
 // Death or the win: the dive's gems are banked however it ended (D67), the
@@ -455,7 +456,14 @@ function endDive() {
   meta.deepest = Math.max(meta.deepest, cameraY);
   diveLive = false;
   menuIndex = END_MENU.items.indexOf(GO_HOME);   // the end screen opens on Go home (D90)
-  persist(saveText());
+  saveNow();
+}
+
+// Every save goes through here, the platform's own too -- the tab hidden, the
+// page closed -- since game/ decides when (D77). Never in the debug mode
+// (D102): its meta is the setup's, and the save on disk is the player's.
+function saveNow() {
+  if (!debugSetup) persist(saveText());
 }
 
 // Every way onto a menu screen, so none can leave the cursor past the end of
@@ -463,6 +471,170 @@ function endDive() {
 function openMenu(name) {
   screen = name;
   menuIndex = 0;
+}
+
+// ---------- the debug mode ----------
+// `?debug` (D102) opens its setup screen in place of the title, on a fresh
+// meta and muted until M: main.js reads no save for it, and `saveNow()` writes
+// none. `code` is a setup's, from the URL -- empty for a bare `?debug`.
+function openDebug(code, seed) {
+  debugSetup = parseSetup(code, seed);
+  meta = freshMeta();
+  diveLive = false;
+  muted = true;
+  openMenu('debug');
+}
+
+// A setup as text, for the address bar and an issue: tokens of a name and a
+// number -- a name's spaces as underscores -- and two flags, comma-separated.
+// The layer, gate, seed and the weapon carried are always written, the rest
+// only when set: `L2,G7,S4471,Harpoon2,puffer4,Dash_reach1,immortal`.
+function setupCode(s = debugSetup) {
+  const token = (name, n) => name.replace(/ /g, '_') + n;
+  return ['L' + (s.layer + 1), 'G' + (s.gate + 1), 'S' + s.seed,
+          token(s.weapon, s.counts[s.weapon] || 0),
+          ...DEBUG_COUNTS.filter(c => c.col !== undefined && s.counts[c.name] > 0)
+                         .map(c => token(c.name, s.counts[c.name])),
+          ...(s.immortal ? ['immortal'] : []), ...(s.oneShot ? ['oneshot'] : [])].join(',');
+}
+
+// The reverse, from whatever the URL holds. What it cannot name -- a typo, a
+// record renamed since -- is kept in `ignored` and shown, never guessed at,
+// and every number is held in range. Without an `S`, the seed given or a
+// fresh one.
+function parseSetup(code, seed = newSeed()) {
+  const s = { layer: 0, gate: 0, seed, immortal: false, oneShot: false,
+              weapon: WEAPONS[0].name, counts: {}, ignored: [] };
+  for (const token of (code || '').split(',').filter(Boolean)) {
+    const [, word, digits] = token.match(/^(.*?)(\d*)$/);
+    const name = word.replace(/_/g, ' '), n = Number(digits);
+    if (token === 'immortal') s.immortal = true;
+    else if (token === 'oneshot') s.oneShot = true;
+    else if (!digits) s.ignored.push(token);
+    else if (name === 'L') s.layer = n - 1;
+    else if (name === 'G') s.gate = n - 1;
+    else if (name === 'S') s.seed = n >>> 0;
+    else if (DEBUG_COUNTS.some(c => c.name === name)) {
+      s.counts[name] = n;
+      if (WEAPONS.some(w => w.name === name)) s.weapon = name;
+    }
+    else s.ignored.push(token);
+  }
+  return clampSetup(s);
+}
+
+// Every number of a setup held in range: a layer that exists, a gate in it,
+// and each count between nothing and its cap.
+function clampSetup(s) {
+  const within = (n, max) => Math.max(0, Math.min(max, n));
+  s.layer = within(s.layer, LAYERS.length - 1);
+  s.gate = within(s.gate, gatesIn(s.layer) - 1);
+  for (const c of DEBUG_COUNTS) if (c.name in s.counts) s.counts[c.name] = within(s.counts[c.name], c.max);
+  return s;
+}
+
+// A setup row's step (D102): at one end, a step past it comes round to the
+// other; anywhere else it moves, and stops at the end -- so Shift's five reach
+// the end before they come round.
+function wrapStep(n, d, max) {
+  if (d < 0 && n <= 0) return max;
+  if (d > 0 && n >= max) return 0;
+  return Math.max(0, Math.min(max, n + d));
+}
+
+// How many gates a layer has: what its stretches draw, each held to its pool.
+function gatesIn(l) {
+  return LAYERS[l].stretches.reduce((n, st) => n + Math.min(st.draw, st.pool.length), 0);
+}
+
+// The setup's own batch, `[type, count]` like any other, in the table's order;
+// empty when no fish is set, and the gate brings what it drew.
+function setupFish(s) {
+  return ENEMY_TYPES.filter(e => s.counts[e.name] > 0).map(e => [e.name, s.counts[e.name]]);
+}
+
+// The setup screen's line under its columns: what the chosen gate drew on this
+// seed, and the fish set in its place. It draws the plan as a dive does, which
+// reseeds the randomness -- harmless here, since every dive reseeds it.
+function gateLine() {
+  const s = debugSetup, fish = setupFish(s);
+  seedRng(s.seed);
+  const drawn = drawPlan();
+  const list = batch => batch.map(([name, n]) => n + ' ' + name).join(', ');
+  return LAYERS[s.layer].name + ', gate ' + (s.gate + 1) + ': ' +
+         list(drawn[drawn.findIndex(e => e.layer === s.layer) + s.gate].batch.enemies) +
+         (fish.length ? '   →   in its place: ' + list(fish) : '');
+}
+
+// The setup's tips (D102): the line under its columns for the marked row --
+// what the row is, and what a piece moves. Worked out from the records and
+// their `apply`, as the mod cards' numbers are (D52), so a tip cannot tell a
+// number the game does not deliver; counted on the diver a dive starts with,
+// carrying the setup's weapon.
+const signed = n => (n < 0 ? '-' : '+') + +Math.abs(n).toFixed(2);
+function moves(apply, w = WEAPONS.find(x => x.name === debugSetup.weapon)) {
+  return modPreview({ apply }, 1, { ...PLAYER_START, ...shotOf(w) })
+    .map(c => c.stat + ' ' + signed(c.to - c.from)).join(', ');
+}
+const needsLine = g => (g.requires ? '   owning it needs ' +
+  Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', ') : '');
+function fishTip(e) {
+  const kind = Object.keys(e).find(k => typeof e[k] === 'object');
+  return e.name + ': ' + DEBUG_BEHAVIOURS[kind || 'chase'] +
+         (e.enters === 'bottom' ? '; rises from below' : '') +
+         (e.carries === false ? '; never glows, so carries no mod' : '') +
+         '   hp ' + e.hp + ' \u00b7 speed ' + e.speed + ' \u00b7 ' + e.value + (e.value === 1 ? ' gem' : ' gems');
+}
+// Tier by tier -- or once, when every tier moves the same.
+function tiersTip(g, w) {
+  const each = g.tiers.map(t => moves(t.apply, w));
+  return each.every(m => m === each[0]) ? each[0] + ' a tier, ' + each.length + ' tiers'
+                                        : each.map((m, i) => 'tier ' + (i + 1) + ': ' + m).join('  \u00b7  ');
+}
+function gearTip(g) {
+  return g.name + ': ' + tiersTip(g) + needsLine(g);
+}
+function pointTip(a) {
+  const by = [...WEAPONS, ...EQUIPMENT].filter(g => g.requires?.[a.name]);
+  return a.name + ': ' + moves(a.apply) + ' a point' +
+         by.map(g => '   owning the ' + g.name + ' needs ' + g.requires[a.name]).join('');
+}
+function modTip(m) {
+  const only = m.weapons && ' the ' + m.weapons.join(' or the ');
+  return m.name + ': ' + m.desc + ' \u2014 ' +
+         moves(m.apply, m.weapons ? WEAPONS.find(w => w.name === m.weapons[0]) : undefined) +
+         ' a pick, up to ' + m.max +
+         (!only ? '' : m.weapons.includes(debugSetup.weapon) ? '   with' + only + ' only' : '   carry' + only + ' to take it') +
+         (m.end ? "   a layer end's own" : '');
+}
+function weaponTip(w) {
+  return w.name + ': ' + Object.entries(shotOf(w)).map(([k, v]) => k + ' ' + v).join(' \u00b7 ') + needsLine(w);
+}
+function weaponTiersTip(w) {
+  return w.name + "'s " + tiersTip(w, w);
+}
+
+// The setup, played: from its screen, and by R or Again from any. Its kit
+// stands in for what persists -- a fresh meta holding the setup's gear and
+// points -- so reset() applies them exactly as a dive from home would. Its
+// fish take the gate's place in a copy of the plan's entry, never in the pool
+// the entry was drawn from.
+function debugDive() {
+  const s = debugSetup, n = name => s.counts[name] || 0;
+  const weapon = WEAPONS.find(w => w.name === s.weapon);
+  meta = { ...freshMeta(), carried: weapon.name, owned: WEAPONS.map(w => w.name),
+           gear: Object.fromEntries([weapon, ...EQUIPMENT].map(g => [g.name, n(g.name)])),
+           spent: Object.fromEntries(ATTRIBUTES.map(a => [a.name, n(a.name)])) };
+  immortal = s.immortal;
+  damageOverride = s.oneShot ? ONE_SHOT : 0;
+  startScenario({
+    batch: drawn => drawn.findIndex(e => e.layer === s.layer) + s.gate,
+    // A weapon mod only with a weapon it fits (D99), as a fish carries it.
+    kit: MODS.filter(m => !m.weapons || m.weapons.includes(weapon.name))
+             .flatMap(m => Array(n(m.name)).fill(m.name)),
+  }, s.seed);
+  const fish = setupFish(s);
+  if (fish.length) plan[batchIndex] = { ...plan[batchIndex], batch: { enemies: fish } };
 }
 
 // ---------- the clock ----------
@@ -551,15 +723,29 @@ function update(dt) {
 }
 
 function step(dt) {
+  // The debug mode's two keys, on every screen (D102): the same setup again --
+  // on its own screen, the first time -- and back to that screen.
+  if (debugSetup && tapped(DEBUG_AGAIN)) return debugDive();
+  if (debugSetup && tapped(DEBUG_SETUP) && screen !== 'debug') return openMenu('debug');
+
   const menu = MENUS[screen];
   if (menu) {
     const items = menu.items;
-    const hovered = rowUnder(aim.x, aim.y, items.length, menu.top);
+    const hovered = items.findIndex((_, i) => inRect(rectOf(menu, i), aim.x, aim.y));
     if (mouseMoved() && hovered >= 0) menuIndex = hovered;
     menuIndex = moveCursor(menuIndex, items.length);
 
-    if (tapped(GO)) items[menuIndex].run();
-    else if (tapped(CLICK) && hovered >= 0) items[hovered].run();
+    // A row holding a value moves with the arrows, five at a time with Shift;
+    // Enter steps it up, and a click steps it toward the side clicked.
+    const item = items[menuIndex], by = FAST.some(k => keys.has(k)) ? 5 : 1;
+    if (item.change && tapped(LEFT)) item.change(-by);
+    else if (item.change && tapped(RIGHT)) item.change(by);
+    else if (tapped(GO)) item.run ? item.run() : item.change(by);
+    else if (tapped(CLICK) && hovered >= 0) {
+      const h = items[hovered], d = h.change && clickStep(rectOf(menu, hovered), aim.x);
+      if (!h.change) h.run();
+      else if (d) h.change(d * by);
+    }
     else if (justPressed.has('Escape') && menu.back) menu.back();
     return;
   }
@@ -587,7 +773,7 @@ function step(dt) {
   if (justPressed.has('Escape')) {
     resumeTo = screen;
     openMenu('paused');
-    persist(saveText());
+    saveNow();
     return;
   }
 

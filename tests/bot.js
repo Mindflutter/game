@@ -73,7 +73,7 @@ export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false
   const g = loadGame();
   if (scenario) g.applyScenario(scenario, seed);
   else g.reset(seed);
-  g.immortal = immortal;                   // the &immortal flag, set once
+  g.immortal = immortal;                   // immortality, set once
   const base = g.batchIndex;
 
   const TICK = g.FIXED_DT;               // the game's own step, not a copy

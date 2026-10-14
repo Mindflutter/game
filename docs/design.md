@@ -32,7 +32,8 @@ game/       content.js  every tuning number + all content tables
             state.js    dive state, what persists (meta), reset(), the
                         snapshot and the save text
             logic.js    step() — arrivals, the gate, the descent, movement,
-                        collision; the plan; home's buying and banking
+                        collision; the plan; home's buying and banking;
+                        the debug mode's setup
                         ── Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
@@ -67,7 +68,10 @@ for exactly seven names:
 written and builds the text; keeping it is the platform's. Loading goes the
 other way — `main.js` reads the stored text at boot and calls `loadSave()` — so
 it needs no name. Under `?test` and `?dev=` it is a no-op, and nothing is
-loaded either, so no check ever reads or overwrites a player's save.
+loaded either, so no check ever reads or overwrites a player's save. Every
+write asks `saveNow()` in `game/` — `main.js`'s own on a hidden or closed page
+included — and it writes nothing in the debug mode (D102 (the debug mode)),
+which loads nothing either.
 
 Exactly seven, and **enforced rather than claimed**: `npm test` loads `game/`
 into a Node `vm` with only these seven stubbed, so reaching for an eighth fails
@@ -121,6 +125,10 @@ title ──Start──> home ──Dive──> playing ──Esc──> paused 
               │ ▲              won
               │ └──Back / Esc── gear, attributes
               └──Gear, Attributes──┘
+
+?debug ──> debug ──Dive / R──> playing ──Backspace──> debug     (D102)
+             ▲                   └──Esc──> paused ──Quit to setup──> debug
+             └──Setup / Esc── dead, won ──Again / R──> playing
 ```
 
 The mod screen is the layer end's pick (D85): a card is marked, then taken on
@@ -155,7 +163,13 @@ home opening marked so a stray Enter or Space — Space is the dash — does wha
 any key did before, and a click only takes the button under it (D90). It
 `flows`: the water drifts on under it (D58). `won` is reached only by killing
 the last layer's boss (D68).
-Menu and options rows are full-width bands from `rowRect` in `content.js`.
+Menu and options rows are full-width bands from `rowRect` in `content.js`; a
+menu with a grid of its own names it as `rect` — the debug setup's
+`debugRect` — and `rectOf()` reads either, for the renderer and the hit-test
+alike. A row with `change(d)` holds a value (the debug setup's): the arrows
+move it, five at a time with Shift, Enter steps it up, and a click on either
+side of it moves it that way (`clickStep()`); a step past either end comes
+round to the other (`wrapStep()`).
 
 **`home` exists only between dives** (D76). With a dive under way the title's
 Start reads Continue and goes straight back into it, to `resumeTo` — play, or
@@ -425,9 +439,9 @@ state and `bulletId` — with the offered cards by name and `at`, the screen pla
 to. `restore()` is the reverse and leaves `resumeTo` set, so Continue goes
 straight back to it (D90). `loadSave(text)` returns `''` when it loaded or found nothing,
 and otherwise a reason, having changed nothing; `main.js` then copies the text
-aside under `abyss-save-rejected` and the title says why. Written by `persist`
-on pause, on a purchase, when a dive ends, and — from `main.js` — when the page
-is hidden or closed. `SAVE_VERSION` is 4. `migrate()` brings an older save up
+aside under `abyss-save-rejected` and the title says why. Written through
+`saveNow()` on pause, on a purchase, when a dive ends, and — asked by `main.js`
+— when the page is hidden or closed; never in the debug mode. `SAVE_VERSION` is 4. `migrate()` brings an older save up
 one version at a time as it loads: a v1 dive's player gains the Gun's shot
 speed and radius as they were then (D83); a v2 dive loses its rank, starts with
 nothing dropped or running and no fish lit in the batch it was in, and — saved
@@ -441,7 +455,7 @@ by the first build of its version, must all load in every later build.
 **Damage.** Contact, an enemy's shot or a burst costs 1 HP behind 1s of
 invulnerability, during which the player blinks — without the i-frames a
 touching enemy drains 3 HP in 50ms. Every hurt goes through `hurtPlayer()`
-(D95): `&immortal`, the i-frames, `batchHit`, the shake and death in one place
+(D95): `immortal`, the i-frames, `batchHit`, the shake and death in one place
 — and the suit's guard, which takes the hit instead of a heart while
 `guardLeft` lasts, refilled to `player.guard` as each batch arrives (D100).
 
@@ -517,17 +531,21 @@ taller cards push all three down (D85).
 Help, the mod cards and `home` are guarded — `home` twice: its layer list
 (`MENUS.home.lines`, with every layer shown) ends above its rows, and its rows,
 read from `rowRect()`, above the hint; `HOME_TOP` is derived from
-`LAYERS.length`. Options and the other
-menus stack rows the same way and are not.
+`LAYERS.length`. Every menu's rows are held above the hint too, wherever
+`rectOf()` puts them — the gear and attribute lists (D96) and the debug
+setup's grid (D102) grow from tables. Options stacks its rows the same way and
+is not.
 
 ## Scenarios
 
 Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42).
-Every scenario and the URL for it, the dev flags, and how to combine them are
-in the root `README.md` → Scenarios. `?dev=<name>` loads one **frozen** —
+Every scenario and the URL for it, and how to combine arguments, are in the
+root `README.md` → Scenarios. `?dev=<name>` loads one **frozen** —
 nothing advances until `advance(n)` — and `&play` runs it live.
 
-`applyScenario(name, seed)` resets, then applies the record: `batch` to start
+`applyScenario(name, seed)` looks the record up and `startScenario(s, seed)`
+plays it — the debug mode's setup goes through it too. It resets, then applies
+the record: `batch` to start
 at that batch's depth — a number, or a function of the drawn plan where the
 place is only known once drawn — `spawn: false` to stop new arrivals
 (`queuePaused`), a list of `[type, x, y]` placed in the view at nominal speed
@@ -535,13 +553,50 @@ with no jitter, and a `kit` of mod names taken as picks. An
 unknown name logs the known ones and does not throw. A scenario never reads or
 writes the save.
 
-The two dev flags, `&immortal` and `&damage=<n>`, survive R: `main.js` sets
-them, and `reset()` leaves them alone and re-applies the damage. `?test` runs
-only as the whole query.
+The two dev flags, `immortal` and `damageOverride`, survive Dive again: the
+debug mode's setup sets them at every dive, and the tests and the bot set them
+directly; `reset()` leaves them alone and re-applies the damage. No URL sets
+them. `?test` runs only as the whole query.
 
 `advance(n)` runs exactly n fixed ticks and draws once — no wall clock involved.
 This is what the bot drives, and the same entries it selects by name, so there
 is no separate test harness. Adding a scenario is a line.
+
+## The debug mode
+
+For playtesting by hand (D102): `?debug` boots into `openDebug(code, seed)`
+instead of the title — a fresh `meta`, no dive, no save read, muted until M —
+and the `debug` screen, a menu of value rows in four columns built from the tables
+(`DEBUG_COUNTS`: the fish, equipment, attributes, mods and each weapon's tier,
+each with its cap). `debugSetup` holds the setup, and stays set for the
+session: while it is, `saveNow()` writes nothing.
+
+A setup is text too: `setupCode()` writes it — `L2,G7,S4471,Harpoon2,puffer4`,
+the layer, gate, seed and weapon always, the rest only when set — and
+`parseSetup()` reads it back, keeping what it cannot name in `ignored`, shown on
+the screen, and holding every number in range (`clampSetup()`). `main.js`
+keeps the address bar on `?debug=<code>` as the setup changes, so the URL
+replays it exactly.
+
+`debugDive()` plays it: a `meta` standing in for what persists — the setup's
+gear, the carried weapon's tier and the points — so `reset()` applies them as a
+dive from `home` would; the setup's immortal and one-shot; then
+`startScenario()` to the chosen gate, with the mods as its kit — a weapon mod
+only with a weapon it fits. Fish set in the setup replace that gate's batch in
+a copy of its plan entry, never in the pool; the dive then runs on as drawn.
+`gateLine()` says on the screen what the gate drew and what replaces it, and
+under it the marked row's `tip` says what the row is and what it moves:
+`fishTip()` from a fish's behaviour field — its words in `DEBUG_BEHAVIOURS`,
+one line per behaviour — and its numbers; `gearTip()`, `pointTip()`,
+`modTip()` and the weapon's from what each tier, point or pick moves, worked
+out by `modPreview()` on the diver a dive starts with (`shotOf()` gives the
+carried weapon's numbers), so a tip cannot state a number the game does not
+deliver. A check holds every tip inside the view's width.
+
+`DEBUG_AGAIN` (R) plays the setup again from any screen, and `DEBUG_SETUP`
+(Backspace) goes back to it; neither does anything outside the debug mode.
+The pause menu's quit and the end screens' two buttons — Again and Setup
+there — lead back to the setup too, never to the title or `home`.
 
 ## Performance, measured
 
@@ -568,7 +623,7 @@ Two suites (D39, D44).
 
 | | Command | Covers |
 |---|---|---|
-| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, no cards open between batches nor at the last layer end, the water flows behind the layer end's cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the dive ends at the bottom and its Dive again dives), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss carries no mod and opens no cards), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap, whatever the fish carry and the layer ends offer; every gem reaching the player; death banking the gems; `home`, buying, points and the micro-task; a layer's micro-tasks kept by number through a rename; Continue going straight back into the dive; the death screen's Dive again and Go home, Go home marked, a click off them doing nothing; a hand-placed enemy paying no task; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 to v4 fixtures loading and firing finite shots, a dive saved with a shot in flight and a puffer swelling playing on identically), mods from drops (`tests/drops.test.js`: one fish lit as every ordinary batch arrives, never a mini-boss or the boss, the mod dropped even when the batch dies at once, flying in, counted, applied and named on a line of its own, nothing lit once every ordinary mod is capped, every ordinary mod once a round and the same from the same seed; the layer end's three valuable cards, none without room for its step, a click or a number marking, Continue or Enter taking; boosts never 1/C kills apart and seldom back to back, never from the arena's last kill, left where they fell and gone after their life, added on a touch and taken back after their time, restarted not stacked, held by the pause, every boost on and off; weapon mods dealt only for a weapon they fit; no rank in the save; a v2 dive saved with the cards up taking its marked card, the glowing fish kept across a save — D84–D88), the weapon record (`tests/meta.test.js`: the carried weapon's numbers on the player and on every shot, tiers of their own, a weapon left at home adding nothing — D83), S5 (content) (`tests/enemies.test.js`: the archer closing, holding, backing off, coming into view before it spits and spitting on its cadence, its shot costing a heart or passing invulnerability unspent, never hitting a fish, dying at its travel; the puffer lighting near and in view, still but for the shove, bursting on time inside its ring and not outside, dying like any fish when shot, paying nothing for a burst; the eel swaying one way and the other within its width while closing in — D95; `tests/meta.test.js`: Gear and Attributes screens; owning, carrying and the carried weapon's tiers, a missing weapon falling back, a scenario's weapon; Heart, Strength and requirements; the Harpoon and the Knife; the Mask, the Weights and the suit's guard; swift and footwork; every layer's own pools, every type met; the counts — D93, D96–D101), the bot starting from a scenario, the dev flags, and the docs (D57) — among them the entity docs' tables against `game/content.js` (D81) and the map in `docs/README.md` (D82). Vitest + fast-check, dev-only. |
+| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, no cards open between batches nor at the last layer end, the water flows behind the layer end's cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the dive ends at the bottom and its Dive again dives), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss carries no mod and opens no cards), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap, whatever the fish carry and the layer ends offer; every gem reaching the player; death banking the gems; `home`, buying, points and the micro-task; a layer's micro-tasks kept by number through a rename; Continue going straight back into the dive; the death screen's Dive again and Go home, Go home marked, a click off them doing nothing; a hand-placed enemy paying no task; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 to v4 fixtures loading and firing finite shots, a dive saved with a shot in flight and a puffer swelling playing on identically), mods from drops (`tests/drops.test.js`: one fish lit as every ordinary batch arrives, never a mini-boss or the boss, the mod dropped even when the batch dies at once, flying in, counted, applied and named on a line of its own, nothing lit once every ordinary mod is capped, every ordinary mod once a round and the same from the same seed; the layer end's three valuable cards, none without room for its step, a click or a number marking, Continue or Enter taking; boosts never 1/C kills apart and seldom back to back, never from the arena's last kill, left where they fell and gone after their life, added on a touch and taken back after their time, restarted not stacked, held by the pause, every boost on and off; weapon mods dealt only for a weapon they fit; no rank in the save; a v2 dive saved with the cards up taking its marked card, the glowing fish kept across a save — D84–D88), the weapon record (`tests/meta.test.js`: the carried weapon's numbers on the player and on every shot, tiers of their own, a weapon left at home adding nothing — D83), S5 (content) (`tests/enemies.test.js`: the archer closing, holding, backing off, coming into view before it spits and spitting on its cadence, its shot costing a heart or passing invulnerability unspent, never hitting a fish, dying at its travel; the puffer lighting near and in view, still but for the shove, bursting on time inside its ring and not outside, dying like any fish when shot, paying nothing for a burst; the eel swaying one way and the other within its width while closing in — D95; `tests/meta.test.js`: Gear and Attributes screens; owning, carrying and the carried weapon's tiers, a missing weapon falling back, a scenario's weapon; Heart, Strength and requirements; the Harpoon and the Knife; the Mask, the Weights and the suit's guard; swift and footwork; every layer's own pools, every type met; the counts — D93, D96–D101), the debug mode (`tests/debug.test.js`: muted from the start, and only there; a fresh kit whatever the save held, nothing saved on pause, at a dive's end or when the platform asks, `main.js` saving only through `saveNow()`; the kit, the place and the fish as set, the pool untouched, a weapon mod that does not fit left out, the flags switched by the setup; the code round-tripping, ignoring what it cannot name, holding every value in range; R replaying the same dive and inert outside the debug mode; every way out leading to the setup; the rows built from the tables and moved by keys and clicks — D102), the bot starting from a scenario, the dev flags, and the docs (D57) — among them the entity docs' tables against `game/content.js` (D81) and the map in `docs/README.md` (D82). Vitest + fast-check, dev-only. |
 | **Browser** | `index.html?test` | The scripted checks (count under Verification), plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`, and the same seed played to the bottom of the dive at three window sizes through real `MouseEvent`s (D29). |
 
 `tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
@@ -584,7 +639,9 @@ an invariant as unproven until a deliberate break makes it fail.
 
 `?test` and any `?dev=` scenario boot with `volume = 0`: those are the URLs
 Playwright drives, and a driven run should not make noise on the machine
-running it. Playing the game normally — no query string — is unaffected.
+running it. Playing the game normally — no query string — is unaffected. The
+debug mode is played by hand, so it is muted rather than silenced: `muted`
+starts set, and M, as anywhere, turns the sound on (D102).
 
 It does not weaken the audio checks. They synthesise each sound in an
 `OfflineAudioContext` and measure its peak there, which never reaches the
