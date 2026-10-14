@@ -277,10 +277,10 @@ const PLAYER_STATS = [
 // micro-tasks -- then the development readout, dimmed. The renderer draws
 // each line at its own colour and weight, one row per entry, so a line added
 // here moves the rest down on its own.
-// The batch shown is the one being fought, or between gates the one ahead.
-const statusEntry = () => plan[Math.max(0, enemies.length ? batchIndex - 1 : batchIndex)] || plan.at(-1);
 function statusLines() {
-  const entry = statusEntry(), layer = plan.filter(e => e.layer === entry.layer);
+  // The batch shown is the one being fought, or between gates the one ahead.
+  const entry = plan[Math.max(0, enemies.length ? batchIndex - 1 : batchIndex)] || plan.at(-1);
+  const layer = plan.filter(e => e.layer === entry.layer);
   const mods = Object.entries(modCounts).map(([name, n]) => name + ' ×' + n);
   return [
     { bold: true, color: '#d8f6ff',
@@ -571,8 +571,8 @@ const ENEMY_TYPES = [
     color: '#ffee58', glow: '#ffc800',
     fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110 } },
   // The eel sways as it comes (D95): `weave` holds how far either side, in px,
-  // and how many sways a second. Claude's picks.
-  // Its body shocks: the one fish that hurts on touch (D108).
+  // and how many sways a second. Its body shocks: the one fish that hurts on
+  // touch (D108). Claude's picks.
   { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, touch: true,
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 } },

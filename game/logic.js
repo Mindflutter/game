@@ -273,16 +273,17 @@ function burst(x, y, color, glow, count, speed, life = 0.45) {
 // per-tick loop to keep squared.
 function swing(ux, uy) {
   const half = player.swing.arc * Math.PI / 360;
-  const cut = enemies.filter(e => {
-    if (e.gone) return false;
+  const cut = [];                            // [distance, fish]
+  for (const e of enemies) {
+    if (e.gone) continue;
     const dx = e.x - player.x, dy = e.y - player.y, d = Math.hypot(dx, dy);
     const body = e.r + player.shotRadius;
-    if (d > player.range + body) return false;
+    if (d > player.range + body) continue;
     const off = Math.acos(Math.max(-1, Math.min(1, (dx * ux + dy * uy) / (d || 1))));
-    return d <= body || off <= half + Math.asin(Math.min(1, body / d));
-  }).sort((a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y))
-    .slice(0, player.pierce + 1);
-  for (const e of cut) {
+    if (d <= body || off <= half + Math.asin(Math.min(1, body / d))) cut.push([d, e]);
+  }
+  cut.sort((a, b) => a[0] - b[0]);
+  for (const [, e] of cut.slice(0, player.pierce + 1)) {
     e.hp -= player.damage;
     e.flash = 0.07;
     hitSparks(e, { vx: ux, vy: uy });
@@ -1060,14 +1061,15 @@ function step(dt) {
     const ex = player.x - e.x;
     const ey = player.y - e.y;
     const d = Math.sqrt(ex * ex + ey * ey) || 1;   // || 1 avoids dividing by zero
+    const ux = ex / d, uy = ey / d;                // toward the diver
 
-    if (e.lunge) lungeStep(e, ex / d, ey / d, d, dt);   // the boss's kind (D64)
-    else if (e.spit) spitStep(e, ex / d, ey / d, d, dt);
-    else if (e.fuse) fuseStep(e, ex / d, ey / d, d, dt);
-    else if (e.weave) weaveStep(e, ex / d, ey / d, d, dt);
-    else if (e.bite) biteStep(e, ex / d, ey / d, d, dt);
+    if (e.lunge) lungeStep(e, ux, uy, d, dt);   // the boss's kind (D64)
+    else if (e.spit) spitStep(e, ux, uy, d, dt);
+    else if (e.fuse) fuseStep(e, ux, uy, d, dt);
+    else if (e.weave) weaveStep(e, ux, uy, d, dt);
+    else if (e.bite) biteStep(e, ux, uy, d, dt);
     else {
-      ease(e, (ex / d) * e.speed, (ey / d) * e.speed, e.ramp, dt);   // D107
+      ease(e, ux * e.speed, uy * e.speed, e.ramp, dt);   // D107
       e.x += (e.vx + e.pushX) * dt;
       e.y += (e.vy + e.pushY) * dt;
     }
@@ -1094,8 +1096,8 @@ function step(dt) {
         // The shove is the dash's baseline and is never bought: scattering a
         // crowd is what makes diving into one a play rather than a mistake,
         // and that has to survive `dashDamage` being zero.
-        e.pushX = (-ex / d) * DASH_PUSH;   // shoved away from the player
-        e.pushY = (-ey / d) * DASH_PUSH;
+        e.pushX = -ux * DASH_PUSH;         // shoved away from the player
+        e.pushY = -uy * DASH_PUSH;
         burst(e.x, e.y, '#bffcff', '#4ff0ff', 6, 130, 0.3);
         // Damage is bought and starts at zero (D51). The white flash reads as
         // "that hurt", so it must not fire on a dash that only pushed.

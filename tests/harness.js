@@ -77,6 +77,19 @@ export function loadGame() {
 // survives a change of FIXED_DT.
 export const ticks = (g, seconds) => Math.round(seconds / g.FIXED_DT);
 
+// Plays `seconds` of game time, tick by tick.
+export const play = (g, seconds) => { for (let i = 0, n = ticks(g, seconds); i < n; i++) g.update(g.FIXED_DT); };
+
+// Kills the player where they stand: one heart left and an eel on top -- the
+// fish that hurts on touch (D108). A diver that lives fails the test.
+export function die(g) {
+  g.player.hp = 1;
+  g.player.hurt = 0;
+  g.placeEnemy('eel', g.player.x, g.player.y);
+  g.update(g.FIXED_DT);
+  if (g.screen !== 'dead') throw new Error('die(): the diver lived, on ' + g.screen);
+}
+
 // Ticks until a batch arrives or the screen changes, holding `hold` the whole
 // way -- nothing in game/ writes `keys`, so setting them once holds them.
 // Returns the camera depth after every tick.

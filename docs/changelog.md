@@ -6,6 +6,18 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**Cleanup after `/simplify`**
+Four review passes (reuse, simplification, efficiency, altitude) over the
+day's diff, S5 (content) through bites. No behaviour change: the window-size
+check's three dives take 844.46s before and after, and every check passes.
+`swing()` works each fish's distance out once; the enemy loop works the
+direction to the diver out once, for every behaviour, the chase and the dash's
+shove; the status bar's one-use `statusEntry` is inlined; the save's migration
+finds a type with `enemyType()`; the eel's comments are one paragraph. In the
+tests, `play()` and `die()` are one copy each, in `harness.js`, and the entity
+docs check builds every behaviour's table — a fish's or a weapon's — with one
+helper.
+
 **Fish bite** (D108 (fish bite))
 The drifter, the darter and the bulwark swim up, stop, open their jaws — a
 dark wedge toward you — and bite a heart only if you are still in reach: the

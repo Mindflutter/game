@@ -2,7 +2,7 @@
 // its state transitions, as S5 (content)'s exit asks of every behaviour. The
 // lunge's checks are in boss.test.js.
 import { describe, it, expect } from 'vitest';
-import { loadGame, ticks } from './harness.js';
+import { loadGame, ticks, play } from './harness.js';
 
 // One fish of `name`, `dist` px straight right of a diver standing in the
 // middle of the view, nothing else arriving and nothing fired.
@@ -14,7 +14,6 @@ function alone(name, dist, seed = 1) {
   expect(g.enemies.length).toBe(1);
   return g;
 }
-const play = (g, seconds) => { for (let i = 0, n = ticks(g, seconds); i < n; i++) g.update(g.FIXED_DT); };
 const distance = (g, e) => Math.hypot(e.x - g.player.x, e.y - g.player.y);
 const shots = g => g.bullets.filter(b => b.evil);
 const inView = (g, e) => e.x - e.r >= 0 && e.x + e.r <= g.ARENA_W &&

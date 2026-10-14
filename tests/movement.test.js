@@ -104,12 +104,12 @@ describe('the facing and the dash (D107)', () => {
 
 describe('fish with a ramp (D107)', () => {
   // A darter swimming at the diver; then the diver sidesteps in one tick.
-  const sidestep = ramp => {
+  const sidestep = withRamp => {
     const g = still();
     g.immortal = true;
     g.placeEnemy('darter', g.player.x + 300, g.player.y);
     const e = g.enemies[0];
-    if (ramp === undefined) delete e.ramp;
+    if (!withRamp) delete e.ramp;
     hold(g, [], 1);
     g.player.y += 150;
     g.update(g.FIXED_DT);
@@ -117,8 +117,8 @@ describe('fish with a ramp (D107)', () => {
   };
 
   it('overshoots a sidestep with a ramp, and turns at once without one', () => {
-    expect(sidestep('darter')).toBeGreaterThan(0.5);
-    expect(sidestep(undefined)).toBeLessThan(1e-6);
+    expect(sidestep(true)).toBeGreaterThan(0.5);
+    expect(sidestep(false)).toBeLessThan(1e-6);
   });
 });
 

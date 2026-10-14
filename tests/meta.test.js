@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks, ride, clearAndWait, atGate } from './harness.js';
+import { loadGame, ticks, ride, clearAndWait, atGate, die } from './harness.js';
 import { botInput } from './bot.js';
 
 const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
@@ -15,16 +15,6 @@ function pick(g) {
   g.justPressed.add('Digit1');
   g.justPressed.add('Enter');
   g.update(g.FIXED_DT);
-}
-
-// Kills the player where they stand: one heart left and an eel on top -- the
-// fish that hurts on touch (D108).
-function die(g) {
-  g.player.hp = 1;
-  g.player.hurt = 0;
-  g.placeEnemy('eel', g.player.x, g.player.y);
-  g.update(g.FIXED_DT);
-  expect(g.screen).toBe('dead');
 }
 
 describe('batches drawn from pools (D71)', () => {

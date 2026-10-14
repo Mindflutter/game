@@ -197,15 +197,19 @@ describe('the entity docs', () => {
     ];
   };
 
+  // A table per behaviour field -- `lunge`, `spit`, `swing`, ... -- a row per
+  // record that has it.
+  const behaviourTables = (records, fields) => fields.map(f => {
+    const have = records.filter(x => x[f]);
+    const sub = keysOf(have.map(x => x[f]));
+    return table(['name', ...sub], have.map(x => [x.name, ...sub.map(k => x[f][k])]));
+  });
+
   it('lists every enemy type at its real numbers', () => {
     const cols = plain(g.ENEMY_TYPES);
     expectIn(doc('enemies.md'), table(cols, g.ENEMY_TYPES.map(t => cols.map(k => t[k]))));
-    // A table per behaviour field -- `lunge`, `spit`, ... -- a row per type that has it.
-    for (const f of keysOf(g.ENEMY_TYPES).filter(k => !cols.includes(k))) {
-      const have = g.ENEMY_TYPES.filter(t => t[f]);
-      const sub = keysOf(have.map(t => t[f]));
-      expectIn(doc('enemies.md'), table(['name', ...sub], have.map(t => [t.name, ...sub.map(k => t[f][k])])));
-    }
+    const behaviours = keysOf(g.ENEMY_TYPES).filter(k => !cols.includes(k));
+    for (const t of behaviourTables(g.ENEMY_TYPES, behaviours)) expectIn(doc('enemies.md'), t);
   });
 
   it('lists every mod with what it does and its card text', () => {
@@ -227,13 +231,10 @@ describe('the entity docs', () => {
 
   it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
     for (const t of gear(g.WEAPONS)) expectIn(doc('weapons.md'), t);
-    // A table per behaviour field -- `swing`, ... -- as the enemies have.
-    for (const f of keysOf(g.WEAPONS).filter(k => k !== 'tiers' && k !== 'requires' &&
-                                               g.WEAPONS.some(w => typeof w[k] === 'object'))) {
-      const have = g.WEAPONS.filter(w => w[f]);
-      const sub = keysOf(have.map(w => w[f]));
-      expectIn(doc('weapons.md'), table(['name', ...sub], have.map(w => [w.name, ...sub.map(k => w[f][k])])));
-    }
+    // Its behaviours, as the enemies' -- not the shop's `tiers` and `requires`.
+    const behaviours = keysOf(g.WEAPONS)
+      .filter(k => !plain(g.WEAPONS).includes(k) && k !== 'tiers' && k !== 'requires');
+    for (const t of behaviourTables(g.WEAPONS, behaviours)) expectIn(doc('weapons.md'), t);
     for (const t of gear(g.EQUIPMENT)) expectIn(doc('equipment.md'), t);
   });
 

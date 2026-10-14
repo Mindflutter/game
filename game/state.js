@@ -364,7 +364,7 @@ function migrate(s) {
   if (s && s.version === 5) {
     if (s.dive) {
       for (const e of s.dive.enemies) {
-        const t = ENEMY_TYPES.find(x => x.name === e.name);
+        const t = enemyType(e.name);
         if (t) Object.assign(e, behaviourOf(t));
       }
     }

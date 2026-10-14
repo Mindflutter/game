@@ -5,7 +5,7 @@
 // every way out.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks } from './harness.js';
+import { loadGame, ticks, play, die } from './harness.js';
 
 // A game in the debug mode, on its setup screen.
 function setup(code = '', seed = 7) {
@@ -14,19 +14,9 @@ function setup(code = '', seed = 7) {
   expect(g.screen).toBe('debug');
   return g;
 }
-const play = (g, seconds) => { for (let i = 0, n = ticks(g, seconds); i < n; i++) g.update(g.FIXED_DT); };
 const press = (g, code) => { g.justPressed.add(code); g.update(g.FIXED_DT); };
 const row = (g, label) => g.MENUS.debug.items.findIndex(r => r.label === label);
 const counted = g => Object.fromEntries(g.enemies.reduce((m, e) => m.set(e.name, (m.get(e.name) || 0) + 1), new Map()));
-
-// Kills the player where they stand, as meta.test.js does.
-function die(g) {
-  g.player.hp = 1;
-  g.player.hurt = 0;
-  g.placeEnemy('eel', g.player.x, g.player.y);
-  g.update(g.FIXED_DT);
-  expect(g.screen).toBe('dead');
-}
 
 describe('the save is never touched', () => {
   it('opens on a fresh kit, whatever the save held -- gear, gems or a dive', () => {
