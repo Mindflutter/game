@@ -294,6 +294,18 @@ function drawField() {
     }
     circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + (fusing ? 0.8 : 0.25) * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
+    // A biter's open jaws (D108): a dark wedge toward the diver, widening
+    // through the wind-up, gone when they snap shut. PLACEHOLDER GRAPHICS.
+    if (e.phase === 'jaws') {
+      const a = Math.atan2(player.y - e.y, player.x - e.x);
+      const open = 0.9 * Math.min(1, e.phaseTime / e.bite.windup);
+      ctx.fillStyle = '#05080f';
+      ctx.beginPath();
+      ctx.moveTo(e.x, e.y);
+      ctx.arc(e.x, e.y, e.r, a - open, a + open);
+      ctx.closePath();
+      ctx.fill();
+    }
     // The glowing fish that carries the batch's mod (D84): a gold ring that
     // pulses. PLACEHOLDER GRAPHICS.
     if (e.carrier) {

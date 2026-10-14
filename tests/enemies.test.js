@@ -255,6 +255,104 @@ describe('the eel (weave)', () => {
   });
 });
 
+describe('the bite (D108)', () => {
+  const bite = name => loadGame().enemyType(name).bite;
+  // A fish whose body is `gap` px from the diver's, held where it is, so only
+  // its jaws move.
+  const at = (gap, name = 'drifter') => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;
+    g.placeEnemy(name, g.player.x + g.player.r + g.enemyType(name).r + gap, g.player.y);
+    const e = g.enemies[0];
+    e.speed = 0;
+    return [g, e];
+  };
+
+  it('chases until its body is within reach, then stops and opens its jaws', () => {
+    const B = bite('drifter');
+    const g = alone('drifter', 300);
+    const e = g.enemies[0];
+    let gap = null;
+    for (let i = 0, n = ticks(g, 6); i < n && e.phase !== 'jaws'; i++) {
+      gap = distance(g, e) - e.r - g.player.r;
+      g.update(g.FIXED_DT);
+    }
+    expect(e.phase).toBe('jaws');
+    expect(gap).toBeLessThanOrEqual(B.reach);
+    const v = Math.hypot(e.vx, e.vy);
+    play(g, B.windup / 2);
+    expect(Math.hypot(e.vx, e.vy)).toBeLessThan(v);   // easing to a halt
+  });
+
+  it('snaps a heart off a diver still in reach, and nothing off one that got away', () => {
+    const B = bite('drifter');
+    const [near, e] = at(B.reach - 2);
+    near.update(near.FIXED_DT);
+    expect(e.phase).toBe('jaws');
+    play(near, B.windup + 0.02);
+    expect([near.player.hp, e.phase]).toEqual([near.player.maxHp - 1, 'rest']);
+    const [far, f] = at(B.reach - 2);
+    far.update(far.FIXED_DT);                    // the jaws open
+    far.player.x -= B.reach + 20;                // and the diver gets away
+    play(far, B.windup + 0.02);
+    expect([far.player.hp, f.phase]).toEqual([far.player.maxHp, 'rest']);   // it snapped on water
+  });
+
+  it('rests before it can bite again', () => {
+    const B = bite('drifter');
+    const [g, e] = at(B.reach - 2);
+    play(g, B.windup + 0.02);
+    expect(g.player.hp).toBe(g.player.maxHp - 1);
+    g.player.hurt = 0;                           // no invulnerability to hide behind
+    play(g, B.rest - 0.05);
+    expect([g.player.hp, e.phase]).toEqual([g.player.maxHp - 1, 'rest']);
+    g.player.hurt = 0;
+    play(g, 0.1 + B.windup);
+    expect(g.player.hp).toBe(g.player.maxHp - 2);
+  });
+
+  it('never bites once dead, nor through invulnerability', () => {
+    const B = bite('drifter');
+    const [g, e] = at(B.reach - 2);
+    g.update(g.FIXED_DT);
+    e.phaseTime = B.windup - g.FIXED_DT / 2;     // it would snap this tick
+    g.killEnemy(e);
+    g.update(g.FIXED_DT);
+    expect(g.player.hp).toBe(g.player.maxHp);
+    const [h, f] = at(B.reach - 2);
+    h.player.hurt = 1;                           // as in a dash
+    play(h, B.windup + 0.02);
+    expect([h.player.hp, f.phase]).toEqual([h.player.maxHp, 'rest']);
+  });
+
+  it('bites from where a shove leaves it', () => {
+    const B = bite('drifter');
+    const [g, e] = at(B.reach - 2);
+    g.update(g.FIXED_DT);                        // the jaws open
+    e.pushX = 400;                               // and the dash shoves it off
+    play(g, B.windup + 0.02);
+    expect(g.player.hp).toBe(g.player.maxHp);
+  });
+
+  it('hurts on touch only with touch: the eel; every other fish only by its attack', () => {
+    const touched = (name, set = {}) => {
+      const g = loadGame();
+      g.reset(1);
+      g.queuePaused = true;
+      g.placeEnemy(name, g.player.x, g.player.y);      // right on the diver
+      Object.assign(g.enemies[0], set);
+      g.update(g.FIXED_DT);
+      return g.player.maxHp - g.player.hp;
+    };
+    const names = ['drifter', 'darter', 'bulwark', 'archer', 'puffer', 'eel', 'mini-boss', 'boss'];
+    expect(names.map(n => [n, touched(n)])).toEqual(names.map(n => [n, n === 'eel' ? 1 : 0]));
+    const charge = { aimX: 1, aimY: 0 };
+    expect(['charge', 'windup', 'rest'].map(phase => touched('mini-boss', { ...charge, phase })))
+      .toEqual([1, 0, 0]);                       // the lunge hurts only as it charges
+  });
+});
+
 describe('arrivals', () => {
   it('every fish arrives wholly outside the view, whatever its size, on every edge', () => {
     const g = loadGame();

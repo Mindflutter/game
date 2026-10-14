@@ -17,11 +17,12 @@ function pick(g) {
   g.update(g.FIXED_DT);
 }
 
-// Kills the player where they stand: one heart left and a bulwark on top.
+// Kills the player where they stand: one heart left and an eel on top -- the
+// fish that hurts on touch (D108).
 function die(g) {
   g.player.hp = 1;
   g.player.hurt = 0;
-  g.placeEnemy('bulwark', g.player.x, g.player.y);
+  g.placeEnemy('eel', g.player.x, g.player.y);
   g.update(g.FIXED_DT);
   expect(g.screen).toBe('dead');
 }
@@ -277,7 +278,7 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     const g = loadGame();
     g.reset(1);
     ride(g);
-    g.placeEnemy('bulwark', g.player.x, g.player.y);   // a real touch
+    g.placeEnemy('eel', g.player.x, g.player.y);       // a real touch: the eel's (D108)
     g.update(g.FIXED_DT);
     expect(g.player.hp).toBe(g.player.maxHp - 1);
     slow(g);
@@ -453,6 +454,15 @@ describe('the save (D70)', () => {
     expect(shots.every(finite)).toBe(true);
   });
 
+  it('gives a dive saved before bites fish that bite, as their type does now', () => {
+    const text = readFileSync(new URL('./fixtures/save-v4.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    const biters = g.enemies.filter(e => g.enemyType(e.name).bite);
+    expect(biters.length).toBeGreaterThan(0);
+    expect(biters.every(e => e.bite && e.ramp === g.enemyType(e.name).ramp)).toBe(true);
+  });
+
   it('loads a save written by the first build of version 4, and plays it on', () => {
     // Saved mid-batch in layer 2 carrying the Harpoon, with a spit shot in
     // flight, a puffer swelling and the suit's guard up (D95, D97, D100).
@@ -462,6 +472,36 @@ describe('the save (D70)', () => {
     expect([g.meta.carried, g.weaponName, g.guardLeft]).toEqual(['Harpoon', 'Harpoon', 1]);
     expect(g.bullets.some(b => b.evil)).toBe(true);
     expect(g.enemies.some(e => e.phase === 'fuse')).toBe(true);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it('loads a save written by the first build of version 5, and plays it on', () => {
+    // Saved mid-batch in layer 2: the diver swimming and turned, darters
+    // chasing with velocities of their own, a shot in flight (D107).
+    const text = readFileSync(new URL('./fixtures/save-v5.json', import.meta.url), 'utf8');
+    const saved = JSON.parse(text).dive.player;
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect([g.player.vx, g.player.vy, g.player.facing]).toEqual([saved.vx, saved.vy, saved.facing]);
+    expect(g.enemies.filter(e => e.name === 'darter').every(e => e.bite)).toBe(true);   // they bite now (D108)
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it('loads a save written by the first build of version 6, and plays it on', () => {
+    // Saved mid-batch in layer 3: a fish with its jaws open, eels about, the
+    // diver swimming, a shot in flight (D108).
+    const text = readFileSync(new URL('./fixtures/save-v6.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect(g.enemies.some(e => e.phase === 'jaws') && g.enemies.some(e => e.touch)).toBe(true);
     g.screen = g.resumeTo;
     g.immortal = true;
     const shots = shotsSeen(g, 600);
@@ -756,7 +796,7 @@ describe('equipment (D100)', () => {
   it('takes the first hit of a batch on the suit: no heart, the i-frames, the batch marked hit', () => {
     const g = wearing({ Suit: 1 });
     expect(g.guardLeft).toBe(1);
-    g.placeEnemy('bulwark', g.player.x, g.player.y);
+    g.placeEnemy('eel', g.player.x, g.player.y);       // it hurts on touch (D108)
     g.update(g.FIXED_DT);
     expect([g.player.hp, g.guardLeft, g.batchHit]).toEqual([g.player.maxHp, 0, true]);
     expect(g.player.hurt).toBeGreaterThan(0);

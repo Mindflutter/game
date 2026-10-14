@@ -544,12 +544,18 @@ const SCENARIOS = {
 // diver's swim is eased (D107), so the fish overshoots a sidestep; without
 // one it turns on the spot.
 const ENEMY_TYPES = [
+  // The plain fish bite (D108): `bite` holds how near its body must come to
+  // the diver's to open its jaws, the seconds they stay open -- the tell --
+  // and the seconds before it can bite again. Claude's picks.
   { name: 'drifter', r: 18, hp: 1, speed: 85,  ramp: 0.6, value: 1,
-    color: '#e8446e', glow: '#ff1e5a' },
+    color: '#e8446e', glow: '#ff1e5a',
+    bite: { reach: 10, windup: 0.3, rest: 0.8 } },
   { name: 'darter',  r: 12, hp: 1, speed: 190, ramp: 0.9, value: 1,
-    color: '#ffb648', glow: '#ff8a00' },
+    color: '#ffb648', glow: '#ff8a00',
+    bite: { reach: 6, windup: 0.15, rest: 0.6 } },
   { name: 'bulwark', r: 34, hp: 6, speed: 52,  ramp: 1.2, value: 3,
-    color: '#a05cff', glow: '#7b2fff' },
+    color: '#a05cff', glow: '#7b2fff',
+    bite: { reach: 40, windup: 0.6, rest: 1.2 } },
   // The archer keeps its distance and spits (D95). `spit` holds its band --
   // closer than `range`, no closer than `near` -- the seconds between spits,
   // and its shot's speed, radius and `travel`. `range` sits under the Gun's,
@@ -566,7 +572,8 @@ const ENEMY_TYPES = [
     fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110 } },
   // The eel sways as it comes (D95): `weave` holds how far either side, in px,
   // and how many sways a second. Claude's picks.
-  { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2,
+  // Its body shocks: the one fish that hurts on touch (D108).
+  { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, touch: true,
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 } },
   // The lungers: the boss, and the mini-boss that rehearses it (D62, D64, D65).
@@ -580,6 +587,13 @@ const ENEMY_TYPES = [
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
     lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 } },
 ];
+
+// What a fish is made with beyond its numbers: its behaviour records --
+// `bite`, `lunge`, ... -- whose presence is the behaviour (D26), so a new one
+// costs nothing where fish are made, and the plain fields that change how it
+// moves or hurts, `ramp` and `touch` (D107, D108).
+const behaviourOf = t => ({ ramp: t.ramp, touch: t.touch,
+  ...Object.fromEntries(Object.entries(t).filter(([, v]) => typeof v === 'object')) });
 
 // `home` (D38): its layer list sits between the heading and the rows, one
 // line per layer at most, so where the rows start is derived from how many
@@ -601,6 +615,7 @@ const DEBUG_POINTS_MAX = 9;     // on one attribute: Claude's pick
 const DEBUG_BEHAVIOURS = {
   chase: 'swims straight at you',
   spit:  'keeps its distance and spits shots at you',
+  bite:  'opens its jaws when it is close, then bites \u2014 get out of reach',
   fuse:  'swells when you come close, bursts and comes on again \u2014 step out of its ring',
   weave: 'sways side to side as it comes \u2014 aim where it will be',
   lunge: 'winds up, then lunges along its line \u2014 step aside',
@@ -897,5 +912,5 @@ const HELP_BLURB = [
   'One batch at a time; clear it and the current takes you down to the next.',
   'Things you kill drop gems. They come to you on their own, and are yours to keep.',
   'Kill the glowing fish for a mod. Grab boosts before they fade. A boss heals, then offers a pick.',
-  'Some fish spit from afar; a puffer that swells is about to burst.',
+  'Fish bite: when the jaws open, get away. Some spit; a puffer that swells is about to burst.',
 ];

@@ -33,9 +33,11 @@ if (location.search === '?test') {
     report();
   });
 
+  // A fish that hurts on touch (D108), as every fish did before bites: these
+  // checks are about touch, i-frames and the dash, not about any one attack.
   const mob = (x, y, over) => Object.assign(
     { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, value: 1, lastHitBy: 0,
-      pushX: 0, pushY: 0, vx: 0, vy: 0 }, over);
+      pushX: 0, pushY: 0, vx: 0, vy: 0, touch: true }, over);
 
   // A bullet, built the way the weapon builds one, so no check hand-rolls a
   // literal that misses a field -- a bullet without `speed` would fly forever,
@@ -143,6 +145,7 @@ if (location.search === '?test') {
   // game only through `aim`, so aim arrives as mousemove events in *client*
   // pixels -- the letterbox conversion, and the camera on top of it, are what is
   // under test. The whole dive: it runs on through every layer (D66).
+  const AIM_GRID = 20;                 // x1, x1.35 and x1.8 all land it on whole pixels
   const traverse = (w, h) => {
     resize(w, h);
     reset(4471);
@@ -152,9 +155,17 @@ if (location.search === '?test') {
       player.hurt = player.iframes;
       if (screen === 'mods') { justPressed.add('Digit1'); justPressed.add('Enter'); }
       else if (enemies.length) {
+        // At the first fish, to the nearest AIM_GRID view px: a point all three
+        // scales put on a whole client pixel, so the aim, and so the dive, is
+        // the same at every size. A whole-pixel aim at the fish itself lands a
+        // different fraction of a pixel off at each, and once fish hover
+        // around the diver rather than sit on it (D108), one grazing shot
+        // sends the dive another way.
         const e = enemies[0];
+        const gx = Math.round(e.x / AIM_GRID) * AIM_GRID;
+        const gy = Math.round((e.y - cameraY) / AIM_GRID) * AIM_GRID;
         window.dispatchEvent(new MouseEvent('mousemove', {
-          clientX: offX + e.x * scale, clientY: offY + (e.y - cameraY) * scale }));
+          clientX: Math.round(offX + gx * scale), clientY: Math.round(offY + gy * scale) }));
         holdFire();
       } else ceaseFire();
       update(FIXED_DT);                          // update() clears justPressed
@@ -166,10 +177,8 @@ if (location.search === '?test') {
   const sizes = [[1280, 800], [1920, 1080], [3440, 1440]].map(([w, h]) => traverse(w, h));
   resize();                                            // back to the real window
   check(sizes.every(t => t > 0), 'D29: every window size must reach the bottom: ' + sizes.join(', '));
-  // Within 2%, not exact: a synthetic MouseEvent carries whole client pixels,
-  // so aim can land up to a pixel off, which can shift a kill by a tick. A
-  // window-size bug moves it by far more.
-  check(Math.max(...sizes) - Math.min(...sizes) <= 0.02 * Math.min(...sizes),
+  // Exactly: with the aim on the grid, every size plays the same dive.
+  check(new Set(sizes).size === 1,
     'D29: difficulty must not depend on window size, times ' + sizes.map(t => t.toFixed(2)).join(' / '));
   console.log('D29 times to the bottom: ' + sizes.map(t => t.toFixed(2)).join(' / ') +
               ' (check took ' + Math.round(performance.now() - traverseFrom) + 'ms)');

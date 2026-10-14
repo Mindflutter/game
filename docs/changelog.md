@@ -6,6 +6,18 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-14
 
+**Fish bite** (D108 (fish bite))
+The drifter, the darter and the bulwark swim up, stop, open their jaws — a
+dark wedge toward you — and bite a heart only if you are still in reach: the
+drifter a short bite, the darter a quick nip it slides past, the bulwark a slow
+chomp with a long reach. The eel's body shocks: it is the one fish that hurts
+on touch. The archer, the puffer and the lungers hurt only by their attack —
+the boss's body is safe except while it charges. The save goes to version 6,
+and a dive saved before bites has fish that bite. Found on the way: the
+window-size check now aims on a grid every tested scale puts on whole pixels
+and requires identical dives, since hovering fish made a fraction of a pixel
+send dives apart; and version 5 now has its fixture.
+
 **The diver swims in water, and faces** (D107 (the diver swims and faces; fish
 with a ramp))
 Movement eases now: a quarter second to full speed, a glide to a stop when you

@@ -19,10 +19,10 @@ S6 (balance), the notes from playing S5 (content) that move the numbers it
 tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
 status bar, the two wordings, the sizes (D104 (bodies doubled)) and the Knife's
 swing (D105 (the Knife swings)), the puffer that comes on again (D106 (the
-puffer bursts and comes on again)) and the swim and the facing (D107 (the diver
-swims and faces; fish with a ramp)). Next: fish that bite
-(`specs/2026-10-14-movement-and-bites-design.md`), then the boss and the
-mini-boss made different and what micro-tasks pay (`plan.md` → Active stage).
+puffer bursts and comes on again)), the swim and the facing (D107 (the diver
+swims and faces; fish with a ramp)) and fish that bite (D108 (fish bite)).
+Next: the boss and the mini-boss made different, and what micro-tasks pay
+(`plan.md` → Active stage).
 Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
@@ -89,15 +89,16 @@ it names, and S6 (balance) measures afresh.
   clears batches far faster, so a human layer is likely well under the 4–8 min
   pillar — which is S6's problem.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
-  4471 reaches the bottom of the dive — three layers since S5 (content) — in
-  811.02 / 809.82 / 802.58s at 1280×800, 1920×1080 and 3440×1440 (stationary,
-  immortal, aiming at the first enemy), driven through real mouse events —
-  measured 2026-10-13. The spread, 1%, is the whole-pixel aim the check allows
-  for: the eels sway, so a pixel moves a kill. On the build with mods from
-  drops, two layers, it was 562.24s at all three; on the S3 build, one layer,
-  296.34s. A `?test` check
-  holds it within 2%; on the S2 layer, dropping the input's `/ scale` failed it
-  at 217.03 / 228.71 / 227.51.
+  4471 reaches the bottom of the dive — three layers — in 844.46s at 1280×800,
+  1920×1080 and 3440×1440 alike (stationary, invulnerable, aiming at the first
+  fish), driven through real mouse events aimed on a 20px grid that all three
+  scales put on whole pixels — measured 2026-10-14, with bites (D108 (fish
+  bite)). The `?test` check requires the three to be identical; dropping the
+  input's `/ scale` leaves the two larger windows short of the bottom. Before
+  bites the aim went to the nearest whole pixel and the check allowed 2%:
+  811.02 / 809.82 / 802.58s on 2026-10-13; on the build with mods from drops,
+  two layers, 562.24s at all three; on the S3 build, one layer, 296.34s; on the
+  S2 layer, dropping `/ scale` failed it at 217.03 / 228.71 / 227.51.
 - **The boss fight** (S3 DoD, D63), mortal bot at the starting kit — no gear,
   no mods — from `last-batch`, seeds 1, 7, 42, 4471, 90210, re-measured
   2026-10-13 on the S5 (content) build: **0 of 5 won**; it dies after 27.3 /

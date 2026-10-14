@@ -23,7 +23,7 @@ const counted = g => Object.fromEntries(g.enemies.reduce((m, e) => m.set(e.name,
 function die(g) {
   g.player.hp = 1;
   g.player.hurt = 0;
-  g.placeEnemy('bulwark', g.player.x, g.player.y);
+  g.placeEnemy('eel', g.player.x, g.player.y);
   g.update(g.FIXED_DT);
   expect(g.screen).toBe('dead');
 }

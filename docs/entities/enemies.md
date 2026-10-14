@@ -12,18 +12,26 @@ pulled to the player (D78 (gems are pulled to the player)).
 
 ## Roster
 
-| name | r | hp | speed | ramp | value | color | glow | carries | enters |
-|---|---|---|---|---|---|---|---|---|---|
-| drifter | 18 | 1 | 85 | 0.6 | 1 | #e8446e | #ff1e5a | — | — |
-| darter | 12 | 1 | 190 | 0.9 | 1 | #ffb648 | #ff8a00 | — | — |
-| bulwark | 34 | 6 | 52 | 1.2 | 3 | #a05cff | #7b2fff | — | — |
-| archer | 16 | 2 | 75 | — | 2 | #5aa9ff | #1f6fff | — | — |
-| puffer | 22 | 3 | 95 | — | 2 | #ffee58 | #ffc800 | — | — |
-| eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | — | — |
-| mini-boss | 52 | 24 | 70 | — | 5 | #e2ff8a | #c6ff3c | false | — |
-| boss | 84 | 60 | 60 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
+| name | r | hp | speed | ramp | value | color | glow | touch | carries | enters |
+|---|---|---|---|---|---|---|---|---|---|---|
+| drifter | 18 | 1 | 85 | 0.6 | 1 | #e8446e | #ff1e5a | — | — | — |
+| darter | 12 | 1 | 190 | 0.9 | 1 | #ffb648 | #ff8a00 | — | — | — |
+| bulwark | 34 | 6 | 52 | 1.2 | 3 | #a05cff | #7b2fff | — | — | — |
+| archer | 16 | 2 | 75 | — | 2 | #5aa9ff | #1f6fff | — | — | — |
+| puffer | 22 | 3 | 95 | — | 2 | #ffee58 | #ffc800 | — | — | — |
+| eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | true | — | — |
+| mini-boss | 52 | 24 | 70 | — | 5 | #e2ff8a | #c6ff3c | — | false | — |
+| boss | 84 | 60 | 60 | — | 30 | #c8ff3c | #9dff00 | — | false | bottom |
 
-Each behaviour's numbers, a table per behaviour field. `lunge`:
+Each behaviour's numbers, a table per behaviour field. `bite`:
+
+| name | reach | windup | rest |
+|---|---|---|---|
+| drifter | 10 | 0.3 | 0.8 |
+| darter | 6 | 0.15 | 0.6 |
+| bulwark | 40 | 0.6 | 1.2 |
+
+`lunge`:
 
 | name | chase | windup | speed | reach | rest |
 |---|---|---|---|---|---|
@@ -50,8 +58,9 @@ Each behaviour's numbers, a table per behaviour field. `lunge`:
 
 Every number is S6 (balance)'s to tune. Marked in the code as Claude's picks:
 the lungers' numbers (D64 (the boss lunges)), the boss's `value` (D68 (the
-layer end is a milestone)), and every type S5 (content) brought (D95 (three
-enemy behaviours, and one way to be hurt)).
+layer end is a milestone)), every type S5 (content) brought (D95 (three
+enemy behaviours, and one way to be hurt)), and the ramps and bites (D107 (the
+diver swims and faces; fish with a ramp), D108 (fish bite)).
 
 ## Fields
 
@@ -67,6 +76,8 @@ enemy behaviours, and one way to be hurt)).
 | `color` | hex | Body colour. Placeholder graphics (D4 (no assets, ever)). |
 | `glow` | hex | Glow colour, the same placeholder. |
 | `carries` | — | `false`: never the glowing fish that carries its batch's mod (D88 (the fish glows from the start)) — the boss and the mini-boss. Absent: it can be. |
+| `bite` | — | Its presence is the behaviour: the type bites (D108 (fish bite)). Holds the numbers in its table above: within `reach` px, body to body, it stops and opens its jaws for `windup` seconds, bites if the diver is still within `reach`, then chases `rest` seconds before it can bite again. |
+| `touch` | — | `true`: its body hurts on contact — the eel's. A fish without it hurts only by its attack (D108 (fish bite)). |
 | `lunge` | — | Its presence is the behaviour: the type lunges instead of only chasing (D64 (the boss lunges)). Holds the timings in the table above: `chase` seconds before a wind-up may start, `windup` and `rest` in seconds, the charge's `speed` in px/s and its `reach` in px. |
 | `spit` | — | Its presence is the behaviour: the type keeps its distance and spits (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: it closes to `range` px and backs off inside `near` px; it spits every `every` seconds, a shot of radius `r` px flying at `speed` px/s for `travel` px. |
 | `fuse` | — | Its presence is the behaviour: the type swells, bursts and chases on (D95 (three enemy behaviours, and one way to be hurt), D106 (the puffer bursts and comes on again)). Holds the numbers in its table above: after chasing for at least `chase` seconds, within `trigger` px it stops and swells for `time` seconds, then bursts, reaching `blast` px, and chases again. |
@@ -79,8 +90,22 @@ A behaviour is a field whose presence switches it on, plus one branch in the
 enemy loop (`step()` in `game/logic.js`) and its step function — never a
 class (D26 (disciplines installed)). S5 (content) brings five to seven.
 
-**Chase** — every type without a behaviour field: swims straight at the player
-at its `speed`. The dash's shove is its only other motion.
+**Chase** — a type without a behaviour field: swims straight at the player at
+its `speed`, eased by its `ramp`. The dash's shove is its only other motion.
+Today every type has a behaviour; the plain fish bite.
+
+**Bite** — chase, open the jaws, bite, rest (`biteStep()`, D108 (fish bite)).
+It chases until its body is within `reach` px of the player's, then stops —
+easing to a halt with its `ramp`, so a heavy fish slides — and holds its jaws
+open for `windup` seconds: the tell, a dark wedge toward the player. They snap
+shut on a heart if the player is still within `reach`, and on water if not;
+then it chases on, `rest` seconds before it can bite again. A dash's shove
+mid-wind-up moves it, and it bites from where it ends up. In one sentence:
+when the jaws open, get away.
+
+**Touch** — a fish with `touch: true` costs a heart on contact: the eel's
+electric body. Every other fish hurts only by its attack — a bite, a spit, a
+burst, or the lunge's charge (D108 (fish bite)).
 
 **Lunge** — chase, wind up, charge, rest, then chase again (`lungeStep()`).
 After `chase` seconds, within `reach` of the player and wholly inside the view,
@@ -88,7 +113,8 @@ it stops and winds up for `windup` seconds with its line locked at where the
 player was. That is the tell: it swells, glows harder and lays a lane as wide
 as its radius along the line. Then it charges along the line at `speed`, for
 `reach` px or to the edge of the view, and rests for `rest` seconds — the
-opening. From the wind-up on, the view holds it, so a charge never takes the
+opening. The charge is its attack: contact hurts while it charges, and only
+then (D108 (fish bite)). From the wind-up on, the view holds it, so a charge never takes the
 fight off screen. In one sentence, per the pillar: when it swells, get out of
 its line.
 
@@ -121,15 +147,20 @@ step, as a school. In one sentence: lead your shots.
 ## drifter
 
 The baseline swarm: slow and fragile, the enemy every other type is measured
-against. Chases.
+against. Bites (D108 (fish bite)): a short wind-up and a small reach, and it
+turns loosely — back off when its jaws open.
 
 ## darter
 
-Small and fast: fast enough to punish lazy kiting. Chases.
+Small and fast: fast enough to punish lazy kiting. Nips (D108 (fish bite)):
+the quickest wind-up and the smallest reach, at a speed its ramp turns slowly
+— step out of its line, and it slides past.
 
 ## bulwark
 
-Big, slow and tough: soaks shots and blocks escape routes. Chases.
+Big, slow and tough: soaks shots and blocks escape routes. Chomps (D108 (fish
+bite)): a long reach and a slow wind-up, and heavy to start and to turn — stay
+out of its reach, or circle it.
 
 ## archer
 
@@ -138,7 +169,7 @@ one way to be hurt)): it punishes standing still and kiting in a straight line,
 the dominant play while everything only chased. Its range sits under the
 Gun's, so the starting weapon can always answer it. The draft's "avoiding the
 player and shooting from a distance", named for the archerfish, which spits
-at its prey.
+at its prey. Harmless to touch: only its spit hurts (D108 (fish bite)).
 
 ## puffer
 
@@ -147,14 +178,16 @@ enemy behaviours, and one way to be hurt), D106 (the puffer bursts and comes
 on again)): the draft's "exploding after a short time". Igor's shape: "chases,
 stops for a brief moment, explodes quickly, continues chasing". It gives a
 batch a fish that must die first, and makes standing your ground in a crowd
-cost; waiting one out no longer clears it. Every number is Claude's pick, S6
-(balance)'s to tune.
+cost; waiting one out no longer clears it. Harmless to touch: only its burst
+hurts (D108 (fish bite)). Every number is Claude's pick, S6 (balance)'s to
+tune.
 
 ## eel
 
 Closes in on a sway (D95 (three enemy behaviours, and one way to be hurt)):
 the draft's "moving in a peculiar way". Fast and slippery, it asks you to aim
-where it will be, not where it is.
+where it will be, not where it is. Its body shocks: the one fish that hurts on
+touch, and it never bites (D108 (fish bite)) — never touch it.
 
 ## mini-boss
 

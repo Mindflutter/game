@@ -263,7 +263,7 @@ function startScenario(s, seed) {
 //
 // `version` from the first write (foundations.md -> The technical contract). A
 // save this build does not know is rejected loudly, never guessed at.
-const SAVE_VERSION = 5;
+const SAVE_VERSION = 6;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, spent: {}, tasks: {},
@@ -321,7 +321,9 @@ function saveText() {
 // name, v3 by its number (D89): these were the names then. v3 had one weapon,
 // carried by every dive: a v3 save owns and carries the Gun (D97), its diver
 // wears no suit (D100), and its batch's clock starts as it loads (D98). v4 had
-// no water: its diver and fish load at rest, the diver facing down (D107).
+// no water: its diver and fish load at rest, the diver facing down (D107). A
+// fish keeps the behaviour it was made with, so a v5 dive's fish get their
+// type's again: drifters saved before bites bite (D108).
 function migrate(s) {
   if (s && s.version === 1) {
     if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
@@ -358,6 +360,15 @@ function migrate(s) {
       for (const e of s.dive.enemies) Object.assign(e, { vx: 0, vy: 0 });
     }
     s.version = 5;
+  }
+  if (s && s.version === 5) {
+    if (s.dive) {
+      for (const e of s.dive.enemies) {
+        const t = ENEMY_TYPES.find(x => x.name === e.name);
+        if (t) Object.assign(e, behaviourOf(t));
+      }
+    }
+    s.version = 6;
   }
   return s;
 }

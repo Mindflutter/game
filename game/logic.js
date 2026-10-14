@@ -13,13 +13,12 @@ function enemyType(name) {
 function makeEnemy(t, x, y, speed) {
   enemies.push({ name: t.name, x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
                  color: t.color, glow: t.glow, lastHitBy: 0,
-                 pushX: 0, pushY: 0, ramp: t.ramp, vx: 0, vy: 0,
-                 // Every behaviour field the type has -- `lunge`, `spit`, ...
-                 // -- whose presence is the behaviour (D26), so a new one costs
-                 // nothing here. Then the step it is on and for how long, which
-                 // each behaviour reads its own way -- a lunger also locks its
-                 // line, aimX/aimY, as it winds up; chasers never touch them.
-                 ...Object.fromEntries(Object.entries(t).filter(([, v]) => typeof v === 'object')),
+                 pushX: 0, pushY: 0, vx: 0, vy: 0,
+                 // Its behaviour (`behaviourOf`). Then the step it is on and for
+                 // how long, which each behaviour reads its own way -- a lunger
+                 // also locks its line, aimX/aimY, as it winds up; chasers
+                 // never touch them.
+                 ...behaviourOf(t),
                  phase: 'chase', phaseTime: 0 });
 }
 
@@ -103,6 +102,7 @@ function lungeStep(e, ux, uy, d, dt) {
   } else if (e.phase === 'charge') {
     vx = e.aimX * L.speed;
     vy = e.aimY * L.speed;
+    if (d < e.r + player.r) hurtPlayer();     // the charge is its attack (D108)
   } else if (e.phaseTime >= L.rest) {        // resting: the opening
     e.phase = 'chase';
     e.phaseTime = 0;
@@ -172,6 +172,31 @@ function fuseStep(e, ux, uy, d, dt) {
     burst(e.x, e.y, e.color, e.glow, 24, 260, 0.45);
     sound('pop');
   }
+}
+
+// ---------- the bite ----------
+// The plain fish's (D108): it chases, eased by its `ramp`, until its body is
+// within `reach` of the diver's; then it stops -- easing to a halt, so a heavy
+// fish slides -- and holds its jaws open for `windup` seconds, the tell. They
+// snap shut on a heart if the diver is still within `reach`, else on water,
+// and it chases on, `rest` seconds before it can bite again.
+function biteStep(e, ux, uy, d, dt) {
+  const B = e.bite;
+  e.phaseTime += dt;
+  if (e.phase === 'jaws') {
+    ease(e, 0, 0, e.ramp, dt);
+    if (e.phaseTime >= B.windup) {
+      if (d - e.r - player.r <= B.reach) hurtPlayer();
+      e.phase = 'rest';
+      e.phaseTime = 0;
+    }
+  } else {
+    ease(e, ux * e.speed, uy * e.speed, e.ramp, dt);
+    if (e.phase === 'rest' && e.phaseTime >= B.rest) { e.phase = 'chase'; e.phaseTime = 0; }
+    if (e.phase === 'chase' && d - e.r - player.r <= B.reach) { e.phase = 'jaws'; e.phaseTime = 0; }
+  }
+  e.x += (e.vx + e.pushX) * dt;
+  e.y += (e.vy + e.pushY) * dt;
 }
 
 // ---------- the weave ----------
@@ -639,6 +664,7 @@ function fishTip(e) {
   return e.name + ': ' + DEBUG_BEHAVIOURS[kind || 'chase'] +
          (e.enters === 'bottom' ? '; rises from below' : '') +
          (e.carries === false ? '; never glows, so carries no mod' : '') +
+         (e.touch ? '; hurts to touch' : '') +
          '   hp ' + e.hp + ' \u00b7 speed ' + e.speed + ' \u00b7 ' + e.value + (e.value === 1 ? ' gem' : ' gems');
 }
 // Tier by tier -- or once, when every tier moves the same.
@@ -1039,6 +1065,7 @@ function step(dt) {
     else if (e.spit) spitStep(e, ex / d, ey / d, d, dt);
     else if (e.fuse) fuseStep(e, ex / d, ey / d, d, dt);
     else if (e.weave) weaveStep(e, ex / d, ey / d, d, dt);
+    else if (e.bite) biteStep(e, ex / d, ey / d, d, dt);
     else {
       ease(e, (ex / d) * e.speed, (ey / d) * e.speed, e.ramp, dt);   // D107
       e.x += (e.vx + e.pushX) * dt;
@@ -1080,7 +1107,9 @@ function step(dt) {
       }
     }
 
-    if (d < e.r + player.r) hurtPlayer();
+    // Touch hurts only where the body does -- the eel's; every other fish
+    // hurts by its attack: a bite, a spit, a burst, a charge (D108).
+    if (e.touch && d < e.r + player.r) hurtPlayer();
   }
 
   // --- move bullets; they die at the edge of your range ---

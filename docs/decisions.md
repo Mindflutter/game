@@ -3479,3 +3479,66 @@ holding; a dash along the facing from a standstill, the swim carrying on after
 it; a fish with a ramp overshooting a sidestep, one without turning at once; a
 v4 save loading at rest, facing down. `checks.js` — the dash's checks face the
 diver before they dash.
+
+## D108 — Fish bite · 2026-10-14
+Igor, after playing S5 (content): "generally, the fish needs to bite. some
+might still damage on touch, but mostly - swim to you, swift bite animation,
+then damage. would feel way more natural. doesnt concern enemies with complex
+attacks that wouldnt kill on touch." Asked whether those stop hurting on touch
+too, and on the rest: "go with your suggestion. for now, you design the enemies
+anyway. remember the solid rule of diversity for all entities and make your
+call here." The design and its check against `foundations.md`:
+`specs/2026-10-14-movement-and-bites-design.md`.
+
+**Decided, by Igor.**
+- Most fish bite: they swim up, wind up where you can see it, and the damage
+  follows. Some keep damage on touch.
+- A fish with an attack of its own — the archer's spit, the puffer's burst, the
+  lunge — hurts only by that attack: Claude's suggestion, taken.
+
+**Claude's call, delegated** — the roster diverse in kind, each fish asking a
+different answer:
+- **The drifter bites**: reach 10px, a 0.3s wind-up, 0.8s before the next —
+  back off when its jaws open.
+- **The darter nips**: reach 6px, 0.15s, 0.6s, at a speed its ramp turns
+  slowly — step out of its line, and it slides past.
+- **The bulwark chomps**: reach 40px, 0.6s, 1.2s, heavy to start and to turn —
+  stay out of its reach, or circle it.
+- **The eel shocks**: `touch: true`, the one fish that hurts on contact, and it
+  never bites — never touch it.
+- **A bite**: `bite: { reach, windup, rest }`, its presence the behaviour. It
+  chases until its body is within `reach` of the diver's, stops — easing to a
+  halt, so a heavy fish slides — and holds its jaws open for `windup` seconds,
+  drawn as a dark wedge toward the diver. They snap shut on a heart only if the
+  diver is still within `reach`; then `rest` seconds of chasing. Through
+  `hurtPlayer()` like every hurt, so the guard, invulnerability and
+  `untouched` treat it as they treat any hurt (D95 (three enemy behaviours, and
+  one way to be hurt)).
+- **The lunge's charge hurts on contact**; a lunger winding up or resting is
+  harmless to touch.
+- **The save goes to version 6**: a fish keeps the behaviour it was made with,
+  so a restored dive's fish get their type's again, and fish saved before bites
+  bite.
+- No sound of its own for a bite: the hurt's, until S7 (alpha polish).
+
+**Supersedes** every fish hurting on touch, the prototype's rule; D95 (three
+enemy behaviours, and one way to be hurt)'s one way stands.
+
+**Found on the way.** The window-size check of D29 (vertical scrolling dive with
+a camera — difficulty invariant to window size) aimed at the first fish through
+whole client pixels, so each window size aimed a different fraction of a pixel
+off. While fish sat on the diver that was harmless; once they hover around it,
+one grazing shot sent the dive another way — 861 / 839 / 861s, past its 2%.
+It now aims on a 20 view-px grid that all three scales put on whole pixels, and
+requires the three dives to be identical; without the input's `/ scale` it
+still fails. And version 5 never got its fixture: `save-v5.json` is now written
+by the version 5 build, beside `save-v6.json`.
+
+**Guarded by**: `tests/enemies.test.js` — chasing into reach, then stopping
+with the jaws open; a heart off a diver still in reach, nothing off one that
+got away; the rest before the next bite; no bite once dead, nor through
+invulnerability; a shoved biter biting from where it ends up; touch hurting
+only for the eel, and a lunger only as it charges. `tests/meta.test.js` — a v4
+dive's fish given their type's bite and ramp; the v5 and v6 fixtures loading
+and playing on. `checks.js` — the window-size check exact; its hand-built fish
+hurt on touch.
