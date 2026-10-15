@@ -180,7 +180,7 @@ it names, and S6 (balance) measures afresh.
   so it cannot see a human lining the dash up along a crowd. It is a weak
   instrument on the same axis the bot is (D50). Analysis in `ideas.md` → the
   dash economy.
-- No known bugs.
+- Open bugs are `bugs.md`'s.
 - `index.html` over `file://` is **unverified by Claude** — Playwright refuses
   `file://` URLs, so everything has been tested over `http://localhost`. Igor
   should confirm double-click still works. Low risk, never actually run.

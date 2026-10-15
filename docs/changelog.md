@@ -6,6 +6,11 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Bugs get a page** (D112 (bugs get a page of their own))
+`bugs.md`, for real issues seen in play, each with what happens, what should,
+how to see it and why. Its first: stats named in code words — `iframes` on a
+mod's card. Nothing recorded before was a bug, so nothing moved.
+
 **The dash a third shorter** (D111 (the dash a third shorter))
 `dashSpeed` 884 to 620: the starting dash covers 99px, not 141, in the same
 0.16s, so its invulnerability is unchanged. Dash reach's steps add the same

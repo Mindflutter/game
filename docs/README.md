@@ -22,6 +22,7 @@ A change to them belongs in the same commit as the code it describes.
 | A challenge, the points it pays, and the attributes they buy | `entities/challenges.md` |
 | Why something was decided, and what was rejected | `decisions.md` |
 | Anything undecided: open questions, parked and declined ideas | `ideas.md` |
+| Something broken in the game — a real issue, not an idea | `bugs.md` |
 | What shipped, and when | `changelog.md` |
 | Igor's description of the whole game | `high level design.md` |
 | A stage's design, and its check against `foundations.md` | `specs/` |
@@ -34,7 +35,7 @@ which of them still hold.
 ## Living docs and logs
 
 **Living docs** say what is true now, and are edited in place: `foundations.md`,
-`plan.md`, `roadmap.md`, `design.md`, `entities/` and `ideas.md`. They carry no
+`plan.md`, `roadmap.md`, `design.md`, `entities/`, `ideas.md` and `bugs.md`. They carry no
 history — no "used to", no struck-through items, no answered questions. When
 something stops being true it is rewritten or deleted, and what happened goes
 to a log.
@@ -59,6 +60,7 @@ copy.
 | Measured bot figures | `roadmap.md` → Health |
 | The check count | `design.md` → Verification |
 | A decision's reasons | its entry in `decisions.md` |
+| An open bug | `bugs.md` |
 
 ## What keeps them true
 

@@ -31,8 +31,8 @@ Then look the rest up by question, not front to back: **`docs/README.md`** is
 the map (D82 — The docs map). Next steps and bot figures are `roadmap.md`; how
 the code works, `design.md`; every enemy, mod, boost, weapon, piece of
 equipment, challenge and attribute, `docs/entities/`; why something was decided,
-`decisions.md`, found by its heading; what is undecided, `ideas.md`; what
-shipped, `changelog.md`.
+`decisions.md`, found by its heading; what is undecided, `ideas.md`; what is
+broken, `bugs.md`; what shipped, `changelog.md`.
 `high level design.md` is Igor's source description. Frozen input, not a
 working doc.
 
@@ -218,8 +218,9 @@ of a challenge (D110).
      `docs/entities/` for any enemy, mod, boost, weapon, piece of equipment,
      challenge or attribute that changed — the check holds its numbers, never
      its prose; `plan.md` if a stage moved; `ideas.md` if an open question
-     closed — the answered item leaves it. A living doc keeps no history
-     (`docs/README.md`).
+     closed — the answered item leaves it; `bugs.md` when a bug is found, and
+     when its fix lands — the fixed issue leaves it. A living doc keeps no
+     history (`docs/README.md`).
   3. **`foundations.md`** — if a rule changed, it is a decision: edit here and
      record it in `decisions.md` in the same step, never quietly.
   4. **`CLAUDE.md`** — it makes factual claims (the seam is seven names, the

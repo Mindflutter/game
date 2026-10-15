@@ -3662,3 +3662,26 @@ retune it.
 **Guarded by**: `tests/docs.test.js` — `design.md`'s starting diver at its real
 numbers. The dash's checks read its length off the diver, so they hold at any
 length.
+
+## D112 — Bugs get a page of their own · 2026-10-15
+Igor: "i also think that a page for bugs is needed, so that you could record it
+there as i notice em - not the ideas, but real issues. move some existing
+there. or is it premature?"
+
+**Decided, by Igor**: `bugs.md`, for real issues seen in play.
+
+**Claude's call**, open to Igor:
+- **Not premature**: playing is now where problems come from, and the debug
+  mode already makes an issue carry its own replay (D102 (the debug mode)). His
+  note the same day, "iframes wording is confusing", is the first entry.
+- **A living doc**: an issue stays until the change that fixes it, which puts
+  the fix and the check that now holds it in `changelog.md`. Each says what
+  happens, what should, how to see it — a `?debug=` URL where one helps — and,
+  once found, why.
+- **Nothing moved there**: every note recorded so far is a design question, a
+  balance number or the graphics, each working as built. They stay in
+  `ideas.md`. `roadmap.md` → Health cites the page instead of saying "no known
+  bugs".
+
+**Guarded by**: `tests/docs.test.js` — the docs map names `bugs.md`, and every
+doc `CLAUDE.md` names exists.
