@@ -832,6 +832,12 @@ function update(dt) {
 }
 
 function step(dt) {
+  // The sound off or on, on every screen: a setting, so it is written at once
+  // (D113).
+  if (tapped(MUTE)) {
+    muted = !muted;
+    saveNow();
+  }
   // The debug mode's two keys, on every screen (D102): the same setup again --
   // on its own screen, the first time -- and back to that screen.
   if (debugSetup && tapped(DEBUG_AGAIN)) return debugDive();
@@ -872,7 +878,10 @@ function step(dt) {
     if (tapped(LEFT))  OPTIONS[optionIndex].change(-1);
     if (tapped(RIGHT) || tapped(GO)) OPTIONS[optionIndex].change(1);
     if (tapped(CLICK) && hovered >= 0) OPTIONS[hovered].change(1);   // same as Enter
-    if (justPressed.has('Escape')) screen = returnTo;
+    if (justPressed.has('Escape')) {
+      saveNow();                     // the settings, as the screen is left (D113)
+      screen = returnTo;
+    }
     return;
   }
 

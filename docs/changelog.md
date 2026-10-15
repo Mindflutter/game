@@ -6,6 +6,12 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Settings are kept** (D113 (settings are kept with the save))
+The sound off or on, the volume, the screen shake and the FPS counter now
+survive a reload and New game, written as M is pressed or Options is left. Not
+a bug — it was parked "until local storage", which the save has been since.
+M's key moved from `platform/audio.js` into `game/`, where key bindings belong.
+
 **Recorded**: in `ideas.md`, whether the dash is locked at the start, why
 `footwork` must be a feat (S6 (balance)'s), weapons and equipment on screens of
 their own, stronger versions of the same fish, three fish ideas — one that

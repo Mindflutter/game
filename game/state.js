@@ -323,9 +323,12 @@ function restore(d) {
   diveLive = true;
 }
 
-// The whole save, as text: what persists, plus the dive if one is under way.
+// The whole save, as text: what persists, the settings, and the dive if one is
+// under way. The settings sit beside what persists, not in it, so New game
+// keeps them (D113).
 function saveText() {
-  return JSON.stringify({ ...meta, dive: diveLive ? snapshot() : null });
+  return JSON.stringify({ ...meta, settings: { volume, muted, shakeLevel, showFps },
+                          dive: diveLive ? snapshot() : null });
 }
 
 // Brings an older save up to this version, or leaves it alone, one version at
@@ -421,8 +424,14 @@ function loadSave(text) {
   if (!s || s.version !== SAVE_VERSION) {
     return 'the save is version ' + (s && s.version) + ', this build reads ' + SAVE_VERSION;
   }
-  const { dive, ...kept } = s;
+  const { dive, settings = {}, ...kept } = s;
   meta = { ...freshMeta(), ...kept };
+  // Each setting only if it reads as one: an odd value keeps its default rather
+  // than refusing the save -- a preference is not worth the progress beside it.
+  if (typeof settings.muted === 'boolean') muted = settings.muted;
+  if (typeof settings.showFps === 'boolean') showFps = settings.showFps;
+  if (typeof settings.volume === 'number' && settings.volume >= 0 && settings.volume <= 1) volume = settings.volume;
+  if (Number.isInteger(settings.shakeLevel) && SHAKE_LEVELS[settings.shakeLevel]) shakeLevel = settings.shakeLevel;
   if (dive) restore(dive);
   return '';
 }

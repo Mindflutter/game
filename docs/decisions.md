@@ -3685,3 +3685,32 @@ there. or is it premature?"
 
 **Guarded by**: `tests/docs.test.js` — the docs map names `bugs.md`, and every
 doc `CLAUDE.md` names exists.
+
+## D113 — Settings are kept with the save · 2026-10-15
+Igor, playing: "possibly bug: save muted state". Not a bug by the docs: keeping
+the settings was parked in `ideas.md` since 2026-09-12 — "Volume and screen
+shake currently reset on every reload", Igor: "no local storage yet" — an
+agreed direction, deliberately not then. Its reason went with D77 (the save):
+there has been a save in local storage since. His note is the "now".
+
+**Decided, by Igor**: the settings survive a reload.
+
+**Claude's call**, open to Igor:
+- **All four**: the sound off or on, the volume, the screen shake and the FPS
+  counter — the parked item's whole direction, not the mute alone.
+- **Beside what persists, not in it**, so New game, which erases the progress,
+  keeps them. The save stays at version 7, still unshipped; a save without
+  them loads with the defaults.
+- **A setting the save cannot read keeps its default**, and the save still
+  loads: a preference is not worth refusing the progress beside it.
+- **Written as M is pressed and as the Options screen is left**, as well as at
+  every save already — and never in the debug mode, which still starts muted.
+- **M's key moves into `game/`** (`MUTE`): D102 (the debug mode) moved the
+  mute's state there, but its key stayed in `platform/audio.js`, against
+  `CLAUDE.md`'s rule that key bindings are content. `game/` now reads it on
+  every screen and decides to save, as D77 (the save) has it decide.
+
+**Guarded by**: `tests/meta.test.js` — all four kept across a reload; M on the
+title and in play, written at once; an option written as Options is left; New
+game keeping them; an unreadable setting read as its default with the save
+still loading; the v7 fixture loading its settings.

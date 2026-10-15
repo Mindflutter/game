@@ -88,10 +88,6 @@ Known friction in Rust specifically: methods on `self` called while iterating
 events and applying them after the loop. `nearestEnemy()` returns
 `Option<usize>`, not a reference.
 
-### Settings persistence (localStorage)
-A few lines. Volume and screen shake currently reset on every reload. Igor:
-"no local storage yet" (2026-09-12) — not rejected, just not now.
-
 ### TypeScript
 Revisit at port time, not before. A build step would cost the double-click
 workflow, which is the whole reason the prototype is in a browser. The no-build

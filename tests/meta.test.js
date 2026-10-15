@@ -486,6 +486,7 @@ describe('the save (D70)', () => {
       .toEqual([{ untouched: 2, beeline: 1, flurry: 1 }, { Heart: 1, Strength: 1 }, 3]);
     expect([g.tally, g.killTimes, g.firstKillAt, g.layerStart])
       .toEqual([saved.tally, saved.killTimes, saved.firstKillAt, saved.layerStart]);
+    expect(g.muted).toBe(true);                  // its settings too (D113)
     g.screen = g.resumeTo;
     g.immortal = true;
     const shots = shotsSeen(g, 600);
@@ -1048,6 +1049,56 @@ describe('enemies placed by hand (D37)', () => {
     expect(g.applyScenario('one-drifter', 1)).toBe(true);
     expect(clearAndWait(g, 1)).toBe('playing');
     expect([g.meta.challenges, g.killTimes]).toEqual([{}, []]);   // not even toward `flurry` (D109)
+  });
+});
+
+describe('settings, kept with the save (D113)', () => {
+  it('keeps the sound off, the volume, the shake and the FPS counter across a reload', () => {
+    const g = loadGame();
+    Object.assign(g, { muted: true, volume: 0.3, shakeLevel: 0, showFps: true });
+    const h = loadGame();
+    expect(h.loadSave(g.saveText())).toBe('');
+    expect([h.muted, h.volume, h.shakeLevel, h.showFps]).toEqual([true, 0.3, 0, true]);
+  });
+
+  it('turns the sound off and on with M, on the title and in play, and writes it at once', () => {
+    const g = loadGame();
+    g.justPressed.add('KeyM');
+    g.update(g.FIXED_DT);
+    expect([g.muted, JSON.parse(g.saved).settings.muted]).toEqual([true, true]);
+    g.reset(1);
+    g.justPressed.add('KeyM');
+    g.update(g.FIXED_DT);
+    expect([g.muted, JSON.parse(g.saved).settings.muted]).toEqual([false, false]);
+  });
+
+  it('writes an option as the Options screen is left', () => {
+    const g = loadGame();
+    g.openScreen('options');
+    g.justPressed.add('ArrowRight');             // the first row, the volume, a notch up
+    g.update(g.FIXED_DT);
+    g.justPressed.add('Escape');
+    g.update(g.FIXED_DT);
+    expect(JSON.parse(g.saved).settings.volume).toBe(0.7);
+  });
+
+  it('keeps the settings through New game, which erases the progress alone', () => {
+    const g = loadGame();
+    g.muted = true;
+    g.newGame();
+    const h = loadGame();
+    expect(h.loadSave(g.saved)).toBe('');
+    expect(h.muted).toBe(true);
+  });
+
+  it('reads a setting it cannot make sense of as its default, and still loads the save', () => {
+    const g = loadGame();
+    g.meta.bank = 50;
+    const save = JSON.parse(g.saveText());
+    save.settings = { muted: 'yes', volume: 7, shakeLevel: 99, showFps: 1 };
+    const h = loadGame();
+    expect(h.loadSave(JSON.stringify(save))).toBe('');
+    expect([h.meta.bank, h.muted, h.volume, h.shakeLevel, h.showFps]).toEqual([50, false, 0.6, 2, false]);
   });
 });
 

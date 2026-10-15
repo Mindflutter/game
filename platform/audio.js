@@ -36,7 +36,6 @@ window.addEventListener('keydown', e => {
   } else if (audio.state === 'suspended') {
     audio.resume();
   }
-  if (e.code === 'KeyM') muted = !muted;
 });
 
 // The gain follows game/'s `volume` here, before every voice, so game/ sets a

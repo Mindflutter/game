@@ -445,6 +445,7 @@ const GO    = ['Enter', 'NumpadEnter', 'Space'];
 const DASH  = ['Space'];
 const CLICK = ['Mouse0'];
 const FAST  = ['ShiftLeft', 'ShiftRight'];   // held: a value row moves five at a time
+const MUTE  = ['KeyM'];                       // the sound off or on, on every screen (D113)
 // The debug mode's own (D102), live only in it: the same setup again, from any
 // screen, and back to its setup screen.
 const DEBUG_AGAIN = ['KeyR'];
