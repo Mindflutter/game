@@ -6,6 +6,11 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**The dash a third shorter** (D111 (the dash a third shorter))
+`dashSpeed` 884 to 620: the starting dash covers 99px, not 141, in the same
+0.16s, so its invulnerability is unchanged. Dash reach's steps add the same
++150px/s, now 99, 123 and 147px.
+
 **Challenges, with a doc of their own** (D110 (challenges))
 Micro-tasks are called challenges, Igor's word, in the code, the save and on
 every screen; a check now fails on the old name in any living doc or the code.

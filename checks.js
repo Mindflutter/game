@@ -302,11 +302,12 @@ if (location.search === '?test') {
   check(twice.hp === 3, 'two Impacts must wound for two, hp=' + twice.hp);
 
   // The wave reaches past the player's body. This one sits 30px beyond the far
-  // end of the dash -- never touched, but well inside the wave.
+  // end of the dash, wherever its length puts that -- never touched, but well
+  // inside the wave.
   reset();
   impact.apply(player);                          // hp is the oracle, so buy it
   player.fireTimer = 999;
-  const ahead = mob(player.x + 171, player.y, { hp: 5, maxHp: 5 });
+  const ahead = mob(player.x + player.dashSpeed * DASH_TIME + 30, player.y, { hp: 5, maxHp: 5 });
   enemies.push(ahead);
   const aheadX = ahead.x;
   dashRight();
@@ -375,10 +376,14 @@ if (location.search === '?test') {
     return player.x - x0;
   };
   const bare = dashDistance(0), finned = dashDistance(8);
+  // Its own length, read off the diver, so the dash can be retuned (D111).
+  reset();
+  const DASH_LENGTH = player.dashSpeed * DASH_TIME;
   check(Math.abs(bare - finned) < 1,
     'Fins must not lengthen the dash: ' + bare.toFixed(1) + 'px bare vs ' +
     finned.toFixed(1) + 'px with eight');
-  check(bare > 100, 'a dash must still cover ground, ' + bare.toFixed(1) + 'px');
+  check(bare > DASH_LENGTH * 0.9, 'a dash must cover most of its length, ' + bare.toFixed(1) +
+    'px of ' + DASH_LENGTH.toFixed(1));
 
   // A dash is a committed lunge (D56): the direction is taken when it starts,
   // and live input must not turn it, reverse it, or stop it by letting go --
@@ -400,7 +405,7 @@ if (location.search === '?test') {
     return { dx: player.x - x0, dy: player.y - y0 };
   };
   const straight = dashAndSwitch('KeyD');
-  check(straight.dx > 100 && Math.abs(straight.dy) < 1,
+  check(straight.dx > DASH_LENGTH * 0.9 && Math.abs(straight.dy) < 1,
     'a dash held straight must travel its length, moved ' + straight.dx.toFixed(1));
   for (const [key, label] of [['KeyW', 'turn it'], ['KeyA', 'reverse it'],
                               [null, 'stop it by letting go']]) {

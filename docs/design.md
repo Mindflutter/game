@@ -308,7 +308,7 @@ its segment against the player, and is spent only by a hit that lands.
 standstill where you last faced — never the cursor, which is usually the
 direction you least want to travel in. It ends with the swim carrying on along
 it at full swim speed. 0.16s at
-`player.dashSpeed` (884px/s) on a `player.dashCooldown` (2.2s) leash,
+`player.dashSpeed` (620px/s) on a `player.dashCooldown` (2.2s) leash,
 invulnerable for the dash plus a moment after, so landing inside what you flew
 through costs nothing. **Committed**: travel follows the direction frozen when
 it started, so live input cannot turn it, reverse it, or stop it by letting go
@@ -329,7 +329,7 @@ a crowd is what makes diving into one a play rather than a mistake, and that has
 to work at tier 0. The white hit flash *is* gated, because a flash reads as
 "that hurt" and firing it on a harmless push is a lie.
 
-Dash reach is `dashSpeed × DASH_TIME` — 141px at the start — and nothing a
+Dash reach is `dashSpeed × DASH_TIME` — 99px at the start (D111) — and nothing a
 dive picks up lengthens it: `dashSpeed` is its own field, not a multiple of
 `speed`, so `Fins` does not feed it (D56). Only the Dash reach attribute does,
 at `home` (D75). The dash takes
@@ -720,7 +720,7 @@ weapons' among them — are in their docs in `entities/`; the rest are here, and
 `npm test` holds them to the code.
 
 `PLAYER_START`, the diver (r 20, speed 260, ramp 0.25, turn 0.2, hp 3, maxHp 3,
-iframes 1, dashCooldown 2.2, dashSpeed 884, mendOnClear 0, dashDamage 0,
+iframes 1, dashCooldown 2.2, dashSpeed 620, mendOnClear 0, dashDamage 0,
 guard 0) · `RAMP_LEFT 0.05` ·
 `GEM_PULL 600` · `NOTICE_TIME 2.5` · `ENEMY_JITTER 0.3` ·
 `GATE_PAUSE 1.2` · `GATE_SPACING 400` · `CURRENT_SPEED 200` ·

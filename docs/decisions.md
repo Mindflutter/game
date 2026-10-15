@@ -3638,3 +3638,27 @@ docs are (D81 (entity docs, one per kind)), and a new name.
 name absent from every living doc and from the code, citations, quotes and
 code spans aside. `tests/meta.test.js` — no screen, line or notice the player
 reads says "task".
+
+## D111 — The dash a third shorter · 2026-10-15
+Igor, playing: "basic dash is too long. reduce by about 30%."
+
+**Decided, by Igor**: the starting dash about 30% shorter.
+
+**Claude's picks**, open to Igor:
+- **`dashSpeed` 884 to 620** — 141px of dash to 99. The dash's time stays 0.16s,
+  so its invulnerability and its feel of a committed lunge stay as D56 (the
+  dash is a fixed, committed lunge) made them; it travels slower instead.
+- **Dash reach's step stays +150px/s**, so a step now adds a quarter of the
+  dash rather than a sixth: 99, 123, 147px — two steps are about the old dash.
+
+**Supersedes** D56 (the dash is a fixed, committed lunge)'s 884px/s and 141px,
+and D75 (the gun's tiers, dash reach, a clean batch)'s 141, 165 and 189px.
+
+**Found on the way**: three of `checks.js`'s dash checks had the old length
+written in — a fish placed at 171px, and two floors of 100px — and failed on
+the shorter dash. They read the length off the diver now, so S6 (balance) can
+retune it.
+
+**Guarded by**: `tests/docs.test.js` — `design.md`'s starting diver at its real
+numbers. The dash's checks read its length off the diver, so they hold at any
+length.

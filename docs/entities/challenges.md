@@ -101,9 +101,10 @@ kit is about four minutes.
 
 ## Dash reach
 
-Each step lengthens the dash: 141px at none, 165 at one, 189 at two (D75 (the
-gun's tiers, dash reach, a clean batch)). The only thing that does: nothing a
-dive picks up lengthens it (D56 (the dash is a fixed, committed lunge)).
+Each step lengthens the dash: 99px at none, 123 at one, 147 at two (D75 (the
+gun's tiers, dash reach, a clean batch), D111 (the dash a third shorter)). The
+only thing that does: nothing a dive picks up lengthens it (D56 (the dash is a
+fixed, committed lunge)).
 
 ## Heart
 

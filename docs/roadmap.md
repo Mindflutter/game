@@ -20,11 +20,12 @@ tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
 status bar, the two wordings, the sizes (D104 (bodies doubled)) and the Knife's
 swing (D105 (the Knife swings)), the puffer that comes on again (D106 (the
 puffer bursts and comes on again)), the swim and the facing (D107 (the diver
-swims and faces; fish with a ramp)), fish that bite (D108 (fish bite)) and
+swims and faces; fish with a ramp)), fish that bite (D108 (fish bite)),
 challenges as ladders (D109 (micro-tasks are ladders; steps cost more as they
-rise), D110 (challenges)). Next: the boss and the mini-boss made different
-(`plan.md` → Active stage); waves are proposed for this pass too, Igor to
-confirm (`ideas.md` → Pace). Each is discussed one at a time.
+rise), D110 (challenges)) and the shorter dash (D111 (the dash a third
+shorter)). Next: the boss and the mini-boss made different (`plan.md` → Active
+stage); waves are proposed for this pass too, Igor to confirm
+(`ideas.md` → Pace). Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's
@@ -38,7 +39,7 @@ Knife (`entities/weapons.md`), of the three pieces of equipment
 (`entities/equipment.md`), of Barbs and the three boosts (`design.md`), and
 the layers' pools — and this pass's: every challenge's rungs, what a rung pays,
 what a step costs and what each attribute's step adds
-(`entities/challenges.md`) — all Claude's picks.
+(`entities/challenges.md`), and the dash's 99px (D111) — all Claude's picks.
 The
 scenarios that start next to each — one fish of each kind, every ordinary type
 in a row, a weapon carried from the top, the second and third layers with a
@@ -147,8 +148,10 @@ it names, and S6 (balance) measures afresh.
   centred player in 2.04s at the earliest, 3.21s on average. Edged, 0.27s;
   cornered, 0.22s. This is what killed the `Lull` mod and what Igor's
   "fish from behind the screen" idea would change.
-- **The dash build, measured 2026-09-27** (D54 batches, batch 8 — 32 enemies,
-  all 1hp — after 3s of closing in; the gun kills 2.5/s, single target):
+- **The dash build, measured 2026-09-27** on the 141px dash — before D111 (the
+  dash a third shorter) made it 99px, so both tables are a regression signal
+  for that build only (D54 batches, batch 8 — 32 enemies, all 1hp — after 3s
+  of closing in; the gun kills 2.5/s, single target):
 
   | build | killed per dash | kills/s | vs the gun |
   |---|---|---|---|
@@ -171,8 +174,7 @@ it names, and S6 (balance) measures afresh.
   mod that raises escape power, and it caps at 3. **The Fins ×10 rows cannot be
   reached** — every mod caps at 3 (D69 (every mod capped)) — and stay as
   measured, as the proof that `Fins` does not feed the dash. The Dash reach
-  attribute (D75), 165 and 189px at one and two steps, is not measured in
-  these tables.
+  attribute (D75) is not measured in these tables.
 
   Caveat as ever: the probe dashes once from a standstill in a fixed direction,
   so it cannot see a human lining the dash up along a crowd. It is a weak

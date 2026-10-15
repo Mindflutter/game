@@ -24,7 +24,7 @@ const PLAYER_START = {
   maxHp: 3,
   iframes: 1,        // seconds of invulnerability after a hit
   dashCooldown: 2.2, // seconds before you can dash again
-  dashSpeed: 884,    // px/s while dashing -- its own number, not a multiple of
+  dashSpeed: 620,    // px/s while dashing -- its own number, not a multiple of
                      // `speed`, so swim speed never lengthens the dash (D56)
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
   dashDamage: 0,     // the dash starts as pure movement (D51). It always shoves;
