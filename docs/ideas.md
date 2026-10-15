@@ -456,6 +456,17 @@ discussed.
 - **The Knife's arc halved.** Igor, 2026-10-15: "knife arc reduce by half" —
   120° to 60°, from D105 (the Knife swings)'s pick, given "for balance".
   **Home**: S6 (balance), his "for balance".
+- **Swimming through biters costs nothing.** Igor, 2026-10-15: "balance
+  issue: i can freely swim thru red & purple enemies without a bite. not
+  necessarily always bad, but need to be addressed". The drifter and the
+  bulwark: since D108 (fish bite) no fish but the eel hurts on touch, and a
+  bite lands only if the diver is still in reach as the jaws shut — 0.3s and
+  0.6s after they open — and a diver at full swim is through and out by then.
+  Ways to address it, none chosen: bodies the diver cannot pass through, so a
+  crowd is a wall and the dash the way through it; contact that slows the
+  swim; a snap at once when the diver is inside a fish's body. **Home**:
+  proposed — whether bodies are solid is a shape for this pass, its numbers
+  S6 (balance)'s; Igor calls it balance, so his to place.
 
 **Graphics**
 

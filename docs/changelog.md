@@ -6,6 +6,10 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Recorded: swimming through biters costs nothing**
+Igor's balance note, in `ideas.md` → The stage's content, with the ways it
+could be addressed — none chosen.
+
 **Settings are kept** (D113 (settings are kept with the save))
 The sound off or on, the volume, the screen shake and the FPS counter now
 survive a reload and New game, written as M is pressed or Options is left. Not
