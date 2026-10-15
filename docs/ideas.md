@@ -178,6 +178,24 @@ built.
 **weapon** — fits only the weapons it names (D99 (weapon mods, and more
 boosts)); the first, Barbs, is built.
 
+## Fish ideas — a running list
+
+Open collection, from Igor's playtesting. Nothing here is committed. Each must
+ask the player for a different answer than the fish already in the game —
+diverse in behaviour, not only in type (`high level design.md`). The fish that
+exist are `entities/enemies.md`; an idea moves there when it is built.
+
+- **A fish that dashes.** Igor, 2026-10-15. The lunge is a dash, but only the
+  boss and the mini-boss have it (D64 (the lunge)); an ordinary fish with a
+  short, quick one — a smaller tell, more often — would be new.
+- **A fish whose shots arc.** Igor, 2026-10-15. The archer's spit flies
+  straight (D95 (three enemy behaviours, and one way to be hurt)); a lob, or a
+  fan like the boss's spit idea (More boss attacks, below), lands where the
+  diver will be or covers a spread.
+- **A shooter that flees.** Igor, 2026-10-15: "escaping range-shooting
+  enemies". The archer already backs off inside its band (D95); one that runs
+  from the diver and shoots as it goes would make the player chase.
+
 ## Recorded future opportunities, explicitly not now
 
 - **Multiplicative interaction between `gear` and `attribute`.** Parked by D36,
@@ -360,6 +378,67 @@ discussed.
   nothing modal mid-fight (5) — and by the pillar that no mechanic needs more
   than a sentence. Open: where a hint shows — at a fish's first arrival, at
   `home`, in the help. **Home**: S7 (alpha polish)'s UX fixing.
+- **Weapons and equipment on screens of their own.** Igor, 2026-10-15: "we
+  need to split weapons and gear. confusing to see in one place". The Gear
+  screen lists the three weapons and the three pieces of equipment together
+  (D96 (gear and attributes on screens of their own)); in the glossary both are
+  gear, so the split is Weapons and Equipment. Kin to `home` showing the
+  character, above, which may replace both screens. **Home**: proposed, the
+  next small step — cheap, and asked for; Igor to confirm.
+
+**The dash**
+
+- **Locked at the start?** Igor, 2026-10-15, with the dash cut by a third (D111
+  (the dash a third shorter)): "maybe dash shouldnt be available at the start?"
+  A lean. What it would touch: the dash is the second verb since D20 (mouse aim
+  and an offensive dash); until it opens, the Dash reach and Strength
+  attributes and the `Reflex` and `Impact` mods would buy nothing, so a draw
+  would have to hold them back; and `footwork` would pay for not dashing with
+  no dash to use. Open: whether, and what opens it — gear, a step, a layer, a
+  challenge's rung. **Home**: open.
+- **`footwork` must be a feat.** Igor, 2026-10-15, asked whether a player who
+  never dashes should earn it: "never dashing needs to be justified - being
+  fast enough to avoid most of enemies. i'd say yes, it all comes to balance."
+  So `footwork` stays any run of batches without a dash (D109 (micro-tasks are
+  ladders; steps cost more as they rise)), and staying clear of most fish
+  without one has to take skill. **Home**: S6 (balance), his "it all comes to
+  balance".
+
+**Health**
+
+- **Bars, hearts, and hits worth more than one.** Igor, 2026-10-15: "should
+  enemies have hp bars? shouls the player? damage exceeding 1?" Open, for
+  discussion. Today a hurt fish only shrinks, to 70% of its size near death, so
+  the boss's 60 hp show little progress; the diver's hearts are `HP 3/3` text
+  in the corner; every hurt costs exactly one heart, through one path (D95
+  (three enemy behaviours, and one way to be hurt)); and the player's damage
+  already runs past one — the Knife's 2, the Harpoon's 3, the Weights' half a
+  point a tier. Claude's lean, unconfirmed:
+  - **Fish**: a small bar over any fish of more than 1 hp, once hurt, and a
+    bar across the top for the boss and the mini-boss. One-hit fish stay bare,
+    so a swarm stays readable. It is also how a stronger version of a fish
+    (Pace, below) would read as tougher. A ring round the body was Claude's
+    first lean; Igor: "Health rings probably wont work on real assets well" —
+    a ring hugs a circle, and a sprite has no clean edge to hug, where a bar
+    over any shape works.
+  - **The diver**: hearts, not a bar — read at a glance, every hit counts, one
+    sentence to explain. A bar earns its place when damage varies widely or
+    armour cuts it by a share, and neither is planned. Drawn as hearts where
+    the eye is, rather than as text in the corner.
+  - **Hits worth more than one heart**, for the heavy attacks — the boss's
+    charge, the puffer's burst — so a heavy attack weighs more, and S6
+    (balance)'s threat system gets a lever: how often a fish lands, times how
+    much. With three hearts a two-heart hit is most of a life, so it comes with
+    more hearts at the start, or halves.
+
+  Igor, on the two-heart hit: "2-heart hits, i suggest possible, but not sure
+  if fits current enemy model" — a lean, the fit open. In the code it would be
+  an amount on each attack's record, passed through the one path every hurt
+  takes; in the design it suits the attacks with a long tell — the lunge, the
+  burst — rather than the swarm's bites, which stay at one.
+
+  **Home**: proposed — the size of a hit is a shape for this pass, its numbers
+  S6 (balance)'s; the drawing after Igor's word.
 
 **The stage's content**
 
@@ -434,6 +513,18 @@ discussed.
   Open: what a wave is — its size, its clock, where it enters — and how it
   reads. **Home**: proposed, this pass before S6 (balance), since it changes
   what a batch is, and the threat system measures batches.
+
+- **Stronger versions of the same fish.** Igor, 2026-10-15: "enemies should
+  have levels of their own. same behavior but different attrs. this way we can
+  reach more diversity, higher layers & batches may get the same enemies as the
+  first ones, but stronger". It is D79 (a dive goes from easiest to hardest)'s
+  rise "in numbers and in enemy types" given a third axis: a drifter deep down
+  is a tougher drifter. It meets S6 (balance)'s threat system, which gives a
+  number per enemy type — each version would carry its own. The word needs
+  choosing: "level" is banned (D32 (the glossary)), and "tier" is gear's.
+  Open: the word, how many versions, what changes between them — hp, speed,
+  bite, size — and how a batch names one. **Home**: proposed, this pass with
+  waves, since both change what a batch is; Igor to confirm.
 
 ## Suggested but not yet discussed
 

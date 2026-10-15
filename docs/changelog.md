@@ -6,6 +6,12 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Recorded**: in `ideas.md`, whether the dash is locked at the start, why
+`footwork` must be a feat (S6 (balance)'s), weapons and equipment on screens of
+their own, stronger versions of the same fish, three fish ideas — one that
+dashes, one whose shots arc, a shooter that flees — and, for discussion, health
+bars and hits worth more than one heart.
+
 **Bugs get a page** (D112 (bugs get a page of their own))
 `bugs.md`, for real issues seen in play, each with what happens, what should,
 how to see it and why. Its first: stats named in code words — `iframes` on a

@@ -61,7 +61,7 @@ Restraint: batches cleared in a row without dashing. Not dashing is a choice,
 not luck, so its rungs follow the dive's shape: three batches, a stretch and
 its mini-boss (six), two of each (ten), a whole layer with its boss (fifteen).
 It is a feat only while staying clear of most fish takes the dash — which is
-S6 (balance)'s to make true.
+S6 (balance)'s to make true (`ideas.md` → The dash).
 
 ## beeline
 
