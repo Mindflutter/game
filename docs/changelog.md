@@ -6,6 +6,23 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Fixed: stats named in code words**
+A mod's card and its pickup line name what it moves in words — Nerve's reads
+`safe after a hit 1 → 1.3`, not `iframes` — from `STAT_NAMES` in
+`game/content.js`, printed by one `statLine()` the two now share; the words are
+Claude's picks. The development readout and the debug setup's tips keep the
+code's names: both are tools for building the game, and the readout is to be
+trimmed or dropped before alpha (D52 (the development readout)). Checks: every
+stat a mod moves has a name, and its pickup line prints it; every line of a
+card, its numbers too, fits the card.
+
+**Fixed: boost lines speak of shots while the Knife swings**
+With the Knife, Frenzy says "you swing much faster", Lance "each swing cuts
+more fish" and Bloom "your blade grows": a boost's `swingDesc`, its line while
+the weapon carried swings (D105 (the Knife swings)). Claude's words. Check: no
+boost's line speaks of shots or fire while the Knife is carried, and the Gun
+keeps the lines it had.
+
 **Recorded: a bug** — boost lines speak of shots while the Knife is carried
 (`bugs.md`).
 

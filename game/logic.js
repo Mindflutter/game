@@ -361,8 +361,7 @@ function collectMod(name) {
   const m = MODS.find(x => x.name === name);
   const moved = modPreview(m);
   takeMod(m);
-  banner = m.name + ' \u2014 ' + m.desc + moved.map(c =>
-    '   ' + c.stat + ' ' + +c.from.toFixed(2) + ' \u2192 ' + +c.to.toFixed(2)).join('');
+  banner = m.name + ' \u2014 ' + m.desc + moved.map(c => '   ' + statLine(c)).join('');
   bannerTime = NOTICE_TIME;
   sound('modA');
   sound('modB');
@@ -378,7 +377,7 @@ function startBoost(name) {
     for (const k in b.add) player[k] += b.add[k];
     boosts.push({ name, left: b.time });
   }
-  banner = b.name + ' \u2014 ' + b.desc;
+  banner = b.name + ' \u2014 ' + ((player.swing && b.swingDesc) || b.desc);
   bannerTime = NOTICE_TIME;
   sound('boost');
 }
@@ -462,6 +461,12 @@ function modPreview(mod, n = 1, base = player) {
     .filter(k => typeof after[k] === 'number' && after[k] !== base[k])
     .map(k => ({ stat: k, from: base[k], to: after[k] }));
 }
+
+// One stat a mod moves, as the card and the pickup line both print it: its
+// name in words (STAT_NAMES), from -> to. Whole numbers stay whole; anything
+// fractional gets two places at most, so a 0.30000000000000004 cannot reach
+// the screen.
+const statLine = c => STAT_NAMES[c.stat] + ' ' + +c.from.toFixed(2) + ' \u2192 ' + +c.to.toFixed(2);
 
 // The beat is over: deal the layer end's cards (D85), the middle one marked.
 // With every mod capped there are none, and Continue alone goes on.

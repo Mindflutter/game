@@ -159,16 +159,29 @@ const MODS = [
     weapons: ['Harpoon'], apply: p => p.pierce += 1 },
 ];
 
+// What a stat a mod moves is called on its card and its pickup line: words a
+// player reads without help, never the code's key. A check holds every stat a
+// mod moves to a name here. HP is the status bar's word.
+const STAT_NAMES = {
+  speed: 'swim speed', maxHp: 'max HP', hp: 'HP', dashCooldown: 'dash cooldown',
+  iframes: 'safe after a hit', dashDamage: 'dash damage', mendOnClear: 'HP back each batch',
+  pierce: 'pierce',
+};
+
 // ---------- boosts ----------
 // A short power a kill drops (D86); documented in docs/entities/boosts.md, held
 // to this table by `npm test`. `add` is numbers rather than a function so it
 // can be taken back when the time runs out -- and for the same reason a boost
-// never moves `hp`.
+// never moves `hp`. `swingDesc` is the line instead while the weapon carried
+// swings (D105): the Knife has no shots to swell.
 const BOOSTS = [
   { name: 'Rush',   desc: 'you swim much faster',  time: 5, add: { speed: 200 } },
-  { name: 'Frenzy', desc: 'you fire much faster',  time: 5, add: { fireRate: 3 } },
-  { name: 'Lance',  desc: 'your shots go through', time: 5, add: { pierce: 4 } },
-  { name: 'Bloom',  desc: 'your shots swell',      time: 6, add: { shotRadius: 6 } },
+  { name: 'Frenzy', desc: 'you fire much faster',  swingDesc: 'you swing much faster',
+    time: 5, add: { fireRate: 3 } },
+  { name: 'Lance',  desc: 'your shots go through', swingDesc: 'each swing cuts more fish',
+    time: 5, add: { pierce: 4 } },
+  { name: 'Bloom',  desc: 'your shots swell',      swingDesc: 'your blade grows',
+    time: 6, add: { shotRadius: 6 } },
 ];
 
 // ---------- gear, attributes, challenges ----------

@@ -107,6 +107,19 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
     expect(stats(g.player)).toEqual(stats(fresh.player));
   });
 
+  it('names what a mod moves on its pickup line in words, never by the code\'s keys', () => {
+    const g = loadGame();
+    for (const m of g.MODS) {
+      g.reset(1);
+      const moved = g.modPreview(m);
+      g.collectMod(m.name);
+      for (const { stat, from, to } of moved) {
+        expect(g.STAT_NAMES[stat], stat).toBeTruthy();
+        expect(g.banner).toContain(g.STAT_NAMES[stat] + ' ' + from + ' → ' + +to.toFixed(2));
+      }
+    }
+  });
+
   it('names a pickup on its own line, never over a challenge\'s', () => {
     // A clean first batch pays the "untouched" challenge as it clears (D109), while
     // its mod is still flying in: the two lines must not overwrite each other.
@@ -424,6 +437,21 @@ describe('boosts (D86)', () => {
       expect(Object.keys(b.add).map(k => g.player[k] - base[k])).toEqual(Object.values(b.add));
       for (let i = 0, n = ticks(g, b.time + 0.05); i < n; i++) g.update(g.FIXED_DT);
       expect(Object.keys(b.add).every(k => Math.abs(g.player[k] - base[k]) < 1e-9)).toBe(true);
+    }
+  });
+
+  it('names a boost in words true of the weapon carried: no shots for the Knife', () => {
+    const g = loadGame();
+    const touch = (b, setup) => {
+      setup();
+      g.queuePaused = true;
+      g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: b.name, life: g.BOOST_LIFE });
+      g.update(g.FIXED_DT);
+      return g.banner;
+    };
+    for (const b of g.BOOSTS) {
+      expect(touch(b, () => g.reset(1))).toContain(b.desc);              // the Gun shoots
+      expect(touch(b, () => g.applyScenario('knife', 1))).not.toMatch(/shot|fire/);
     }
   });
 

@@ -38,7 +38,7 @@ ordinary mod `END_STEP 2` picks at once. Every number is S6 (balance)'s to tune.
 | `max` | picks | How many times one dive can take it (D69 (every mod capped)): a switch caps at 1, anything that stacks at 3. No fish carries a mod at its max, and no layer end offers one without room for what its card gives. Where the caps sit is S6 (balance)'s. |
 | `end` | — | `true` marks one of the layer end's own mods (D85 (the layer end's pick)): offered only on its cards, once a card, and never carried by a fish. Without it the mod is ordinary — carried by fish, and on a layer end's card at the bigger step, `END_STEP` picks at once. |
 | `weapons` | — | The weapons a `weapon`-scoped mod fits, by name (D83 (the weapon record)): it is dealt — by a glowing fish or on a layer end's card — only while one of them is carried (D99 (weapon mods, and more boosts)). |
-| `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The "from → to" rows on a card and on the pickup line are worked out from it, at most `MOD_ROWS 2` of them. |
+| `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The "from → to" rows on a card and on the pickup line are worked out from it, at most `MOD_ROWS 2` of them, each stat named in words from `STAT_NAMES`. |
 
 ## Fins
 
@@ -97,6 +97,7 @@ numbers are Claude's picks, S6 (balance)'s to tune.
    weapon, naming real weapons in `weapons` — `max`
    an integer of at least 1, the card text inside the card, at most `MOD_ROWS`
    stats moved — and every stat it moves shown on the development readout
-   (`PLAYER_STATS`), so a new stat needs its line there.
+   (`PLAYER_STATS`) and named in words in `STAT_NAMES`, for its card and its
+   pickup line, so a new stat needs a line in both.
 
 Ideas for more wait in `ideas.md` → Mod ideas.

@@ -1041,11 +1041,12 @@ if (location.search === '?test') {
       Math.round(widest) + 'px: ' + which);
   }
 
-  // The same rule sideways: a mod description is prose in a fixed-width box, and
-  // the renderer centres it, so it cannot notice one running off the edge.
-  const widest = widestModDesc();
+  // The same rule sideways: a mod's description and its rows of numbers are
+  // text in a fixed-width box, and the renderer centres them, so it cannot
+  // notice one running off the edge.
+  const widest = widestCardLine();
   check(widest <= CARD_W - CARD_PAD * 2,
-    'a mod description must fit its card: widest is ' + Math.round(widest) +
+    'every line of a mod card must fit it: widest is ' + Math.round(widest) +
     'px, the card allows ' + (CARD_W - CARD_PAD * 2) + 'px');
 
   // ...and downwards. Continue and the hint sit under the cards (D85), derived

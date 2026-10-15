@@ -54,7 +54,7 @@ export function loadGame() {
                  'batchDashed', 'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
                  'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps'];
   // Constants are `const`, so they get a getter only.
-  const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS',
+  const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS', 'STAT_NAMES',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
                   'MOD_OFFER_DELAY', 'MOD_ROWS',
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',

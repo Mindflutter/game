@@ -54,7 +54,9 @@ the fields and the checks that will hold it. The alpha's counts were S5
 4. **A scenario** if it can be met alone — every new enemy type gets one —
    and its row in the root `README.md`.
 5. **Player-facing text**: its `desc`, the pickup line, `HELP_KEYS`,
-   `HELP_BLURB`, `home` labels. No check reads them.
+   `HELP_BLURB`, `home` labels. No check reads them, but for two: a stat a
+   mod moves needs its words in `STAT_NAMES`, and a boost whose `desc` speaks
+   of shots needs a `swingDesc`, for the Knife.
 6. **Every screen drawn from a list it grew** — `home` rows, the cards, the
    readout (`PLAYER_STATS` for any stat it moves). Screenshot it.
 7. **Verify**: `npm test` and `index.html?test`, output filtered, both green.

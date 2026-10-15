@@ -66,25 +66,24 @@ function drawAimLine() {
   ctx.stroke();
 }
 
-// A CSS font string, so it lives here and not in game/: it means nothing in
-// the layer that survives to Rust, and both of its readers are in this file.
+// CSS font strings, so they live here and not in game/: they mean nothing in
+// the layer that survives to Rust, and all their readers are in this file.
 const CARD_DESC_FONT = '13px system-ui, sans-serif';
+const CARD_ROW_FONT = '12px system-ui, sans-serif';
 
 // Seconds a boost on the floor blinks before it is gone (D86): the warning.
 // Drawing only, so it lives here.
 const BOOST_BLINK = 2;
 
-// Whole numbers stay whole; anything fractional gets two places at most, so a
-// 0.30000000000000004 cannot reach the screen.
-const fmtStat = n => (Number.isInteger(n) ? n : +n.toFixed(2));
-
-// The widest mod description, in pixels, at the font the cards draw it in.
-// A mod is a line of prose in a fixed-width box, and nothing in the game state
-// can see it running off the edge. The check calls this; `measureText` is
-// canvas, so the rule lives in the browser suite.
-function widestModDesc() {
-  ctx.font = CARD_DESC_FONT;
-  return Math.max(...MODS.map(m => ctx.measureText(m.desc).width));
+// The widest line a mod card prints, in pixels, at the font the cards draw it
+// in: a description, or a row of numbers at the card's step. A card is lines
+// of text in a fixed-width box, and nothing in the game state can see one
+// running off the edge. The check calls this; `measureText` is canvas, so the
+// rule lives in the browser suite.
+function widestCardLine() {
+  const width = (font, text) => { ctx.font = font; return ctx.measureText(text).width; };
+  return Math.max(...MODS.flatMap(m => [width(CARD_DESC_FONT, m.desc),
+    ...modPreview(m, cardStep(m)).map(c => width(CARD_ROW_FONT, statLine(c)))]));
 }
 
 // The layer end's pick (D85): the cards, a card marked, and Continue. The
@@ -124,14 +123,13 @@ function drawModCards() {
 
     // The numbers (D52): the change worked out from the mod itself, the stack
     // from modCounts, so a repeated card reads differently from a fresh one.
-    ctx.font = '12px system-ui, sans-serif';
+    ctx.font = CARD_ROW_FONT;
     ctx.fillStyle = on ? '#6fd8e8' : '#4d7a8a';
     // No slice: the card draws every row the mod moves, and a check holds the
     // pool to MOD_ROWS, so a mod that moved a third stat fails the suite rather
     // than quietly losing a number off the bottom of the card.
     modPreview(u, cardStep(u)).forEach((c, n) => {
-      ctx.fillText(c.stat + '  ' + fmtStat(c.from) + ' → ' + fmtStat(c.to),
-                   x + w / 2, y + 90 + n * 17);
+      ctx.fillText(statLine(c), x + w / 2, y + 90 + n * 17);
     });
 
     ctx.fillStyle = on ? '#4d7a8a' : '#3d6270';

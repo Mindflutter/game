@@ -11,12 +11,12 @@ end's pick, its **Boosts** paragraph.
 
 ## Roster
 
-| name | desc | time | adds |
-|---|---|---|---|
-| Rush | you swim much faster | 5 | speed +200 |
-| Frenzy | you fire much faster | 5 | fireRate +3 |
-| Lance | your shots go through | 5 | pierce +4 |
-| Bloom | your shots swell | 6 | shotRadius +6 |
+| name | desc | time | swingDesc | adds |
+|---|---|---|---|---|
+| Rush | you swim much faster | 5 | — | speed +200 |
+| Frenzy | you fire much faster | 5 | you swing much faster | fireRate +3 |
+| Lance | your shots go through | 5 | each swing cuts more fish | pierce +4 |
+| Bloom | your shots swell | 6 | your blade grows | shotRadius +6 |
 
 **adds** is read straight off `add`. Every number is Claude's pick, S6
 (balance)'s to tune.
@@ -27,6 +27,7 @@ end's pick, its **Boosts** paragraph.
 |---|---|---|
 | `name` | — | The key, and the first word of the pickup line. A saved dive keeps the boosts running and those on the floor by name. |
 | `desc` | — | Its one line, shown as it is touched. A kind, not a degree, like a mod's. |
+| `swingDesc` | — | Its line instead while the weapon carried swings rather than shoots — the Knife (D105 (the Knife swings)) — for a `desc` that speaks of shots. Left out, `desc` serves every weapon. |
 | `time` | s | How long it runs once touched. Touched again while it runs, the clock restarts; nothing stacks. |
 | `add` | — | What it adds to the player while it runs, `{ stat: amount }` — numbers, not a function, so the same amounts come off when `time` runs out. It adds on top of everything else and never multiplies (D74 (mods on top of gear and attributes)). Never `hp`, which could not be taken back cleanly. |
 
@@ -40,21 +41,25 @@ numbers are Claude's picks too (D99 (weapon mods, and more boosts)).
 
 Fire much faster, for five seconds (D99 (weapon mods, and more boosts)). The
 weapon's own number, so it helps every weapon, the slow Harpoon most of all.
+With the Knife it swings much faster, and says so.
 
 ## Lance
 
 Your shots go through four more fish, for five seconds (D99 (weapon mods, and
-more boosts)): a crowd turns into a line to shoot down.
+more boosts)): a crowd turns into a line to shoot down. With the Knife, each
+swing cuts four more.
 
 ## Bloom
 
 Your shots swell, for six seconds (D99 (weapon mods, and more boosts)): a wider
 shot is an easier hit, and the readout shows it as `size`. A shot keeps the
-size it was fired at.
+size it was fired at. With the Knife the blade grows: it reaches further, and
+a little wider.
 
 ## Adding one
 
-1. A line in `BOOSTS`: `name`, `desc`, `time`, `add`. Anything it adds must be a
+1. A line in `BOOSTS`: `name`, `desc`, `time`, `add` — and `swingDesc` if
+   `desc` speaks of shots, which the Knife does not fire. Anything it adds must be a
    field of the player — `PLAYER_START`, or the carried weapon's numbers —
    since it is added to and taken back off the player.
 2. A row in the roster and a section here under its `name`. `npm test` fails
