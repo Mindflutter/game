@@ -4,6 +4,19 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-15
+
+**Recorded: waves, and micro-tasks opened**
+Igor's note from playtesting — the game too easy and predictable, waves to
+push a fast clear — in `ideas.md` → Pace, with Crimsonland as his reference.
+What micro-tasks pay is opened for discussion with how attributes grow; the
+tasks themselves stay.
+
+**Recorded: two notes for balance**
+In `ideas.md` → Open — from playing S5 (content), in Igor's words, both for
+S6 (balance): the puffer still feels clumsy, faster or with acceleration
+maybe, which acceleration open; and the Knife's arc halved.
+
 ## 2026-10-14
 
 **Cleanup after `/simplify`**

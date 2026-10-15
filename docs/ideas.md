@@ -367,6 +367,20 @@ discussed.
   a bad design." Its behaviour stands; it goes with the graphics, below.
 - **The archer works** — "shooting enemies are quite good atm. just a positive
   commentary". Its behaviour stands; its numbers stay S6 (balance)'s.
+- **The puffer still feels clumsy.** Igor, 2026-10-15, playing the build with
+  D106 (the puffer bursts and comes on again): "exploding guy still feels
+  clumsy. maybe acceleration or making it faster would help." A lean, given
+  "for balance". What there is to turn: its `speed` (`entities/enemies.md`),
+  and a ramp, which D107 (the diver swims and faces; fish with a ramp) gave
+  the plain chasers but not the puffer — it chases at full speed from its
+  first tick and stops dead to swell. A D107 ramp would make it smoother but
+  slower off the mark, not quicker, and changes its step rather than adding a
+  line to `game/content.js`. Open: which acceleration — that ramp, or a
+  puffer that gathers pace as it chases. **Home**: S6 (balance), his "for
+  balance".
+- **The Knife's arc halved.** Igor, 2026-10-15: "knife arc reduce by half" —
+  120° to 60°, from D105 (the Knife swings)'s pick, given "for balance".
+  **Home**: S6 (balance), his "for balance".
 
 **Graphics**
 
@@ -406,6 +420,69 @@ discussed.
   weaknesses and resistances. **Home**: what a task asks, where a player can
   read it — with the hints, above; what a task pays, a design pass of its own
   before S6 (balance), which measures the economy it settles.
+
+  **Opened for discussion 2026-10-15**, with how attributes grow. Igor: the
+  tasks stay — "micro tasks are not going away, because it's a nice idea and it
+  feels good for the achiever type of gamers". His questions: what is wrong
+  with points; whether the same design can show a player how to earn; what
+  gems instead would lose and win; tasks "easy at the start and gradually grow
+  in complexity? like "1-3-5-10 batches without dash" (just an example)";
+  whether another currency is needed, "same mechanism or different? related to
+  kills or not?"; cosmetics or badges, "but on the other hand they need
+  motivation for completing them". What the code says: **nine points in the
+  whole game** — three tasks, once per layer, three layers — after which a
+  task pays nothing; `untouched` and `swift` are judged at every batch's
+  clear, so a small opener can pay both on a first dive before the player
+  knows they exist; and the Harpoon needs a point of Strength while nothing
+  says where a point comes from. Claude's lean, unconfirmed: points stay (D36
+  (attributes)), and a task becomes visible before it pays, deliberate — tied
+  to a moment, not any batch — and laddered, each rung a streak or one dive's
+  feat, never a running total, which is a quota; a badge beside the point.
+  Igor, the same day: "i like your lean, do that", and of grind: "the rule
+  still holds, i just need to point out that in roguelite a lot of repetition
+  happens anyway, cant avoid it. just so that there is not TOO MUCH grind for
+  the sake of one damn point." Open before the spec: whether a ladder climbs
+  anywhere in a dive or one rung a layer.
+
+**Pace**
+
+- **Waves: a push to clear fast.** Igor, 2026-10-15, playtesting: "we need to
+  start working on waves. for me the game feels to easy and predictable, i
+  dont feel overwhelmed at any point, bosses are easy. here's the point: we
+  gotta push the player to clear the enemies fast, because new ones are
+  constantly coming (remember the prototype). but - waves must be hard to
+  guess, so distribute the enemy spawn into a period of time. it's the
+  rogulite - you are dead at some point, but most likely you go FURTHER next
+  time and are rewarded for it. so a sense of nervous rush and inevitability
+  should come to a player, but not scare him away - motivate istead. and this
+  sense is postponed each dive, if you play equally good that is." His
+  reference for being overwhelmed: Crimsonland.
+
+  Against what is settled, read for what it means in the game:
+  - **It fits D27 (batches are hard-gated)** if a batch stays a bounded queue
+    that gates the descent, its fish arriving spread over time, on a clock
+    rather than on the last clear — so a slow clear meets the next arrivals
+    still fighting. D27 retired the prototype's director because arrivals grew
+    without bound and death came at a fixed time whatever the player did; a
+    bounded batch on a clock cannot diverge. An endless stream inside a gate
+    would supersede D27.
+  - **One tension, with the glossary's wave**: a multi-wave batch "must
+    telegraph that more is coming". "Hard to guess" can be *when, where and
+    what*, while *that* more is coming still shows.
+  - **Inevitability postponed by playing well** is the dive's rising threat
+    (D79 (a dive goes from easiest to hardest)) and S6 (balance)'s threat
+    system: death comes where the threat outgrows the kit, and gear moves that
+    point deeper.
+  - Kin: fish that arrive from behind the screen, above — arrivals near the
+    diver, the fade-in their telegraph.
+  - **Crimsonland**: its Survival is the prototype's shape — an endless stream
+    on a shortening timer, death certain. Its Quests are nearer this: a finite,
+    scripted list of spawns on a timeline, the quest over when all are dead. A
+    review's complaint: fish spawning on top of the player unwarned.
+
+  Open: what a wave is — its size, its clock, where it enters — and how it
+  reads. **Home**: proposed, this pass before S6 (balance), since it changes
+  what a batch is, and the threat system measures batches.
 
 ## Suggested but not yet discussed
 
