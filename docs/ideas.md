@@ -357,7 +357,8 @@ discussed.
   could be dropdown on home screen for example. all with buttons and clear ux,
   currently theres one row per item with an arrow. refer to classics for tier
   up." Reopens D96 (gear and attributes on screens of their own), Claude's
-  delegated call. What `home` shows and how a tier is bought carry over to the
+  delegated call, as D114 (weapons and equipment on screens of their own)
+  amended it. What `home` shows and how a tier is bought carry over to the
   port; the drawing does not, and the canvas gets no investment (D17 (the
   browser build is a throwaway prototype)), so how much is built here is part
   of the question. **Home**: S7 (alpha polish)'s UX fixing.
@@ -374,13 +375,6 @@ discussed.
   nothing modal mid-fight (5) — and by the pillar that no mechanic needs more
   than a sentence. Open: where a hint shows — at a fish's first arrival, at
   `home`, in the help. **Home**: S7 (alpha polish)'s UX fixing.
-- **Weapons and equipment on screens of their own.** Igor, 2026-10-15: "we
-  need to split weapons and gear. confusing to see in one place". The Gear
-  screen lists the three weapons and the three pieces of equipment together
-  (D96 (gear and attributes on screens of their own)); in the glossary both are
-  gear, so the split is Weapons and Equipment. Kin to `home` showing the
-  character, above, which may replace both screens. **Home**: proposed, the
-  next small step — cheap, and asked for; Igor to confirm.
 
 **The dash**
 

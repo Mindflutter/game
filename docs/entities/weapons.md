@@ -6,7 +6,7 @@ glossary) — fired by holding the left mouse button (D45 (the weapon is
 manual)). The tables mirror `WEAPONS` in `game/content.js`, and `npm test`
 fails when the two disagree. How firing works is `design.md` → Firing.
 
-Any number are owned and one is carried, chosen on `home`'s Gear screen
+Any number are owned and one is carried, chosen on `home`'s Weapons screen
 between dives and never switched mid-dive (D97 (weapons are owned, and one is
 carried)). When a dive starts, the carried weapon's numbers are copied onto the
 player, and its tiers apply there — so mods, attributes and the

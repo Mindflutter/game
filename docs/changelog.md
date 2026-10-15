@@ -6,6 +6,15 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Weapons and equipment on screens of their own** (D114 (weapons and equipment
+on screens of their own))
+`home`'s Gear row is now two, Weapons and Equipment, each a screen holding only
+its own rows — Igor: "we need to split weapons and gear. confusing to see in
+one place". The rows' names and order are Claude's. Checks: `home`'s rows, each
+screen holding only its own and left by Back or Esc; every screen whose Back
+leads `home` draws as its menu, since one `render.js` does not name falls
+through to the dive's field.
+
 **Fixed: stats named in code words**
 A mod's card and its pickup line name what it moves in words — Nerve's reads
 `safe after a hit 1 → 1.3`, not `iframes` — from `STAT_NAMES` in

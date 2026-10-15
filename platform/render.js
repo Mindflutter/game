@@ -752,7 +752,7 @@ function draw() {
 
   if (screen === 'title')        { drawMenu(MENUS.title); drawSaveError(); }
   else if (screen === 'home')    drawHome();
-  else if (screen === 'gear' || screen === 'attributes' || screen === 'newGame') drawMenu(MENUS[screen]);
+  else if (['weapons', 'equipment', 'attributes', 'newGame'].includes(screen)) drawMenu(MENUS[screen]);
   else if (screen === 'help')    drawHelp();
   else if (screen === 'options') drawOptions();
   else if (screen === 'debug')   drawDebug();

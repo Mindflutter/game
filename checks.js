@@ -980,14 +980,30 @@ if (location.search === '?test') {
   check(lastRow.y + lastRow.h < HINT_Y - 10,
     'home: the rows must end above the hint, rows end at ' + (lastRow.y + lastRow.h) +
     ', hint at ' + HINT_Y);
-  // Every menu's rows end above the hint too: the gear and attribute screens
-  // and the debug setup's grid (D102) grow from tables, and a menu cannot
-  // notice its rows running into the hint. The lowest row, wherever its grid
-  // puts it.
+  // Every menu's rows end above the hint too: the weapons, equipment and
+  // attribute screens and the debug setup's grid (D102) grow from tables, and a
+  // menu cannot notice its rows running into the hint. The lowest row, wherever
+  // its grid puts it.
   for (const [name, menu] of Object.entries(MENUS)) {
     const end = Math.max(...menu.items.map((_, i) => { const r = rectOf(menu, i); return r.y + r.h; }));
     check(end < HINT_Y - 10,
       name + ': the rows must end above the hint, rows end at ' + end + ', hint at ' + HINT_Y);
+  }
+
+  // Every screen whose Back leads home is drawn as that menu (D114): draw()
+  // names the menus it draws, and one it does not know falls through to the
+  // dive's field.
+  {
+    const was = { screen, drawMenu };
+    const drawn = [];
+    drawMenu = m => drawn.push(m);
+    const homes = Object.entries(MENUS).filter(([, m]) => m.back === BACK_HOME.run);
+    for (const [name] of homes) { screen = name; draw(); }
+    screen = was.screen;
+    drawMenu = was.drawMenu;
+    const missed = homes.filter(([, m]) => !drawn.includes(m)).map(([name]) => name);
+    check(homes.length > 0 && missed.length === 0,
+      'every screen Back leads home from must draw as its menu, drawn as something else: ' + missed.join(','));
   }
 
   // The challenges under the Attributes and pause screens' rows (D109) grow with

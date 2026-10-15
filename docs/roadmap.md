@@ -22,8 +22,9 @@ swing (D105 (the Knife swings)), the puffer that comes on again (D106 (the
 puffer bursts and comes on again)), the swim and the facing (D107 (the diver
 swims and faces; fish with a ramp)), fish that bite (D108 (fish bite)),
 challenges as ladders (D109 (micro-tasks are ladders; steps cost more as they
-rise), D110 (challenges)) and the shorter dash (D111 (the dash a third
-shorter)). Next: the boss and the mini-boss made different (`plan.md` → Active
+rise), D110 (challenges)), the shorter dash (D111 (the dash a third
+shorter)) and weapons and equipment on screens of their own (D114 (weapons and
+equipment on screens of their own)). Next: the boss and the mini-boss made different (`plan.md` → Active
 stage); waves and enemy grades are proposed for this pass too, Igor to confirm
 (`ideas.md` → Pace). Each is discussed one at a time.
 

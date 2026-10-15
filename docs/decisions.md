@@ -3714,3 +3714,27 @@ there has been a save in local storage since. His note is the "now".
 title and in play, written at once; an option written as Options is left; New
 game keeping them; an unreadable setting read as its default with the save
 still loading; the v7 fixture loading its settings.
+
+## D114 — Weapons and equipment on screens of their own · 2026-10-15
+Igor, 2026-10-15: "we need to split weapons and gear. confusing to see in one
+place" — recorded as a proposal, then taken when offered as the next step:
+"Weapons/Equipment split". It supersedes D96 (gear and attributes on screens of
+their own)'s one Gear screen; the rest of D96 stands.
+
+**Decided, by Igor**: the weapons and the equipment are on screens of their
+own. Both are gear in the glossary, so the screens are Weapons and Equipment.
+
+**Claude's call**, open to Igor:
+- **`home` holds Dive, Weapons, Equipment, Attributes, Help and Options**, in
+  that order: what you fight with, what you wear, what you are.
+- **Each screen holds only its own rows**, with the gems to spend, and ends on
+  a Back row; Esc goes `home`. A weapon's row does what D97 (weapons are owned,
+  and one is carried) says, unchanged.
+
+Still open, in `ideas.md`: whether `home` shows the character, which may
+replace all three screens.
+
+**Guarded by**: `tests/meta.test.js` — `home`'s rows; Weapons, Equipment and
+Attributes opened and left by Esc and by Back, each holding only its own.
+`checks.js` — every screen whose Back leads `home` draws as its menu; every
+menu's rows end above the hint.

@@ -288,16 +288,24 @@ describe('home: gear, points, challenges (D31, D36)', () => {
     expect(g.screen).toBe('playing');
   });
 
-  it('keeps gear and attributes on screens of their own, left by Back or Esc (D96)', () => {
+  it('keeps weapons, equipment and attributes on screens of their own, left by Back or Esc (D96, D114)', () => {
     const g = loadGame();
     g.openMenu('home');
     const row = (menu, label) => g.MENUS[menu].items.find(i => i.label === label);
-    expect(g.MENUS.home.items.map(i => i.label)).toEqual(['Dive', 'Gear', 'Attributes', 'Help', 'Options']);
-    row('home', 'Gear').run();
-    expect(g.screen).toBe('gear');
-    expect(g.MENUS.gear.items.some(i => i.label.startsWith('Gun'))).toBe(true);
+    // What each row is, its name, without the tier or price after it.
+    const names = menu => g.MENUS[menu].items.map(i => i.label.split('   ')[0]);
+    expect(g.MENUS.home.items.map(i => i.label))
+      .toEqual(['Dive', 'Weapons', 'Equipment', 'Attributes', 'Help', 'Options']);
+    row('home', 'Weapons').run();
+    expect(g.screen).toBe('weapons');
+    expect(names('weapons')).toEqual([...g.WEAPONS.map(w => w.name), 'Back']);
     g.justPressed.add('Escape');
     g.update(g.FIXED_DT);
+    expect(g.screen).toBe('home');
+    row('home', 'Equipment').run();
+    expect(g.screen).toBe('equipment');
+    expect(names('equipment')).toEqual([...g.EQUIPMENT.map(e => e.name), 'Back']);
+    row('equipment', 'Back').run();
     expect(g.screen).toBe('home');
     row('home', 'Attributes').run();
     expect(g.screen).toBe('attributes');
@@ -656,7 +664,7 @@ describe('owning and carrying weapons (D97)', () => {
 });
 
 describe('the weapons (D97)', () => {
-  const row = (g, name) => g.MENUS.gear.items.find(i => i.label.startsWith(name + ' '));
+  const row = (g, name) => g.MENUS.weapons.items.find(i => i.label.startsWith(name + ' '));
   // Fishes in a line to the diver's right, `gap` px apart, and one shot fired
   // at them: the trigger arms on a released button, then the held one fires.
   const lineAndFire = (g, n, gap) => {

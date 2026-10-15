@@ -744,7 +744,7 @@ function clickStep(r, x) {
 const END_TOP = ARENA_H / 2 + 100;
 const GO_HOME = { get label() { return debugSetup ? 'Setup' : 'Go home'; },
                   run: () => openMenu(debugSetup ? 'debug' : 'home') };
-// The gear and attribute screens' last row, and their Esc (D96).
+// The weapons, equipment and attribute screens' last row, and their Esc (D96).
 const BACK_HOME = { label: 'Back', run: () => openMenu('home') };
 // What a piece of gear requires and is not yet met (D98), on its row.
 const needs = g => (meets(g) ? '' : '   needs ' +
@@ -831,25 +831,26 @@ const MENUS = {
     },
     top: HOME_TOP,
     back: () => openMenu('title'),
-    // What it sells lives a screen deeper, gear and attributes each on its
-    // own (D96): three weapons, three pieces and three attributes on one
-    // screen would run through the hint.
+    // What it sells lives a screen deeper, weapons, equipment and attributes
+    // each on its own (D96, D114): three weapons, three pieces and three
+    // attributes on one screen would run through the hint, and weapons in
+    // one list with equipment read as a muddle.
     items: [
       { label: 'Dive', run: () => reset() },             // every dive from the top (D66)
-      { label: 'Gear',       run: () => openMenu('gear') },
+      { label: 'Weapons',    run: () => openMenu('weapons') },
+      { label: 'Equipment',  run: () => openMenu('equipment') },
       { label: 'Attributes', run: () => openMenu('attributes') },
       { label: 'Help',    run: () => openScreen('help') },
       { label: 'Options', run: () => openScreen('options') },
     ],
   },
-  gear: {
-    heading: 'GEAR',
+  weapons: {
+    heading: 'WEAPONS',
     get sub() { return meta.bank + ' gems'; },
     top: MENU_TOP,
     back: BACK_HOME.run,
     items: [
-      // Every weapon -- to own, to carry, or the carried one's tier (D97) --
-      // then every piece of equipment's tier.
+      // Every weapon -- to own, to carry, or the carried one's tier (D97).
       ...WEAPONS.map(w => ({
         get label() {
           if (meta.carried === w.name) return w.name + '   equipped   ' + tierLabel(w);
@@ -861,6 +862,16 @@ const MENUS = {
           return meta.carried === w.name ? !canBuy(w) : !meta.owned.includes(w.name) && !canOwn(w);
         },
         run: () => pickWeapon(w) })),
+      BACK_HOME,
+    ],
+  },
+  equipment: {
+    heading: 'EQUIPMENT',
+    get sub() { return meta.bank + ' gems'; },
+    top: MENU_TOP,
+    back: BACK_HOME.run,
+    items: [
+      // Every piece of equipment's tier.
       ...EQUIPMENT.map(g => ({
         get label() { return g.name + '   ' + tierLabel(g) + needs(g); },
         get dim() { return !canBuy(g); },
