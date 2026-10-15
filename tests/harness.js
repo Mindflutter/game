@@ -51,16 +51,17 @@ export function loadGame() {
                  'screen', 'currentSeed', 'bulletId', 'shakeLevel',
                  'immortal', 'damageOverride', 'plan', 'meta', 'diveLive',
                  'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
-                 'batchTime', 'batchDashed', 'debugSetup', 'menuIndex', 'muted'];
+                 'batchDashed', 'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
+                 'debugSetup', 'menuIndex', 'muted'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
                   'MOD_OFFER_DELAY', 'MOD_ROWS',
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
                   'BOOSTS', 'BOOST_C', 'BOOST_LIFE', 'END_STEP',
-                  'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'TASKS',
+                  'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'CHALLENGES',
                   'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK',
-                  'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT'];
+                  'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT', 'HELP_BLURB'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [
     ...STATE.map(n => `${n}: { get: () => ${n}, set: v => { ${n} = v; }, configurable: true }`),

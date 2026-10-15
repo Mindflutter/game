@@ -17,8 +17,9 @@ what S6 (balance) would otherwise tune twice — what changes the meaning of a
 number before the numbers are tuned:
 
 - Igor's notes from playing S5 (content) proposed for before S6 (balance)
-  (`ideas.md` → Open — from playing S5 (content)), what micro-tasks pay among
-  them.
+  (`ideas.md` → Open — from playing S5 (content)). What challenges pay is
+  settled: ladders (D109 (micro-tasks are ladders; steps cost more as they
+  rise)), `specs/2026-10-15-micro-task-ladders-design.md`.
 - **Movement with acceleration and a facing, and fish that bite** — Igor,
   2026-10-14: `specs/2026-10-14-movement-and-bites-design.md`.
 - **The boss and the mini-boss made different** — Igor, 2026-10-14:
@@ -43,7 +44,7 @@ the decisions listed say why.
 | S2 — The dive: camera and descent | 2026-09-28 | A layer that scrolls under a camera, a current between gate depths that never stops | D58–D61 |
 | S3 — One boss, one complete layer | 2026-09-29 | The boss as the layer's last batch, two mini-bosses, the lunge — a layer that can be finished | D62–D65 |
 | The layer-to-layer design pass | 2026-09-30 | How a dive runs on through the layers — decided, checked against `foundations.md`, planned | D66–D73 |
-| S4 — Meta loop skeleton | 2026-09-30 | Two layers drawn from pools, the layer end and the win, every mod capped, `home` with the gun's tiers and dash reach, a micro-task, the versioned save | D74–D79 |
+| S4 — Meta loop skeleton | 2026-09-30 | Two layers drawn from pools, the layer end and the win, every mod capped, `home` with the gun's tiers and dash reach, a challenge, the versioned save | D74–D79 |
 | Before S5 — two requirements | 2026-10-13 | A doc for every kind of entity, held to the code; the weapon record; mods dropped by a glowing fish, the layer end's pick, boosts, rank retired | D80–D92 |
 | S5 — Content to the DoD numbers | 2026-10-14 | The archer, the puffer and the eel; the Harpoon and the Knife, owned and carried; three pieces of equipment, Heart and Strength, swift and footwork; Barbs and three boosts; three layers with pools of their own — and, from playing it, the debug mode and New game | D93–D103 |
 

@@ -20,22 +20,26 @@ tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
 status bar, the two wordings, the sizes (D104 (bodies doubled)) and the Knife's
 swing (D105 (the Knife swings)), the puffer that comes on again (D106 (the
 puffer bursts and comes on again)), the swim and the facing (D107 (the diver
-swims and faces; fish with a ramp)) and fish that bite (D108 (fish bite)).
-Next: the boss and the mini-boss made different, and what micro-tasks pay
-(`plan.md` → Active stage).
-Each is discussed one at a time.
+swims and faces; fish with a ramp)), fish that bite (D108 (fish bite)) and
+challenges as ladders (D109 (micro-tasks are ladders; steps cost more as they
+rise), D110 (challenges)). Next: the boss and the mini-boss made different
+(`plan.md` → Active stage); waves are proposed for this pass too, Igor to
+confirm (`ideas.md` → Pace). Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's
 haul (`entities/enemies.md`), S4's — the Gun's prices and tier step
-(`entities/weapons.md`), dash reach and `GEM_PULL` (`design.md`) — the
+(`entities/weapons.md`), `GEM_PULL` (`design.md`) — the
 mods rework's: the layer end's bigger step (`design.md`), `Mend` as the layer
 end's own (`entities/mods.md`), the boost chance, a boost's life on the floor
 and `Rush` (`entities/boosts.md`) — and S5 (content)'s: every number of the
 archer, the puffer and the eel (`entities/enemies.md`), of the Harpoon and the
 Knife (`entities/weapons.md`), of the three pieces of equipment
-(`entities/equipment.md`), of Barbs and the three boosts, Heart, Strength and
-`SWIFT_TIME` (`design.md`), and the layers' pools — all Claude's picks. The
+(`entities/equipment.md`), of Barbs and the three boosts (`design.md`), and
+the layers' pools — and this pass's: every challenge's rungs, what a rung pays,
+what a step costs and what each attribute's step adds
+(`entities/challenges.md`) — all Claude's picks.
+The
 scenarios that start next to each — one fish of each kind, every ordinary type
 in a row, a weapon carried from the top, the second and third layers with a
 kit — are in the root `README.md` → Scenarios.
@@ -167,7 +171,7 @@ it names, and S6 (balance) measures afresh.
   mod that raises escape power, and it caps at 3. **The Fins ×10 rows cannot be
   reached** — every mod caps at 3 (D69 (every mod capped)) — and stay as
   measured, as the proof that `Fins` does not feed the dash. The Dash reach
-  attribute (D75), 165 and 189px at one and two points, is not measured in
+  attribute (D75), 165 and 189px at one and two steps, is not measured in
   these tables.
 
   Caveat as ever: the probe dashes once from a standstill in a fixed direction,

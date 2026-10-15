@@ -62,7 +62,7 @@ describe('the setup reaches the dive', () => {
     g.debugDive();
     const h = loadGame();
     h.meta = { ...h.freshMeta(), carried: 'Harpoon', owned: ['Gun', 'Harpoon', 'Knife'],
-               gear: { Harpoon: 2, Mask: 1, Suit: 2 }, spent: { Heart: 2, Strength: 1 } };
+               gear: { Harpoon: 2, Mask: 1, Suit: 2 }, raised: { Heart: 2, Strength: 1 } };
     h.reset(7);
     for (const n of ['Fins', 'Fins', 'Barbs', 'Barbs', 'Barbs']) h.takeMod(h.MODS.find(m => m.name === n));
     expect(g.weaponName).toBe('Harpoon');

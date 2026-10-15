@@ -19,6 +19,7 @@ A change to them belongs in the same commit as the code it describes.
 | A boost | `entities/boosts.md` |
 | A weapon: its numbers and tiers | `entities/weapons.md` |
 | A piece of equipment | `entities/equipment.md` |
+| A challenge, the points it pays, and the attributes they buy | `entities/challenges.md` |
 | Why something was decided, and what was rejected | `decisions.md` |
 | Anything undecided: open questions, parked and declined ideas | `ideas.md` |
 | What shipped, and when | `changelog.md` |
@@ -72,6 +73,8 @@ copy.
 - the root `README.md` lists every scenario;
 - decisions are named, numbered without gaps, cited only if they exist, and the
   newest has a changelog entry;
+- no living doc, nor the code, calls a challenge by its old name (D110
+  (challenges));
 - this map names every doc, and every doc it — or `CLAUDE.md` — names exists.
 
 What no check can see is whether prose is still true. That is the consistency
@@ -94,6 +97,9 @@ One doc per kind of entity, in `entities/`, all in the same layout (D81
    the decisions behind it, whose numbers they are. The numbers stay in the
    roster.
 5. **Adding one** — the steps, and the checks that will hold the new item.
+
+A doc may add a section for a rule its items share: `entities/challenges.md`'s
+**Points**, which also holds the attributes the points buy (D110 (challenges)).
 
 They describe what is in the game. An idea for an enemy or a mod goes to
 `ideas.md`, and moves here when it is built.

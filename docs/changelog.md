@@ -6,6 +6,30 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Challenges, with a doc of their own** (D110 (challenges))
+Micro-tasks are called challenges, Igor's word, in the code, the save and on
+every screen; a check now fails on the old name in any living doc or the code.
+`entities/challenges.md` holds the challenges, the points they pay and the
+attributes the points buy, its tables held to the code like every entity doc's;
+the attributes' numbers moved there from `design.md`.
+
+**Micro-tasks are ladders** (D109 (micro-tasks are ladders; steps cost more as
+they rise))
+Five tasks, each a different skill, each a ladder of four rungs that pay once,
+ever, in any layer: `untouched` (clean batches in a row), `footwork` (batches
+without a dash), `beeline` (the glowing fish killed first), `flurry` (kills in
+two seconds) and `swift` (a layer against the clock). Rung k pays k points;
+step n of an attribute costs n. The Attributes screen and the pause menu list
+every task with a badge per rung earned and what the next asks and pays; the
+status bar counts each live, and tasks paying on one tick share the notice.
+`home`'s layer list loses its task marks; the help gains a line. The rungs are
+sized from the dive's shape and the bot, as a floor
+(`specs/2026-10-15-micro-task-ladders-design.md`). The save goes to version 7:
+a v6 save's tasks become rungs, its steps come back as points, and the batch's
+clock, read only by the old `swift`, is gone. Found on the way: the help's last
+line could sit on its hint while its layout check passed; the check now asks
+for a line's height, and the key list starts higher.
+
 **Recorded: waves, and micro-tasks opened**
 Igor's note from playtesting — the game too easy and predictable, waves to
 push a fast clear — in `ideas.md` → Pace, with Crimsonland as his reference.

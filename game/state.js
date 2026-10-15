@@ -23,25 +23,37 @@ let breathTimer = 0;
 // whichever layer it belongs to, and the bottom is `plan.length`.
 let plan = [];
 
-// Whether the player has taken a hit since the current batch arrived -- what
-// the "untouched" micro-task reads when the batch clears (D36).
+// Whether the player has taken a hit since the current batch arrived, and
+// whether they have dashed: what `untouched` and `footwork` read when it
+// clears (D109).
 let batchHit = false;
+let batchDashed = false;
 // Hits the suit can still take this batch (D100): `player.guard`, refilled as
 // each batch arrives.
 let guardLeft = 0;
-// Seconds since the current batch arrived, and whether the diver has dashed
-// since: what `swift` and `footwork` read when it clears (D98).
-let batchTime = 0;
-let batchDashed = false;
+// The challenges' counts this dive (D109): each streak so far, by challenge
+// name; the times of the recent kills, for `flurry`; when the batch's first
+// kill and its glowing fish's death came, for `beeline` -- null until each
+// happens; and when the layer under way began, for `swift` -- null between
+// layers, and for a layer the dive began partway into.
+let tally = {};
+let killTimes = [];
+let firstKillAt = null;
+let glowAt = null;
+let layerStart = null;
 
 // A line of text shown for a moment over play, and how many seconds it has
-// left: a micro-task paying out. The layer's name needs no state -- it is
+// left: a challenge paying out. The layer's name needs no state -- it is
 // derived from the plan and the camera.
 let notice = '';
 let noticeTime = 0;
+// The rungs paid this tick, so two challenges paying at once share the notice
+// rather than one hiding the other (D109). Emptied as each tick of play
+// begins, so it is never part of a saved dive.
+let paidNow = [];
 // The same for a pickup -- a mod or a boost, named as it lands (D84, D86) --
 // on a line of its own, so a batch's mod flying in cannot write over the
-// micro-task its clear just paid.
+// challenge its clear just paid.
 let banner = '';
 let bannerTime = 0;
 
@@ -172,12 +184,13 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
     dashEnd: 0,        // seconds of the closing ring left
   };
   // What persists, added to the start (D36): each tier of the carried weapon
-  // and of the equipment, and each point, applied once. A weapon left at home
-  // adds nothing. Mods add on top during the dive; nothing multiplies.
+  // and of the equipment, and each attribute's step, applied once. A weapon
+  // left at home adds nothing. Mods add on top during the dive; nothing
+  // multiplies.
   for (const g of [weapon, ...EQUIPMENT]) {
     for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.tiers[i].apply(player);
   }
-  for (const a of ATTRIBUTES) for (let i = 0; i < (meta.spent[a.name] || 0); i++) a.apply(player);
+  for (const a of ATTRIBUTES) for (let i = 0; i < (meta.raised[a.name] || 0); i++) a.apply(player);
   if (damageOverride > 0) player.damage = damageOverride;   // a dev flag
   guardLeft = player.guard;
   enemies = [];
@@ -208,10 +221,15 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   modCounts = {};      // mods are dive-scoped: last dive's picks do not carry
   choiceIndex = 0;
   batchHit = false;
-  batchTime = 0;
   batchDashed = false;
+  tally = {};
+  killTimes = [];
+  firstKillAt = null;
+  glowAt = null;
+  layerStart = null;
   notice = '';
   noticeTime = 0;
+  paidNow = [];
   banner = '';
   bannerTime = 0;
   diveLive = true;
@@ -256,17 +274,17 @@ function startScenario(s, seed) {
 
 // ---------- what persists ----------
 // Everything that outlives a dive (D31, D36, D67): the gems banked, gear tiers
-// and attribute points held -- keyed by name -- the micro-tasks done per layer,
-// the deepest the camera has been and how many layers have been cleared. Points
-// *available* are derived (`points()`), never stored, so they cannot disagree
-// with the tasks that paid them.
+// and attribute steps raised -- keyed by name -- the rungs each challenge has
+// paid (D109), the deepest the camera has been and how many layers have been
+// cleared. Points *available* are derived (`points()`), never stored, so they
+// cannot disagree with the rungs that paid them.
 //
 // `version` from the first write (foundations.md -> The technical contract). A
 // save this build does not know is rejected loudly, never guessed at.
-const SAVE_VERSION = 6;
+const SAVE_VERSION = 7;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
-  return { version: SAVE_VERSION, bank: 0, gear: {}, spent: {}, tasks: {},
+  return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
            deepest: 0, cleared: 0,
            owned: WEAPONS.filter(w => !w.cost).map(w => w.name), carried: WEAPONS[0].name };
 }
@@ -287,7 +305,7 @@ function snapshot() {
            choices: choices.map(c => c.name), accumulator, rngState,
            currentSeed, bulletId, plan, batchHit, notice, noticeTime,
            banner, bannerTime, modRound, boosts, sinceBoost, weaponName, guardLeft,
-           batchTime, batchDashed,
+           batchDashed, tally, killTimes, firstKillAt, glowAt, layerStart,
            at: screen === 'playing' || screen === 'mods' ? screen : resumeTo };
 }
 
@@ -299,7 +317,7 @@ function restore(d) {
      fireArmed, currency, modCounts, offerTimer, choiceIndex,
      accumulator, rngState, currentSeed, bulletId, plan, batchHit, notice,
      noticeTime, banner, bannerTime, modRound, boosts, sinceBoost, weaponName,
-     guardLeft, batchTime, batchDashed } = d);
+     guardLeft, batchDashed, tally, killTimes, firstKillAt, glowAt, layerStart } = d);
   choices = d.choices.map(n => MODS.find(m => m.name === n));
   resumeTo = d.at;
   diveLive = true;
@@ -317,13 +335,19 @@ function saveText() {
 // back with its rank dropped, and with nothing dropped or running yet; the
 // batch it was in has no fish lit. Saved with the cards up, it takes the card
 // it had marked -- a gems or heart card, gone since, gives nothing -- and an
-// offer still on its way is dropped. v2 kept a layer's micro-tasks by its
+// offer still on its way is dropped. v2 kept a layer's challenges by its
 // name, v3 by its number (D89): these were the names then. v3 had one weapon,
 // carried by every dive: a v3 save owns and carries the Gun (D97), its diver
 // wears no suit (D100), and its batch's clock starts as it loads (D98). v4 had
 // no water: its diver and fish load at rest, the diver facing down (D107). A
 // fish keeps the behaviour it was made with, so a v5 dive's fish get their
-// type's again: drifters saved before bites bite (D108).
+// type's again: drifters saved before bites bite (D108). v6 paid each
+// challenge once a layer, under `tasks`, and a step cost a point (D109, D110):
+// it becomes as many rungs of its name as the layers it paid in, so no point
+// is lost, and every step comes back
+// as points to spend, since steps cost more now. Its dive has no streaks, its
+// batch's first kill unknown -- so that batch cannot pay `beeline` -- and no
+// clock on its layer, so `swift` waits for the next.
 function migrate(s) {
   if (s && s.version === 1) {
     if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
@@ -369,6 +393,19 @@ function migrate(s) {
       }
     }
     s.version = 6;
+  }
+  if (s && s.version === 6) {
+    const paid = Object.values(s.tasks || {});
+    s.challenges = Object.fromEntries(['untouched', 'swift', 'footwork']
+      .map(name => [name, paid.filter(l => l[name]).length]).filter(([, n]) => n));
+    delete s.tasks;
+    delete s.spent;
+    s.raised = {};
+    if (s.dive) {
+      delete s.dive.batchTime;
+      Object.assign(s.dive, { tally: {}, killTimes: [], firstKillAt: -1, glowAt: null, layerStart: null });
+    }
+    s.version = 7;
   }
   return s;
 }

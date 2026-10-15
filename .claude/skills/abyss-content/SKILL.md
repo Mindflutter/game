@@ -1,6 +1,6 @@
 ---
 name: abyss-content
-description: Use when adding or changing a piece of Abyss game content — an enemy type or enemy behaviour, a mod, a boost, a weapon or its tiers, a piece of equipment, an attribute, a micro-task, a batch, a layer or a scenario — including designing one with Igor before it is built.
+description: Use when adding or changing a piece of Abyss game content — an enemy type or enemy behaviour, a mod, a boost, a weapon or its tiers, a piece of equipment, an attribute, a challenge, a batch, a layer or a scenario — including designing one with Igor before it is built.
 ---
 
 # Adding content to Abyss
@@ -36,8 +36,8 @@ the fields and the checks that will hold it. The alpha's counts were S5
 | boost | `BOOSTS` | `entities/boosts.md` | On when touched, off after `time`; no cap, nothing kept (D86 (boosts)). |
 | weapon | `WEAPONS` | `entities/weapons.md` | Three or four `tiers`; combat stats (D83 (the weapon record)). |
 | equipment | `EQUIPMENT` | `entities/equipment.md` | Three or four `tiers`; combat stats — body stats are attributes' (D36 (attributes)). |
-| attribute | `ATTRIBUTES` | `design.md` → What persists | A body stat; sums with gear, never multiplies (D36 (attributes)). Permanent dash improvements live here (D74 (dash improvements are attributes)). |
-| micro-task | `TASKS` | `design.md` → What persists | Mastery, never a quota; pays once per layer, ever (D36 (attributes)). Judged by `met()` when a batch clears. |
+| attribute | `ATTRIBUTES` | `entities/challenges.md` | A body stat, raised a step at a time, step n costing n points; sums with gear, never multiplies (D36 (attributes), D109 (micro-tasks are ladders; steps cost more as they rise)). Permanent dash improvements live here (D74 (dash improvements are attributes)). |
+| challenge | `CHALLENGES` | `entities/challenges.md` | Mastery, never a quota (D36 (attributes)): a ladder of rungs, each a streak or one dive's feat, earned in any layer, rung k paying k points (D109 (micro-tasks are ladders; steps cost more as they rise)). Judged on a clear, a kill or a layer end. Never called "micro-task" (D110 (challenges)). |
 | batch, layer | the pools, `STRETCHES`, `LAYERS` | `design.md` → Arrivals, Layers and the plan | A layer owns its pools; no fixed lists (D71 (batches are drawn from pools)). One wave per batch unless the next is telegraphed (glossary → wave). Sized by total hp until S6 (balance). Numbered until named (D89 (layers are numbered until they are named)). |
 | scenario | `SCENARIOS` | root `README.md` → Scenarios | One thing in isolation (D37 (scenarios)). |
 

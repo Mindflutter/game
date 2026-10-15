@@ -107,20 +107,20 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
     expect(stats(g.player)).toEqual(stats(fresh.player));
   });
 
-  it('names a pickup on its own line, never over a micro-task\'s', () => {
-    // A clean first batch pays the "untouched" task as it clears (D36), while
+  it('names a pickup on its own line, never over a challenge\'s', () => {
+    // A clean first batch pays the "untouched" challenge as it clears (D109), while
     // its mod is still flying in: the two lines must not overwrite each other.
     const g = loadGame();
     g.reset(1);
     g.immortal = true;
     ride(g);
     for (const e of [...g.enemies]) g.killEnemy(e);
-    g.update(g.FIXED_DT);                          // the clear: the task pays
-    const task = g.notice;
-    expect(task).not.toBe('');
+    g.update(g.FIXED_DT);                          // the clear: the challenge pays
+    const paid = g.notice;
+    expect(paid).not.toBe('');
     for (let i = 0, n = ticks(g, 3); i < n && !held(g); i++) g.update(g.FIXED_DT);
     expect(held(g)).toBe(1);
-    expect(g.notice).toBe(task);
+    expect(g.notice).toBe(paid);
     expect(g.banner).toContain(Object.keys(g.modCounts)[0]);
   });
 

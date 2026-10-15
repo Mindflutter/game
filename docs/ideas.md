@@ -395,55 +395,6 @@ discussed.
   since they feed the sizes and shapes above; kept as links in the docs, not
   image files (D4 (no assets, ever)). Open: whether to start now.
 
-**The meta loop**
-
-- **Micro-tasks are unclear, and what they pay is open.** "micro-tasks are
-  absolutely unclear now. think player perspective: "i need to boost my attrs,
-  ok i need some points, what are those? ok, i just randomly completed some
-  task and for some reason i got a point. how do i earn more?". these tasks are
-  a good idea, but i am thinking maybe they could reward with something extra
-  that is really good for a player, but not attr points. thus, attr points to
-  be purchased via gems. or not. it could be a a second currency, like crates
-  or shells found separately. what is "something extra" then? just cosmetic
-  stuff like a badge or a look? gear+ items like carrying a single bomb? being
-  stroger against certain enemy type? this comment is a big discussion with a
-  lot of unknowns." Two parts. **What a player sees**: the status bar names
-  the layer's tasks, ✓ once paid, but by name alone — what each asks shows
-  only on the line that says it paid. **What a task pays** reopens D36 (attributes) and D98 (attributes,
-  micro-tasks and what gear requires), and meets `foundations.md` at several
-  points. Points bought with gems undo the genre contract's fourth point —
-  "money cannot buy them … That non-fungibility is the entire reason the tier
-  exists". Shells keep that point only if they buy nothing but attributes;
-  dropped by kills, they can be farmed, which the glossary's cap at the source
-  stops; found apart from the fight, they are the gathering the sixth point
-  rules out. A bonus against one kind of fish sits beside a non-goal, elemental
-  weaknesses and resistances. **Home**: what a task asks, where a player can
-  read it — with the hints, above; what a task pays, a design pass of its own
-  before S6 (balance), which measures the economy it settles.
-
-  **Opened for discussion 2026-10-15**, with how attributes grow. Igor: the
-  tasks stay — "micro tasks are not going away, because it's a nice idea and it
-  feels good for the achiever type of gamers". His questions: what is wrong
-  with points; whether the same design can show a player how to earn; what
-  gems instead would lose and win; tasks "easy at the start and gradually grow
-  in complexity? like "1-3-5-10 batches without dash" (just an example)";
-  whether another currency is needed, "same mechanism or different? related to
-  kills or not?"; cosmetics or badges, "but on the other hand they need
-  motivation for completing them". What the code says: **nine points in the
-  whole game** — three tasks, once per layer, three layers — after which a
-  task pays nothing; `untouched` and `swift` are judged at every batch's
-  clear, so a small opener can pay both on a first dive before the player
-  knows they exist; and the Harpoon needs a point of Strength while nothing
-  says where a point comes from. Claude's lean, unconfirmed: points stay (D36
-  (attributes)), and a task becomes visible before it pays, deliberate — tied
-  to a moment, not any batch — and laddered, each rung a streak or one dive's
-  feat, never a running total, which is a quota; a badge beside the point.
-  Igor, the same day: "i like your lean, do that", and of grind: "the rule
-  still holds, i just need to point out that in roguelite a lot of repetition
-  happens anyway, cant avoid it. just so that there is not TOO MUCH grind for
-  the sake of one damn point." Open before the spec: whether a ladder climbs
-  anywhere in a dive or one rung a layer.
-
 **Pace**
 
 - **Waves: a push to clear fast.** Igor, 2026-10-15, playtesting: "we need to

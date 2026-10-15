@@ -3542,3 +3542,99 @@ only for the eel, and a lunger only as it charges. `tests/meta.test.js` — a v4
 dive's fish given their type's bite and ramp; the v5 and v6 fixtures loading
 and playing on. `checks.js` — the window-size check exact; its hand-built fish
 hurt on touch.
+
+## D109 — Micro-tasks are ladders; steps cost more as they rise · 2026-10-15
+Igor, after playing S5 (content): "micro-tasks are absolutely unclear now …
+how do i earn more?". Discussed 2026-10-15 with how attributes grow; he took
+Claude's lean — "i like your lean, do that" — then left the rest to Claude:
+"calculate it for the best balance. go your way, invent more microtasks,
+ladders, make it clear and earnable, implement". The design, its sizing and its
+check against `foundations.md`: `specs/2026-10-15-micro-task-ladders-design.md`.
+
+**Decided, by Igor.**
+- Points stay what micro-tasks pay, and only they pay them (D36 (attributes)).
+  No new currency, and gems buy no points.
+- The tasks stay: "micro tasks are not going away".
+- A task is visible before it pays, deliberate, and a ladder — easy at the
+  start, harder up it — each rung a streak or one dive's feat, never a running
+  total; a badge beside the point.
+- Any layer can earn any rung ("go your way", over one rung a layer).
+- Mastery, not quotas, still holds; "just so that there is not TOO MUCH grind
+  for the sake of one damn point".
+
+**Claude's call, delegated**, open to Igor:
+- **Five tasks, five skills**: `untouched` (batches in a row without a hit —
+  the guard's too) 1, 3, 6, 10; `footwork` (batches in a row without dashing)
+  3, 6, 10, 15; `beeline` (batches in a row whose glowing fish dies first — a
+  batch with none skipped, a fish killed on the same tick counted together)
+  1, 3, 5, 8; `flurry` (fish within `FLURRY_TIME`, 2 seconds) 6, 12, 20, 30;
+  `swift` (a layer from its first batch to its boss) within 8, 6, 5 and 4
+  minutes. A streak lives for the dive; a broken one starts again on the next
+  batch.
+- **Sized by the dive's shape**: a streak's rung marks the per-batch rate at
+  which it is expected within a dive — 32%, 62%, 79% clean for `untouched`'s 3,
+  6, 10; `swift` walks the pillar's 4–8 minutes; `flurry` follows what a kit
+  can do in two seconds. The bot measured as a floor (D50 (the bot measures its
+  own policy)).
+- **Rung k pays k points; step n of an attribute costs n.** A ladder pays 10,
+  all five 50 — nine steps of one attribute, the ceiling one attribute had
+  before. A requirement counts steps.
+- **Shown** under the Attributes screen's rows and the pause menu's, a badge
+  per rung earned and the next rung's ask and pay; live on the status bar; a
+  rung paid on the notice line, tasks paying on one tick sharing it. `home`'s
+  layer list loses its task marks. The help gains a line.
+- **The save goes to version 7**: `tasks` by name, rungs earned; `spent`
+  becomes `raised`, steps; a v6 task becomes as many rungs as the layers it
+  paid in, and every v6 step comes back as points. The batch's clock, which
+  only the old `swift` read, is gone.
+
+**Supersedes** D36 (attributes)'s cap per layer — the cap at the source stays,
+held by the ladders' rungs — and D98 (attributes, micro-tasks and what gear
+requires)'s three tasks, a point each once per layer, `swift` within
+`SWIFT_TIME`, and a step a point; D93 (the content stage's counts)'s three
+micro-tasks become five. The glossary's `point`, `attribute` and `micro-task`
+change with it, and `rung` and `step` join it.
+
+**Found on the way**: the help screen's last line could sit on its hint while
+the layout check passed — ten pixels between baselines is less than a line's
+height. The check now asks for a line's height, and the key list starts higher.
+
+**Guarded by**: `tests/meta.test.js` — a clean streak paying each rung once,
+ever, broken by a hit and by the guard's; a dash breaking `footwork`; the
+glowing fish first, or on the same tick, and a batch without one skipped;
+kills dropping out of the two seconds, on the bar and in the save, and several
+rungs at once; tasks sharing the notice; a layer timed to its boss, and none
+begun partway; a fish placed by hand counting for nothing; step n priced at n;
+the task lines; every count kept with a saved dive; a v6 save's tasks as rungs
+and its steps as points, the Harpoon still carried; the v7 fixture. `checks.js`
+— the task lines above the hint, every line and notice inside the view, the
+help a line's height above its hint.
+
+## D110 — Micro-tasks are challenges, with a doc of their own · 2026-10-15
+Igor, after D109 (micro-tasks are ladders; steps cost more as they rise): "lets
+make an md for micro tasks and points, similar to other entities. but lets
+rename micro tasks to challenges or suggest something."
+
+**Decided, by Igor.** A doc for them and the points, laid out as the entity
+docs are (D81 (entity docs, one per kind)), and a new name.
+
+**Claude's call**, open to Igor:
+- **The name is his: challenges.** The word a player reads without help, and
+  the one games use for exactly this. The glossary's `micro-task` becomes
+  `challenge`; the old names, "micro-task" and "task", are retired as "level"
+  was (D32 (the glossary)).
+- **Renamed everywhere it is live**: the code — `CHALLENGES`, `challengeLines()`
+  and the rest — the save's key, `challenges`, and every word on screen. The
+  save stays at version 7: D109 (micro-tasks are ladders; steps cost more as
+  they rise)'s version had not shipped, so it takes the new key from the start,
+  and a v6 save's `tasks` migrate straight to it.
+- **One doc, `entities/challenges.md`**, holding the challenges, the points they
+  pay and the attributes the points buy — the attributes move out of
+  `design.md`, so their numbers have one home, and a `Points` section holds the
+  rule both sides share. `design.md` keeps how each is judged.
+
+**Guarded by**: `tests/docs.test.js` — the doc's tables rebuilt from
+`CHALLENGES` and `ATTRIBUTES`, every field and item documented, and the old
+name absent from every living doc and from the code, citations, quotes and
+code spans aside. `tests/meta.test.js` — no screen, line or notice the player
+reads says "task".

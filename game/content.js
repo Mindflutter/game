@@ -76,7 +76,7 @@ const FIXED_DT       = 1 / 120;
 // bound -- at most MAX_FRAME_DT / FIXED_DT ticks a frame -- so a slow frame
 // cannot spiral into simulating forever.
 const MAX_FRAME_DT   = 0.05;
-const NOTICE_TIME    = 2.5;   // seconds a micro-task's or a pickup's line stays
+const NOTICE_TIME    = 2.5;   // seconds a challenge's or a pickup's line stays
                               // up. Claude's pick
 const MOD_OFFER_DELAY = 0.6;  // seconds between the boss dying and the layer
                               // end's cards appearing: the kill burst lives
@@ -88,8 +88,8 @@ const END_STEP       = 2;     // picks at once: an ordinary mod on a layer end's
 // apart, and seldom two in a row.
 const BOOST_C        = 0.02;
 const BOOST_LIFE     = 6;     // seconds a boost lies where it fell, then it is gone
-const SWIFT_TIME     = 10;    // seconds within which a cleared batch pays `swift`
-                              // (D98). Claude's pick
+const FLURRY_TIME    = 2;     // seconds within which `flurry` counts kills (D109).
+                              // Claude's pick
 
 let bulletId = 0;           // so a piercing shot can't hit the same enemy twice
 
@@ -171,7 +171,7 @@ const BOOSTS = [
   { name: 'Bloom',  desc: 'your shots swell',      time: 6, add: { shotRadius: 6 } },
 ];
 
-// ---------- gear, attributes, micro-tasks ----------
+// ---------- gear, attributes, challenges ----------
 // What persists between dives, spent at `home` (D31, D36). Each is a line of
 // data whose `apply` raises the player -- once per point held, or once per
 // tier, each tier its own (D83). Everything sums, with mods on top; nothing
@@ -192,7 +192,7 @@ const WEAPONS = [
             { cost: 100, apply: p => p.fireRate += 0.5 },
             { cost: 200, apply: p => p.fireRate += 0.5 }] },
   // Slow, long and heavy, through what it hits: the draft's railgun (D97). Heavy
-  // gear waits for a strong diver, so it needs a point of Strength (D98).
+  // gear waits for a strong diver, so it needs a step of Strength (D98).
   { name: 'Harpoon', fireRate: 0.8, damage: 3, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2,
     cost: 150, requires: { Strength: 1 },
     tiers: [{ cost: 80,  apply: p => p.damage += 1 },
@@ -228,28 +228,50 @@ const EQUIPMENT = [
                              { cost: 280, apply: p => p.damage += 0.5 }] },
 ];
 
-// `attribute` -- body stats, raised by points that only micro-tasks pay.
-// Uncapped at the spending end: a layer holds a finite set of tasks, so the
-// cap is at the source (D36). Dash improvements live here, not in gear (D74).
-// Gear may require points spent on one (`requires`, D98).
+// `attribute` -- body stats, raised a step at a time with points that only
+// challenges pay. Step n costs n points (D109): the first is cheap, depth is
+// dear. Uncapped where it is raised: the ladders hold a finite set of rungs,
+// so the cap is at the source (D36). Dash improvements live here, not in gear
+// (D74). Gear may require steps of one (`requires`, D98).
 const ATTRIBUTES = [
   { name: 'Dash reach', apply: p => p.dashSpeed += 150 },
   { name: 'Heart',      apply: p => { p.maxHp += 1; p.hp += 1; } },
   { name: 'Strength',   apply: p => p.dashDamage += 1 },
 ];
 
-// `micro-task` -- mastery, never a quota (D36). Judged when a batch clears;
-// each pays its `points` once per layer, ever. `met(entry)` reads the dive's
-// state at that moment, and the plan entry just cleared.
-const TASKS = [
-  { name: 'untouched', desc: 'clear a batch without taking a hit', points: 1,
-    met: () => !batchHit },
-  { name: 'swift',     desc: 'clear a batch within ' + SWIFT_TIME + ' seconds', points: 1,
-    met: () => batchTime <= SWIFT_TIME },
-  // A mini-boss's batch is known by its fish, not by identity, so a restored
-  // dive's copy of the plan still answers (D98).
-  { name: 'footwork',  desc: 'beat a mini-boss without dashing', points: 1,
-    met: entry => !batchDashed && entry.batch.enemies.some(([name]) => name === 'mini-boss') },
+// 1 + 2 + ... + n: what a ladder's first n rungs pay, and what an attribute's
+// first n steps cost (D109).
+const tri = n => n * (n + 1) / 2;
+
+// `challenge` -- mastery, never a quota (D36): a ladder whose rungs pay once,
+// ever -- rung k pays k points -- in any layer (D109). Its count is judged at
+// one moment: `clear` takes the streak so far and returns it after the batch
+// just cleared, `kill` counts after a kill, `end` reads a layer at its end.
+// With `within`, a rung is a time to beat rather than a count to reach. `ask`
+// is a rung in one sentence. Claude's picks, sized in
+// docs/entities/challenges.md.
+const CHALLENGES = [
+  { name: 'untouched', rungs: [1, 3, 6, 10],
+    ask: n => (n === 1 ? 'clear a batch without a hit' : 'clear ' + n + ' batches in a row without a hit'),
+    clear: n => (batchHit ? 0 : n + 1) },
+  { name: 'footwork',  rungs: [3, 6, 10, 15],
+    ask: n => 'clear ' + n + ' batches in a row without dashing',
+    clear: n => (batchDashed ? 0 : n + 1) },
+  // A batch with no glowing fish -- a lunger's, or any once every mod is
+  // capped -- neither counts nor breaks it. A fish killed in the same tick as
+  // the glowing one died with it: one swing or one dash is one moment.
+  { name: 'beeline',   rungs: [1, 3, 5, 8],
+    ask: n => (n === 1 ? 'kill a glowing fish before the rest of its batch'
+                       : 'kill the glowing fish first, ' + n + ' batches in a row'),
+    clear: n => (glowAt === null ? n : glowAt === firstKillAt ? n + 1 : 0) },
+  { name: 'flurry',    rungs: [6, 12, 20, 30],
+    ask: n => 'kill ' + n + ' fish within ' + FLURRY_TIME + ' seconds',
+    kill: () => killTimes.filter(t => elapsed - t <= FLURRY_TIME).length },
+  // From the layer's first batch arriving to its boss's clear. A dive begun
+  // partway into a layer has no start for it, and that layer is not judged.
+  { name: 'swift',     rungs: [480, 360, 300, 240], within: true,
+    ask: s => 'clear a layer within ' + s / 60 + ' minutes',
+    end: () => (layerStart === null ? Infinity : elapsed - layerStart) },
 ];
 
 // ---------- the development readout ----------
@@ -274,7 +296,7 @@ const PLAYER_STATS = [
 // ---------- the status bar ----------
 // Everything a diver needs to read mid-fight, one line per kind, top-down: the
 // body and the kit, where in the abyss, the mods and boosts, the layer's
-// micro-tasks -- then the development readout, dimmed. The renderer draws
+// challenges -- then the development readout, dimmed. The renderer draws
 // each line at its own colour and weight, one row per entry, so a line added
 // here moves the rest down on its own.
 function statusLines() {
@@ -294,12 +316,37 @@ function statusLines() {
     { color: '#ffe9a8',
       text: 'mods ' + (mods.join('  ') || 'none') +
             boosts.map(b => '   ' + b.name + ' ' + b.left.toFixed(1) + 's').join('') },
-    { color: '#a8ffd8',
-      text: 'tasks ' + TASKS.map(t => t.name + (meta.tasks[entry.layer]?.[t.name] ? ' ✓' : ' –')).join('   ') },
+    { color: '#a8ffd8', text: 'challenges ' + CHALLENGES.map(challengeStatus).join('   ') },
     // The development readout (D52): what the character actually is, right now.
     { color: '#4d7a8a', small: true,
       text: PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') },
   ];
+}
+
+// m:ss, for `swift`'s clock and its rungs.
+const clock = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+
+// A challenge on the status bar (D109): its count now against its next rung -- a
+// hit or a dash puts a streak back to 0 where it is seen -- or, every rung
+// earned, its badges.
+function challengeStatus(c) {
+  const k = meta.challenges[c.name] || 0;
+  if (k === c.rungs.length) return c.name + ' ' + '●'.repeat(k);
+  const now = c.clear ? (tally[c.name] || 0) : (c.kill || c.end)(), rung = c.rungs[k];
+  return c.name + ' ' + (c.within ? (now === Infinity ? '–' : clock(now)) + '/' + clock(rung) : now + '/' + rung);
+}
+
+// The challenges on the Attributes and pause screens (D109), under their rows: a
+// badge per rung earned, then the next rung -- what it asks and what it pays.
+const CHALLENGE_LINE = 24;
+const challengesTop = menu => menu.top + menu.items.length * ROW_STEP + 10;
+function challengeLines() {
+  return ['Challenges pay the points, each rung once, in any layer', ...CHALLENGES.map(c => {
+    const k = meta.challenges[c.name] || 0;
+    return c.name + '   ' + '●'.repeat(k) + '○'.repeat(c.rungs.length - k) + '   ' +
+           (k < c.rungs.length ? c.ask(c.rungs[k]) + '  —  ' + (k + 1) + (k ? ' points' : ' point')
+                               : 'every rung earned');
+  })];
 }
 
 // Menu and options rows: one full-width band per entry, anchored on the text
@@ -608,7 +655,7 @@ const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 // or piece of gear joins it with nothing to write.
 const ONE_SHOT         = 100;   // damage that kills anything here in one shot
 const DEBUG_FISH_MAX   = 50;    // of one type in the setup's batch: Claude's pick
-const DEBUG_POINTS_MAX = 9;     // on one attribute: Claude's pick
+const DEBUG_STEPS_MAX  = 9;     // of one attribute: Claude's pick
 // What a fish does, in words, for its tip: one line per behaviour field --
 // a new behaviour needs its line, and `npm test` says so -- and `chase` for a
 // fish with none. Its numbers come from its record.
@@ -627,7 +674,7 @@ const DEBUG_BEHAVIOURS = {
 const DEBUG_COUNTS = [
   ...ENEMY_TYPES.map(e => ({ name: e.name, col: 1, max: DEBUG_FISH_MAX, tip: () => fishTip(e) })),
   ...EQUIPMENT.map(g => ({ name: g.name, col: 2, max: g.tiers.length, of: true, tip: () => gearTip(g) })),
-  ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: DEBUG_POINTS_MAX, tip: () => pointTip(a) })),
+  ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: DEBUG_STEPS_MAX, tip: () => stepTip(a) })),
   ...MODS.map(m => ({ name: m.name, col: 3, max: m.max, of: true, tip: () => modTip(m) })),
   ...WEAPONS.map(w => ({ name: w.name, max: w.tiers.length, of: true })),
 ];
@@ -722,7 +769,7 @@ const MENUS = {
   newGame: {
     heading: 'NEW GAME',
     get sub() {
-      return 'This erases your save for good: gems, gear, attributes, micro-tasks and depth' +
+      return 'This erases your save for good: gems, gear, attributes, challenges and depth' +
              (diveLive ? ', and the dive in progress.' : '.');
     },
     warn: true,
@@ -739,6 +786,7 @@ const MENUS = {
     heading: 'PAUSED',
     sub: '',
     top: MENU_TOP,
+    challenges: true,
     back: () => { screen = resumeTo; },
     items: [
       { label: 'Resume',        run: () => { screen = resumeTo; } },
@@ -760,14 +808,12 @@ const MENUS = {
              '      deepest ' + Math.round(meta.deepest / 10) + 'm';
     },
     // The layers, one line each (D66): an unlocked one by name, with whether
-    // it has been cleared and which micro-tasks it has paid; the next locked
-    // one as ???; the rest hidden. Unlocked means the one before it was cleared.
+    // it has been cleared; the next locked one as ???; the rest hidden.
+    // Unlocked means the one before it was cleared.
     get lines() {
       return LAYERS.slice(0, meta.cleared + 2).map((layer, l) => l > meta.cleared
         ? { text: '???', locked: true }
-        : { text: layer.name + (l < meta.cleared ? '   cleared' : '') + '   ' +
-                  TASKS.map(t => t.name + (meta.tasks[l]?.[t.name] ? ' ✓' : ' –'))
-                       .join('   ') });
+        : { text: layer.name + (l < meta.cleared ? '   cleared' : '') });
     },
     top: HOME_TOP,
     back: () => openMenu('title'),
@@ -810,16 +856,20 @@ const MENUS = {
   },
   attributes: {
     heading: 'ATTRIBUTES',
-    get sub() { const p = points(); return p + (p === 1 ? ' point' : ' points') + ' to spend'; },
+    get sub() {
+      const p = points();
+      return p + (p === 1 ? ' point' : ' points') + ' to spend      each step costs a point more than the last';
+    },
     top: MENU_TOP,
     back: BACK_HOME.run,
+    challenges: true,                  // where points come from, under the rows (D109)
     items: [
       ...ATTRIBUTES.map(a => ({
         get label() {
-          const n = meta.spent[a.name] || 0;
-          return a.name + '   ' + n + ' → ' + (n + 1) + '   1 point';
+          const n = meta.raised[a.name] || 0;
+          return a.name + '   ' + n + ' → ' + (n + 1) + '   ' + (n + 1) + (n ? ' points' : ' point');
         },
-        get dim() { return points() <= 0; },
+        get dim() { return points() < (meta.raised[a.name] || 0) + 1; },
         run: () => raise(a) })),
       BACK_HOME,
     ],
@@ -913,4 +963,5 @@ const HELP_BLURB = [
   'Things you kill drop gems. They come to you on their own, and are yours to keep.',
   'Kill the glowing fish for a mod. Grab boosts before they fade. A boss heals, then offers a pick.',
   'Fish bite: when the jaws open, get away. Some spit; a puffer that swells is about to burst.',
+  'Challenges pay the points for attributes, a rung at a time: see them under Attributes, or pause.',
 ];

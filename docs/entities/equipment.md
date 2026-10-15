@@ -44,7 +44,7 @@ The same shape as a weapon's tiers (`weapons.md`), without the shot.
 |---|---|---|
 | `name` | — | The key, and the label of its row at `home`. The save keeps the tiers owned by it, so renaming one orphans what players own. |
 | `tiers` | — | Three or four upgrades, each `{ cost, apply }`: the gems it costs, and what it adds to the player, `p => …`. Applied once per tier owned when a dive starts; gear, attributes and mods all add, nothing multiplies (D36 (attributes), D74 (mods on top of gear and attributes)). |
-| `requires` | — | **Reserved** — no piece requires one yet, though `meets()` reads it for any gear (D98 (attributes, micro-tasks and what gear requires)): `{ attribute: points }`, the points that must be spent on an attribute before a tier can be bought — "heavy gun needs strength 5" (D36 (attributes)). Scheduling, not scaling. |
+| `requires` | — | **Reserved** — no piece requires one yet, though `meets()` reads it for any gear (D98 (attributes, micro-tasks and what gear requires)): `{ attribute: steps }`, the steps an attribute must be raised before a tier can be bought (D109 (micro-tasks are ladders; steps cost more as they rise)) — "heavy gun needs strength 5" (D36 (attributes)). Scheduling, not scaling. |
 
 ## Mask
 

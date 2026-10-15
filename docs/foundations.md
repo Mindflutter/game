@@ -37,9 +37,9 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 | **wave** | A spawn group *inside* a batch. **Default: one batch is one wave.** Multi-wave batches are permitted but are a UX risk — Igor's concern, 2026-09-26: a batch that keeps refilling reads as "the gate is broken" rather than as a second wave. Any multi-wave batch must telegraph that more is coming. | not a "batch" |
 | **prototype** | The survivors-like auto-shooter this grew out of. A closed phase, not a version of the current game. | not "the game" |
 | **home** | The surface screen: shop, the layers unlocked and the depth reached, launch. Every dive starts at the top — there is no layer select (D66). | "base", "backyard" are flavour, not terms |
-| **attribute** | A **body** stat raised by spending attribute points at home. Points are earned by in-dive micro-tasks, never bought, and are capped at the source — a layer holds a finite set of tasks (D36). | not "gear", not a "mod" |
-| **point** | An attribute point (D36): paid by a micro-task, once per layer, ever, and spent at `home` to raise an attribute. Never bought, and it buys no gear. | not currency, not a "mod point" (declined) |
-| **micro-task** | An in-dive objective that pays attribute points, rewarding **mastery not quotas** — "clear a batch undamaged", never "kill 50 darters" (D36). | not an "achievement" |
+| **attribute** | A **body** stat raised a **step** at a time by spending attribute points at home, each step a point dearer than the last (D109). Points are earned by in-dive challenges, never bought, and are capped at the source — the ladders hold a finite set of rungs (D36, D109). | not "gear", not a "mod"; a step is not a "tier" |
+| **point** | An attribute point (D36): paid by a rung of a challenge, once, ever, and spent at `home` to raise an attribute (D109). Never bought, and it buys no gear. | not currency, not a "mod point" (declined) |
+| **challenge** | An in-dive objective that pays attribute points, rewarding **mastery not quotas** — "clear a batch undamaged", never "kill 50 darters" (D36). Each is a ladder of **rungs**, harder up it, each a streak or one dive's feat, earned in any layer (D109). Igor's word (D110). | not an "achievement"; never "micro-task" or "task", its old names |
 
 ## The genre contract
 
@@ -53,7 +53,7 @@ What this game *is*, stated so a branching session cannot drift off it.
    gates; the arena locks during one.
 4. **Three progression tiers** (D31 — Two-tier progression, D36 — Attributes):
    - `gear` — bought with currency, persists, **combat** stats.
-   - `attribute` — earned as points by in-dive micro-tasks, spent freely at
+   - `attribute` — earned as points by in-dive challenges, spent freely at
      home, persists, **body** stats.
    - `mod` — carried by a glowing fish in every batch, or picked at a layer
      end; gone at the end of the dive (D84, D85). A `boost` lasts seconds and
@@ -178,5 +178,5 @@ Named so they stop being re-proposed.
 Tracked in `ideas.md`, not here. The draft's own `(?)` markers plus what this
 contract does not decide: the lost item, what currency is called, whether
 collectibles feed stats or story or both, terrain complexity beyond a vertical
-shaft. Which attributes exist and what each micro-task is was S5 (content)'s,
-and is D98.
+shaft. Which attributes exist and what each challenge is was S5 (content)'s,
+and is D98, made ladders by D109.

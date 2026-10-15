@@ -947,9 +947,13 @@ if (location.search === '?test') {
   // ---------- screens fit ----------
   // Help's layout is derived from the data; this guard keeps it so. No state
   // check can see text running through text.
+  // A text's last baseline must sit a line's height above the hint's, or the
+  // two touch: ten pixels between baselines let the help's last line sit on
+  // the hint while this passed.
+  const LINE_CLEAR = 24;
   openScreen('help');
   draw();
-  check(helpBottom < HINT_Y - 10,
+  check(helpBottom < HINT_Y - LINE_CLEAR,
     'the help screen must end above the hint: content ends at ' + helpBottom +
     ', hint sits at ' + HINT_Y + ' -- add a row and it overflows');
   screen = 'title';
@@ -979,6 +983,37 @@ if (location.search === '?test') {
     const end = Math.max(...menu.items.map((_, i) => { const r = rectOf(menu, i); return r.y + r.h; }));
     check(end < HINT_Y - 10,
       name + ': the rows must end above the hint, rows end at ' + end + ', hint at ' + HINT_Y);
+  }
+
+  // The challenges under the Attributes and pause screens' rows (D109) grow with
+  // CHALLENGES, and each line with its ask, so neither the stack nor a line can be
+  // left to the eye: the lines end above the hint, and every line -- at every
+  // rung, earned or not -- fits the view, as does every rung's notice and the
+  // notice of all of them paying on one tick.
+  {
+    const metaWas = meta;
+    for (const [name, menu] of Object.entries(MENUS).filter(([, m]) => m.challenges)) {
+      const end = challengesTop(menu) + (challengeLines().length - 1) * CHALLENGE_LINE;
+      check(end < HINT_Y - LINE_CLEAR,
+        name + ': the challenge lines must end above the hint, they end at ' + end + ', hint at ' + HINT_Y);
+    }
+    let widest = 0, which = '';
+    const measure = (font, text) => {
+      ctx.font = font;
+      const width = ctx.measureText(text).width;
+      if (width > widest) { widest = width; which = text; }
+    };
+    for (const t of CHALLENGES) {
+      for (let k = 0; k <= t.rungs.length; k++) {
+        meta = { ...freshMeta(), challenges: { [t.name]: k } };
+        challengeLines().forEach(line => measure(CHALLENGE_FONT, line));
+        if (k) measure(NOTICE_FONT, t.name + ': ' + t.ask(t.rungs[k - 1]) + ' \u2014 10 points');
+      }
+    }
+    measure(NOTICE_FONT, CHALLENGES.map(t => t.name).join(', ') + ' \u2014 50 points');
+    meta = metaWas;
+    check(widest < ARENA_W - 32, 'challenges: every line and notice must fit the view, the widest is ' +
+      Math.round(widest) + 'px: ' + which);
   }
 
   // The debug setup's tips sit on one line under its columns (D102), and the

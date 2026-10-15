@@ -78,6 +78,19 @@ describe('docs/', () => {
     expect(settings.enabledPlugins?.['superpowers@claude-plugins-official']).toBe(false);
   });
 
+  it('calls a challenge a challenge: never by its old name (D110)', () => {
+    // The glossary binds docs and code alike (D32). A decision's name in a
+    // citation, a quote, a code span or a path may keep the old word; the
+    // prose and the code may not. The logs are history, and keep it too.
+    const OLD = /micro-?tasks?/i;
+    const prose = text => text.replace(/D\d+ \([^)]*\)/g, '').replace(/`[^`]*`/g, '').replace(/"[^"\n]*"/g, '');
+    const said = [...docNames.filter(f => f !== 'decisions.md' && f !== 'changelog.md').map(f => ['docs/' + f, read(f)]),
+                  ['CLAUDE.md', src('CLAUDE.md')], ['.claude/skills/abyss-content/SKILL.md', src('.claude/skills/abyss-content/SKILL.md')]]
+      .filter(([, text]) => OLD.test(prose(text))).map(([f]) => f);
+    const coded = [...js('game'), ...js('platform'), 'main.js', 'checks.js'].filter(f => OLD.test(src(f)));
+    expect([...said, ...coded]).toEqual([]);
+  });
+
   it('keeps the docs CLAUDE.md tells the reader to open', () => {
     // A doc CLAUDE.md or the map in docs/README.md names must exist, or a cold
     // session is sent somewhere that is not there -- and the other way: a doc
@@ -229,6 +242,14 @@ describe('the entity docs', () => {
       g.BOOSTS.map(b => [...cols.map(k => b[k]), adds(b)])));
   });
 
+  it('lists every challenge -- when it is judged, its rungs, what it asks -- and every attribute (D110)', () => {
+    const judged = c => ['clear', 'kill', 'end'].find(k => c[k]);
+    expectIn(doc('challenges.md'), table(['name', 'judged', 'within', 'rungs', 'the first asks', 'the top asks'],
+      g.CHALLENGES.map(c => [c.name, judged(c), c.within, c.rungs, c.ask(c.rungs[0]), c.ask(c.rungs.at(-1))])));
+    expectIn(doc('challenges.md'), table(['name', 'a step adds'],
+      g.ATTRIBUTES.map(a => [a.name, moved([a.apply], true)])));
+  });
+
   it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
     for (const t of gear(g.WEAPONS)) expectIn(doc('weapons.md'), t);
     // Its behaviours, as the enemies' -- not the shop's `tiers` and `requires`.
@@ -251,6 +272,7 @@ describe('the entity docs', () => {
       'boosts.md': keysOf(g.BOOSTS),
       'weapons.md': keysOf(g.WEAPONS),
       'equipment.md': [...new Set(['name', 'tiers', ...keysOf(g.EQUIPMENT)])],
+      'challenges.md': keysOf([...g.CHALLENGES, ...g.ATTRIBUTES]),
     };
     const wrong = [];
     for (const [file, keys] of Object.entries(shapes)) {
@@ -267,10 +289,12 @@ describe('the entity docs', () => {
   });
 
   it('gives every item a section, and no section to an item the code lacks', () => {
-    // Any other heading has to be one of the layout's own.
-    const LAYOUT = ['Roster', 'Fields', 'Behaviours', 'Adding one'];
+    // Any other heading has to be one of the layout's own -- `Points` is the
+    // rule the challenges and the attributes share (D110).
+    const LAYOUT = ['Roster', 'Fields', 'Behaviours', 'Points', 'Adding one'];
     const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS, 'boosts.md': g.BOOSTS,
-                    'weapons.md': g.WEAPONS, 'equipment.md': g.EQUIPMENT };
+                    'weapons.md': g.WEAPONS, 'equipment.md': g.EQUIPMENT,
+                    'challenges.md': [...g.CHALLENGES, ...g.ATTRIBUTES] };
     const wrong = [];
     for (const [file, records] of Object.entries(items)) {
       const names = records.map(r => r.name);

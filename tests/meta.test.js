@@ -220,7 +220,7 @@ describe('gems (D35, D67)', () => {
   });
 });
 
-describe('home: gear, points, micro-tasks (D31, D36)', () => {
+describe('home: gear, points, challenges (D31, D36)', () => {
   const gun = g => g.WEAPONS.find(x => x.name === 'Gun');
   const reach = g => g.ATTRIBUTES.find(x => x.name === 'Dash reach');
 
@@ -239,41 +239,31 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     expect(JSON.parse(g.saved).gear.Gun).toBe(gun(g).tiers.length);   // written at once
   });
 
-  // `slow` puts a batch past `swift`'s time, so these clears pay `untouched` alone.
-  const slow = g => { g.batchTime = 1e6; };
-
-  it('pays a point for a clean batch, once per layer, and spends it on reach', () => {
+  it('pays a clean batch\'s rung, and spends its point on a step', () => {
     const g = loadGame();
     g.reset(1);
     ride(g);
-    slow(g);
     clearAndWait(g, 0.1);                        // the first batch, untouched
-    expect(g.points()).toBe(1);
-    expect(g.notice).not.toBe('');
-    ride(g);
-    g.notice = '';
-    slow(g);
-    clearAndWait(g, 0.1);                        // a second clean batch, same layer
-    expect(g.points()).toBe(1);
-    expect(g.notice).toBe('');                   // and nothing announced twice
+    expect(g.meta.challenges.untouched).toBe(1);
+    expect(g.notice).toContain('untouched');
+    g.meta.challenges = { untouched: 1 };             // its point alone
     g.raise(reach(g));
-    g.raise(reach(g));                           // the second has nothing to spend
+    g.raise(reach(g));                           // the second step costs 2: nothing left
     expect(g.points()).toBe(0);
-    expect(g.meta.spent['Dash reach']).toBe(1);
+    expect(g.meta.raised['Dash reach']).toBe(1);
     g.reset(2);
     expect(g.player.dashSpeed).toBe(g.PLAYER_START.dashSpeed + 150);
   });
 
-  it('pays no point for a batch that landed a hit', () => {
+  it('pays untouched nothing for a batch that landed a hit', () => {
     const g = loadGame();
     g.reset(1);
     ride(g);
     g.placeEnemy('eel', g.player.x, g.player.y);       // a real touch: the eel's (D108)
     g.update(g.FIXED_DT);
     expect(g.player.hp).toBe(g.player.maxHp - 1);
-    slow(g);
     clearAndWait(g, 0.1);
-    expect(g.points()).toBe(0);
+    expect([g.tally.untouched, g.meta.challenges.untouched]).toEqual([0, undefined]);
   });
 
   it('opens on the title with no dive, goes `home` between dives, and Continue with one under way', () => {
@@ -316,26 +306,6 @@ describe('home: gear, points, micro-tasks (D31, D36)', () => {
     expect(g.screen).toBe('home');
   });
 
-  it('keeps a layer\'s micro-tasks by its number, whatever it is called', () => {
-    // Layers are numbered until they are named (D89): renaming one must not
-    // forget what it has already paid, on the save or on `home`.
-    const g = loadGame();
-    g.reset(1);
-    ride(g);
-    slow(g);
-    clearAndWait(g, 0.1);                        // a clean first batch: the task pays
-    expect(g.points()).toBe(1);
-    g.LAYERS[0].name = 'Somewhere Else';
-    g.reset(2);
-    ride(g);
-    g.notice = '';
-    slow(g);
-    clearAndWait(g, 0.1);                        // a clean batch of the renamed layer
-    expect(g.points()).toBe(1);                  // pays nothing: the task is still done
-    expect(g.notice).toBe('');
-    expect(g.MENUS.home.lines[0].text).toContain('Somewhere Else');
-    expect(g.MENUS.home.lines[0].text).toContain('\u2713');
-  });
 });
 
 describe('the save (D70)', () => {
@@ -384,17 +354,17 @@ describe('the save (D70)', () => {
     expect(b.saveText()).toBe(a.saveText());
   });
 
-  it('keeps what persists across a reload, micro-task counters included', () => {
+  it('keeps what persists across a reload, the challenges\' rungs included', () => {
     const g = loadGame();
     g.meta.bank = 123;
     g.meta.gear.Gun = 2;
-    g.meta.tasks[0] = { untouched: 1 };
+    g.meta.challenges.untouched = 2;
     g.meta.deepest = 4000;
     g.diveLive = false;
     const h = loadGame();
     expect(h.loadSave(g.saveText())).toBe('');
     expect(h.meta).toEqual(g.meta);
-    expect(h.points()).toBe(1);
+    expect(h.points()).toBe(3);
     expect(h.diveLive).toBe(false);
   });
 
@@ -433,8 +403,9 @@ describe('the save (D70)', () => {
     // shot as it was then, and is written back as the current version.
     expect([g.player.shotSpeed, g.player.shotRadius]).toEqual([430, 4]);
     expect(JSON.parse(g.saveText()).version).toBe(g.freshMeta().version);
-    // Its micro-tasks were kept by layer name; they come back by number (D89).
-    expect(g.meta.tasks).toEqual({ 0: { untouched: 1 } });
+    // Its challenges were kept by layer name, then by number (D89), and come
+    // back as rungs (D109).
+    expect(g.meta.challenges).toEqual({ untouched: 1 });
     expect(g.points()).toBe(1);
     g.screen = g.resumeTo;
     g.immortal = true;
@@ -492,6 +463,29 @@ describe('the save (D70)', () => {
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
     expect(g.enemies.some(e => e.phase === 'jaws') && g.enemies.some(e => e.touch)).toBe(true);
+    // Paid once in layer 3, a rung now; mid-layer and mid-batch, it waits for
+    // the next batch's first kill and the next layer's clock (D109).
+    expect([g.meta.challenges, g.meta.raised, g.points()]).toEqual([{ untouched: 1 }, {}, 1]);
+    expect([g.tally, g.firstKillAt, g.layerStart]).toEqual([{}, -1, null]);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it('loads a save written by the first build of version 7, and plays it on', () => {
+    // Saved mid-batch in layer 1 carrying the Harpoon, with streaks running,
+    // two recent kills, the batch's first kill taken and the layer's clock on
+    // (D109).
+    const text = readFileSync(new URL('./fixtures/save-v7.json', import.meta.url), 'utf8');
+    const saved = JSON.parse(text).dive;
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect([g.meta.challenges, g.meta.raised, g.points()])
+      .toEqual([{ untouched: 2, beeline: 1, flurry: 1 }, { Heart: 1, Strength: 1 }, 3]);
+    expect([g.tally, g.killTimes, g.firstKillAt, g.layerStart])
+      .toEqual([saved.tally, saved.killTimes, saved.firstKillAt, saved.layerStart]);
     g.screen = g.resumeTo;
     g.immortal = true;
     const shots = shotsSeen(g, 600);
@@ -520,7 +514,7 @@ describe('the save (D70)', () => {
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
     expect(g.meta.bank).toBeGreaterThan(0);
-    expect(g.meta.tasks).toEqual({ 0: { untouched: 1 } });   // by number now (D89)
+    expect(g.meta.challenges).toEqual({ untouched: 1 });          // a rung now (D109)
     expect(g.diveLive).toBe(true);
     g.screen = g.resumeTo;
     g.immortal = true;
@@ -740,14 +734,14 @@ describe('the weapons (D97)', () => {
     expect(g.enemies[0].hp).toBe(hp - g.player.damage);
   });
 
-  it('the Harpoon waits for a point of Strength, and its row says so', () => {
+  it('the Harpoon waits for a step of Strength, and its row says so', () => {
     const g = loadGame();
     g.meta.bank = 1000;
     expect(row(g, 'Harpoon').label).toContain('needs Strength 1');
     expect(row(g, 'Harpoon').dim).toBe(true);
     row(g, 'Harpoon').run();
     expect(g.meta.owned).toEqual(['Gun']);
-    g.meta.tasks[0] = { untouched: 1 };
+    g.meta.challenges.untouched = 1;
     g.raise(g.ATTRIBUTES.find(a => a.name === 'Strength'));
     expect(row(g, 'Harpoon').label).not.toContain('needs');
     expect(row(g, 'Harpoon').dim).toBe(false);
@@ -823,56 +817,9 @@ describe('equipment (D100)', () => {
 });
 
 describe('attributes and requirements (D98)', () => {
-  const mini = g => g.plan.findIndex(e => e.batch.enemies.some(([n]) => n === 'mini-boss'));
-  // The first batch of gate `k` arrived, the diver kept alive.
-  const fighting = k => { const g = atGate(k); g.immortal = true; ride(g); return g; };
-
-  it('pays swift for a batch cleared inside its time, and not after', () => {
-    const quick = fighting(0);
-    quick.batchHit = true;                       // so only swift can pay
-    for (let i = 0, n = ticks(quick, 1); i < n; i++) quick.update(quick.FIXED_DT);
-    clearAndWait(quick, 0.1);
-    expect(quick.meta.tasks[0]).toEqual({ swift: 1 });
-    const late = fighting(0);
-    late.batchHit = true;
-    for (let i = 0, n = ticks(late, 10.5); i < n; i++) late.update(late.FIXED_DT);
-    clearAndWait(late, 0.1);
-    expect(late.meta.tasks[0]).toBe(undefined);
-  });
-
-  it('pays footwork for a mini-boss beaten without a dash, and not with one, or for any other batch', () => {
-    const k = mini(atGate(0));
-    const clean = fighting(k);
-    clean.batchHit = true;
-    clean.batchTime = 1e6;                       // so only footwork can pay
-    clearAndWait(clean, 0.1);
-    expect(clean.meta.tasks[0]).toEqual({ footwork: 1 });
-    const dashed = fighting(k);
-    dashed.keys.add('KeyD');
-    dashed.justPressed.add('Space');
-    dashed.update(dashed.FIXED_DT);
-    expect(dashed.batchDashed).toBe(true);
-    dashed.batchHit = true;
-    dashed.batchTime = 1e6;
-    clearAndWait(dashed, 0.1);
-    expect(dashed.meta.tasks[0]).toBe(undefined);
-    const ordinary = fighting(1);
-    ordinary.batchHit = true;
-    ordinary.batchTime = 1e6;
-    clearAndWait(ordinary, 0.1);
-    expect(ordinary.meta.tasks[0]).toBe(undefined);
-  });
-
-  it('keeps a batch\'s clock and its dash with a saved dive', () => {
-    const a = fighting(0);
-    Object.assign(a, { batchTime: 4.5, batchDashed: true });
-    const b = loadGame();
-    expect(b.loadSave(a.saveText())).toBe('');
-    expect([b.batchTime, b.batchDashed]).toEqual([4.5, true]);
-  });
-
   const attr = (g, name) => g.ATTRIBUTES.find(a => a.name === name);
-  const earn = (g, n) => { for (let l = 0; l < n; l++) g.meta.tasks[l] = { untouched: 1 }; };
+  // Points enough, from one ladder's rungs: 1, 3, 6... (D109).
+  const earn = (g, rungs) => { g.meta.challenges = { untouched: rungs }; };
 
   it('raises a heart with Heart, full, and the dash\'s wound with Strength', () => {
     const g = loadGame();
@@ -884,7 +831,7 @@ describe('attributes and requirements (D98)', () => {
     expect(g.player.dashDamage).toBe(g.PLAYER_START.dashDamage + 1);
   });
 
-  it('owns or buys nothing that requires more points than are spent, and takes no gems', () => {
+  it('owns or buys nothing that requires more steps than are raised, and takes no gems', () => {
     const g = loadGame();
     const w = { ...g.WEAPONS[0], name: 'Spear', cost: 10, requires: { Strength: 1 }, tiers: [] };
     const piece = { name: 'Belt', requires: { Heart: 2 }, tiers: [{ cost: 10, apply: p => { p.damage += 1; } }] };
@@ -904,6 +851,175 @@ describe('attributes and requirements (D98)', () => {
     g.buy(piece);
     expect([g.meta.owned, g.meta.gear.Belt, g.meta.bank]).toEqual([['Gun', 'Spear'], 1, 80]);
   });
+
+  it('prices step n of an attribute at n points, against what the rungs paid', () => {
+    const g = loadGame();
+    g.meta.challenges = { untouched: 2, flurry: 1 };   // 1 + 2, and 1
+    expect(g.points()).toBe(4);
+    const heart = attr(g, 'Heart');
+    const row = () => g.MENUS.attributes.items.find(i => i.label.startsWith('Heart'));
+    expect(row().label).toContain('0 → 1   1 point');
+    g.raise(heart);
+    g.raise(heart);                              // 1, then 2
+    expect([g.points(), g.meta.raised.Heart]).toEqual([1, 2]);
+    expect(row().label).toContain('2 → 3   3 points');
+    expect(row().dim).toBe(true);
+    g.raise(heart);                              // the third costs 3: refused
+    expect([g.points(), g.meta.raised.Heart]).toEqual([1, 2]);
+  });
+});
+
+describe('challenge ladders (D109, D110)', () => {
+  const mini = g => g.plan.findIndex(e => e.batch.enemies.some(([n]) => n === 'mini-boss'));
+  // The first batch of gate `k` arrived, the diver kept alive.
+  const fighting = k => { const g = atGate(k); g.immortal = true; ride(g); return g; };
+  // A dive from the top, the diver kept alive.
+  const diving = s => { const g = loadGame(); g.reset(s); g.immortal = true; return g; };
+  const cleanBatches = (g, n) => { for (let i = 0; i < n; i++) { ride(g); clearAndWait(g, 0.1); } };
+
+  it('counts clean batches in a row, pays each rung once, ever, and starts again after a hit -- the guard\'s too', () => {
+    const g = diving(1);
+    cleanBatches(g, 3);
+    expect([g.tally.untouched, g.meta.challenges.untouched]).toEqual([3, 2]);   // rungs 1 and 3
+    ride(g);
+    g.immortal = false;
+    g.player.guard = 1;
+    g.guardLeft = 1;
+    g.hurtPlayer();                              // the suit takes it: still a hit
+    expect(g.player.hp).toBe(g.player.maxHp);
+    g.immortal = true;
+    clearAndWait(g, 0.1);
+    expect([g.tally.untouched, g.meta.challenges.untouched]).toEqual([0, 2]);
+    g.reset(2);                                  // the next dive: the streak is new, the rungs kept
+    cleanBatches(g, 1);
+    expect([g.tally.untouched, g.meta.challenges.untouched]).toEqual([1, 2]);
+    expect(g.notice).not.toContain('untouched');
+  });
+
+  it('counts batches cleared without a dash, and starts again after one', () => {
+    const g = diving(1);
+    cleanBatches(g, 3);
+    expect(g.meta.challenges.footwork).toBe(1);       // rung 1: three in a row
+    ride(g);
+    g.keys.add('KeyD');
+    g.justPressed.add('Space');
+    g.update(g.FIXED_DT);
+    expect(g.batchDashed).toBe(true);
+    g.keys.clear();
+    clearAndWait(g, 0.1);
+    expect([g.tally.footwork, g.meta.challenges.footwork]).toEqual([0, 1]);
+  });
+
+  it('counts a glowing fish killed first -- or on the same tick as the first -- and starts again after another first', () => {
+    const same = fighting(0);
+    same.killEnemy(same.enemies.find(e => !e.carrier));
+    same.killEnemy(same.enemies.find(e => e.carrier));   // the same tick: together
+    clearAndWait(same, 0.1);
+    expect([same.tally.beeline, same.meta.challenges.beeline]).toEqual([1, 1]);
+    const late = fighting(0);
+    late.tally.beeline = 2;
+    late.killEnemy(late.enemies.find(e => !e.carrier));
+    late.update(late.FIXED_DT);                  // a tick later: too late
+    clearAndWait(late, 0.1);
+    expect([late.tally.beeline, late.meta.challenges.beeline]).toEqual([0, undefined]);
+  });
+
+  it('skips a batch with no glowing fish, neither counting nor breaking the streak', () => {
+    const g = fighting(mini(atGate(0)));
+    expect(g.enemies.some(e => e.carrier)).toBe(false);
+    g.tally.beeline = 2;
+    clearAndWait(g, 0.1);
+    expect(g.tally.beeline).toBe(2);
+  });
+
+  it('counts kills within two seconds, the older dropping out, and pays several rungs at once', () => {
+    const g = fighting(0);
+    while (g.enemies.length < 14) g.placeEnemy('drifter', g.player.x + 300, g.player.y);
+    const kill = n => { for (const e of g.enemies.filter(x => !x.gone).slice(0, n)) g.killEnemy(e); };
+    kill(5);
+    for (let i = 0, n = ticks(g, 2.1); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.statusLines().map(l => l.text).join()).toContain('flurry 0/6');   // the bar forgets too
+    kill(5);                                     // five in the window, the first five gone from it
+    expect([g.meta.challenges.flurry, g.killTimes.length]).toEqual([undefined, 5]);   // and the save
+    kill(1);
+    expect(g.meta.challenges.flurry).toBe(1);         // six within two seconds
+    const at = fighting(0);
+    while (at.enemies.length < 12) at.placeEnemy('drifter', at.player.x + 300, at.player.y);
+    for (const e of [...at.enemies]) at.killEnemy(e);
+    expect(at.meta.challenges.flurry).toBe(2);        // 6 and 12 at once: 1 + 2 points
+    expect(at.notice).toBe('flurry: kill 12 fish within 2 seconds \u2014 3 points');
+  });
+
+  it('lets challenges paying on one tick share the notice', () => {
+    const g = fighting(0);
+    clearAndWait(g, 0.1);                        // all at once: clean, and the glowing fish first
+    expect(g.notice).toBe('untouched, beeline \u2014 2 points');
+  });
+
+  it('times a layer from its first batch to its boss, and pays every rung it beats', () => {
+    const g = diving(1);
+    const boss = g.plan.findIndex(e => e.end);
+    ride(g);
+    expect(g.layerStart).toBe(g.elapsed);
+    for (let i = 0; i < boss; i++) { clearAndWait(g, 0.1); ride(g); }
+    g.layerStart = g.elapsed - 330;              // five and a half minutes in
+    expect(clearAndWait(g, 1)).toBe('mods');     // the boss down, the layer end's cards
+    expect([g.meta.challenges.swift, g.layerStart]).toEqual([2, null]);   // within 8 and 6, not 5
+  });
+
+  it('never times a layer the dive began partway into', () => {
+    const g = loadGame();
+    expect(g.applyScenario('mini-boss', 1)).toBe(true);
+    g.immortal = true;
+    for (let i = 0; i < 20 && g.screen === 'playing'; i++) { ride(g); clearAndWait(g, 0.1); }
+    expect(g.screen).toBe('mods');
+    expect(g.meta.challenges.swift).toBe(undefined);
+  });
+
+  it('keeps the batch\'s dash and every count with a saved dive', () => {
+    const a = fighting(0);
+    Object.assign(a, { batchDashed: true, tally: { untouched: 4, beeline: 1 }, killTimes: [a.elapsed],
+                       firstKillAt: a.elapsed, glowAt: null, layerStart: 1.5 });
+    const b = loadGame();
+    expect(b.loadSave(a.saveText())).toBe('');
+    expect([b.batchDashed, b.tally, b.killTimes, b.firstKillAt, b.glowAt, b.layerStart])
+      .toEqual([true, { untouched: 4, beeline: 1 }, [a.elapsed], a.elapsed, null, 1.5]);
+  });
+
+  it('calls them challenges on every screen, line and notice the player reads (D110)', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.climb(g.CHALLENGES[0], 99);                // a notice, every rung at once
+    const menus = ['title', 'home', 'attributes', 'paused', 'newGame'].map(m => g.MENUS[m]);
+    const read = [g.notice, ...g.challengeLines(), ...g.statusLines().map(l => l.text), ...g.HELP_BLURB,
+                  ...menus.flatMap(m => [m.heading, m.sub, ...m.items.map(i => i.label)])];
+    expect(read.filter(line => /\btasks?\b|micro-?tasks?/i.test(line))).toEqual([]);
+    expect(read.join('\n')).toContain('Challenges pay the points');
+  });
+
+  it('lists every challenge on the Attributes and pause screens: its badges, then its next rung', () => {
+    const g = loadGame();
+    g.meta.challenges = { untouched: 4, beeline: 1 };
+    const lines = g.challengeLines();
+    expect(lines).toHaveLength(g.CHALLENGES.length + 1);
+    expect(lines).toContain('untouched   ●●●●   every rung earned');
+    expect(lines).toContain('beeline   ●○○○   kill the glowing fish first, 3 batches in a row  —  2 points');
+    expect(lines).toContain('footwork   ○○○○   clear 3 batches in a row without dashing  —  1 point');
+    expect([g.MENUS.attributes.challenges, g.MENUS.paused.challenges]).toEqual([true, true]);
+  });
+
+  it('turns a v6 save\'s tasks into rungs and its steps back into points, keeping what it carries', () => {
+    const v6 = JSON.parse(readFileSync(new URL('./fixtures/save-v6.json', import.meta.url), 'utf8'));
+    Object.assign(v6, { tasks: { 0: { untouched: 1, swift: 1 }, 1: { untouched: 1, footwork: 1 } },
+                        spent: { Heart: 3, Strength: 1 }, owned: ['Gun', 'Harpoon'], carried: 'Harpoon' });
+    const g = loadGame();
+    expect(g.loadSave(JSON.stringify(v6))).toBe('');
+    expect(g.meta.challenges).toEqual({ untouched: 2, swift: 1, footwork: 1 });
+    expect([g.meta.raised, g.points()]).toEqual([{}, 5]);   // it had earned 4
+    expect([g.meta.owned, g.meta.carried]).toEqual([['Gun', 'Harpoon'], 'Harpoon']);
+    g.reset(1);
+    expect(g.weaponName).toBe('Harpoon');
+  });
 });
 
 describe('the content stage\'s counts (D93)', () => {
@@ -919,7 +1035,7 @@ describe('the content stage\'s counts (D93)', () => {
     for (const x of [...g.WEAPONS, ...g.EQUIPMENT]) within(x.name + ' tiers', x.tiers.length, 3, 4);
     within('mods', g.MODS.length, 5, 7);
     within('boosts', g.BOOSTS.length, 4, 6);     // Rush and 3-5 new
-    within('micro-tasks', g.TASKS.length, 3, 3);
+    within('challenges', g.CHALLENGES.length, 5, 5);   // five since D109
     within('attributes', g.ATTRIBUTES.length, 3, 3);
   });
 });
@@ -931,7 +1047,7 @@ describe('enemies placed by hand (D37)', () => {
     const g = loadGame();
     expect(g.applyScenario('one-drifter', 1)).toBe(true);
     expect(clearAndWait(g, 1)).toBe('playing');
-    expect(g.meta.tasks).toEqual({});
+    expect([g.meta.challenges, g.killTimes]).toEqual([{}, []]);   // not even toward `flurry` (D109)
   });
 });
 
@@ -940,8 +1056,8 @@ describe('a new game (D103)', () => {
   // back on the title in the middle of a dive, all of it saved.
   function invested() {
     const g = loadGame();
-    Object.assign(g.meta, { bank: 300, gear: { Mask: 2 }, spent: { Heart: 1 },
-                            tasks: { 0: { untouched: 1 } }, cleared: 1, deepest: 4000 });
+    Object.assign(g.meta, { bank: 300, gear: { Mask: 2 }, raised: { Heart: 1 },
+                            challenges: { untouched: 1 }, cleared: 1, deepest: 4000 });
     g.reset(5);
     g.saveNow();
     g.openMenu('title');
@@ -1002,11 +1118,12 @@ describe('the status bar', () => {
     expect(text(g)).toContain(g.enemies.length + ' fish left');
   });
 
-  it('shows the weapon and its tier, the guard left, the mods held and the layer\'s tasks', () => {
+  it('shows the weapon and its tier, the guard left, the mods held and the challenges\' counts', () => {
     const g = loadGame();
     g.meta.gear.Gun = 2;
-    g.meta.tasks[0] = { swift: 1 };
+    g.meta.challenges = { swift: 4, untouched: 1 };
     g.reset(1);
+    g.tally.untouched = 2;
     g.player.guard = 2;
     g.guardLeft = 1;
     g.modCounts = { Impact: 2 };
@@ -1014,7 +1131,8 @@ describe('the status bar', () => {
     expect(t).toContain('Gun tier 2');
     expect(t).toContain('GUARD 1/2');
     expect(t).toContain('Impact ×2');
-    expect(t).toContain('swift ✓');
-    expect(t).toContain('untouched –');
+    expect(t).toContain('swift ●●●●');            // every rung earned (D109)
+    expect(t).toContain('untouched 2/3');         // the streak against its next rung
+    expect(t).toContain('flurry 0/6');
   });
 });

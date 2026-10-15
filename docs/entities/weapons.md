@@ -59,7 +59,7 @@ adds. Both are worked out from the tiers' `apply` by the check.
 | `swing` | — | Its presence is the behaviour: the weapon cuts instead of shooting (D105 (the Knife swings)). Each pull hits every fish whose body reaches into an arc toward the cursor, `arc` degrees wide, at once; the arc is drawn for `time` seconds. No shot, so nothing to miss with or to fly on. |
 | `tiers` | — | Three or four upgrades, each `{ cost, apply }`: the gems it costs, and what it adds to the player, `p => …`. Each tier may add something different (D83 (the weapon record)). |
 | `cost` | gems | What owning the weapon costs at `home`; 0 owns it from the start (D97 (weapons are owned, and one is carried)). Owned, it is carried for nothing, and the one carried raises its tiers. |
-| `requires` | — | `{ attribute: points }`: the points that must be spent on an attribute before the weapon can be owned (D36 (attributes), D98 (attributes, micro-tasks and what gear requires)) — "heavy gun needs strength 5". Unmet, its row is dim and says what it needs. Scheduling, not scaling. |
+| `requires` | — | `{ attribute: steps }`: the steps an attribute must be raised before the weapon can be owned (D36 (attributes), D98 (attributes, micro-tasks and what gear requires), D109 (micro-tasks are ladders; steps cost more as they rise)) — "heavy gun needs strength 5". Unmet, its row is dim and says what it needs. Scheduling, not scaling. |
 
 Diversity is data: a railgun is a fast, piercing shot, a slow heavy one is
 slow and hits hard. A weapon gets a behaviour of its own only when its numbers
@@ -85,7 +85,7 @@ Slow, long and heavy, through what it hits (D97 (weapons are owned, and one is
 carried)): the draft's "extra fast railgun-like type". A shot every second and a
 bit, flying fast and far, that hits hard and passes through two fish into a
 third — so it wastes damage on the one-hit swarm and lines up the rest. It
-requires a point of Strength: heavy gear waits for a strong diver, D36
+requires a step of Strength: heavy gear waits for a strong diver, D36
 (attributes)'s own example. Its tiers add damage, then rate, then pierce. Every
 number is Claude's pick, S6 (balance)'s to tune.
 

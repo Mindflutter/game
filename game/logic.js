@@ -314,6 +314,14 @@ function hitSparks(e, b) {
 function killEnemy(e) {
   e.gone = true;
   kills += 1;
+  // What `beeline` and `flurry` count (D109) -- in a batch of the plan only, so
+  // a fish placed by hand pays nothing.
+  if (plan[batchIndex - 1]) {
+    if (firstKillAt === null) firstKillAt = elapsed;
+    if (e.carrier) glowAt = elapsed;
+    killTimes = [...killTimes.filter(t => elapsed - t <= FLURRY_TIME), elapsed];
+    for (const c of CHALLENGES) if (c.kill) climb(c, c.kill());
+  }
   for (let n = 0; n < e.value; n++) {
     gems.push({ x: e.x + (rng() - 0.5) * 18,
                 y: e.y + (rng() - 0.5) * 18, r: 4 });
@@ -402,7 +410,7 @@ function mouseMoved() {
   return moved;
 }
 
-// A batch just died: pay the micro-tasks and Mend, and at a layer end the heal
+// A batch just died: pay the challenges and Mend, and at a layer end the heal
 // and the pick of valuable mods (D85) -- the dive's one pause. A gate's own mod
 // rode in on its glowing fish (D84).
 function clearBatch() {
@@ -411,19 +419,17 @@ function clearBatch() {
   // they pay Mend, and nothing that belongs to a layer.
   const entry = plan[batchIndex - 1];
   if (entry) {
-    // Micro-tasks first, so the layer end's heal cannot read as a clean batch.
-    // Each pays once per layer, ever (D36): kept in what persists, not the
-    // dive, under the layer's number -- its name is a placeholder (D89).
-    const layer = entry.layer;
-    for (const t of TASKS) {
-      if (meta.tasks[layer]?.[t.name] || !t.met(entry)) continue;
-      meta.tasks[layer] = { ...meta.tasks[layer], [t.name]: 1 };
-      notice = t.desc + ': ' + t.points + (t.points === 1 ? ' point' : ' points');
-      noticeTime = NOTICE_TIME;
+    // Challenges first, so the layer end's heal cannot read as a clean batch
+    // (D109): each streak goes on or starts again, and a layer's end reads its
+    // clock -- stopped then until the next layer's first batch.
+    for (const c of CHALLENGES) {
+      if (c.clear) climb(c, tally[c.name] = c.clear(tally[c.name] || 0));
+      if (c.end && entry.end) climb(c, c.end());
     }
     // The layer end is a milestone (D68): a full heal, and the layer counts as
     // cleared at `home` from now on, whatever the rest of the dive does.
     if (entry.end) {
+      layerStart = null;
       player.hp = player.maxHp;
       meta.cleared = Math.max(meta.cleared, entry.layer + 1);
     }
@@ -474,24 +480,42 @@ function takeMod(mod) {
   modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
 }
 
+// A challenge's count reached `v` (D109): every rung it now meets pays, in order
+// and once ever -- rung k pays k points -- and the notice names the highest,
+// or, with others paid on the same tick, every challenge by name and the total.
+// What persists, not the dive, keeps the rungs.
+function climb(c, v) {
+  const was = meta.challenges[c.name] || 0;
+  let k = was;
+  while (k < c.rungs.length && (c.within ? v <= c.rungs[k] : v >= c.rungs[k])) k += 1;
+  if (k === was) return;
+  meta.challenges[c.name] = k;
+  // A challenge paying twice in a tick -- a swing of twelve, kill by kill -- is
+  // one entry.
+  let now = paidNow.find(p => p.c === c);
+  if (!now) paidNow.push(now = { c, paid: 0 });
+  now.paid += tri(k) - tri(was);
+  const total = paidNow.reduce((a, p) => a + p.paid, 0);
+  notice = (paidNow.length === 1 ? c.name + ': ' + c.ask(c.rungs[k - 1]) : paidNow.map(p => p.c.name).join(', ')) +
+           ' \u2014 ' + total + (total === 1 ? ' point' : ' points');
+  noticeTime = NOTICE_TIME;
+}
+
 // ---------- home ----------
-// Attribute points to spend: what the micro-tasks paid, less what is spent.
-// Derived every time, so the two can never disagree (D36).
+// Attribute points to spend: what the ladders' rungs paid, less what the steps
+// raised cost (D109). Derived every time, so the two can never disagree (D36).
 function points() {
-  let earned = 0;
-  for (const done of Object.values(meta.tasks)) {
-    for (const t of TASKS) if (done[t.name]) earned += t.points;
-  }
-  return earned - Object.values(meta.spent).reduce((a, b) => a + b, 0);
+  return CHALLENGES.reduce((a, c) => a + tri(meta.challenges[c.name] || 0), 0) -
+         ATTRIBUTES.reduce((a, x) => a + tri(meta.raised[x.name] || 0), 0);
 }
 
 // The next tier's cost, or undefined at the top -- where `canBuy` is false,
 // since no bank is `>= undefined`. `home` dims the row by the same test.
 const nextCost = g => g.tiers[meta.gear[g.name] || 0]?.cost;
 const canBuy = g => meets(g) && meta.bank >= nextCost(g);
-// Whether the points spent on each attribute a piece of gear requires reach
+// Whether the steps raised on each attribute a piece of gear requires reach
 // it (D36, D98): scheduling, not scaling -- it changes when, never how much.
-const meets = g => Object.entries(g.requires || {}).every(([a, n]) => (meta.spent[a] || 0) >= n);
+const meets = g => Object.entries(g.requires || {}).every(([a, n]) => (meta.raised[a] || 0) >= n);
 
 // A weapon's row at `home` (D97): owning one costs its gems and carries it at
 // once, one owned is carried for nothing, and the one carried raises its tier.
@@ -515,9 +539,11 @@ function buy(g) {
   saveNow();
 }
 
+// Step n of an attribute costs n points (D109).
 function raise(a) {
-  if (points() <= 0) return;
-  meta.spent[a.name] = (meta.spent[a.name] || 0) + 1;
+  const step = (meta.raised[a.name] || 0) + 1;
+  if (points() < step) return;
+  meta.raised[a.name] = step;
   saveNow();
 }
 
@@ -677,9 +703,9 @@ function tiersTip(g, w) {
 function gearTip(g) {
   return g.name + ': ' + tiersTip(g) + needsLine(g);
 }
-function pointTip(a) {
+function stepTip(a) {
   const by = [...WEAPONS, ...EQUIPMENT].filter(g => g.requires?.[a.name]);
-  return a.name + ': ' + moves(a.apply) + ' a point' +
+  return a.name + ': ' + moves(a.apply) + ' a step' +
          by.map(g => '   owning the ' + g.name + ' needs ' + g.requires[a.name]).join('');
 }
 function modTip(m) {
@@ -699,7 +725,7 @@ function weaponTiersTip(w) {
 
 // The setup, played: from its screen, and by R or Again from any. Its kit
 // stands in for what persists -- a fresh meta holding the setup's gear and
-// points -- so reset() applies them exactly as a dive from home would. Its
+// steps -- so reset() applies them exactly as a dive from home would. Its
 // fish take the gate's place in a copy of the plan's entry, never in the pool
 // the entry was drawn from.
 function debugDive() {
@@ -707,7 +733,7 @@ function debugDive() {
   const weapon = WEAPONS.find(w => w.name === s.weapon);
   meta = { ...freshMeta(), carried: weapon.name, owned: WEAPONS.map(w => w.name),
            gear: Object.fromEntries([weapon, ...EQUIPMENT].map(g => [g.name, n(g.name)])),
-           spent: Object.fromEntries(ATTRIBUTES.map(a => [a.name, n(a.name)])) };
+           raised: Object.fromEntries(ATTRIBUTES.map(a => [a.name, n(a.name)])) };
   immortal = s.immortal;
   damageOverride = s.oneShot ? ONE_SHOT : 0;
   startScenario({
@@ -888,7 +914,7 @@ function step(dt) {
   }
 
   elapsed += dt;
-  batchTime += dt;
+  paidNow = [];
   if (player.hurt > 0) player.hurt -= dt;
   if (noticeTime > 0) noticeTime -= dt;
   if (bannerTime > 0) bannerTime -= dt;
@@ -935,8 +961,11 @@ function step(dt) {
         light();
         batchHit = false;
         guardLeft = player.guard;
-        batchTime = 0;
         batchDashed = false;
+        firstKillAt = null;
+        glowAt = null;
+        // A layer's first batch starts `swift`'s clock (D109).
+        if (plan[batchIndex].layer !== plan[batchIndex - 1]?.layer) layerStart = elapsed;
         batchIndex += 1;
       }
     }

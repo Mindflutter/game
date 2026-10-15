@@ -457,17 +457,17 @@ function drawField() {
     ctx.fillText(LAYERS[next.layer].name, ARENA_W / 2, 200);
     ctx.textAlign = 'left';
   }
-  // A micro-task paying out: a line, never a stop (the genre contract, 6).
+  // A challenge paying out: a line, never a stop (the genre contract, 6).
   // Only in play: its clock runs only there, so under an end screen it would
   // hang on forever.
   if (screen === 'playing' && noticeTime > 0) {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#a8ffd8';
-    ctx.font = '17px system-ui, sans-serif';
+    ctx.font = NOTICE_FONT;
     ctx.fillText(notice, ARENA_W / 2, 240);
     ctx.textAlign = 'left';
   }
-  // A pickup, named as it lands (D84, D86), on its own line under the task's.
+  // A pickup, named as it lands (D84, D86), on its own line under the challenge's.
   if (screen === 'playing' && bannerTime > 0) {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffe9a8';
@@ -547,6 +547,11 @@ function drawHint(text) {
   ctx.fillText(text, ARENA_W / 2, HINT_Y);
 }
 
+// The challenge lines' and the notice's fonts: a check measures every line and
+// every rung's notice at these against the view's width (D109).
+const CHALLENGE_FONT = '15px system-ui, sans-serif';
+const NOTICE_FONT = '17px system-ui, sans-serif';
+
 function drawMenu(menu) {
   ctx.textAlign = 'center';
   ctx.shadowBlur = 28;
@@ -563,6 +568,16 @@ function drawMenu(menu) {
   }
 
   drawRows(menu);
+
+  // The challenges under a menu's rows (D109): which lines and where is
+  // `challengeLines()` and `challengesTop()` in game/; this prints them.
+  if (menu.challenges) {
+    ctx.font = CHALLENGE_FONT;
+    challengeLines().forEach((line, i) => {
+      ctx.fillStyle = i ? '#7fb0c0' : '#456b78';    // the first says what they are
+      ctx.fillText(line, ARENA_W / 2, challengesTop(menu) + i * CHALLENGE_LINE);
+    });
+  }
 }
 
 // A menu's rows and its hint -- the menus' and the end screens' alike.
@@ -657,7 +672,7 @@ function drawHelp() {
 
   // The blurb starts below the key list rather than at a fixed y, so a new key
   // row pushes the blurb down instead of running through it.
-  const keyTop = 232, keyStep = 34;
+  const keyTop = 212, keyStep = 34;
   const blurbTop = keyTop + HELP_KEYS.length * keyStep + 30;
 
   ctx.font = '16px system-ui, sans-serif';

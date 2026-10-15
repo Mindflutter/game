@@ -20,7 +20,7 @@ dive's one pause, ended by Continue (D68, D85) — and the current carries you o
 into the next layer (D66). Kills drop gems, which fly to you (D35) and are
 banked when the dive ends. A dive ends in
 death, or in the win at the bottom of the last layer; then `home`, where gems
-buy gun tiers and micro-task points raise dash reach. The measured times live
+buy gear and the points challenges pay raise attributes. The measured times live
 in `roadmap.md` → Health, and only there.
 
 ## Files
@@ -158,6 +158,9 @@ resumes, `home` goes to the title, gear and attributes go `home`).
 **`home` sells a screen deeper** (D96): its rows are Dive, Gear, Attributes,
 Help and Options; Gear lists the weapons and the equipment with the gems to
 spend, Attributes the attributes with the points, and each ends on a Back row.
+Under the Attributes screen's rows and the pause menu's, a menu with
+`challenges` lists the challenges — `challengeLines()`, from `challengesTop()`,
+`CHALLENGE_LINE` apart (D109).
 The browser suite holds every menu's rows above the hint. Every way onto a menu is `openMenu()`,
 which also resets the cursor.
 Help takes a click as "go on". The end screens — `dead` and `won` — are one
@@ -362,7 +365,7 @@ keeps its type's `name`, which is how `light()` reads `carries`. Killing the car
 kept apart from `gems`, since currency has nothing to do with mods — and it
 flies to you at `GEM_PULL` and never fades. `collectMod()` takes it and names
 it on the pickup line, `banner`, with its numbers from `modPreview()` — a line
-of its own, so it never writes over a micro-task's `notice`.
+of its own, so it never writes over a challenge's `notice`.
 
 Which mod a fish carries is `drawCarried()`'s: an ordinary mod — not one of the
 layer end's own, `end` — still under its cap, every one once before any comes
@@ -373,7 +376,7 @@ its slot is taken the moment it drops. With every ordinary mod capped it returns
 lights: the easiest answer while caps are balance's question (Igor,
 2026-10-12).
 
-Clearing a batch pays the micro-tasks and `Mend` (`mendOnClear`). At a layer
+Clearing a batch pays the challenges and `Mend` (`mendOnClear`). At a layer
 end it also starts `offerTimer` at `MOD_OFFER_DELAY`, because the boss's kill
 burst lives 0.5s and cards landing on the frame of the kill read as a jump cut
 (D51). When it expires, `openModOffer()` deals `rollValuable()` — up to three
@@ -418,18 +421,18 @@ caught on the frame you die is yours. Nothing in the code names the currency,
 because what it is called is still open in `ideas.md`.
 
 **What persists** (D31, D36, D75). `meta` in `state.js`: `version`, `bank`,
-`gear` (tiers owned, by name), `spent` (attribute points spent, by name),
-`tasks` (per layer number, the micro-tasks it has paid — numbers, since the
-names are placeholders, D89), `deepest` (the deepest
+`gear` (tiers owned, by name), `raised` (attribute steps raised, by name),
+`challenges` (rungs earned, by challenge name, D109, D110), `deepest` (the deepest
 camera depth reached, shown in metres at 10px each) and `cleared` (layers
 cleared, which is what unlocks the next at `home`), `owned` (the weapons owned,
 by name) and `carried` (the one a dive carries, D97). Points available are
-**derived** — `points()`, earned from `tasks` less `spent` — never stored.
+**derived** — `points()`, `tri()` of every ladder's rungs less `tri()` of
+every attribute's steps, `tri(n)` being 1 + 2 + … + n — never stored.
 `reset(seed, weapon)` builds the player as `PLAYER_START` carrying `weapon` —
 the one `carried` names, or the first if the save names one that is gone, or a
 scenario's — its numbers copied on (D83) and its name kept as `weaponName`,
 plus each tier of that weapon and of the equipment,
-plus each attribute point; mods then add on top as they are picked up. All sums. A weapon
+plus each attribute step; mods then add on top as they are picked up. All sums. A weapon
 left at `home` adds nothing.
 
 - `WEAPONS` and `EQUIPMENT`: the gear for sale, a tier at a time, by name
@@ -437,21 +440,25 @@ left at `home` adds nothing.
   tier. A weapon is owned first: `pickWeapon()` owns one for its `cost` and
   carries it at once, carries an owned one for nothing, and raises the tier of
   the one carried (D97). What costs nothing is owned from the start.
-- `ATTRIBUTES`: **Dash reach**, each point +150px/s of `dashSpeed`, 141 → 165 →
-  189px of dash; **Heart**, each point one more heart, full; **Strength**, each
-  point +1 `dashDamage` — the dash hurts what it shoves (D98). `raise()` refuses
-  without a point.
-- `requires` on any piece of gear: `{ attribute: points }`. `meets()` holds it
-  against the points spent; unmet, `canOwn()` and `canBuy()` refuse, the row is
+- `ATTRIBUTES` — Dash reach, Heart and Strength; what a step adds is
+  `entities/challenges.md`'s. Each step applies once (D98), and step n costs n
+  points (D109): `raise()` refuses a step that costs more than is held.
+- `requires` on any piece of gear: `{ attribute: steps }`. `meets()` holds it
+  against the steps raised; unmet, `canOwn()` and `canBuy()` refuse, the row is
   dim and says what it needs. Scheduling, not scaling (D36, D98).
-- `TASKS`, each paying 1 point once per layer, ever (D98): **untouched** — a
-  batch cleared with `batchHit` still false; **swift** — a batch cleared within
-  `SWIFT_TIME 10` seconds of arriving (`batchTime`); **footwork** — a mini-boss
-  beaten without a dash (`batchDashed`), its batch known by its fish so a
-  restored plan still matches. `met(entry)` reads the dive and the plan entry
-  just cleared. Judged in `clearBatch()` before the layer end's heal; the
-  payout shows as a line (`notice`, for `NOTICE_TIME`) over play. Enemies
-  placed by hand (a scenario's) belong to no plan entry and pay no task.
+- `CHALLENGES`, each a ladder (D109, D110) — the roster, its rungs and what
+  each asks are `entities/challenges.md`'s. A `clear` challenge's streak lives
+  in `tally` for the dive, judged in `clearBatch()` before the layer end's
+  heal: `untouched` reads `batchHit`, `footwork` `batchDashed`, `beeline`
+  `glowAt` against `firstKillAt`, a batch with no glowing fish (`glowAt` null)
+  skipped. A `kill` challenge is judged in `killEnemy()` — `flurry` counts
+  `killTimes` within `FLURRY_TIME` — and an `end` one at a layer end: `swift`
+  reads `layerStart`, set as a layer's first batch arrives and cleared at its
+  end. `climb()` pays every rung a count now meets and puts it on a line over
+  play (`notice`, for `NOTICE_TIME`); challenges paying on one tick share it
+  (`paidNow`). A fish placed by hand (a scenario's) belongs to no plan entry
+  and counts for nothing. The status bar shows each count against its next
+  rung.
 
 All the numbers are Claude's picks, S6's to tune. Buying and raising write the
 save at once.
@@ -461,23 +468,27 @@ dive is under way (`diveLive`), else `null`. `snapshot()` copies every variable
 a dive owns — the player, every entity array (`drops` among them), the plan,
 the queue, camera, current and water, the timers, currency, `modCounts`, the
 mod round, the boosts running and `sinceBoost`, `weaponName`, `guardLeft`,
-`batchTime` and `batchDashed`, the RNG's
+`batchDashed`, the challenges' counts (`tally`, `killTimes`, `firstKillAt`,
+`glowAt`, `layerStart`), the RNG's
 state and `bulletId` — with the offered cards by name and `at`, the screen play resumes
 to. `restore()` is the reverse and leaves `resumeTo` set, so Continue goes
 straight back to it (D90). `loadSave(text)` returns `''` when it loaded or found nothing,
 and otherwise a reason, having changed nothing; `main.js` then copies the text
 aside under `abyss-save-rejected` and the title says why. Written through
 `saveNow()` on pause, on a purchase, when a dive ends, and — asked by `main.js`
-— when the page is hidden or closed; never in the debug mode. `SAVE_VERSION` is 6. `migrate()` brings an older save up
+— when the page is hidden or closed; never in the debug mode. `SAVE_VERSION` is 7. `migrate()` brings an older save up
 one version at a time as it loads: a v1 dive's player gains the Gun's shot
 speed and radius as they were then (D83); a v2 dive loses its rank, starts with
 nothing dropped or running and no fish lit in the batch it was in, and — saved
 with the cards up — takes the card it had marked (D84); a v2 save's
-micro-tasks move from the layers' old names to their numbers (D89); a v3 save
+challenges move from the layers' old names to their numbers (D89); a v3 save
 owns and carries the Gun, and its dive carries it with no guard and its
 batch's clock starting as it loads (D97, D98, D100); a v4 dive's diver and fish
 load at rest, the diver facing down (D107); a v5 dive's fish get their type's
-behaviour again, so fish saved before bites bite (D108).
+behaviour again, so fish saved before bites bite (D108); a v6 save's `tasks`
+become as many rungs of each challenge as the layers each paid in, its steps come back as points,
+and its dive has no streaks, its batch's first kill unknown and no clock on its
+layer (D109).
 `tests/fixtures/save-v1.json` to `save-v6.json`, each written by the first
 build of its version, must all load in every later build.
 
@@ -535,7 +546,8 @@ and drawn by the renderer one row per entry, each in its own colour: hp, the
 suit's guard left (only with a suit), gems and the carried weapon with its tier,
 in bold; the layer, the batch within it — the one fought, or between gates the
 one ahead — the fish left, time and kills; the mods held and the boosts
-running with their seconds left (D86); the layer's micro-tasks, ✓ once paid;
+running with their seconds left (D86); each challenge's count against its
+next rung, or its badges once every rung is earned (D109);
 then the development readout, above. Built from Igor's note, 2026-10-14:
 "missing info for the status bar during dive, make sure to add everything" —
 how it looks is Claude's.
@@ -620,7 +632,7 @@ keeps the address bar on `?debug=<code>` as the setup changes, so the URL
 replays it exactly.
 
 `debugDive()` plays it: a `meta` standing in for what persists — the setup's
-gear, the carried weapon's tier and the points — so `reset()` applies them as a
+gear, the carried weapon's tier and the attribute steps — so `reset()` applies them as a
 dive from `home` would; the setup's immortal and one-shot; then
 `startScenario()` to the chosen gate, with the mods as its kit — a weapon mod
 only with a weapon it fits. Fish set in the setup replace that gate's batch in
@@ -664,7 +676,7 @@ Two suites (D39, D44).
 
 | | Command | Covers |
 |---|---|---|
-| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, no cards open between batches nor at the last layer end, the water flows behind the layer end's cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the dive ends at the bottom and its Dive again dives), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss carries no mod and opens no cards), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap, whatever the fish carry and the layer ends offer; every gem reaching the player; death banking the gems; `home`, buying, points and the micro-task; a layer's micro-tasks kept by number through a rename; Continue going straight back into the dive; New game asking first, and erasing everything only once confirmed (D103); the death screen's Dive again and Go home, Go home marked, a click off them doing nothing; a hand-placed enemy paying no task; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 to v4 fixtures loading and firing finite shots, a dive saved with a shot in flight and a puffer swelling playing on identically), mods from drops (`tests/drops.test.js`: one fish lit as every ordinary batch arrives, never a mini-boss or the boss, the mod dropped even when the batch dies at once, flying in, counted, applied and named on a line of its own, nothing lit once every ordinary mod is capped, every ordinary mod once a round and the same from the same seed; the layer end's three valuable cards, none without room for its step, a click or a number marking, Continue or Enter taking; boosts never 1/C kills apart and seldom back to back, never from the arena's last kill, left where they fell and gone after their life, added on a touch and taken back after their time, restarted not stacked, held by the pause, every boost on and off; weapon mods dealt only for a weapon they fit; no rank in the save; a v2 dive saved with the cards up taking its marked card, the glowing fish kept across a save — D84–D88), the weapon record (`tests/meta.test.js`: the carried weapon's numbers on the player and on every shot, tiers of their own, a weapon left at home adding nothing — D83), S5 (content) (`tests/enemies.test.js`: the archer closing, holding, backing off, coming into view before it spits and spitting on its cadence, its shot costing a heart or passing invulnerability unspent, never hitting a fish, dying at its travel; the puffer lighting near and in view, still but for the shove, bursting on time inside its ring and not outside and chasing on, lighting again only after its chase, dying like any fish when shot, never bursting once cut down, paying nothing for a burst (D106); the eel swaying one way and the other within its width while closing in — D95; `tests/meta.test.js`: Gear and Attributes screens; owning, carrying and the carried weapon's tiers, a missing weapon falling back, a scenario's weapon; Heart, Strength and requirements; the Harpoon and the Knife; the Mask, the Weights and the suit's guard; swift and footwork; every layer's own pools, every type met; the counts — D93, D96–D101; the status bar naming the layer and the batch within it, the fish left, the weapon and its tier, the guard, the mods and the tasks), the debug mode (`tests/debug.test.js`: muted from the start, and only there; a fresh kit whatever the save held, nothing saved on pause, at a dive's end or when the platform asks, `main.js` saving only through `saveNow()`; the kit, the place and the fish as set, the pool untouched, a weapon mod that does not fit left out, the flags switched by the setup; the code round-tripping, ignoring what it cannot name, holding every value in range; R replaying the same dive and inert outside the debug mode; every way out leading to the setup; the rows built from the tables and moved by keys and clicks — D102), bites (`tests/enemies.test.js`: chasing into reach then stopping with the jaws open, a heart off a diver still in reach and nothing off one that got away, the rest before the next bite, no bite once dead or through invulnerability, a shoved biter biting from where it ends up, touch hurting only for the eel and a lunger only as it charges; `tests/meta.test.js`: a v4 dive's fish given their type's bite, the v5 and v6 fixtures playing on — D108), movement in water (`tests/movement.test.js`: moving on the first tick but at full speed only after the ramp, a glide and a reversal that swings through, the same swim at any tick length, a raised speed in the same ramp, no speed banked against an edge, the facing turning the shorter way and holding, the dash along it from a standstill with the swim carrying on, a fish with a ramp overshooting a sidestep, a v4 save at rest — D107), the bot starting from a scenario, the dev flags, and the docs (D57) — among them the entity docs' tables against `game/content.js` (D81) and the map in `docs/README.md` (D82). Vitest + fast-check, dev-only. |
+| **Node** | `npm test` (`npm run test:watch`) | The seam, property-based invariants over generated seeds — no NaN ever, hp bounds, view bounds, seeded replay, time-based decay — the descent (`tests/descent.test.js`: the camera never moves while a batch lives but the water keeps flowing, the next batch is under 3s away, the camera stops exactly at each depth, swimming does not hurry the current, no cards open between batches nor at the last layer end, the water flows behind the layer end's cards and drifts under the death and layer-end screens, pausing freezes the camera and the water, aim and arrivals follow the camera, the dive ends at the bottom and its Dive again dives), the boss (`tests/boss.test.js`: a lunger never charges without a full wind-up, holds its line through it and stays in the view without jumping; the mini-boss winds up longer and is weaker; the boss rises from below, centred; every layer ends on the boss with two lone mini-bosses along the way; a mini-boss carries no mod and opens no cards), S4 (`tests/meta.test.js`: the plan — same seed same batches, two seeds different, every batch from its own pool and never twice, pools larger than their draws; going on through a layer end with a heal and the cards, then the next layer with nothing between; the boss's haul; the `layer-2` kit; no mod past its cap, whatever the fish carry and the layer ends offer; every gem reaching the player; death banking the gems; `home`, buying, points and the challenges; Continue going straight back into the dive; New game asking first, and erasing everything only once confirmed (D103); the death screen's Dive again and Go home, Go home marked, a click off them doing nothing; a hand-placed enemy counting toward no challenge; the save restored at any tick playing on identically, meta round-tripping, bad saves refused, the v1 to v4 fixtures loading and firing finite shots, a dive saved with a shot in flight and a puffer swelling playing on identically), mods from drops (`tests/drops.test.js`: one fish lit as every ordinary batch arrives, never a mini-boss or the boss, the mod dropped even when the batch dies at once, flying in, counted, applied and named on a line of its own, nothing lit once every ordinary mod is capped, every ordinary mod once a round and the same from the same seed; the layer end's three valuable cards, none without room for its step, a click or a number marking, Continue or Enter taking; boosts never 1/C kills apart and seldom back to back, never from the arena's last kill, left where they fell and gone after their life, added on a touch and taken back after their time, restarted not stacked, held by the pause, every boost on and off; weapon mods dealt only for a weapon they fit; no rank in the save; a v2 dive saved with the cards up taking its marked card, the glowing fish kept across a save — D84–D88), the weapon record (`tests/meta.test.js`: the carried weapon's numbers on the player and on every shot, tiers of their own, a weapon left at home adding nothing — D83), S5 (content) (`tests/enemies.test.js`: the archer closing, holding, backing off, coming into view before it spits and spitting on its cadence, its shot costing a heart or passing invulnerability unspent, never hitting a fish, dying at its travel; the puffer lighting near and in view, still but for the shove, bursting on time inside its ring and not outside and chasing on, lighting again only after its chase, dying like any fish when shot, never bursting once cut down, paying nothing for a burst (D106); the eel swaying one way and the other within its width while closing in — D95; `tests/meta.test.js`: Gear and Attributes screens; owning, carrying and the carried weapon's tiers, a missing weapon falling back, a scenario's weapon; Heart, Strength and requirements; the Harpoon and the Knife; the Mask, the Weights and the suit's guard; every layer's own pools, every type met; the counts — D93, D96–D101; the status bar naming the layer and the batch within it, the fish left, the weapon and its tier, the guard, the mods and the tasks), challenge ladders (`tests/meta.test.js`: a clean streak paying each rung once, ever, broken by a hit and by the guard's; a dash breaking `footwork`; the glowing fish first or on the same tick, a batch without one skipped; kills dropping out of the two seconds, on the bar and in the save, several rungs at once; challenges sharing the notice; a layer timed to its boss and none begun partway; step n priced at n; the task lines; every count kept with a saved dive; a v6 save's `tasks` as rungs and steps as points; the v7 fixture — D109, D110), the debug mode (`tests/debug.test.js`: muted from the start, and only there; a fresh kit whatever the save held, nothing saved on pause, at a dive's end or when the platform asks, `main.js` saving only through `saveNow()`; the kit, the place and the fish as set, the pool untouched, a weapon mod that does not fit left out, the flags switched by the setup; the code round-tripping, ignoring what it cannot name, holding every value in range; R replaying the same dive and inert outside the debug mode; every way out leading to the setup; the rows built from the tables and moved by keys and clicks — D102), bites (`tests/enemies.test.js`: chasing into reach then stopping with the jaws open, a heart off a diver still in reach and nothing off one that got away, the rest before the next bite, no bite once dead or through invulnerability, a shoved biter biting from where it ends up, touch hurting only for the eel and a lunger only as it charges; `tests/meta.test.js`: a v4 dive's fish given their type's bite, the v5 and v6 fixtures playing on — D108), movement in water (`tests/movement.test.js`: moving on the first tick but at full speed only after the ramp, a glide and a reversal that swings through, the same swim at any tick length, a raised speed in the same ramp, no speed banked against an edge, the facing turning the shorter way and holding, the dash along it from a standstill with the swim carrying on, a fish with a ramp overshooting a sidestep, a v4 save at rest — D107), the bot starting from a scenario, the dev flags, and the docs (D57) — among them the entity docs' tables against `game/content.js` (D81) and the map in `docs/README.md` (D82). Vitest + fast-check, dev-only. |
 | **Browser** | `index.html?test` | The scripted checks (count under Verification), plus what Node cannot reach: audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js`, and the same seed played to the bottom of the dive at three window sizes through real `MouseEvent`s (D29). |
 
 `tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
@@ -714,18 +726,16 @@ guard 0) · `RAMP_LEFT 0.05` ·
 `GATE_PAUSE 1.2` · `GATE_SPACING 400` · `CURRENT_SPEED 200` ·
 `CURRENT_CRAWL 30` · `CURRENT_EASE 0.05` · `MOD_OFFER_DELAY 0.6` ·
 `END_STEP 2` · `BOOST_C 0.02` ·
-`BOOST_LIFE 6` · `FIXED_DT 1/120` ·
+`BOOST_LIFE 6` · `FLURRY_TIME 2` · `FIXED_DT 1/120` ·
 `MAX_FRAME_DT 0.05` · `DASH_TIME 0.16` ·
 `DASH_GRACE 0.15` · `DASH_REACH 40` · `DASH_ARC 0.2` ·
 `DASH_END 0.18` · `DASH_PUSH 320` · `PUSH_DRAG 0.02` · `SHAKE_FADE 0.02` ·
-`SHAKE_FLOOR 0.15` · `SHAKE_HURT 7` · `SHAKE_DEATH 38` · and the tables
-the entity docs do not cover: `ATTRIBUTES` (Dash reach: +150px/s a point;
-Heart: +1 heart; Strength: +1 dash damage) ·
-`TASKS` (untouched, swift, footwork: 1 point a layer each).
+`SHAKE_FLOOR 0.15` · `SHAKE_HURT 7` · `SHAKE_DEATH 38`. The challenges'
+and the attributes' numbers are `entities/challenges.md`'s.
 
 ## Verification
 
-**`index.html?test`** runs the suite in the console (currently **194** checks —
+**`index.html?test`** runs the suite in the console (currently **197** checks —
 this doc owns that count; `roadmap.md` cites it). It is what actually
 **executed** — more than `grep -c` finds, because some call sites sit inside
 loops.
