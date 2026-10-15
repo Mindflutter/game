@@ -6,6 +6,9 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-15
 
+**Recorded: a bug** — boost lines speak of shots while the Knife is carried
+(`bugs.md`).
+
 **Recorded: swimming through biters costs nothing**
 Igor's balance note, in `ideas.md` → The stage's content, with the ways it
 could be addressed — none chosen.
