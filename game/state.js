@@ -13,9 +13,16 @@ let queuePaused = false;    // a scenario can stop the batch queue (D37)
 // `breathTimer` counts only the quiet beat before a dive's *first* batch
 // (GATE_PAUSE); every later batch waits on the descent (D58). It is not a gate
 // flag: a gate is the whole stretch where the descent is stopped, fight
-// included, so "at a gate" is `enemies.length > 0`.
+// included, so "at a gate" is `batchLive()`.
 let batchIndex = 0;
 let breathTimer = 0;
+
+// The batch's fish still to come (D115): `{ name, at }`, soonest first, `at`
+// on the dive's clock (`elapsed`).
+let incoming = [];
+
+// The batch lives while a fish of it is in the arena or still to come.
+function batchLive() { return enemies.length > 0 || incoming.length > 0; }
 
 // The dive's batches, drawn whole from its seed when it starts (D71): one
 // entry per gate, `{ layer, batch }`, the last of each layer marked `end`.
@@ -202,6 +209,7 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   kills = 0;
   queuePaused = false;   // scenarios switch this on; normal play never does
   batchIndex = 0;
+  incoming = [];
   breathTimer = GATE_PAUSE;   // a dive opens on the beat, so it starts calm
   cameraY = 0;         // every dive starts at the top of the first layer (D66)
   current = CURRENT_CRAWL;   // the water is already moving when a dive opens
@@ -281,7 +289,7 @@ function startScenario(s, seed) {
 //
 // `version` from the first write (foundations.md -> The technical contract). A
 // save this build does not know is rejected loudly, never guessed at.
-const SAVE_VERSION = 7;
+const SAVE_VERSION = 8;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
@@ -300,7 +308,7 @@ let meta = freshMeta();
 // the screen play resumes to, since the pause menu may be what is showing.
 function snapshot() {
   return { player, enemies, bullets, gems, drops, particles, elapsed, kills, shake,
-           queuePaused, batchIndex, breathTimer, cameraY, current, waterY,
+           queuePaused, batchIndex, incoming, breathTimer, cameraY, current, waterY,
            fireArmed, currency, modCounts, offerTimer, choiceIndex,
            choices: choices.map(c => c.name), accumulator, rngState,
            currentSeed, bulletId, plan, batchHit, notice, noticeTime,
@@ -313,7 +321,7 @@ function snapshot() {
 // the title's Continue goes straight there (D90).
 function restore(d) {
   ({ player, enemies, bullets, gems, drops, particles, elapsed, kills, shake,
-     queuePaused, batchIndex, breathTimer, cameraY, current, waterY,
+     queuePaused, batchIndex, incoming, breathTimer, cameraY, current, waterY,
      fireArmed, currency, modCounts, offerTimer, choiceIndex,
      accumulator, rngState, currentSeed, bulletId, plan, batchHit, notice,
      noticeTime, banner, bannerTime, modRound, boosts, sinceBoost, weaponName,
@@ -350,7 +358,8 @@ function saveText() {
 // is lost, and every step comes back
 // as points to spend, since steps cost more now. Its dive has no streaks, its
 // batch's first kill unknown -- so that batch cannot pay `beeline` -- and no
-// clock on its layer, so `swift` waits for the next.
+// clock on its layer, so `swift` waits for the next. v7 brought a batch in
+// whole: its dive has no fish still to come (D115).
 function migrate(s) {
   if (s && s.version === 1) {
     if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
@@ -409,6 +418,10 @@ function migrate(s) {
       Object.assign(s.dive, { tally: {}, killTimes: [], firstKillAt: -1, glowAt: null, layerStart: null });
     }
     s.version = 7;
+  }
+  if (s && s.version === 7) {
+    if (s.dive) s.dive.incoming = [];
+    s.version = 8;
   }
   return s;
 }

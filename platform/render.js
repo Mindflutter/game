@@ -447,7 +447,7 @@ function drawField() {
   // the next batch is a layer's first and has not arrived. PLACEHOLDER
   // GRAPHICS, like the water's colour: the cheapest "a new layer" until art.
   const next = plan[batchIndex];
-  if (screen === 'playing' && next && enemies.length === 0 &&
+  if (screen === 'playing' && next && !batchLive() &&
       (batchIndex === 0 || plan[batchIndex - 1].end)) {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9ef7ff';

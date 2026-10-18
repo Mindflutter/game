@@ -44,7 +44,7 @@ export function loadGame() {
   // of the global object, so `enemies` and friends are invisible from outside.
   // Bridge them with accessors generated from the names, rather than eval.
   const STATE = ['player', 'enemies', 'bullets', 'gems', 'particles',
-                 'elapsed', 'kills', 'shake', 'queuePaused', 'batchIndex', 'breathTimer',
+                 'elapsed', 'kills', 'shake', 'queuePaused', 'batchIndex', 'incoming', 'breathTimer',
                  'cameraY', 'waterY',
                  'currency', 'choices', 'choiceIndex', 'modCounts',
                  'drops', 'boosts', 'banner', 'sinceBoost',
@@ -58,6 +58,7 @@ export function loadGame() {
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
                   'MOD_OFFER_DELAY', 'MOD_ROWS',
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
+                  'WAVE_MIN', 'WAVE_MAX', 'WAVE_GAP', 'WAVE_JITTER', 'WAVE_SPREAD',
                   'BOOSTS', 'BOOST_C', 'BOOST_LIFE', 'END_STEP',
                   'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'CHALLENGES',
                   'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK',
@@ -117,9 +118,11 @@ export function atGate(k) {
   return g;
 }
 
-// Kills the batch through the real death path, then plays on until the screen
-// changes -- the layer end's cards, or the win -- or `seconds` run out.
+// Kills the batch through the real death path -- its waves still to come
+// brought in first (D115) -- then plays on until the screen changes -- the
+// layer end's cards, or the win -- or `seconds` run out.
 export function clearAndWait(g, seconds = 5) {
+  for (const f of g.incoming.splice(0)) g.arrive(f.name);
   for (const e of [...g.enemies]) g.killEnemy(e);
   for (let i = 0, n = ticks(g, seconds); i < n && g.screen === 'playing'; i++) g.update(g.FIXED_DT);
   return g.screen;

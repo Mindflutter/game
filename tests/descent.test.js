@@ -28,7 +28,7 @@ describe('the descent', () => {
       g.immortal = true;                       // the bot kept alive
       for (let i = 0, n = ticks(g, 60); i < n && g.batchIndex < 4 && !bad; i++) {
         botInput(g);                           // the bot's own tick
-        const fighting = g.enemies.length > 0, frozen = g.screen === 'mods';
+        const fighting = g.batchLive(), frozen = g.screen === 'mods';
         const before = g.cameraY;
         g.update(g.FIXED_DT);
         if ((fighting || frozen) && g.cameraY !== before) bad = { tick: i, from: before, to: g.cameraY };
@@ -213,6 +213,8 @@ describe('the descent', () => {
     g.reset(1);
     g.cameraY = 5000;
     g.spawnBatch({ enemies: [['drifter', 40]] });
+    for (const f of g.incoming.splice(0)) g.arrive(f.name);   // its later waves too (D115)
+    expect(g.enemies).toHaveLength(40);
     for (const e of g.enemies) {
       const outside = e.x < 0 || e.x > g.ARENA_W ||
                       e.y < g.cameraY || e.y > g.cameraY + g.ARENA_H;
@@ -220,5 +222,100 @@ describe('the descent', () => {
       expect(e.y).toBeGreaterThan(g.cameraY - 100);
       expect(e.y).toBeLessThan(g.cameraY + g.ARENA_H + 100);
     }
+  });
+});
+
+// Waves (D115): a batch arrives a wave at a time, on a clock that does not wait
+// for the last one to die, and its gate holds until the last wave is dead.
+describe('waves', () => {
+  const BIG = { enemies: [['drifter', 30], ['bulwark', 5]] };
+  // A batch brought in by hand, mid-layer, with the queue stopped behind it
+  // and the diver kept alive and still, so nothing dies unless a test kills it.
+  const arrived = (batch = BIG, seed = 1) => {
+    const g = loadGame();
+    g.reset(seed);
+    g.immortal = true;
+    g.queuePaused = true;
+    g.spawnBatch(batch);
+    return g;
+  };
+  const counts = list => list.reduce((c, n) => ({ ...c, [n]: (c[n] || 0) + 1 }), {});
+
+  it('brings the first wave whole and keeps the rest to come -- every fish once', () => {
+    fc.assert(fc.property(fc.integer({ min: 0, max: 2 ** 31 }), seed => {
+      const g = arrived(BIG, seed);
+      expect(g.enemies.length).toBeGreaterThanOrEqual(g.WAVE_MIN);
+      expect(g.enemies.length).toBeLessThanOrEqual(g.WAVE_MAX);
+      expect(counts([...g.enemies, ...g.incoming].map(f => f.name))).toEqual({ drifter: 30, bulwark: 5 });
+    }), { numRuns: 20 });
+    expect(arrived({ enemies: [['boss', 1]] }).incoming).toEqual([]);   // one fish, one wave
+  });
+
+  it('brings each later fish at its own moment, whether or not the first wave is dead', () => {
+    const g = arrived();
+    const first = g.enemies.length, due = g.incoming.map(f => f.at);
+    // The schedule: the second wave no sooner than one short gap, the last no
+    // later than every gap long plus its trickle.
+    const waves = Math.ceil(35 / g.WAVE_MIN);
+    expect(due[0]).toBeGreaterThanOrEqual(g.WAVE_GAP * (1 - g.WAVE_JITTER));
+    expect(due.at(-1)).toBeLessThanOrEqual((waves - 1) * g.WAVE_GAP * (1 + g.WAVE_JITTER) + g.WAVE_SPREAD);
+    let bad = null;
+    for (let i = 0, n = ticks(g, due.at(-1)) + 1; i < n && !bad; i++) {
+      g.update(g.FIXED_DT);
+      const want = first + due.filter(t => t <= g.elapsed).length;
+      if (g.enemies.length !== want) bad = { at: g.elapsed, have: g.enemies.length, want };
+    }
+    expect(bad).toBeNull();
+    expect(g.enemies.length).toBe(35);                          // all in, none killed
+  });
+
+  it('trickles a wave\'s fish in one at a time rather than all on one tick', () => {
+    const at = arrived().incoming.map(f => f.at);
+    expect(new Set(at).size).toBe(at.length);
+  });
+
+  it('calls the next fish at once when the arena empties, the rest moved up with it', () => {
+    const g = arrived();
+    const gaps = g.incoming.slice(1).map((f, i) => f.at - g.incoming[i].at);
+    const left = g.incoming.length;
+    for (const e of [...g.enemies]) g.killEnemy(e);
+    g.update(g.FIXED_DT);                                       // swept: the arena is empty
+    g.update(g.FIXED_DT);
+    expect(g.enemies.length).toBeGreaterThan(0);
+    expect(g.incoming.length).toBeLessThan(left);
+    const now = g.incoming.slice(1).map((f, i) => f.at - g.incoming[i].at);
+    expect(now).toEqual(gaps.slice(gaps.length - now.length).map(x => expect.closeTo(x, 9)));
+  });
+
+  it('holds the gate and pays nothing between waves; clears once, on the last wave\'s last fish', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.immortal = true;
+    ride(g);
+    expect(g.incoming.length).toBeGreaterThan(0);
+    const k = g.batchIndex, cam = g.cameraY;
+    let cleared = 0;
+    for (let i = 0, n = ticks(g, 60); i < n && g.batchIndex === k; i++) {
+      const lastWave = g.incoming.length === 0;
+      for (const e of [...g.enemies]) g.killEnemy(e);
+      g.update(g.FIXED_DT);
+      if (g.tally.untouched) {
+        cleared += 1;
+        expect(lastWave).toBe(true);
+        break;
+      }
+      expect(g.cameraY).toBe(cam);
+    }
+    expect(cleared).toBe(1);
+  });
+
+  it('holds the waves while paused', () => {
+    const g = arrived();
+    g.queuePaused = false;
+    const left = g.incoming.map(f => f.at);
+    g.justPressed.add('Escape');
+    for (let i = 0, n = ticks(g, 30); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.screen).toBe('paused');
+    expect(g.incoming.map(f => f.at)).toEqual(left);
   });
 });

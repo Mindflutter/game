@@ -381,14 +381,20 @@ describe('boosts (D86)', () => {
     expect(gaps.filter(x => x === 1).length / gaps.length).toBeLessThan(0.06);
   });
 
-  it('never drops one from the kill that empties the arena', () => {
-    const g = loadGame();
-    g.reset(1);
-    g.queuePaused = true;
-    g.placeEnemy('drifter', 100, g.cameraY + 100);
-    g.sinceBoost = Math.ceil(1 / g.BOOST_C);                 // certain, but for the rule
-    g.killEnemy(g.enemies[0]);
-    expect(g.drops).toHaveLength(0);
+  it('never drops one from the kill that ends the batch -- only empties the arena, and it may', () => {
+    const lone = waves => {
+      const g = loadGame();
+      g.reset(1);
+      g.queuePaused = true;
+      g.incoming = waves;
+      g.placeEnemy('drifter', 100, g.cameraY + 100);
+      g.sinceBoost = Math.ceil(1 / g.BOOST_C);               // certain, but for the rule
+      g.killEnemy(g.enemies[0]);
+      return g.drops;
+    };
+    expect(lone([])).toHaveLength(0);
+    // A wave still to come: the fight goes on, so the boost has a use (D115).
+    expect(lone([{ name: 'drifter', at: 99 }])).toHaveLength(1);
     const h = loadGame();
     h.reset(1);
     expect(boostAt(h, 100, h.cameraY + 100).boost).toBeTruthy();   // with a fish left, it drops

@@ -300,7 +300,14 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
   ruled out, and after the boss itself (D62 — the boss is the layer's last
   batch). When it comes, the glossary's **batch** row — "enemies of comparable
   threat" — no longer fits that batch, since a boss and its escorts are not
-  comparable.
+  comparable. Igor, 2026-10-17: "boss & mini-boss fights should include
+  incoming enemies according to the balance for current batch. boss fight may
+  change a bit to endless enemies incoming until the big guy is defeated -
+  keeping the player fit." The mini-boss's half meets D65 (a mini-boss is a
+  smaller boss)'s "one tougher enemy in a batch of its own". The endless half
+  is a lean, and it would be a stream inside a gate — the shape D27 (batches
+  are hard-gated) retired — ended by the boss's death rather than by a count.
+  Open: escorts at all, how many, and whether the boss's run without end.
 - **More boss attacks.** The spit — a fan of slow toxic blobs, from the draft's
   "spitting out dangerous toxins" and "shooting an arc" — and the lunge and
   the spit in turn. Offered alongside the lunge; Igor took the lunge alone
@@ -477,43 +484,18 @@ discussed.
 
 **Pace**
 
-- **Waves: a push to clear fast.** Igor, 2026-10-15, playtesting: "we need to
-  start working on waves. for me the game feels to easy and predictable, i
-  dont feel overwhelmed at any point, bosses are easy. here's the point: we
-  gotta push the player to clear the enemies fast, because new ones are
-  constantly coming (remember the prototype). but - waves must be hard to
-  guess, so distribute the enemy spawn into a period of time. it's the
-  rogulite - you are dead at some point, but most likely you go FURTHER next
-  time and are rewarded for it. so a sense of nervous rush and inevitability
-  should come to a player, but not scare him away - motivate istead. and this
-  sense is postponed each dive, if you play equally good that is." His
-  reference for being overwhelmed: Crimsonland.
-
-  Against what is settled, read for what it means in the game:
-  - **It fits D27 (batches are hard-gated)** if a batch stays a bounded queue
-    that gates the descent, its fish arriving spread over time, on a clock
-    rather than on the last clear — so a slow clear meets the next arrivals
-    still fighting. D27 retired the prototype's director because arrivals grew
-    without bound and death came at a fixed time whatever the player did; a
-    bounded batch on a clock cannot diverge. An endless stream inside a gate
-    would supersede D27.
-  - **One tension, with the glossary's wave**: a multi-wave batch "must
-    telegraph that more is coming". "Hard to guess" can be *when, where and
-    what*, while *that* more is coming still shows.
-  - **Inevitability postponed by playing well** is the dive's rising threat
-    (D79 (a dive goes from easiest to hardest)) and S6 (balance)'s threat
-    system: death comes where the threat outgrows the kit, and gear moves that
-    point deeper.
-  - Kin: fish that arrive from behind the screen, above — arrivals near the
-    diver, the fade-in their telegraph.
-  - **Crimsonland**: its Survival is the prototype's shape — an endless stream
-    on a shortening timer, death certain. Its Quests are nearer this: a finite,
-    scripted list of spawns on a timeline, the quest over when all are dead. A
-    review's complaint: fish spawning on top of the player unwarned.
-
-  Open: what a wave is — its size, its clock, where it enters — and how it
-  reads. **Home**: proposed, this pass before S6 (balance), since it changes
-  what a batch is, and the threat system measures batches.
+- **Waves: does it overwhelm?** Built as D115 (batches arrive in waves), on
+  Claude's shape and numbers — 5–10 fish a wave, 4s ± 40% apart, 2s of
+  trickle, an empty arena calling the next. Igor's aim was "a sense of nervous
+  rush and inevitability ... not scare him away - motivate instead", with
+  Crimsonland as the reference for being overwhelmed. With today's batch sizes
+  the waves put fewer fish on screen at once than a whole batch did, and the
+  kiting bot lasts longer for it (`roadmap.md` → Health). Open, to Igor's play:
+  whether it rushes; if not, the levers are the clock and the batch sizes.
+  Also open: whether the status bar's `(12 coming)` is telegraph enough, or a
+  wave wants a sound or a mark at the edge it enters by; and where waves enter
+  — still a random edge, the kin idea being fish from behind the screen,
+  above, arriving near the diver with the fade-in as their telegraph.
 
 - **Stronger versions of the same fish.** Igor, 2026-10-15: "enemies should
   have levels of their own. same behavior but different attrs. this way we can

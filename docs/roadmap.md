@@ -24,9 +24,12 @@ swims and faces; fish with a ramp)), fish that bite (D108 (fish bite)),
 challenges as ladders (D109 (micro-tasks are ladders; steps cost more as they
 rise), D110 (challenges)), the shorter dash (D111 (the dash a third
 shorter)) and weapons and equipment on screens of their own (D114 (weapons and
-equipment on screens of their own)). Next: the boss and the mini-boss made different (`plan.md` → Active
-stage); waves and enemy grades are proposed for this pass too, Igor to confirm
-(`ideas.md` → Pace). Each is discussed one at a time.
+equipment on screens of their own)) and batches arriving in waves (D115
+(batches arrive in waves)). Next: the boss and the mini-boss made different
+(`plan.md` → Active stage), their escorts arriving as waves do — whether the
+boss's run without end is open (`ideas.md` → Open — from the boss (S3)); enemy
+grades are proposed for this pass too, Igor to confirm (`ideas.md` → Pace).
+Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's
@@ -95,12 +98,13 @@ it names, and S6 (balance) measures afresh.
   clears batches far faster, so a human layer is likely well under the 4–8 min
   pillar — which is S6's problem.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
-  4471 reaches the bottom of the dive — three layers — in 844.46s at 1280×800,
+  4471 reaches the bottom of the dive — three layers — in the same time at 1280×800,
   1920×1080 and 3440×1440 alike (stationary, invulnerable, aiming at the first
   fish), driven through real mouse events aimed on a 20px grid that all three
-  scales put on whole pixels — measured 2026-10-14, with bites (D108 (fish
-  bite)). The `?test` check requires the three to be identical; dropping the
-  input's `/ scale` leaves the two larger windows short of the bottom. Before
+  scales put on whole pixels — measured 2026-10-17, with waves (D115 (batches
+  arrive in waves)): 1010.34s at all three. The `?test` check requires the three to be identical; dropping the
+  input's `/ scale` leaves the two larger windows short of the bottom. With
+  bites, before waves, 844.46s on 2026-10-14. Before
   bites the aim went to the nearest whole pixel and the check allowed 2%:
   811.02 / 809.82 / 802.58s on 2026-10-13; on the build with mods from drops,
   two layers, 562.24s at all three; on the S3 build, one layer, 296.34s; on the
@@ -116,27 +120,34 @@ it names, and S6 (balance) measures afresh.
   backs out of range, so its shots never land, and backs straight along the
   lunge's line, so the charges do. A measure of the bot's policy, not of the
   boss (D50); Igor's playthrough decides whether the layer is winnable.
-- **The meta loop** (S4 DoD), re-measured 2026-10-13 on the S5 (content)
-  build — three layers with pools of their own (D101), the new fish in them —
-  mortal bot, seeds 1, 7, 42, 4471, 90210, from the top, each a whole dive or
-  1800s of one:
+- **The meta loop** (S4 DoD), re-measured 2026-10-17 on the build with waves
+  (D115 (batches arrive in waves)) — mortal bot, seeds 1, 7, 42, 4471, 90210,
+  from the top, each a whole dive or 1800s of one — and, for comparison, on the
+  build just before it (`07d2f79`):
 
   | | gates cleared | gems | mean gates | mean gems |
   |---|---|---|---|---|
-  | starting gun | 5 / 5 / 0 / 5 / 1 | 72 / 65 / 13 / 79 / 27 | 3.2 | 51.2 |
-  | gun tier 1 | 6 / 5 / 7 / 12 / 10 | 95 / 69 / 131 / 258 / 164 | 8.0 | 143.4 |
+  | starting gun | 4 / 4 / 4 / 4 / 4 | 56 / 54 / 62 / 58 / 54 | 4.0 | 56.8 |
+  | gun tier 1 | 4 / 4 / 4 / 4 / 9 | 56 / 54 / 62 / 58 / 145 | 5.0 | 75.0 |
+  | starting gun, before waves | 0 / 4 / 4 / 4 / 4 | 13 / 54 / 62 / 58 / 54 | 3.2 | 48.2 |
+  | gun tier 1, before waves | 4 / 4 / 4 / 4 / 4 | 56 / 54 / 62 / 58 / 54 | 4.0 | 56.8 |
 
-  **Dives to the first purchase: 1** (target ≤ 3) — seed 1 alone banks 72
-  against the first tier's 40. **Measurably stronger**: the same seeds, tier 1
-  against the starting gun, clear 2.5× the gates. Seed 42 dies in its first
-  batch, the 14 darters D71 can draw as an opener (`ideas.md` → Open — raised
-  during S4). **Layer 2**, from `layer-2` (a kit of fifteen mods, the starting
-  gun): dies after 6 / 10 / 6 / 10 / 10 clears, banking 112–195 gems — it never
-  reaches layer 2's boss. **Layer 3**, from `layer-3` (sixteen mods): dies
-  after 1 / 5 / 1 / 1 / 1 clears, banking 35–125 — the eels, puffers and
-  archers mixed undo a bot that only backs away. The bot never seeks a boost
-  (D86) — it takes one only by swimming over it — so these figures are a floor.
-  Bot policy as ever (D50): Igor finds batches easy.
+  **Nine dives of ten die at the fifth gate, the first mini-boss** — a lone
+  lunger the kiting bot cannot kill (the boss fight, above); before waves,
+  eight, and a ninth sat alive at it until the cap — so the table measures the bot against the mini-boss more than the batches
+  or the gun: "measurably stronger" (S4 DoD) now shows in one seed. On
+  2026-10-13, before the swim and bites (D107, D108), the same seeds cleared
+  3.2 and 8.0 gates on average, getting past it. **Dives to the first
+  purchase: 1** (target ≤ 3) — every seed banks more than the first tier's 40.
+  **Layer 2**, from `layer-2` (a kit of fifteen mods, the starting gun): dies at
+  its first mini-boss after 4 clears on every seed, banking 80–84 gems, before
+  waves and after. **Layer 3**, from `layer-3` (sixteen mods): dies after 2 / 2
+  / 1 / 1 / 2 clears, banking 36–70; before waves 0 / 1 / 1 / 1 / 0, banking
+  21–57. **Waves make the bot's fights easier, not harder**: with today's batch
+  sizes they put fewer fish on screen at once than a batch arriving whole did,
+  which is what layer 3 and seed 1 show. The bot never seeks a boost (D86) —
+  it takes one only by swimming over it — so these figures are a floor. Bot
+  policy as ever (D50): Igor finds batches easy.
 - **Per weapon** (S5 (content), D97), mortal bot from the top through the
   `harpoon` and `knife` scenarios, seeds as above: the **Harpoon** clears 0 / 3
   / 0 / 0 / 1 gates, the **Knife** 2 at every seed — the Knife as a short

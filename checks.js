@@ -96,7 +96,9 @@ if (location.search === '?test') {
   // --- arrivals ---
   reset(1);
   spawnBatch({ enemies: [['drifter', 6], ['darter', 6], ['bulwark', 6]] });
-  check(enemies.length === 18, 'a batch must bring exactly what it names, got ' + enemies.length);
+  check(enemies.length + incoming.length === 18,
+    'a batch must bring exactly what it names, its waves to come included (D115), got ' +
+    (enemies.length + incoming.length));
   check(enemies.every(e => e.x < 0 || e.x > ARENA_W || e.y < 0 || e.y > ARENA_H),
     'enemies must arrive outside the arena');
   check(new Set(enemies.map(e => e.speed)).size > 1,
@@ -119,13 +121,15 @@ if (location.search === '?test') {
   pastGate();                                      // wait out the opening gate
   check(enemies.length > 0 && batchIndex === 1, 'the first batch must arrive, batchIndex ' + batchIndex);
 
-  const firstBatchSize = enemies.length;
+  // Its own later waves arrive meanwhile (D115); nothing else may.
+  const firstBatchSize = enemies.length + incoming.length;
   runAlive(600);                                   // ten seconds of not killing
-  check(enemies.length === firstBatchSize && batchIndex === 1,
+  check(enemies.length + incoming.length === firstBatchSize && batchIndex === 1,
     'nothing may arrive while a batch lives: ' + enemies.length + ' enemies, batchIndex ' + batchIndex);
 
   // Clear it by hand and the gate opens, then the next batch comes.
   enemies = [];
+  incoming = [];
   runAlive(1);
   check(cameraY > 0, 'clearing a batch must start the descent before the next');
   check(batchIndex === 1, 'the next batch must not arrive during the gate');
@@ -135,6 +139,7 @@ if (location.search === '?test') {
   // A third in a row. Continues the sequence above rather than restarting it:
   // one more clear is the only new information.
   enemies = [];
+  incoming = [];
   runAlive(1);
   runAlive(60 * 30, arrived);
   check(batchIndex === 3, 'three batches must clear in sequence, got ' + batchIndex);

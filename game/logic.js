@@ -36,17 +36,30 @@ function edgeSpawnPoint(t) {
   return              { x: -m,                 y: rng() * ARENA_H };
 }
 
-// Brings in one batch: every enemy it names, at the edge, with the usual speed
-// jitter so a batch does not arrive as a drill squad.
+// Brings in one batch (D115): its fish shuffled and dealt into waves of
+// WAVE_MIN to WAVE_MAX. The first arrives now, whole; each later one starts
+// WAVE_GAP after the last, give or take, its fish each at their own moment
+// within WAVE_SPREAD -- so when, how many and which are all hard to call.
 function spawnBatch(batch) {
-  for (const [name, count] of batch.enemies) {
-    const type = enemyType(name);
-    if (!type) continue;
-    for (let i = 0; i < count; i++) {
-      const { x, y } = edgeSpawnPoint(type);
-      makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
-    }
+  const all = batch.enemies.flatMap(([name, count]) => Array(count).fill(name));
+  const fish = drawDistinct(all, all.length);
+  const size = () => WAVE_MIN + Math.floor(rng() * (WAVE_MAX - WAVE_MIN + 1));
+  fish.splice(0, size()).forEach(name => arrive(name));
+  let start = elapsed;
+  while (fish.length) {
+    start += WAVE_GAP * (1 - WAVE_JITTER + rng() * 2 * WAVE_JITTER);
+    for (const name of fish.splice(0, size())) incoming.push({ name, at: start + rng() * WAVE_SPREAD });
   }
+  incoming.sort((a, b) => a.at - b.at);
+}
+
+// One fish of a batch, at the edge, with the usual speed jitter so a wave does
+// not arrive as a drill squad.
+function arrive(name) {
+  const type = enemyType(name);
+  if (!type) return;
+  const { x, y } = edgeSpawnPoint(type);
+  makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
 }
 
 // Places one named enemy at a known spot, at its nominal speed and no jitter.
@@ -329,10 +342,11 @@ function killEnemy(e) {
   if (e.carrier) dropMod(e);
   // A boost, perhaps (D86): the chance is BOOST_C for every kill since the last
   // one dropped, so it grows until it is certain. Never from the kill that
-  // empties the arena -- it would only fade behind you while the current
-  // carried you on -- though that kill still counts toward the next.
+  // ends the batch -- it would only fade behind you while the current carried
+  // you on -- though that kill still counts toward the next. One that only
+  // empties the arena between waves may drop one: the fight goes on (D115).
   sinceBoost += 1;
-  if (enemies.some(x => !x.gone) && rng() < BOOST_C * sinceBoost) {
+  if ((enemies.some(x => !x.gone) || incoming.length) && rng() < BOOST_C * sinceBoost) {
     drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS, 1)[0].name, life: BOOST_LIFE });
     sinceBoost = 0;
   }
@@ -944,12 +958,22 @@ function step(dt) {
   boosts = boosts.filter(a => !a.gone);
 
   // --- the gate: one batch at a time, and nothing arrives until it is clear ---
-  // (D27). An empty arena *is* the cleared state, so the beat needs no flag of
-  // its own. `else if`, so a pending offer holding the queue is structural
-  // rather than a condition someone can drop.
+  // (D27). An empty arena with nothing still to come *is* the cleared state, so
+  // the beat needs no flag of its own. `else if`, so a pending offer holding
+  // the queue, or the batch's own waves, is structural rather than a condition
+  // someone can drop.
   if (offerTimer > 0) {
     offerTimer -= dt;
     if (offerTimer <= 0) openModOffer();
+  } else if (incoming.length) {
+    // The batch's later waves (D115), each fish on its own clock. An empty
+    // arena calls the next one at once and moves the rest up with it, so a
+    // fast clear is never left waiting and a slow one meets them still fighting.
+    if (!enemies.length && incoming[0].at > elapsed) {
+      const lead = incoming[0].at - elapsed;
+      for (const f of incoming) f.at -= lead;
+    }
+    while (incoming.length && incoming[0].at <= elapsed) arrive(incoming.shift().name);
   } else if (!queuePaused && enemies.length === 0) {
     // Each batch waits at its own depth. Once the last one is cleared, the same
     // arithmetic points one gate further: the bottom of the last layer.
@@ -1264,13 +1288,13 @@ function step(dt) {
 
   // Sweep up everything marked during this frame. Never remove things from
   // an array while you are still looping over it.
-  const wasFighting = enemies.length > 0;
+  const wasFighting = batchLive();
   enemies = enemies.filter(e => !e.gone);
-  // The batch died this frame. `screen === 'playing'` because a frame can both
-  // kill the last enemy and kill the player, and the death screen outranks the
-  // clear -- without it, dying on the boss's last hit heals you and hands you
-  // the layer end's cards.
-  if (wasFighting && enemies.length === 0 && screen === 'playing') clearBatch();
+  // The batch died this frame -- its last wave, not merely the arena.
+  // `screen === 'playing'` because a frame can both kill the last enemy and
+  // kill the player, and the death screen outranks the clear -- without it,
+  // dying on the boss's last hit heals you and hands you the layer end's cards.
+  if (wasFighting && !batchLive() && screen === 'playing') clearBatch();
   bullets = bullets.filter(b => !b.gone);
   gems    = gems.filter(g => !g.gone);
   drops   = drops.filter(d => !d.gone);

@@ -3738,3 +3738,69 @@ replace all three screens.
 Attributes opened and left by Esc and by Back, each holding only its own.
 `checks.js` — every screen whose Back leads `home` draws as its menu; every
 menu's rows end above the hint.
+
+## D115 — Batches arrive in waves · 2026-10-17
+Igor, 2026-10-15, playtesting: "we need to start working on waves. for me the
+game feels to easy and predictable, i dont feel overwhelmed at any point ...
+we gotta push the player to clear the enemies fast, because new ones are
+constantly coming ... but - waves must be hard to guess, so distribute the
+enemy spawn into a period of time." On 2026-10-17, offered waves before the
+boss and the mini-boss made different, since a boss's escorts would arrive the
+same way: "go ahead".
+
+**Decided, by Igor**: a batch's fish arrive spread over time, on a clock that
+does not wait for the arena to empty, so a slow clear meets the next arrivals
+still fighting. The glossary's **wave** row changes with it: one batch was one
+wave by default; now a batch arrives in several, and the telegraph it asked of
+any multi-wave batch is kept.
+
+**It keeps D27 (batches are hard-gated)**: a batch is still a bounded queue
+that gates the descent — the camera holds until its last wave is dead, and
+nothing of the next batch arrives before. What D27 retired was arrivals
+without end, growing faster than the player could; a batch's waves end with
+its count.
+
+**Claude's calls**, open to Igor:
+- **The shape.** A batch's fish are shuffled and dealt into waves of
+  `WAVE_MIN`–`WAVE_MAX`. The first wave arrives whole as the camera reaches the
+  gate, as a batch did. Each later one starts `WAVE_GAP` after the one before,
+  give or take `WAVE_JITTER` of it, and its fish trickle in, each at its own
+  moment within `WAVE_SPREAD`, at random edges. When, how many, which and where
+  are all drawn from the seed.
+- **An empty arena calls the next fish at once**, and moves the rest of the
+  schedule up with it. A fast clear is never left waiting in empty water, so
+  it pays in pace (the pillar "easy layers stay relevant"); a slow one meets
+  the clock.
+- **The numbers**: 5–10 fish a wave, 4s ± 40% between waves, 2s of trickle.
+- **The telegraph** is the status bar: `17 fish left (12 coming)` counts the
+  fish still to come, so an arena that empties and fills again reads as a
+  wave, not a broken gate.
+- **The glowing fish is in the first wave** — `light()` picks among the fish
+  present as the batch arrives — so it still glows from the moment the batch
+  does, and `beeline` asks what it asked.
+- **A boost may drop from the kill that empties the arena between waves.**
+  The rule it narrows (D86 (boosts)) kept boosts off the arena's last kill
+  because the current would carry you past it; between waves the fight goes
+  on, so the reason no longer holds. The batch's last kill still drops none.
+- A batch of one fish — a mini-boss's, the boss's — is one wave, as before.
+
+**Measured, and against the aim**: with today's batch sizes, waves put fewer
+fish on screen at once than a batch arriving whole did, and the kiting bot
+lasts longer for it (`roadmap.md` → Health). Overwhelm now comes from how fast
+the waves come against how fast you clear, which batch sizes and the clock
+set — S6 (balance)'s numbers, or Igor's, from playing it.
+
+**Save**: version 8 holds the fish still to come; a v7 dive has none.
+
+**Guarded by**: `tests/descent.test.js` → waves — the first wave whole and
+every fish once; each later fish at its own moment, whether or not the first
+wave is dead; a wave's fish on ticks of their own; an empty arena calling the
+next at once, the rest moved up; the gate held and nothing paid between waves,
+the clear once on the last wave's last fish; the waves held under pause — and
+the descent's camera held while a batch lives, waves to come included.
+`tests/drops.test.js` — a boost from the kill that empties the arena between
+waves, never from the batch's last. `tests/meta.test.js` — the status bar
+counting the fish to come, between waves too; the v8 fixture playing on and
+its next fish arriving; the v7 fixture loading with none to come. `checks.js`
+— a batch brings what it names, its waves included; nothing else arrives
+while it lives.

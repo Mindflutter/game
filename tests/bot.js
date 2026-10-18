@@ -88,7 +88,7 @@ export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false
     botInput(g);
     g.update(TICK);                      // update() clears justPressed itself
     ticks++;
-    if (g.batchIndex - base > times.length && g.enemies.length === 0) {
+    if (g.batchIndex - base > times.length && !g.batchLive()) {
       times.push(+((ticks - startTick) * TICK).toFixed(2));
     }
   }

@@ -4,7 +4,23 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
-## 2026-10-15
+## 2026-10-17
+
+**Batches arrive in waves** (D115 (batches arrive in waves))
+A batch no longer arrives whole. Its fish are shuffled and dealt into waves:
+the first comes as the camera reaches the gate, each later one about 4s after
+the one before, its fish trickling in over 2s, so a slow clear meets the next
+arrivals still fighting — Igor: "we gotta push the player to clear the enemies
+fast, because new ones are constantly coming". An empty arena calls the next
+fish at once. The gate still holds until the last wave is dead (D27 (batches
+are hard-gated)), and the status bar counts the fish still to come —
+`17 fish left (12 coming)`, and the help says a batch comes in waves. The shape and the numbers are Claude's picks. A
+boost may now drop from the kill that empties the arena between waves. The
+save is version 8. Checks: the first wave whole and every fish once; each later
+fish at its own moment; an empty arena calling the next; the gate held and
+nothing paid between waves; the clear once, on the last wave's last fish; the
+waves held under pause; the boost rule; the status bar; the v8 fixture.
+
 
 **Weapons and equipment on screens of their own** (D114 (weapons and equipment
 on screens of their own))

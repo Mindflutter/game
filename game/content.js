@@ -56,6 +56,13 @@ const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
 const GATE_PAUSE     = 1.2;   // seconds of quiet before a dive's FIRST batch, so
                               // a dive opens calm; every later batch waits on
                               // the descent instead, which is its own beat
+// Waves (D115): a batch arrives a wave at a time, on a clock that does not wait
+// for the last one to die. Claude's picks.
+const WAVE_MIN       = 5;     // fish in a wave, drawn between these two
+const WAVE_MAX       = 10;
+const WAVE_GAP       = 4;     // seconds from one wave's start to the next's...
+const WAVE_JITTER    = 0.4;   // ...give or take this share of it
+const WAVE_SPREAD    = 2;     // seconds a later wave's fish trickle in over
 // The descent (D58): each batch waits at its own depth and a current carries
 // the view from one to the next. The current never stops -- it only slows
 // while a batch is fought. Claude's picks.
@@ -314,7 +321,7 @@ const PLAYER_STATS = [
 // here moves the rest down on its own.
 function statusLines() {
   // The batch shown is the one being fought, or between gates the one ahead.
-  const entry = plan[Math.max(0, enemies.length ? batchIndex - 1 : batchIndex)] || plan.at(-1);
+  const entry = plan[Math.max(0, batchLive() ? batchIndex - 1 : batchIndex)] || plan.at(-1);
   const layer = plan.filter(e => e.layer === entry.layer);
   const mods = Object.entries(modCounts).map(([name, n]) => name + ' ×' + n);
   return [
@@ -324,7 +331,10 @@ function statusLines() {
             '   GEMS ' + currency + '   ' + weaponName + ' tier ' + (meta.gear[weaponName] || 0) },
     { color: '#9ef7ff',
       text: LAYERS[entry.layer].name + '   batch ' + (layer.indexOf(entry) + 1) + '/' + layer.length +
-            (enemies.length ? '   ' + enemies.length + ' fish left' : '') +
+            // Fish still to come count too, and say so: an empty arena that
+            // fills again must read as a wave, not a broken gate (D115).
+            (batchLive() ? '   ' + (enemies.length + incoming.length) + ' fish left' +
+                           (incoming.length ? ' (' + incoming.length + ' coming)' : '') : '') +
             '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed' },
     { color: '#ffe9a8',
       text: 'mods ' + (mods.join('  ') || 'none') +
@@ -466,7 +476,7 @@ const DEBUG_SETUP = ['Backspace'];
 
 // ---------- batches ----------
 // A batch is the gated unit (D27): counts per enemy type, arriving at the edges
-// of the view, and nothing else arrives until it is dead. Each stretch between
+// of the view in waves (D115), and nothing else arrives until it is dead. Each stretch between
 // the mini-bosses is a pool a dive draws from (D71), and each layer has pools
 // of its own (D101), meeting the fish in turn: the archer at the end of the
 // first, the puffer in the second, the eel in the third. They are sized on
@@ -984,7 +994,7 @@ const HELP_BLURB = [
   'Hold the left mouse button to shoot along whatever you point at; the Knife swings there.',
   'Shots die at the edge of the ring, so range is a real range.',
   'Space dashes where you face: through the swarm unharmed, shoving it aside.',
-  'One batch at a time; clear it and the current takes you down to the next.',
+  'One batch at a time, coming in waves; clear it all and the current takes you down to the next.',
   'Things you kill drop gems. They come to you on their own, and are yours to keep.',
   'Kill the glowing fish for a mod. Grab boosts before they fade. A boss heals, then offers a pick.',
   'Fish bite: when the jaws open, get away. Some spit; a puffer that swells is about to burst.',

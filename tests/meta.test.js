@@ -495,9 +495,26 @@ describe('the save (D70)', () => {
     expect([g.tally, g.killTimes, g.firstKillAt, g.layerStart])
       .toEqual([saved.tally, saved.killTimes, saved.firstKillAt, saved.layerStart]);
     expect(g.muted).toBe(true);                  // its settings too (D113)
+    expect(g.incoming).toEqual([]);              // its batch came in whole (D115)
     g.screen = g.resumeTo;
     g.immortal = true;
     const shots = shotsSeen(g, 600);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it('loads a save written by the first build of version 8, and plays it on', () => {
+    // Saved mid-batch in layer 1, a wave still to come (D115).
+    const text = readFileSync(new URL('./fixtures/save-v8.json', import.meta.url), 'utf8');
+    const saved = JSON.parse(text).dive;
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect(g.incoming).toEqual(saved.incoming);
+    expect(g.incoming.length).toBeGreaterThan(0);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, ticks(g, saved.incoming[0].at - saved.elapsed) + 1);
+    expect(g.incoming.length).toBeLessThan(saved.incoming.length);   // and it came
     expect(shots.length).toBeGreaterThan(0);
     expect(shots.every(finite)).toBe(true);
   });
@@ -1174,7 +1191,13 @@ describe('the status bar', () => {
     expect(text(g)).not.toContain('fish left');
     ride(g);
     expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);   // the one fought
-    expect(text(g)).toContain(g.enemies.length + ' fish left');
+    const coming = g.incoming.length;
+    expect(coming).toBeGreaterThan(0);
+    expect(text(g)).toContain((g.enemies.length + coming) + ' fish left (' + coming + ' coming)');
+    // Between waves the arena is empty, and the bar still says the batch is on (D115).
+    g.enemies = [];
+    expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);
+    expect(text(g)).toContain(coming + ' fish left (' + coming + ' coming)');
   });
 
   it('shows the weapon and its tier, the guard left, the mods held and the challenges\' counts', () => {
