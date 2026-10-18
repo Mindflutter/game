@@ -6,6 +6,14 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-18
 
+**A key no longer sticks**
+Igor, playing: "down key got stuck at some point, cant go upwards". A key
+counts as held until its keyup comes, and two keyups never come: a key let go
+after the window lost focus, and, on a Mac, a key let go while Cmd was down.
+The key stayed held for good, and W only cancelled it out. Losing focus, or
+letting go of Cmd, now lets go of every key. Two checks in `?test`, each seen
+failing first.
+
 **Bosses bring escorts** (D116 (bosses bring escorts))
 Igor asked for fish beside the boss and the mini-boss — "boss fight may change
 a bit to endless enemies incoming until the big guy is defeated" — and handed

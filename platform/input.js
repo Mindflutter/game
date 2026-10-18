@@ -15,7 +15,13 @@ window.addEventListener('keydown', e => {
   keys.add(e.code);
   if (!e.repeat) justPressed.add(e.code);     // ignore the OS key-repeat
 });
-window.addEventListener('keyup', e => keys.delete(e.code));
+// No keyup comes for a key let go while Cmd is down (on a Mac) or after the
+// window lost focus, so either lets go of every key.
+window.addEventListener('keyup', e => {
+  if (e.code === 'MetaLeft' || e.code === 'MetaRight') keys.clear();
+  else keys.delete(e.code);
+});
+window.addEventListener('blur', () => keys.clear());
 
 // UP / DOWN / LEFT / RIGHT / GO / DASH / CLICK live in game/content.js: which
 // key means which action is content, not platform, and keeping them there is

@@ -121,6 +121,14 @@ if (location.search === '?test') {
   window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ц', code: 'KeyW' }));
   check(!keys.has('KeyW'), 'releasing it must stop the player');
 
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyS' }));
+  window.dispatchEvent(new Event('blur'));
+  check(!keys.has('KeyS'), 'a key held as the window loses focus must not stay held');
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyS' }));
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'MetaLeft' }));
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: 'MetaLeft' }));
+  check(!keys.has('KeyS'), 'a key let go under Cmd must not stay held');
+
   // The death screen opens on Go home (D90); a Russian-layout W steps up to
   // Dive again, and Enter takes it.
   reset();

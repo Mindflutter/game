@@ -786,7 +786,8 @@ Covering: that every sound is loud enough to hear, and that nothing plays
 before a key press; non-Latin keyboard layouts through real `KeyboardEvent`s —
 a Russian-layout W moving the diver and the death screen's cursor, an AZERTY 1
 marking a card; the menu cursor wrapping at both ends and ignoring a key's
-auto-repeat (`platform/input.js`); the same seed reaching the bottom of the
+auto-repeat, and no key left held when its keyup never comes — the window
+losing focus, or Cmd let go (`platform/input.js`); the same seed reaching the bottom of the
 dive in the same time at 1280×800, 1920×1080 and 3440×1440, driven through
 real mouse events aimed on a grid all three scales put on whole pixels, so the
 three dives are identical (D29, D108); a dim screen darkening the letterbox
