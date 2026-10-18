@@ -3881,3 +3881,65 @@ the status bar's telegraph. → the layer — every boss and mini-boss escorted
 from the pool before it, none of the batch glowing. `tests/debug.test.js` — a
 debug gate's fish in place of a mini-boss's escorts; the gate line naming a
 mini-boss's escorts and the boss's crowd.
+
+## D117 — The boss's fan, in turn with its lunge · 2026-10-18
+The pass before S6 (balance). Igor, 2026-10-14: "mini-boss and boss have one
+kind of behavior. we need to make them different." Claude offered three ways:
+the boss gains a second attack and the mini-boss stays the lunge alone; the
+mini-boss gains an attack of its own and the boss keeps the lunge; or both,
+each something different — leaning to the first, so the mini-bosses still
+teach what the boss does. Igor, 2026-10-18: "your lean".
+
+**Decided, by Igor**: the boss gains an attack; the mini-boss only lunges.
+**Delegated to Claude, and open to Igor to reopen**: which attack, and its
+shape.
+
+- **The fan** — the spit parked since D64 (the boss lunges), the draft's
+  "spitting out dangerous toxins" and "shooting an arc". The boss chases,
+  stands and winds up as for a lunge, its line locked at where the diver was,
+  but the tell lays down `count` lines spread across `arc` degrees around it.
+  As the wind-up ends a slow shot flies along every line, and the boss rests —
+  the opening, as after a charge. In one sentence: when it lays down many
+  lines, slip between them.
+- **In turn, the lunge first**: lunge, fan, lunge, fan. Fixed, not drawn from
+  the seed, so the boss can be read; the lunge first, so the bottom opens on
+  what the mini-bosses taught.
+- **Its shots are the archer's** (D95 (three enemy behaviours, and one way to
+  be hurt)): in `bullets[]`, through `hurtPlayer()`, never touching a fish.
+- **The boss's death takes every enemy shot still flying.** D116 (bosses bring
+  escorts) made its death the end of the fight; a shot landing after it would
+  cost a heart the layer end has just healed. That held already for the
+  archers in its crowd, whose shots outlived the boss until now. Asked whether
+  those should keep flying, Igor: "all escort dies - motivates to defeat the
+  boss faster".
+- **A `fan` is a lunger's second attack**, read only beside a `lunge`: one
+  step, `lungeStep()`, takes either. A fish that fans alone is `ideas.md` →
+  Fish ideas, and would get its own step when it comes.
+- **The numbers are Claude's picks**: seven shots across 90°, at 160 px/s —
+  slower than the archer's 210 — of radius 9, for 600 px; a 0.8s wind-up, and
+  the lunge's chase, reach and rest. 15° between shots leaves the diver room to
+  slip through from about 220 px out; nearer, the way out is round the fan's
+  side.
+
+**What it amends.** D64 (the boss lunges) did not take the spit, nor both
+attacks in turn, "now"; both are taken. D65 (a mini-boss is a smaller boss)
+stands: the mini-boss still rehearses the boss's tell, which is now half of
+what the boss does. The glossary's **boss** and **mini-boss** rows say so.
+
+**Debug**: the boss's tip names both attacks.
+
+**Save**: no new version. A fish keeps the behaviour it was made with, so a
+boss already fighting in a dive saved before this only lunges; one still to
+come fans.
+
+**Measured** (`roadmap.md` → Health): the immortal bot takes longer to kill
+the boss; the mortal bot still dies before it.
+
+**Guarded by**: `tests/boss.test.js` → the lunge and the fan — over seeds and
+both lungers, no charge and no fan without its full wind-up, the line held
+through it, in view, the attacks in turn with the lunge first, the mini-boss
+only lunging; the fan's count, spread, centre and shots. → escorts — a save
+taken mid-wind-up playing on identically; every shot gone on the boss's death.
+`tests/debug.test.js` — the boss's tip names both attacks. `checks.js` — every
+tip fits the view, which the boss's first did not. Each verified by breaking
+it.

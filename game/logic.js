@@ -94,36 +94,46 @@ function ease(b, wantX, wantY, ramp, dt) {
   b.vy = wantY + (b.vy - wantY) * k;
 }
 
-// ---------- the lunge ----------
-// The boss's attack, and the mini-boss's (D64, D65): chase, wind up, charge,
-// rest -- then chase again. The wind-up is the tell: the lunger stands and
-// swells with its line drawn, and the line is fixed when the wind-up *starts*,
-// at where the player was, which is what makes "get out of its line" possible.
-// It winds up only wholly inside the view, so the tell is always seen, and from
-// then on the view holds it: a charge that left the view would take the fight
-// with it. The rest is the opening. Moves the lunger itself, the dash's push
-// included.
+// ---------- the lunge, and the fan ----------
+// The boss's attacks, and the mini-boss's (D64, D65, D117): chase, wind up,
+// attack, rest -- then chase again. The wind-up is the tell: the lunger stands
+// and swells with its line drawn, and the line is fixed when the wind-up
+// *starts*, at where the player was, which is what makes "get out of its line"
+// possible. It winds up only wholly inside the view, so the tell is always
+// seen, and from then on the view holds it: a charge that left the view would
+// take the fight with it. The rest is the opening. With a `fan`, every other
+// wind-up ends in shots instead; `attack` absent is the lunge, as on a fish
+// saved before fans. Moves the lunger itself, the dash's push included.
 function lungeStep(e, ux, uy, d, dt) {
-  const L = e.lunge;
+  const fanning = e.phase === 'chase' ? e.fan && e.attack === 'lunge' : e.attack === 'fan';
+  const A = fanning ? e.fan : e.lunge;
   e.phaseTime += dt;
   let vx = 0, vy = 0;
   if (e.phase === 'chase') {
     vx = ux * e.speed;
     vy = uy * e.speed;
     const [cx, cy] = viewClamp(e);          // nothing to clamp: wholly inside
-    if (e.phaseTime >= L.chase && d < L.reach && cx === e.x && cy === e.y) {
+    if (e.phaseTime >= A.chase && d < A.reach && cx === e.x && cy === e.y) {
       e.phase = 'windup';
       e.phaseTime = 0;
+      e.attack = fanning ? 'fan' : 'lunge';
       e.aimX = ux;
       e.aimY = uy;
     }
   } else if (e.phase === 'windup') {
-    if (e.phaseTime >= L.windup) { e.phase = 'charge'; e.phaseTime = 0; }
+    if (e.phaseTime >= A.windup) {
+      e.phase = fanning ? 'rest' : 'charge';
+      e.phaseTime = 0;
+      if (fanning) {
+        for (const a of fanAims(e)) enemyShot(e, Math.cos(a), Math.sin(a), A);
+        sound('spit');
+      }
+    }
   } else if (e.phase === 'charge') {
-    vx = e.aimX * L.speed;
-    vy = e.aimY * L.speed;
+    vx = e.aimX * A.speed;
+    vy = e.aimY * A.speed;
     if (d < e.r + player.r) hurtPlayer();     // the charge is its attack (D108)
-  } else if (e.phaseTime >= L.rest) {        // resting: the opening
+  } else if (e.phaseTime >= A.rest) {        // resting: the opening
     e.phase = 'chase';
     e.phaseTime = 0;
   }
@@ -131,12 +141,23 @@ function lungeStep(e, ux, uy, d, dt) {
   e.y += vy * dt + e.pushY * dt;
   if (e.phase === 'chase') return;
   const [x, y] = viewClamp(e);
-  if (e.phase === 'charge' && (x !== e.x || y !== e.y || e.phaseTime * L.speed >= L.reach)) {
+  if (e.phase === 'charge' && (x !== e.x || y !== e.y || e.phaseTime * A.speed >= A.reach)) {
     e.phase = 'rest';
     e.phaseTime = 0;
   }
   e.x = x;
   e.y = y;
+}
+
+function fanAims(e) {
+  const F = e.fan, centre = Math.atan2(e.aimY, e.aimX);
+  const step = F.arc * Math.PI / 180 / (F.count - 1);
+  return Array.from({ length: F.count }, (_, k) => centre + (k - (F.count - 1) / 2) * step);
+}
+
+function enemyShot(e, ux, uy, S) {
+  bullets.push({ evil: true, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
+                 speed: S.speed, travelled: 0, maxTravel: S.travel });
 }
 
 // ---------- the spit ----------
@@ -156,8 +177,7 @@ function spitStep(e, ux, uy, d, dt) {
   e.phaseTime += dt;
   if (seen && d <= S.range && e.phaseTime >= S.every) {
     e.phaseTime = 0;
-    bullets.push({ evil: true, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
-                   speed: S.speed, travelled: 0, maxTravel: S.travel });
+    enemyShot(e, ux, uy, S);
     sound('spit');
   }
 }
@@ -344,6 +364,7 @@ function killEnemy(e) {
   }
   // The last of a crowd's leads takes the crowd with it (D116): no mopping up
   // after the boss, and the escorts pay nothing -- the fight is the boss's.
+  // Its shots go too: none may land after the layer end heals (D117).
   if (e.lead && !enemies.some(x => x.lead && !x.gone)) {
     for (const x of enemies) {
       if (!x.escort || x.gone) continue;
@@ -351,6 +372,7 @@ function killEnemy(e) {
       burst(x.x, x.y, x.color, x.glow, 12 + x.maxHp * 2, 170 + x.maxHp * 14, 0.5);
     }
     incoming = [];
+    for (const b of bullets) if (b.evil) b.gone = true;
   }
   for (let n = 0; n < e.value; n++) {
     gems.push({ x: e.x + (rng() - 0.5) * 18,
@@ -725,8 +747,8 @@ function moves(apply, w = WEAPONS.find(x => x.name === debugSetup.weapon)) {
 const needsLine = g => (g.requires ? '   owning it needs ' +
   Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', ') : '');
 function fishTip(e) {
-  const kind = Object.keys(e).find(k => typeof e[k] === 'object');
-  return e.name + ': ' + DEBUG_BEHAVIOURS[kind || 'chase'] +
+  const kinds = Object.keys(e).filter(k => typeof e[k] === 'object');
+  return e.name + ': ' + (kinds.length ? kinds : ['chase']).map(k => DEBUG_BEHAVIOURS[k]).join('; then ') +
          (e.enters === 'bottom' ? '; rises from below' : '') +
          (e.carries === false ? '; never glows, so carries no mod' : '') +
          (e.touch ? '; hurts to touch' : '') +

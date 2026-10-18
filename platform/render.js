@@ -267,7 +267,8 @@ function drawField() {
   for (const e of enemies) {
     const hit = e.flash > 0;
     const winding = e.phase === 'windup', fusing = e.phase === 'fuse';
-    const k = winding ? e.phaseTime / e.lunge.windup : fusing ? e.phaseTime / e.fuse.time : 0;
+    const fanning = winding && e.attack === 'fan', A = fanning ? e.fan : e.lunge;
+    const k = winding ? e.phaseTime / A.windup : fusing ? e.phaseTime / e.fuse.time : 0;
     if (fusing) {
       ctx.save();
       ctx.globalAlpha = 0.15 + 0.45 * k;
@@ -282,11 +283,13 @@ function drawField() {
       ctx.save();
       ctx.globalAlpha = 0.1 + 0.25 * k;
       ctx.strokeStyle = e.glow;
-      ctx.lineWidth = e.r;
+      ctx.lineWidth = fanning ? 2 * A.r : e.r;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(e.x, e.y);
-      ctx.lineTo(e.x + e.aimX * e.lunge.reach, e.y + e.aimY * e.lunge.reach);
+      for (const a of fanning ? fanAims(e) : [Math.atan2(e.aimY, e.aimX)]) {
+        ctx.moveTo(e.x, e.y);
+        ctx.lineTo(e.x + Math.cos(a) * A.reach, e.y + Math.sin(a) * A.reach);
+      }
       ctx.stroke();
       ctx.restore();
     }

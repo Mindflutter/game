@@ -25,8 +25,7 @@ number before the numbers are tuned:
 - **The boss and the mini-boss made different** — Igor, 2026-10-14:
   "mini-boss and boss have one kind of behavior. we need to make them
   different. this would belong to a completed s5, naturally we have to do it
-  outside of it, so plan that too." Kin to `ideas.md` → Open — from the boss
-  (S3).
+  outside of it, so plan that too." Built as D117 (the boss's fan).
 
 Where it stands is `roadmap.md` → Next. **S6 — Balance** follows; its entry,
 S5 exiting, is met, and it opens on Igor's word.

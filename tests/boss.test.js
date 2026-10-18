@@ -1,5 +1,6 @@
-// The boss and the mini-bosses: the lunge, the layer's shape, what a
-// mini-boss's clear pays, and their escorts (D62, D63, D64, D65, D88, D116).
+// The boss and the mini-bosses: the lunge, the boss's fan, the layer's shape,
+// what a mini-boss's clear pays, and their escorts (D62, D63, D64, D65, D88,
+// D116, D117).
 // The design is in docs/specs/2026-09-29-s3-boss-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
@@ -16,8 +17,8 @@ const inView = (g, e) => e.x - e.r >= 0 && e.x + e.r <= g.ARENA_W &&
 const walk = fc.array(fc.subarray(['KeyA', 'KeyD', 'KeyW', 'KeyS']),
                       { minLength: 107, maxLength: 107 });
 
-describe('the lunge (D64)', () => {
-  it('never charges without a full wind-up, holds its line through it, and stays in view without jumping', () => {
+describe('the lunge (D64) and the fan (D117)', () => {
+  it('never attacks without a full wind-up, holds its line through it, stays in view without jumping, and takes its attacks in turn', () => {
     fc.assert(fc.property(fc.constantFrom('boss', 'mini-boss'),
                           fc.integer({ min: 0, max: 2 ** 32 - 1 }), walk, (name, seed, steps) => {
       // One lunger alone, and a player kept alive (`immortal`) who walks and
@@ -27,10 +28,10 @@ describe('the lunge (D64)', () => {
       g.reset(seed);
       g.queuePaused = true;
       g.spawnBatch({ enemies: [[name, 1]] });
-      const L = g.enemyType(name).lunge;
+      const T = g.enemyType(name);
       // Recorded per tick and asserted once per run: an expect() on every tick
       // was two thirds of this test's cost. Each entry names its tick.
-      const bad = [];
+      const bad = [], attacks = [];
       let prev = 'chase', run = 0, aim = null, charges = 0, maxStep = 0;
       for (let i = 0, n = ticks(g, 40); i < n; i++) {
         if (i % 45 === 0) {
@@ -46,9 +47,15 @@ describe('the lunge (D64)', () => {
         if (e.phase !== prev) {                    // a step just began
           if (e.phase === 'charge') {
             charges++;
-            if (prev !== 'windup' || run * g.FIXED_DT < L.windup - 1e-9) bad.push(['early charge', i]);
+            if (prev !== 'windup' || run * g.FIXED_DT < T.lunge.windup - 1e-9) bad.push(['early charge', i]);
           }
-          if (e.phase === 'windup') aim = [e.aimX, e.aimY];
+          // Wind-up straight to rest: a fan just flew.
+          if (e.phase === 'rest' && prev === 'windup' &&
+              (e.attack !== 'fan' || run * g.FIXED_DT < T.fan.windup - 1e-9)) bad.push(['early fan', i]);
+          if (e.phase === 'windup') {
+            aim = [e.aimX, e.aimY];
+            attacks.push(e.attack);
+          }
           prev = e.phase;
           run = 0;
         }
@@ -57,16 +64,39 @@ describe('the lunge (D64)', () => {
         if (e.phase !== 'chase' && !inView(g, e)) bad.push(['out of view', i]);
       }
       expect(bad.slice(0, 3)).toEqual([]);          // the first three are enough to read
-      expect(maxStep).toBeLessThanOrEqual(L.speed * g.FIXED_DT + 1e-9);
+      expect(maxStep).toBeLessThanOrEqual(T.lunge.speed * g.FIXED_DT + 1e-9);
       expect(charges).toBeGreaterThan(0);          // or the rest is vacuous
+      expect(attacks).toEqual(attacks.map((_, k) => T.fan && k % 2 ? 'fan' : 'lunge'));
+      expect(attacks.length).toBeGreaterThan(1);
     }), { numRuns: 20 });
   });
 
-  it('teaches before it tests: the mini-boss winds up longer, and is weaker (D65)', () => {
+  it('teaches before it tests: the mini-boss winds up longer, is weaker, and only lunges (D65, D117)', () => {
     const g = loadGame();
     const mini = g.enemyType('mini-boss'), boss = g.enemyType('boss');
     expect(mini.lunge.windup).toBeGreaterThan(boss.lunge.windup);
     expect(mini.hp).toBeLessThan(boss.hp);
+    expect(mini.fan).toBeUndefined();
+    expect(boss.fan).toBeDefined();
+  });
+
+  it('spits its fan as the wind-up ends: `count` shots spread evenly across `arc`, centred on the locked line', () => {
+    const g = loadGame();
+    g.immortal = true;
+    g.reset(1);
+    g.queuePaused = true;
+    g.spawnBatch({ enemies: [['boss', 1]] });
+    const e = g.enemies[0], F = e.fan;
+    Object.assign(e, { x: g.ARENA_W / 2, y: g.cameraY + 150, phase: 'windup', attack: 'fan',
+                       aimX: 0, aimY: 1, phaseTime: F.windup - g.FIXED_DT / 2 });
+    g.update(g.FIXED_DT);
+    const shots = g.bullets.filter(b => b.evil);
+    expect(e.phase).toBe('rest');
+    expect(shots).toHaveLength(F.count);
+    const step = F.arc * Math.PI / 180 / (F.count - 1);
+    shots.map(b => Math.atan2(b.vy, b.vx)).sort((a, b) => a - b)
+      .forEach((a, k) => expect(a).toBeCloseTo(Math.PI / 2 + (k - (F.count - 1) / 2) * step));
+    for (const b of shots) expect([b.speed, b.r, b.maxTravel]).toEqual([F.speed, F.r, F.travel]);
   });
 
   it('brings the boss up from below the view, centred', () => {
@@ -203,6 +233,32 @@ describe('escorts (D116)', () => {
     b.screen = b.resumeTo;
     for (const g of [a, b]) play(g, 5);
     expect(b.saveText()).toBe(a.saveText());
+  });
+
+  it('plays on identically from a save taken while the boss winds up a fan (D117)', () => {
+    const a = fight(3, 'boss');
+    const boss = () => a.enemies.find(e => e.lead);
+    for (let i = 0; i < ticks(a, 60) && !(boss().phase === 'windup' && boss().attack === 'fan'); i++) {
+      a.update(a.FIXED_DT);
+    }
+    expect([boss().phase, boss().attack]).toEqual(['windup', 'fan']);
+    const b = loadGame();
+    b.immortal = true;
+    expect(b.loadSave(a.saveText())).toBe('');
+    b.screen = b.resumeTo;
+    for (const g of [a, b]) play(g, 5);
+    expect(b.saveText()).toBe(a.saveText());
+  });
+
+  it('takes every shot still flying with the boss, so none lands after the fight is over (D117)', () => {
+    const g = fight(1, 'boss');
+    play(g, 3);
+    const boss = g.enemies.find(e => e.lead);
+    Object.assign(boss, { phase: 'windup', attack: 'fan', aimX: 0, aimY: 1, phaseTime: boss.fan.windup });
+    g.update(g.FIXED_DT);
+    expect(g.bullets.some(b => b.evil && !b.gone)).toBe(true);
+    g.killEnemy(boss);
+    expect(g.bullets.filter(b => b.evil && !b.gone)).toEqual([]);
   });
 
   it('meets its bosses alone in a dive saved before escorts', () => {

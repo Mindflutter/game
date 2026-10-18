@@ -282,6 +282,8 @@ describe('the setup screen', () => {
     expect(tip('Fins')).toMatch(/speed \+45/);
     expect(tip('darter')).toMatch(/hp 1\b/);
     expect(tip('puffer')).toMatch(/swells/);             // its behaviour, in words
+    expect(tip('boss')).toContain(g.DEBUG_BEHAVIOURS.lunge);
+    expect(tip('boss')).toContain(g.DEBUG_BEHAVIOURS.fan);
     expect(tip('Strength')).toMatch(/Harpoon/);          // what needs it
     expect(tip('Tier')).toMatch(/fireRate \+0\.5/);      // the carried weapon's tiers
   });

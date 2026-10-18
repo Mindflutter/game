@@ -6,6 +6,21 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-18
 
+**The boss's fan** (D117 (the boss's fan))
+Igor: "mini-boss and boss have one kind of behavior. we need to make them
+different", then "your lean" — the boss gains an attack, the mini-boss only
+lunges. The boss now takes two attacks in turn, the lunge first: every other
+wind-up lays down seven lines across 90° instead of one lane, and ends in a
+fan of slow shots along them, then the same rest. The mini-bosses still teach
+its lunge; the fan is what the bottom adds. The shots are the archer's, and
+every enemy shot still flying now dies with the boss, so none lands after the
+layer end has healed you. The debug setup's tip names both attacks — the
+browser suite caught the first wording running off the view. No new save
+version: a boss already fighting in an older save only lunges. The immortal
+bot takes longer to kill the boss; the mortal bot still dies before it
+(`roadmap.md` → Health). Amends D64 (the boss lunges); the glossary's
+**boss** and **mini-boss** rows; the fan idea leaves `ideas.md`.
+
 **A key no longer sticks**
 Igor, playing: "down key got stuck at some point, cant go upwards". A key
 counts as held until its keyup comes, and two keyups never come: a key let go

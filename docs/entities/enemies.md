@@ -38,6 +38,12 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 | mini-boss | 1 | 1.5 | 780 | 450 | 1.2 |
 | boss | 1 | 1 | 780 | 450 | 1.2 |
 
+`fan`:
+
+| name | chase | windup | reach | rest | count | arc | speed | r | travel |
+|---|---|---|---|---|---|---|---|---|---|
+| boss | 1 | 0.8 | 450 | 1.2 | 7 | 90 | 160 | 9 | 600 |
+
 `spit`:
 
 | name | range | near | every | speed | r | travel |
@@ -57,7 +63,8 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 | eel | 50 | 0.9 |
 
 Every number is S6 (balance)'s to tune. Marked in the code as Claude's picks:
-the lungers' numbers (D64 (the boss lunges)), the boss's `value` (D68 (the
+the lungers' numbers (D64 (the boss lunges)), the boss's fan (D117 (the
+boss's fan)), the boss's `value` (D68 (the
 layer end is a milestone)), every type S5 (content) brought (D95 (three
 enemy behaviours, and one way to be hurt)), and the ramps and bites (D107 (the
 diver swims and faces; fish with a ramp), D108 (fish bite)).
@@ -79,6 +86,7 @@ diver swims and faces; fish with a ramp), D108 (fish bite)).
 | `bite` | — | Its presence is the behaviour: the type bites (D108 (fish bite)). Holds the numbers in its table above: within `reach` px, body to body, it stops and opens its jaws for `windup` seconds, bites if the diver is still within `reach`, then chases `rest` seconds before it can bite again. |
 | `touch` | — | `true`: its body hurts on contact — the eel's. A fish without it hurts only by its attack (D108 (fish bite)). |
 | `lunge` | — | Its presence is the behaviour: the type lunges instead of only chasing (D64 (the boss lunges)). Holds the timings in the table above: `chase` seconds before a wind-up may start, `windup` and `rest` in seconds, the charge's `speed` in px/s and its `reach` in px. |
+| `fan` | — | A lunger's second attack (D117 (the boss's fan)), taken in turn with the lunge, the lunge first; read only beside a `lunge`. Holds the numbers in its table above: the lunge's `chase`, `windup`, `reach` and `rest`, then `count` shots spread evenly across `arc` degrees, each of radius `r` px flying at `speed` px/s for `travel` px. |
 | `spit` | — | Its presence is the behaviour: the type keeps its distance and spits (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: it closes to `range` px and backs off inside `near` px; it spits every `every` seconds, a shot of radius `r` px flying at `speed` px/s for `travel` px. |
 | `fuse` | — | Its presence is the behaviour: the type swells, bursts and chases on (D95 (three enemy behaviours, and one way to be hurt), D106 (the puffer bursts and comes on again)). Holds the numbers in its table above: after chasing for at least `chase` seconds, within `trigger` px it stops and swells for `time` seconds, then bursts, reaching `blast` px, and chases again. |
 | `weave` | — | Its presence is the behaviour: the type sways as it closes in (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: `width` px either side of its heading, `rate` sways a second. |
@@ -117,6 +125,17 @@ opening. The charge is its attack: contact hurts while it charges, and only
 then (D108 (fish bite)). From the wind-up on, the view holds it, so a charge never takes the
 fight off screen. In one sentence, per the pillar: when it swells, get out of
 its line.
+
+**Fan** — the lunge's turn-about (`lungeStep()`, D117 (the boss's fan)). A
+lunger with a `fan` takes its attacks in turn, the lunge first: every other
+wind-up ends in shots rather than a charge. It chases, stands and winds up as
+for a lunge, by the fan's own numbers, with its line locked at where the
+player was — but the tell lays down `count` lines, spread evenly across `arc`
+degrees around that line and each as wide as a shot. As the wind-up ends it
+spits a shot along every line — the spit's shot, the same hurt — and rests.
+When the boss dies, every enemy shot still flying goes with it (D116 (bosses
+bring escorts)): the fight is over. In one sentence: when it lays down many
+lines, slip between them.
 
 **Spit** — keep the distance, and spit (`spitStep()`). It closes to its
 `range`, backs off inside `near` — never out of the view — and holds between.
@@ -193,7 +212,8 @@ touch, and it never bites (D108 (fish bite)) — never touch it.
 
 A smaller boss (D65 (a mini-boss is a smaller boss)): it lunges like the boss,
 weaker and slower to wind up, so it teaches the boss's tell where the stakes
-are low. It leads in its escorts at an ordinary gate: one ordinary batch from
+are low. It only lunges: the fan is what the boss adds at the bottom (D117
+(the boss's fan)). It leads in its escorts at an ordinary gate: one ordinary batch from
 the pool before it, dealt into the waves behind it and cleared like any (D116
 (bosses bring escorts)). Neither it nor its escorts glow, so its gate pays no
 mod (D88 (the fish glows from the start)) — Igor: "remove glow from
@@ -206,13 +226,13 @@ boss).
 The layer's last batch (D62 (the boss is the layer's last batch)); killing it
 is the layer end. It rises from
 below the view, centred — Igor: "The boss swims in from the bottom". Lunges,
-with a shorter wind-up than the mini-boss. Its `value` is the layer end's big
+with a shorter wind-up than the mini-boss, and spits a fan in turn with each
+lunge (D117 (the boss's fan)) — the one attack the mini-bosses never showed. Its `value` is the layer end's big
 haul of gems (D68 (the layer end is a milestone)). It never glows: the layer
 end's pick pays its batch (D85 (the layer end's pick), D88 (the fish glows
 from the start)). Its escorts are a crowd (D116 (bosses bring escorts)):
 topped back up to `BOSS_CROWD` while it lives, drawn from one batch of the
-layer's last pool, paying no gems, and dying with it. More attacks wait in
-`ideas.md`.
+layer's last pool, paying no gems, and dying with it.
 
 ## Adding one
 

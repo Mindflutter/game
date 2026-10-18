@@ -26,15 +26,16 @@ rise), D110 (challenges)), the shorter dash (D111 (the dash a third
 shorter)) and weapons and equipment on screens of their own (D114 (weapons and
 equipment on screens of their own)), batches arriving in waves (D115
 (batches arrive in waves)) and escorts for the boss and the mini-boss — the
-boss's a crowd that keeps coming until it dies (D116 (bosses bring escorts)).
-Next: the boss and the mini-boss made different in what they do (`plan.md` →
-Active stage) — both still lunge alone, and more attacks wait in `ideas.md` →
-Open — from the boss (S3); enemy grades are proposed for this pass too, Igor
-to confirm (`ideas.md` → Pace). Each is discussed one at a time.
+boss's a crowd that keeps coming until it dies (D116 (bosses bring escorts))
+— and the two made different: the boss spits a fan in turn with its lunge,
+the mini-boss only lunges (D117 (the boss's fan)). Next: stronger versions of
+the same fish (`ideas.md` → Pace) and hits of varying damage (`ideas.md` →
+Bars, hearts, and hits worth more than one), which join this pass, Igor's
+word on 2026-10-18. Each is discussed one at a time.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
-`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's and the boss's
-haul (`entities/enemies.md`), S4's — the Gun's prices and tier step
+`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and
+the boss's haul (`entities/enemies.md`), S4's — the Gun's prices and tier step
 (`entities/weapons.md`), `GEM_PULL` (`design.md`) — the
 mods rework's: the layer end's bigger step (`design.md`), `Mend` as the layer
 end's own (`entities/mods.md`), the boost chance, a boost's life on the floor
@@ -102,10 +103,11 @@ are a regression signal for their build only. S6 (balance) measures afresh.
   4471 reaches the bottom of the dive — three layers — in the same time at 1280×800,
   1920×1080 and 3440×1440 alike (stationary, invulnerable, aiming at the first
   fish), driven through real mouse events aimed on a 20px grid that all three
-  scales put on whole pixels — measured 2026-10-18, with escorts (D116
-  (bosses bring escorts)): 1035.55s at all three. The `?test` check requires the three to be identical; dropping the
+  scales put on whole pixels — measured 2026-10-18, with the boss's fan
+  (D117 (the boss's fan)): 1032.24s at all three. The `?test` check requires the three to be identical; dropping the
   input's `/ scale` leaves the two larger windows short of the bottom. With
-  waves, before escorts, 1010.34s on 2026-10-17; with bites, before waves,
+  escorts, before the fan, 1035.55s the same day; with waves, before escorts,
+  1010.34s on 2026-10-17; with bites, before waves,
   844.46s on 2026-10-14. Before
   bites the aim went to the nearest whole pixel and the check allowed 2%:
   811.02 / 809.82 / 802.58s on 2026-10-13; on the build with mods from drops,
@@ -113,13 +115,14 @@ are a regression signal for their build only. S6 (balance) measures afresh.
   S2 layer, dropping `/ scale` failed it at 217.03 / 228.71 / 227.51.
 - **The boss fight** (S3 DoD, D63), at the starting kit — no gear, no mods —
   from `last-batch`, seeds 1, 7, 42, 4471, 90210, timed from the scenario's
-  start, 300s cap; re-measured 2026-10-18 with escorts (D116 (bosses bring
-  escorts)) and, for comparison, on the build just before them (`480c4f5`).
-  Mortal: **0 of 5 won** either way; with the crowd it dies after 13.5 / 8.3 /
-  18.3 / 35.3 / 8.9s, before it after 26.4 / 22.0 / 25.4 / 21.9 / 25.2s.
-  Immortal, it kills the boss in 156.1 / 174.2 / 110.5 / 135.7 / 183.4s, before
-  in 78.8 / 66.1 / 76.0 / 66.0 / 69.5s: the bot shoots the nearest fish, and
-  the crowd keeps one nearer than the boss. **The mini-boss**, from
+  start, 300s cap; re-measured 2026-10-18 with the boss's fan (D117 (the
+  boss's fan)) and, for comparison, on the build just before it, with escorts
+  (`610937c`). Mortal: **0 of 5 won** either way; with the fan it dies after
+  12.0 / 8.3 / 16.1 / 21.3 / 8.9s, before it after 13.5 / 8.3 / 18.3 / 35.3 /
+  8.9s. Immortal, it kills the boss in 260.5 / 182.0 / 176.4 / 180.8 /
+  172.0s, before in 156.1 / 174.2 / 110.5 / 135.7 / 183.4s. Escorts had
+  already doubled that time: the bot shoots the nearest fish, and the crowd
+  keeps one nearer than the boss. **The mini-boss**, from
   `mini-boss`: 0 of 5 won with escorts, dying after 102.4 / 70.3 / 18.7 / 61.9
   / 82.4s; before, 0 of 5, dying after 58.3 / 111.8 / 68.2 / 49.0s and seed
   4471 alive at the cap. Immortal, 103.6 / 86.7 / cap / 116.6 / 101.3s, before

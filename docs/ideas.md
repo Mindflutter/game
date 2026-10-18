@@ -186,7 +186,7 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
   short, quick one — a smaller tell, more often — would be new.
 - **A fish whose shots arc.** Igor, 2026-10-15. The archer's spit flies
   straight (D95 (three enemy behaviours, and one way to be hurt)); a lob, or a
-  fan like the boss's spit idea (More boss attacks, below), lands where the
+  fan like the boss's (D117 (the boss's fan)), lands where the
   diver will be or covers a spread.
 - **A shooter that flees.** Igor, 2026-10-15: "escaping range-shooting
   enemies". The archer already backs off inside its band (D95); one that runs
@@ -293,15 +293,6 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
   graphics, to be replaced** — Igor: "if it's a graphics matter, state it and
   document that it's going to be modified later". What stays open is the art.
 
-## Open — from the boss (S3)
-
-- **More boss attacks.** The spit — a fan of slow toxic blobs, from the draft's
-  "spitting out dangerous toxins" and "shooting an arc" — and the lunge and
-  the spit in turn. Offered alongside the lunge; Igor took the lunge alone
-  (D64 — the boss lunges): "we will do enemy polishing later anyways". The
-  spit can use the enemy shots the archer brought (D95 (three enemy
-  behaviours, and one way to be hurt)).
-
 ## Open — raised during S4 (meta loop skeleton)
 
 - **How batches grow, balance-wise — S6 (balance)'s.** Igor, 2026-09-30:
@@ -407,7 +398,13 @@ discussed.
     over any shape works.
   - **The diver**: hearts, not a bar — read at a glance, every hit counts, one
     sentence to explain. A bar earns its place when damage varies widely or
-    armour cuts it by a share, and neither is planned. Drawn as hearts where
+    armour cuts it by a share — and since 2026-10-18 damage varies (below), so
+    this lean is open again: hearts, more of them, or a bar. Igor, the same
+    day: "well you only start at 3 hearts, right?" — 3 is the start; Heart
+    adds one a step, Vitality up to three in a dive, and the Suit's guard
+    takes up to three hits a batch. So a heavy hit can be sized against the
+    hearts a diver has where it is met — at most 2 against a starting diver,
+    or every heavy hit is a whole life. Drawn as hearts where
     the eye is, rather than as text in the corner.
   - **Hits worth more than one heart**, for the heavy attacks — the boss's
     charge, the puffer's burst — so a heavy attack weighs more, and S6
@@ -415,14 +412,16 @@ discussed.
     much. With three hearts a two-heart hit is most of a life, so it comes with
     more hearts at the start, or halves.
 
-  Igor, on the two-heart hit: "2-heart hits, i suggest possible, but not sure
-  if fits current enemy model" — a lean, the fit open. In the code it would be
-  an amount on each attack's record, passed through the one path every hurt
-  takes; in the design it suits the attacks with a long tell — the lunge, the
-  burst — rather than the swarm's bites, which stay at one.
+  Igor, 2026-10-15: "2-heart hits, i suggest possible, but not sure if fits
+  current enemy model"; then, 2026-10-18: "hits worth two hearts - not limited
+  to two, we are varying damage". **Settled: hits vary in damage, not capped
+  at two.** In the code it is an amount on each attack's record, passed
+  through the one path every hurt takes. Open: how much each attack deals —
+  Claude's lean, unconfirmed, the heavy attacks with a long tell (the lunge,
+  the burst) above the swarm's bites — and what the diver's hearts become.
 
-  **Home**: proposed — the size of a hit is a shape for this pass, its numbers
-  S6 (balance)'s; the drawing after Igor's word.
+  **Home**: this pass, Igor, 2026-10-18 — the size of a hit is a shape for
+  it, its numbers S6 (balance)'s; the drawing after Igor's word.
 
 **The stage's content**
 
@@ -441,6 +440,11 @@ discussed.
   line to `game/content.js`. Open: which acceleration — that ramp, or a
   puffer that gathers pace as it chases. **Home**: S6 (balance), his "for
   balance".
+- **Bosses and mini-bosses quicker.** Igor, 2026-10-18: "note for balance:
+  make bosses & mini bosses quicker". What there is to turn: their `speed`,
+  the lunge's chase, wind-up, charge speed and rest, and the boss's fan
+  (`entities/enemies.md`). Open: which of them. **Home**: S6 (balance), his
+  "note for balance".
 - **The Knife's arc halved.** Igor, 2026-10-15: "knife arc reduce by half" —
   120° to 60°, from D105 (the Knife swings)'s pick, given "for balance".
   **Home**: S6 (balance), his "for balance".
@@ -502,8 +506,8 @@ discussed.
   number per enemy type — each version would carry its own. The word needs
   choosing: "level" is banned (D32 (the glossary)), and "tier" is gear's.
   Open: the word, how many versions, what changes between them — hp, speed,
-  bite, size — and how a batch names one. **Home**: proposed, this pass with
-  waves, since both change what a batch is; Igor to confirm.
+  bite, size — and how a batch names one. **Home**: this pass — Igor,
+  2026-10-18, naming it in answer to the proposal.
 
 ## Suggested but not yet discussed
 

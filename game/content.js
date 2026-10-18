@@ -662,10 +662,13 @@ const ENEMY_TYPES = [
   { name: 'mini-boss', r: 52, hp: 24, speed: 70, value: 5, carries: false,
     color: '#e2ff8a', glow: '#c6ff3c',
     lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
-  // The boss's `value` is the layer end's big haul of gems (D68).
+  // The boss's `value` is the layer end's big haul of gems (D68); its `fan`,
+  // D117's. Claude's picks.
   { name: 'boss',      r: 84, hp: 60, speed: 60, value: 30, carries: false,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
-    lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 } },
+    lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 },
+    fan:   { chase: 1, windup: 0.8, reach: 450, rest: 1.2,
+             count: 7, arc: 90, speed: 160, r: 9, travel: 600 } },
 ];
 
 // What a fish is made with beyond its numbers: its behaviour records --
@@ -699,6 +702,7 @@ const DEBUG_BEHAVIOURS = {
   fuse:  'swells when you come close, bursts and comes on again \u2014 step out of its ring',
   weave: 'sways side to side as it comes \u2014 aim where it will be',
   lunge: 'winds up, then lunges along its line \u2014 step aside',
+  fan:   'spits a fan of shots \u2014 slip between them',
 };
 // Every name a setup counts, with its cap, its column and its tip: the fish in
 // its batch, a piece of equipment's tier, an attribute's points, a mod's picks
