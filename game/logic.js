@@ -40,11 +40,16 @@ function edgeSpawnPoint(t) {
 // WAVE_MIN to WAVE_MAX. The first arrives now, whole; each later one starts
 // WAVE_GAP after the last, give or take, its fish each at their own moment
 // within WAVE_SPREAD -- so when, how many and which are all hard to call.
-function spawnBatch(batch) {
-  const all = batch.enemies.flatMap(([name, count]) => Array(count).fill(name));
-  const fish = drawDistinct(all, all.length);
+// With escorts (D116) the batch's own fish lead, first in whatever the draw:
+// a mini-boss's escorts are dealt into the waves behind it, while the boss
+// comes alone and its crowd follows, topped up at the gate while it lives.
+function spawnBatch(batch, escorts) {
+  const names = b => b.enemies.flatMap(([name, count]) => Array(count).fill(name));
+  const lead = escorts ? names(batch) : [];
+  const rest = !escorts ? names(batch) : batch.crowd ? [] : names(escorts);
+  const fish = [...lead, ...drawDistinct(rest, rest.length)];
   const size = () => WAVE_MIN + Math.floor(rng() * (WAVE_MAX - WAVE_MIN + 1));
-  fish.splice(0, size()).forEach(name => arrive(name));
+  fish.splice(0, size()).forEach(name => arrive(name, batch.crowd && { lead: true }));
   let start = elapsed;
   while (fish.length) {
     start += WAVE_GAP * (1 - WAVE_JITTER + rng() * 2 * WAVE_JITTER);
@@ -54,12 +59,14 @@ function spawnBatch(batch) {
 }
 
 // One fish of a batch, at the edge, with the usual speed jitter so a wave does
-// not arrive as a drill squad.
-function arrive(name) {
+// not arrive as a drill squad. `flags` mark a crowd's lead or one of its
+// escorts, which pays no gems (D116).
+function arrive(name, flags) {
   const type = enemyType(name);
   if (!type) return;
   const { x, y } = edgeSpawnPoint(type);
   makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
+  Object.assign(enemies.at(-1), flags);
 }
 
 // Places one named enemy at a known spot, at its nominal speed and no jitter.
@@ -335,6 +342,16 @@ function killEnemy(e) {
     killTimes = [...killTimes.filter(t => elapsed - t <= FLURRY_TIME), elapsed];
     for (const c of CHALLENGES) if (c.kill) climb(c, c.kill());
   }
+  // The last of a crowd's leads takes the crowd with it (D116): no mopping up
+  // after the boss, and the escorts pay nothing -- the fight is the boss's.
+  if (e.lead && !enemies.some(x => x.lead && !x.gone)) {
+    for (const x of enemies) {
+      if (!x.escort || x.gone) continue;
+      x.gone = true;
+      burst(x.x, x.y, x.color, x.glow, 12 + x.maxHp * 2, 170 + x.maxHp * 14, 0.5);
+    }
+    incoming = [];
+  }
   for (let n = 0; n < e.value; n++) {
     gems.push({ x: e.x + (rng() - 0.5) * 18,
                 y: e.y + (rng() - 0.5) * 18, r: 4 });
@@ -362,11 +379,12 @@ function dropMod(e) {
 }
 
 // A batch of the plan has just arrived: one of its fish glows from the start
-// and carries the batch's mod (D84, D88) -- never a boss or a mini-boss, whose
-// type says `carries: false`, and none once every ordinary mod is capped.
+// and carries the batch's mod (D84, D88) -- never in a batch a boss or a
+// mini-boss leads, whose type says `carries: false`, not even on its escorts
+// (D116), and none once every ordinary mod is capped.
 function light() {
-  const can = enemies.filter(e => enemyType(e.name).carries !== false);
-  if (can.length && carriable().length) drawDistinct(can, 1)[0].carrier = true;
+  if (enemies.some(e => enemyType(e.name).carries === false) || !carriable().length) return;
+  drawDistinct(enemies, 1)[0].carrier = true;
 }
 
 // A mod reaching you: taken, and named on the pickup line with what it
@@ -688,8 +706,9 @@ function gateLine() {
   seedRng(s.seed);
   const drawn = drawPlan();
   const list = batch => batch.map(([name, n]) => n + ' ' + name).join(', ');
-  return LAYERS[s.layer].name + ', gate ' + (s.gate + 1) + ': ' +
-         list(drawn[drawn.findIndex(e => e.layer === s.layer) + s.gate].batch.enemies) +
+  const { batch, escorts } = drawn[drawn.findIndex(e => e.layer === s.layer) + s.gate];
+  return LAYERS[s.layer].name + ', gate ' + (s.gate + 1) + ': ' + list(batch.enemies) +
+         (escorts ? (batch.crowd ? ', its crowd from ' : ', escorted by ') + list(escorts.enemies) : '') +
          (fish.length ? '   →   in its place: ' + list(fish) : '');
 }
 
@@ -761,8 +780,10 @@ function debugDive() {
     kit: MODS.filter(m => !m.weapons || m.weapons.includes(weapon.name))
              .flatMap(m => Array(n(m.name)).fill(m.name)),
   }, s.seed);
+  // The fish take the gate's whole place, a mini-boss's or the boss's escorts
+  // included (D116).
   const fish = setupFish(s);
-  if (fish.length) plan[batchIndex] = { ...plan[batchIndex], batch: { enemies: fish } };
+  if (fish.length) plan[batchIndex] = { ...plan[batchIndex], batch: { enemies: fish }, escorts: undefined };
 }
 
 // ---------- the clock ----------
@@ -796,14 +817,17 @@ function gateDepth(k) {
 }
 
 // The dive's batches, drawn from its seed (D71): each stretch of each layer
-// draws its count from its pool, never the same batch twice. The layer's last
-// entry is its end. Called by reset() before anything else draws, so the plan
-// is the first thing a seed decides.
+// draws its count from its pool, never the same batch twice, and a boss's or a
+// mini-boss's escorts from theirs (D116). The layer's last entry is its end.
+// Called by reset() before anything else draws, so the plan is the first thing
+// a seed decides.
 function drawPlan() {
   const out = [];
   LAYERS.forEach((layer, l) => {
     for (const s of layer.stretches) {
-      for (const batch of drawDistinct(s.pool, s.draw)) out.push({ layer: l, batch });
+      for (const batch of drawDistinct(s.pool, s.draw)) {
+        out.push({ layer: l, batch, ...(s.escorts && { escorts: drawDistinct(s.escorts, 1)[0] }) });
+      }
     }
     out[out.length - 1].end = true;
   });
@@ -962,6 +986,18 @@ function step(dt) {
   // the beat needs no flag of its own. `else if`, so a pending offer holding
   // the queue, or the batch's own waves, is structural rather than a condition
   // someone can drop.
+  // The boss's crowd (D116): while its lead lives, topped back up to the
+  // batch's `crowd` from its escorts' mix -- bounded, so it never piles up,
+  // and ended by the lead's death rather than by a count.
+  if (enemies.some(e => e.lead && !e.gone)) {
+    const { batch, escorts } = plan[batchIndex - 1];
+    const mix = escorts.enemies.flatMap(([name, count]) => Array(count).fill(name));
+    for (let n = enemies.filter(e => e.escort && !e.gone).length + incoming.length; n < batch.crowd; n++) {
+      incoming.push({ name: mix[Math.floor(rng() * mix.length)], at: elapsed + rng() * WAVE_SPREAD,
+                      flags: { escort: true, value: 0 } });
+    }
+    incoming.sort((a, b) => a.at - b.at);
+  }
   if (offerTimer > 0) {
     offerTimer -= dt;
     if (offerTimer <= 0) openModOffer();
@@ -970,10 +1006,13 @@ function step(dt) {
     // arena calls the next one at once and moves the rest up with it, so a
     // fast clear is never left waiting and a slow one meets them still fighting.
     if (!enemies.length && incoming[0].at > elapsed) {
-      const lead = incoming[0].at - elapsed;
-      for (const f of incoming) f.at -= lead;
+      const early = incoming[0].at - elapsed;
+      for (const f of incoming) f.at -= early;
     }
-    while (incoming.length && incoming[0].at <= elapsed) arrive(incoming.shift().name);
+    while (incoming.length && incoming[0].at <= elapsed) {
+      const f = incoming.shift();
+      arrive(f.name, f.flags);
+    }
   } else if (!queuePaused && enemies.length === 0) {
     // Each batch waits at its own depth. Once the last one is cleared, the same
     // arithmetic points one gate further: the bottom of the last layer.
@@ -995,7 +1034,7 @@ function step(dt) {
       // the dive is banked at the end of this tick.
       if (batchIndex >= plan.length) screen = 'won';
       else {
-        spawnBatch(plan[batchIndex].batch);
+        spawnBatch(plan[batchIndex].batch, plan[batchIndex].escorts);
         light();
         batchHit = false;
         guardLeft = player.guard;

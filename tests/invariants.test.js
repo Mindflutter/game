@@ -211,7 +211,9 @@ describe('invariants that must hold for every dive', () => {
     // ...and two seeds play two dives, each recorded as the one it used.
     const a = dive(4471, 600, 1), b = dive(9999, 600, 1);   // the same hands
     expect([a.currentSeed, b.currentSeed]).toEqual([4471, 9999]);
-    expect(JSON.stringify([a.enemies.length, a.kills, a.player.x])).not.toBe(JSON.stringify([b.enemies.length, b.kills, b.player.x]));
+    // Where the fish are: the seed's alone, where the diver's moves are the hands'.
+    const fish = g => JSON.stringify(g.enemies.map(e => [e.name, Math.round(e.x), Math.round(e.y)]));
+    expect(fish(a)).not.toBe(fish(b));
   });
 
   it('decays on a time base, not a frame base (D15)', () => {

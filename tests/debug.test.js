@@ -91,6 +91,22 @@ describe('the setup reaches the dive', () => {
     expect(g.plan[b + 1]).toEqual(drawn.plan[b + 1]);
   });
 
+  it("puts its fish in place of a mini-boss's escorts too (D116)", () => {
+    const g = setup('L1,G5,S7,Gun0,puffer4');
+    g.debugDive();
+    const drawn = loadGame();
+    drawn.reset(7);
+    expect(drawn.plan[g.batchIndex].escorts).toBeDefined();   // an escorted gate
+    for (let i = 0, n = ticks(g, 3); i < n && !g.enemies.length; i++) g.update(g.FIXED_DT);
+    expect([...g.enemies, ...g.incoming].map(f => f.name)).toEqual(Array(4).fill('puffer'));
+  });
+
+  it("says what a gate drew, a mini-boss's escorts and the boss's crowd included (D116)", () => {
+    expect(setup('L1,G4,S7').gateLine()).not.toMatch(/escorted|crowd/);
+    expect(setup('L1,G5,S7').gateLine()).toMatch(/1 mini-boss, escorted by \d+ \w+/);
+    expect(setup('L1,G15,S7').gateLine()).toMatch(/1 boss, its crowd from \d+ \w+/);
+  });
+
   it('no fish set: the gate brings what it drew', () => {
     const g = setup('L1,G3,S7,Gun0');
     g.debugDive();

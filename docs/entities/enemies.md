@@ -193,22 +193,26 @@ touch, and it never bites (D108 (fish bite)) — never touch it.
 
 A smaller boss (D65 (a mini-boss is a smaller boss)): it lunges like the boss,
 weaker and slower to wind up, so it teaches the boss's tell where the stakes
-are low. Always alone, in a batch of its own at an ordinary gate. It never
-glows, so its gate pays no mod (D88 (the fish glows from the start)) — Igor:
-"remove glow from mini-bosses". It arrives from a random edge like any batch —
+are low. It leads in its escorts at an ordinary gate: one ordinary batch from
+the pool before it, dealt into the waves behind it and cleared like any (D116
+(bosses bring escorts)). Neither it nor its escorts glow, so its gate pays no
+mod (D88 (the fish glows from the start)) — Igor: "remove glow from
+mini-bosses". It arrives from a random edge like any batch —
 how a mini-boss arrives was left unsettled by D65 (a mini-boss is a smaller
 boss).
 
 ## boss
 
-Alone in the layer's last batch, which is otherwise a normal batch (D62 (the
-boss is the layer's last batch)); clearing it is the layer end. It rises from
+The layer's last batch (D62 (the boss is the layer's last batch)); killing it
+is the layer end. It rises from
 below the view, centred — Igor: "The boss swims in from the bottom". Lunges,
 with a shorter wind-up than the mini-boss. Its `value` is the layer end's big
 haul of gems (D68 (the layer end is a milestone)). It never glows: the layer
 end's pick pays its batch (D85 (the layer end's pick), D88 (the fish glows
-from the start)). Normal enemies alongside it,
-and more attacks, wait in `ideas.md`.
+from the start)). Its escorts are a crowd (D116 (bosses bring escorts)):
+topped back up to `BOSS_CROWD` while it lives, drawn from one batch of the
+layer's last pool, paying no gems, and dying with it. More attacks wait in
+`ideas.md`.
 
 ## Adding one
 

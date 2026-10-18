@@ -124,7 +124,7 @@ export function atGate(k) {
 // brought in first (D115) -- then plays on until the screen changes -- the
 // layer end's cards, or the win -- or `seconds` run out.
 export function clearAndWait(g, seconds = 5) {
-  for (const f of g.incoming.splice(0)) g.arrive(f.name);
+  for (const f of g.incoming.splice(0)) g.arrive(f.name, f.flags);
   for (const e of [...g.enemies]) g.killEnemy(e);
   for (let i = 0, n = ticks(g, seconds); i < n && g.screen === 'playing'; i++) g.update(g.FIXED_DT);
   return g.screen;

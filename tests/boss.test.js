@@ -1,8 +1,9 @@
-// The boss and the mini-bosses: the lunge, the layer's shape, and what a
-// mini-boss's clear pays (D62, D63, D64, D65, D88). The design is in
-// docs/specs/2026-09-29-s3-boss-design.md.
+// The boss and the mini-bosses: the lunge, the layer's shape, what a
+// mini-boss's clear pays, and their escorts (D62, D63, D64, D65, D88, D116).
+// The design is in docs/specs/2026-09-29-s3-boss-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
+import { readFileSync } from 'node:fs';
 import { loadGame, ticks, ride, clearAndWait } from './harness.js';
 
 // Wholly inside the view -- the one place a tell can be read.
@@ -81,13 +82,17 @@ describe('the lunge (D64)', () => {
 describe('the layer (D62, D65)', () => {
   const has = name => e => e.batch.enemies.some(([n]) => n === name);
 
-  it('ends every layer on the boss, alone, with two lone mini-bosses along the way', () => {
+  it('ends every layer on the boss, with two mini-bosses along the way, each escorted from the pool before it', () => {
     // Over a drawn dive (D71), layer by layer: the fixed places hold whatever
-    // the pools drew around them.
+    // the pools drew around them. Escorts ride beside the batch (D116), so
+    // the batch itself is still the boss or the mini-boss alone.
     const g = loadGame();
     g.reset(1);
-    g.LAYERS.forEach((_, l) => {
+    g.LAYERS.forEach((L, l) => {
       const layer = g.plan.filter(e => e.layer === l);
+      const escorted = layer.filter(e => e.escorts);
+      expect(escorted).toEqual(layer.filter(e => has('mini-boss')(e) || has('boss')(e)));
+      escorted.forEach((e, i) => expect(L.stretches[2 * i].pool).toContain(e.escorts));
       expect(layer.at(-1).batch.enemies).toEqual([['boss', 1]]);
       expect(layer.at(-1).end).toBe(true);
       expect(layer.filter(has('mini-boss')).map(e => e.batch.enemies))
@@ -97,13 +102,137 @@ describe('the layer (D62, D65)', () => {
     });
   });
 
-  it('carries no mod on a mini-boss, and opens no cards when it dies (D88)', () => {
+  it('carries no mod on a mini-boss, nor on its escorts, and opens no cards when it dies (D88, D116)', () => {
     const g = loadGame();
     expect(g.applyScenario('mini-boss', 1)).toBe(true);
     ride(g);
-    expect(g.enemies.map(e => e.maxHp)).toEqual([g.enemyType('mini-boss').hp]);
+    expect(g.enemies.filter(e => e.name === 'mini-boss')).toHaveLength(1);
+    expect(g.enemies.length).toBeGreaterThan(1);
     expect(clearAndWait(g, 1)).toBe('playing');
     const held = Object.values(g.modCounts).reduce((a, b) => a + b, 0);
     expect(held + g.drops.filter(d => d.mod).length).toBe(0);
+  });
+});
+
+describe('escorts (D116)', () => {
+  // A dive's first boss or mini-boss, arrived; the diver kept alive and never
+  // firing, so the fight lasts as long as the test wants.
+  const fight = (seed, name) => {
+    const g = loadGame();
+    g.immortal = true;
+    g.startScenario({ batch: p => p.findIndex(e => e.batch.enemies.some(([n]) => n === name)) }, seed);
+    ride(g);
+    return g;
+  };
+  const play = (g, seconds) => { for (let i = 0, n = ticks(g, seconds); i < n; i++) g.update(g.FIXED_DT); };
+  const crowd = g => g.enemies.filter(e => e.escort);
+  const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
+
+  it('keeps the boss\'s crowd topped up to its size while the boss lives, from its own mix, never past it', () => {
+    fc.assert(fc.property(seed, s => {
+      const g = fight(s, 'boss');
+      const { batch, escorts } = g.plan[g.batchIndex - 1];
+      let over = false;
+      for (let i = 0, n = ticks(g, 6); i < n; i++) {
+        if (i === ticks(g, 3)) for (const e of crowd(g).slice(0, 2)) g.killEnemy(e);   // a gap to fill
+        g.update(g.FIXED_DT);
+        if (crowd(g).length + g.incoming.length > batch.crowd) over = true;
+      }
+      expect(over).toBe(false);
+      expect(crowd(g)).toHaveLength(batch.crowd);
+      expect(crowd(g).every(e => escorts.enemies.some(([n]) => n === e.name))).toBe(true);
+    }), { numRuns: 10 });
+  });
+
+  it('pays no gems for an escort, though one may drop a boost', () => {
+    const g = fight(1, 'boss');
+    play(g, 3);
+    const gems = g.gems.length;
+    g.sinceBoost = 1e6;                        // the next roll is certain
+    g.killEnemy(crowd(g)[0]);
+    expect(g.gems.length).toBe(gems);
+    expect(g.drops.filter(d => d.boost)).toHaveLength(1);
+  });
+
+  it('takes the crowd with the boss: every escort gone on the tick it dies, none still coming, no boost, then the layer end', () => {
+    const g = fight(1, 'boss');
+    play(g, 3);
+    g.killEnemy(crowd(g)[0]);
+    g.update(g.FIXED_DT);                      // its replacement is on its way
+    expect(g.incoming.length).toBeGreaterThan(0);
+    const gems = g.gems.length, boss = g.enemies.find(e => e.lead);
+    g.sinceBoost = 1e6;
+    g.killEnemy(boss);
+    expect(g.enemies.filter(e => !e.gone)).toEqual([]);
+    expect(g.incoming).toEqual([]);
+    expect(g.gems.length - gems).toBe(boss.value);   // the haul, and no more
+    expect(g.drops.filter(d => d.boost)).toEqual([]);
+    expect(clearAndWait(g, 1)).toBe('mods');
+  });
+
+  it('brings a mini-boss in first, its escorts dealt into the waves behind it, and holds the gate until every one is dead', () => {
+    fc.assert(fc.property(seed, s => {
+      const g = fight(s, 'mini-boss');
+      const { escorts } = g.plan[g.batchIndex - 1];
+      expect(g.enemies.some(e => e.name === 'mini-boss')).toBe(true);
+      expect([...g.enemies, ...g.incoming].map(f => f.name).sort())
+        .toEqual(['mini-boss', ...escorts.enemies.flatMap(([n, c]) => Array(c).fill(n))].sort());
+    }), { numRuns: 10 });
+    const g = fight(1, 'mini-boss');
+    expect(g.statusLines()[1].text).toContain('fish left');   // a count: no crowd here
+    const at = g.batchIndex;
+    g.killEnemy(g.enemies.find(e => e.name === 'mini-boss'));
+    const gems = g.gems.length, escort = g.enemies.find(e => !e.gone);
+    g.killEnemy(escort);
+    expect(g.gems.length - gems).toBe(escort.value);   // an ordinary batch's fish: they pay
+    play(g, 2);
+    expect([g.batchLive(), g.batchIndex]).toEqual([true, at]);
+    expect(clearAndWait(g, 1)).toBe('playing');
+    expect(g.batchLive()).toBe(false);
+  });
+
+  it('plays on identically from a save taken mid-crowd, its newcomers included', () => {
+    const a = fight(3, 'boss');
+    play(a, 3);
+    a.killEnemy(crowd(a)[0]);
+    a.update(a.FIXED_DT);
+    expect(a.incoming.length).toBeGreaterThan(0);
+    const b = loadGame();
+    b.immortal = true;
+    expect(b.loadSave(a.saveText())).toBe('');
+    b.screen = b.resumeTo;
+    for (const g of [a, b]) play(g, 5);
+    expect(b.saveText()).toBe(a.saveText());
+  });
+
+  it('meets its bosses alone in a dive saved before escorts', () => {
+    const g = loadGame();
+    expect(g.loadSave(readFileSync(new URL('./fixtures/save-v8.json', import.meta.url), 'utf8'))).toBe('');
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const k = g.plan.findIndex(e => e.end);
+    expect(g.plan[k].escorts).toBeUndefined();         // as it was saved
+    Object.assign(g, { enemies: [], incoming: [], batchIndex: k, cameraY: g.gateDepth(k) });
+    g.player.y = g.cameraY + g.ARENA_H / 2;
+    ride(g);
+    play(g, 4);
+    expect(g.enemies.map(e => e.name)).toEqual(['boss']);
+    expect(g.incoming).toEqual([]);
+  });
+
+  it('brings no crowd to a boss placed by hand, even just past a layer end', () => {
+    // The plan's entry behind is a boss's, crowd and all.
+    const g = loadGame();
+    g.immortal = true;
+    g.startScenario({ batch: p => p.findIndex(e => e.end) + 1, spawn: false, enemies: [['boss', 640, 200]] }, 1);
+    play(g, 4);
+    expect(g.enemies.map(e => e.name)).toEqual(['boss']);
+    expect(g.incoming).toEqual([]);
+  });
+
+  it('says on the status bar that escorts come until the boss dies, rather than counting them', () => {
+    const g = fight(1, 'boss');
+    expect(g.statusLines()[1].text).toContain('escorts keep coming until the boss dies');
+    expect(g.statusLines()[1].text).not.toContain('fish left');
   });
 });

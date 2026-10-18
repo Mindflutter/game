@@ -63,6 +63,9 @@ const WAVE_MAX       = 10;
 const WAVE_GAP       = 4;     // seconds from one wave's start to the next's...
 const WAVE_JITTER    = 0.4;   // ...give or take this share of it
 const WAVE_SPREAD    = 2;     // seconds a later wave's fish trickle in over
+// Escorts (D116): the boss's crowd, kept topped up to this many while it lives,
+// each newcomer due within WAVE_SPREAD of the gap opening. Claude's pick.
+const BOSS_CROWD     = 6;
 // The descent (D58): each batch waits at its own depth and a current carries
 // the view from one to the next. The current never stops -- it only slows
 // while a batch is fought. Claude's picks.
@@ -322,6 +325,7 @@ const PLAYER_STATS = [
 function statusLines() {
   // The batch shown is the one being fought, or between gates the one ahead.
   const entry = plan[Math.max(0, batchLive() ? batchIndex - 1 : batchIndex)] || plan.at(-1);
+  const lead = enemies.find(e => e.lead);
   const layer = plan.filter(e => e.layer === entry.layer);
   const mods = Object.entries(modCounts).map(([name, n]) => name + ' ×' + n);
   return [
@@ -332,8 +336,10 @@ function statusLines() {
     { color: '#9ef7ff',
       text: LAYERS[entry.layer].name + '   batch ' + (layer.indexOf(entry) + 1) + '/' + layer.length +
             // Fish still to come count too, and say so: an empty arena that
-            // fills again must read as a wave, not a broken gate (D115).
-            (batchLive() ? '   ' + (enemies.length + incoming.length) + ' fish left' +
+            // fills again must read as a wave, not a broken gate (D115). A
+            // crowd has no count to give, only its end (D116).
+            (lead ? '   escorts keep coming until the ' + lead.name + ' dies' :
+             batchLive() ? '   ' + (enemies.length + incoming.length) + ' fish left' +
                            (incoming.length ? ' (' + incoming.length + ' coming)' : '') : '') +
             '   ' + elapsed.toFixed(1) + 's   ' + kills + ' killed' },
     { color: '#ffe9a8',
@@ -476,14 +482,15 @@ const DEBUG_SETUP = ['Backspace'];
 
 // ---------- batches ----------
 // A batch is the gated unit (D27): counts per enemy type, arriving at the edges
-// of the view in waves (D115), and nothing else arrives until it is dead. Each stretch between
+// of the view in waves (D115), and nothing else arrives until it is dead -- the
+// boss's crowd aside, which comes until the boss dies (D116). Each stretch between
 // the mini-bosses is a pool a dive draws from (D71), and each layer has pools
 // of its own (D101), meeting the fish in turn: the archer at the end of the
 // first, the puffer in the second, the eel in the third. They are sized on
 // total hp (D54) until S6's threat number replaces it (D79) -- untuned
 // placeholders, Claude's picks.
 const MINI_BOSS = { enemies: [['mini-boss', 1]] };
-const BOSS      = { enemies: [['boss', 1]] };
+const BOSS      = { enemies: [['boss', 1]], crowd: BOSS_CROWD };
 
 // ---------- layers ----------
 // A layer is a record that owns its batches (D71): a run of **stretches**,
@@ -499,11 +506,13 @@ const BOSS      = { enemies: [['boss', 1]] };
 // (D89).
 //
 // Every layer today has the same shape -- four from a pool, a mini-boss, four,
-// a mini-boss, four, the boss -- around its own three pools.
+// a mini-boss, four, the boss -- around its own three pools. A mini-boss and
+// the boss bring escorts (D116): one batch drawn from the pool before them,
+// dealt in behind a mini-boss, or the mix of the boss's crowd.
 const layer = (name, color, [a, b, c]) => ({ name, color, stretches: [
-  { draw: 4, pool: a }, { draw: 1, pool: [MINI_BOSS] },
-  { draw: 4, pool: b }, { draw: 1, pool: [MINI_BOSS] },
-  { draw: 4, pool: c }, { draw: 1, pool: [BOSS] },
+  { draw: 4, pool: a }, { draw: 1, pool: [MINI_BOSS], escorts: a },
+  { draw: 4, pool: b }, { draw: 1, pool: [MINI_BOSS], escorts: b },
+  { draw: 4, pool: c }, { draw: 1, pool: [BOSS], escorts: c },
 ] });
 const LAYERS = [
   layer('Layer 1', [12, 23, 39], [
@@ -588,7 +597,7 @@ const SCENARIOS = {
   // dive ends, without playing all of it. `batch` may be a function of the
   // drawn plan (D71), where a place is only known once it is drawn.
   'last-batch':  { batch: plan => plan.length - 1 },
-  // The first mini-boss (D65), alone. Derived the same way.
+  // The first mini-boss (D65), with its escorts (D116). Derived the same way.
   'mini-boss':   { batch: plan => plan.findIndex(e => e.batch === MINI_BOSS) },
   // The top of the second layer, with the kit a dive would carry there: what
   // the first layer's glowing fish carried -- every ordinary mod three times
@@ -996,7 +1005,7 @@ const HELP_BLURB = [
   'Space dashes where you face: through the swarm unharmed, shoving it aside.',
   'One batch at a time, coming in waves; clear it all and the current takes you down to the next.',
   'Things you kill drop gems. They come to you on their own, and are yours to keep.',
-  'Kill the glowing fish for a mod. Grab boosts before they fade. A boss heals, then offers a pick.',
+  'Kill the glowing fish for a mod. Grab boosts before they fade. A boss\'s escorts come until it dies; then it heals you and offers a pick.',
   'Fish bite: when the jaws open, get away. Some spit; a puffer that swells is about to burst.',
   'Challenges pay the points for attributes, a rung at a time: see them under Attributes, or pause.',
 ];

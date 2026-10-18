@@ -6,6 +6,26 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-18
 
+**Bosses bring escorts** (D116 (bosses bring escorts))
+Igor asked for fish beside the boss and the mini-boss — "boss fight may change
+a bit to endless enemies incoming until the big guy is defeated" — and handed
+the shape over: "on boss question go your way". The boss now fights inside a
+crowd that refills to 6 while it lives, each newcomer within 2s of a kill,
+drawn from one batch of the layer's last pool; the crowd pays no gems but can
+drop boosts, and dies with the boss, so the boss's kill is still the layer
+end. A mini-boss leads in one ordinary batch from the pool before it, dealt
+into waves behind it and cleared like any batch. Neither batch glows (D88 (the
+fish glows from the start)). The status bar says `escorts keep coming until
+the boss dies` in place of a count, and the help says it too. A debug dive's
+fish replace a gate's escorts along with its batch, and its setup names them. No new save version: a
+dive saved before this meets its bosses alone. The bot takes about twice as
+long to kill the boss, and its dives now get past the first mini-boss on two
+seeds of five (`roadmap.md` → Health). Amends D27 (batches are hard-gated),
+D62 (the boss is the layer's last batch) and D65 (a mini-boss is a smaller
+boss); the glossary's **batch**, **boss**, **mini-boss**, **gate** and
+**wave** rows with it. `design.md`'s opening also said two layers; there are
+three (D101 (three layers)).
+
 **The browser suite holds only what a browser can check** (D39 (the test
 stack))
 `checks.js` kept the game's logic checks from before the Node suite existed —

@@ -295,19 +295,6 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
 
 ## Open — from the boss (S3)
 
-- **Normal enemies alongside the boss.** Igor, 2026-09-29: "no one cancels the
-  normal enemies along the boss, but let's get the boss finished first". Not
-  ruled out, and after the boss itself (D62 — the boss is the layer's last
-  batch). When it comes, the glossary's **batch** row — "enemies of comparable
-  threat" — no longer fits that batch, since a boss and its escorts are not
-  comparable. Igor, 2026-10-17: "boss & mini-boss fights should include
-  incoming enemies according to the balance for current batch. boss fight may
-  change a bit to endless enemies incoming until the big guy is defeated -
-  keeping the player fit." The mini-boss's half meets D65 (a mini-boss is a
-  smaller boss)'s "one tougher enemy in a batch of its own". The endless half
-  is a lean, and it would be a stream inside a gate — the shape D27 (batches
-  are hard-gated) retired — ended by the boss's death rather than by a count.
-  Open: escorts at all, how many, and whether the boss's run without end.
 - **More boss attacks.** The spit — a fan of slow toxic blobs, from the draft's
   "spitting out dangerous toxins" and "shooting an arc" — and the lunge and
   the spit in turn. Offered alongside the lunge; Igor took the lunge alone
@@ -496,6 +483,15 @@ discussed.
   wave wants a sound or a mark at the edge it enters by; and where waves enter
   — still a random edge, the kin idea being fish from behind the screen,
   above, arriving near the diver with the fade-in as their telegraph.
+
+- **Escorts: do they feel right?** Built as D116 (bosses bring escorts), Igor
+  handing the shape over ("on boss question go your way"): the boss's crowd
+  refills to 6 while it lives, each newcomer within 2s of the gap, paying no
+  gems, dying with the boss; a mini-boss leads in a whole batch from the pool
+  before it. Open, to Igor's play: the crowd's size and pace, whether a whole
+  batch is too much beside a mini-boss, and whether the crowd should pay
+  something after all. "According to the balance for current batch" is S6
+  (balance)'s, once a fish has a threat number.
 
 - **Stronger versions of the same fish.** Igor, 2026-10-15: "enemies should
   have levels of their own. same behavior but different attrs. this way we can

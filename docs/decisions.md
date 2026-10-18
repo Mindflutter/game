@@ -3803,3 +3803,81 @@ waves, never from the batch's last. `tests/dive.test.js` — the status bar
 counting the fish to come, between waves too. `tests/save.test.js` — the v8
 fixture playing on and its next fish arriving; the v7 fixture loading with
 none to come.
+
+## D116 — Bosses bring escorts; the boss's come until it dies · 2026-10-18
+Igor, 2026-10-17: "boss & mini-boss fights should include incoming enemies
+according to the balance for current batch. boss fight may change a bit to
+endless enemies incoming until the big guy is defeated - keeping the player
+fit." Claude offered a shape, and one question: for the boss, a crowd that
+refills to a set size as you kill, or fish that keep arriving on a timer
+whatever you do. Igor, 2026-10-18: "on boss question go your way".
+
+**Decided, by Igor**: the boss and the mini-boss fight with other fish beside
+them. **Delegated to Claude, and open to Igor to reopen**: everything below.
+"May change a bit to endless" was a lean; the choice between its two readings
+was handed over.
+
+- **The boss's escorts are a crowd that refills.** While the boss lives they
+  are topped back up to `BOSS_CROWD`, each newcomer due within `WAVE_SPREAD`
+  of the gap opening, drawn at random from one batch the plan draws from the
+  layer's last ordinary pool. The boss still arrives alone from below; its
+  crowd follows from the edges. Chosen over the stream on a timer: a stream
+  that adds whatever the player does is the prototype's death spiral, which
+  D27 (batches are hard-gated) retired; a crowd keeps the pressure level.
+- **The boss's death ends the fight.** Its escorts die with it on the same
+  tick, and none still coming arrives; the layer end follows as it did for a
+  boss alone. Mopping up after the boss would be an anticlimax.
+- **The crowd pays no gems** — a fight that refills would otherwise be a farm
+  to stall on — **but may drop boosts** (D86 (boosts)): a longer fight brings
+  more help. The boss's kill, the batch's last, drops none, as any batch's
+  last.
+- **A mini-boss's escorts are one ordinary batch**, drawn from the pool of the
+  stretch before it, dealt into waves behind it (D115 (batches arrive in
+  waves)) and cleared like any batch: they pay gems, and the gate holds until
+  every one is dead. The mini-boss arrives in the first wave whatever the
+  draw. That alone makes the two fights different.
+- **Escorts never glow**: a batch a boss or a mini-boss leads carries no mod,
+  its escorts included (D88 (the fish glows from the start)).
+- **"According to the balance for current batch"** waits for S6 (balance)'s
+  threat number (D79 (easiest to hardest, balance's to say)). Until then the
+  escorts come from the layer's own pools, at the pools' sizes.
+- **The telegraph** — the **wave** row's binding concern, that a batch which
+  refills must not read as a broken gate: the status bar says `escorts keep
+  coming until the boss dies` in place of a count, which a crowd does not
+  have, and so does the help.
+- **The numbers**: a crowd of 6; a mini-boss's escorts a whole batch.
+
+**What it amends.** D27 (batches are hard-gated): a batch is still a bounded
+queue that gates the descent. The crowd is capped at its size and each
+newcomer replaces a kill, so arrivals cannot outgrow the player — the
+divergence D27 retired cannot occur — and it ends with the boss rather than
+with a count. D62 (the boss is the layer's last batch) and D65 (a mini-boss is
+a smaller boss): the boss is no longer alone in its batch, nor a mini-boss
+"one tougher enemy in a batch of its own"; and D115 (batches arrive in
+waves)'s "a batch of one fish — a mini-boss's, the boss's — is one wave" no
+longer describes them. The glossary's **batch** row loses "of comparable
+threat", which a boss and its escorts are not, as D62 foresaw; the **boss**
+and **mini-boss** rows say what comes with them.
+
+**Debug**: a debug dive's fish take a gate's whole place, escorts included,
+and the setup's gate line names the escorts a gate drew (D102 (the debug
+mode)).
+
+**Save**: no new version. The marks live on the fish and on the fish to come,
+which the save already holds; a dive saved before this has no escorts in its
+plan and meets its bosses alone.
+
+**Measured** (`roadmap.md` → Health): the crowd about doubles the immortal
+bot's time to kill the boss, and the mortal bot dies sooner; escorts carry two
+of five dives past the first mini-boss the bot could not kill alone.
+
+**Guarded by**: `tests/boss.test.js` → escorts — the crowd topped up to its
+size from its own mix and never past it; no gems from it, a boost possible;
+every escort gone on the boss's death tick, none still coming, no boost, then
+the layer end; the mini-boss first, its escorts dealt in behind, the gate held
+until every one is dead, a count on the status bar; a save mid-crowd playing
+on identically; a v8 dive's bosses alone; no crowd for a boss placed by hand;
+the status bar's telegraph. → the layer — every boss and mini-boss escorted
+from the pool before it, none of the batch glowing. `tests/debug.test.js` — a
+debug gate's fish in place of a mini-boss's escorts; the gate line naming a
+mini-boss's escorts and the boss's crowd.
