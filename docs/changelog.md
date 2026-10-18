@@ -24,6 +24,12 @@ stepping over a fish, at today's dash speed. The old suite passed with either
 rule broken. Both now fail when it is. CLAUDE.md's line on what carries to
 the port names the checks in `tests/`.
 
+**`meta.test.js` split by topic**
+Its tests, unchanged, are now `dive.test.js` (pools, the layers, mods and gems
+across a dive, the status bar), `home.test.js` (gear, weapons, equipment,
+attributes, New game), `save.test.js` (the save, its versions, the settings)
+and `challenges.test.js`.
+
 ---
 
 ## 2026-10-17

@@ -302,7 +302,7 @@ let meta = freshMeta();
 // A dive is plain numbers in plain objects, its randomness one 32-bit number,
 // and it runs in fixed ticks -- so a copy of these variables *is* the dive,
 // and a restored one plays on exactly as it would have. Every variable a dive
-// owns must be here: the save-and-restore property check (tests/meta.test.js)
+// owns must be here: the save-and-restore property check (tests/save.test.js)
 // diverges on any that is missed.
 // The mod cards on offer hold functions, so they are saved by name; `at` is
 // the screen play resumes to, since the pause menu may be what is showing.
