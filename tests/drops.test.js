@@ -13,8 +13,9 @@ const paid = g => held(g) + g.drops.filter(d => d.mod).length;
 // The ordinary mods a fish can carry: not a layer end's own, and fitting the
 // weapon carried (D99).
 const ordinary = g => g.MODS.filter(m => !m.end && g.fits(m));
-// Numbers a mod can move, for comparing two players.
-const STATS = ['speed', 'maxHp', 'dashCooldown', 'iframes', 'dashDamage', 'mendOnClear'];
+// Every number a mod or boost moves: the readout's and the hearts, as
+// dive.test.js holds them to be.
+const STATS = [...loadGame().PLAYER_STATS.map(s => s.stat), 'hp', 'maxHp'];
 const stats = p => STATS.map(k => p[k]);
 
 // The dive's first layer end, its boss arrived, the diver kept alive.

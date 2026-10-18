@@ -6,6 +6,14 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-18
 
+**The drops' stat checks see every stat**
+Found during the comment cut. The check that a boost left lying on the floor
+changes nothing compared six body stats kept by hand. Three of the four
+boosts move none of them, so a floor boost applied by mistake passed whenever
+the drop was Frenzy, Lance or Bloom (seed 1 drops Bloom). The list is now the
+readout's (`PLAYER_STATS`) plus the hearts, which `dive.test.js` already holds
+to every stat a mod or boost moves. Seen failing first, against that very bug.
+
 **Comments cut to the why** (D91 (comments amend the code))
 Igor: "i see you are adding a lot of comments in the code again. are they
 really so important? shouldnt most of code be self-evident?", then yes to the
