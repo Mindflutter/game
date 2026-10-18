@@ -3801,6 +3801,4 @@ the descent's camera held while a batch lives, waves to come included.
 `tests/drops.test.js` — a boost from the kill that empties the arena between
 waves, never from the batch's last. `tests/meta.test.js` — the status bar
 counting the fish to come, between waves too; the v8 fixture playing on and
-its next fish arriving; the v7 fixture loading with none to come. `checks.js`
-— a batch brings what it names, its waves included; nothing else arrives
-while it lives.
+its next fish arriving; the v7 fixture loading with none to come.

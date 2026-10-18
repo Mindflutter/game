@@ -65,6 +65,14 @@ describe('batches drawn from pools (D71)', () => {
     expect(g.ENEMY_TYPES.filter(t => !met.has(t.name)).map(t => t.name)).toEqual([]);
   });
 
+  it('names only real fish in every batch, each in a count of at least one', () => {
+    // Content is data (D6): a typo here would only make the game quietly easier.
+    const g = loadGame();
+    const named = g.LAYERS.flatMap(l => l.stretches.flatMap(st => st.pool)).flatMap(b => b.enemies);
+    expect(named.filter(([name]) => !g.ENEMY_TYPES.some(t => t.name === name))).toEqual([]);
+    expect(named.every(([, count]) => Number.isInteger(count) && count >= 1)).toBe(true);
+  });
+
   it('holds more batches in every ordinary pool than it draws', () => {
     // A pool the size of its draw only reshuffles the same batches -- the
     // same batches every dive, which is what D71 exists to end.
@@ -1198,6 +1206,17 @@ describe('the status bar', () => {
     g.enemies = [];
     expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);
     expect(text(g)).toContain(coming + ' fish left (' + coming + ' coming)');
+  });
+
+  it('shows on the readout every stat a mod or a boost moves, each a real field of the diver (D52)', () => {
+    // hp and maxHp are the `HP 3/4` on the line above.
+    const g = loadGame();
+    g.reset();
+    const shown = g.PLAYER_STATS.map(s => s.stat).concat(['hp', 'maxHp']);
+    const moved = [...new Set([...g.MODS.flatMap(m => g.modPreview(m).map(c => c.stat)),
+                               ...g.BOOSTS.flatMap(b => Object.keys(b.add))])];
+    expect(moved.filter(k => !shown.includes(k))).toEqual([]);
+    expect(g.PLAYER_STATS.filter(s => !(s.stat in g.player)).map(s => s.stat)).toEqual([]);
   });
 
   it('shows the weapon and its tier, the guard left, the mods held and the challenges\' counts', () => {

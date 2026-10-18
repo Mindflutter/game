@@ -85,6 +85,9 @@ describe('the port seam', () => {
     expect(g.advanceBy(g.FIXED_DT * 2)).toBe(2);
     expect(g.advanceBy(g.FIXED_DT * 0.6)).toBe(0);   // banked, not stretched
     expect(g.advanceBy(g.FIXED_DT * 0.6)).toBe(1);
+    g.reset(1);
+    expect(g.advanceBy(g.MAX_FRAME_DT)).toBe(g.MAX_FRAME_DT / g.FIXED_DT);   // a whole frame, whole
+    g.reset(1);
     // A minute in another tab must not be simulated all at once.
     expect(g.advanceBy(60)).toBe(g.MAX_FRAME_DT / g.FIXED_DT);
   });
@@ -115,6 +118,30 @@ describe('the bot', () => {
 
 // The dev flags, `immortal` and `damageOverride`: set by the debug mode's
 // setup (D102), the tests and the bot. What they do is game state, checked here.
+describe('scenarios (D37)', () => {
+  it('place exactly what they name, and a paused queue never gains a fish', () => {
+    const g = loadGame();
+    expect(g.applyScenario('one-drifter')).toBe(true);
+    expect(g.enemies.map(e => e.name)).toEqual(['drifter']);
+    expect(g.queuePaused).toBe(true);
+    let most = 1;
+    for (let i = 0; i < 900; i++) { g.update(1 / 60); most = Math.max(most, g.enemies.length); }
+    expect(most).toBe(1);
+    expect(g.applyScenario('all-types')).toBe(true);
+    expect(g.enemies.map(e => e.name)).toEqual(g.ENEMY_TYPES.filter(t => t.carries !== false).map(t => t.name));
+  });
+
+  it('start deep in the queue with it running, and an unknown one says so', () => {
+    const g = loadGame();
+    expect(g.applyScenario('late-swarm')).toBe(true);
+    expect([g.batchIndex, g.queuePaused]).toEqual([5, false]);
+    g.immortal = true;
+    for (let i = 0; i < 300; i++) g.update(1 / 60);
+    expect([g.batchIndex, g.enemies.length > 0]).toEqual([6, true]);
+    expect(g.applyScenario('no-such-scenario')).toBe(false);
+  });
+});
+
 describe('dev flags', () => {
   // hp after two seconds with a bulwark parked on the player.
   function hpUnderBulwark(immortal) {
@@ -181,6 +208,10 @@ describe('invariants that must hold for every dive', () => {
       };
       expect(trace()).toBe(trace());
     }), { numRuns: 25 });
+    // ...and two seeds play two dives, each recorded as the one it used.
+    const a = dive(4471, 600, 1), b = dive(9999, 600, 1);   // the same hands
+    expect([a.currentSeed, b.currentSeed]).toEqual([4471, 9999]);
+    expect(JSON.stringify([a.enemies.length, a.kills, a.player.x])).not.toBe(JSON.stringify([b.enemies.length, b.kills, b.player.x]));
   });
 
   it('decays on a time base, not a frame base (D15)', () => {

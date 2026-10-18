@@ -44,6 +44,31 @@ describe('the descent', () => {
     }), { numRuns: 5 });
   });
 
+  it('opens on a quiet beat, then holds each batch until it is dead -- three in a row (D27)', () => {
+    // Kept alive by hand rather than `immortal`, so the fish still swarm.
+    const g = loadGame();
+    g.reset(1);
+    const run = (n, until = () => false) => {
+      for (let i = 0; i < n && !until(); i++) { g.player.hurt = g.player.iframes; g.update(1 / 60); }
+      expect(g.screen).toBe('playing');
+    };
+    expect(g.enemies.length === 0 && g.breathTimer > 0).toBe(true);
+    run(Math.ceil(g.GATE_PAUSE * 60) + 3);
+    expect(g.enemies.length > 0 && g.batchIndex === 1).toBe(true);
+    const size = g.enemies.length + g.incoming.length;
+    run(600);                                  // ten seconds of not killing
+    expect([g.enemies.length + g.incoming.length, g.batchIndex]).toEqual([size, 1]);
+    for (const k of [2, 3]) {
+      g.enemies = [];
+      g.incoming = [];
+      run(1);
+      expect(g.cameraY).toBeGreaterThan(g.gateDepth(k - 2));   // the descent begins...
+      expect(g.batchIndex).toBe(k - 1);                       // ...before the next arrives
+      run(60 * 30, () => g.enemies.length > 0);
+      expect([g.batchIndex, g.enemies.length > 0]).toEqual([k, true]);
+    }
+  });
+
   it('keeps the water flowing during a fight -- the current never stops', () => {
     // "Descent stops" means no further in enemies; the water still moves. Only
     // the background shows it (graphics, D58), so this reads the flow, not the camera.
@@ -215,6 +240,7 @@ describe('the descent', () => {
     g.spawnBatch({ enemies: [['drifter', 40]] });
     for (const f of g.incoming.splice(0)) g.arrive(f.name);   // its later waves too (D115)
     expect(g.enemies).toHaveLength(40);
+    expect(new Set(g.enemies.map(e => e.speed)).size).toBeGreaterThan(1);   // not a drill squad
     for (const e of g.enemies) {
       const outside = e.x < 0 || e.x > g.ARENA_W ||
                       e.y < g.cameraY || e.y > g.cameraY + g.ARENA_H;

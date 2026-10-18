@@ -482,6 +482,47 @@ describe('boosts (D86)', () => {
   });
 });
 
+describe('the mods themselves', () => {
+  it('are each body, comfort, or a weapon mod naming real weapons, under names of their own (D99)', () => {
+    const g = loadGame();
+    const scoped = m => m.scope === 'body' || m.scope === 'comfort' ||
+      m.scope === 'weapon' && m.weapons?.length > 0 && m.weapons.every(n => g.WEAPONS.some(w => w.name === n));
+    expect(g.MODS.filter(m => !scoped(m)).map(m => m.name)).toEqual([]);
+    expect(new Set(g.MODS.map(m => m.name)).size).toBe(g.MODS.length);
+  });
+
+  it('each move no more stats than a card has rows for', () => {
+    const g = loadGame();
+    g.reset();
+    expect(g.MODS.filter(m => g.modPreview(m).length > g.MOD_ROWS).map(m => m.name)).toEqual([]);
+  });
+
+  it('preview exactly what taking one does, without doing it (D52)', () => {
+    const g = loadGame();
+    g.reset();
+    const fins = g.MODS.find(m => m.name === 'Fins');
+    const speed = g.player.speed;
+    const preview = g.modPreview(fins);
+    expect(g.player.speed).toBe(speed);        // previewing applies nothing
+    fins.apply(g.player);
+    expect(preview).toHaveLength(1);
+    expect([preview[0].stat, preview[0].to]).toEqual(['speed', g.player.speed]);
+  });
+
+  it('are counted and applied when taken from a card -- Mend\'s effect too -- and gone with the dive', () => {
+    const g = loadGame();
+    g.reset();
+    g.screen = 'mods';
+    g.choices = [g.MODS.find(m => m.name === 'Mend')];
+    g.choiceIndex = 0;
+    g.justPressed.add('Enter');
+    g.update(0.016);
+    expect([g.modCounts.Mend, g.player.mendOnClear]).toEqual([1, 1]);
+    g.reset();                                 // mods are dive-scoped (D34)
+    expect(g.modCounts).toEqual({});
+  });
+});
+
 describe('rank is retired (D87)', () => {
   it('keeps no rank in the dive or in the save', () => {
     const g = loadGame();

@@ -12,7 +12,7 @@ gated batches. Anything describing an auto-shooter is describing the prototype.
 **The browser build is a throwaway prototype.** The end goal is a native
 executable (Rust or C++) with real graphics; this version gets dropped after
 that port. What carries over is the gameplay logic, the tuned constants, the
-data tables and the `?test` checks — *not* the rendering. Do not invest in the
+data tables and the checks in `tests/` — *not* the rendering. Do not invest in the
 canvas layer, a sprite pipeline, or browser-specific polish.
 
 ## Read before proposing work

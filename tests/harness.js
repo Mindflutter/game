@@ -52,7 +52,8 @@ export function loadGame() {
                  'immortal', 'damageOverride', 'plan', 'meta', 'diveLive',
                  'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
                  'batchDashed', 'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
-                 'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps'];
+                 'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps',
+                 'fireArmed', 'offerTimer', 'optionIndex', 'returnTo'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS', 'STAT_NAMES',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
@@ -62,7 +63,8 @@ export function loadGame() {
                   'BOOSTS', 'BOOST_C', 'BOOST_LIFE', 'END_STEP',
                   'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'CHALLENGES',
                   'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK',
-                  'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT', 'HELP_BLURB'];
+                  'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT', 'HELP_BLURB',
+                  'DASH_TIME', 'SHAKE_LEVELS', 'MENU_TOP', 'OPTION_TOP', 'HOME_TOP', 'PLAYER_STATS'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [
     ...STATE.map(n => `${n}: { get: () => ${n}, set: v => { ${n} = v; }, configurable: true }`),

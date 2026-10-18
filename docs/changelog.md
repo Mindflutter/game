@@ -4,6 +4,28 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-18
+
+**The browser suite holds only what a browser can check** (D39 (the test
+stack))
+`checks.js` kept the game's logic checks from before the Node suite existed —
+152 of its 199, which every change had to keep in step twice. Each one now
+lives in Node or was dropped for a Node test that already guards the same
+rule, proven by breaking the rule and watching that test fail: the trigger,
+shots, the dash, gems, touch, Mend and the layer end's timing in
+`tests/combat.test.js`; menus, the cards' keys, options, shake and sparks in
+`tests/screens.test.js`; the gate in sequence, the mods' own records,
+scenarios and the readout beside their kin. The browser suite keeps 47: sound,
+canvas and every screen fitting, real keyboard and mouse events, the menu
+cursor, the window sizes, the stepped driver. Two moved checks had stopped
+testing what they said: the dash's wave reaching past the body, since the
+bodies doubled (D104 (bodies doubled)), and the dash sweeping rather than
+stepping over a fish, at today's dash speed. The old suite passed with either
+rule broken. Both now fail when it is. CLAUDE.md's line on what carries to
+the port names the checks in `tests/`.
+
+---
+
 ## 2026-10-17
 
 **Batches arrive in waves** (D115 (batches arrive in waves))
