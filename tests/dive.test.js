@@ -1,8 +1,6 @@
-// The dive through the layers -- batches drawn from pools, the layer end and
-// on into the next, mods and gems across a whole dive, the status bar --
-// built in S4 (meta loop skeleton), designed in
-// docs/specs/2026-09-30-s4-meta-loop-design.md. Each test names the decision
-// it guards.
+// The dive through the layers: batches drawn from pools, the layer end and on
+// into the next, mods and gems across a whole dive, the status bar. Designed
+// in docs/specs/2026-09-30-s4-meta-loop-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { loadGame, ticks, ride, clearAndWait, atGate, die } from './harness.js';

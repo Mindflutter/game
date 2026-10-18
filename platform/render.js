@@ -1,5 +1,4 @@
-// ===== render (platform) =====
-// Canvas drawing. Rewritten on a port.
+// ===== render (platform) -- rewritten on a port =====
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
@@ -28,9 +27,7 @@ function circle(x, y, r, fill, glow, blur = 20) {
   ctx.shadowBlur = 0;
 }
 
-// Where your shots will go: a dashed line out to the edge of the ring, fading
-// as it goes so it guides the eye without competing with the enemies, and a
-// crosshair sitting exactly where the shots will die.
+// Faded, so it guides the eye without competing with the fish.
 function drawAimLine() {
   const dx = aim.x - player.x, dy = aim.y + cameraY - player.y;   // aim is in the view
   const d = Math.hypot(dx, dy) || 1;
@@ -51,8 +48,6 @@ function drawAimLine() {
   ctx.stroke();
   ctx.restore();
 
-  // A small ring with four ticks, brighter than the line so the end reads
-  // clearly without drawing the eye off the enemies.
   ctx.strokeStyle = 'rgba(159, 247, 255, 0.55)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -66,32 +61,26 @@ function drawAimLine() {
   ctx.stroke();
 }
 
-// CSS font strings, so they live here and not in game/: they mean nothing in
-// the layer that survives to Rust, and all their readers are in this file.
+// CSS fonts live here, not in game/: they mean nothing after the port.
 const CARD_DESC_FONT = '13px system-ui, sans-serif';
 const CARD_ROW_FONT = '12px system-ui, sans-serif';
 
-// Seconds a boost on the floor blinks before it is gone (D86): the warning.
-// Drawing only, so it lives here.
+// Seconds a floor boost blinks before it goes (D86). Drawing only, so here.
 const BOOST_BLINK = 2;
 
-// The widest line a mod card prints, in pixels, at the font the cards draw it
-// in: a description, or a row of numbers at the card's step. A card is lines
-// of text in a fixed-width box, and nothing in the game state can see one
-// running off the edge. The check calls this; `measureText` is canvas, so the
-// rule lives in the browser suite.
+// No game state can see a card's text run off its box, so the browser suite
+// measures it here.
 function widestCardLine() {
   const width = (font, text) => { ctx.font = font; return ctx.measureText(text).width; };
   return Math.max(...MODS.flatMap(m => [width(CARD_DESC_FONT, m.desc),
     ...modPreview(m, cardStep(m)).map(c => width(CARD_ROW_FONT, statLine(c)))]));
 }
 
-// The layer end's pick (D85): the cards, a card marked, and Continue. The
-// wording is Claude's placeholder (ideas.md -> friendlier end-of-dive messages).
+// The layer end's pick (D85). The wording is Claude's placeholder (ideas.md).
 function drawModCards() {
   dimArena();
 
-  // The layer just cleared. A check can open the cards with no plan behind them.
+  // A check can open the cards with no plan behind them.
   const entry = plan[batchIndex - 1];
   ctx.textAlign = 'center';
   ctx.fillStyle = '#9ef7ff';
@@ -112,7 +101,6 @@ function drawModCards() {
     ctx.lineWidth = on ? 2 : 1;
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 
-    // An ordinary mod comes at the bigger step here, and says so.
     ctx.fillStyle = '#bffcff';
     ctx.font = '19px system-ui, sans-serif';
     ctx.fillText(u.end ? u.name : u.name + ' \u00d7' + END_STEP, x + w / 2, y + 38);
@@ -121,13 +109,10 @@ function drawModCards() {
     ctx.font = CARD_DESC_FONT;
     ctx.fillText(u.desc, x + w / 2, y + 64);
 
-    // The numbers (D52): the change worked out from the mod itself, the stack
-    // from modCounts, so a repeated card reads differently from a fresh one.
     ctx.font = CARD_ROW_FONT;
     ctx.fillStyle = on ? '#6fd8e8' : '#4d7a8a';
-    // No slice: the card draws every row the mod moves, and a check holds the
-    // pool to MOD_ROWS, so a mod that moved a third stat fails the suite rather
-    // than quietly losing a number off the bottom of the card.
+    // No slice: a check holds every mod to MOD_ROWS, so a row too many fails
+    // the suite instead of falling off the card.
     modPreview(u, cardStep(u)).forEach((c, n) => {
       ctx.fillText(statLine(c), x + w / 2, y + 90 + n * 17);
     });
@@ -157,9 +142,8 @@ function drawModCards() {
     : 'nothing left to choose:  Enter or Continue to go on', ARENA_W / 2, MOD_HINT_Y);
 }
 
-// Where the mod screen's bottom hint sits: under Continue, which sits under
-// the cards (`continueRect()` in content.js owns both boxes). Taller cards push
-// all of it down, so a check holds the hint inside the view.
+// Derived from Continue's box, so taller cards push it down; a check holds it
+// in view.
 const MOD_HINT_Y = continueRect().y + continueRect().h + 34;
 
 // So a silent game can tell you why it is silent.
@@ -195,13 +179,9 @@ function coverMargins() {
   ctx.restore();
 }
 
-// The water: specks carried by the current, so it shows flowing even while a
-// fight holds the camera still (D58). Drawn in the view, scrolled by `waterY`.
-// PLACEHOLDER GRAPHICS -- the moving background is to be replaced with real
-// art later (ideas.md -> "A lively background"); only the flow is settled.
-// Hashed from the grid cell, never from rng(): drawing must not consume the
-// dive's seeded sequence, or the same seed replays differently depending on
-// what happened to be on screen.
+// The current, shown by specks scrolled with `waterY` (D58). PLACEHOLDER
+// GRAPHICS (ideas.md -> "A lively background"). Hashed per cell, never rng():
+// drawing must not consume the seeded sequence.
 const SPECK_CELL = 90;
 function drawSpecks() {
   ctx.fillStyle = 'rgba(159, 247, 255, 0.18)';
@@ -216,15 +196,14 @@ function drawSpecks() {
   }
 }
 
-// The play field. draw() has already set up arena coordinates and the shake.
+// draw() has already set up view coordinates and the shake.
 function drawField() {
-  drawSpecks();                  // the water, in the view: it flows on its own
+  drawSpecks();
 
   // World draws go through the camera; the HUD below does not.
   ctx.save();
   ctx.translate(0, -cameraY);
 
-  // How far your shots reach — the player needs to see this.
   ctx.strokeStyle = 'rgba(79, 240, 255, 0.10)';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -233,12 +212,9 @@ function drawField() {
 
   if (screen === 'playing') drawAimLine();
 
-  // Gems fly to you and never fade (D35), so there is no blink to warn of it.
   for (const g of gems) circle(g.x, g.y, g.r, '#a8ffd8', '#2affb0', 14);
 
-  // What kills drop besides gems (D84, D86). PLACEHOLDER GRAPHICS: a mod is a
-  // gold coin flying in; a boost a magenta diamond where it fell, blinking out
-  // over its last BOOST_BLINK seconds.
+  // PLACEHOLDER GRAPHICS: a mod is a gold coin, a boost a magenta diamond.
   for (const d of drops) {
     if (d.mod) circle(d.x, d.y, d.r, '#fff1b8', '#ffc400', 24);
     else if (d.life > BOOST_BLINK || Math.floor(d.life * 8) % 2 === 0) {
@@ -258,12 +234,8 @@ function drawField() {
     }
   }
 
-  // A wounded enemy shrinks, so you can see a big one is nearly finished,
-  // and flashes white for a frame or two when hit. A lunger winding up (D64)
-  // swells, glows harder and lays its lane down ahead of it -- the tell --
-  // all of it growing with `k`, 0 to 1 across the wind-up.
-  // A puffer swelling (D95) is the same tell, harder: it puffs up and draws the
-  // ring its burst will reach.
+  // A wounded fish shrinks, so a big one near death shows. A tell grows with
+  // `k`, 0 to 1 across it.
   for (const e of enemies) {
     const hit = e.flash > 0;
     const winding = e.phase === 'windup', fusing = e.phase === 'fuse';
@@ -295,8 +267,7 @@ function drawField() {
     }
     circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + (fusing ? 0.8 : 0.25) * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
-    // A biter's open jaws (D108): a dark wedge toward the diver, widening
-    // through the wind-up, gone when they snap shut. PLACEHOLDER GRAPHICS.
+    // A biter's open jaws (D108). PLACEHOLDER GRAPHICS.
     if (e.phase === 'jaws') {
       const a = Math.atan2(player.y - e.y, player.x - e.x);
       const open = 0.9 * Math.min(1, e.phaseTime / e.bite.windup);
@@ -307,8 +278,7 @@ function drawField() {
       ctx.closePath();
       ctx.fill();
     }
-    // The glowing fish that carries the batch's mod (D84): a gold ring that
-    // pulses. PLACEHOLDER GRAPHICS.
+    // The fish carrying the batch's mod (D84). PLACEHOLDER GRAPHICS.
     if (e.carrier) {
       ctx.save();
       ctx.globalAlpha = 0.8 + 0.2 * Math.sin(elapsed * 8);
@@ -323,21 +293,18 @@ function drawField() {
     }
   }
 
-  // Sparks shrink as they die.
   for (const p of particles) {
     circle(p.x, p.y, p.r * (p.life / p.maxLife), p.color, p.glow, 10);
   }
 
-  // Bullets are streaks, not dots — so they don't read as gems, and so you
-  // can see which way they're going.
+  // Streaks, not dots: a shot never reads as a gem, and shows its heading.
   ctx.shadowBlur = 12;
   ctx.shadowColor = '#9ef7ff';
   ctx.strokeStyle = '#eaffff';
   ctx.lineCap = 'round';
   for (const b of bullets) {
     if (b.evil) continue;
-    // As wide as the shot's hitbox, so a knife's slash and a swollen shot look
-    // as big as they hit (D97).
+    // As wide as its hitbox, so it looks as big as it hits (D97).
     ctx.lineWidth = Math.max(3, b.r);
     ctx.beginPath();
     ctx.moveTo(b.x, b.y);
@@ -345,18 +312,15 @@ function drawField() {
     ctx.stroke();
   }
   ctx.shadowBlur = 0;
-  // An enemy's shot is a round blob in its spitter's blue, so it never reads
-  // as one of yours (D95). PLACEHOLDER GRAPHICS.
+  // Round and blue, so an enemy's shot never reads as yours (D95).
+  // PLACEHOLDER GRAPHICS.
   for (const b of bullets) if (b.evil) circle(b.x, b.y, b.r, '#cfe3ff', '#1f6fff', 16);
 
-  // Blink while invulnerable, so getting hit is visible — but never during a
-  // dash: blinking out mid-flight is exactly what made the dash read as a
-  // teleport, since the eye saw the player at one end and then the other.
+  // No blink mid-dash: blinking out mid-flight made the dash read as a teleport.
   const blinking = player.hurt > 0 && player.dashTime <= 0 &&
                    Math.floor(player.hurt * 10) % 2 === 0;
   if (!blinking) circle(player.x, player.y, player.r, '#bffcff', '#4ff0ff', 25);
-  // Where the body faces (D107) -- where a dash from a standstill goes.
-  // PLACEHOLDER GRAPHICS.
+  // The facing (D107). PLACEHOLDER GRAPHICS.
   if (!blinking) {
     const fx = Math.cos(player.facing), fy = Math.sin(player.facing);
     ctx.strokeStyle = '#0d3b47';
@@ -367,8 +331,7 @@ function drawField() {
     ctx.stroke();
   }
 
-  // The suit's guard (D100): a gold ring while it has a hit left to take this
-  // batch. PLACEHOLDER GRAPHICS.
+  // The suit's guard (D100). PLACEHOLDER GRAPHICS.
   if (guardLeft > 0) {
     ctx.save();
     ctx.strokeStyle = '#ffe680';
@@ -381,8 +344,7 @@ function drawField() {
     ctx.restore();
   }
 
-  // The Knife's cut (D105): the swept wedge, fading as `swingLeft` runs out.
-  // PLACEHOLDER GRAPHICS.
+  // The Knife's cut (D105). PLACEHOLDER GRAPHICS.
   if (player.swingLeft > 0) {
     const face = Math.atan2(player.swingY, player.swingX);
     const half = player.swing.arc * Math.PI / 360;
@@ -395,8 +357,6 @@ function drawField() {
     ctx.fill();
   }
 
-  // The wave the dash pushes ahead of it: an arc at the edge of its reach,
-  // facing the way the dash is going, brightest at the start of the lunge.
   if (player.dashTime > 0) {
     const face = Math.atan2(player.dashDy, player.dashDx);
     const half = Math.acos(DASH_ARC);
@@ -409,8 +369,6 @@ function drawField() {
     ctx.stroke();
   }
 
-  // ...and the ring it leaves when it lands: it expands and fades, just enough
-  // to say the lunge finished rather than stopped.
   if (player.dashEnd > 0) {
     const t = player.dashEnd / DASH_END;            // 1 -> 0
     ctx.strokeStyle = 'rgba(159, 247, 255, ' + (0.5 * t).toFixed(3) + ')';
@@ -420,8 +378,7 @@ function drawField() {
     ctx.stroke();
   }
 
-  // The dash recharging: an arc that sweeps closed as it comes back. Nothing
-  // is drawn once it's ready, so a clean ring means you have it.
+  // Nothing once ready: a clean ring means the dash is back.
   if (player.dashCd > 0) {
     const left = player.dashCd / player.dashCooldown;
     ctx.strokeStyle = 'rgba(79, 240, 255, 0.45)';
@@ -436,8 +393,7 @@ function drawField() {
 
   // --- HUD ---
   const STATUS_STEP = 20;
-  // The status bar: its lines are game/'s, their rows derived from the count.
-  // The sound's state rides on the first, since only the platform knows it.
+  // The sound's state rides on the first line: only the platform knows it.
   ctx.textAlign = 'left';
   const status = statusLines();
   status.forEach((line, i) => {
@@ -446,9 +402,8 @@ function drawField() {
     ctx.fillText(line.text + (i === 0 ? audioStatus() : ''), 16, 30 + i * STATUS_STEP);
   });
 
-  // The layer's name, while the current carries you into it (D72) -- derived:
-  // the next batch is a layer's first and has not arrived. PLACEHOLDER
-  // GRAPHICS, like the water's colour: the cheapest "a new layer" until art.
+  // The layer's name while the current carries you into it (D72): the next
+  // batch is a layer's first and has not arrived. PLACEHOLDER GRAPHICS.
   const next = plan[batchIndex];
   if (screen === 'playing' && next && !batchLive() &&
       (batchIndex === 0 || plan[batchIndex - 1].end)) {
@@ -458,9 +413,8 @@ function drawField() {
     ctx.fillText(LAYERS[next.layer].name, ARENA_W / 2, 200);
     ctx.textAlign = 'left';
   }
-  // A challenge paying out: a line, never a stop (the genre contract, 6).
   // Only in play: its clock runs only there, so under an end screen it would
-  // hang on forever.
+  // hang on.
   if (screen === 'playing' && noticeTime > 0) {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#a8ffd8';
@@ -468,7 +422,6 @@ function drawField() {
     ctx.fillText(notice, ARENA_W / 2, 240);
     ctx.textAlign = 'left';
   }
-  // A pickup, named as it lands (D84, D86), on its own line under the challenge's.
   if (screen === 'playing' && bannerTime > 0) {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffe9a8';
@@ -485,8 +438,7 @@ function drawField() {
                  '   sparks ' + particles.length, 16, 30 + status.length * STATUS_STEP);
   }
 
-  // A debug dive says so, with its setup and its two keys (D102), where a
-  // screenshot for an issue will carry them.
+  // Where a screenshot for an issue will carry it (D102).
   if (debugSetup) {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#4d7a8a';
@@ -495,16 +447,13 @@ function drawField() {
   }
 }
 
-// The end of a dive, either way it ends: death, or the win at the bottom of the
-// last layer (D68, D72). The wording is Claude's placeholder, open to Igor
-// (ideas.md -> friendlier end-of-dive messages).
+// The wording is Claude's placeholder (ideas.md).
 const END_SCREENS = {
   dead: { heading: 'CONSUMED',      color: '#ff5c85' },
   won:  { heading: 'ABYSS CLEARED', color: '#9ef7ff' },
 };
 
-// A refused save, said where the player will see it (the technical contract:
-// "rejected loudly"). main.js sets it at boot and keeps the refused text aside.
+// A refused save, said on screen: rejected loudly, never lost.
 let saveError = '';
 function drawSaveError() {
   if (!saveError) return;
@@ -529,16 +478,13 @@ function drawEnd() {
   ctx.fillText(currency + ' gems, ' + elapsed.toFixed(1) + 's, killed ' + kills,
                ARENA_W / 2, ARENA_H / 2 + 26);
 
-  drawRows(MENUS[screen]);       // Dive again, Go home (D90)
+  drawRows(MENUS[screen]);
 }
 
-// The y the hint sits on. Screens that stack rows from a data table must end
-// above it, and a check asserts they do: no state check can see text running
-// through text.
+// Rows stacked from data must end above the hint; a check asserts it.
 const HINT_Y = ARENA_H - 64;
 
-// Where the last line of the help screen ends. Set by drawHelp(), read by the
-// checks; there is no other way to notice a screen has outgrown itself.
+// Where help's last line ends, for the check: it can outgrow the screen.
 let helpBottom = 0;
 
 function drawHint(text) {
@@ -548,8 +494,7 @@ function drawHint(text) {
   ctx.fillText(text, ARENA_W / 2, HINT_Y);
 }
 
-// The challenge lines' and the notice's fonts: a check measures every line and
-// every rung's notice at these against the view's width (D109).
+// A check measures every challenge line and notice at these (D109).
 const CHALLENGE_FONT = '15px system-ui, sans-serif';
 const NOTICE_FONT = '17px system-ui, sans-serif';
 
@@ -563,15 +508,13 @@ function drawMenu(menu) {
   ctx.shadowBlur = 0;
 
   if (menu.sub) {
-    ctx.fillStyle = menu.warn ? '#ff5c85' : '#456b78';   // a warning reads red (D103)
+    ctx.fillStyle = menu.warn ? '#ff5c85' : '#456b78';
     ctx.font = '15px system-ui, sans-serif';
     ctx.fillText(menu.sub, ARENA_W / 2, 276);
   }
 
   drawRows(menu);
 
-  // The challenges under a menu's rows (D109): which lines and where is
-  // `challengeLines()` and `challengesTop()` in game/; this prints them.
   if (menu.challenges) {
     ctx.font = CHALLENGE_FONT;
     challengeLines().forEach((line, i) => {
@@ -581,11 +524,8 @@ function drawMenu(menu) {
   }
 }
 
-// A menu's rows and its hint -- the menus' and the end screens' alike.
 function drawRows(menu) {
   ctx.textAlign = 'center';
-  // A row that cannot be taken right now -- a tier you cannot afford -- is
-  // drawn dim, highlighted or not.
   menu.items.forEach((item, i) => {
     const on = i === menuIndex;
     ctx.fillStyle = item.dim ? (on ? '#5d8b99' : '#2f5563') : (on ? '#bffcff' : '#547f8d');
@@ -597,8 +537,6 @@ function drawRows(menu) {
   drawHint('\u2191 \u2193 or mouse,  Enter or click to pick');
 }
 
-// `home` (D38, D66): the menu, plus its layer lines -- which layers show, and
-// how, is `MENUS.home.lines` in game/; this only prints them.
 function drawHome() {
   drawMenu(MENUS.home);
   ctx.textAlign = 'center';
@@ -609,14 +547,11 @@ function drawHome() {
   });
 }
 
-// The marked row's tip on the debug setup (D102), one line: a check measures
-// every tip at this font against the view's width.
+// A check measures every tip at this against the view's width.
 const DEBUG_TIP_FONT = '15px system-ui, sans-serif';
 
-// The debug mode's setup (D102): which rows there are, where each sits and
-// what it holds are `MENUS.debug` and `debugRect()` in game/; this prints them.
-// A value row reads its label on the left and `‹ value ›` at three quarters
-// across, where a click on either side moves it (`clickStep()`).
+// A value row: its label left, `‹ value ›` three quarters across, where
+// `clickStep()` reads the click.
 function drawDebug() {
   const menu = MENUS.debug;
   ctx.textAlign = 'center';
@@ -718,17 +653,16 @@ function drawOptions() {
   drawHint('\u2191 \u2193 or mouse,  \u2190 \u2192 or click to change,  Esc to go back');
 }
 
-// The water darkens with depth: each layer's own colour at its top (D72),
-// near-black at its bottom. The letterbox margin gets the same colour, so it
-// stays invisible. PLACEHOLDER GRAPHICS, as the layer's name is.
+// Each layer's colour at its top (D72), near-black at its bottom; the margin
+// too, so it stays invisible. PLACEHOLDER GRAPHICS.
 function waterColor() {
-  // No dive has been drawn yet -- the title at boot: the top of the first layer.
+  // Before any dive -- the title at boot -- the first layer's top.
   let color = LAYERS[0].color, lit = 1;
   if (plan.length) {
     const l = layerAt(cameraY);
     const first = plan.findIndex(e => e.layer === l);
     const last = plan.findLastIndex(e => e.layer === l);
-    const top = first ? gateDepth(first - 1) : 0;     // where the layer begins
+    const top = first ? gateDepth(first - 1) : 0;
     lit = 1 - Math.min(1, Math.max(0, (cameraY - top) / (gateDepth(last) - top)));
     color = LAYERS[l].color;
   }
@@ -738,9 +672,7 @@ function waterColor() {
 }
 
 function draw() {
-  // Paint the whole window, including the letterbox margin, then switch
-  // into view coordinates. What spills into the margin is painted over by
-  // coverMargins() once the field is drawn.
+  // The whole window, margin included; coverMargins() paints over what spills.
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = waterColor();
   ctx.fillRect(0, 0, canvas.width, canvas.height);

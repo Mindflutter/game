@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { loadGame } from './harness.js';
 
-// One reader for the whole repo; `read` is the docs/ view of it.
 const ROOT = new URL('../', import.meta.url);
 const src = f => readFileSync(new URL(f, ROOT), 'utf8');
 const read = f => src('docs/' + f);
@@ -104,10 +103,8 @@ describe('docs/', () => {
   });
 });
 
-// The numbers docs quote about the code, regenerated rather than trusted
-// (CLAUDE.md: "every number the docs quote about the code is regenerable").
-// The game's scripts are read from the directories, so a new file cannot be
-// silently left out.
+// The numbers docs quote about the code, regenerated rather than trusted. The
+// scripts are read from the directories, so a new file cannot be left out.
 const js = dir => readdirSync(new URL(dir + '/', ROOT)).filter(f => f.endsWith('.js')).map(f => dir + '/' + f);
 const GAME = js('game');
 const PLATFORM = [...js('platform'), 'main.js'];
@@ -152,8 +149,6 @@ describe('numbers the docs quote about the code', () => {
   });
 
   it('names no constant that the code does not have', () => {
-    // The living docs only; decisions.md and changelog.md are history and may
-    // name what a later change removed.
     const words = new Set([...GAME, ...PLATFORM].map(src).join('\n').match(/\w+/g));
     const live = DESCRIBE_CODE.map(read)
       .concat(src('CLAUDE.md'), src('README.md')).join('\n');
@@ -164,11 +159,9 @@ describe('numbers the docs quote about the code', () => {
 });
 
 // ---------- the entity docs ----------
-// One doc per kind of entity in docs/entities/ (D81): every item, its numbers
-// and what it is for. The numbers are copies of game/content.js, and a copy is
-// a number that will disagree with itself -- so every table is rebuilt here
-// from the code and must appear in its doc verbatim. When one fails, the table
-// it wanted is in the diff: paste it in.
+// The entity docs (D81): every table is rebuilt here from the code and must
+// appear in its doc verbatim. When one fails, the table it wanted is in the
+// diff: paste it in.
 describe('the entity docs', () => {
   const g = loadGame();
   const doc = f => read('entities/' + f);
@@ -199,7 +192,6 @@ describe('the entity docs', () => {
       ? (to[k] < base[k] ? '-' : '+') + r3(Math.abs(to[k] - base[k]))
       : r3(to[k]))).join(', ');
   };
-  // A piece of gear's roster and its tiers, one row a tier.
   const gear = records => {
     const cols = ['name', ...plain(records).filter(k => k !== 'name')];
     return [
@@ -260,12 +252,9 @@ describe('the entity docs', () => {
   });
 
   it('documents every field the code has, and only those or reserved ones', () => {
-    // The record's shape is what S5 (content) writes its content on, so a
-    // field nobody documented -- or a documented one the code dropped -- is
-    // the shape drifting. A field the code does not have yet is allowed only
-    // marked **Reserved**, for the stage that adds it. Every piece of gear has
-    // a name and tiers, which is all the shop reads -- equipment too, before
-    // any exists.
+    // A field nobody documented, or a documented one the code dropped, is the
+    // shape drifting. One the code lacks yet is allowed marked **Reserved**.
+    // Every piece of gear has a name and tiers, equipment too.
     const shapes = {
       'enemies.md': keysOf(g.ENEMY_TYPES),
       'mods.md': keysOf(g.MODS),

@@ -1,29 +1,21 @@
-// A scripted bot, so balance is reported as numbers rather than impressions
-// (D16). It drives the seam directly -- keys, aim, the mouse button -- and runs
-// as fast as Node will go, not at wall-clock speed.
-//
-// It is deliberately a weak, simple driver: for regression it only has to be
-// *consistent*, and a bot that plays brilliantly would flatter the balance and
-// make everything look too easy. See `ideas.md` -> "There are three bots".
+// A scripted bot, so balance is numbers, not impressions (D16). Deliberately
+// weak: for regression it only has to be consistent, and a brilliant bot would
+// flatter the balance. See `ideas.md` -> "There are three bots".
 import { loadGame } from './harness.js';
 
-// Aim at the nearest enemy, hold the trigger, and back away from it. That is
-// the whole policy.
-//
-// `g.player`, `g.ARENA_W` and friends are vm-bridged accessors, not plain
-// properties -- every read crosses into the sandbox. They are hoisted out of
-// the loop because this runs ~10k times per dive with ~9 enemies each.
+// The whole policy: aim at the nearest enemy, hold the trigger, back away.
+// Bridged reads cross into the sandbox, so they are hoisted out of the loop.
 export function kiteAndShoot(g) {
   const p = g.player;
   const px = p.x, py = p.y;
-  // The middle of the *view*, in world space: the camera moves, and a centre
-  // fixed at 400 would drag the bot to the top of the layer.
+  // The middle of the *view*: a fixed centre would drag the bot to the top of
+  // the layer.
   const cx = g.ARENA_W / 2, cy = g.cameraY + g.ARENA_H / 2;
 
   let near = null, best = Infinity;
   for (const e of g.enemies) {
     const dx = e.x - px, dy = e.y - py;
-    const d2 = dx * dx + dy * dy;          // squared: we only ever compare
+    const d2 = dx * dx + dy * dy;
     if (d2 < best) { best = d2; near = e; }
   }
 
@@ -44,39 +36,27 @@ export function kiteAndShoot(g) {
 // One tick of the bot's input, without the update: shared by `diveReport` and
 // by tests that assert on every tick, so both play the same bot.
 export function botInput(g) {
-  // A layer end offers valuable mods (D85), and the dive does not go on until
-  // one is marked and Continue pressed -- so the bot has to pick. It always
-  // takes the first card rather than rolling: a bot that chose at random would
-  // build itself differently every dive, and two dives that are not the same
-  // dive cannot be compared. Boosts it never seeks (D86): it touches one only
-  // by swimming over it, so its numbers stay a floor.
+  // Always the first card: a bot choosing at random would build itself
+  // differently every dive, and two different dives cannot be compared (D85).
+  // Boosts it never seeks (D86), so its numbers stay a floor.
   if (g.screen === 'mods') {
     g.justPressed.add('Digit1');
     g.justPressed.add('Enter');
   } else kiteAndShoot(g);
 }
 
-// Plays one dive and reports how long each batch took to clear.
-//
-// `batchIndex > times.length` is the "a begun batch is still unrecorded" test,
-// so no separate timing flag is needed: once a clear is pushed the condition is
-// false, which is what stops the timer re-arming during the quiet beat when the
-// arena is legitimately empty.
-// `secondsCap` is *game* time, not ticks, so it survives a change of step size.
-//
-// `immortal` keeps the bot alive, which is how a traverse time is taken: the
-// mortal bot dies before the bottom, and a dive it cannot finish has no
-// traverse time to report. `scenario` starts it from a named setup instead of
-// the top (D37) -- how the boss fight is measured alone (D63). A scenario can
-// start deep in the list, so batches count from where it began.
+// `batchIndex > times.length` means a begun batch is still unrecorded, so the
+// quiet beat between batches cannot re-arm the timer. `immortal` is how a
+// traverse time is taken: the mortal bot dies before the bottom. A `scenario`
+// starts from a named setup (D37), such as the boss fight alone (D63).
 export function diveReport(seed, batches = 5, secondsCap = 180, immortal = false, scenario) {
   const g = loadGame();
   if (scenario) g.applyScenario(scenario, seed);
   else g.reset(seed);
-  g.immortal = immortal;                   // immortality, set once
+  g.immortal = immortal;
   const base = g.batchIndex;
 
-  const TICK = g.FIXED_DT;               // the game's own step, not a copy
+  const TICK = g.FIXED_DT;
   const tickCap = Math.round(secondsCap / TICK);
 
   const times = [];

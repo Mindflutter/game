@@ -1,11 +1,10 @@
 // The fight itself: the trigger, shots, the dash, touch, gems, and what a
-// clear or a death does on the tick it lands. Moved from the browser suite,
-// which keeps only what Node cannot check (D39).
+// clear or a death does on the tick it lands.
 import { describe, it, expect } from 'vitest';
 import { loadGame } from './harness.js';
 
-// A fish that hurts on touch (D108), as every fish did before bites: these
-// checks are about touch, i-frames and the dash, not about any one attack.
+// A fish that hurts on touch (D108): these checks are about touch, i-frames
+// and the dash, not any one attack.
 const mob = (x, y, over) => Object.assign(
   { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, value: 1, lastHitBy: 0,
     pushX: 0, pushY: 0, vx: 0, vy: 0, touch: true }, over);
@@ -22,9 +21,8 @@ const shot = (g, over = {}) => {
   return b;
 };
 
-// Point at something and pull the trigger (D28). A real press always follows
-// a frame with the button up, which arms the trigger (D47); these start
-// mid-press, so they set that precondition rather than simulate it.
+// A real press arms the trigger with a frame up first (D47); these start
+// mid-press, so they arm it.
 const holdFire = g => { g.fireArmed = true; g.keys.add('Mouse0'); };
 const fireAt = (g, e) => { g.aim.x = e.x; g.aim.y = e.y; holdFire(g); };
 const run = (g, n, dt = 1 / 60) => { for (let i = 0; i < n; i++) g.update(dt); };

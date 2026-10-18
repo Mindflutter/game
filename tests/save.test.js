@@ -1,7 +1,6 @@
-// The save -- a dive resumable at any tick, what persists, the settings, and
-// every older version migrated -- built in S4 (meta loop skeleton), designed
-// in docs/specs/2026-09-30-s4-meta-loop-design.md. Each test names the
-// decision it guards.
+// The save: a dive resumable at any tick, what persists, the settings, and
+// every older version migrated. Designed in
+// docs/specs/2026-09-30-s4-meta-loop-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';

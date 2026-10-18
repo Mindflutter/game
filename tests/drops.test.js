@@ -1,8 +1,4 @@
-// Mods from drops: a glowing fish carries each batch's mod (D84 (mods are
-// dropped)), glowing from the moment it arrives and never a boss or a
-// mini-boss (D88 (the fish glows from the start)), the layer end offers a pick
-// of valuable mods (D85 (the layer end's pick)), kills drop boosts (D86
-// (boosts)), and rank is gone (D87 (rank is retired)). Designed in
+// Mods from drops (D84, D85, D86, D87, D88). Designed in
 // docs/specs/2026-10-12-mods-from-drops-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
@@ -17,7 +13,7 @@ const paid = g => held(g) + g.drops.filter(d => d.mod).length;
 // The ordinary mods a fish can carry: not a layer end's own, and fitting the
 // weapon carried (D99).
 const ordinary = g => g.MODS.filter(m => !m.end && g.fits(m));
-// The six numbers a mod can move, for comparing two players.
+// Numbers a mod can move, for comparing two players.
 const STATS = ['speed', 'maxHp', 'dashCooldown', 'iframes', 'dashDamage', 'mendOnClear'];
 const stats = p => STATS.map(k => p[k]);
 

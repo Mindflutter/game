@@ -1,7 +1,6 @@
 // The screens and what they answer to -- menus, the cards' keys, options --
-// and the picture's own motion: shake and sparks. Moved from the browser
-// suite, which keeps only what Node cannot check (D39): the menu cursor's
-// arrows are platform's (`moveCursor`), so they stay there.
+// and shake and sparks. The menu cursor's arrows are platform's
+// (`moveCursor`), so they stay in the browser suite.
 import { describe, it, expect } from 'vitest';
 import { loadGame } from './harness.js';
 

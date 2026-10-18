@@ -8,41 +8,29 @@ function enemyType(name) {
   return t;
 }
 
-// Builds the record. Speed is passed in rather than derived, because a batch
-// arrival wants jitter while a scenario wants one predictable enemy.
+// Speed is passed in: a batch's arrivals jitter, a scenario's must not.
 function makeEnemy(t, x, y, speed) {
   enemies.push({ name: t.name, x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
                  color: t.color, glow: t.glow, lastHitBy: 0,
                  pushX: 0, pushY: 0, vx: 0, vy: 0,
-                 // Its behaviour (`behaviourOf`). Then the step it is on and for
-                 // how long, which each behaviour reads its own way -- a lunger
-                 // also locks its line, aimX/aimY, as it winds up; chasers
-                 // never touch them.
                  ...behaviourOf(t),
                  phase: 'chase', phaseTime: 0 });
 }
 
-// Somewhere just outside the view, so arrivals fade in from the dark rather
-// than popping into view. In view coordinates; the caller adds the camera.
-// The boss rises from below, centred, before any draw from the seed, so no
-// other arrival moves.
+// Just outside the view, in view coordinates: the caller adds the camera. The
+// boss's place draws nothing from the seed, so it moves no other arrival.
 function edgeSpawnPoint(t) {
-  const m = 40 + t.r;                    // past the edge by the whole body
+  const m = 40 + t.r;
   if (t.enters === 'bottom') return { x: ARENA_W / 2, y: ARENA_H + m };
-  const edge = Math.floor(rng() * 4);    // 0 top, 1 right, 2 bottom, 3 left
+  const edge = Math.floor(rng() * 4);
   if (edge === 0) return { x: rng() * ARENA_W, y: -m };
   if (edge === 1) return { x: ARENA_W + m,     y: rng() * ARENA_H };
   if (edge === 2) return { x: rng() * ARENA_W, y: ARENA_H + m };
   return              { x: -m,                 y: rng() * ARENA_H };
 }
 
-// Brings in one batch (D115): its fish shuffled and dealt into waves of
-// WAVE_MIN to WAVE_MAX. The first arrives now, whole; each later one starts
-// WAVE_GAP after the last, give or take, its fish each at their own moment
-// within WAVE_SPREAD -- so when, how many and which are all hard to call.
-// With escorts (D116) the batch's own fish lead, first in whatever the draw:
-// a mini-boss's escorts are dealt into the waves behind it, while the boss
-// comes alone and its crowd follows, topped up at the gate while it lives.
+// One batch, dealt into waves (D115). With escorts (D116) its own fish lead:
+// a mini-boss's escorts follow in the waves, the boss's crowd at the gate.
 function spawnBatch(batch, escorts) {
   const names = b => b.enemies.flatMap(([name, count]) => Array(count).fill(name));
   const lead = escorts ? names(batch) : [];
@@ -58,9 +46,8 @@ function spawnBatch(batch, escorts) {
   incoming.sort((a, b) => a.at - b.at);
 }
 
-// One fish of a batch, at the edge, with the usual speed jitter so a wave does
-// not arrive as a drill squad. `flags` mark a crowd's lead or one of its
-// escorts, which pays no gems (D116).
+// Jittered, so a wave does not arrive as a drill squad. `flags` mark a crowd's
+// lead or escort (D116).
 function arrive(name, flags) {
   const type = enemyType(name);
   if (!type) return;
@@ -69,25 +56,21 @@ function arrive(name, flags) {
   Object.assign(enemies.at(-1), flags);
 }
 
-// Places one named enemy at a known spot, at its nominal speed and no jitter.
-// A scenario is for watching one thing behave, so it must not vary.
+// No jitter: a scenario watches one thing behave, so it must not vary.
 function placeEnemy(name, x, y) {
   const t = enemyType(name);
   if (t) makeEnemy(t, x, y, t.speed);
 }
 
-// Where `o` would sit held inside the view, to its own radius: the view is a
-// fixed window onto the world, `cameraY` from the top. Returns the pair rather
-// than moving `o`, so "is it wholly inside?" is the same call.
+// Returns the pair rather than moving `o`, so "is it wholly inside?" is the
+// same call.
 function viewClamp(o) {
   return [Math.max(o.r, Math.min(ARENA_W - o.r, o.x)),
           Math.max(cameraY + o.r, Math.min(cameraY + ARENA_H - o.r, o.y))];
 }
 
-// Water (D107): a body's velocity closes on the one it wants by the same share
-// every tick -- RAMP_LEFT of a change still to go after `ramp` seconds -- so a
-// start eases up, a release glides and a reversal swings through. Math.pow
-// keeps it the same at any tick length. No ramp, no easing: it turns at once.
+// Water (D107): RAMP_LEFT of a change is still to go after `ramp` seconds. No
+// ramp, no easing: it turns at once.
 function ease(b, wantX, wantY, ramp, dt) {
   const k = ramp ? Math.pow(RAMP_LEFT, dt / ramp) : 0;
   b.vx = wantX + (b.vx - wantX) * k;
@@ -95,15 +78,10 @@ function ease(b, wantX, wantY, ramp, dt) {
 }
 
 // ---------- the lunge, and the fan ----------
-// The boss's attacks, and the mini-boss's (D64, D65, D117): chase, wind up,
-// attack, rest -- then chase again. The wind-up is the tell: the lunger stands
-// and swells with its line drawn, and the line is fixed when the wind-up
-// *starts*, at where the player was, which is what makes "get out of its line"
-// possible. It winds up only wholly inside the view, so the tell is always
-// seen, and from then on the view holds it: a charge that left the view would
-// take the fight with it. The rest is the opening. With a `fan`, every other
-// wind-up ends in shots instead; `attack` absent is the lunge, as on a fish
-// saved before fans. Moves the lunger itself, the dash's push included.
+// The boss's and the mini-boss's (D64, D65, D117). The line is fixed as the
+// wind-up starts, which is what makes it dodgeable. It winds up only wholly in
+// view, so the tell is seen, and the view holds it after: a charge that left
+// would take the fight with it. No `attack` is the lunge, as saved before fans.
 function lungeStep(e, ux, uy, d, dt) {
   const fanning = e.phase === 'chase' ? e.fan && e.attack === 'lunge' : e.attack === 'fan';
   const A = fanning ? e.fan : e.lunge;
@@ -161,11 +139,8 @@ function enemyShot(e, ux, uy, S) {
 }
 
 // ---------- the spit ----------
-// The archer's (D95): it closes to its range, backs off inside `near`, and
-// holds between. While within range and wholly in the view it spits at where
-// the diver is, `every` seconds -- so a shot always comes from a fish you can
-// see, and one outside the view comes in first. Backing off never leaves the
-// view. `phaseTime` is the time since its last spit.
+// The archer's (D95). It spits only wholly in view, so a shot always comes
+// from a fish you can see. `phaseTime` is the time since its last spit.
 function spitStep(e, ux, uy, d, dt) {
   const S = e.spit;
   const [cx, cy] = viewClamp(e);
@@ -183,12 +158,9 @@ function spitStep(e, ux, uy, d, dt) {
 }
 
 // ---------- the fuse ----------
-// The puffer's (D95, D106): it chases for at least `chase` seconds; then,
-// within `trigger` of the diver and wholly in the view -- so the tell is
-// always seen -- it stops and swells for `time` seconds and bursts, costing a
-// heart within `blast`, and chases on. The dash's shove still moves it, which
-// is the answer to one. It outlives its burst, so a burst pays nothing: only
-// a fish you kill does.
+// The puffer's (D95, D106). It fuses only wholly in view, so the tell is seen;
+// the dash's shove still moves it, which is the answer to one. It outlives its
+// burst, so a burst pays nothing.
 function fuseStep(e, ux, uy, d, dt) {
   const F = e.fuse;
   e.phaseTime += dt;
@@ -215,11 +187,7 @@ function fuseStep(e, ux, uy, d, dt) {
 }
 
 // ---------- the bite ----------
-// The plain fish's (D108): it chases, eased by its `ramp`, until its body is
-// within `reach` of the diver's; then it stops -- easing to a halt, so a heavy
-// fish slides -- and holds its jaws open for `windup` seconds, the tell. They
-// snap shut on a heart if the diver is still within `reach`, else on water,
-// and it chases on, `rest` seconds before it can bite again.
+// The plain fish's (D108). The jaws ease it to a halt, so a heavy fish slides.
 function biteStep(e, ux, uy, d, dt) {
   const B = e.bite;
   e.phaseTime += dt;
@@ -240,10 +208,8 @@ function biteStep(e, ux, uy, d, dt) {
 }
 
 // ---------- the weave ----------
-// The eel's (D95): it closes in like a chaser while swaying across its
-// heading, `width` px either side at `rate` sways a second -- so a shot aimed
-// where it is misses where it will be. `phaseTime` is the sway's clock, so a
-// batch's eels sway in step, as a school.
+// The eel's (D95): `width` px either side, `rate` sways a second. `phaseTime`
+// is the sway's clock, so a batch's eels sway in step, as a school.
 function weaveStep(e, ux, uy, d, dt) {
   const w = 2 * Math.PI * e.weave.rate;
   const side = e.weave.width * w * Math.cos(w * (e.phaseTime += dt));   // the sway's speed
@@ -251,11 +217,8 @@ function weaveStep(e, ux, uy, d, dt) {
   e.y += (uy * e.speed + ux * side + e.pushY) * dt;
 }
 
-// The one way the diver is hurt -- a bite, a shot, a burst (D95). Nothing while
-// the i-frames or the dash's invulnerability run, or while `immortal`;
-// otherwise the i-frames, the batch marked as hit for `untouched`, and a heart
-// -- or the suit's guard, while it has one left this batch (D100). Returns
-// whether it landed, so a shot that did not is not spent.
+// The one way the diver is hurt (D95, D100). Returns whether it landed, so a
+// shot that did not is not spent.
 function hurtPlayer() {
   if (player.hurt > 0 || immortal) return false;
   player.hurt = player.iframes;
@@ -278,15 +241,12 @@ function hurtPlayer() {
   return true;
 }
 
-// How far a point is from a line segment, squared. A fast hitbox tested only
-// where it *landed* skips whatever it crossed on the way, so the dash and
-// bullets test the segment they swept this frame (D50, D53). Squared, because
-// both callers are per-frame collision loops: no square root.
+// A fast hitbox tested only where it landed skips whatever it crossed, so the
+// dash and bullets test the segment they swept (D50, D53).
 function segDistanceSq(px, py, ax, ay, bx, by) {
   const sx = bx - ax, sy = by - ay;
   const len2 = sx * sx + sy * sy;
-  // t is how far along the segment the closest point sits, clamped to its ends
-  // so the shape is a capsule and not an infinite line.
+  // Clamped to the ends: a capsule, not an infinite line.
   const t = len2 ? Math.max(0, Math.min(1, ((px - ax) * sx + (py - ay) * sy) / len2)) : 0;
   const dx = px - (ax + t * sx), dy = py - (ay + t * sy);
   return dx * dx + dy * dy;
@@ -296,8 +256,6 @@ function spark(x, y, vx, vy, life, r, color, glow) {
   particles.push({ x, y, vx, vy, life, maxLife: life, r, color, glow });
 }
 
-// A puff of shrinking sparks thrown in every direction. Purely decorative,
-// but it's what makes a kill feel like an event rather than a disappearance.
 function burst(x, y, color, glow, count, speed, life = 0.45) {
   for (let i = 0; i < count; i++) {
     const a = rng() * Math.PI * 2;
@@ -306,14 +264,11 @@ function burst(x, y, color, glow, count, speed, life = 0.45) {
   }
 }
 
-// The Knife's cut (D105): everything in the arc toward (ux, uy) at once, no
-// shot. A fish counts if its body reaches into the blade's sweep -- out to
-// `range` plus the blade's own `shotRadius`, and past the arc's edge by as
-// much. Nearest first, pierce + 1 at most. Runs once per pull, so it has no
-// per-tick loop to keep squared.
+// The Knife's cut (D105). Runs once per pull, not every tick, so it need not
+// keep distances squared.
 function swing(ux, uy) {
   const half = player.swing.arc * Math.PI / 360;
-  const cut = [];                            // [distance, fish]
+  const cut = [];
   for (const e of enemies) {
     if (e.gone) continue;
     const dx = e.x - player.x, dy = e.y - player.y, d = Math.hypot(dx, dy);
@@ -334,8 +289,6 @@ function swing(ux, uy) {
   player.swingY = uy;
 }
 
-// Sparks kicked back along the shot, so a hit that doesn't kill still looks
-// like it landed.
 function hitSparks(e, b) {
   const bs = Math.sqrt(b.vx * b.vx + b.vy * b.vy) || 1;
   for (let n = 0; n < 5; n++) {
@@ -348,23 +301,20 @@ function hitSparks(e, b) {
   }
 }
 
-// One enemy's death, from whatever killed it -- a shot, a swing or a dash.
-// Three callers, and duplicating the gem drop is how the paths quietly drift
-// apart.
+// Every death goes through here -- shot, swing or dash -- so the paths cannot
+// drift apart.
 function killEnemy(e) {
   e.gone = true;
   kills += 1;
-  // What `beeline` and `flurry` count (D109) -- in a batch of the plan only, so
-  // a fish placed by hand pays nothing.
+  // A fish placed by hand pays no challenge (D109).
   if (plan[batchIndex - 1]) {
     if (firstKillAt === null) firstKillAt = elapsed;
     if (e.carrier) glowAt = elapsed;
     killTimes = [...killTimes.filter(t => elapsed - t <= FLURRY_TIME), elapsed];
     for (const c of CHALLENGES) if (c.kill) climb(c, c.kill());
   }
-  // The last of a crowd's leads takes the crowd with it (D116): no mopping up
-  // after the boss, and the escorts pay nothing -- the fight is the boss's.
-  // Its shots go too: none may land after the layer end heals (D117).
+  // The last lead takes its crowd with it (D116), and every shot: none may land
+  // after the layer end heals (D117).
   if (e.lead && !enemies.some(x => x.lead && !x.gone)) {
     for (const x of enemies) {
       if (!x.escort || x.gone) continue;
@@ -379,11 +329,8 @@ function killEnemy(e) {
                 y: e.y + (rng() - 0.5) * 18, r: 4 });
   }
   if (e.carrier) dropMod(e);
-  // A boost, perhaps (D86): the chance is BOOST_C for every kill since the last
-  // one dropped, so it grows until it is certain. Never from the kill that
-  // ends the batch -- it would only fade behind you while the current carried
-  // you on -- though that kill still counts toward the next. One that only
-  // empties the arena between waves may drop one: the fight goes on (D115).
+  // A boost (D86), never from the kill that ends the batch: it would fade behind
+  // you as the current carried you on. Between waves the fight goes on (D115).
   sinceBoost += 1;
   if ((enemies.some(x => !x.gone) || incoming.length) && rng() < BOOST_C * sinceBoost) {
     drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS, 1)[0].name, life: BOOST_LIFE });
@@ -394,23 +341,18 @@ function killEnemy(e) {
 }
 
 // ---------- what kills drop besides gems (D84, D86) ----------
-// The batch's mod, where its glowing fish died. It flies to you like a gem and
-// never fades: it is yours for the dive.
 function dropMod(e) {
   drops.push({ x: e.x, y: e.y, r: 7, mod: drawCarried().name });
 }
 
-// A batch of the plan has just arrived: one of its fish glows from the start
-// and carries the batch's mod (D84, D88) -- never in a batch a boss or a
-// mini-boss leads, whose type says `carries: false`, not even on its escorts
-// (D116), and none once every ordinary mod is capped.
+// One fish glows from the start (D84, D88), but not in a batch a boss leads,
+// its escorts included (D116).
 function light() {
   if (enemies.some(e => enemyType(e.name).carries === false) || !carriable().length) return;
   drawDistinct(enemies, 1)[0].carrier = true;
 }
 
-// A mod reaching you: taken, and named on the pickup line with what it
-// changed -- the numbers stay in sight, as on the cards (D52).
+// The pickup line names what it changed, as the cards do (D52).
 function collectMod(name) {
   const m = MODS.find(x => x.name === name);
   const moved = modPreview(m);
@@ -421,7 +363,6 @@ function collectMod(name) {
   sound('modB');
 }
 
-// A boost touched: its numbers go on, and come off when its time runs out.
 // Touched again while it runs, its clock restarts and nothing more is added.
 function startBoost(name) {
   const b = BOOSTS.find(x => x.name === name);
@@ -436,8 +377,6 @@ function startBoost(name) {
   sound('boost');
 }
 
-// Mouse hit-testing. The rectangles come from content.js, so the renderer and
-// this agree on where things are without either owning the other's layout.
 const inRect = (r, x, y) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 
 function cardUnder(x, y) {
@@ -447,15 +386,13 @@ function cardUnder(x, y) {
   return -1;
 }
 
-// Which row of a menu or the options list is under a point, or -1.
 function rowUnder(x, y, n, top) {
   for (let i = 0; i < n; i++) if (inRect(rowRect(i, top), x, y)) return i;
   return -1;
 }
 
-// Has the mouse actually moved since the last frame? A cursor left resting on
-// a row must not overrule the keys every frame. Every screen with a cursor --
-// the menus, options, the layer end's cards -- calls it once a frame.
+// A cursor resting on a row must not overrule the keys every frame. Every
+// screen with a cursor calls it once a frame.
 function mouseMoved() {
   const moved = aim.x !== lastAimX || aim.y !== lastAimY;
   lastAimX = aim.x;
@@ -463,51 +400,36 @@ function mouseMoved() {
   return moved;
 }
 
-// A batch just died: pay the challenges and Mend, and at a layer end the heal
-// and the pick of valuable mods (D85) -- the dive's one pause. A gate's own mod
-// rode in on its glowing fish (D84).
 function clearBatch() {
-  // The batch just cleared is the plan's entry before `batchIndex`. Enemies
-  // placed by hand before the first batch -- a scenario's (D37) -- have none:
-  // they pay Mend, and nothing that belongs to a layer.
+  // A scenario's hand-placed fish (D37) have no entry: they pay Mend, and
+  // nothing that belongs to a layer.
   const entry = plan[batchIndex - 1];
   if (entry) {
-    // Challenges first, so the layer end's heal cannot read as a clean batch
-    // (D109): each streak goes on or starts again, and a layer's end reads its
-    // clock -- stopped then until the next layer's first batch.
+    // Challenges first, so the layer end's heal cannot read as a clean batch (D109).
     for (const c of CHALLENGES) {
       if (c.clear) climb(c, tally[c.name] = c.clear(tally[c.name] || 0));
       if (c.end && entry.end) climb(c, c.end());
     }
-    // The layer end is a milestone (D68): a full heal, and the layer counts as
-    // cleared at `home` from now on, whatever the rest of the dive does.
+    // A milestone (D68): cleared at `home` whatever the rest of the dive does.
     if (entry.end) {
       layerStart = null;
       player.hp = player.maxHp;
       meta.cleared = Math.max(meta.cleared, entry.layer + 1);
     }
   }
-  // The last layer's end pays no pick and no Mend -- nothing to go on to
-  // (D59, narrowed by D68). The current carries you to the bottom, the win.
+  // The last layer's end pays no pick and no Mend: nothing to go on to (D59, D68).
   if (batchIndex >= plan.length) return;
   // A comfort mod is a standing effect rather than a stat, so it acts here.
   if (player.mendOnClear) {
     player.hp = Math.min(player.maxHp, player.hp + player.mendOnClear);
   }
-  // The layer end's cards do not come up on the same frame as the kill. The
-  // boss is still bursting -- `killEnemy` throws sparks that live 0.5s -- and
-  // dimming the arena over them reads as a jump cut rather than as a reward;
-  // the offer arrives once the death has played (D51).
+  // The cards wait for the boss's burst to play: dimming over it reads as a
+  // jump cut, not a reward (D51).
   if (entry && entry.end) offerTimer = MOD_OFFER_DELAY;
 }
 
-// What a mod would actually change, worked out by applying it to a copy of the
-// player and diffing the numbers (D52). Derived from `apply` itself rather than
-// written on the record, so a card can never advertise a number the mod does
-// not deliver, and adding a mod still costs exactly one line.
-// `n` picks of it at once: a layer end's card gives an ordinary mod at the
-// bigger step (D85), and its numbers say so. `base` is the diver it is worked
-// out on: the one in play, or the debug setup's (D102) before any dive.
+// Derived from `apply` itself (D52), so a card can never advertise a number
+// the mod does not deliver. A layer end's card gives `n` picks at once (D85).
 function modPreview(mod, n = 1, base = player) {
   const after = { ...base };
   for (let i = 0; i < n; i++) mod.apply(after);
@@ -516,14 +438,10 @@ function modPreview(mod, n = 1, base = player) {
     .map(k => ({ stat: k, from: base[k], to: after[k] }));
 }
 
-// One stat a mod moves, as the card and the pickup line both print it: its
-// name in words (STAT_NAMES), from -> to. Whole numbers stay whole; anything
-// fractional gets two places at most, so a 0.30000000000000004 cannot reach
-// the screen.
+// Two places at most, so a 0.30000000000000004 cannot reach the screen.
 const statLine = c => STAT_NAMES[c.stat] + ' ' + +c.from.toFixed(2) + ' \u2192 ' + +c.to.toFixed(2);
 
-// The beat is over: deal the layer end's cards (D85), the middle one marked.
-// With every mod capped there are none, and Continue alone goes on.
+// With every mod capped there are no cards, and Continue alone goes on.
 function openModOffer() {
   choices = rollValuable();
   choiceIndex = Math.floor(choices.length / 2);
@@ -532,25 +450,19 @@ function openModOffer() {
   sound('modB');
 }
 
-// A mod taken -- carried in by a fish, from a layer end's card, or from a
-// scenario's kit. Counted, so the draws can refuse it once it is at its max.
 function takeMod(mod) {
   mod.apply(player);
   modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
 }
 
-// A challenge's count reached `v` (D109): every rung it now meets pays, in order
-// and once ever -- rung k pays k points -- and the notice names the highest,
-// or, with others paid on the same tick, every challenge by name and the total.
-// What persists, not the dive, keeps the rungs.
+// Every rung `v` now meets pays, once ever, rung k paying k points (D109).
 function climb(c, v) {
   const was = meta.challenges[c.name] || 0;
   let k = was;
   while (k < c.rungs.length && (c.within ? v <= c.rungs[k] : v >= c.rungs[k])) k += 1;
   if (k === was) return;
   meta.challenges[c.name] = k;
-  // A challenge paying twice in a tick -- a swing of twelve, kill by kill -- is
-  // one entry.
+  // A challenge paying twice in a tick -- a swing's kills -- is one entry.
   let now = paidNow.find(p => p.c === c);
   if (!now) paidNow.push(now = { c, paid: 0 });
   now.paid += tri(k) - tri(was);
@@ -561,24 +473,20 @@ function climb(c, v) {
 }
 
 // ---------- home ----------
-// Attribute points to spend: what the ladders' rungs paid, less what the steps
-// raised cost (D109). Derived every time, so the two can never disagree (D36).
+// Derived every time, so paid and spent can never disagree (D36, D109).
 function points() {
   return CHALLENGES.reduce((a, c) => a + tri(meta.challenges[c.name] || 0), 0) -
          ATTRIBUTES.reduce((a, x) => a + tri(meta.raised[x.name] || 0), 0);
 }
 
-// The next tier's cost, or undefined at the top -- where `canBuy` is false,
-// since no bank is `>= undefined`. `home` dims the row by the same test.
+// Undefined at the top, where `canBuy` is false: no bank is `>= undefined`.
 const nextCost = g => g.tiers[meta.gear[g.name] || 0]?.cost;
 const canBuy = g => meets(g) && meta.bank >= nextCost(g);
-// Whether the steps raised on each attribute a piece of gear requires reach
-// it (D36, D98): scheduling, not scaling -- it changes when, never how much.
+// Scheduling, not scaling: it changes when, never how much (D36, D98).
 const meets = g => Object.entries(g.requires || {}).every(([a, n]) => (meta.raised[a] || 0) >= n);
 
-// A weapon's row at `home` (D97): owning one costs its gems and carries it at
-// once, one owned is carried for nothing, and the one carried raises its tier.
-// Every write saves at once: a purchase is never undone by a closed tab.
+// A weapon's row at `home` (D97). Every write saves at once: a purchase is
+// never undone by a closed tab.
 const canOwn = w => meets(w) && meta.bank >= w.cost;
 function pickWeapon(w) {
   if (meta.carried === w.name) return buy(w);
@@ -598,7 +506,6 @@ function buy(g) {
   saveNow();
 }
 
-// Step n of an attribute costs n points (D109).
 function raise(a) {
   const step = (meta.raised[a.name] || 0) + 1;
   if (points() < step) return;
@@ -606,8 +513,7 @@ function raise(a) {
   saveNow();
 }
 
-// Death or the win: the dive's gems are banked however it ended (D67), the
-// depth it reached is kept, and the dive is gone from the save (D70).
+// Banked however the dive ended (D67); the dive leaves the save (D70).
 function endDive() {
   meta.bank += currency;
   meta.deepest = Math.max(meta.deepest, cameraY);
@@ -616,23 +522,19 @@ function endDive() {
   saveNow();
 }
 
-// Every save goes through here, the platform's own too -- the tab hidden, the
-// page closed -- since game/ decides when (D77). Never in the debug mode
-// (D102): its meta is the setup's, and the save on disk is the player's.
+// Every save, the platform's too, since game/ decides when (D77). Never in the
+// debug mode (D102): its meta is the setup's, not the player's.
 function saveNow() {
   if (!debugSetup) persist(saveText());
 }
 
-// Every way onto a menu screen, so none can leave the cursor past the end of
-// a shorter menu than the one before.
+// Every way onto a menu, so none leaves the cursor past a shorter menu's end.
 function openMenu(name) {
   screen = name;
   menuIndex = 0;
 }
 
-// A new game (D103): what persists and any dive under way, gone for good --
-// the save written fresh, which is what clearing it means here -- then
-// `home`, as on a first launch.
+// A new game (D103): the save written fresh is what clearing it means here.
 function newGame() {
   meta = freshMeta();
   diveLive = false;
@@ -641,9 +543,7 @@ function newGame() {
 }
 
 // ---------- the debug mode ----------
-// `?debug` (D102) opens its setup screen in place of the title, on a fresh
-// meta and muted until M: main.js reads no save for it, and `saveNow()` writes
-// none. `code` is a setup's, from the URL -- empty for a bare `?debug`.
+// `?debug` (D102): main.js reads no save for it, and `saveNow()` writes none.
 function openDebug(code, seed) {
   debugSetup = parseSetup(code, seed);
   meta = freshMeta();
@@ -652,10 +552,8 @@ function openDebug(code, seed) {
   openMenu('debug');
 }
 
-// A setup as text, for the address bar and an issue: tokens of a name and a
-// number -- a name's spaces as underscores -- and two flags, comma-separated.
-// The layer, gate, seed and the weapon carried are always written, the rest
-// only when set: `L2,G7,S4471,Harpoon2,puffer4,Dash_reach1,immortal`.
+// A setup as text, for the address bar and an issue:
+// `L2,G7,S4471,Harpoon2,puffer4,Dash_reach1,immortal`.
 function setupCode(s = debugSetup) {
   const token = (name, n) => name.replace(/ /g, '_') + n;
   return ['L' + (s.layer + 1), 'G' + (s.gate + 1), 'S' + s.seed,
@@ -665,10 +563,8 @@ function setupCode(s = debugSetup) {
           ...(s.immortal ? ['immortal'] : []), ...(s.oneShot ? ['oneshot'] : [])].join(',');
 }
 
-// The reverse, from whatever the URL holds. What it cannot name -- a typo, a
-// record renamed since -- is kept in `ignored` and shown, never guessed at,
-// and every number is held in range. Without an `S`, the seed given or a
-// fresh one.
+// What it cannot name -- a typo, a record renamed since -- is shown in
+// `ignored`, never guessed at.
 function parseSetup(code, seed = newSeed()) {
   const s = { layer: 0, gate: 0, seed, immortal: false, oneShot: false,
               weapon: WEAPONS[0].name, counts: {}, ignored: [] };
@@ -690,8 +586,6 @@ function parseSetup(code, seed = newSeed()) {
   return clampSetup(s);
 }
 
-// Every number of a setup held in range: a layer that exists, a gate in it,
-// and each count between nothing and its cap.
 function clampSetup(s) {
   const within = (n, max) => Math.max(0, Math.min(max, n));
   s.layer = within(s.layer, LAYERS.length - 1);
@@ -700,29 +594,24 @@ function clampSetup(s) {
   return s;
 }
 
-// A setup row's step (D102): at one end, a step past it comes round to the
-// other; anywhere else it moves, and stops at the end -- so Shift's five reach
-// the end before they come round.
+// Wraps only from the end itself, so Shift's five reach the end before they
+// come round.
 function wrapStep(n, d, max) {
   if (d < 0 && n <= 0) return max;
   if (d > 0 && n >= max) return 0;
   return Math.max(0, Math.min(max, n + d));
 }
 
-// How many gates a layer has: what its stretches draw, each held to its pool.
 function gatesIn(l) {
   return LAYERS[l].stretches.reduce((n, st) => n + Math.min(st.draw, st.pool.length), 0);
 }
 
-// The setup's own batch, `[type, count]` like any other, in the table's order;
-// empty when no fish is set, and the gate brings what it drew.
 function setupFish(s) {
   return ENEMY_TYPES.filter(e => s.counts[e.name] > 0).map(e => [e.name, s.counts[e.name]]);
 }
 
-// The setup screen's line under its columns: what the chosen gate drew on this
-// seed, and the fish set in its place. It draws the plan as a dive does, which
-// reseeds the randomness -- harmless here, since every dive reseeds it.
+// It reseeds the randomness to draw the plan: harmless, since every dive
+// reseeds it.
 function gateLine() {
   const s = debugSetup, fish = setupFish(s);
   seedRng(s.seed);
@@ -734,11 +623,8 @@ function gateLine() {
          (fish.length ? '   →   in its place: ' + list(fish) : '');
 }
 
-// The setup's tips (D102): the line under its columns for the marked row --
-// what the row is, and what a piece moves. Worked out from the records and
-// their `apply`, as the mod cards' numbers are (D52), so a tip cannot tell a
-// number the game does not deliver; counted on the diver a dive starts with,
-// carrying the setup's weapon.
+// The setup's tips (D102), worked out from `apply` as the cards are (D52), so a
+// tip cannot tell a number the game does not deliver.
 const signed = n => (n < 0 ? '-' : '+') + +Math.abs(n).toFixed(2);
 function moves(apply, w = WEAPONS.find(x => x.name === debugSetup.weapon)) {
   return modPreview({ apply }, 1, { ...PLAYER_START, ...shotOf(w) })
@@ -754,7 +640,6 @@ function fishTip(e) {
          (e.touch ? '; hurts to touch' : '') +
          '   hp ' + e.hp + ' \u00b7 speed ' + e.speed + ' \u00b7 ' + e.value + (e.value === 1 ? ' gem' : ' gems');
 }
-// Tier by tier -- or once, when every tier moves the same.
 function tiersTip(g, w) {
   const each = g.tiers.map(t => moves(t.apply, w));
   return each.every(m => m === each[0]) ? each[0] + ' a tier, ' + each.length + ' tiers'
@@ -783,11 +668,9 @@ function weaponTiersTip(w) {
   return w.name + "'s " + tiersTip(w, w);
 }
 
-// The setup, played: from its screen, and by R or Again from any. Its kit
-// stands in for what persists -- a fresh meta holding the setup's gear and
-// steps -- so reset() applies them exactly as a dive from home would. Its
-// fish take the gate's place in a copy of the plan's entry, never in the pool
-// the entry was drawn from.
+// A fresh meta holds the setup's gear and steps, so reset() applies them as a
+// dive from home would. Its fish replace a copy of the plan's entry, never the
+// pool it was drawn from.
 function debugDive() {
   const s = debugSetup, n = name => s.counts[name] || 0;
   const weapon = WEAPONS.find(w => w.name === s.weapon);
@@ -798,28 +681,23 @@ function debugDive() {
   damageOverride = s.oneShot ? ONE_SHOT : 0;
   startScenario({
     batch: drawn => drawn.findIndex(e => e.layer === s.layer) + s.gate,
-    // A weapon mod only with a weapon it fits (D99), as a fish carries it.
+    // A weapon mod only with a weapon it fits (D99).
     kit: MODS.filter(m => !m.weapons || m.weapons.includes(weapon.name))
              .flatMap(m => Array(n(m.name)).fill(m.name)),
   }, s.seed);
-  // The fish take the gate's whole place, a mini-boss's or the boss's escorts
-  // included (D116).
+  // The gate's whole place, escorts included (D116).
   const fish = setupFish(s);
   if (fish.length) plan[batchIndex] = { ...plan[batchIndex], batch: { enemies: fish }, escorts: undefined };
 }
 
 // ---------- the clock ----------
-// The simulation advances in whole FIXED_DT steps and nothing else, whatever
-// the display is doing (D53): leftover time is banked, so every machine
-// simulates the same game -- with a variable `dt`, every collision test would
-// sample at a distance set by the frame rate. In `game/` rather than the frame
-// loop because it is the simulation's, and ports. Returns the tick count so a
-// check can prove the banking.
+// Whole FIXED_DT steps only, leftover time banked, so every machine simulates
+// the same game (D53). In `game/`, not the frame loop, because it ports.
+// Returns the tick count so a check can prove the banking.
 let accumulator = 0;
 
 function advanceBy(elapsed) {
-  // Capped before it is banked, so time spent in another tab is discarded
-  // rather than queued up and simulated all at once.
+  // Capped before it is banked, so time in another tab is dropped, not queued.
   accumulator += Math.min(elapsed, MAX_FRAME_DT);
   let ticks = 0;
   while (accumulator >= FIXED_DT) {
@@ -831,18 +709,14 @@ function advanceBy(elapsed) {
 }
 
 // ---------- the descent ----------
-// Batch `k` waits at this depth (D58); `k = plan.length` is the bottom of the
-// last layer. The layers stack in one tall strip (D72), so depth keeps adding
-// up across them and this needs no layer at all.
+// `k = plan.length` is the bottom of the last layer (D58). The layers stack in
+// one strip (D72), so this needs no layer.
 function gateDepth(k) {
   return k * GATE_SPACING;
 }
 
-// The dive's batches, drawn from its seed (D71): each stretch of each layer
-// draws its count from its pool, never the same batch twice, and a boss's or a
-// mini-boss's escorts from theirs (D116). The layer's last entry is its end.
-// Called by reset() before anything else draws, so the plan is the first thing
-// a seed decides.
+// Drawn from the seed (D71, D116). reset() calls it before anything else
+// draws, so the plan is the first thing a seed decides.
 function drawPlan() {
   const out = [];
   LAYERS.forEach((layer, l) => {
@@ -856,39 +730,31 @@ function drawPlan() {
   return out;
 }
 
-// Which layer a depth is in: that of the next batch waiting at or below it,
-// or the last layer past the bottom. The renderer asks, for the water's colour
-// (D72). Here rather than there, because it is the dive's geometry and ports.
+// The renderer asks, for the water's colour (D72); here because it is the
+// dive's geometry, and ports.
 function layerAt(y) {
   return (plan.find((_, k) => gateDepth(k) >= y) ?? plan[plan.length - 1]).layer;
 }
 
 // ---------- update ----------
-// One wrapper so this-frame's key presses are forgotten afterwards, whichever
-// way step() returned.
+// So this frame's presses are forgotten whichever way step() returned.
 function update(dt) {
-  // Arm the trigger only on a button the player has actually released since
-  // gameplay began. Every non-playing screen disarms it, which covers every
-  // route into 'playing' rather than only the ones we remember to patch.
+  // Armed only by a button released since play began. Every other screen
+  // disarms it, which covers every route into play.
   if (screen !== 'playing') fireArmed = false;
   else if (!CLICK.some(c => keys.has(c))) fireArmed = true;
 
   const cameraFrom = cameraY;
   step(dt);
-  // The water never stops (D58). Outside step(), which returns early on every
-  // screen but play: the water keeps flowing behind the layer end's cards and
-  // under the end screens. Menus freeze it, except a menu that `flows` -- pause
-  // is the player stepping out. Its speed eases up while the camera travels and
-  // down to a drift otherwise, and the background scrolls by `waterY`.
+  // The water never stops (D58): outside step(), which returns early on every
+  // screen but play. Menus freeze it, except one that `flows`.
   if ((!MENUS[screen] || MENUS[screen].flows) && screen !== 'help' && screen !== 'options') {
     const target = cameraY > cameraFrom ? CURRENT_SPEED : CURRENT_CRAWL;
     current += (target - current) * (1 - Math.pow(CURRENT_EASE, dt));
     waterY += current * dt;
   }
-  // Outside step() for the same reason: a death sets the shake on its last
-  // playing tick, and it must still settle on the screens after. Math.pow(_, dt)
-  // rather than a per-frame factor, so the fade takes the same time at any
-  // frame rate.
+  // Outside step() too: a death sets the shake on its last playing tick, and it
+  // must settle on the screens after.
   if (shake > 0) {
     shake *= Math.pow(SHAKE_FADE, dt);
     if (shake < SHAKE_FLOOR) shake = 0;      // otherwise it jitters forever
@@ -897,14 +763,12 @@ function update(dt) {
 }
 
 function step(dt) {
-  // The sound off or on, on every screen: a setting, so it is written at once
-  // (D113).
+  // On every screen, and a setting, so written at once (D113).
   if (tapped(MUTE)) {
     muted = !muted;
     saveNow();
   }
-  // The debug mode's two keys, on every screen (D102): the same setup again --
-  // on its own screen, the first time -- and back to that screen.
+  // The debug mode's two keys, on every screen (D102).
   if (debugSetup && tapped(DEBUG_AGAIN)) return debugDive();
   if (debugSetup && tapped(DEBUG_SETUP) && screen !== 'debug') return openMenu('debug');
 
@@ -915,8 +779,6 @@ function step(dt) {
     if (mouseMoved() && hovered >= 0) menuIndex = hovered;
     menuIndex = moveCursor(menuIndex, items.length);
 
-    // A row holding a value moves with the arrows, five at a time with Shift;
-    // Enter steps it up, and a click steps it toward the side clicked.
     const item = items[menuIndex], by = FAST.some(k => keys.has(k)) ? 5 : 1;
     if (item.change && tapped(LEFT)) item.change(-by);
     else if (item.change && tapped(RIGHT)) item.change(by);
@@ -942,7 +804,7 @@ function step(dt) {
 
     if (tapped(LEFT))  OPTIONS[optionIndex].change(-1);
     if (tapped(RIGHT) || tapped(GO)) OPTIONS[optionIndex].change(1);
-    if (tapped(CLICK) && hovered >= 0) OPTIONS[hovered].change(1);   // same as Enter
+    if (tapped(CLICK) && hovered >= 0) OPTIONS[hovered].change(1);
     if (justPressed.has('Escape')) {
       saveNow();                     // the settings, as the screen is left (D113)
       screen = returnTo;
@@ -950,9 +812,8 @@ function step(dt) {
     return;
   }
 
-  // Esc pauses from play and from the mod cards alike -- the only two screens
-  // that reach this line -- and Resume goes back to whichever it was. Pausing
-  // writes the save: it is the moment a dive is most likely put down (D70).
+  // Only play and the mod cards reach this line. Pausing saves: it is the moment
+  // a dive is most likely put down (D70).
   if (justPressed.has('Escape')) {
     resumeTo = screen;
     openMenu('paused');
@@ -960,11 +821,8 @@ function step(dt) {
     return;
   }
 
-  // The layer end's pick (D85). The arena is empty -- the boss is dead -- so
-  // holding play until you choose interrupts nothing (D33). A card is marked by
-  // a click, its number or the arrows, and you can switch; Continue, or Enter,
-  // takes the marked one and the current carries you on. A cursor passing over
-  // a card marks nothing: on its way down to Continue it crosses the cards.
+  // The layer end's pick (D85, D33). Hovering marks nothing: on its way down to
+  // Continue the cursor crosses the cards.
   if (screen === 'mods') {
     const n = choices.length;
     if (n && tapped(LEFT))  choiceIndex = (choiceIndex + n - 1) % n;
@@ -992,8 +850,7 @@ function step(dt) {
   if (player.hurt > 0) player.hurt -= dt;
   if (noticeTime > 0) noticeTime -= dt;
   if (bannerTime > 0) bannerTime -= dt;
-  // Boosts run on play's clock: the pause and the layer end's pick hold them,
-  // since every other screen returns above (D86).
+  // Boosts run on play's clock: every other screen returns above (D86).
   for (const a of boosts) {
     a.left -= dt;
     if (a.left > 0) continue;
@@ -1003,14 +860,10 @@ function step(dt) {
   }
   boosts = boosts.filter(a => !a.gone);
 
-  // --- the gate: one batch at a time, and nothing arrives until it is clear ---
-  // (D27). An empty arena with nothing still to come *is* the cleared state, so
-  // the beat needs no flag of its own. `else if`, so a pending offer holding
-  // the queue, or the batch's own waves, is structural rather than a condition
-  // someone can drop.
-  // The boss's crowd (D116): while its lead lives, topped back up to the
-  // batch's `crowd` from its escorts' mix -- bounded, so it never piles up,
-  // and ended by the lead's death rather than by a count.
+  // --- the gate: one batch at a time, nothing until it is clear (D27) ---
+  // An empty arena with nothing still to come *is* the cleared state, so it
+  // needs no flag. `else if`, so an offer or the waves hold the queue
+  // structurally, not by a condition someone can drop. The boss's crowd (D116).
   if (enemies.some(e => e.lead && !e.gone)) {
     const { batch, escorts } = plan[batchIndex - 1];
     const mix = escorts.enemies.flatMap(([name, count]) => Array(count).fill(name));
@@ -1024,9 +877,8 @@ function step(dt) {
     offerTimer -= dt;
     if (offerTimer <= 0) openModOffer();
   } else if (incoming.length) {
-    // The batch's later waves (D115), each fish on its own clock. An empty
-    // arena calls the next one at once and moves the rest up with it, so a
-    // fast clear is never left waiting and a slow one meets them still fighting.
+    // Later waves (D115). An empty arena calls the next at once and moves the
+    // rest up, so a fast clear is never left waiting.
     if (!enemies.length && incoming[0].at > elapsed) {
       const early = incoming[0].at - elapsed;
       for (const f of incoming) f.at -= early;
@@ -1036,24 +888,18 @@ function step(dt) {
       arrive(f.name, f.flags);
     }
   } else if (!queuePaused && enemies.length === 0) {
-    // Each batch waits at its own depth. Once the last one is cleared, the same
-    // arithmetic points one gate further: the bottom of the last layer.
     const target = gateDepth(batchIndex);
     // Only a dive's opening beat counts down; every later batch waits on the
     // descent instead, which is a beat of its own.
     if (breathTimer > 0) breathTimer -= dt;
     if (cameraY < target) {
-      // The current carries the camera down, clamped at the next depth so a
-      // batch always finds you *at* it, and carries the player with it --
-      // otherwise the view would outrun them and its top edge would drag them
-      // like a wall. Swimming moves you within the view, never the view.
+      // Clamped so a batch always finds you *at* its depth. The diver rides
+      // along, or the view's top edge would drag them like a wall.
       cameraY = Math.min(target, cameraY + current * dt);
       player.y += current * dt;
     }
     else if (breathTimer <= 0) {
-      // Past the last batch the target is the bottom of the last layer. The
-      // last batch is its boss (D62), so reaching the bottom is the win (D68);
-      // the dive is banked at the end of this tick.
+      // Reaching the bottom is the win (D62, D68), banked at the end of this tick.
       if (batchIndex >= plan.length) screen = 'won';
       else {
         spawnBatch(plan[batchIndex].batch, plan[batchIndex].escorts);
@@ -1081,8 +927,7 @@ function step(dt) {
   const len = Math.hypot(dx, dy);
   if (len > 0) { dx /= len; dy /= len; }
 
-  // The body turns toward the keys held, the shorter way round, `turn`
-  // seconds a half circle, and holds its facing when they are let go (D107).
+  // `turn` is seconds a half circle (D107).
   if (len > 0) {
     const want = Math.atan2(dy, dx) - player.facing;
     const gap = Math.atan2(Math.sin(want), Math.cos(want));
@@ -1092,9 +937,8 @@ function step(dt) {
   }
 
   // --- the dash ---
-  // Along the facing (D107): where you swim, or from a standstill where you
-  // last faced -- never the mouse, which is where you shoot, usually the way
-  // you least want to travel.
+  // Along the facing, never the mouse: you shoot the way you least want to go
+  // (D107).
   if (player.dashCd > 0)  player.dashCd -= dt;
   if (player.dashEnd > 0) player.dashEnd -= dt;
   if (player.dashTime > 0) {
@@ -1113,12 +957,9 @@ function step(dt) {
     batchDashed = true;
     sound('dash');
   }
-  // A dash is committed (D56). Travel follows the direction frozen when it
-  // started, not the keys held now -- otherwise mid-dash input steers it,
-  // holding the opposite key reverses it (and the wave then faces the way you
-  // came), and *releasing* the keys stops you dead while `dashTime` runs on:
-  // free invulnerability for standing still.
-  // Out of it, the swim carries on along it at full swim speed (D107).
+  // A dash is committed (D56): with the keys steering it, letting go would stop
+  // you dead in free invulnerability. Out of it, the swim carries on at full
+  // speed (D107).
   const dashing = player.dashTime > 0;
   if (dashing) {
     player.vx = player.dashDx * player.speed;
@@ -1127,40 +968,32 @@ function step(dt) {
     ease(player, dx * player.speed, dy * player.speed, player.ramp, dt);
   }
 
-  // Where the dash's wave is measured from. Kept before the move and after the
-  // clamp is applied below, so the segment is the distance actually travelled
-  // rather than the distance asked for.
+  // Kept before the move; the clamp below then makes the segment the distance
+  // travelled, not the distance asked for.
   const fromX = player.x, fromY = player.y;
 
   player.x += (dashing ? player.dashDx * player.dashSpeed : player.vx) * dt;
   player.y += (dashing ? player.dashDy * player.dashSpeed : player.vy) * dt;
-  // To the view, not the world: the world is a tall strip and the camera moves.
-  // An edge stops the swim going into it, so no speed banks up against it
-  // (D107). No edge ever pushes: the current carries the diver with the view.
+  // An edge stops the swim into it, so no speed banks up against it (D107).
   const [cx, cy] = viewClamp(player);
   if (cx !== player.x) player.vx = 0;
   if (cy !== player.y) player.vy = 0;
   [player.x, player.y] = [cx, cy];
 
-  // An afterimage every frame of the dash. Without it the eye sees the player
-  // at one end and then the other, and reads a teleport instead of a move.
+  // An afterimage, or the eye reads the dash as a teleport.
   if (player.dashTime > 0) {
     spark(player.x, player.y, 0, 0, 0.22, player.r * 0.85, '#bffcff', '#4ff0ff');
   }
 
   // --- the weapon fires while you hold the button, along the cursor (D28) ---
-  // A shot dies at `maxTravel`: the ring is a real range (D8). The cooldown is
-  // clamped at zero rather than run negative, so holding the button gives an
-  // honest rate while the *first* click is always instant.
+  // The cooldown stops at zero, not below, so holding gives an honest rate while
+  // the first click is always instant. The ring is a real range (D8).
   player.fireTimer = Math.max(player.fireTimer - dt, 0);
   if (player.swingLeft > 0) player.swingLeft -= dt;
   if (player.fireTimer <= 0 && fireArmed && CLICK.some(c => keys.has(c))) {
     const tx = aim.x - player.x;
-    // `aim` is in the view (platform's job, D22); the world sits `cameraY`
-    // below it. Converted here, where it is read, not once in input.js: aim is
-    // only written on mousemove while the camera moves every descent tick, so
-    // a world-space aim would go stale under a still cursor -- and the menus
-    // and cards hit-test it in view space.
+    // `aim` is in view coordinates (D22), converted where it is read: it changes
+    // only on mousemove, so a world-space aim would go stale as the camera moves.
     const ty = aim.y + cameraY - player.y;
     const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
     if (player.swing) swing(tx / d, ty / d);
@@ -1169,29 +1002,25 @@ function step(dt) {
       x: player.x, y: player.y, r: player.shotRadius,
       vx: (tx / d) * player.shotSpeed,
       vy: (ty / d) * player.shotSpeed,
-      speed: player.shotSpeed,       // its own speed, so range is measured at
-                                     // the speed it actually flies (D53)
+      speed: player.shotSpeed,
       pierce: player.pierce,
       travelled: 0,
-      maxTravel: player.range,       // the ring means what it says
+      maxTravel: player.range,
     });
     player.fireTimer = 1 / player.fireRate;
     sound('shoot');
   }
 
   // --- move enemies toward the diver, and hurt the diver on contact ---
-  // The drag is the same for every enemy this frame, so it is worked out once.
-  const pd = Math.pow(PUSH_DRAG, dt);   // per second, not per frame: a flat
-                                        // factor would shove 2.4x further on a
-                                        // 144Hz screen
+  const pd = Math.pow(PUSH_DRAG, dt);
   for (const e of enemies) {
     if (e.gone) continue;                  // cut down by a swing this tick: no step, no bite
     const ex = player.x - e.x;
     const ey = player.y - e.y;
     const d = Math.sqrt(ex * ex + ey * ey) || 1;   // || 1 avoids dividing by zero
-    const ux = ex / d, uy = ey / d;                // toward the diver
+    const ux = ex / d, uy = ey / d;
 
-    if (e.lunge) lungeStep(e, ux, uy, d, dt);   // the boss's kind (D64)
+    if (e.lunge) lungeStep(e, ux, uy, d, dt);
     else if (e.spit) spitStep(e, ux, uy, d, dt);
     else if (e.fuse) fuseStep(e, ux, uy, d, dt);
     else if (e.weave) weaveStep(e, ux, uy, d, dt);
@@ -1205,30 +1034,22 @@ function step(dt) {
     e.pushX *= pd;
     e.pushY *= pd;
 
-    // The dash's wave: anything within reach of the line the dash swept this
-    // frame, in the direction it is facing (D50). Swept, not sampled at the
-    // landing point, so a fast step cannot carry the dash past an enemy; facing
-    // is judged from where the frame started, so an enemy the step overshot does
-    // not count as "behind". All of it inside the guard: a dash is up a small
-    // share of the time, and this loop runs every tick.
+    // The dash's wave (D50). Facing is judged from where the frame started, so
+    // an enemy the step overshot does not count as behind.
     if (dashing && e.lastHitBy !== player.dashId) {
       const dashReach = e.r + DASH_REACH;
       const fx = e.x - fromX, fy = e.y - fromY;
       const dot = fx * player.dashDx + fy * player.dashDy;
-      // The facing cone, squared: `dot / |f| > DASH_ARC` is the same question
-      // as `dot > 0 && dot^2 > DASH_ARC^2 * |f|^2`, without the square root or
-      // the divide.
+      // `dot / |f| > DASH_ARC`, squared to skip the root and the divide.
       if (segDistanceSq(e.x, e.y, fromX, fromY, player.x, player.y) < dashReach * dashReach &&
           dot > 0 && dot * dot > DASH_ARC * DASH_ARC * (fx * fx + fy * fy)) {
         e.lastHitBy = player.dashId;
-        // The shove is the dash's baseline and is never bought: scattering a
-        // crowd is what makes diving into one a play rather than a mistake,
-        // and that has to survive `dashDamage` being zero.
-        e.pushX = -ux * DASH_PUSH;         // shoved away from the player
+        // The shove is never bought: it is what makes diving into a crowd a
+        // play, and must survive `dashDamage` being zero.
+        e.pushX = -ux * DASH_PUSH;
         e.pushY = -uy * DASH_PUSH;
         burst(e.x, e.y, '#bffcff', '#4ff0ff', 6, 130, 0.3);
-        // Damage is bought and starts at zero (D51). The white flash reads as
-        // "that hurt", so it must not fire on a dash that only pushed.
+        // The flash reads as "that hurt", so not on a dash that only pushed (D51).
         if (player.dashDamage > 0) {
           e.hp -= player.dashDamage;
           e.flash = 0.07;
@@ -1237,8 +1058,7 @@ function step(dt) {
       }
     }
 
-    // Touch hurts only where the body does -- the eel's; every other fish
-    // hurts by its attack: a bite, a spit, a burst, a charge (D108).
+    // Without `touch`, a fish hurts only by its attack (D108).
     if (e.touch && d < e.r + player.r) hurtPlayer();
   }
 
@@ -1246,9 +1066,7 @@ function step(dt) {
   for (const b of bullets) {
     b.x += b.vx * dt;
     b.y += b.vy * dt;
-    // The bullet's own speed, set by the weapon that fired it (D83): the
-    // DoD's "railgun-speed projectile" and a jab fly at different speeds, and
-    // a range counted at the wrong speed gives it the wrong range.
+    // The bullet's own speed (D83): counted at another, its range would be wrong.
     b.travelled += b.speed * dt;
     if (b.travelled >= b.maxTravel) b.gone = true;
   }
@@ -1257,23 +1075,18 @@ function step(dt) {
   // ponytail: every bullet against every enemy. Fine to a few hundred of each;
   // if it ever chugs, bucket entities into a grid and only compare neighbours.
   for (const b of bullets) {
-    if (b.gone || b.evil) continue;              // an enemy's shot never hits a fish
-    // Where this frame's flight began. Derived rather than stored: the bullet
-    // is never clamped, so the start is exactly where the step came from --
-    // unlike the player, who is clamped to the arena and therefore needs a
-    // remembered `fromX`/`fromY`.
+    if (b.gone || b.evil) continue;
+    // Derived, not stored: unlike the diver, a bullet is never clamped.
     const ax = b.x - b.vx * dt, ay = b.y - b.vy * dt;
     for (const e of enemies) {
       if (e.gone) continue;
-      // Swept against the segment the bullet crossed this frame, not the point
-      // it reached (D53): a fixed step bounds the step, not a bullet's speed.
-      // Squared: this is the loop that runs bullets x enemies every tick.
+      // Swept (D53): a fixed step bounds the step, not a bullet's speed.
       const reach = e.r + b.r;
       if (segDistanceSq(e.x, e.y, ax, ay, b.x, b.y) < reach * reach) {
         if (e.lastHitBy === b.id) continue;   // a shot hits each enemy at most once
         e.lastHitBy = b.id;
         e.hp -= player.damage;
-        e.flash = 0.07;                       // a white frame or two on impact
+        e.flash = 0.07;
         hitSparks(e, b);
         if (e.hp <= 0) killEnemy(e);
         if (b.pierce > 0) { b.pierce -= 1; }
@@ -1283,8 +1096,7 @@ function step(dt) {
   }
 
   // --- enemy shots vs the diver (D95) ---
-  // Swept like every fast hitbox (D53). Spent only by a hit that lands, so the
-  // dash's invulnerability passes through them as it passes through fish.
+  // Swept (D53), and spent only by a hit that lands, so i-frames pass through.
   for (const b of bullets) {
     if (b.gone || !b.evil) continue;
     const reach = player.r + b.r;
@@ -1293,8 +1105,6 @@ function step(dt) {
   }
 
   // --- gems fly to you, from anywhere, and never fade (D35, D78) ---
-  // Nothing can be stranded, so nothing expires: not by the edge of a ring,
-  // and not by the descent carrying you away from where they dropped.
   for (const g of gems) {
     const gx = player.x - g.x;
     const gy = player.y - g.y;
@@ -1305,16 +1115,11 @@ function step(dt) {
     if (d < player.r + g.r + 4) {
       g.gone = true;
       sound('gem');
-      // The dive's takings, banked at `home` when the dive ends however it
-      // ends (D67).
       currency += 1;
     }
   }
 
   // --- what kills drop besides gems (D84, D86) ---
-  // A mod flies to you like a gem, from anywhere, and never fades: it is yours
-  // for the dive. A boost lies where it fell, and is gone unless touched
-  // before its life runs out.
   for (const d of drops) {
     const dx = player.x - d.x;
     const dy = player.y - d.y;
@@ -1334,8 +1139,6 @@ function step(dt) {
   }
 
   // --- sparks fly out, slow down and fade ---
-  // Drag has to be per second, not per frame: `vx *= 0.92` every frame would
-  // slow sparks 2.4x faster on a 144Hz screen than on a 60Hz one.
   const drag = Math.pow(0.06, dt);      // down to 6% of speed each second
   for (const p of particles) {
     p.x += p.vx * dt;
@@ -1347,21 +1150,16 @@ function step(dt) {
 
   for (const e of enemies) if (e.flash > 0) e.flash -= dt;
 
-  // Sweep up everything marked during this frame. Never remove things from
-  // an array while you are still looping over it.
   const wasFighting = batchLive();
   enemies = enemies.filter(e => !e.gone);
-  // The batch died this frame -- its last wave, not merely the arena.
-  // `screen === 'playing'` because a frame can both kill the last enemy and
-  // kill the player, and the death screen outranks the clear -- without it,
-  // dying on the boss's last hit heals you and hands you the layer end's cards.
+  // A frame can kill both the last enemy and the diver: the death outranks the
+  // clear, or dying on the boss's last hit would heal you.
   if (wasFighting && !batchLive() && screen === 'playing') clearBatch();
   bullets = bullets.filter(b => !b.gone);
   gems    = gems.filter(g => !g.gone);
   drops   = drops.filter(d => !d.gone);
   particles = particles.filter(p => p.life > 0);
-  // A dive that ended this tick is banked last, after every gem the tick paid
-  // -- a gem caught on the frame you die is yours (D67). Every later tick on
-  // the end screen returns early above, so this runs once.
+  // Last, so a gem caught on the frame you die is yours (D67). Later ticks on
+  // the end screen return above, so this runs once.
   if (screen === 'dead' || screen === 'won') endDive();
 }

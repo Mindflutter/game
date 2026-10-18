@@ -1,5 +1,4 @@
-// Challenge ladders (D109 (micro-tasks are ladders; steps cost more as they
-// rise), D110 (challenges)), designed in
+// Challenge ladders (D109, D110). Designed in
 // docs/specs/2026-10-15-micro-task-ladders-design.md.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';

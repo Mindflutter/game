@@ -2,12 +2,10 @@
 // Open index.html?test and read the console. Only what a browser alone can check --
 // canvas, audio, real input, the window (D39); the game's logic is tested in Node, tests/.
 
-// ---------- checks: open index.html?test and look at the console ----------
 if (location.search === '?test') {
   // ---------- harness ----------
-  // A check that cannot fail is not a check (D39). check() counts; report() is
-  // the only thing that says whether the suite passed, and it runs once, last,
-  // after the awaits.
+  // A check that cannot fail is not a check (D39): report() alone says whether
+  // the suite passed, once, last, after the awaits.
   let passed = 0;
   const failures = [];
   const check = (cond, msg) => {
@@ -34,39 +32,27 @@ if (location.search === '?test') {
     report();
   });
 
-  // Point at something and pull the trigger. The weapon fires along the cursor,
-  // so a check that expects a shot to land says where the cursor is rather than
-  // inheriting it; and it is manual (D28), so the check holds 'Mouse0', which
-  // is how a mouse button reaches the game (D22).
-  // A real press is always preceded by a frame with the button up, which is
-  // what arms the trigger (D47). These helpers start mid-press, so they assert
-  // that precondition instead of simulating it. The arming logic itself is
-  // exercised by its own check, in tests/combat.test.js.
+  // 'Mouse0' is how a mouse button reaches the game (D22). A real press arms the
+  // trigger with a frame up first (D47); these start mid-press, so arm it.
   const holdFire = () => { fireArmed = true; keys.add('Mouse0'); };
   const ceaseFire = () => keys.delete('Mouse0');
 
   // --- window size (D29) ---
-  // The same seed, played through the real mouse path at three window sizes,
-  // must reach the bottom of the dive in the same time. The window reaches the
-  // game only through `aim`, so aim arrives as mousemove events in *client*
-  // pixels -- the letterbox conversion, and the camera on top of it, are what is
-  // under test. The whole dive: it runs on through every layer (D66).
+  // The same seed through the real mouse path at three window sizes must reach
+  // the bottom in the same time: `aim` arrives in client pixels, so the
+  // letterbox conversion and the camera are what is under test.
   const AIM_GRID = 20;                 // x1, x1.35 and x1.8 all land it on whole pixels
   const traverse = (w, h) => {
     resize(w, h);
     reset(4471);
-    // The cap grows with the dive -- 450s a layer is headroom -- so another layer
-    // does not fail this for a reason that has nothing to do with window size.
+    // 450s a layer is headroom, so another layer cannot fail this.
     for (let i = 0; i < LAYERS.length * 450 / FIXED_DT && screen !== 'won'; i++) {
       player.hurt = player.iframes;
       if (screen === 'mods') { justPressed.add('Digit1'); justPressed.add('Enter'); }
       else if (enemies.length) {
-        // At the first fish, to the nearest AIM_GRID view px: a point all three
-        // scales put on a whole client pixel, so the aim, and so the dive, is
-        // the same at every size. A whole-pixel aim at the fish itself lands a
-        // different fraction of a pixel off at each, and once fish hover
-        // around the diver rather than sit on it (D108), one grazing shot
-        // sends the dive another way.
+        // On the AIM_GRID, which every scale puts on a whole client pixel: aimed
+        // at the fish itself, each size lands a different fraction off, and one
+        // grazing shot sends the dive another way.
         const e = enemies[0];
         const gx = Math.round(e.x / AIM_GRID) * AIM_GRID;
         const gy = Math.round((e.y - cameraY) / AIM_GRID) * AIM_GRID;
@@ -90,9 +76,8 @@ if (location.search === '?test') {
               ' (check took ' + Math.round(performance.now() - traverseFrom) + 'ms)');
 
   // --- the dim reaches the letterbox (D58) ---
-  // The water tint paints the margin too, so a dim screen has to cover it as
-  // well, or it leaves bright bands down the sides. A window wider than 16:10,
-  // so there is a side margin to read.
+  // The tint paints the margin too, so a dim screen must cover it, or leave
+  // bright bands. Wider than 16:10, so there is a side margin to read.
   resize(1800, 800);
   reset(1);
   screen = 'mods';
@@ -108,9 +93,8 @@ if (location.search === '?test') {
   check(audio === null, 'no audio context before a key press');
   sound('shoot');
 
-  // Every binding must work on a non-Latin keyboard. These dispatch real
-  // events with the character a Russian (or AZERTY) layout actually produces,
-  // while the physical key stays the same.
+  // Real events with the character a Russian or AZERTY layout types, on the
+  // same physical key: every binding must still work.
   reset();
   keys.clear();
   window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ц', code: 'KeyW' }));
@@ -157,28 +141,22 @@ if (location.search === '?test') {
   choices = [];
 
   // --- the menu cursor (platform/input.js) ---
-  // tap() presses a key for exactly one frame, the way a real press arrives.
   const tap = code => { justPressed.add(code); update(1 / 60); };
 
-  // The cursor wraps at both ends.
   screen = 'title'; menuIndex = 0;
   tap('ArrowUp');
   check(menuIndex === MENUS.title.items.length - 1, 'cursor wraps upward');
   tap('ArrowDown');
   check(menuIndex === 0, 'cursor wraps back down');
 
-  // Holding a key must not scroll the menu: a repeat is not a fresh press.
   screen = 'title'; menuIndex = 0;
   window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowDown', repeat: true }));
   update(1 / 60);
   check(menuIndex === 0, 'key auto-repeat must not move the cursor');
 
   // ---------- screens fit ----------
-  // Help's layout is derived from the data; this guard keeps it so. No state
-  // check can see text running through text.
-  // A text's last baseline must sit a line's height above the hint's, or the
-  // two touch: ten pixels between baselines let the help's last line sit on
-  // the hint while this passed.
+  // No state check sees text running through text. A line's height, not ten
+  // pixels: ten let the help's last line sit on the hint while this passed.
   const LINE_CLEAR = 24;
   openScreen('help');
   draw();
@@ -187,12 +165,8 @@ if (location.search === '?test') {
     ', hint sits at ' + HINT_Y + ' -- add a row and it overflows');
   screen = 'title';
 
-  // `home` stacks its layer list above its rows and its rows above the hint,
-  // both from tables (LAYERS, WEAPONS, EQUIPMENT, ATTRIBUTES). Drawn with every layer shown
-  // -- the tallest the list gets -- so a sixth layer or a third gear item fails
-  // here rather than running text through text.
-  // Read from the layout's own owners: the lines from `MENUS.home.lines`, drawn
-  // `HOME_LINE` apart from `HOME_LAYERS_TOP`, the rows from `rowRect()`.
+  // `home` with every layer shown, the tallest its list gets, measured from the
+  // layout's own owners.
   const metaWas = meta;
   meta = { ...freshMeta(), cleared: LAYERS.length };
   const listEnd = HOME_LAYERS_TOP + (MENUS.home.lines.length - 1) * HOME_LINE;
@@ -204,19 +178,15 @@ if (location.search === '?test') {
   check(lastRow.y + lastRow.h < HINT_Y - 10,
     'home: the rows must end above the hint, rows end at ' + (lastRow.y + lastRow.h) +
     ', hint at ' + HINT_Y);
-  // Every menu's rows end above the hint too: the weapons, equipment and
-  // attribute screens and the debug setup's grid (D102) grow from tables, and a
-  // menu cannot notice its rows running into the hint. The lowest row, wherever
-  // its grid puts it.
+  // Every menu's rows too: the weapons, equipment, attribute and debug (D102)
+  // screens grow from tables.
   for (const [name, menu] of Object.entries(MENUS)) {
     const end = Math.max(...menu.items.map((_, i) => { const r = rectOf(menu, i); return r.y + r.h; }));
     check(end < HINT_Y - 10,
       name + ': the rows must end above the hint, rows end at ' + end + ', hint at ' + HINT_Y);
   }
 
-  // Every screen whose Back leads home is drawn as that menu (D114): draw()
-  // names the menus it draws, and one it does not know falls through to the
-  // dive's field.
+  // A screen draw() does not name falls through to the dive's field (D114).
   {
     const was = { screen, drawMenu };
     const drawn = [];
@@ -230,11 +200,8 @@ if (location.search === '?test') {
       'every screen Back leads home from must draw as its menu, drawn as something else: ' + missed.join(','));
   }
 
-  // The challenges under the Attributes and pause screens' rows (D109) grow with
-  // CHALLENGES, and each line with its ask, so neither the stack nor a line can be
-  // left to the eye: the lines end above the hint, and every line -- at every
-  // rung, earned or not -- fits the view, as does every rung's notice and the
-  // notice of all of them paying on one tick.
+  // Challenge lines (D109) grow with CHALLENGES and their asks: the stack ends
+  // above the hint, and every line at every rung, and every notice, fits.
   {
     const metaWas = meta;
     for (const [name, menu] of Object.entries(MENUS).filter(([, m]) => m.challenges)) {
@@ -261,9 +228,7 @@ if (location.search === '?test') {
       Math.round(widest) + 'px: ' + which);
   }
 
-  // The debug setup's tips sit on one line under its columns (D102), and the
-  // renderer cannot notice one running off the view: each must fit, with
-  // every weapon carried, since some tips change with it.
+  // The debug tips (D102), with every weapon carried, since some change with it.
   {
     const was = debugSetup;
     debugSetup = parseSetup('', 1);
@@ -281,43 +246,33 @@ if (location.search === '?test') {
       Math.round(widest) + 'px: ' + which);
   }
 
-  // The same rule sideways: a mod's description and its rows of numbers are
-  // text in a fixed-width box, and the renderer centres them, so it cannot
-  // notice one running off the edge.
+  // The same rule sideways: the renderer centres a card's lines in a fixed-width
+  // box, so it cannot notice one running off the edge.
   const widest = widestCardLine();
   check(widest <= CARD_W - CARD_PAD * 2,
     'every line of a mod card must fit it: widest is ' + Math.round(widest) +
     'px, the card allows ' + (CARD_W - CARD_PAD * 2) + 'px');
 
-  // ...and downwards. Continue and the hint sit under the cards (D85), derived
-  // from their box, so a taller card pushes both down -- out of the view, if far
-  // enough. Read from the owners, cardRect() and continueRect().
+  // ...and downwards (D85): a taller card pushes Continue and the hint down.
   const cardsEnd = cardRect(0, 3).y + CARD_H;
   const contEnd = continueRect().y + continueRect().h;
   check(cardsEnd < continueRect().y && contEnd < MOD_HINT_Y - 10 && MOD_HINT_Y < ARENA_H - 20,
     'the cards, Continue and the hint must stack inside the view: cards end at ' + cardsEnd +
     ', Continue at ' + contEnd + ', the hint sits at ' + MOD_HINT_Y);
 
-  // advance() is the stepped-mode driver: exactly n ticks, no wall clock at all.
   applyScenario('one-drifter');
   const steppedFrom = elapsed;
   advance(30);
-  // Derived from FIXED_DT, not a hardcoded step, so the step can change without
-  // editing this.
   check(Math.abs(elapsed - steppedFrom - 30 * FIXED_DT) < 1e-9,
     'advance(30) must move exactly 30 fixed ticks, moved ' + (elapsed - steppedFrom));
 
-  // ?test is not a scenario, so the frame loop must still run normally here.
   check(stepped === false, '?test must not be stepped');
 
-  // Leave the game in a known state before the frame loop gets it. This has to
-  // stay synchronous: the loop starts as soon as this block returns, and the
-  // sound checks below are async, so deferring the reset would let the loop play
-  // out whatever the last check left behind.
+  // Synchronous: the loop starts as soon as this block returns, and the sound
+  // checks are async, so a deferred reset would let the loop play out whatever
+  // the last check left.
   reset();
 
-  // Every sound must actually be loud enough to hear. Render each one offline
-  // through the real voice() and measure its peak.
   (async () => {
     for (const [name, spec] of Object.entries(SOUNDS)) {
       const off = new OfflineAudioContext(1, 44100, Math.ceil(44100 * (spec.dur + 0.05)));

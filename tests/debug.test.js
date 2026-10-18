@@ -1,8 +1,5 @@
-// The debug mode (D102 (the debug mode)): `?debug` opens a setup screen in
-// place of the title -- where, which fish, the diver's kit -- and plays it with
-// sound, never reading or writing the save. Each failure case it could meet is
-// pinned here: the save, the kit, the place, the fish, the code, the keys and
-// every way out.
+// The debug mode (D102). Each failure case it could meet is pinned here: the
+// save, the kit, the place, the fish, the code, the keys and every way out.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { loadGame, ticks, play, die } from './harness.js';

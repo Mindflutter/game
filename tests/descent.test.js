@@ -155,8 +155,7 @@ describe('the descent', () => {
 
   it('opens no cards between batches, nor at the last layer end', () => {
     // Mods are dropped, never offered at a gate (D84); the layer end keeps its
-    // pick (D85) -- but not the last one: "you clear the last layer - you won
-    // the game" (D68).
+    // pick (D85), but not the last one, which is the win (D68).
     const mid = loadGame();
     mid.reset(1);
     ride(mid);                                  // the first batch arrives

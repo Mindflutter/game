@@ -1,11 +1,9 @@
-// ===== audio (platform) =====
-// WebAudio synthesis. Rewritten on a port.
+// ===== audio (platform) -- rewritten on a port =====
 
 let audio = null;
 let master = null;
 
-// One voice: an oscillator through its own volume envelope. Takes the context
-// as an argument so the checks can render it offline and measure how loud it is.
+// Takes the context so the checks can render it offline and measure it.
 function voice(ac, dest, s, t, pitch = 1) {
   const freq = s.freq * pitch;
   const osc = ac.createOscillator();

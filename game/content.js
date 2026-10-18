@@ -1,20 +1,16 @@
-// ===== content =====
-// Every tuning number and content table, with the small helpers that read them.
+// ===== content: every tuning number and content table =====
 
 // ---------- the view ----------
-// The game sees a fixed 1280x800 view of the world whatever the window size, so
-// difficulty does not depend on the monitor (D29). The world is a tall strip;
-// the view is `cameraY` from its top.
+// A fixed view whatever the window, so difficulty does not depend on the
+// monitor (D29). The world is a tall strip; the view sits `cameraY` down it.
 const ARENA_W = 1280;
 const ARENA_H = 800;
 
 // ---------- balance ----------
-// Every number that decides how the game plays, in one place: what transfers
-// to a port as-is.
-// Anything a mod, boost, tier or attribute raises is a field here, not a bare
-// `const`: a line of data cannot edit a `const` (D34).
-// The diver alone: the carried weapon's numbers join these when a dive starts
-// (`WEAPONS`, D83).
+// Every number that decides how the game plays: what transfers to a port
+// as-is. What a mod, boost, tier or attribute raises is a field, never a bare
+// `const`, which a line of data cannot edit (D34). The weapon's numbers join
+// these as a dive starts (D83).
 const PLAYER_START = {
   r: 20,             // radius, in pixels
   speed: 260,        // pixels per second
@@ -27,19 +23,14 @@ const PLAYER_START = {
   dashSpeed: 620,    // px/s while dashing -- its own number, not a multiple of
                      // `speed`, so swim speed never lengthens the dash (D56)
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
-  dashDamage: 0,     // the dash starts as pure movement (D51). It always shoves;
-                     // hurting what it shoves is bought, never free
+  dashDamage: 0,     // pure movement until bought (D51); it always shoves
   guard: 0,          // hits a batch can take without a heart -- the suit's (D100)
 };
 
-// The dash: short, and on a long enough leash that spending it is a decision.
-// You pass through the swarm unharmed and shove it aside, so diving into a
-// crowd is a play rather than a mistake.
 const DASH_TIME      = 0.16;  // seconds of dash
 const DASH_GRACE     = 0.15;  // extra invulnerability after it, so you don't
                               // land inside the enemy you just flew through
-// The dash pushes a wave ahead of it rather than only hitting what it bumps
-// into: everything within reach AND in front of the direction of travel.
+// A wave ahead of the dash: everything within reach AND in front of it.
 const DASH_REACH     = 40;    // px past an enemy's own radius
 const DASH_ARC       = 0.2;   // cos of the half-angle: 0.2 is a 156-degree front
 const DASH_END       = 0.18;  // seconds of the ring that closes the dash
@@ -49,26 +40,20 @@ const PUSH_DRAG      = 0.02;  // ...with this fraction of it left after a second
 // `ramp` seconds -- so `ramp` is its time to full speed, near enough.
 const RAMP_LEFT      = 0.05;
 
-// Gems fly to you from wherever they drop and never fade (D35, D78) -- fast
-// enough to outrun a swimming player. Claude's pick.
+// Fast enough to outrun the swimming diver (D35, D78). Claude's pick.
 const GEM_PULL       = 600;   // px/s a gem flies toward you
 const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
-const GATE_PAUSE     = 1.2;   // seconds of quiet before a dive's FIRST batch, so
-                              // a dive opens calm; every later batch waits on
-                              // the descent instead, which is its own beat
-// Waves (D115): a batch arrives a wave at a time, on a clock that does not wait
-// for the last one to die. Claude's picks.
+const GATE_PAUSE     = 1.2;   // seconds of quiet before a dive's first batch;
+                              // later ones wait on the descent
+// Waves (D115). Claude's picks.
 const WAVE_MIN       = 5;     // fish in a wave, drawn between these two
 const WAVE_MAX       = 10;
 const WAVE_GAP       = 4;     // seconds from one wave's start to the next's...
 const WAVE_JITTER    = 0.4;   // ...give or take this share of it
 const WAVE_SPREAD    = 2;     // seconds a later wave's fish trickle in over
-// Escorts (D116): the boss's crowd, kept topped up to this many while it lives,
-// each newcomer due within WAVE_SPREAD of the gap opening. Claude's pick.
+// The boss's crowd, topped up to this while it lives (D116). Claude's pick.
 const BOSS_CROWD     = 6;
-// The descent (D58): each batch waits at its own depth and a current carries
-// the view from one to the next. The current never stops -- it only slows
-// while a batch is fought. Claude's picks.
+// The descent (D58). Claude's picks.
 const GATE_SPACING   = 400;   // world px between gate depths: about two seconds
                               // of travel at CURRENT_SPEED
 const CURRENT_SPEED  = 200;   // px/s between batches
@@ -76,15 +61,11 @@ const CURRENT_CRAWL  = 30;    // px/s during a fight: the water still flows
 const CURRENT_EASE   = 0.05;  // fraction of the speed change still left after
                               // one second -- eases up after a clear, down on
                               // an arrival, never a jolt
-// The simulation's one and only step size (D53): the frame loop's accumulator,
-// `advance()` and the bot all step by it. 1/120 rather than 1/60 because there
-// is no render interpolation -- the picture is drawn wherever the last tick
-// left things, so the step size *is* the smoothness.
+// The one step size (D53). 1/120, not 1/60: with no render interpolation the
+// step size is the smoothness.
 const FIXED_DT       = 1 / 120;
-// The longest real frame the simulation will believe in. Caps tab-switching
-// (a minute away must not teleport everything) and doubles as the catch-up
-// bound -- at most MAX_FRAME_DT / FIXED_DT ticks a frame -- so a slow frame
-// cannot spiral into simulating forever.
+// The longest frame the simulation believes: a minute away must not teleport
+// everything, and it bounds the catch-up, so a slow frame cannot spiral.
 const MAX_FRAME_DT   = 0.05;
 const NOTICE_TIME    = 2.5;   // seconds a challenge's or a pickup's line stays
                               // up. Claude's pick
@@ -109,17 +90,14 @@ const SHAKE_LEVELS = [
   { name: 'low',    mul: 0.5 },
   { name: 'normal', mul: 1 },
 ];
-// Shake eases out exponentially: a hard linear stop reads as the picture
-// being switched off, an exponential tail reads as the water settling.
 const SHAKE_FADE  = 0.02;   // fraction of the shake still left after one second
 const SHAKE_FLOOR = 0.15;   // below a fifth of a pixel, snap to a still picture
 const SHAKE_HURT  = 7;      // px, taking a hit
-const SHAKE_DEATH = 38;     // px, dying -- a real slam, it only happens once
+const SHAKE_DEATH = 38;     // px, dying
 
 // ---------- sound ----------
-// Every sound is an oscillator and a fading volume envelope. No audio files.
-// `vol` is peak amplitude, 0..1. Anything under about 0.15 is inaudible on
-// laptop speakers for a short blip -- the ?test checks hold us to that.
+// Oscillators with fading envelopes, no audio files. `vol` is peak amplitude,
+// 0..1: under about 0.15 a blip is inaudible on laptop speakers, as ?test holds.
 const SOUNDS = {
   shoot:  { freq: 680,  dur: 0.05, type: 'square',   vol: 0.20, slide: 0.55 },
   dash:   { freq: 520,  dur: 0.18, type: 'triangle', vol: 0.30, slide: 0.32 },
@@ -136,22 +114,8 @@ const SOUNDS = {
 };
 
 // ---------- mods ----------
-// A dive-scoped power: carried by a glowing fish (D84, D88), or picked at a
-// layer end (D85). Every field is documented in docs/entities/mods.md, and
-// `npm test` holds the two together.
-//
-// `scope` is body, comfort or weapon. A weapon mod names the weapons it fits,
-// `weapons`, and is dealt only while one of them is carried (D99): "+1
-// damage" is huge on a railgun and nothing on a spray gun.
-//
-// Mods differ in **kind, not degree**: a pickup has to be felt and recognised
-// in the middle of a fight, and the layer end's pick stays a gut read -- so the
-// descriptions read as sentences, not stat lines.
-//
-// `max` lets the draws refuse a mod already maxed: it keeps a bounded stat
-// honest (a cooldown has a floor of zero) and gives a dive's power a ceiling
-// (D69). `end` marks one of the layer end's own: offered only on its cards,
-// never carried by a fish.
+// Documented in docs/entities/mods.md, held to it by `npm test`. A `desc`
+// reads as a sentence, not a stat line: a pickup must be recognised mid-fight.
 const MODS = [
   { name: 'Fins',     scope: 'body',    desc: 'you swim faster', max: 3,
     apply: p => p.speed += 45 },
@@ -169,9 +133,8 @@ const MODS = [
     weapons: ['Harpoon'], apply: p => p.pierce += 1 },
 ];
 
-// What a stat a mod moves is called on its card and its pickup line: words a
-// player reads without help, never the code's key. A check holds every stat a
-// mod moves to a name here. HP is the status bar's word.
+// Words a player reads, never the code's key. A check holds every stat a mod
+// moves to a name here.
 const STAT_NAMES = {
   speed: 'swim speed', maxHp: 'max HP', hp: 'HP', dashCooldown: 'dash cooldown',
   iframes: 'safe after a hit', dashDamage: 'dash damage', mendOnClear: 'HP back each batch',
@@ -179,11 +142,8 @@ const STAT_NAMES = {
 };
 
 // ---------- boosts ----------
-// A short power a kill drops (D86); documented in docs/entities/boosts.md, held
-// to this table by `npm test`. `add` is numbers rather than a function so it
-// can be taken back when the time runs out -- and for the same reason a boost
-// never moves `hp`. `swingDesc` is the line instead while the weapon carried
-// swings (D105): the Knife has no shots to swell.
+// Documented in docs/entities/boosts.md, held to it by `npm test`. `add` is
+// numbers, not a function, so it can be taken back -- and so never moves `hp`.
 const BOOSTS = [
   { name: 'Rush',   desc: 'you swim much faster',  time: 5, add: { speed: 200 } },
   { name: 'Frenzy', desc: 'you fire much faster',  swingDesc: 'you swing much faster',
@@ -195,36 +155,24 @@ const BOOSTS = [
 ];
 
 // ---------- gear, attributes, challenges ----------
-// What persists between dives, spent at `home` (D31, D36). Each is a line of
-// data whose `apply` raises the player -- once per point held, or once per
-// tier, each tier its own (D83). Everything sums, with mods on top; nothing
-// multiplies (D36, D74).
-//
-// The save keys them by `name`, so renaming one orphans what players own.
-// Every number here is Claude's pick, S6's to tune.
+// What persists, spent at `home` (D31, D36): everything sums, mods on top,
+// nothing multiplies. The save keys them by `name`, so renaming one orphans
+// what players own. Claude's picks.
 
-// `gear` -- bought with gems, combat stats: the weapons, then the equipment.
-// Each tier is `{ cost, apply }`, in the order they are bought.
-//
-// A weapon is the shot a dive fires (D83). A dive copies the carried weapon's
-// numbers onto the player, where mods, attributes and the readout find them.
-// Documented in docs/entities/weapons.md -- `npm test` holds it here.
+// Documented in docs/entities/weapons.md, held to it by `npm test`.
 const WEAPONS = [
   { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, cost: 0,
     tiers: [{ cost: 40,  apply: p => p.fireRate += 0.5 },
             { cost: 100, apply: p => p.fireRate += 0.5 },
             { cost: 200, apply: p => p.fireRate += 0.5 }] },
-  // Slow, long and heavy, through what it hits: the draft's railgun (D97). Heavy
-  // gear waits for a strong diver, so it needs a step of Strength (D98).
+  // The draft's railgun (D97), needing Strength (D98).
   { name: 'Harpoon', fireRate: 0.8, damage: 3, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2,
     cost: 150, requires: { Strength: 1 },
     tiers: [{ cost: 80,  apply: p => p.damage += 1 },
             { cost: 160, apply: p => p.fireRate += 0.2 },
             { cost: 300, apply: p => p.pierce += 1 }] },
-  // Melee (D105): `swing` makes it a blade, not a shot. Each pull cuts at once
-  // through the arc toward the cursor -- `arc` degrees wide, drawn for `time`
-  // seconds -- out to `range` plus the blade's `shotRadius`, as far as a shot
-  // that size would touch; `pierce` caps it at pierce + 1 fish, nearest first.
+  // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
+  // swing at pierce + 1 fish, nearest first.
   { name: 'Knife', fireRate: 3, damage: 2, range: 56, shotRadius: 18, pierce: 6,
     swing: { arc: 120, time: 0.15 }, cost: 100,
     tiers: [{ cost: 60,  apply: p => p.range += 12 },
@@ -232,47 +180,34 @@ const WEAPONS = [
             { cost: 260, apply: p => p.fireRate += 0.75 }] },
 ];
 
-// Equipment: gear that is not a weapon (D81), raising combat numbers only --
-// body stats are attributes' (D36). Documented in docs/entities/equipment.md
-// -- `npm test` holds it here.
+// Combat numbers only; body stats are attributes' (D36). Documented in
+// docs/entities/equipment.md.
 const EQUIPMENT = [
-  // You see further, so you shoot further.
   { name: 'Mask',    tiers: [{ cost: 50,  apply: p => p.range += 30 },
                              { cost: 120, apply: p => p.range += 30 },
                              { cost: 240, apply: p => p.range += 30 }] },
-  // Takes the first hit of every batch, one more a tier: the defence D36
-  // gives gear.
   { name: 'Suit',    tiers: [{ cost: 90,  apply: p => p.guard += 1 },
                              { cost: 200, apply: p => p.guard += 1 },
                              { cost: 380, apply: p => p.guard += 1 }] },
-  // Heavier shots hit harder.
   { name: 'Weights', tiers: [{ cost: 70,  apply: p => p.damage += 0.5 },
                              { cost: 150, apply: p => p.damage += 0.5 },
                              { cost: 280, apply: p => p.damage += 0.5 }] },
 ];
 
-// `attribute` -- body stats, raised a step at a time with points that only
-// challenges pay. Step n costs n points (D109): the first is cheap, depth is
-// dear. Uncapped where it is raised: the ladders hold a finite set of rungs,
-// so the cap is at the source (D36). Dash improvements live here, not in gear
-// (D74). Gear may require steps of one (`requires`, D98).
+// Uncapped here: the challenges' finite rungs cap them at the source (D36).
+// Step n costs n points (D109).
 const ATTRIBUTES = [
   { name: 'Dash reach', apply: p => p.dashSpeed += 150 },
   { name: 'Heart',      apply: p => { p.maxHp += 1; p.hp += 1; } },
   { name: 'Strength',   apply: p => p.dashDamage += 1 },
 ];
 
-// 1 + 2 + ... + n: what a ladder's first n rungs pay, and what an attribute's
-// first n steps cost (D109).
+// What a ladder's first n rungs pay, and an attribute's first n steps cost (D109).
 const tri = n => n * (n + 1) / 2;
 
-// `challenge` -- mastery, never a quota (D36): a ladder whose rungs pay once,
-// ever -- rung k pays k points -- in any layer (D109). Its count is judged at
-// one moment: `clear` takes the streak so far and returns it after the batch
-// just cleared, `kill` counts after a kill, `end` reads a layer at its end.
-// With `within`, a rung is a time to beat rather than a count to reach. `ask`
-// is a rung in one sentence. Claude's picks, sized in
-// docs/entities/challenges.md.
+// Judged at one moment: `clear` takes the streak and returns it after the
+// batch just cleared, `kill` counts after a kill, `end` reads a layer at its
+// end. With `within`, a rung is a time to beat (D109). Claude's picks.
 const CHALLENGES = [
   { name: 'untouched', rungs: [1, 3, 6, 10],
     ask: n => (n === 1 ? 'clear a batch without a hit' : 'clear ' + n + ' batches in a row without a hit'),
@@ -280,9 +215,8 @@ const CHALLENGES = [
   { name: 'footwork',  rungs: [3, 6, 10, 15],
     ask: n => 'clear ' + n + ' batches in a row without dashing',
     clear: n => (batchDashed ? 0 : n + 1) },
-  // A batch with no glowing fish -- a lunger's, or any once every mod is
-  // capped -- neither counts nor breaks it. A fish killed in the same tick as
-  // the glowing one died with it: one swing or one dash is one moment.
+  // A batch with no glowing fish neither counts nor breaks it. A kill on the
+  // glowing fish's tick ties with it: one swing or dash is one moment.
   { name: 'beeline',   rungs: [1, 3, 5, 8],
     ask: n => (n === 1 ? 'kill a glowing fish before the rest of its batch'
                        : 'kill the glowing fish first, ' + n + ' batches in a row'),
@@ -290,19 +224,16 @@ const CHALLENGES = [
   { name: 'flurry',    rungs: [6, 12, 20, 30],
     ask: n => 'kill ' + n + ' fish within ' + FLURRY_TIME + ' seconds',
     kill: () => killTimes.filter(t => elapsed - t <= FLURRY_TIME).length },
-  // From the layer's first batch arriving to its boss's clear. A dive begun
-  // partway into a layer has no start for it, and that layer is not judged.
+  // A dive begun partway into a layer has no start for it: not judged.
   { name: 'swift',     rungs: [480, 360, 300, 240], within: true,
     ask: s => 'clear a layer within ' + s / 60 + ' minutes',
     end: () => (layerStart === null ? Infinity : elapsed - layerStart) },
 ];
 
 // ---------- the development readout ----------
-// The player numbers worth watching while the game is being built (D52); to be
-// trimmed or dropped before alpha. `stat` names the player field, which is what
-// lets a check prove the readout complete: anything a mod or boost can change
-// must be shown. `hp` and `maxHp` are drawn as `HP 3/4` on the line above, and
-// the check names them.
+// To be trimmed before alpha (D52). `stat` names the player field, so a check
+// proves everything a mod or boost changes is shown; `hp` and `maxHp` are the
+// status bar's `HP 3/4`.
 const PLAYER_STATS = [
   { stat: 'speed',        label: 'spd',     read: p => Math.round(p.speed) },
   { stat: 'range',        label: 'rng',     read: p => Math.round(p.range) },
@@ -317,11 +248,7 @@ const PLAYER_STATS = [
 ];
 
 // ---------- the status bar ----------
-// Everything a diver needs to read mid-fight, one line per kind, top-down: the
-// body and the kit, where in the abyss, the mods and boosts, the layer's
-// challenges -- then the development readout, dimmed. The renderer draws
-// each line at its own colour and weight, one row per entry, so a line added
-// here moves the rest down on its own.
+// One entry a row, so a line added here moves the rest down.
 function statusLines() {
   // The batch shown is the one being fought, or between gates the one ahead.
   const entry = plan[Math.max(0, batchLive() ? batchIndex - 1 : batchIndex)] || plan.at(-1);
@@ -335,9 +262,8 @@ function statusLines() {
             '   GEMS ' + currency + '   ' + weaponName + ' tier ' + (meta.gear[weaponName] || 0) },
     { color: '#9ef7ff',
       text: LAYERS[entry.layer].name + '   batch ' + (layer.indexOf(entry) + 1) + '/' + layer.length +
-            // Fish still to come count too, and say so: an empty arena that
-            // fills again must read as a wave, not a broken gate (D115). A
-            // crowd has no count to give, only its end (D116).
+            // Fish to come count, so an arena that fills again reads as a wave,
+            // not a broken gate (D115). A crowd has only its end (D116).
             (lead ? '   escorts keep coming until the ' + lead.name + ' dies' :
              batchLive() ? '   ' + (enemies.length + incoming.length) + ' fish left' +
                            (incoming.length ? ' (' + incoming.length + ' coming)' : '') : '') +
@@ -346,18 +272,13 @@ function statusLines() {
       text: 'mods ' + (mods.join('  ') || 'none') +
             boosts.map(b => '   ' + b.name + ' ' + b.left.toFixed(1) + 's').join('') },
     { color: '#a8ffd8', text: 'challenges ' + CHALLENGES.map(challengeStatus).join('   ') },
-    // The development readout (D52): what the character actually is, right now.
     { color: '#4d7a8a', small: true,
       text: PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') },
   ];
 }
 
-// m:ss, for `swift`'s clock and its rungs.
 const clock = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
 
-// A challenge on the status bar (D109): its count now against its next rung -- a
-// hit or a dash puts a streak back to 0 where it is seen -- or, every rung
-// earned, its badges.
 function challengeStatus(c) {
   const k = meta.challenges[c.name] || 0;
   if (k === c.rungs.length) return c.name + ' ' + '●'.repeat(k);
@@ -365,8 +286,6 @@ function challengeStatus(c) {
   return c.name + ' ' + (c.within ? (now === Infinity ? '–' : clock(now)) + '/' + clock(rung) : now + '/' + rung);
 }
 
-// The challenges on the Attributes and pause screens (D109), under their rows: a
-// badge per rung earned, then the next rung -- what it asks and what it pays.
 const CHALLENGE_LINE = 24;
 const challengesTop = menu => menu.top + menu.items.length * ROW_STEP + 10;
 function challengeLines() {
@@ -378,29 +297,21 @@ function challengeLines() {
   })];
 }
 
-// Menu and options rows: one full-width band per entry, anchored on the text
-// baseline the renderer draws at, so the mouse can hit a row anywhere along it
-// rather than only on the glyphs.
+// Full-width bands on the text baseline, so the mouse hits a row anywhere.
 const ROW_W = 420, ROW_H = 38, ROW_STEP = 46;
 const MENU_TOP = 380, OPTION_TOP = 300;
 function rowRect(i, top) {
   return { x: ARENA_W / 2 - ROW_W / 2, y: top + i * ROW_STEP - 26, w: ROW_W, h: ROW_H };
 }
-// Where a menu's row `i` sits: in the menu's own grid if it has one, `rect` --
-// the debug setup's -- else in the band from its `top`.
 function rectOf(menu, i) {
   return menu.rect ? menu.rect(i) : rowRect(i, menu.top);
 }
 
-// Where the layer end's cards sit, in arena coordinates. The renderer draws
-// them and the logic hit-tests the mouse against them, so the numbers belong
-// to neither. `CARD_PAD` is the margin a description must leave on each side:
-// the renderer centres the text and cannot notice it overflowing, so a check
-// measures against this.
+// The renderer draws the cards and the logic hit-tests them, so their numbers
+// belong to neither. A check measures descriptions against `CARD_PAD`.
 const CARD_W = 220, CARD_H = 186, CARD_GAP = 24, CARD_PAD = 12;
-// How many "stat from -> to" rows a card has room for. A check holds the mod
-// pool to this, so a mod that moves a third stat fails the suite rather than
-// dropping a number off the bottom of the card.
+// A check holds every mod to this many rows, so a third stat fails the suite
+// instead of falling off the card.
 const MOD_ROWS = 2;
 function cardRect(i, n) {
   const totalW = n * CARD_W + (n - 1) * CARD_GAP;
@@ -408,33 +319,25 @@ function cardRect(i, n) {
            y: ARENA_H / 2 - CARD_H / 2, w: CARD_W, h: CARD_H };
 }
 
-// The layer end's Continue (D85), under the cards: a card is marked, and taken
-// here. Derived from the cards' box, so moving them moves it.
 function continueRect() {
   const c = cardRect(0, 1);
   return { x: ARENA_W / 2 - CARD_W / 2, y: c.y + c.h + 20, w: CARD_W, h: ROW_H };
 }
 
-// How many of a mod are yours: taken, or dropped and still flying to you.
-// Nothing stops a mod in flight reaching you, so every draw counts it, or the
-// last slot under a cap is dealt again before it lands.
+// Taken, or flying to you: a draw that skipped a mod in flight would deal the
+// last slot under a cap again before it lands.
 function held(m) {
   return (modCounts[m.name] || 0) + drops.filter(d => d.mod === m.name).length;
 }
 
-// Whether a mod fits the weapon this dive carries (D99): a weapon mod only the
-// weapons it names, every other mod any.
 function fits(m) { return !m.weapons || m.weapons.includes(weaponName); }
 
-// The ordinary mods still under their caps: what a fish can carry (D84).
 function carriable() {
   return MODS.filter(m => !m.end && fits(m) && held(m) < m.max);
 }
 
-// The mod a glowing fish carries: every ordinary mod once before any comes
-// again -- a round, dealt from the seed and refilled when spent -- and none
-// past its cap. `null` once every one is capped, and then no fish glows: the
-// easiest answer while caps are balance's question (D84).
+// Every ordinary mod once before any comes again. `null` once all are capped,
+// and no fish glows: the easiest answer while caps are balance's (D84).
 function drawCarried() {
   const open = carriable();
   if (!open.length) return null;
@@ -448,24 +351,15 @@ function drawCarried() {
   return m;
 }
 
-// How many picks a layer end's card gives (D85): one of its own mods once, an
-// ordinary one at the bigger step.
 const cardStep = m => (m.end ? 1 : END_STEP);
 
-// The layer end's cards: up to three valuable mods, distinct, from one pool --
-// its own mods and the ordinary ones, each only with room under its cap for
-// what the card gives. Fewer when the pool runs short; none at all leaves only
-// Continue.
 function rollValuable() {
   return drawDistinct(MODS.filter(m => fits(m) && held(m) + cardStep(m) <= m.max), 3);
 }
 
 // ---------- key bindings ----------
-// Which physical key means which action. Content, not platform: the game decides
-// that dashing is Space, while reading the keyboard is platform's job (D44).
-//
-// Always `e.code` (the physical key), never `e.key` (the character it types) --
-// see D12. On a Russian layout WASD type ц/ф/ы/в; on AZERTY they are ZQSD.
+// Content, not platform: which key means what is the game's call (D44).
+// Always `e.code`, never `e.key` (D12).
 const UP    = ['ArrowUp', 'KeyW'];
 const DOWN  = ['ArrowDown', 'KeyS'];
 const LEFT  = ['ArrowLeft', 'KeyA'];
@@ -475,40 +369,21 @@ const DASH  = ['Space'];
 const CLICK = ['Mouse0'];
 const FAST  = ['ShiftLeft', 'ShiftRight'];   // held: a value row moves five at a time
 const MUTE  = ['KeyM'];                       // the sound off or on, on every screen (D113)
-// The debug mode's own (D102), live only in it: the same setup again, from any
-// screen, and back to its setup screen.
+// The debug mode's own (D102).
 const DEBUG_AGAIN = ['KeyR'];
 const DEBUG_SETUP = ['Backspace'];
 
 // ---------- batches ----------
-// A batch is the gated unit (D27): counts per enemy type, arriving at the edges
-// of the view in waves (D115), and nothing else arrives until it is dead -- the
-// boss's crowd aside, which comes until the boss dies (D116). Each stretch between
-// the mini-bosses is a pool a dive draws from (D71), and each layer has pools
-// of its own (D101), meeting the fish in turn: the archer at the end of the
-// first, the puffer in the second, the eel in the third. They are sized on
-// total hp (D54) until S6's threat number replaces it (D79) -- untuned
-// placeholders, Claude's picks.
+// Sized on total hp (D54) until S6's threat number replaces it (D79): untuned,
+// Claude's picks.
 const MINI_BOSS = { enemies: [['mini-boss', 1]] };
 const BOSS      = { enemies: [['boss', 1]], crowd: BOSS_CROWD };
 
 // ---------- layers ----------
-// A layer is a record that owns its batches (D71): a run of **stretches**,
-// each a pool and how many to `draw` from it. One shape for all of them -- a
-// mini-boss or the boss is a stretch whose pool holds one batch and draws one,
-// so their fixed places need no special case. The last stretch's batch is the
-// layer end (D68).
-//
-// `color` is the water at the top of the layer, darkening to the same
-// near-black at its bottom. PLACEHOLDER GRAPHICS (D72): the colour and the
-// name are the cheapest way to say "a new layer" until art exists. The
-// colours are Claude's picks; the layers are numbered until they are named
-// (D89).
-//
-// Every layer today has the same shape -- four from a pool, a mini-boss, four,
-// a mini-boss, four, the boss -- around its own three pools. A mini-boss and
-// the boss bring escorts (D116): one batch drawn from the pool before them,
-// dealt in behind a mini-boss, or the mix of the boss's crowd.
+// A layer owns its batches (D71): stretches, each a pool and how many to
+// `draw`. A mini-boss or the boss is a stretch whose pool holds one batch, so
+// their places need no special case. `color` is the water at its top:
+// PLACEHOLDER GRAPHICS (D72), Claude's picks. Numbered until named (D89).
 const layer = (name, color, [a, b, c]) => ({ name, color, stretches: [
   { draw: 4, pool: a }, { draw: 1, pool: [MINI_BOSS], escorts: a },
   { draw: 4, pool: b }, { draw: 1, pool: [MINI_BOSS], escorts: b },
@@ -569,48 +444,30 @@ const LAYERS = [
 ];
 
 // ---------- scenarios ----------
-// Named dev setups (D37). `?dev=<name>` loads one in isolation so a single
-// thing can be watched; add `&play` to run it live instead of frozen. The bot
-// selects the same entries by name, so there is no separate test harness.
-// Adding one is a line.
+// Named dev setups (D37), `?dev=<name>`: README.md -> Scenarios.
 const SCENARIOS = {
-  // One enemy, nothing else arriving. For watching a single behaviour.
   'one-drifter': { spawn: false, enemies: [['drifter', 900, 400]] },
   'one-archer':  { spawn: false, enemies: [['archer', 1100, 400]] },
   'one-puffer':  { spawn: false, enemies: [['puffer', 1000, 400]] },
   'one-eel':     { spawn: false, enemies: [['eel', 1150, 400]] },
-  // A dive from the top carrying a weapon `home` did not choose (D97): how S6
-  // measures each weapon alone.
   'harpoon':     { weapon: 'Harpoon' },
   'knife':       { weapon: 'Knife' },
-  // Every ordinary type -- all but the boss and the mini-boss -- in a row,
-  // for telling them apart at a glance. Read from the table, so a new type
-  // joins it.
   'all-types':   { spawn: false,
                    get enemies() {
                      const t = ENEMY_TYPES.filter(e => e.carries !== false);
                      return t.map((e, i) => [e.name, ARENA_W * (i + 1) / (t.length + 1), 220]);
                    } },
-  // The queue several batches in, for eyeballing density and pressure.
   'late-swarm':  { batch: 5 },
-  // The last batch -- the last layer's boss -- then the bottom, the win: how a
-  // dive ends, without playing all of it. `batch` may be a function of the
-  // drawn plan (D71), where a place is only known once it is drawn.
+  // `batch` may be a function of the drawn plan (D71): a place known only once drawn.
   'last-batch':  { batch: plan => plan.length - 1 },
-  // The first mini-boss (D65), with its escorts (D116). Derived the same way.
   'mini-boss':   { batch: plan => plan.findIndex(e => e.batch === MINI_BOSS) },
-  // The top of the second layer, with the kit a dive would carry there: what
-  // the first layer's glowing fish carried -- every ordinary mod three times
-  // but one, here Impact (D84) -- and its layer end's pick, Mend (D85). Claude's
-  // picks, so the bot measures layer 2 against a known kit without fighting
-  // down the first.
+  // The kit a dive carries there: every ordinary mod at its cap but Impact
+  // (D84), and the layer end's Mend (D85). Claude's picks.
   'layer-2':     { batch: plan => plan.findIndex(e => e.layer === 1),
                    kit: ['Fins', 'Fins', 'Fins', 'Vitality', 'Vitality', 'Vitality',
                          'Reflex', 'Reflex', 'Reflex', 'Nerve', 'Nerve', 'Nerve',
                          'Impact', 'Impact', 'Mend'] },
-  // The top of the third, carrying the Gun: every ordinary mod at its cap by
-  // then, and the first layer end's Mend; the second's had nothing left to
-  // offer. Claude's pick, as above.
+  // Every ordinary mod at its cap, and the first layer end's Mend. Claude's pick.
   'layer-3':     { batch: plan => plan.findIndex(e => e.layer === 2),
                    kit: ['Fins', 'Fins', 'Fins', 'Vitality', 'Vitality', 'Vitality',
                          'Reflex', 'Reflex', 'Reflex', 'Nerve', 'Nerve', 'Nerve',
@@ -618,15 +475,9 @@ const SCENARIOS = {
 };
 
 // ---------- enemy types ----------
-// Documented in docs/entities/enemies.md -- `npm test` holds it to this table.
-// What the currency `value` pays in is still unnamed (`ideas.md`), which is
-// why nothing in the code names it. A `ramp` eases the plain chase as the
-// diver's swim is eased (D107), so the fish overshoots a sidestep; without
-// one it turns on the spot.
+// Documented in docs/entities/enemies.md, held to it by `npm test`.
 const ENEMY_TYPES = [
-  // The plain fish bite (D108): `bite` holds how near its body must come to
-  // the diver's to open its jaws, the seconds they stay open -- the tell --
-  // and the seconds before it can bite again. Claude's picks.
+  // The plain fish bite (D108). Claude's picks.
   { name: 'drifter', r: 18, hp: 1, speed: 85,  ramp: 0.6, value: 1,
     color: '#e8446e', glow: '#ff1e5a',
     bite: { reach: 10, windup: 0.3, rest: 0.8 } },
@@ -636,29 +487,21 @@ const ENEMY_TYPES = [
   { name: 'bulwark', r: 34, hp: 6, speed: 52,  ramp: 1.2, value: 3,
     color: '#a05cff', glow: '#7b2fff',
     bite: { reach: 40, windup: 0.6, rest: 1.2 } },
-  // The archer keeps its distance and spits (D95). `spit` holds its band --
-  // closer than `range`, no closer than `near` -- the seconds between spits,
-  // and its shot's speed, radius and `travel`. `range` sits under the Gun's,
-  // so the starting weapon can always answer it. Claude's picks.
+  // The archer (D95). Its `range` sits under the Gun's, so the starting weapon
+  // can always answer it. Claude's picks.
   { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2,
     color: '#5aa9ff', glow: '#1f6fff',
     spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420 } },
-  // The puffer chases, stops, bursts and chases on (D95, D106). `fuse` holds
-  // the seconds it chases before it can light, how near it must get to light
-  // it, the seconds it swells -- the tell -- and its blast's radius. Claude's
-  // picks.
+  // The puffer (D95, D106). Claude's picks.
   { name: 'puffer',  r: 22, hp: 3, speed: 95,  value: 2,
     color: '#ffee58', glow: '#ffc800',
     fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110 } },
-  // The eel sways as it comes (D95): `weave` holds how far either side, in px,
-  // and how many sways a second. Its body shocks: the one fish that hurts on
-  // touch (D108). Claude's picks.
+  // The eel (D95), the one fish that hurts on touch (D108). Claude's picks.
   { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, touch: true,
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 } },
-  // The lungers: the boss, and the mini-boss that rehearses it (D62, D64, D65).
-  // `lunge` holds the timings, and its presence is the behaviour. Neither ever
-  // glows (D88): `carries: false` keeps a batch's mod off them. Claude's picks.
+  // The boss, and the mini-boss that rehearses its lunge (D62, D64, D65).
+  // Neither glows (D88). Claude's picks.
   { name: 'mini-boss', r: 52, hp: 24, speed: 70, value: 5, carries: false,
     color: '#e2ff8a', glow: '#c6ff3c',
     lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
@@ -671,30 +514,22 @@ const ENEMY_TYPES = [
              count: 7, arc: 90, speed: 160, r: 9, travel: 600 } },
 ];
 
-// What a fish is made with beyond its numbers: its behaviour records --
-// `bite`, `lunge`, ... -- whose presence is the behaviour (D26), so a new one
-// costs nothing where fish are made, and the plain fields that change how it
-// moves or hurts, `ramp` and `touch` (D107, D108).
+// Behaviour records, whose presence is the behaviour (D26), so a new one costs
+// nothing where fish are made; plus `ramp` and `touch` (D107, D108).
 const behaviourOf = t => ({ ramp: t.ramp, touch: t.touch,
   ...Object.fromEntries(Object.entries(t).filter(([, v]) => typeof v === 'object')) });
 
-// `home` (D38): its layer list sits between the heading and the rows, one
-// line per layer at most, so where the rows start is derived from how many
-// layers there are -- a fixed top would let a fifth layer run into them.
+// Derived from how many layers `home` lists, or a fifth would run into the rows.
 const HOME_LAYERS_TOP = 326, HOME_LINE = 26;
 const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 
 // ---------- the debug mode ----------
-// `?debug` (D102): a setup screen in place of the title, for playtesting a
-// piece alone or several together by hand -- where, which fish and how many,
-// and the diver's kit. Its rows are built from the tables, so a new fish, mod
-// or piece of gear joins it with nothing to write.
+// `?debug` (D102). Its rows are built from the tables, so new content joins it
+// with nothing to write.
 const ONE_SHOT         = 100;   // damage that kills anything here in one shot
 const DEBUG_FISH_MAX   = 50;    // of one type in the setup's batch: Claude's pick
 const DEBUG_STEPS_MAX  = 9;     // of one attribute: Claude's pick
-// What a fish does, in words, for its tip: one line per behaviour field --
-// a new behaviour needs its line, and `npm test` says so -- and `chase` for a
-// fish with none. Its numbers come from its record.
+// A fish's tip: one line per behaviour field, which `npm test` asks for.
 const DEBUG_BEHAVIOURS = {
   chase: 'swims straight at you',
   spit:  'keeps its distance and spits shots at you',
@@ -704,10 +539,7 @@ const DEBUG_BEHAVIOURS = {
   lunge: 'winds up, then lunges along its line \u2014 step aside',
   fan:   'spits a fan of shots \u2014 slip between them',
 };
-// Every name a setup counts, with its cap, its column and its tip: the fish in
-// its batch, a piece of equipment's tier, an attribute's points, a mod's picks
-// -- and every weapon's tier, shown for the one carried. `of` marks a cap that
-// is the game's own, worth showing beside the count.
+// `of` marks a cap that is the game's own, shown beside the count.
 const DEBUG_COUNTS = [
   ...ENEMY_TYPES.map(e => ({ name: e.name, col: 1, max: DEBUG_FISH_MAX, tip: () => fishTip(e) })),
   ...EQUIPMENT.map(g => ({ name: g.name, col: 2, max: g.tiers.length, of: true, tip: () => gearTip(g) })),
@@ -715,8 +547,7 @@ const DEBUG_COUNTS = [
   ...MODS.map(m => ({ name: m.name, col: 3, max: m.max, of: true, tip: () => modTip(m) })),
   ...WEAPONS.map(w => ({ name: w.name, max: w.tiers.length, of: true })),
 ];
-// A counted row of the setup. A weapon mod goes into the dive only with a
-// weapon it fits (D99), so with another carried its row is dim.
+// A weapon mod enters a dive only with a weapon it fits (D99); otherwise dim.
 const countRow = c => ({
   label: c.name,
   col: c.col,
@@ -726,10 +557,8 @@ const countRow = c => ({
   change: d => { debugSetup.counts[c.name] = wrapStep(debugSetup.counts[c.name] || 0, d, c.max); },
 });
 
-// The setup screen's grid: a column per heading, rows `DEBUG_STEP` apart, and
-// the Dive row under the tallest column with the gate's line and the marked
-// row's tip between -- so a new fish or mod pushes them down, and the browser
-// suite holds them above the hint.
+// Dive sits under the tallest column, so new content pushes it down; the
+// browser suite holds it above the hint.
 const DEBUG_COLS = ['WHERE', 'FISH', 'DIVER', 'MODS'];
 const DEBUG_TOP = 236, DEBUG_STEP = 32, DEBUG_COL_W = 280;
 const debugColX = c => ARENA_W * (2 * c + 1) / (2 * DEBUG_COLS.length);
@@ -743,36 +572,24 @@ function debugRect(i) {
   const k = items.slice(0, i).filter(x => x.col === r.col).length;
   return { x: debugColX(r.col) - DEBUG_COL_W / 2, y: DEBUG_TOP + k * DEBUG_STEP - 22, w: DEBUG_COL_W, h: 30 };
 }
-// A click on a value row: its left half is the label and moves nothing, then
-// ‹ lowers and › raises, either side of the value at three quarters across.
+// The label half moves nothing; ‹ lowers and › raises, either side of the value.
 function clickStep(r, x) {
   return x < r.x + r.w / 2 ? 0 : x < r.x + r.w * 3 / 4 ? -1 : 1;
 }
 
 // ---------- menus ----------
-// A list of entries, so adding one is a line. Anything that depends on state --
-// a label, a sub-line, `dim` (a row that cannot be taken right now), `home`'s
-// `lines` -- is a getter, so the renderer reads every one the same way. `top`
-// is where the rows start, which the renderer and the hit-test share; `back`
-// is what Esc does, on a menu that has one. A screen is a menu exactly when it
-// has an entry here -- `step()` asks `MENUS[screen]` -- and the water stops on
-// every menu but one that `flows`. A row with `change(d)` holds a value that
-// the arrows and a click move -- the debug setup's -- and `rect` lays a menu's
-// rows out in a grid of its own.
+// A screen is a menu exactly when it has an entry here: `step()` asks
+// `MENUS[screen]`, and the water stops on every menu but one that `flows`.
+// What depends on state is a getter, so the renderer reads every field alike.
 //
-// The end of a dive, either way it ends: Dive again or Go home (D90). The water
-// keeps flowing under it (D58). Go home opens marked (`endDive()`), so a stray
-// Enter or Space -- Space is the dash -- never starts a dive by accident. In
-// the debug mode they read Again and Setup, and go there (D102).
+// Go home opens marked (`endDive()`), so a stray Enter or Space -- the dash --
+// never starts a dive.
 const END_TOP = ARENA_H / 2 + 100;
 const GO_HOME = { get label() { return debugSetup ? 'Setup' : 'Go home'; },
                   run: () => openMenu(debugSetup ? 'debug' : 'home') };
-// The weapons, equipment and attribute screens' last row, and their Esc (D96).
 const BACK_HOME = { label: 'Back', run: () => openMenu('home') };
-// What a piece of gear requires and is not yet met (D98), on its row.
 const needs = g => (meets(g) ? '' : '   needs ' +
   Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', '));
-// A piece of gear's tier, and what the next costs.
 const tierLabel = g => {
   const t = meta.gear[g.name] || 0, cost = nextCost(g);
   return 'tier ' + t + (cost === undefined ? ', the top' : ' → ' + (t + 1) + '   ' + cost + ' gems');
@@ -791,8 +608,7 @@ const MENUS = {
     sub: 'something small, in very deep water',
     top: MENU_TOP,
     items: [
-      // `home` lives between dives only (D76): with a dive under way, Start is
-      // Continue and goes straight back into it, where it was (D90).
+      // With a dive under way, Start is Continue, straight back in (D76, D90).
       { get label() { return diveLive ? 'Continue' : 'Start'; },
         run: () => { if (diveLive) screen = resumeTo; else openMenu('home'); } },
       { label: 'Help',    run: () => openScreen('help') },
@@ -801,8 +617,7 @@ const MENUS = {
       { label: 'New game', run: () => openMenu('newGame') },
     ],
   },
-  // A new game erases the save for good, so it says so first, in red, and
-  // Cancel is the row a stray Enter takes (D103).
+  // Cancel first, so a stray Enter cancels (D103).
   newGame: {
     heading: 'NEW GAME',
     get sub() {
@@ -829,8 +644,8 @@ const MENUS = {
       { label: 'Resume',        run: () => { screen = resumeTo; } },
       { label: 'Help',          run: () => openScreen('help') },
       { label: 'Options',       run: () => openScreen('options') },
-      // The dive stays saved -- pausing wrote it -- and the title offers it back.
-      // The debug mode saved nothing, and goes back to its setup (D102).
+      // Pausing saved the dive, and the title offers it back. The debug mode
+      // saved nothing (D102).
       { get label() { return debugSetup ? 'Quit to setup' : 'Quit to title'; },
         run: () => openMenu(debugSetup ? 'debug' : 'title') },
     ],
@@ -844,9 +659,7 @@ const MENUS = {
       return meta.bank + ' gems      ' + p + (p === 1 ? ' point' : ' points') +
              '      deepest ' + Math.round(meta.deepest / 10) + 'm';
     },
-    // The layers, one line each (D66): an unlocked one by name, with whether
-    // it has been cleared; the next locked one as ???; the rest hidden.
-    // Unlocked means the one before it was cleared.
+    // Unlocked layers by name, the next as ???, the rest hidden (D66).
     get lines() {
       return LAYERS.slice(0, meta.cleared + 2).map((layer, l) => l > meta.cleared
         ? { text: '???', locked: true }
@@ -854,10 +667,8 @@ const MENUS = {
     },
     top: HOME_TOP,
     back: () => openMenu('title'),
-    // What it sells lives a screen deeper, weapons, equipment and attributes
-    // each on its own (D96, D114): three weapons, three pieces and three
-    // attributes on one screen would run through the hint, and weapons in
-    // one list with equipment read as a muddle.
+    // What it sells is a screen deeper (D96, D114): on one, it would run
+    // through the hint.
     items: [
       { label: 'Dive', run: () => reset() },             // every dive from the top (D66)
       { label: 'Weapons',    run: () => openMenu('weapons') },
@@ -873,7 +684,6 @@ const MENUS = {
     top: MENU_TOP,
     back: BACK_HOME.run,
     items: [
-      // Every weapon -- to own, to carry, or the carried one's tier (D97).
       ...WEAPONS.map(w => ({
         get label() {
           if (meta.carried === w.name) return w.name + '   equipped   ' + tierLabel(w);
@@ -894,7 +704,6 @@ const MENUS = {
     top: MENU_TOP,
     back: BACK_HOME.run,
     items: [
-      // Every piece of equipment's tier.
       ...EQUIPMENT.map(g => ({
         get label() { return g.name + '   ' + tierLabel(g) + needs(g); },
         get dim() { return !canBuy(g); },
@@ -922,9 +731,7 @@ const MENUS = {
       BACK_HOME,
     ],
   },
-  // The debug mode's setup (D102): its code is the sub-line, the gate's line
-  // says what the chosen gate drew -- or the fish set in its place -- and Dive
-  // sits under the four columns. Nothing to go back to: the title is not here.
+  // No `back`: the title is not part of the debug mode's flow.
   debug: {
     heading: 'DEBUG',
     get sub() {

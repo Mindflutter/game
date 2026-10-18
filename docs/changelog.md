@@ -6,6 +6,18 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-18
 
+**Comments cut to the why** (D91 (comments amend the code))
+Igor: "i see you are adding a lot of comments in the code again. are they
+really so important? shouldnt most of code be self-evident?", then yes to the
+same cut on the existing code. Every comment in `game/`, `platform/`,
+`main.js`, `checks.js`, `tests/` and the citation hook was read against D91
+(comments amend the code). A comment that restated the line below, a
+signature, a test's name or a doc went. Kept: a constraint, a gotcha, an
+ordering hazard, an old save's shape, a decision pointer, a unit, a
+`ponytail:` note, "Claude's picks" and PLACEHOLDER GRAPHICS. The code is the
+same token for token: every file was minified before and after and compared.
+Both suites pass unchanged.
+
 **The boss's fan** (D117 (the boss's fan))
 Igor: "mini-boss and boss have one kind of behavior. we need to make them
 different", then "your lean" — the boss gains an attack, the mini-boss only

@@ -1,16 +1,12 @@
-// Property-based invariants: things that must hold for *every* dive, not just
-// the handful a scripted check happens to walk through. fast-check generates
-// the seeds and the input, and shrinks a failure to its smallest case.
-//
-// Each one guards a recorded decision (D39). A decision without a check erodes
-// silently, and that is what this file is for.
+// Things that must hold for *every* dive, not only the ones a scripted check
+// walks through; fast-check shrinks a failure to its smallest case. Each one
+// guards a recorded decision (D39).
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { loadGame, SEAM, ticks } from './harness.js';
 import { diveReport } from './bot.js';
 
-// Drives a dive with pseudo-random but seed-derived input, so a failing case
-// replays exactly. Returns the game context for inspection.
+// Seed-derived input, so a failing case replays exactly.
 function dive(seed, ticks, inputSeed = seed) {
   const g = loadGame();
   g.reset(seed);
@@ -24,11 +20,9 @@ function dive(seed, ticks, inputSeed = seed) {
     if (next() < 0.5) g.keys.add('KeyS');
     if (next() < 0.02) g.justPressed.add('Space');
     if (next() < 0.08) {
-      // The degenerate case the `|| 1` guards exist for: cursor exactly on the
-      // player, so the aim vector has zero length. It happens for real -- `aim`
-      // starts at the arena centre, which is where the player starts too. A
-      // generator that only ever picks random points never reaches it, and then
-      // the NaN invariant is a check that can only pass.
+      // Cursor exactly on the player, a zero-length aim: `aim` starts where the
+      // player does, and random points alone never reach it, leaving the NaN
+      // check one that can only pass.
       g.aim.x = g.player.x;
       g.aim.y = g.player.y - g.cameraY;      // aim is in the view (D58)
     } else {
@@ -55,9 +49,7 @@ function allNumbers(g) {
 
 describe('the port seam', () => {
   it('game/ loads with nothing but the seven seam names (D18)', () => {
-    // If game/ reaches for an eighth name, or any browser API, at load, this
-    // throws. The seventh, `persist`, is the save's: storing text is
-    // platform's, deciding when is game's (D77).
+    // An eighth seam name, or any browser API, at load throws here.
     expect(SEAM).toHaveLength(7);
     const g = loadGame();
     expect(typeof g.update).toBe('function');
@@ -98,26 +90,22 @@ describe('the bot', () => {
     // The bot is the instrument every balance number comes from (D16), so it
     // needs a caller: without one it can rot silently and nothing would say so.
     const a = diveReport(4471, 3);
-    // Not '=== 3': how many batches a seed reaches depends on the batch table,
-    // which S6 will move. What must hold is that the bot clears *something*
-    // and does so deterministically.
+    // Not '=== 3': that moves with the batch table. It must clear *something*,
+    // deterministically.
     expect(a.clearTimes.length).toBeGreaterThan(0);
     expect(diveReport(4471, 3)).toEqual(a);
   });
 
   it('starts from a scenario and records only the fights it plays (D63)', () => {
-    // From the last boss's batch: one clear, then the win. A report that
-    // started from the top instead, or logged a zero-second "clear" at tick
-    // one because the scenario's batchIndex did not start at 0, fails one of
-    // the two.
+    // One clear, then the win: a report from the top, or a zero-second "clear"
+    // from a scenario's batchIndex not starting at 0, fails one of the two.
     const r = diveReport(4471, 2, 300, true, 'last-batch');
     expect(r.clearTimes.length).toBe(1);
     expect(r.won).toBe(true);
   });
 });
 
-// The dev flags, `immortal` and `damageOverride`: set by the debug mode's
-// setup (D102), the tests and the bot. What they do is game state, checked here.
+// The dev flags (D102): what they do is game state, checked here.
 describe('scenarios (D37)', () => {
   it('place exactly what they name, and a paused queue never gains a fish', () => {
     const g = loadGame();
@@ -143,7 +131,6 @@ describe('scenarios (D37)', () => {
 });
 
 describe('dev flags', () => {
-  // hp after two seconds with a bulwark parked on the player.
   function hpUnderBulwark(immortal) {
     const g = loadGame();
     g.immortal = immortal;
@@ -217,9 +204,7 @@ describe('invariants that must hold for every dive', () => {
   });
 
   it('decays on a time base, not a frame base (D15)', () => {
-    // The rule is Math.pow(x, dt), never a per-frame factor -- a per-frame
-    // factor runs 2.4x faster on a 144Hz screen. So one second of shake must
-    // decay the same amount however finely that second is sliced.
+    // Math.pow(x, dt): one second of shake decays the same however it is sliced.
     fc.assert(fc.property(fc.integer({ min: 2, max: 240 }), steps => {
       const decay = n => {
         const g = loadGame();

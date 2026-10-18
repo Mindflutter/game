@@ -1,11 +1,6 @@
-// Stop hook: refuse a reply that cites a decision (D58) or a stage (S2) without
-// its short name in brackets right after it -- "D58 (the descent)". CLAUDE.md
-// asks for this, and it is enforced here instead of remembered.
-//
-// Reads the hook payload on stdin, collects the assistant text written since
-// the last real user message, and exits 2 (block, with the reason on stderr)
-// on the first bare citation. Docs headings use "D58 — Name"; that form is
-// accepted too, since it names the decision.
+// Stop hook: blocks a reply citing a decision (D58) or a stage (S2) without
+// its short name in brackets after it, as CLAUDE.md asks. "D58 — Name", the
+// docs' heading form, names it too.
 import { readFileSync } from 'node:fs';
 
 const input = JSON.parse(readFileSync(0, 'utf8'));
@@ -19,9 +14,8 @@ for (let i = lines.length - 1; i >= 0; i--) {
   try { e = JSON.parse(lines[i]); } catch { continue; }
   const content = e.message?.content;
   if (e.type === 'user') {
-    // Hook feedback, agent reports and skill expansions arrive as `isMeta`
-    // user entries mid-turn. They are not the prompt; stopping at them left the
-    // turn's earlier text unchecked.
+    // Hook feedback and skill expansions arrive mid-turn as `isMeta` user
+    // entries; stopping at them would leave the turn's earlier text unchecked.
     if (e.isMeta) continue;
     const isToolResult = Array.isArray(content) && content.some(c => c.type === 'tool_result');
     if (!isToolResult) break;                      // the prompt this reply answers

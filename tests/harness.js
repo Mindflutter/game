@@ -1,14 +1,9 @@
-// Loads game/ into Node with nothing but the port seam stubbed out.
-//
-// This is not a convenience: it is the seam check, executable. `game/` is
-// supposed to contain zero browser API and reach into platform/ for exactly
-// seven names (D18) -- the seventh, `persist`, is the save's (D77). Reaching
-// for an eighth throws -- at load, or on any path a test drives; a path no
-// test drives can still hide one.
+// Loads game/ into Node with only the port seam stubbed: the seam check,
+// executable. `game/` reaches platform/ for exactly seven names (D18, D77); an
+// eighth throws, at load or on any path a test drives.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-// The seven names, and only the seven.
 export const SEAM = ['sound', 'keys', 'justPressed', 'tapped', 'moveCursor', 'aim', 'persist'];
 
 // No TICK constant: every caller has a loaded game in hand, and a copy of
@@ -24,14 +19,13 @@ export function loadGame() {
 
   const ctx = {
     // --- the seam ---
-    sound: () => {},                                   // audio is platform's job
+    sound: () => {},
     keys,
     justPressed,
     tapped: codes => codes.some(c => justPressed.has(c)),
     moveCursor: (index, _length) => index,             // menus are not under test
     aim: { x: 0, y: 0 },
-    // Storing is platform's job; here the last text written is kept on the
-    // context, as `saved`, so a test can read what the game would have stored.
+    // The last text written, as `saved`, for a test to read.
     persist: text => { ctx.saved = text; },
     // --- language builtins the sandbox needs ---
     Math, Object, Array, Set, Map, JSON, Number, String, Boolean, isNaN, isFinite,
@@ -40,9 +34,8 @@ export function loadGame() {
   ctx.globalThis = ctx;
   vm.createContext(ctx);
 
-  // `let` at the top level of a script becomes a lexical binding, not a property
-  // of the global object, so `enemies` and friends are invisible from outside.
-  // Bridge them with accessors generated from the names, rather than eval.
+  // A top-level `let` is a lexical binding, not a global property, so it is
+  // invisible from outside: bridged by generated accessors, not eval.
   const STATE = ['player', 'enemies', 'bullets', 'gems', 'particles',
                  'elapsed', 'kills', 'shake', 'queuePaused', 'batchIndex', 'incoming', 'breathTimer',
                  'cameraY', 'waterY',
@@ -77,15 +70,12 @@ export function loadGame() {
 
 // ---------- shared by the test files ----------
 
-// Ticks for `seconds` of game time, in the game's own step, so a test's budget
-// survives a change of FIXED_DT.
+// In the game's own step, so a test's budget survives a change of FIXED_DT.
 export const ticks = (g, seconds) => Math.round(seconds / g.FIXED_DT);
 
-// Plays `seconds` of game time, tick by tick.
 export const play = (g, seconds) => { for (let i = 0, n = ticks(g, seconds); i < n; i++) g.update(g.FIXED_DT); };
 
-// Kills the player where they stand: one heart left and an eel on top -- the
-// fish that hurts on touch (D108). A diver that lives fails the test.
+// An eel on top: the fish that hurts on touch (D108).
 export function die(g) {
   g.player.hp = 1;
   g.player.hurt = 0;
@@ -94,9 +84,8 @@ export function die(g) {
   if (g.screen !== 'dead') throw new Error('die(): the diver lived, on ' + g.screen);
 }
 
-// Ticks until a batch arrives or the screen changes, holding `hold` the whole
-// way -- nothing in game/ writes `keys`, so setting them once holds them.
-// Returns the camera depth after every tick.
+// Nothing in game/ writes `keys`, so setting `hold` once holds it. Returns the
+// camera depth after every tick.
 export function ride(g, hold = []) {
   g.keys.clear();
   for (const k of hold) g.keys.add(k);
@@ -120,9 +109,7 @@ export function atGate(k) {
   return g;
 }
 
-// Kills the batch through the real death path -- its waves still to come
-// brought in first (D115) -- then plays on until the screen changes -- the
-// layer end's cards, or the win -- or `seconds` run out.
+// Through the real death path, its waves still to come brought in first (D115).
 export function clearAndWait(g, seconds = 5) {
   for (const f of g.incoming.splice(0)) g.arrive(f.name, f.flags);
   for (const e of [...g.enemies]) g.killEnemy(e);

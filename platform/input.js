@@ -1,19 +1,14 @@
-// ===== input (platform) =====
-// Keyboard and mouse. Rewritten on a port.
+// ===== input (platform) -- rewritten on a port =====
 
-// ---------- input ----------
-// Remember which keys are held down right now, BY PHYSICAL POSITION.
-// e.code is the key itself ('KeyW'); e.key is the character that key types,
-// which depends on the keyboard layout -- on a Russian layout WASD type
-// ц/ф/ы/в, so matching the character would miss them. Position also does the
-// right thing on AZERTY, where those four keys are labelled ZQSD.
+// Keys by e.code, their position, never e.key, the character they type: a
+// Russian layout or AZERTY changes the character, not the position.
 const keys = new Set();
-// Menus need to know a key *went down this frame*, not that it is held --
-// otherwise holding Down flies through the list. Cleared at the end of update().
+// Keys that went down this frame, so holding Down cannot fly through a menu.
+// Cleared at the end of update().
 const justPressed = new Set();
 window.addEventListener('keydown', e => {
   keys.add(e.code);
-  if (!e.repeat) justPressed.add(e.code);     // ignore the OS key-repeat
+  if (!e.repeat) justPressed.add(e.code);
 });
 // No keyup comes for a key let go while Cmd is down (on a Mac) or after the
 // window lost focus, so either lets go of every key.
@@ -23,27 +18,21 @@ window.addEventListener('keyup', e => {
 });
 window.addEventListener('blur', () => keys.clear());
 
-// UP / DOWN / LEFT / RIGHT / GO / DASH / CLICK live in game/content.js: which
-// key means which action is content, not platform, and keeping them there is
-// what holds the port seam at seven names. content.js loads first, so they are
-// available here.
+// UP, DOWN, ... live in game/content.js: which key means what is content, and
+// keeping it there holds the seam at seven names.
 const tapped = codes => codes.some(c => justPressed.has(c));
 
-// Mouse buttons ride in the same two sets as the keys, under codes a keyboard
-// can never produce ('Mouse0'), so menus can use tapped() without caring which
-// device the player reached for.
+// Mouse buttons share the key sets, under codes no keyboard produces, so menus
+// read either device through tapped().
 window.addEventListener('mousedown', e => {
   keys.add('Mouse' + e.button);
   justPressed.add('Mouse' + e.button);
 });
 window.addEventListener('mouseup', e => keys.delete('Mouse' + e.button));
 
-// Where you are aiming, in VIEW coordinates. The canvas is a scaled,
-// letterboxed 1280x800 view of the world, so a screen pixel is not a view
-// pixel -- undo the scale and the letterbox offset the renderer applied. The
-// world sits `cameraY` below the view; game/ adds it where aim is read (D58).
-// Starts pointing straight up, so the first shot has a direction even if the
-// mouse has never moved.
+// In view coordinates: the canvas is scaled and letterboxed, so undo both.
+// game/ adds `cameraY` where it reads aim (D58). Pointing up until the mouse
+// first moves, so the first shot has a direction.
 const aim = { x: ARENA_W / 2, y: 0 };
 window.addEventListener('mousemove', e => {
   aim.x = (e.clientX - offX) / scale;

@@ -1,132 +1,99 @@
-// ===== state =====
-// Everything a dive owns, plus the settings the options screen edits.
+// ===== state: everything a dive owns, so restarting is one call =====
 
 // ---------- game state ----------
-// Everything a dive owns lives here, so restarting is one call.
 let player, enemies, bullets, gems, drops, particles;
 let elapsed, kills, shake;
 let queuePaused = false;    // a scenario can stop the batch queue (D37)
 
-// Where the batch queue stands (D27). `batchIndex` counts batches *begun* and
-// never resets within a dive, so it is also how many have been cleared.
-//
-// `breathTimer` counts only the quiet beat before a dive's *first* batch
-// (GATE_PAUSE); every later batch waits on the descent (D58). It is not a gate
-// flag: a gate is the whole stretch where the descent is stopped, fight
-// included, so "at a gate" is `batchLive()`.
+// `batchIndex` counts batches begun and never resets in a dive, so it is also
+// how many are cleared. `breathTimer` is only the quiet beat before the first
+// batch (GATE_PAUSE); "at a gate" is `batchLive()`.
 let batchIndex = 0;
 let breathTimer = 0;
 
 // The batch's fish still to come (D115): `{ name, at }`, soonest first, `at`
-// on the dive's clock (`elapsed`).
+// on `elapsed`.
 let incoming = [];
 
-// The batch lives while a fish of it is in the arena or still to come.
 function batchLive() { return enemies.length > 0 || incoming.length > 0; }
 
-// The dive's batches, drawn whole from its seed when it starts (D71): one
-// entry per gate, `{ layer, batch }`, the last of each layer marked `end`.
-// The abyss is one tall strip (D72), so entry k waits at `gateDepth(k)`
-// whichever layer it belongs to, and the bottom is `plan.length`.
+// The dive's batches, drawn from its seed as it starts (D71): `{ layer, batch }`
+// per gate, each layer's last marked `end`. Entry k waits at `gateDepth(k)`.
 let plan = [];
 
-// Whether the player has taken a hit since the current batch arrived, and
-// whether they have dashed: what `untouched` and `footwork` read when it
-// clears (D109).
+// Hit, or dashed, since the batch arrived: `untouched` and `footwork` (D109).
 let batchHit = false;
 let batchDashed = false;
-// Hits the suit can still take this batch (D100): `player.guard`, refilled as
-// each batch arrives.
+// Hits the suit can still take this batch (D100).
 let guardLeft = 0;
-// The challenges' counts this dive (D109): each streak so far, by challenge
-// name; the times of the recent kills, for `flurry`; when the batch's first
-// kill and its glowing fish's death came, for `beeline` -- null until each
-// happens; and when the layer under way began, for `swift` -- null between
-// layers, and for a layer the dive began partway into.
+// The challenges' counts (D109): streaks by name, recent kill times for
+// `flurry`, the batch's first kill and glowing fish's death for `beeline`, the
+// layer's start for `swift` -- null until each happens, or for a layer begun
+// partway.
 let tally = {};
 let killTimes = [];
 let firstKillAt = null;
 let glowAt = null;
 let layerStart = null;
 
-// A line of text shown for a moment over play, and how many seconds it has
-// left: a challenge paying out. The layer's name needs no state -- it is
-// derived from the plan and the camera.
+// A challenge paying out, shown `noticeTime` more seconds.
 let notice = '';
 let noticeTime = 0;
-// The rungs paid this tick, so two challenges paying at once share the notice
-// rather than one hiding the other (D109). Emptied as each tick of play
-// begins, so it is never part of a saved dive.
+// Rungs paid this tick, so two paying at once share the notice (D109). Emptied
+// as each tick begins, so never saved.
 let paidNow = [];
-// The same for a pickup -- a mod or a boost, named as it lands (D84, D86) --
-// on a line of its own, so a batch's mod flying in cannot write over the
-// challenge its clear just paid.
+// A pickup, named as it lands (D84, D86), on its own line so a mod flying in
+// cannot write over the challenge its clear just paid.
 let banner = '';
 let bannerTime = 0;
 
-// A dive is under way: begun, and not yet ended by death or the win. What the
-// save writes as the dive in progress (D70), and what turns the title's Start
-// into Continue.
+// Begun and not yet ended: what the save writes as the dive in progress (D70),
+// and what makes the title's Start a Continue.
 let diveLive = false;
 
-// The camera: how far down the world the top of the view sits. Everything
-// in a dive lives in world coordinates; only `aim` and the HUD are in the view.
+// How far down the world the top of the view sits. A dive lives in world
+// coordinates; only `aim` and the HUD are in the view.
 let cameraY = 0;
-// The current (D58): its speed, which is never zero, and how far the water has
-// flowed. The camera holds during a fight; the water does not -- `waterY` is
-// what the background scrolls by, so the flow shows while nothing else moves.
+// The current (D58), never zero, and how far the water has flowed: the camera
+// holds in a fight, the background scrolls by `waterY` regardless.
 let current = 0;
 let waterY = 0;
 
-// The trigger is armed only once the button has been seen released. A menu
-// reads a click as an edge (justPressed) while the weapon reads it as a held
-// state (keys), so without this one physical click is read twice: the click
-// that starts a dive would also fire into it (D47).
+// Armed only once the button is seen released: a menu reads a click as an
+// edge, the weapon as held, so one click would also fire into the dive (D47).
 let fireArmed = false;
 
-// The carried weapon's name: what the dive fires (D83), and which weapon mods
-// fit it (D97). Its numbers are on the player.
+// The carried weapon (D83, D97); its numbers are on the player.
 let weaponName = '';
 
-// In-dive progress, reset every dive. `currency` is the dive's takings, spent
-// at `home`. `modCounts` is how many times each mod has been taken, which is
-// what lets the draws refuse one that is already maxed. `choices` is the layer
-// end's cards (D85).
+// `currency` is the dive's takings; `modCounts` how often each mod was taken,
+// so a capped one is never drawn; `choices` the layer end's cards (D85).
 let currency, choices, modCounts;
 
-// Seconds until the layer end's cards appear, counting from the boss dying.
-// `> 0` means "the layer is cleared and the offer is coming" -- the death gets
-// to finish playing before the game asks you to read three cards.
+// Seconds until the layer end's cards, from the boss's death, so the death
+// finishes playing first.
 let offerTimer = 0;
 
-// The ordinary mods dealt in the current round, by name: none comes again until
-// every one still under its cap has come once (`drawCarried()`).
+// Mods dealt this round: none again until every uncapped one has come.
 let modRound = [];
-// The boosts running, `{ name, left }` with `left` in seconds, and the kills
-// since a boost last dropped -- the chance of the next grows with it (D86).
+// Boosts running, `{ name, left }`, and kills since one dropped (D86).
 let boosts = [];
 let sinceBoost = 0;
 
-// Which screen we're on: one variable, so there is exactly one answer at a time.
 // 'title' | 'home' | 'weapons' | 'equipment' | 'attributes' | 'playing' | 'mods' |
 // 'paused' | 'help' | 'options' | 'dead' | 'won' | 'newGame' | 'debug'
 let screen = 'title';
 let menuIndex = 0;          // cursor in whichever menu is up
 let choiceIndex = 0;        // the marked card at a layer end (D85)
 let lastAimX = 0, lastAimY = 0;   // so a still mouse doesn't fight the arrows
-let optionIndex = 0;        // cursor in the options list
+let optionIndex = 0;
 let returnTo = 'title';     // where Esc goes back to from help / options
 let resumeTo = 'playing';   // where the pause menu and the title's Continue
                             // go back to: play, or the layer end's cards
 
 // ---------- randomness ----------
-// Every random number in a dive comes from here, seeded, so the same seed
-// replays the same dive exactly. That is what lets two balance measurements be
-// of the *same* game instead of two different ones, and it turns "it broke
-// sometimes" into "it broke on seed 4471".
-//
-// mulberry32: 32 bits of state, one multiply-xor-shift round. Tiny, fast, and
-// statistically fine for gameplay -- this is not cryptography.
+// Every random number in a dive comes from here, so a seed replays the dive
+// exactly. mulberry32: tiny, fast, fine for gameplay, not for cryptography.
 let rngState = 0;
 let currentSeed = 0;
 
@@ -135,9 +102,7 @@ function seedRng(seed) {
   rngState = currentSeed;
 }
 
-// The one deliberate exception: *choosing* a seed is not part of the
-// deterministic sequence, so an unseeded dive picks one at random. A port does
-// the same with whatever its language offers.
+// Choosing a seed is the one draw outside the seeded sequence.
 function newSeed() {
   return (Math.random() * 0x100000000) >>> 0;
 }
@@ -150,9 +115,6 @@ function rng() {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
-// `n` distinct picks from `pool`, in the order drawn -- fewer if it runs out.
-// A copy, so the splicing doesn't wreck the table. Every seeded draw without
-// repeats goes through here.
 function drawDistinct(pool, n) {
   const left = [...pool], out = [];
   while (out.length < n && left.length) {
@@ -161,15 +123,12 @@ function drawDistinct(pool, n) {
   return out;
 }
 
-// An unseeded dive picks its seed (`newSeed()`). `weapon` is the one home
-// chose (D97) -- or the first, when the save names one that is gone -- unless
-// a scenario names another.
+// `weapon`: home's choice (D97), the first if the save names one that is gone.
 function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAPONS[0]) {
   seedRng(seed === undefined ? newSeed() : seed);
   // First, before anything else draws: the whole dive's batches (D71).
   plan = drawPlan();
-  // The diver, carrying a weapon: its numbers go onto the player, where mods,
-  // attributes and the readout find them (D83).
+  // The weapon's numbers go onto the player, where mods and the readout find them.
   const shot = shotOf(weapon);
   weaponName = weapon.name;
   player = {
@@ -190,10 +149,8 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
     dashDy: 0,         // so letting go of the keys can't spin it
     dashEnd: 0,        // seconds of the closing ring left
   };
-  // What persists, added to the start (D36): each tier of the carried weapon
-  // and of the equipment, and each attribute's step, applied once. A weapon
-  // left at home adds nothing. Mods add on top during the dive; nothing
-  // multiplies.
+  // What persists, added once (D36): the carried weapon's and the equipment's
+  // tiers, each attribute's steps. Mods add on top; nothing multiplies.
   for (const g of [weapon, ...EQUIPMENT]) {
     for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.tiers[i].apply(player);
   }
@@ -207,26 +164,26 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   particles = [];
   elapsed = 0;         // seconds survived
   kills = 0;
-  queuePaused = false;   // scenarios switch this on; normal play never does
+  queuePaused = false;
   batchIndex = 0;
   incoming = [];
-  breathTimer = GATE_PAUSE;   // a dive opens on the beat, so it starts calm
+  breathTimer = GATE_PAUSE;
   cameraY = 0;         // every dive starts at the top of the first layer (D66)
-  current = CURRENT_CRAWL;   // the water is already moving when a dive opens
+  current = CURRENT_CRAWL;
   waterY = 0;
   fireArmed = false;     // a click that started the dive is not a shot
   bulletId = 0;        // or two dives with the same seed hand out different ids
   shake = 0;           // pixels of screen shake left
-  screen = 'playing';  // a reset dive is a running dive
+  screen = 'playing';
 
   currency = 0;
-  offerTimer = 0;      // no offer pending on a fresh dive
+  offerTimer = 0;
   modRound = [];
   boosts = [];
   sinceBoost = 0;
   accumulator = 0;     // no banked time carried into a new dive
   choices = [];
-  modCounts = {};      // mods are dive-scoped: last dive's picks do not carry
+  modCounts = {};
   choiceIndex = 0;
   batchHit = false;
   batchDashed = false;
@@ -243,14 +200,10 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   diveLive = true;
 }
 
-// A weapon's shot: the numbers it puts on the diver (D83), without what the
-// shop reads.
 function shotOf({ name, tiers, cost, requires, ...shot }) {
   return shot;
 }
 
-// Loads a named scenario from SCENARIOS (D37). Returns false for an unknown
-// name so the caller can complain.
 function applyScenario(name, seed) {
   const s = SCENARIOS[name];
   if (!s) return false;
@@ -258,22 +211,16 @@ function applyScenario(name, seed) {
   return true;
 }
 
-// Plays a scenario's record -- a named one, or the debug mode's setup (D102).
-// Starts from a clean reset, so a scenario is a dive like any other -- just
-// one that was set up rather than spawned into.
 function startScenario(s, seed) {
   reset(seed, WEAPONS.find(w => w.name === s.weapon));
-  // `!== undefined`, or `batch: 0` would be unreachable. The camera starts at
-  // that batch's depth, or a deep scenario would first descend the whole way.
-  // The player moves with it, or a stepped scenario draws them off-screen.
-  // A function of the plan where the batch is only known once drawn (D71).
+  // `!== undefined`, or `batch: 0` is unreachable. Camera and player start at
+  // the batch's depth, or a deep scenario would descend all the way first.
   const b = typeof s.batch === 'function' ? s.batch(plan) : s.batch;
   if (b !== undefined) {
     batchIndex = b;
     cameraY = gateDepth(b);
     player.y = cameraY + ARENA_H / 2;
   }
-  // A stated kit: taken as picks, as if picked up on the way down.
   for (const name of s.kit || []) takeMod(MODS.find(m => m.name === name));
   if (s.spawn === false) queuePaused = true;
   // Scenario positions are in the view, so they hold at any depth.
@@ -281,14 +228,9 @@ function startScenario(s, seed) {
 }
 
 // ---------- what persists ----------
-// Everything that outlives a dive (D31, D36, D67): the gems banked, gear tiers
-// and attribute steps raised -- keyed by name -- the rungs each challenge has
-// paid (D109), the deepest the camera has been and how many layers have been
-// cleared. Points *available* are derived (`points()`), never stored, so they
-// cannot disagree with the rungs that paid them.
-//
-// `version` from the first write (foundations.md -> The technical contract). A
-// save this build does not know is rejected loudly, never guessed at.
+// Everything that outlives a dive (D31, D36, D67). Points available are
+// derived (`points()`), never stored, so they cannot disagree with the rungs.
+// An unknown `version` is rejected loudly, never guessed at.
 const SAVE_VERSION = 8;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
@@ -299,13 +241,9 @@ function freshMeta() {
 let meta = freshMeta();
 
 // ---------- the dive, as data (D70) ----------
-// A dive is plain numbers in plain objects, its randomness one 32-bit number,
-// and it runs in fixed ticks -- so a copy of these variables *is* the dive,
-// and a restored one plays on exactly as it would have. Every variable a dive
-// owns must be here: the save-and-restore property check (tests/save.test.js)
-// diverges on any that is missed.
-// The mod cards on offer hold functions, so they are saved by name; `at` is
-// the screen play resumes to, since the pause menu may be what is showing.
+// A copy of these variables is the dive, and plays on exactly (D70). Every
+// variable a dive owns must be here: tests/save.test.js diverges on one missed.
+// Cards hold functions, so they go by name; `at` is where play resumes.
 function snapshot() {
   return { player, enemies, bullets, gems, drops, particles, elapsed, kills, shake,
            queuePaused, batchIndex, incoming, breathTimer, cameraY, current, waterY,
@@ -317,8 +255,6 @@ function snapshot() {
            at: screen === 'playing' || screen === 'mods' ? screen : resumeTo };
 }
 
-// The reverse. The dive comes back to `resumeTo`, the screen it was on, and
-// the title's Continue goes straight there (D90).
 function restore(d) {
   ({ player, enemies, bullets, gems, drops, particles, elapsed, kills, shake,
      queuePaused, batchIndex, incoming, breathTimer, cameraY, current, waterY,
@@ -331,35 +267,13 @@ function restore(d) {
   diveLive = true;
 }
 
-// The whole save, as text: what persists, the settings, and the dive if one is
-// under way. The settings sit beside what persists, not in it, so New game
-// keeps them (D113).
+// The settings sit beside what persists, so New game keeps them (D113).
 function saveText() {
   return JSON.stringify({ ...meta, settings: { volume, muted, shakeLevel, showFps },
                           dive: diveLive ? snapshot() : null });
 }
 
-// Brings an older save up to this version, or leaves it alone, one version at
-// a time. v1 kept the shot in constants, so a v1 dive's player has no shot
-// speed or radius: it gets the Gun's as they were then, 430 and 4 (D83).
-// v2 picked a mod at every gate and counted a rank (D84, D87): a v2 dive comes
-// back with its rank dropped, and with nothing dropped or running yet; the
-// batch it was in has no fish lit. Saved with the cards up, it takes the card
-// it had marked -- a gems or heart card, gone since, gives nothing -- and an
-// offer still on its way is dropped. v2 kept a layer's challenges by its
-// name, v3 by its number (D89): these were the names then. v3 had one weapon,
-// carried by every dive: a v3 save owns and carries the Gun (D97), its diver
-// wears no suit (D100), and its batch's clock starts as it loads (D98). v4 had
-// no water: its diver and fish load at rest, the diver facing down (D107). A
-// fish keeps the behaviour it was made with, so a v5 dive's fish get their
-// type's again: drifters saved before bites bite (D108). v6 paid each
-// challenge once a layer, under `tasks`, and a step cost a point (D109, D110):
-// it becomes as many rungs of its name as the layers it paid in, so no point
-// is lost, and every step comes back
-// as points to spend, since steps cost more now. Its dive has no streaks, its
-// batch's first kill unknown -- so that batch cannot pay `beeline` -- and no
-// clock on its layer, so `swift` waits for the next. v7 brought a batch in
-// whole: its dive has no fish still to come (D115).
+// One version at a time; what each step makes up for is `design.md` → The save.
 function migrate(s) {
   if (s && s.version === 1) {
     if (s.dive) s.dive.player = { shotSpeed: 430, shotRadius: 4, ...s.dive.player };
@@ -426,10 +340,8 @@ function migrate(s) {
   return s;
 }
 
-// Reads a save back. Returns '' when it loaded -- or when there was nothing
-// to load -- and otherwise why it was refused, having changed nothing: the
-// caller keeps the refused text aside and says so on screen, so a save is
-// never silently lost or silently half-read.
+// '' when loaded or nothing to load; otherwise why it was refused, having
+// changed nothing, so the caller can keep the text aside.
 function loadSave(text) {
   if (text === null || text === undefined) return '';
   let s;
@@ -439,8 +351,8 @@ function loadSave(text) {
   }
   const { dive, settings = {}, ...kept } = s;
   meta = { ...freshMeta(), ...kept };
-  // Each setting only if it reads as one: an odd value keeps its default rather
-  // than refusing the save -- a preference is not worth the progress beside it.
+  // An odd setting keeps its default rather than refusing the save: a
+  // preference is not worth the progress beside it.
   if (typeof settings.muted === 'boolean') muted = settings.muted;
   if (typeof settings.showFps === 'boolean') showFps = settings.showFps;
   if (typeof settings.volume === 'number' && settings.volume >= 0 && settings.volume <= 1) volume = settings.volume;
@@ -454,14 +366,12 @@ let muted = false;          // M flips it (platform/audio.js); the debug mode st
 let shakeLevel = 2;         // index into SHAKE_LEVELS
 let showFps = false;
 
-// Dev flags, set by the debug mode's setup (D102), the tests and the bot. Like
-// the settings above they are not part of a dive, so reset() leaves them alone
-// and they survive Dive again. Normal play never turns them on.
+// Dev flags (D102), set by the debug setup, the tests and the bot. Not part of a
+// dive, so reset() leaves them and they survive Dive again.
 let immortal = false;       // nothing can hurt the player
 let damageOverride = 0;     // above 0, every shot does this much
 
-// The debug mode's setup (D102), or null outside it. `?debug` sets it at boot
-// and nothing unsets it; while it is set, nothing is saved (`saveNow()`).
+// Set by `?debug` at boot and never unset; while set, nothing is saved.
 let debugSetup = null;
 
 function openScreen(name) {

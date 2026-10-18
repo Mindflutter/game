@@ -1,6 +1,5 @@
-// The ordinary enemies' behaviours beyond the chase (D95): each is checked on
-// its state transitions, as S5 (content)'s exit asks of every behaviour. The
-// lunge's checks are in boss.test.js.
+// The ordinary enemies' behaviours beyond the chase (D95), each checked on its
+// state transitions. The lunge's are in boss.test.js.
 import { describe, it, expect } from 'vitest';
 import { loadGame, ticks, play } from './harness.js';
 
