@@ -380,7 +380,7 @@ describe('equipment (D100)', () => {
   it('takes a hit whole on one charge, whatever its damage (D118)', () => {
     const g = wearing({ Suit: 1 });
     g.placeEnemy('eel', g.player.x, g.player.y);
-    g.enemies[0].touch = 2;
+    g.enemies[0].touch.damage = 2;
     g.update(g.FIXED_DT);
     expect([g.player.hp, g.guardLeft]).toEqual([g.player.maxHp, 0]);
     for (let i = 0, n = ticks(g, g.player.iframes + 0.1); i < n; i++) g.update(g.FIXED_DT);

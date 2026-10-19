@@ -26,7 +26,9 @@ number before the numbers are tuned:
   "mini-boss and boss have one kind of behavior. we need to make them
   different. this would belong to a completed s5, naturally we have to do it
   outside of it, so plan that too." Built as D117 (the boss's fan).
-
+- **Real knockback** — Igor, 2026-10-19: "drawn bump stays for s7, real
+  knockback - design and implement now":
+  `specs/2026-10-19-knockback-design.md`, built as D122 (knockback).
 
 Where it stands is `roadmap.md` → Next. **S6 — Balance** follows; its entry,
 S5 exiting, is met, and it opens on Igor's word.
@@ -85,7 +87,9 @@ in the game".
 
 **Entry:** S6 exits.
 
-**Work:** Game feel. Sound. Assets **only if** the condition is hit —
+**Work:** Game feel — among it a fish bumped by the shot that hits it (Igor,
+2026-10-19: "shooting causes bump - actually a good idea, put in the plan";
+`ideas.md` → Feel). Sound. Assets **only if** the condition is hit —
 indistinguishable enemies, indistinguishable layers, or visual clumsiness.
 UX fixing — `ideas.md` → Screens, among it what a tier does for the player
 (Igor, 2026-10-19).

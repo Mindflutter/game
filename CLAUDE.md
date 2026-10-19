@@ -172,6 +172,12 @@ of a challenge (D110).
   strength** ("slows" is not "stops"), and a rule is read for what it means in
   the game before anything is called a contradiction.
 
+- **A comment from Igor is acted on at once only if both hold**: the change is
+  minimal, and it directly concerns the current conversation. Anything else is
+  recorded where it can be picked up later — `bugs.md`, `plan.md`, `ideas.md`,
+  or wherever it belongs — with his words, and said so in the reply. Igor,
+  2026-10-19: "pick a proper place so that we can come back to it any time
+  later".
 - **One question per response.** Not four. Igor has to hold the whole context
   to answer, and a wall of simultaneous decisions is expensive for a human in a
   way it is not for a model. Ask the most load-bearing one, act on assumptions

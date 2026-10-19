@@ -162,19 +162,19 @@ const BOOSTS = [
 
 // Documented in docs/entities/weapons.md, held to it by `npm test`.
 const WEAPONS = [
-  { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, cost: 0,
+  { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, knock: 60, cost: 0,
     tiers: [{ cost: 40,  apply: p => p.fireRate += 0.5 },
             { cost: 100, apply: p => p.fireRate += 0.5 },
             { cost: 200, apply: p => p.fireRate += 0.5 }] },
   // The draft's railgun (D97), needing Strength (D98).
-  { name: 'Harpoon', fireRate: 0.8, damage: 3, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2,
+  { name: 'Harpoon', fireRate: 0.8, damage: 3, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2, knock: 200,
     cost: 150, requires: { Strength: 1 },
     tiers: [{ cost: 80,  apply: p => p.damage += 1 },
             { cost: 160, apply: p => p.fireRate += 0.2 },
             { cost: 300, apply: p => p.pierce += 1 }] },
   // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
   // swing at pierce + 1 fish, nearest first.
-  { name: 'Knife', fireRate: 3, damage: 2, range: 56, shotRadius: 18, pierce: 6,
+  { name: 'Knife', fireRate: 3, damage: 2, range: 56, shotRadius: 18, pierce: 6, knock: 40,
     swing: { arc: 120, time: 0.15 }, cost: 100,
     tiers: [{ cost: 60,  apply: p => p.range += 12 },
             { cost: 140, apply: p => p.damage += 1 },
@@ -242,6 +242,7 @@ const PLAYER_STATS = [
   { stat: 'damage',       label: 'dmg',     read: p => p.damage },
   { stat: 'pierce',       label: 'pierce',  read: p => p.pierce },
   { stat: 'shotRadius',   label: 'size',    read: p => p.shotRadius },
+  { stat: 'knock',        label: 'knock',   read: p => p.knock },
   { stat: 'dashDamage',   label: 'dashdmg', read: p => p.dashDamage },
   { stat: 'dashCooldown', label: 'dashcd',  read: p => p.dashCooldown.toFixed(1) + 's' },
   { stat: 'iframes',      label: 'ifr',     read: p => p.iframes.toFixed(2) + 's' },
@@ -481,43 +482,44 @@ const ENEMY_TYPES = [
   // The plain fish bite (D108). Claude's picks.
   { name: 'drifter', r: 18, hp: 1, speed: 85,  ramp: 0.6, value: 1,
     color: '#e8446e', glow: '#ff1e5a',
-    bite: { reach: 10, windup: 0.3, rest: 0.8, damage: 1 } },
+    bite: { reach: 10, windup: 0.3, rest: 0.8, damage: 1, knock: 240 } },
   { name: 'darter',  r: 12, hp: 1, speed: 190, ramp: 0.9, value: 1,
     color: '#ffb648', glow: '#ff8a00',
-    bite: { reach: 6, windup: 0.15, rest: 0.6, damage: 1 } },
+    bite: { reach: 6, windup: 0.15, rest: 0.6, damage: 1, knock: 180 } },
   { name: 'bulwark', r: 34, hp: 6, speed: 52,  ramp: 1.2, value: 3,
     color: '#a05cff', glow: '#7b2fff',
-    bite: { reach: 40, windup: 0.6, rest: 1.2, damage: 1 } },
+    bite: { reach: 40, windup: 0.6, rest: 1.2, damage: 1, knock: 420 } },
   // The archer (D95). Its `range` sits under the Gun's, so the starting weapon
   // can always answer it. Claude's picks.
   { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2,
     color: '#5aa9ff', glow: '#1f6fff',
-    spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420, damage: 1 } },
+    spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420, damage: 1, knock: 150 } },
   // The puffer (D95, D106). Claude's picks.
   { name: 'puffer',  r: 22, hp: 3, speed: 95,  value: 2,
     color: '#ffee58', glow: '#ffc800',
-    fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110, damage: 1 } },
+    fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110, damage: 1, knock: 480 } },
   // The eel (D95), the one fish that hurts on touch (D108). Claude's picks.
-  { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, touch: 1,
+  { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2,
     color: '#38f2c0', glow: '#00c896',
-    weave: { width: 50, rate: 0.9 } },
+    weave: { width: 50, rate: 0.9 },
+    touch: { damage: 1, knock: 240 } },
   // The boss, and the mini-boss that rehearses its lunge (D62, D64, D65).
   // Neither glows (D88). Claude's picks.
   { name: 'mini-boss', r: 52, hp: 24, speed: 70, value: 5, carries: false,
     color: '#e2ff8a', glow: '#c6ff3c',
-    lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2, damage: 1 } },
+    lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2, damage: 1, knock: 600 } },
   // The boss's `value` is the layer end's big haul of gems (D68); its `fan`,
   // D117's. Claude's picks.
   { name: 'boss',      r: 84, hp: 60, speed: 60, value: 30, carries: false,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
-    lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2, damage: 1 },
+    lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2, damage: 1, knock: 600 },
     fan:   { chase: 1, windup: 0.8, reach: 450, rest: 1.2,
-             count: 7, arc: 90, speed: 160, r: 9, travel: 600, damage: 1 } },
+             count: 7, arc: 90, speed: 160, r: 9, travel: 600, damage: 1, knock: 150 } },
 ];
 
 // Behaviour records, whose presence is the behaviour (D26), so a new one costs
-// nothing where fish are made; plus `ramp` and `touch` (D107, D108).
-const behaviourOf = t => ({ ramp: t.ramp, touch: t.touch,
+// nothing where fish are made; plus `ramp` (D107).
+const behaviourOf = t => ({ ramp: t.ramp,
   ...Object.fromEntries(Object.entries(t).filter(([, v]) => typeof v === 'object')) });
 
 // Grades (D119): the same fish, stronger -- its numbers, never its behaviour.
@@ -549,6 +551,7 @@ const DEBUG_BEHAVIOURS = {
   weave: 'sways side to side as it comes \u2014 aim where it will be',
   lunge: 'winds up, then lunges along its line \u2014 step aside',
   fan:   'spits a fan of shots \u2014 slip between them',
+  touch: 'hurts to touch',
 };
 // `of` marks a cap that is the game's own, shown beside the count.
 const DEBUG_COUNTS = [

@@ -8,62 +8,70 @@ business: `game/content.js` → batches and layers.
 True of every type: its body is solid — the diver cannot swim through it, nor
 another fish sit inside it, and the lighter of two is pushed further (D120
 (bodies are solid)); it hurts only by its attack, each attack costing its own
-`damage` (D118 (hits vary in damage)), then the player's i-frames — a guard
-charge takes a hit whole; the dash passes through it and shoves it, and hurts it once `dashDamage` is bought (D51
+`damage` (D118 (hits vary in damage)) and knocking the diver back by its own
+`knock` (D122 (knockback)), then the player's i-frames — a guard charge takes
+a hit whole, its knock too; the diver's hits knock it back in turn, the
+heavier by area less; the dash passes through it and shoves it, and hurts it once `dashDamage` is bought (D51
 (the dash is bought)); and it drops its `value` in gems when it dies, which are
 pulled to the player (D78 (gems are pulled to the player)).
 
 ## Roster
 
-| name | r | hp | speed | ramp | value | color | glow | touch | carries | enters |
-|---|---|---|---|---|---|---|---|---|---|---|
-| drifter | 18 | 1 | 85 | 0.6 | 1 | #e8446e | #ff1e5a | — | — | — |
-| darter | 12 | 1 | 190 | 0.9 | 1 | #ffb648 | #ff8a00 | — | — | — |
-| bulwark | 34 | 6 | 52 | 1.2 | 3 | #a05cff | #7b2fff | — | — | — |
-| archer | 16 | 2 | 75 | — | 2 | #5aa9ff | #1f6fff | — | — | — |
-| puffer | 22 | 3 | 95 | — | 2 | #ffee58 | #ffc800 | — | — | — |
-| eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | 1 | — | — |
-| mini-boss | 52 | 24 | 70 | — | 5 | #e2ff8a | #c6ff3c | — | false | — |
-| boss | 84 | 60 | 60 | — | 30 | #c8ff3c | #9dff00 | — | false | bottom |
+| name | r | hp | speed | ramp | value | color | glow | carries | enters |
+|---|---|---|---|---|---|---|---|---|---|
+| drifter | 18 | 1 | 85 | 0.6 | 1 | #e8446e | #ff1e5a | — | — |
+| darter | 12 | 1 | 190 | 0.9 | 1 | #ffb648 | #ff8a00 | — | — |
+| bulwark | 34 | 6 | 52 | 1.2 | 3 | #a05cff | #7b2fff | — | — |
+| archer | 16 | 2 | 75 | — | 2 | #5aa9ff | #1f6fff | — | — |
+| puffer | 22 | 3 | 95 | — | 2 | #ffee58 | #ffc800 | — | — |
+| eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | — | — |
+| mini-boss | 52 | 24 | 70 | — | 5 | #e2ff8a | #c6ff3c | false | — |
+| boss | 84 | 60 | 60 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
 
 Each behaviour's numbers, a table per behaviour field. `bite`:
 
-| name | reach | windup | rest | damage |
-|---|---|---|---|---|
-| drifter | 10 | 0.3 | 0.8 | 1 |
-| darter | 6 | 0.15 | 0.6 | 1 |
-| bulwark | 40 | 0.6 | 1.2 | 1 |
+| name | reach | windup | rest | damage | knock |
+|---|---|---|---|---|---|
+| drifter | 10 | 0.3 | 0.8 | 1 | 240 |
+| darter | 6 | 0.15 | 0.6 | 1 | 180 |
+| bulwark | 40 | 0.6 | 1.2 | 1 | 420 |
 
 `lunge`:
 
-| name | chase | windup | speed | reach | rest | damage |
-|---|---|---|---|---|---|---|
-| mini-boss | 1 | 1.5 | 780 | 450 | 1.2 | 1 |
-| boss | 1 | 1 | 780 | 450 | 1.2 | 1 |
+| name | chase | windup | speed | reach | rest | damage | knock |
+|---|---|---|---|---|---|---|---|
+| mini-boss | 1 | 1.5 | 780 | 450 | 1.2 | 1 | 600 |
+| boss | 1 | 1 | 780 | 450 | 1.2 | 1 | 600 |
 
 `fan`:
 
-| name | chase | windup | reach | rest | count | arc | speed | r | travel | damage |
-|---|---|---|---|---|---|---|---|---|---|---|
-| boss | 1 | 0.8 | 450 | 1.2 | 7 | 90 | 160 | 9 | 600 | 1 |
+| name | chase | windup | reach | rest | count | arc | speed | r | travel | damage | knock |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| boss | 1 | 0.8 | 450 | 1.2 | 7 | 90 | 160 | 9 | 600 | 1 | 150 |
 
 `spit`:
 
-| name | range | near | every | speed | r | travel | damage |
-|---|---|---|---|---|---|---|---|
-| archer | 240 | 170 | 2 | 210 | 6 | 420 | 1 |
+| name | range | near | every | speed | r | travel | damage | knock |
+|---|---|---|---|---|---|---|---|---|
+| archer | 240 | 170 | 2 | 210 | 6 | 420 | 1 | 150 |
 
 `fuse`:
 
-| name | chase | trigger | time | blast | damage |
-|---|---|---|---|---|---|
-| puffer | 1.5 | 90 | 0.5 | 110 | 1 |
+| name | chase | trigger | time | blast | damage | knock |
+|---|---|---|---|---|---|---|
+| puffer | 1.5 | 90 | 0.5 | 110 | 1 | 480 |
 
 `weave`:
 
 | name | width | rate |
 |---|---|---|
 | eel | 50 | 0.9 |
+
+`touch`:
+
+| name | damage | knock |
+|---|---|---|
+| eel | 1 | 240 |
 
 Every number is S6 (balance)'s to tune. Marked in the code as Claude's picks:
 the lungers' numbers (D64 (the boss lunges)), the boss's fan (D117 (the
@@ -104,7 +112,7 @@ enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks.
 | `glow` | hex | Glow colour, the same placeholder. |
 | `carries` | — | `false`: never the glowing fish that carries its batch's mod (D88 (the fish glows from the start)) — the boss and the mini-boss. Absent: it can be. |
 | `bite` | — | Its presence is the behaviour: the type bites (D108 (fish bite)). Holds the numbers in its table above: within `reach` px, body to body, it stops and opens its jaws for `windup` seconds, bites if the diver is still within `reach`, then chases `rest` seconds before it can bite again. |
-| `touch` | — | Its damage on contact: its body hurts on contact — the eel's, a whole number like every attack's `damage` (D118 (hits vary in damage)). A fish without it hurts only by its attack (D108 (fish bite)). |
+| `touch` | — | Its presence is the behaviour: its body hurts on contact — the eel's. Holds its `damage` and its `knock`, as every attack (D118 (hits vary in damage), D122 (knockback)). A fish without it hurts only by its attack (D108 (fish bite)). |
 | `lunge` | — | Its presence is the behaviour: the type lunges instead of only chasing (D64 (the boss lunges)). Holds the timings in the table above: `chase` seconds before a wind-up may start, `windup` and `rest` in seconds, the charge's `speed` in px/s and its `reach` in px. |
 | `fan` | — | A lunger's second attack (D117 (the boss's fan)), taken in turn with the lunge, the lunge first; read only beside a `lunge`. Holds the numbers in its table above: the lunge's `chase`, `windup`, `reach` and `rest`, then `count` shots spread evenly across `arc` degrees, each of radius `r` px flying at `speed` px/s for `travel` px. |
 | `spit` | — | Its presence is the behaviour: the type keeps its distance and spits (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: it closes to `range` px and backs off inside `near` px; it spits every `every` seconds, a shot of radius `r` px flying at `speed` px/s for `travel` px. |
@@ -119,7 +127,8 @@ enemy loop (`step()` in `game/logic.js`) and its step function — never a
 class (D26 (disciplines installed)). S5 (content) brings five to seven.
 
 **Chase** — a type without a behaviour field: swims straight at the player at
-its `speed`, eased by its `ramp`. The dash's shove is its only other motion.
+its `speed`, eased by its `ramp`. The dash's shove and the knock of a hit
+(D122 (knockback)) are its only other motion.
 Today every type has a behaviour; the plain fish bite.
 
 **Bite** — chase, open the jaws, bite, rest (`biteStep()`, D108 (fish bite)).

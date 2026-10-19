@@ -1,13 +1,13 @@
 // The fight itself: the trigger, shots, the dash, touch, gems, and what a
 // clear or a death does on the tick it lands.
 import { describe, it, expect } from 'vitest';
-import { loadGame } from './harness.js';
+import { loadGame, play, until, fishAt } from './harness.js';
 
 // A fish that hurts on touch (D108): these checks are about touch, i-frames
 // and the dash, not any one attack.
 const mob = (x, y, over) => Object.assign(
   { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, value: 1, lastHitBy: 0,
-    pushX: 0, pushY: 0, vx: 0, vy: 0, touch: 1 }, over);
+    pushX: 0, pushY: 0, vx: 0, vy: 0, touch: { damage: 1, knock: 0 } }, over);
 
 // A bullet, built the way the weapon builds one, so no check hand-rolls a
 // literal that misses a field -- a bullet without `speed` would fly forever,
@@ -160,7 +160,7 @@ describe('shots', () => {
     const tough = mob(g.player.x + 90, g.player.y, { hp: 9, maxHp: 9 });
     g.enemies.push(tough);
     fireAt(g, tough);
-    run(g, 40);
+    until(g, 1, () => tough.hp < 9);
     expect(tough.hp < 9 && g.kills === 0).toBe(true);
     expect(g.particles.length).toBeGreaterThan(0);
   });
@@ -184,7 +184,7 @@ describe('touch and gems', () => {
   it('costs its touch once for a fish walking into a standing diver, not twice (D118)', () => {
     const g = loadGame();
     g.reset();
-    g.enemies.push(mob(g.player.x + 200, g.player.y, { speed: 100, hp: 999, maxHp: 999, touch: 2 }));
+    g.enemies.push(mob(g.player.x + 200, g.player.y, { speed: 100, hp: 999, maxHp: 999, touch: { damage: 2, knock: 0 } }));
     run(g, 150, 0.016);                        // 2.4s: touches once, not twice
     expect(g.player.hp).toBe(g.player.maxHp - 2);
   });
@@ -322,9 +322,10 @@ describe('the dash (D50, D51, D56)', () => {
     g.justPressed.add('Space');
     run(g, Math.floor((g.DASH_TIME + g.DASH_GRACE) / g.FIXED_DT) - 1, g.FIXED_DT);
     expect(g.player.hurt).toBeLessThanOrEqual(0);           // nothing blinks
-    expect(g.hurtPlayer(1)).toBe(false);                    // and nothing lands
+    const bite = { damage: 1, knock: 0 };
+    expect(g.hurtPlayer(bite, 0, 0)).toBe(false);           // and nothing lands
     run(g, 3, g.FIXED_DT);
-    expect(g.hurtPlayer(1)).toBe(true);
+    expect(g.hurtPlayer(bite, 0, 0)).toBe(true);
   });
 });
 
@@ -375,7 +376,7 @@ describe('the clear and the death, on the tick they land', () => {
   it('ends the dive at 0 HP, not below, on a hit bigger than the HP left (D118)', () => {
     const g = quiet();
     g.player.hp = 1;
-    g.enemies.push(mob(g.player.x, g.player.y, { touch: 3 }));
+    g.enemies.push(mob(g.player.x, g.player.y, { touch: { damage: 3, knock: 0 } }));
     g.update(1 / 60);
     expect([g.screen, g.player.hp]).toEqual(['dead', 0]);
   });
@@ -397,5 +398,107 @@ describe('the clear and the death, on the tick they land', () => {
     const at = g.batchIndex;
     run(g, 300);
     expect([g.batchIndex, g.enemies.length, g.screen]).toEqual([at, 0, 'mods']);
+  });
+});
+
+describe('knockback (D122)', () => {
+  it('knocks a fish along the shot that hits it, a lighter one further', () => {
+    const moved = name => {
+      const g = quiet();
+      const e = fishAt(g, name, 100);
+      e.hp = e.maxHp = 99;
+      const [x, y] = [e.x, e.y];
+      shot(g);
+      play(g, 0.5);
+      return [e.x - x, Math.abs(e.y - y)];
+    };
+    const [puffer, sideways] = moved('puffer'), [bulwark] = moved('bulwark');
+    expect(puffer).toBeGreaterThan(bulwark);
+    expect(bulwark).toBeGreaterThan(0);
+    expect(sideways).toBeLessThan(0.5);
+  });
+
+  it('knocks every fish a piercing shot passes through', () => {
+    const g = quiet();
+    const fish = [fishAt(g, 'puffer', 80), fishAt(g, 'puffer', 160)];
+    for (const e of fish) e.hp = e.maxHp = 99;
+    const xs = fish.map(e => e.x);
+    shot(g, { pierce: 1 });
+    play(g, 0.75);
+    fish.forEach((e, i) => expect(e.x).toBeGreaterThan(xs[i]));
+  });
+
+  it('never knocks a lunger off its line once it winds up (D64)', () => {
+    const g = quiet();
+    const e = fishAt(g, 'mini-boss', 130);
+    Object.assign(e, { phase: 'windup', attack: 'lunge', aimX: -1, aimY: 0, phaseTime: 0 });
+    const at = [e.x, e.y];
+    shot(g, { vx: 4000 });
+    play(g, 0.05);
+    expect(e.hp).toBeLessThan(e.maxHp);
+    expect([e.x, e.y]).toEqual(at);
+  });
+
+  it('knocks a fish along the swing that cuts it', () => {
+    const g = loadGame();
+    expect(g.applyScenario('knife', 1)).toBe(true);
+    g.queuePaused = true;
+    const e = fishAt(g, 'puffer', 20);
+    e.hp = e.maxHp = 99;
+    const x = e.x;
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    holdFire(g);
+    g.update(g.FIXED_DT);
+    g.keys.delete('Mouse0');
+    play(g, 0.25);
+    expect(e.hp).toBeLessThan(99);
+    expect(e.x).toBeGreaterThan(x);
+  });
+
+  // Every way a fish hurts, set to land from the diver's right: the knock
+  // carries the diver left, away, at about its strength.
+  const HITS = [
+    ["a drifter's bite", g => fishAt(g, 'drifter', 5), e => e.bite],
+    ["a darter's bite", g => fishAt(g, 'darter', 3), e => e.bite],
+    ["a bulwark's bite", g => fishAt(g, 'bulwark', 20), e => e.bite],
+    ["an archer's shot", g => Object.assign(fishAt(g, 'archer', 160), { phaseTime: 99 }), e => e.spit],
+    ["a puffer's burst", g => Object.assign(fishAt(g, 'puffer', 40), { phase: 'fuse', phaseTime: 0 }), e => e.fuse],
+    ['a charge', g => Object.assign(fishAt(g, 'mini-boss', -5),
+      { phase: 'charge', attack: 'lunge', aimX: -1, aimY: 0, phaseTime: 0 }), e => e.lunge],
+    ["an eel's touch", g => fishAt(g, 'eel', -3), e => e.touch],
+  ];
+  for (const [what, place, record] of HITS) {
+    it(`knocks the diver away with ${what}, at about its strength`, () => {
+      const g = quiet();
+      g.immortal = true;
+      const k = record(place(g)).knock;
+      expect(until(g, 5, () => g.batchHit)).toBe(true);
+      expect(g.player.vx).toBeLessThan(-0.5 * k);
+    });
+  }
+
+  it('knocks the diver only when the hit lands, immortal or not', () => {
+    const knocked = setup => {
+      const g = quiet();
+      setup(g);
+      fishAt(g, 'eel', -3);
+      g.update(g.FIXED_DT);
+      g.update(g.FIXED_DT);
+      return g.player.vx < -10;
+    };
+    expect([knocked(g => { g.player.hurt = 10; }), knocked(g => { g.player.safe = 10; }),
+            knocked(g => { g.guardLeft = 1; }), knocked(g => { g.immortal = true; })])
+      .toEqual([false, false, false, true]);
+  });
+
+  it('holds a knocked diver in view at an edge', () => {
+    const g = quiet();
+    g.immortal = true;
+    g.player.x = g.player.r;
+    Object.assign(fishAt(g, 'puffer', 40), { phase: 'fuse', phaseTime: 0 });
+    play(g, 1);
+    expect(g.batchHit).toBe(true);
+    expect(g.player.x).toBeGreaterThanOrEqual(g.player.r);
   });
 });

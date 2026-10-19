@@ -371,6 +371,15 @@ discussed.
 
 **The dash**
 
+- **The shove, earned.** Igor, 2026-10-19, during knockback (D122
+  (knockback)): "dash knockback - good idea, but should be earned. default
+  without it is ok. goes for mechanics and attrs design". Today every dash
+  shoves what it passes, bought or not — D51 (the dash is bought, and the
+  offer waits for the death) made it free, Claude's call, never asked. Open:
+  what earns it — an attribute, a mod, gear — and how strong. Kin: the next
+  note's lock on the dash itself, and the dash economy under Recorded future
+  opportunities. **Home**: the mechanics and attributes design, Igor's
+  words; untouched until then.
 - **Locked at the start?** Igor, 2026-10-15, with the dash cut by a third (D111
   (the dash a third shorter)): "maybe dash shouldnt be available at the start?"
   A lean. What it would touch: the dash is the second verb since D20 (mouse aim
@@ -433,6 +442,18 @@ discussed.
 - **The Knife's arc halved.** Igor, 2026-10-15: "knife arc reduce by half" —
   120° to 60°, from D105 (the Knife swings)'s pick, given "for balance".
   **Home**: S6 (balance), his "for balance".
+
+**Feel**
+
+- **A bounce on a hit.** Igor, 2026-10-19: "we need to add a small bounce off
+  (for fish and for player both maybe?) for a hit to feel more naturally. like
+  visual representation of impact along with player blinking". Then: "drawn
+  bump stays for s7, real knockback - design and implement now". Real
+  knockback is built, both ways (D122 (knockback)); the drawn bump is in
+  `plan.md` under S7 (alpha polish)'s game feel, a jolt over the top. Still
+  open: **the diver's knock** — his "maybe", built so he can play it, his to
+  keep or drop. Kin: "Shake when enemies take damage", under Suggested,
+  below.
 
 **Crowds**
 

@@ -4139,3 +4139,74 @@ archer — a shot passes the i-frames and the dash's grace unspent, and is spent
 on an immortal diver, which blinks with its HP full. `checks.js` — a hurt
 fish drawn at its full size, with its bar. Each seen failing against the rule
 broken.
+
+## D122 — Knockback: a hit moves what it hits · 2026-10-19
+The pass before S6 (balance). Igor, after playing solid bodies (D120 (bodies
+are solid)), on the bump he saw — "i meant bump after bite" — and on a shot's:
+"drawn bump stays for s7, real knockback - design and implement now". His
+note before that, for both: "a small bounce off (for fish and for player both
+maybe?)". The bump after a bite was solid bodies: a heavy biter swims back
+into the diver after biting and shoves it; a darter is too light to. Designed
+in `specs/2026-10-19-knockback-design.md`.
+
+**Decided.**
+- **Real knockback, now** — Igor's word. **The drawn bump stays in S7 (alpha
+  polish)** (`plan.md`), over the top of this.
+- **Every hit carries a `knock`**, in px/s — the shape. Each weapon's, onto
+  the player with its other numbers; each attack record's — the bite, the
+  spit, the burst, the charge, the fan, and the eel's touch, which becomes a
+  record, `{ damage, knock }`, like every attack.
+- **The diver's hits knock fish** along the shot, or the swing, into the push
+  the dash's shove already uses, fading by `PUSH_DRAG`; knocks add. **By
+  area, as bodies are** (D120 (bodies are solid)): a fish of radius `r` gets
+  `knock × (diver r / r)²`. **A lunger out of its chase is not knocked** — its
+  lane is its tell (D64 (the boss lunges)), the same weight bodies use.
+- **Fish's hits knock the diver**, away from the fish or along the shot, onto
+  its swim, which its ramp eases off (D107 (the diver swims and faces; fish
+  with a ramp)); the edge and the bodies stop it as they stop a swim. The
+  diver's is Igor's lean — "both maybe?" — built, and his to keep or drop
+  after playing.
+- **Only a hit that lands knocks**: none through the i-frames or the dash's
+  grace. **The guard takes the knock too** — Claude's pick, as it takes a hit
+  whole (D118 (hits vary in damage)). Immortal is knocked: the hit lands and
+  shows (D121 (only a hit blinks; a hurt fish carries a bar)).
+- **The numbers are Claude's picks**, S6 (balance)'s to tune: the Gun 60, the
+  Harpoon 200, the Knife 40; bites 180–420, a shot 150, the burst 480, a
+  charge 600, the eel's touch 240 (`docs/entities/`).
+- **The aim is read in whole 1/256ths of a view pixel.** The window-size
+  check of D29 (difficulty invariant to window size) failed on this change:
+  at a 1920×1080 window, scale 1.35, a quarter of its grid aims came back
+  from the client-to-view conversion one float ulp off. An ulp of aim never
+  moved anything before; a knock carries it into a fish's position, and the
+  bodies amplify it over a dive. Rounded at the conversion, every size reads
+  one point alike, far below what a hand can aim.
+- **Save v10**: a saved fish's attacks knock as its type's do now, an eel's
+  touch becomes its record, a shot already in flight knocks nothing, and the
+  diver takes its weapon's knock. `tests/fixtures/save-v10.json` is its
+  fixture.
+
+**The risk, against a pillar**: "No batch is cleared without the player
+moving" (`foundations.md`). Knock strong enough, at a rate high enough,
+holds a crowd off a diver who stands still. At these numbers the Gun firing
+without pause slows a puffer by about a third and a bulwark by a quarter, and
+a drifter and a darter die to their first shot. S6 (balance) measures it.
+
+**Not decided**: the dash's shove. Igor, mid-design: "dash knockback - good
+idea, but should be earned. default without it is ok. goes for mechanics and
+attrs design". Today every dash shoves — D51 (the dash is bought, and the
+offer waits for the death), Claude's call, never asked. Recorded in
+`ideas.md` → The dash, for that design; unchanged here.
+
+**Guarded by**: `tests/combat.test.js` → knockback — a shot knocks a fish
+along its travel, a puffer further than a bulwark; a piercing shot each fish;
+a lunger winding up not at all; a swing along the swing; every way a fish
+hurts — three bites, a shot, a burst, a charge, the eel's touch — knocking
+the diver away at about its strength; none through the i-frames, the grace or
+the guard, and an immortal diver knocked; a knocked diver held in view at an
+edge. `tests/enemies.test.js` — every attack and every weapon a whole knock of
+at least 0. `checks.js` — the window-size check, failing without the rounding. `tests/save.test.js` — a v9 dive's knocks, its eel's touch and its
+shot in flight; the v10 fixture plays on. Each verified by breaking it.
+Checks that built the eel's touch as a number now build its record; a bite's
+rest, and a hurt fish's sparks, are checked with the knock out of their way;
+the crowd check judges bodies in view, where two fish arriving on one spot
+past the edge part at the capped rate.

@@ -217,7 +217,7 @@ describe('the save (D70)', () => {
     saved.dive.bullets.push({ evil: true, x: 0, y: 0, r: 6, vx: 0, vy: 0, speed: 0,
                               travelled: 0, maxTravel: 100 });
     const g = loadGame();
-    const old = ({ damage, ...rest }) => rest;                        // a record as v8 saved it
+    const old = ({ damage, knock, ...rest }) => rest;                 // a record as v8 saved it
     const { bite, ...body } = saved.dive.enemies[0];
     // A boss saved mid-fight before its fan (D117), and an eel.
     saved.dive.enemies.push({ ...body, name: 'boss', lunge: old(g.enemyType('boss').lunge) },
@@ -225,7 +225,7 @@ describe('the save (D70)', () => {
     expect(g.loadSave(JSON.stringify(saved))).toBe('');
     const [boss, eel] = g.enemies.slice(-2);
     expect(g.enemies.filter(e => e.bite).map(e => e.bite.damage)).toEqual(Array(g.enemies.length - 2).fill(1));
-    expect([boss.lunge.damage, eel.touch]).toEqual([1, 1]);
+    expect([boss.lunge.damage, eel.touch.damage]).toEqual([1, 1]);
     expect(eel.weave).toEqual(g.enemyType('eel').weave);             // moves, never hurts
     expect(g.enemies.map(e => Object.keys(e))).toEqual(saved.dive.enemies.map(e => Object.keys(e)));
     expect(g.bullets.filter(b => b.evil).map(b => b.damage)).toEqual([1]);
@@ -237,6 +237,35 @@ describe('the save (D70)', () => {
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
     expect(g.bullets.filter(b => b.evil).map(b => b.damage)).toEqual([1]);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
+  it("gives a v9 dive's fish their type's knock, an eel's touch its record, a shot in flight none (D122)", () => {
+    const saved = JSON.parse(readFileSync(new URL('./fixtures/save-v9.json', import.meta.url), 'utf8'));
+    saved.dive.enemies.push({ ...saved.dive.enemies[0], name: 'eel', touch: 2 });    // graded
+    const g = loadGame();
+    expect(g.loadSave(JSON.stringify(saved))).toBe('');
+    const knocks = g.enemies.flatMap(e => Object.entries(e)
+      .filter(([, v]) => v && typeof v === 'object' && 'damage' in v).map(([k, v]) => [e.name, k, v.knock]));
+    expect(knocks.length).toBeGreaterThan(1);
+    expect(knocks).toEqual(knocks.map(([n, k]) => [n, k, g.enemyType(n)[k] ? g.enemyType(n)[k].knock : 0]));
+    expect(g.enemies.at(-1).touch).toEqual({ damage: 2, knock: g.enemyType('eel').touch.knock });
+    expect(g.bullets.filter(b => b.evil).map(b => b.knock)).toEqual([0]);
+    expect(g.player.knock).toBe(g.WEAPONS.find(w => w.name === g.weaponName).knock);
+  });
+
+  it('loads a save written by the first build of version 10, and plays it on', () => {
+    // Saved mid-fight with every type, an eel's touch a record and an archer's
+    // shot in flight carrying its knock (D122).
+    const text = readFileSync(new URL('./fixtures/save-v10.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect(g.enemies.find(e => e.touch).touch.knock).toBeGreaterThan(0);
+    expect(g.bullets.filter(b => b.evil).map(b => b.knock)).toEqual([g.enemyType('archer').spit.knock]);
     g.screen = g.resumeTo;
     g.immortal = true;
     const shots = shotsSeen(g, 600);

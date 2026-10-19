@@ -14,7 +14,6 @@ function makeEnemy(t, x, y, speed, grade = 1) {
   const G = GRADES[grade - 1], hp = t.hp * G.hp;
   const behaviour = Object.fromEntries(Object.entries(behaviourOf(t)).map(([k, v]) =>
     [k, typeof v === 'object' && 'damage' in v ? { ...v, damage: v.damage + G.damage } : v]));
-  if (behaviour.touch) behaviour.touch += G.damage;      // a touch is its damage alone
   return { name: t.name, grade, x, y, r: t.r, speed: speed * G.speed, hp, maxHp: hp,
            value: Math.round(t.value * G.value),
            color: t.color, glow: t.glow, lastHitBy: 0,
@@ -151,7 +150,7 @@ function fanAims(e) {
 
 function enemyShot(e, ux, uy, S) {
   bullets.push({ evil: true, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
-                 speed: S.speed, travelled: 0, maxTravel: S.travel, damage: S.damage });
+                 speed: S.speed, travelled: 0, maxTravel: S.travel, damage: S.damage, knock: S.knock });
 }
 
 // ---------- the spit ----------
@@ -197,7 +196,7 @@ function fuseStep(e, ux, uy, d, dt) {
     e.phase = 'chase';
     e.phaseTime = 0;
     const bx = player.x - e.x, by = player.y - e.y, reach = F.blast + player.r;
-    if (bx * bx + by * by < reach * reach) hurtPlayer(F.damage);
+    if (bx * bx + by * by < reach * reach) hurtPlayer(F, ux, uy);
     burst(e.x, e.y, e.color, e.glow, 24, 260, 0.45);
     sound('pop');
   }
@@ -211,7 +210,7 @@ function biteStep(e, ux, uy, d, dt) {
   if (e.phase === 'jaws') {
     ease(e, 0, 0, e.ramp, dt);
     if (e.phaseTime >= B.windup) {
-      if (d - e.r - player.r <= B.reach) hurtPlayer(B.damage);
+      if (d - e.r - player.r <= B.reach) hurtPlayer(B, ux, uy);
       e.phase = 'rest';
       e.phaseTime = 0;
     }
@@ -235,9 +234,10 @@ function weaveStep(e, ux, uy, d, dt) {
 }
 
 // The one way the diver is hurt (D95, D100, D118). Returns whether it landed,
-// so a shot that did not is not spent. The guard counts hits, not damage.
-// Immortal, a hit lands and shows but takes no HP (D121).
-function hurtPlayer(damage) {
+// so a shot that did not is not spent. The guard counts hits, not damage, and
+// takes the knock too (D122): `hit` is the attack's record, `ux, uy` the way
+// it knocks. Immortal, a hit lands and shows but takes no HP (D121).
+function hurtPlayer(hit, ux, uy) {
   if (player.hurt > 0 || player.safe > 0) return false;
   player.hurt = player.iframes;
   batchHit = true;
@@ -247,7 +247,10 @@ function hurtPlayer(damage) {
     sound('guard');
     return true;
   }
-  if (!immortal) player.hp = Math.max(0, player.hp - damage);
+  // Onto the swim, which its ramp eases off (D107).
+  player.vx += ux * hit.knock;
+  player.vy += uy * hit.knock;
+  if (!immortal) player.hp = Math.max(0, player.hp - hit.damage);
   shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;
   burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
   sound('hurt');
@@ -292,8 +295,8 @@ function separate(dt) {
     if (dd >= min * min) continue;
     const d = Math.sqrt(dd), nx = d ? dx / d : 1, ny = d ? dy / d : 0;
     const overlap = d ? Math.min(min - d, most) : most, we = weight(e);
-    if (e.touch) hurtPlayer(e.touch);
-    else if (e.phase === 'charge') hurtPlayer(e.lunge.damage);
+    if (e.touch) hurtPlayer(e.touch, nx, ny);
+    else if (e.phase === 'charge') hurtPlayer(e.lunge, nx, ny);
     const share = overlap * we / (we + player.r * player.r);
     const [x, y] = viewClamp({ x: player.x + nx * share, y: player.y + ny * share, r: player.r });
     const moved = (x - player.x) * nx + (y - player.y) * ny;
@@ -350,12 +353,22 @@ function swing(ux, uy) {
   for (const [, e] of cut.slice(0, player.pierce + 1)) {
     e.hp -= player.damage;
     e.flash = 0.07;
+    knock(e, ux, uy);
     hitSparks(e, { vx: ux, vy: uy });
     if (e.hp <= 0) killEnemy(e);
   }
   player.swingLeft = player.swing.time;      // what the renderer draws
   player.swingX = ux;
   player.swingY = uy;
+}
+
+// A hit knocks a fish along it (D122), as the bodies weigh: the heavier by
+// area less, a lunger out of its chase not at all.
+function knock(e, ux, uy) {
+  if (pinned(e)) return;
+  const k = player.knock * player.r * player.r / weight(e);
+  e.pushX += ux * k;
+  e.pushY += uy * k;
 }
 
 function hitSparks(e, b) {
@@ -707,11 +720,12 @@ const needsLine = g => (g.requires ? '   owning it needs ' +
   Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', ') : '');
 function fishTip(e, grade) {
   const f = makeEnemy(e, 0, 0, e.speed, grade);
-  const kinds = Object.keys(e).filter(k => typeof e[k] === 'object');
+  // A touch is not a step after the others: it hurts all along.
+  const kinds = Object.keys(e).filter(k => typeof e[k] === 'object' && k !== 'touch');
   return e.name + ': ' + (kinds.length ? kinds : ['chase']).map(k => DEBUG_BEHAVIOURS[k]).join('; then ') +
          (e.enters === 'bottom' ? '; rises from below' : '') +
          (e.carries === false ? '; never glows, so carries no mod' : '') +
-         (e.touch ? '; hurts to touch' : '') +
+         (e.touch ? '; ' + DEBUG_BEHAVIOURS.touch : '') +
          '   hp ' + f.hp + ' \u00b7 speed ' + Math.round(f.speed) + ' \u00b7 ' +
          f.value + (f.value === 1 ? ' gem' : ' gems');
 }
@@ -1164,6 +1178,7 @@ function step(dt) {
         e.lastHitBy = b.id;
         e.hp -= player.damage;
         e.flash = 0.07;
+        knock(e, b.vx / b.speed, b.vy / b.speed);
         hitSparks(e, b);
         if (e.hp <= 0) killEnemy(e);
         if (b.pierce > 0) { b.pierce -= 1; }
@@ -1178,7 +1193,7 @@ function step(dt) {
     if (b.gone || !b.evil) continue;
     const reach = player.r + b.r;
     if (segDistanceSq(player.x, player.y, b.x - b.vx * dt, b.y - b.vy * dt, b.x, b.y) < reach * reach &&
-        hurtPlayer(b.damage)) b.gone = true;
+        hurtPlayer(b, b.vx / b.speed, b.vy / b.speed)) b.gone = true;
   }
 
   // --- gems fly to you, from anywhere, and never fade (D35, D78) ---

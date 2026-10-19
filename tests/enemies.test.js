@@ -327,6 +327,7 @@ describe('the bite (D108)', () => {
   it('rests before it can bite again', () => {
     const B = bite('drifter');
     const [g, e] = at(B.reach - 2);
+    e.bite.knock = 0;                            // the rest alone, not a chase back
     play(g, B.windup + 0.02);
     expect(g.player.hp).toBe(g.player.maxHp - 1);
     g.player.hurt = 0;                           // no invulnerability to hide behind
@@ -401,12 +402,15 @@ describe('damage (D118)', () => {
 
   it('gives every attack a whole damage of at least 1', () => {
     const g = loadGame();
-    const amounts = [...attacks(g).map(([n, k, v]) => [n, k, v.damage]),
-                     ...g.ENEMY_TYPES.filter(t => t.touch).map(t => [t.name, 'touch', t.touch])];
     expect(attacks(g).length).toBeGreaterThan(0);
-    expect(amounts.filter(([, , d]) => !(Number.isInteger(d) && d >= 1))).toEqual([]);
+    expect(attacks(g).filter(([, , v]) => !(Number.isInteger(v.damage) && v.damage >= 1))).toEqual([]);
   });
 
+  it('gives every hit a whole knock of at least 0: every attack, every weapon (D122)', () => {
+    const g = loadGame();
+    const hits = [...attacks(g), ...g.WEAPONS.map(w => [w.name, 'weapon', w])];
+    expect(hits.filter(([, , v]) => !(Number.isInteger(v.knock) && v.knock >= 0))).toEqual([]);
+  });
 });
 
 describe('grades (D119)', () => {
@@ -434,7 +438,6 @@ describe('grades (D119)', () => {
           if (typeof v === 'object' && 'damage' in v) expect(e[k]).toEqual({ ...v, damage: v.damage + G.damage });
           else if (typeof v === 'object') expect(e[k]).toEqual(v);
         }
-        if (t.touch) expect(e.touch).toBe(t.touch + G.damage);
       });
     }
     expect(JSON.stringify(g.ENEMY_TYPES)).toBe(types);

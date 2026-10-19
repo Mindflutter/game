@@ -35,8 +35,10 @@ seen today only in the debug mode (D119 (grades)) — and solid bodies, the dash
 the way through a crowd (D120 (bodies are solid)). From Igor playing that:
 only a hit blinks, a hurt fish carries a bar, immortal shows its hits (D121
 (only a hit blinks; a hurt fish carries a bar)), and the debug Grade reaches
-every fish. Open from playing it, the pile-up (`ideas.md` → Crowds). Next:
-Igor's word on what else joins this pass, or S6 (balance) opens.
+every fish; then real knockback, both ways (D122 (knockback)). Every item
+placed in this pass is built; open from playing it, the pile-up (`ideas.md` →
+Crowds), the diver's knock (`ideas.md` → Feel), and the dash's shove, earned
+(`ideas.md` → The dash). S6 (balance) opens on Igor's word.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and

@@ -15,11 +15,11 @@ readout see them like any other stat, and everything adds, nothing multiplies
 
 ## Roster
 
-| name | fireRate | damage | range | shotSpeed | shotRadius | pierce | cost | at top |
-|---|---|---|---|---|---|---|---|---|
-| Gun | 2.5 | 1 | 250 | 430 | 4 | 0 | 0 | fireRate 4 |
-| Harpoon | 0.8 | 3 | 420 | 950 | 3 | 2 | 150 | fireRate 1, damage 4, pierce 3 |
-| Knife | 3 | 2 | 56 | — | 18 | 6 | 100 | fireRate 3.75, damage 3, range 68 |
+| name | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
+|---|---|---|---|---|---|---|---|---|---|
+| Gun | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
+| Harpoon | 0.8 | 3 | 420 | 950 | 3 | 2 | 200 | 150 | fireRate 1, damage 4, pierce 3 |
+| Knife | 3 | 2 | 56 | — | 18 | 6 | 40 | 100 | fireRate 3.75, damage 3, range 68 |
 
 Each weapon's tiers, in the order they are bought:
 
@@ -55,6 +55,7 @@ adds. Both are worked out from the tiers' `apply` by the check.
 | `range` | px | A shot that hits nothing dies after flying this far — a real range (D8 (the weapon has a bounded firing range)). A swing's blade reaches this far from the diver's centre. |
 | `shotSpeed` | px/s | How fast a shot flies; a swinging weapon has none. Each shot carries its own speed, and its range is counted at it; shots are swept, so no speed tunnels through an enemy (D53 (fixed timestep, and bullets sweep too)). |
 | `shotRadius` | px | The shot's hitbox: a hit is the shot's radius plus the enemy's. A swing's blade is as wide, past `range` and past the arc's edges. |
+| `knock` | px/s | How hard a hit knocks a fish back, along the shot or the swing (D122 (knockback)): the speed it gives a body the diver's size, less to a heavier one by area — a fish of radius `r` gets `knock × (the diver's r / r)²`. A lunger out of its chase is not knocked. The push fades as the dash's shove does. |
 | `pierce` | enemies | Extra enemies a shot passes through. One shot hits any enemy at most once. A swing cuts `pierce` + 1 at most, nearest first. |
 | `swing` | — | Its presence is the behaviour: the weapon cuts instead of shooting (D105 (the Knife swings)). Each pull hits every fish whose body reaches into an arc toward the cursor, `arc` degrees wide, at once; the arc is drawn for `time` seconds. No shot, so nothing to miss with or to fly on. |
 | `tiers` | — | Three or four upgrades, each `{ cost, apply }`: the gems it costs, and what it adds to the player, `p => …`. Each tier may add something different (D83 (the weapon record)). |

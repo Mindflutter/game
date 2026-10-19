@@ -33,10 +33,14 @@ window.addEventListener('mouseup', e => keys.delete('Mouse' + e.button));
 // In view coordinates: the canvas is scaled and letterboxed, so undo both.
 // game/ adds `cameraY` where it reads aim (D58). Pointing up until the mouse
 // first moves, so the first shot has a direction.
+// In whole 1/256ths of a pixel: at a scale like 1.35 the same point comes back
+// an ulp off, and a knock follows the aim, so an ulp would play one dive two
+// ways at two window sizes (D29, D122).
 const aim = { x: ARENA_W / 2, y: 0 };
+const AIM_STEP = 256;
 window.addEventListener('mousemove', e => {
-  aim.x = (e.clientX - offX) / scale;
-  aim.y = (e.clientY - offY) / scale;
+  aim.x = Math.round((e.clientX - offX) / scale * AIM_STEP) / AIM_STEP;
+  aim.y = Math.round((e.clientY - offY) / scale * AIM_STEP) / AIM_STEP;
 });
 
 function moveCursor(index, length) {

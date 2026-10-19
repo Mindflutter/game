@@ -6,6 +6,21 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-19
 
+**Knockback** (D122 (knockback))
+Igor: "real knockback - design and implement now". Every hit carries a
+`knock`: the diver's shots and swings knock fish back along the hit, the
+heavier by area less and a committed lunger not at all; every fish attack
+knocks the diver away, the eel's touch now a record like the rest. Only a
+landed hit knocks, and the guard takes it whole. The numbers are Claude's
+picks; the readout shows the weapon's. Save v10, with its fixture. The dash's
+shove, which Igor wants earned, is recorded for the mechanics and attributes
+design and unchanged. The window-size check caught a 1920×1080 window
+playing the dive differently — an ulp of aim, now carried by the knock — so
+the aim is read in whole 1/256ths of a pixel. Along the way:
+`docs/entities/enemies.md` still said a wounded fish is drawn smaller and the
+eel's touch is `true`, and `design.md` that the touch lands in the enemy loop
+— all fixed.
+
 **Only a hit blinks; a hurt fish carries a bar** (D121 (only a hit blinks; a
 hurt fish carries a bar))
 From Igor's playtest. The dash keeps its invulnerability on a timer of its
