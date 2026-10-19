@@ -15,11 +15,11 @@ fish and the layer end's pick.
 | name | scope | desc | max | end | per pick | at max |
 |---|---|---|---|---|---|---|
 | Fins | body | you swim faster | 3 | — | speed +45 | speed 395 |
-| Vitality | body | one more heart, it comes full | 3 | — | hp +1, maxHp +1 | hp 6, maxHp 6 |
+| Vitality | body | 1 more max HP, it comes full | 3 | — | hp +1, maxHp +1 | hp 6, maxHp 6 |
 | Reflex | body | the dash comes back sooner | 3 | — | dashCooldown -0.4 | dashCooldown 1 |
 | Nerve | body | hits leave you safe longer | 3 | — | iframes +0.3 | iframes 1.9 |
 | Impact | body | the dash wounds what it throws | 3 | — | dashDamage +1 | dashDamage 3 |
-| Mend | comfort | a heart back each batch | 1 | true | mendOnClear +1 | mendOnClear 1 |
+| Mend | comfort | 1 HP back each batch | 1 | true | mendOnClear +1 | mendOnClear 1 |
 | Barbs | weapon | harpoons go through one more | 3 | — | pierce +1 | pierce 5 |
 
 **per pick** is what taking it once changes; **at max** is the stat after
@@ -47,7 +47,7 @@ since D56 (the dash is a fixed, committed lunge).
 
 ## Vitality
 
-One more heart, and it arrives full.
+1 more max HP, and it arrives full.
 
 ## Reflex
 
@@ -69,8 +69,8 @@ it matters only against enemies with more than one hit point.
 ## Mend
 
 Comfort, and the first of the layer end's own mods (D85 (the layer end's
-pick)): a heart back each time a batch is cleared, never past full. Claude's
-pick for the first valuable mod — the one switch in the pool, and "a heart back
+pick)): 1 HP back each time a batch is cleared, never past full. Claude's
+pick for the first valuable mod — the one switch in the pool, and "1 HP back
 each batch" reads as worth a double step. A standing effect rather than a stat
 — `clearBatch()` reads `mendOnClear`. The last layer's end pays nothing, Mend
 included (D68 (the layer end is a milestone)).

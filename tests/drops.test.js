@@ -13,7 +13,7 @@ const paid = g => held(g) + g.drops.filter(d => d.mod).length;
 // The ordinary mods a fish can carry: not a layer end's own, and fitting the
 // weapon carried (D99).
 const ordinary = g => g.MODS.filter(m => !m.end && g.fits(m));
-// Every number a mod or boost moves: the readout's and the hearts, as
+// Every number a mod or boost moves: the readout's and HP, as
 // dive.test.js holds them to be.
 const STATS = [...loadGame().PLAYER_STATS.map(s => s.stat), 'hp', 'maxHp'];
 const stats = p => STATS.map(k => p[k]);

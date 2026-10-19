@@ -231,7 +231,7 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 8;
+const SAVE_VERSION = 9;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
@@ -336,6 +336,18 @@ function migrate(s) {
   if (s && s.version === 7) {
     if (s.dive) s.dive.incoming = [];
     s.version = 8;
+  }
+  if (s && s.version === 8) {
+    if (s.dive) {
+      // Onto the attacks a fish has: a boss saved before its fan still only lunges.
+      for (const e of s.dive.enemies) {
+        const t = enemyType(e.name) || {};
+        for (const [k, v] of Object.entries(e)) if (v && typeof v === 'object' && t[k] && 'damage' in t[k]) v.damage = 1;
+        if (e.touch) e.touch = 1;
+      }
+      for (const b of s.dive.bullets) if (b.evil) b.damage = 1;
+    }
+    s.version = 9;
   }
   return s;
 }

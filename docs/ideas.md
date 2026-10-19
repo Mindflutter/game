@@ -382,46 +382,28 @@ discussed.
 **Health**
 
 - **Bars, hearts, and hits worth more than one.** Igor, 2026-10-15: "should
-  enemies have hp bars? shouls the player? damage exceeding 1?" Open, for
-  discussion. Today a hurt fish only shrinks, to 70% of its size near death, so
-  the boss's 60 hp show little progress; the diver's hearts are `HP 3/3` text
-  in the corner; every hurt costs exactly one heart, through one path (D95
-  (three enemy behaviours, and one way to be hurt)); and the player's damage
-  already runs past one — the Knife's 2, the Harpoon's 3, the Weights' half a
-  point a tier. Claude's lean, unconfirmed:
-  - **Fish**: a small bar over any fish of more than 1 hp, once hurt, and a
-    bar across the top for the boss and the mini-boss. One-hit fish stay bare,
-    so a swarm stays readable. It is also how a stronger version of a fish
-    (Pace, below) would read as tougher. A ring round the body was Claude's
-    first lean; Igor: "Health rings probably wont work on real assets well" —
-    a ring hugs a circle, and a sprite has no clean edge to hug, where a bar
-    over any shape works.
-  - **The diver**: hearts, not a bar — read at a glance, every hit counts, one
-    sentence to explain. A bar earns its place when damage varies widely or
-    armour cuts it by a share — and since 2026-10-18 damage varies (below), so
-    this lean is open again: hearts, more of them, or a bar. Igor, the same
-    day: "well you only start at 3 hearts, right?" — 3 is the start; Heart
-    adds one a step, Vitality up to three in a dive, and the Suit's guard
-    takes up to three hits a batch. So a heavy hit can be sized against the
-    hearts a diver has where it is met — at most 2 against a starting diver,
-    or every heavy hit is a whole life. Drawn as hearts where
-    the eye is, rather than as text in the corner.
-  - **Hits worth more than one heart**, for the heavy attacks — the boss's
-    charge, the puffer's burst — so a heavy attack weighs more, and S6
-    (balance)'s threat system gets a lever: how often a fish lands, times how
-    much. With three hearts a two-heart hit is most of a life, so it comes with
-    more hearts at the start, or halves.
+  enemies have hp bars? shouls the player? damage exceeding 1?" Hits vary in
+  damage, the unit unchanged, is D118 (hits vary in damage); every amount is 1
+  until S6 (balance) sizes them — Claude's lean, unconfirmed, the heavy
+  attacks with a long tell (the lunge, the burst) above the swarm's bites.
+  Still open:
+  - **Fish**: today a hurt fish only shrinks, to 70% of its size near death,
+    so the boss's 60 hp show little progress. Claude's lean, unconfirmed: a
+    small bar over any fish of more than 1 hp, once hurt, and a bar across the
+    top for the boss and the mini-boss. One-hit fish stay bare, so a swarm
+    stays readable. It is also how a stronger version of a fish (Pace,
+    below) would read as tougher. A ring round the body was Claude's first lean; Igor:
+    "Health rings probably wont work on real assets well" — a ring hugs a
+    circle, and a sprite has no clean edge to hug, where a bar over any shape
+    works.
+  - **The diver's readout.** Igor, 2026-10-19: "half hearts is confusing.
+    either enough hearts or a bar", leaning to "proper hp system"; then, on a
+    bar: "honestly i dont know. i think upper status bar would suffice, with a
+    player itself changing appearance (for graphics later)". A lean: the
+    status bar's `HP` stays the readout, and the diver's look showing its hurt
+    waits for the graphics (below).
 
-  Igor, 2026-10-15: "2-heart hits, i suggest possible, but not sure if fits
-  current enemy model"; then, 2026-10-18: "hits worth two hearts - not limited
-  to two, we are varying damage". **Settled: hits vary in damage, not capped
-  at two.** In the code it is an amount on each attack's record, passed
-  through the one path every hurt takes. Open: how much each attack deals —
-  Claude's lean, unconfirmed, the heavy attacks with a long tell (the lunge,
-  the burst) above the swarm's bites — and what the diver's hearts become.
-
-  **Home**: this pass, Igor, 2026-10-18 — the size of a hit is a shape for
-  it, its numbers S6 (balance)'s; the drawing after Igor's word.
+  **Home**: the amounts S6 (balance)'s; the fish's bars after Igor's word.
 
 **The stage's content**
 
@@ -466,7 +448,9 @@ discussed.
   must go to assets now, but: 1 schematically circles and squares are ok, but
   hard to follow". Not the condition D4 (no assets, ever) waits on: "not saying
   we must go to assets now". The sizes, his second point, were settled before
-  S6 (balance) by D104 (bodies doubled). Open: what makes the shapes easier to
+  S6 (balance) by D104 (bodies doubled). The diver's look showing how hurt it
+  is joins this — Igor, 2026-10-19, under Bars, hearts, and hits worth more
+  than one. Open: what makes the shapes easier to
   follow, and when.
 - **References for each fish and entity.** "image or even gif references for
   enemy types and other entities? too early?" Claude: not too early to collect,

@@ -82,12 +82,13 @@ describe('the archer (spit)', () => {
     expect(inView(g, e)).toBe(true);
   });
 
-  it('costs a heart with a shot that reaches the diver, and the shot is spent', () => {
+  it('costs its damage with a shot that reaches the diver, and the shot is spent (D118)', () => {
     const S = spit();
     const g = alone('archer', S.range - 20);
-    g.enemies[0].phaseTime = S.every;
+    const e = g.enemies[0];
+    Object.assign(e, { phaseTime: S.every, spit: { ...S, damage: 2 } });
     play(g, (S.range - 20) / S.speed + 0.1);
-    expect(g.player.hp).toBe(g.player.maxHp - 1);
+    expect(g.player.hp).toBe(g.player.maxHp - 2);
     expect(shots(g).length).toBe(0);
   });
 
@@ -147,12 +148,13 @@ describe('the puffer (fuse)', () => {
     expect(e.x).toBeGreaterThan(x);
   });
 
-  it('bursts after its time, costing a heart inside the blast and nothing outside it, and lives on', () => {
+  it('bursts after its time, costing its damage inside the blast and nothing outside it, and lives on', () => {
     const F = fuse();
     const near = ready(F.trigger - 10);
+    near.enemies[0].fuse = { ...F, damage: 2 };
     play(near, F.time + 0.05);
     expect(near.enemies.map(e => [e.phase, e.hp])).toEqual([['chase', near.enemies[0].maxHp]]);
-    expect(near.player.hp).toBe(near.player.maxHp - 1);
+    expect(near.player.hp).toBe(near.player.maxHp - 2);
     const far = ready(F.trigger - 10);
     far.update(far.FIXED_DT);                    // the fuse is lit
     far.player.x -= F.blast;                     // and the diver steps out of the ring
@@ -283,13 +285,14 @@ describe('the bite (D108)', () => {
     expect(Math.hypot(e.vx, e.vy)).toBeLessThan(v);   // easing to a halt
   });
 
-  it('snaps a heart off a diver still in reach, and nothing off one that got away', () => {
+  it('snaps its damage off a diver still in reach, and nothing off one that got away', () => {
     const B = bite('drifter');
     const [near, e] = at(B.reach - 2);
+    e.bite = { ...B, damage: 2 };
     near.update(near.FIXED_DT);
     expect(e.phase).toBe('jaws');
     play(near, B.windup + 0.02);
-    expect([near.player.hp, e.phase]).toEqual([near.player.maxHp - 1, 'rest']);
+    expect([near.player.hp, e.phase]).toEqual([near.player.maxHp - 2, 'rest']);
     const [far, f] = at(B.reach - 2);
     far.update(far.FIXED_DT);                    // the jaws open
     far.player.x -= B.reach + 20;                // and the diver gets away
@@ -365,4 +368,19 @@ describe('arrivals', () => {
     }
     expect(bad).toEqual([]);
   });
+});
+
+describe('damage (D118)', () => {
+  // Every attack as [type, behaviour, record]; weave only moves a fish.
+  const attacks = g => g.ENEMY_TYPES.flatMap(t => Object.entries(t)
+    .filter(([k, v]) => typeof v === 'object' && k !== 'weave').map(([k, v]) => [t.name, k, v]));
+
+  it('gives every attack a whole damage of at least 1', () => {
+    const g = loadGame();
+    const amounts = [...attacks(g).map(([n, k, v]) => [n, k, v.damage]),
+                     ...g.ENEMY_TYPES.filter(t => t.touch).map(t => [t.name, 'touch', t.touch])];
+    expect(attacks(g).length).toBeGreaterThan(0);
+    expect(amounts.filter(([, , d]) => !(Number.isInteger(d) && d >= 1))).toEqual([]);
+  });
+
 });

@@ -20,7 +20,7 @@ describe('challenge ladders (D109, D110)', () => {
     g.immortal = false;
     g.player.guard = 1;
     g.guardLeft = 1;
-    g.hurtPlayer();                              // the suit takes it: still a hit
+    g.hurtPlayer(1);                             // the suit takes it: still a hit
     expect(g.player.hp).toBe(g.player.maxHp);
     g.immortal = true;
     clearAndWait(g, 0.1);

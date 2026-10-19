@@ -108,7 +108,7 @@ fixed, committed lunge)).
 
 ## Heart
 
-Each step one more heart, given full (D98 (attributes, micro-tasks and what
+Each step 1 more max HP, given full (D98 (attributes, micro-tasks and what
 gear requires)).
 
 ## Strength

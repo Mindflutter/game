@@ -354,7 +354,7 @@ describe('equipment (D100)', () => {
     expect([g.player.range, g.player.damage, g.player.guard]).toEqual([gun.range + 60, gun.damage + 1.5, 1]);
   });
 
-  it('takes the first hit of a batch on the suit: no heart, the i-frames, the batch marked hit', () => {
+  it('takes the first hit of a batch on the suit: no HP, the i-frames, the batch marked hit', () => {
     const g = wearing({ Suit: 1 });
     expect(g.guardLeft).toBe(1);
     g.placeEnemy('eel', g.player.x, g.player.y);       // it hurts on touch (D108)
@@ -362,7 +362,7 @@ describe('equipment (D100)', () => {
     expect([g.player.hp, g.guardLeft, g.batchHit]).toEqual([g.player.maxHp, 0, true]);
     expect(g.player.hurt).toBeGreaterThan(0);
     for (let i = 0, n = ticks(g, g.player.iframes + 0.1); i < n; i++) g.update(g.FIXED_DT);
-    expect(g.player.hp).toBe(g.player.maxHp - 1);   // the next one is a heart
+    expect(g.player.hp).toBe(g.player.maxHp - 1);   // the next one costs HP
   });
 
   it('guards a spit shot like a bite, and spends the shot', () => {
@@ -372,6 +372,16 @@ describe('equipment (D100)', () => {
     for (let i = 0, n = ticks(g, 1.1); i < n; i++) g.update(g.FIXED_DT);
     expect([g.player.hp, g.guardLeft]).toEqual([g.player.maxHp, 0]);
     expect(g.bullets.filter(b => b.evil)).toHaveLength(0);
+  });
+
+  it('takes a hit whole on one charge, whatever its damage (D118)', () => {
+    const g = wearing({ Suit: 1 });
+    g.placeEnemy('eel', g.player.x, g.player.y);
+    g.enemies[0].touch = 2;
+    g.update(g.FIXED_DT);
+    expect([g.player.hp, g.guardLeft]).toEqual([g.player.maxHp, 0]);
+    for (let i = 0, n = ticks(g, g.player.iframes + 0.1); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.player.hp).toBe(g.player.maxHp - 2);
   });
 
   it('refills the guard as each batch arrives', () => {
@@ -398,7 +408,7 @@ describe('attributes and requirements (D98)', () => {
   // Points enough, from one ladder's rungs: 1, 3, 6... (D109).
   const earn = (g, rungs) => { g.meta.challenges = { untouched: rungs }; };
 
-  it('raises a heart with Heart, full, and the dash\'s wound with Strength', () => {
+  it('raises max HP with Heart, full, and the dash\'s wound with Strength', () => {
     const g = loadGame();
     earn(g, 2);
     g.raise(attr(g, 'Heart'));

@@ -24,7 +24,7 @@ const PLAYER_START = {
                      // `speed`, so swim speed never lengthens the dash (D56)
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
   dashDamage: 0,     // pure movement until bought (D51); it always shoves
-  guard: 0,          // hits a batch can take without a heart -- the suit's (D100)
+  guard: 0,          // hits a batch can take without losing HP -- the suit's (D100)
 };
 
 const DASH_TIME      = 0.16;  // seconds of dash
@@ -119,7 +119,7 @@ const SOUNDS = {
 const MODS = [
   { name: 'Fins',     scope: 'body',    desc: 'you swim faster', max: 3,
     apply: p => p.speed += 45 },
-  { name: 'Vitality', scope: 'body',    desc: 'one more heart, it comes full', max: 3,
+  { name: 'Vitality', scope: 'body',    desc: '1 more max HP, it comes full', max: 3,
     apply: p => { p.maxHp += 1; p.hp += 1; } },
   { name: 'Reflex',   scope: 'body',    desc: 'the dash comes back sooner', max: 3,
     apply: p => p.dashCooldown -= 0.4 },
@@ -127,7 +127,7 @@ const MODS = [
     apply: p => p.iframes += 0.3 },
   { name: 'Impact',   scope: 'body',    desc: 'the dash wounds what it throws', max: 3,
     apply: p => p.dashDamage += 1 },
-  { name: 'Mend',     scope: 'comfort', desc: 'a heart back each batch', max: 1,
+  { name: 'Mend',     scope: 'comfort', desc: '1 HP back each batch', max: 1,
     end: true, apply: p => p.mendOnClear = 1 },
   { name: 'Barbs',    scope: 'weapon',  desc: 'harpoons go through one more', max: 3,
     weapons: ['Harpoon'], apply: p => p.pierce += 1 },
@@ -480,38 +480,38 @@ const ENEMY_TYPES = [
   // The plain fish bite (D108). Claude's picks.
   { name: 'drifter', r: 18, hp: 1, speed: 85,  ramp: 0.6, value: 1,
     color: '#e8446e', glow: '#ff1e5a',
-    bite: { reach: 10, windup: 0.3, rest: 0.8 } },
+    bite: { reach: 10, windup: 0.3, rest: 0.8, damage: 1 } },
   { name: 'darter',  r: 12, hp: 1, speed: 190, ramp: 0.9, value: 1,
     color: '#ffb648', glow: '#ff8a00',
-    bite: { reach: 6, windup: 0.15, rest: 0.6 } },
+    bite: { reach: 6, windup: 0.15, rest: 0.6, damage: 1 } },
   { name: 'bulwark', r: 34, hp: 6, speed: 52,  ramp: 1.2, value: 3,
     color: '#a05cff', glow: '#7b2fff',
-    bite: { reach: 40, windup: 0.6, rest: 1.2 } },
+    bite: { reach: 40, windup: 0.6, rest: 1.2, damage: 1 } },
   // The archer (D95). Its `range` sits under the Gun's, so the starting weapon
   // can always answer it. Claude's picks.
   { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2,
     color: '#5aa9ff', glow: '#1f6fff',
-    spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420 } },
+    spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420, damage: 1 } },
   // The puffer (D95, D106). Claude's picks.
   { name: 'puffer',  r: 22, hp: 3, speed: 95,  value: 2,
     color: '#ffee58', glow: '#ffc800',
-    fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110 } },
+    fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110, damage: 1 } },
   // The eel (D95), the one fish that hurts on touch (D108). Claude's picks.
-  { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, touch: true,
+  { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, touch: 1,
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 } },
   // The boss, and the mini-boss that rehearses its lunge (D62, D64, D65).
   // Neither glows (D88). Claude's picks.
   { name: 'mini-boss', r: 52, hp: 24, speed: 70, value: 5, carries: false,
     color: '#e2ff8a', glow: '#c6ff3c',
-    lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2 } },
+    lunge: { chase: 1, windup: 1.5, speed: 780, reach: 450, rest: 1.2, damage: 1 } },
   // The boss's `value` is the layer end's big haul of gems (D68); its `fan`,
   // D117's. Claude's picks.
   { name: 'boss',      r: 84, hp: 60, speed: 60, value: 30, carries: false,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
-    lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2 },
+    lunge: { chase: 1, windup: 1.0, speed: 780, reach: 450, rest: 1.2, damage: 1 },
     fan:   { chase: 1, windup: 0.8, reach: 450, rest: 1.2,
-             count: 7, arc: 90, speed: 160, r: 9, travel: 600 } },
+             count: 7, arc: 90, speed: 160, r: 9, travel: 600, damage: 1 } },
 ];
 
 // Behaviour records, whose presence is the behaviour (D26), so a new one costs

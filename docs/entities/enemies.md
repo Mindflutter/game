@@ -5,8 +5,9 @@ mirror `ENEMY_TYPES` in `game/content.js`, and `npm test` fails when the two
 disagree. Which enemies a dive meets, and how many at once, is the batches'
 business: `game/content.js` → batches and layers.
 
-True of every type: it hurts on contact — one heart, then the player's
-i-frames; the dash shoves it, and hurts it once `dashDamage` is bought (D51
+True of every type: it hurts only by its attack, each attack costing its own `damage`
+(D118 (hits vary in damage)), then the player's i-frames — a guard charge
+takes a hit whole; the dash shoves it, and hurts it once `dashDamage` is bought (D51
 (the dash is bought)); and it drops its `value` in gems when it dies, which are
 pulled to the player (D78 (gems are pulled to the player)).
 
@@ -19,42 +20,42 @@ pulled to the player (D78 (gems are pulled to the player)).
 | bulwark | 34 | 6 | 52 | 1.2 | 3 | #a05cff | #7b2fff | — | — | — |
 | archer | 16 | 2 | 75 | — | 2 | #5aa9ff | #1f6fff | — | — | — |
 | puffer | 22 | 3 | 95 | — | 2 | #ffee58 | #ffc800 | — | — | — |
-| eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | true | — | — |
+| eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | 1 | — | — |
 | mini-boss | 52 | 24 | 70 | — | 5 | #e2ff8a | #c6ff3c | — | false | — |
 | boss | 84 | 60 | 60 | — | 30 | #c8ff3c | #9dff00 | — | false | bottom |
 
 Each behaviour's numbers, a table per behaviour field. `bite`:
 
-| name | reach | windup | rest |
-|---|---|---|---|
-| drifter | 10 | 0.3 | 0.8 |
-| darter | 6 | 0.15 | 0.6 |
-| bulwark | 40 | 0.6 | 1.2 |
+| name | reach | windup | rest | damage |
+|---|---|---|---|---|
+| drifter | 10 | 0.3 | 0.8 | 1 |
+| darter | 6 | 0.15 | 0.6 | 1 |
+| bulwark | 40 | 0.6 | 1.2 | 1 |
 
 `lunge`:
 
-| name | chase | windup | speed | reach | rest |
-|---|---|---|---|---|---|
-| mini-boss | 1 | 1.5 | 780 | 450 | 1.2 |
-| boss | 1 | 1 | 780 | 450 | 1.2 |
+| name | chase | windup | speed | reach | rest | damage |
+|---|---|---|---|---|---|---|
+| mini-boss | 1 | 1.5 | 780 | 450 | 1.2 | 1 |
+| boss | 1 | 1 | 780 | 450 | 1.2 | 1 |
 
 `fan`:
 
-| name | chase | windup | reach | rest | count | arc | speed | r | travel |
-|---|---|---|---|---|---|---|---|---|---|
-| boss | 1 | 0.8 | 450 | 1.2 | 7 | 90 | 160 | 9 | 600 |
+| name | chase | windup | reach | rest | count | arc | speed | r | travel | damage |
+|---|---|---|---|---|---|---|---|---|---|---|
+| boss | 1 | 0.8 | 450 | 1.2 | 7 | 90 | 160 | 9 | 600 | 1 |
 
 `spit`:
 
-| name | range | near | every | speed | r | travel |
-|---|---|---|---|---|---|---|
-| archer | 240 | 170 | 2 | 210 | 6 | 420 |
+| name | range | near | every | speed | r | travel | damage |
+|---|---|---|---|---|---|---|---|
+| archer | 240 | 170 | 2 | 210 | 6 | 420 | 1 |
 
 `fuse`:
 
-| name | chase | trigger | time | blast |
-|---|---|---|---|---|
-| puffer | 1.5 | 90 | 0.5 | 110 |
+| name | chase | trigger | time | blast | damage |
+|---|---|---|---|---|---|
+| puffer | 1.5 | 90 | 0.5 | 110 | 1 |
 
 `weave`:
 
@@ -84,7 +85,7 @@ diver swims and faces; fish with a ramp), D108 (fish bite)).
 | `glow` | hex | Glow colour, the same placeholder. |
 | `carries` | — | `false`: never the glowing fish that carries its batch's mod (D88 (the fish glows from the start)) — the boss and the mini-boss. Absent: it can be. |
 | `bite` | — | Its presence is the behaviour: the type bites (D108 (fish bite)). Holds the numbers in its table above: within `reach` px, body to body, it stops and opens its jaws for `windup` seconds, bites if the diver is still within `reach`, then chases `rest` seconds before it can bite again. |
-| `touch` | — | `true`: its body hurts on contact — the eel's. A fish without it hurts only by its attack (D108 (fish bite)). |
+| `touch` | — | Its damage on contact: its body hurts on contact — the eel's, a whole number like every attack's `damage` (D118 (hits vary in damage)). A fish without it hurts only by its attack (D108 (fish bite)). |
 | `lunge` | — | Its presence is the behaviour: the type lunges instead of only chasing (D64 (the boss lunges)). Holds the timings in the table above: `chase` seconds before a wind-up may start, `windup` and `rest` in seconds, the charge's `speed` in px/s and its `reach` in px. |
 | `fan` | — | A lunger's second attack (D117 (the boss's fan)), taken in turn with the lunge, the lunge first; read only beside a `lunge`. Holds the numbers in its table above: the lunge's `chase`, `windup`, `reach` and `rest`, then `count` shots spread evenly across `arc` degrees, each of radius `r` px flying at `speed` px/s for `travel` px. |
 | `spit` | — | Its presence is the behaviour: the type keeps its distance and spits (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: it closes to `range` px and backs off inside `near` px; it spits every `every` seconds, a shot of radius `r` px flying at `speed` px/s for `travel` px. |
@@ -106,12 +107,12 @@ Today every type has a behaviour; the plain fish bite.
 It chases until its body is within `reach` px of the player's, then stops —
 easing to a halt with its `ramp`, so a heavy fish slides — and holds its jaws
 open for `windup` seconds: the tell, a dark wedge toward the player. They snap
-shut on a heart if the player is still within `reach`, and on water if not;
+shut for its `damage` if the player is still within `reach`, and on water if not;
 then it chases on, `rest` seconds before it can bite again. A dash's shove
 mid-wind-up moves it, and it bites from where it ends up. In one sentence:
 when the jaws open, get away.
 
-**Touch** — a fish with `touch: true` costs a heart on contact: the eel's
+**Touch** — a fish with `touch` costs that much on contact: the eel's
 electric body. Every other fish hurts only by its attack — a bite, a spit, a
 burst, or the lunge's charge (D108 (fish bite)).
 
@@ -121,8 +122,8 @@ it stops and winds up for `windup` seconds with its line locked at where the
 player was. That is the tell: it swells, glows harder and lays a lane as wide
 as its radius along the line. Then it charges along the line at `speed`, for
 `reach` px or to the edge of the view, and rests for `rest` seconds — the
-opening. The charge is its attack: contact hurts while it charges, and only
-then (D108 (fish bite)). From the wind-up on, the view holds it, so a charge never takes the
+opening. The charge is its attack: contact costs its `damage` while it
+charges, and only then (D108 (fish bite)). From the wind-up on, the view holds it, so a charge never takes the
 fight off screen. In one sentence, per the pillar: when it swells, get out of
 its line.
 
@@ -132,7 +133,8 @@ wind-up ends in shots rather than a charge. It chases, stands and winds up as
 for a lunge, by the fan's own numbers, with its line locked at where the
 player was — but the tell lays down `count` lines, spread evenly across `arc`
 degrees around that line and each as wide as a shot. As the wind-up ends it
-spits a shot along every line — the spit's shot, the same hurt — and rests.
+spits a shot along every line — a shot like the spit's, for the fan's
+`damage` — and rests.
 When the boss dies, every enemy shot still flying goes with it (D116 (bosses
 bring escorts)): the fight is over. In one sentence: when it lays down many
 lines, slip between them.
@@ -142,8 +144,8 @@ lines, slip between them.
 While within range and wholly inside the view it spits a shot at where the
 player is, every `every` seconds; one outside the view comes in first, so a
 shot always comes from a fish you can see. A shot flies straight for its
-`travel` and costs a heart where it meets the player — the same hurt as a
-bite, through `hurtPlayer()` — but never touches a fish, and the dash's
+`travel` and costs its `damage` where it meets the player — the shot carries
+it, so it lands for what it was fired with — but never touches a fish, and the dash's
 invulnerability lets it through unspent. In one sentence: the blue ones spit,
 so keep moving.
 
@@ -151,8 +153,8 @@ so keep moving.
 bursts and comes on again)). Once it has chased for `chase` seconds — since it
 arrived, or since its last burst — within `trigger` of the player and wholly
 inside the view, it stops and swells for `time` seconds — the tell: it puffs
-up and draws the ring its burst will reach — then bursts, costing a heart if
-the player is inside `blast`, and chases on. The dash's shove still moves it,
+up and draws the ring its burst will reach — then bursts, costing its `damage`
+if the player is inside `blast`, and chases on. The dash's shove still moves it,
 which is the answer to one. It outlives every burst, so only killing it ends
 it, and pays like any fish; a burst pays nothing. In one sentence: when it
 swells, get out of its ring — and kill it before it comes back.

@@ -54,7 +54,7 @@ weapon is carried, so it lengthens the Knife's slash as much as the Gun's shot.
 ## Suit
 
 Defence, which D36 (attributes) gives gear: the suit takes the first hit of
-every batch, one more a tier (`guard`). A guarded hit costs no heart but still
+every batch, one more a tier (`guard`). A guarded hit costs no HP but still
 gives the i-frames and still counts as a hit for `untouched`; a bite, a shot
 and a burst are guarded alike. The guard refills as each batch arrives, and a
 gold ring around the diver shows one left.

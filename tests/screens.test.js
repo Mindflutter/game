@@ -15,7 +15,7 @@ const run = (g, n, dt = 1 / 60) => { for (let i = 0; i < n; i++) g.update(dt); }
 const at = (g, r) => { g.aim.x = r.x + r.w / 2; g.aim.y = r.y + r.h / 2; };
 // A fish on the diver that cannot die, so it hurts until it is taken away.
 const leech = g => g.enemies.push({ x: g.player.x + 15, y: g.player.y, r: 9, speed: 0, hp: 999, maxHp: 999,
-                                    value: 1, lastHitBy: 0, pushX: 0, pushY: 0, vx: 0, vy: 0, touch: true });
+                                    value: 1, lastHitBy: 0, pushX: 0, pushY: 0, vx: 0, vy: 0, touch: 1 });
 
 describe('menus', () => {
   it('opens the pause menu on Esc in play, and resumes on Esc again', () => {

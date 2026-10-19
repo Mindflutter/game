@@ -7,7 +7,7 @@ import { loadGame } from './harness.js';
 // and the dash, not any one attack.
 const mob = (x, y, over) => Object.assign(
   { x, y, r: 9, speed: 0, hp: 1, maxHp: 1, value: 1, lastHitBy: 0,
-    pushX: 0, pushY: 0, vx: 0, vy: 0, touch: true }, over);
+    pushX: 0, pushY: 0, vx: 0, vy: 0, touch: 1 }, over);
 
 // A bullet, built the way the weapon builds one, so no check hand-rolls a
 // literal that misses a field -- a bullet without `speed` would fly forever,
@@ -181,12 +181,12 @@ describe('shots', () => {
 });
 
 describe('touch and gems', () => {
-  it('costs one heart for a fish walking into a standing diver, not two', () => {
+  it('costs its touch once for a fish walking into a standing diver, not twice (D118)', () => {
     const g = loadGame();
     g.reset();
-    g.enemies.push(mob(g.player.x + 200, g.player.y, { speed: 100, hp: 999, maxHp: 999 }));
+    g.enemies.push(mob(g.player.x + 200, g.player.y, { speed: 100, hp: 999, maxHp: 999, touch: 2 }));
     run(g, 150, 0.016);                        // 2.4s: touches once, not twice
-    expect(g.player.hp).toBe(2);
+    expect(g.player.hp).toBe(g.player.maxHp - 2);
   });
 
   it('pays a collected gem into the purse and opens nothing (D34)', () => {
@@ -326,7 +326,7 @@ describe('the clear and the death, on the tick they land', () => {
     expect(g.player.hurt).toBeLessThanOrEqual(0);
   });
 
-  it('heals a heart with Mend on a clear, never past the maximum', () => {
+  it('heals 1 HP with Mend on a clear, never past the maximum', () => {
     const clear = hp => {
       const g = loadGame();
       g.reset();
@@ -357,6 +357,14 @@ describe('the clear and the death, on the tick they land', () => {
     expect(g.screen).toBe('dead');
     expect(g.player.hp).toBeLessThanOrEqual(0);
     expect(g.offerTimer).toBeLessThanOrEqual(0);
+  });
+
+  it('ends the dive at 0 HP, not below, on a hit bigger than the HP left (D118)', () => {
+    const g = quiet();
+    g.player.hp = 1;
+    g.enemies.push(mob(g.player.x, g.player.y, { touch: 3 }));
+    g.update(1 / 60);
+    expect([g.screen, g.player.hp]).toEqual(['dead', 0]);
   });
 
   it('opens the layer end\'s cards once the boss\'s death has played, and nothing arrives behind them (D51)', () => {

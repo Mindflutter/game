@@ -212,6 +212,38 @@ describe('the save (D70)', () => {
     expect(shots.every(finite)).toBe(true);
   });
 
+  it("gives a v8 dive's fish and shots in flight a damage of 1, as every hit was then (D118)", () => {
+    const saved = JSON.parse(readFileSync(new URL('./fixtures/save-v8.json', import.meta.url), 'utf8'));
+    saved.dive.bullets.push({ evil: true, x: 0, y: 0, r: 6, vx: 0, vy: 0, speed: 0,
+                              travelled: 0, maxTravel: 100 });
+    const g = loadGame();
+    const old = ({ damage, ...rest }) => rest;                        // a record as v8 saved it
+    const { bite, ...body } = saved.dive.enemies[0];
+    // A boss saved mid-fight before its fan (D117), and an eel.
+    saved.dive.enemies.push({ ...body, name: 'boss', lunge: old(g.enemyType('boss').lunge) },
+                            { ...body, name: 'eel', touch: true, weave: old(g.enemyType('eel').weave) });
+    expect(g.loadSave(JSON.stringify(saved))).toBe('');
+    const [boss, eel] = g.enemies.slice(-2);
+    expect(g.enemies.filter(e => e.bite).map(e => e.bite.damage)).toEqual(Array(g.enemies.length - 2).fill(1));
+    expect([boss.lunge.damage, eel.touch]).toEqual([1, 1]);
+    expect(eel.weave).toEqual(g.enemyType('eel').weave);             // moves, never hurts
+    expect(g.enemies.map(e => Object.keys(e))).toEqual(saved.dive.enemies.map(e => Object.keys(e)));
+    expect(g.bullets.filter(b => b.evil).map(b => b.damage)).toEqual([1]);
+  });
+
+  it('loads a save written by the first build of version 9, and plays it on', () => {
+    // Saved mid-batch in layer 1, an archer's shot in flight carrying its damage (D118).
+    const text = readFileSync(new URL('./fixtures/save-v9.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect(g.bullets.filter(b => b.evil).map(b => b.damage)).toEqual([1]);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    const shots = shotsSeen(g, 600);
+    expect(shots.length).toBeGreaterThan(0);
+    expect(shots.every(finite)).toBe(true);
+  });
+
   it('loads a save written by the first build of version 3, and plays it on', () => {
     // Saved mid-batch with its fish lit and a boost on the floor (D84, D86).
     const text = readFileSync(new URL('./fixtures/save-v3.json', import.meta.url), 'utf8');

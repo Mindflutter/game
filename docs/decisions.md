@@ -3943,3 +3943,51 @@ taken mid-wind-up playing on identically; every shot gone on the boss's death.
 `tests/debug.test.js` — the boss's tip names both attacks. `checks.js` — every
 tip fits the view, which the boss's first did not. Each verified by breaking
 it.
+
+## D118 — Hits vary in damage · 2026-10-19
+The pass before S6 (balance). Igor, 2026-10-15: "should enemies have hp bars?
+shouls the player? damage exceeding 1?"; then, 2026-10-18: "hits worth two
+hearts - not limited to two, we are varying damage". Every hurt cost exactly 1
+HP, through one path (D95 (three enemy behaviours, and one way to be hurt)),
+so the boss's lunge weighed what a drifter's bite did.
+
+**Decided, by Igor.**
+- **Each attack deals an amount of its own**, not capped at two.
+- **The unit stays.** Claude leaned to half hearts, then to a scale ten times
+  finer; Igor: "half hearts is confusing", and "if minimal damage is 1 (which
+  it is), then it stays. further on - a question of balance". The smallest hit
+  is 1, as every hit was; how much HP the diver has and how much each attack
+  takes are S6 (balance)'s. Heart, Vitality and Mend keep their meaning.
+- **A guard charge takes one hit whole, whatever its damage.** Igor: "one
+  instance of damage maybe?"; Claude agreeing: a charge counts hits while HP
+  counts damage, so defence stays a different thing from health (D100
+  (equipment)) — a charge that soaked an amount would be HP refilled each
+  batch. It takes whatever lands first, so it cannot be saved for the heavy
+  hit. Isaac's Holy Mantle is the same rule. Igor, once built: "guard rule ok".
+- **HP, not hearts.** Igor: "rename hearts to hp". What the game and the docs
+  call the diver's health is HP — Vitality's and Mend's lines say so. The
+  attribute keeps its name, Heart, as Strength keeps its.
+
+**Built.** `damage` on every attack's record — `bite`, `spit`, `fuse`, `lunge`,
+`fan` — and the eel's `touch` is now its amount rather than `true`. Each
+caller passes its own to `hurtPlayer(damage)`; an enemy shot carries its
+record's, so it lands for what it was fired with. HP stops at 0. **Every
+amount is 1**, so nothing plays differently yet: the amounts are S6
+(balance)'s lever, and the threat system's — how often a fish lands, times how
+much.
+
+**Not decided here.** The diver's readout — Igor leans to the status bar,
+with the diver's look showing its hurt once there are graphics — and bars
+over fish: `ideas.md` → Bars, hearts, and hits worth more than one.
+
+**Save**: version 9. Every attack a v8 dive's fish has, and its enemy shots, get
+a `damage` of 1, as every hit was then — onto the records a fish was saved
+with, so a boss saved before its fan (D117 (the boss's fan)) still only lunges.
+
+**Guarded by**: `tests/enemies.test.js` — every attack a whole damage of at
+least 1; the bite, the archer's shot and the burst each taking their own.
+`tests/combat.test.js` — a touch taking its own, once; a hit bigger than the
+HP left ending the dive at 0. `tests/boss.test.js` — the charge taking its
+own; the fan's shots carrying theirs. `tests/home.test.js` — one guard charge
+taking a hit of 2 whole. `tests/save.test.js` — a v8 dive's fish and shots at
+1; the v9 fixture playing on. Each verified by breaking it.

@@ -110,7 +110,7 @@ function lungeStep(e, ux, uy, d, dt) {
   } else if (e.phase === 'charge') {
     vx = e.aimX * A.speed;
     vy = e.aimY * A.speed;
-    if (d < e.r + player.r) hurtPlayer();     // the charge is its attack (D108)
+    if (d < e.r + player.r) hurtPlayer(A.damage);     // the charge is its attack (D108)
   } else if (e.phaseTime >= A.rest) {        // resting: the opening
     e.phase = 'chase';
     e.phaseTime = 0;
@@ -135,7 +135,7 @@ function fanAims(e) {
 
 function enemyShot(e, ux, uy, S) {
   bullets.push({ evil: true, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
-                 speed: S.speed, travelled: 0, maxTravel: S.travel });
+                 speed: S.speed, travelled: 0, maxTravel: S.travel, damage: S.damage });
 }
 
 // ---------- the spit ----------
@@ -180,7 +180,7 @@ function fuseStep(e, ux, uy, d, dt) {
     e.phase = 'chase';
     e.phaseTime = 0;
     const bx = player.x - e.x, by = player.y - e.y, reach = F.blast + player.r;
-    if (bx * bx + by * by < reach * reach) hurtPlayer();
+    if (bx * bx + by * by < reach * reach) hurtPlayer(F.damage);
     burst(e.x, e.y, e.color, e.glow, 24, 260, 0.45);
     sound('pop');
   }
@@ -194,7 +194,7 @@ function biteStep(e, ux, uy, d, dt) {
   if (e.phase === 'jaws') {
     ease(e, 0, 0, e.ramp, dt);
     if (e.phaseTime >= B.windup) {
-      if (d - e.r - player.r <= B.reach) hurtPlayer();
+      if (d - e.r - player.r <= B.reach) hurtPlayer(B.damage);
       e.phase = 'rest';
       e.phaseTime = 0;
     }
@@ -217,9 +217,9 @@ function weaveStep(e, ux, uy, d, dt) {
   e.y += (uy * e.speed + ux * side + e.pushY) * dt;
 }
 
-// The one way the diver is hurt (D95, D100). Returns whether it landed, so a
-// shot that did not is not spent.
-function hurtPlayer() {
+// The one way the diver is hurt (D95, D100, D118). Returns whether it landed,
+// so a shot that did not is not spent. The guard counts hits, not damage.
+function hurtPlayer(damage) {
   if (player.hurt > 0 || immortal) return false;
   player.hurt = player.iframes;
   batchHit = true;
@@ -229,7 +229,7 @@ function hurtPlayer() {
     sound('guard');
     return true;
   }
-  player.hp -= 1;
+  player.hp = Math.max(0, player.hp - damage);
   shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;
   burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
   sound('hurt');
@@ -1059,7 +1059,7 @@ function step(dt) {
     }
 
     // Without `touch`, a fish hurts only by its attack (D108).
-    if (e.touch && d < e.r + player.r) hurtPlayer();
+    if (e.touch && d < e.r + player.r) hurtPlayer(e.touch);
   }
 
   // --- move bullets; they die at the edge of your range ---
@@ -1101,7 +1101,7 @@ function step(dt) {
     if (b.gone || !b.evil) continue;
     const reach = player.r + b.r;
     if (segDistanceSq(player.x, player.y, b.x - b.vx * dt, b.y - b.vy * dt, b.x, b.y) < reach * reach &&
-        hurtPlayer()) b.gone = true;
+        hurtPlayer(b.damage)) b.gone = true;
   }
 
   // --- gems fly to you, from anywhere, and never fade (D35, D78) ---

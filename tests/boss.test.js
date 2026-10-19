@@ -96,7 +96,19 @@ describe('the lunge (D64) and the fan (D117)', () => {
     const step = F.arc * Math.PI / 180 / (F.count - 1);
     shots.map(b => Math.atan2(b.vy, b.vx)).sort((a, b) => a - b)
       .forEach((a, k) => expect(a).toBeCloseTo(Math.PI / 2 + (k - (F.count - 1) / 2) * step));
-    for (const b of shots) expect([b.speed, b.r, b.maxTravel]).toEqual([F.speed, F.r, F.travel]);
+    for (const b of shots) expect([b.speed, b.r, b.maxTravel, b.damage]).toEqual([F.speed, F.r, F.travel, F.damage]);
+  });
+
+  it('costs its damage as its charge reaches the diver (D118)', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;
+    g.placeEnemy('mini-boss', g.player.x - 200, g.player.y);
+    const e = g.enemies[0];
+    Object.assign(e, { x: g.player.x - e.r - g.player.r + 5, phase: 'charge', phaseTime: 0,
+                       aimX: 1, aimY: 0, lunge: { ...e.lunge, damage: 2 } });
+    g.update(g.FIXED_DT);
+    expect(g.player.hp).toBe(g.player.maxHp - 2);
   });
 
   it('brings the boss up from below the view, centred', () => {

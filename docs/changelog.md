@@ -4,6 +4,26 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-19
+
+**Hits vary in damage** (D118 (hits vary in damage))
+Igor: "hits worth two hearts - not limited to two, we are varying damage",
+then "if minimal damage is 1 (which it is), then it stays". Every attack's
+record — `bite`, `spit`, `fuse`, `lunge`, `fan` — has a `damage`, and the eel's
+`touch` is its amount; `hurtPlayer(damage)` takes it, an enemy shot carries
+its record's, and HP stops at 0. A guard charge takes a hit whole, whatever its
+damage — Igor: "guard rule ok". Every amount is 1, so nothing
+plays differently: the amounts are S6 (balance)'s. The save is version 9; a v8
+dive's fish and shots load at 1 — a boss saved before its fan still only lunges — and `save-v9.json` is its fixture. Every new
+check was seen failing against the rule it guards broken. `entities/enemies.md`
+also lost a stale line from before D108 (fish bite): that every fish hurts on
+contact.
+
+**HP, not hearts** (D118 (hits vary in damage))
+Igor: "rename hearts to hp". Vitality reads "1 more max HP, it comes full" and
+Mend "1 HP back each batch", no wider than before; the docs and the checks'
+names say HP. The attribute Heart keeps its name.
+
 ## 2026-10-18
 
 **The drops' stat checks see every stat**

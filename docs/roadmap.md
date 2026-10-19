@@ -28,10 +28,10 @@ equipment on screens of their own)), batches arriving in waves (D115
 (batches arrive in waves)) and escorts for the boss and the mini-boss — the
 boss's a crowd that keeps coming until it dies (D116 (bosses bring escorts))
 — and the two made different: the boss spits a fan in turn with its lunge,
-the mini-boss only lunges (D117 (the boss's fan)). Next: stronger versions of
-the same fish (`ideas.md` → Pace) and hits of varying damage (`ideas.md` →
-Bars, hearts, and hits worth more than one), which join this pass, Igor's
-word on 2026-10-18. Each is discussed one at a time.
+the mini-boss only lunges (D117 (the boss's fan)) — and hits of varying
+damage, every amount 1 until S6 (balance) (D118 (hits vary in damage)). Next: stronger
+versions of the same fish (`ideas.md` → Pace), which join this pass, Igor's
+word on 2026-10-18.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and
