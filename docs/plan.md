@@ -87,7 +87,8 @@ in the game".
 
 **Work:** Game feel. Sound. Assets **only if** the condition is hit —
 indistinguishable enemies, indistinguishable layers, or visual clumsiness.
-UX fixing.
+UX fixing — `ideas.md` → Screens, among it what a tier does for the player
+(Igor, 2026-10-19).
 D35's `+N` popup over collected gems is feel, and waits here, unbuilt (D78
 (gems are pulled to the player)).
 

@@ -57,7 +57,7 @@ keyboard events through the input layer, including non-Latin layouts.
 ## Debug mode
 
 For playtesting by hand: **`index.html?debug`** opens a setup screen in place
-of the title — the layer and gate, which fish and how many, the grade they arrive at, the weapon and its
+of the title — the layer and gate, which fish and how many, the grade every fish of the dive arrives at, the weapon and its
 tier, equipment, attributes and mods, immortal, one-shot and the seed. Pick
 with the arrows or the mouse (Shift moves a value by five, and past either end
 a value comes round to the other), then Dive.

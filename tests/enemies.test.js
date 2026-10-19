@@ -92,16 +92,26 @@ describe('the archer (spit)', () => {
     expect(shots(g).length).toBe(0);
   });
 
-  it('lets a shot through the dash\'s invulnerability and immortality, unspent', () => {
+  it('lets a shot through the i-frames and the dash\'s invulnerability, unspent', () => {
     const S = spit();
-    for (const guard of ['hurt', 'immortal']) {
+    for (const timer of ['hurt', 'safe']) {
       const g = alone('archer', S.range - 20);
       g.enemies[0].phaseTime = S.every;
-      if (guard === 'hurt') g.player.hurt = 10; else g.immortal = true;
+      g.player[timer] = 10;
       play(g, (S.range - 20) / S.speed + 0.1);
       expect(g.player.hp).toBe(g.player.maxHp);
       expect(shots(g).length).toBe(1);
     }
+  });
+
+  it('spends a shot on an immortal diver, the hit shown and no HP taken (D121)', () => {
+    const S = spit();
+    const g = alone('archer', S.range - 20);
+    g.enemies[0].phaseTime = S.every;
+    g.immortal = true;
+    play(g, (S.range - 20) / S.speed + 0.1);
+    expect([g.player.hp, shots(g).length, g.batchHit]).toEqual([g.player.maxHp, 0, true]);
+    expect(g.player.hurt).toBeGreaterThan(0);    // it blinks
   });
 
   it('never hits a fish, and its shot dies at its travel', () => {

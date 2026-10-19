@@ -315,6 +315,17 @@ describe('the dash (D50, D51, D56)', () => {
       expect(Math.abs(r.dy)).toBeLessThan(1);
     }
   });
+
+  it('is safe through its grace, without the blink a hit has (D121)', () => {
+    const g = quiet();
+    g.player.fireTimer = 999;
+    g.justPressed.add('Space');
+    run(g, Math.floor((g.DASH_TIME + g.DASH_GRACE) / g.FIXED_DT) - 1, g.FIXED_DT);
+    expect(g.player.hurt).toBeLessThanOrEqual(0);           // nothing blinks
+    expect(g.hurtPlayer(1)).toBe(false);                    // and nothing lands
+    run(g, 3, g.FIXED_DT);
+    expect(g.hurtPlayer(1)).toBe(true);
+  });
 });
 
 describe('the clear and the death, on the tick they land', () => {

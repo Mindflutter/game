@@ -139,7 +139,8 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
     vx: 0,             // the swim's velocity, eased toward the keys (D107)
     vy: 0,
     facing: Math.PI / 2,   // where the body points, a dash's way; down, into the abyss
-    hurt: 0,           // seconds of invulnerability left
+    hurt: 0,           // seconds of invulnerability left after a hit: it blinks
+    safe: 0,           // seconds of the dash's invulnerability left: no blink (D121)
     fireTimer: 0,      // seconds until the next shot
     dashTime: 0,       // seconds of dash left, 0 when not dashing
     dashCd: 0,         // seconds until the dash is ready again

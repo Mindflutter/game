@@ -234,8 +234,8 @@ function drawField() {
     }
   }
 
-  // A wounded fish shrinks, so a big one near death shows. A tell grows with
-  // `k`, 0 to 1 across it.
+  // A wounded fish carries a bar and keeps its size, the size of its body
+  // (D121). A tell grows with `k`, 0 to 1 across it.
   for (const e of enemies) {
     const hit = e.flash > 0;
     const winding = e.phase === 'windup', fusing = e.phase === 'fuse';
@@ -265,7 +265,7 @@ function drawField() {
       ctx.stroke();
       ctx.restore();
     }
-    circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + (fusing ? 0.8 : 0.25) * k),
+    circle(e.x, e.y, e.r * (1 + (fusing ? 0.8 : 0.25) * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
     // The grade on the body, above the first (D119). PLACEHOLDER GRAPHICS.
     if (e.grade > 1) {
@@ -276,6 +276,13 @@ function drawField() {
       ctx.textBaseline = 'middle';
       ctx.fillText(e.grade, e.x, e.y);
       ctx.restore();
+    }
+    // Only once hurt, so a one-hit fish never has one. PLACEHOLDER GRAPHICS.
+    if (e.hp < e.maxHp) {
+      ctx.fillStyle = '#05080f';
+      ctx.fillRect(e.x - e.r, e.y - e.r - 9, 2 * e.r, 4);
+      ctx.fillStyle = e.glow;
+      ctx.fillRect(e.x - e.r, e.y - e.r - 9, 2 * e.r * e.hp / e.maxHp, 4);
     }
     // A biter's open jaws (D108). PLACEHOLDER GRAPHICS.
     if (e.phase === 'jaws') {
@@ -326,7 +333,8 @@ function drawField() {
   // PLACEHOLDER GRAPHICS.
   for (const b of bullets) if (b.evil) circle(b.x, b.y, b.r, '#cfe3ff', '#1f6fff', 16);
 
-  // No blink mid-dash: blinking out mid-flight made the dash read as a teleport.
+  // A hit blinks; the dash's own invulnerability does not (D121). Not mid-dash
+  // either: blinking out mid-flight made the dash read as a teleport.
   const blinking = player.hurt > 0 && player.dashTime <= 0 &&
                    Math.floor(player.hurt * 10) % 2 === 0;
   if (!blinking) circle(player.x, player.y, player.r, '#bffcff', '#4ff0ff', 25);

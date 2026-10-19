@@ -32,8 +32,11 @@ the mini-boss only lunges (D117 (the boss's fan)) — and hits of varying
 damage, every amount 1 until S6 (balance) (D118 (hits vary in damage)) — and
 grades, the same fish stronger, chosen by S6 (balance)'s threat system and
 seen today only in the debug mode (D119 (grades)) — and solid bodies, the dash
-the way through a crowd (D120 (bodies are solid)). Next: Igor playing it,
-then his word on what else joins this pass, or S6 (balance) opens.
+the way through a crowd (D120 (bodies are solid)). From Igor playing that:
+only a hit blinks, a hurt fish carries a bar, immortal shows its hits (D121
+(only a hit blinks; a hurt fish carries a bar)), and the debug Grade reaches
+every fish. Open from playing it, the pile-up (`ideas.md` → Crowds). Next:
+Igor's word on what else joins this pass, or S6 (balance) opens.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and

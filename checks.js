@@ -89,6 +89,22 @@ if (location.search === '?test') {
   check(margin.every((c, i) => Math.abs(c - inside[i]) <= 2),
     'a dim screen must darken the margin as much as the view: margin ' + margin + ', view ' + inside);
 
+  // --- a hurt fish keeps its size and carries a bar (D121) ---
+  reset(1);
+  queuePaused = true;
+  enemies.length = 0;
+  placeEnemy('bulwark', ARENA_W / 2 + 200, cameraY + ARENA_H / 2);
+  const f = enemies[0];
+  f.hp = 1;
+  draw();
+  const at = (x, y) => px(Math.round(x * scale + offX), Math.round((y - cameraY) * scale + offY));
+  const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= 8);
+  check(near(at(f.x + f.r * 0.9, f.y), hex(f.color)),
+    'a hurt fish must keep its full size: ' + at(f.x + f.r * 0.9, f.y));
+  check(near(at(f.x - f.r + 3, f.y - f.r - 7), hex(f.glow)),
+    'a hurt fish must carry its bar: ' + at(f.x - f.r + 3, f.y - f.r - 7));
+
   // Sound is a no-op before the player has pressed anything, not a crash.
   check(audio === null, 'no audio context before a key press');
   sound('shoot');

@@ -4104,3 +4104,38 @@ still winding up, a puffer pressing it at an edge still lighting.
 landing on contact. Each verified by breaking it. Two checks that
 stacked fish on one spot — a fish on the diver's very centre, drifters 6px
 apart under the Knife — were given setups bodies allow, their rules unchanged.
+
+## D121 — Only a hit blinks; a hurt fish carries a bar · 2026-10-19
+From Igor playing the pass, 2026-10-19: "blink after dash is really
+annoying", "cant see if damage is taken in debug mode when being immortal",
+"fish reducing in size, health bars should make it go away".
+
+**Decided.**
+- **The dash's invulnerability is its own timer**, `player.safe`, no longer
+  the i-frames' `hurt`, and only `hurt` blinks. D21 (the dash that read as a
+  teleport) hid the blink while the dash flew; its 0.15s of grace after still
+  blinked, every dash. Still safe for `DASH_TIME + DASH_GRACE`, as before.
+- **Immortal, a hit lands and shows, and takes no HP**: the blink, the shake,
+  the sound, a guard charge, `batchHit`, an enemy shot spent. Before, it
+  never landed, so nothing showed. Amends D95 (three enemy behaviours, and
+  one way to be hurt) — a shot passed `&immortal` unspent — and the tip of
+  D102 (the debug mode)'s row.
+- **A hurt fish carries a bar and keeps its size**, Igor's word. Since D120
+  (bodies are solid) the shrinking also lied: a fish drawn at 70% held the
+  others off at its full body. Claude's picks: a small bar over the body,
+  shown only once hurt, so a one-hit fish never carries one; the boss and the
+  mini-boss carry the same bar. A bar across the top for them was Claude's
+  lean, and stays open (`ideas.md` → Health).
+
+**Not decided**: the pile-up Igor saw, open in `ideas.md` → Crowds.
+
+**Measured**: nothing re-measured. The immortal bot's dives now throw sparks
+on a hit, from the seeded stream, so its runs differ from here; each bot
+figure names its build (`roadmap.md` → Health).
+
+**Guarded by**: `tests/combat.test.js` → the dash — safe through its grace
+with `hurt` never set, and hurt again after. `tests/enemies.test.js` → the
+archer — a shot passes the i-frames and the dash's grace unspent, and is spent
+on an immortal diver, which blinks with its HP full. `checks.js` — a hurt
+fish drawn at its full size, with its bar. Each seen failing against the rule
+broken.

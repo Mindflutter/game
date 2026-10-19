@@ -151,7 +151,7 @@ describe('the code', () => {
 
   it('brings its fish at its grade, later waves too, and names the grade (D119)', () => {
     const g = setup('L1,G3,S7,Grade3,Gun0,drifter20,immortal');
-    expect(g.gateLine()).toContain('20 drifter at grade 3');
+    expect(g.gateLine()).toContain('all at grade 3');
     const t = g.enemyType('drifter'), G = g.GRADES[2];
     expect(g.MENUS.debug.items[row(g, 'drifter')].tip)
       .toContain('hp ' + t.hp * G.hp + ' \u00b7 speed ' + Math.round(t.speed * G.speed));
@@ -159,6 +159,16 @@ describe('the code', () => {
     until(g, 30, () => !g.incoming.length && g.enemies.length > 0);
     expect(g.incoming).toEqual([]);
     expect(g.enemies.map(e => e.grade)).toEqual(Array(20).fill(3));
+  });
+
+  it('brings every fish of the dive at its grade, drawn or chosen, the boss\'s crowd too (D119)', () => {
+    const g = setup('L1,G99,S7,Grade2,Gun0,immortal');
+    g.debugDive();
+    const entries = g.plan.flatMap(p => [...p.batch.enemies, ...(p.escorts ? p.escorts.enemies : [])]);
+    expect(entries.every(([, , grade]) => grade === 2)).toBe(true);
+    until(g, 30, () => g.enemies.some(e => e.escort));
+    expect(g.enemies.some(e => e.name === 'boss') && g.enemies.some(e => e.escort)).toBe(true);
+    expect(g.enemies.every(e => e.grade === 2)).toBe(true);
   });
 
   it('plays on identically from a save taken with graded fish still to come (D119)', () => {

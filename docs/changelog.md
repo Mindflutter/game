@@ -6,6 +6,20 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-19
 
+**Only a hit blinks; a hurt fish carries a bar** (D121 (only a hit blinks; a
+hurt fish carries a bar))
+From Igor's playtest. The dash keeps its invulnerability on a timer of its
+own, so its grace no longer blinks. Immortal, a hit now lands and shows —
+blink, shake, sound, guard, shot spent — and takes no HP. A hurt fish keeps
+its size and carries a small bar, shown once hurt. The pile-up he saw is
+open in `ideas.md` → Crowds.
+
+**The debug Grade reaches every fish** (D119 (grades))
+Igor saw no grade numbers. The Grade row reached only the fish picked in the
+setup, and only at its gate: the drawn batches, and every batch after the
+first, came at grade 1, unmarked. Now every fish of a debug dive arrives at
+it, and the boss's crowd carries an escort entry's grade, which it dropped.
+
 **Bodies are solid** (D120 (bodies are solid))
 Igor: "i can freely swim thru red & purple enemies without a bite", and on
 where it goes, "your choice". Seen failing first: a diver at full swim came out

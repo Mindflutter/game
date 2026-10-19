@@ -236,8 +236,9 @@ function weaveStep(e, ux, uy, d, dt) {
 
 // The one way the diver is hurt (D95, D100, D118). Returns whether it landed,
 // so a shot that did not is not spent. The guard counts hits, not damage.
+// Immortal, a hit lands and shows but takes no HP (D121).
 function hurtPlayer(damage) {
-  if (player.hurt > 0 || immortal) return false;
+  if (player.hurt > 0 || player.safe > 0) return false;
   player.hurt = player.iframes;
   batchHit = true;
   if (guardLeft > 0) {
@@ -246,7 +247,7 @@ function hurtPlayer(damage) {
     sound('guard');
     return true;
   }
-  player.hp = Math.max(0, player.hp - damage);
+  if (!immortal) player.hp = Math.max(0, player.hp - damage);
   shake = SHAKE_HURT * SHAKE_LEVELS[shakeLevel].mul;
   burst(player.x, player.y, '#bffcff', '#4ff0ff', 16, 190, 0.5);
   sound('hurt');
@@ -678,7 +679,7 @@ function gatesIn(l) {
 }
 
 function setupFish(s) {
-  return ENEMY_TYPES.filter(e => s.counts[e.name] > 0).map(e => [e.name, s.counts[e.name], s.grade]);
+  return ENEMY_TYPES.filter(e => s.counts[e.name] > 0).map(e => [e.name, s.counts[e.name]]);
 }
 
 // It reseeds the randomness to draw the plan: harmless, since every dive
@@ -687,11 +688,12 @@ function gateLine() {
   const s = debugSetup, fish = setupFish(s);
   seedRng(s.seed);
   const drawn = drawPlan();
-  const list = batch => batch.map(([name, n, grade]) => n + ' ' + name + (grade > 1 ? ' at grade ' + grade : '')).join(', ');
+  const list = batch => batch.map(([name, n]) => n + ' ' + name).join(', ');
   const { batch, escorts } = drawn[drawn.findIndex(e => e.layer === s.layer) + s.gate];
   return LAYERS[s.layer].name + ', gate ' + (s.gate + 1) + ': ' + list(batch.enemies) +
          (escorts ? (batch.crowd ? ', its crowd from ' : ', escorted by ') + list(escorts.enemies) : '') +
-         (fish.length ? '   →   in its place: ' + list(fish) : '');
+         (fish.length ? '   →   in its place: ' + list(fish) : '') +
+         (s.grade > 1 ? '   →   all at grade ' + s.grade : '');
 }
 
 // The setup's tips (D102), worked out from `apply` as the cards are (D52), so a
@@ -761,6 +763,9 @@ function debugDive() {
   // The gate's whole place, escorts included (D116).
   const fish = setupFish(s);
   if (fish.length) plan[batchIndex] = { ...plan[batchIndex], batch: { enemies: fish }, escorts: undefined };
+  // Every fish of the dive at the setup's grade (D119), drawn or chosen.
+  const graded = b => b && { ...b, enemies: b.enemies.map(([name, count]) => [name, count, s.grade]) };
+  if (s.grade > 1) plan = plan.map(p => ({ ...p, batch: graded(p.batch), escorts: graded(p.escorts) }));
 }
 
 // ---------- the clock ----------
@@ -921,6 +926,7 @@ function step(dt) {
   elapsed += dt;
   paidNow = [];
   if (player.hurt > 0) player.hurt -= dt;
+  if (player.safe > 0) player.safe -= dt;
   if (noticeTime > 0) noticeTime -= dt;
   if (bannerTime > 0) bannerTime -= dt;
   // Boosts run on play's clock: every other screen returns above (D86).
@@ -939,9 +945,9 @@ function step(dt) {
   // structurally, not by a condition someone can drop. The boss's crowd (D116).
   if (enemies.some(e => e.lead && !e.gone)) {
     const { batch, escorts } = plan[batchIndex - 1];
-    const mix = escorts.enemies.flatMap(([name, count]) => Array(count).fill(name));
+    const mix = names(escorts);
     for (let n = enemies.filter(e => e.escort && !e.gone).length + incoming.length; n < batch.crowd; n++) {
-      incoming.push({ name: mix[Math.floor(rng() * mix.length)], at: elapsed + rng() * WAVE_SPREAD,
+      incoming.push({ ...mix[Math.floor(rng() * mix.length)], at: elapsed + rng() * WAVE_SPREAD,
                       flags: { escort: true, value: 0 } });
     }
     incoming.sort((a, b) => a.at - b.at);
@@ -1026,7 +1032,7 @@ function step(dt) {
     player.dashDy = Math.sin(player.facing);
     // Invulnerable for the dash plus a moment after, so finishing it inside
     // something you flew through doesn't cost an hp.
-    player.hurt = Math.max(player.hurt, DASH_TIME + DASH_GRACE);
+    player.safe = DASH_TIME + DASH_GRACE;
     batchDashed = true;
     sound('dash');
   }

@@ -336,6 +336,14 @@ discussed.
 
 **Screens**
 
+- **What a tier does.** Igor, 2026-10-19: "player has no idea what tier-up
+  means for him. put this point into ux / polish plan to address". A row on
+  the Weapons or Equipment screen reads `tier 1 → 2   140 gems`, and nothing
+  says what the next tier changes — the Mask's reach, the Weights' damage, the
+  Suit's guard, a weapon's step. The words exist: the debug mode works out
+  what a tier moves from the game itself (`gearTip()`, D102 (the debug mode)).
+  Kin to the next note's "refer to classics for tier up". **Home**: S7 (alpha
+  polish)'s UX fixing, Igor's word.
 - **`home` shows the character; gear and attributes stop being lists.** "gear
   & attributes submenus are really hard to use. on home screen i want to see
   the character - what's equipped, what weapon is on, attrs, tiers. submenus
@@ -387,22 +395,18 @@ discussed.
   until S6 (balance) sizes them — Claude's lean, unconfirmed, the heavy
   attacks with a long tell (the lunge, the burst) above the swarm's bites.
   Still open:
-  - **Fish**: today a hurt fish only shrinks, to 70% of its size near death,
-    so the boss's 60 hp show little progress. Claude's lean, unconfirmed: a
-    small bar over any fish of more than 1 hp, once hurt, and a bar across the
-    top for the boss and the mini-boss. One-hit fish stay bare, so a swarm
-    stays readable. A ring round the body was Claude's first lean; Igor:
-    "Health rings probably wont work on real assets well" — a ring hugs a
-    circle, and a sprite has no clean edge to hug, where a bar over any shape
-    works.
   - **The diver's readout.** Igor, 2026-10-19: "half hearts is confusing.
     either enough hearts or a bar", leaning to "proper hp system"; then, on a
     bar: "honestly i dont know. i think upper status bar would suffice, with a
     player itself changing appearance (for graphics later)". A lean: the
     status bar's `HP` stays the readout, and the diver's look showing its hurt
     waits for the graphics (below).
+  - **The boss's bar.** A hurt fish carries a small bar over its body (D121
+    (only a hit blinks; a hurt fish carries a bar)), the boss and the
+    mini-boss too. Claude's lean, unconfirmed: theirs across the top of the
+    view instead, where 60 hp of progress reads.
 
-  **Home**: the amounts S6 (balance)'s; the fish's bars after Igor's word.
+  **Home**: the amounts S6 (balance)'s; the boss's bar after Igor's word.
 
 **The stage's content**
 
@@ -429,6 +433,20 @@ discussed.
 - **The Knife's arc halved.** Igor, 2026-10-15: "knife arc reduce by half" —
   120° to 60°, from D105 (the Knife swings)'s pick, given "for balance".
   **Home**: S6 (balance), his "for balance".
+
+**Crowds**
+
+- **Fish pile up.** Igor, 2026-10-19, after playing solid bodies (D120
+  (bodies are solid)): "many fish awkwardly pile up because of new physics -
+  honestly dont know how to deal. maybe leave for now. they should try to
+  surround". Every fish steers for the diver's own centre, so now that bodies
+  keep apart, the ones behind queue behind the front ones in a clump or a
+  chain. Part of the look was the shrinking — a hurt fish drawn smaller than
+  the body holding the others off — gone with D121 (only a hit blinks; a hurt
+  fish carries a bar). A lean, not a decision: they should surround. The usual
+  way is for each chaser to steer for its own spot on a ring round the diver,
+  spread by angle, rather than for the diver itself, so a crowd closes as a
+  circle instead of a queue. **Home**: open — "maybe leave for now".
 
 **Graphics**
 

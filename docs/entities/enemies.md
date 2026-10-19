@@ -94,7 +94,7 @@ enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks.
 | Field | Unit | Meaning |
 |---|---|---|
 | `name` | — | The key: batches and scenarios name the type by it. |
-| `hp` | damage | What it takes to kill, against the weapon's `damage` per hit. A wounded enemy is drawn smaller. |
+| `hp` | damage | What it takes to kill, against the weapon's `damage` per hit. A wounded enemy carries a bar over its body (D121 (only a hit blinks; a hurt fish carries a bar)). |
 | `speed` | px/s | How fast it swims at the player. A batch arrival spreads it by `ENEMY_JITTER 0.3` — ±15%; a scenario places it at exactly this. |
 | `r` | px | Body radius, and the hitbox: the circle drawn is what collides. |
 | `ramp` | s | Eases its chase as the diver's swim is eased (D107 (the diver swims and faces; fish with a ramp)): seconds to full speed, near enough, and to turn — so it overshoots a sidestep. Absent, it turns on the spot. Only the plain chase reads it; a behaviour that moves the fish its own way keeps its own movement. |
