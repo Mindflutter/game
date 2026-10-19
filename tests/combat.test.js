@@ -350,8 +350,10 @@ describe('the clear and the death, on the tick they land', () => {
     g.batchIndex = g.plan.findIndex(e => e.end) + 1;
     g.player.hp = 1;
     g.player.hurt = 0;
-    g.enemies.push(mob(g.player.x, g.player.y));
-    shot(g, { vx: 0, maxTravel: 100 });        // already on top of it
+    // Bodies are solid (D120), so it can only press against the diver.
+    const x = g.player.x + g.player.r + 7;
+    g.enemies.push(mob(x, g.player.y));
+    shot(g, { x, vx: 0, maxTravel: 100 });     // already on top of it
     g.update(1 / 60);
     expect([g.kills, g.enemies.length]).toEqual([1, 0]);
     expect(g.screen).toBe('dead');

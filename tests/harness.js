@@ -84,6 +84,15 @@ export function until(g, seconds, done) {
   return false;
 }
 
+// A fish of `name` to the diver's right with `gap` px of water between their
+// bodies, held where it is but for pushes.
+export function fishAt(g, name, gap) {
+  g.placeEnemy(name, g.player.x + g.player.r + g.enemyType(name).r + gap, g.player.y);
+  const e = g.enemies.at(-1);
+  e.speed = 0;
+  return e;
+}
+
 // An eel on top: the fish that hurts on touch (D108).
 export function die(g) {
   g.player.hp = 1;

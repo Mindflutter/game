@@ -76,6 +76,15 @@ function viewClamp(o) {
           Math.max(cameraY + o.r, Math.min(cameraY + ARENA_H - o.r, o.y))];
 }
 
+// For a fish that attacks only wholly in view: the way to the diver, as near
+// as its body fits in view. Bodies are solid (D120), so one pressed half out of
+// view against a diver at an edge would never attack again.
+function towardInView(e) {
+  const [tx, ty] = viewClamp({ x: player.x, y: player.y, r: e.r });
+  const dx = tx - e.x, dy = ty - e.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+  return [dx / d, dy / d];
+}
+
 // Water (D107): RAMP_LEFT of a change is still to go after `ramp` seconds. No
 // ramp, no easing: it turns at once.
 function ease(b, wantX, wantY, ramp, dt) {
@@ -95,8 +104,9 @@ function lungeStep(e, ux, uy, d, dt) {
   e.phaseTime += dt;
   let vx = 0, vy = 0;
   if (e.phase === 'chase') {
-    vx = ux * e.speed;
-    vy = uy * e.speed;
+    const [wx, wy] = towardInView(e);
+    vx = wx * e.speed;
+    vy = wy * e.speed;
     const [cx, cy] = viewClamp(e);          // nothing to clamp: wholly inside
     if (e.phaseTime >= A.chase && d < A.reach && cx === e.x && cy === e.y) {
       e.phase = 'windup';
@@ -117,7 +127,6 @@ function lungeStep(e, ux, uy, d, dt) {
   } else if (e.phase === 'charge') {
     vx = e.aimX * A.speed;
     vy = e.aimY * A.speed;
-    if (d < e.r + player.r) hurtPlayer(A.damage);     // the charge is its attack (D108)
   } else if (e.phaseTime >= A.rest) {        // resting: the opening
     e.phase = 'chase';
     e.phaseTime = 0;
@@ -177,8 +186,9 @@ function fuseStep(e, ux, uy, d, dt) {
       e.phase = 'fuse';
       e.phaseTime = 0;
     } else {
-      e.x += ux * e.speed * dt;
-      e.y += uy * e.speed * dt;
+      const [wx, wy] = towardInView(e);
+      e.x += wx * e.speed * dt;
+      e.y += wy * e.speed * dt;
     }
   }
   e.x += e.pushX * dt;
@@ -246,6 +256,57 @@ function hurtPlayer(damage) {
     sound('death');
   }
   return true;
+}
+
+// ---------- bodies ----------
+// Solid (D120): what overlaps is pushed apart, the heavier by area moving less.
+// A lunger out of its chase is not pushed at all: its lane is its tell (D64).
+// The dash passes through -- that is what it is for.
+// ponytail: every pair, O(n^2); ideas.md -> Spatial grid for collision.
+const pinned = e => e.lunge && e.phase !== 'chase';
+const weight = e => pinned(e) ? 1e12 : e.r * e.r;
+
+// Parting at a capped rate, a deep overlap -- a diver pinned under a charge --
+// eases apart instead of jumping.
+function separate(dt) {
+  const most = BODY_PUSH * dt;
+  const live = enemies.filter(e => !e.gone);
+  for (let i = 0; i < live.length; i++) {
+    for (let j = i + 1; j < live.length; j++) {
+      const a = live[i], b = live[j], dx = b.x - a.x, dy = b.y - a.y, min = a.r + b.r, dd = dx * dx + dy * dy;
+      if (dd >= min * min) continue;
+      const d = Math.sqrt(dd), nx = d ? dx / d : 1, ny = d ? dy / d : 0;
+      const wa = weight(a), wb = weight(b), k = (d ? Math.min(min - d, most) : most) / (wa + wb);
+      a.x -= nx * k * wb;
+      a.y -= ny * k * wb;
+      b.x += nx * k * wa;
+      b.y += ny * k * wa;
+    }
+  }
+  if (player.dashTime > 0) return;
+  // Where the diver meets a fish, a touch lands and so does a charge (D108).
+  // An edge holds the diver, so a fish pinning it there takes the whole push.
+  for (const e of live) {
+    const dx = player.x - e.x, dy = player.y - e.y, min = e.r + player.r, dd = dx * dx + dy * dy;
+    if (dd >= min * min) continue;
+    const d = Math.sqrt(dd), nx = d ? dx / d : 1, ny = d ? dy / d : 0;
+    const overlap = d ? Math.min(min - d, most) : most, we = weight(e);
+    if (e.touch) hurtPlayer(e.touch);
+    else if (e.phase === 'charge') hurtPlayer(e.lunge.damage);
+    const share = overlap * we / (we + player.r * player.r);
+    const [x, y] = viewClamp({ x: player.x + nx * share, y: player.y + ny * share, r: player.r });
+    const moved = (x - player.x) * nx + (y - player.y) * ny;
+    [player.x, player.y] = [x, y];
+    const left = pinned(e) ? 0 : overlap - moved;
+    e.x -= nx * left;
+    e.y -= ny * left;
+    // No swim banks up against a body, as against an edge (D107).
+    const into = player.vx * nx + player.vy * ny;
+    if (into < 0) {
+      player.vx -= into * nx;
+      player.vy -= into * ny;
+    }
+  }
 }
 
 // A fast hitbox tested only where it landed skips whatever it crossed, so the
@@ -1023,7 +1084,7 @@ function step(dt) {
     sound('shoot');
   }
 
-  // --- move enemies toward the diver, and hurt the diver on contact ---
+  // --- move enemies toward the diver, and let them attack ---
   const pd = Math.pow(PUSH_DRAG, dt);
   for (const e of enemies) {
     if (e.gone) continue;                  // cut down by a swing this tick: no step, no bite
@@ -1069,10 +1130,8 @@ function step(dt) {
         }
       }
     }
-
-    // Without `touch`, a fish hurts only by its attack (D108).
-    if (e.touch && d < e.r + player.r) hurtPlayer(e.touch);
   }
+  separate(dt);
 
   // --- move bullets; they die at the edge of your range ---
   for (const b of bullets) {

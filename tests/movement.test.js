@@ -3,7 +3,7 @@
 // in docs/specs/2026-10-14-movement-and-bites-design.md.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { loadGame } from './harness.js';
+import { loadGame, ticks, until, fishAt } from './harness.js';
 
 // A diver alone in the middle of the view, nothing arriving.
 function still() {
@@ -129,5 +129,120 @@ describe('the save (D107)', () => {
     expect(g.loadSave(text)).toBe('');
     expect([g.player.vx, g.player.vy, g.player.facing]).toEqual([0, 0, Math.PI / 2]);
     expect(g.enemies.every(e => e.vx === 0 && e.vy === 0)).toBe(true);
+  });
+});
+
+describe('bodies (D120)', () => {
+  const ahead = (name, gap) => {
+    const g = still();
+    g.immortal = true;
+    return [g, fishAt(g, name, gap)];
+  };
+  const overlap = (a, b) => a.r + b.r - Math.hypot(a.x - b.x, a.y - b.y);
+
+  it('pushes the lighter body further: the diver shoves a darter more than a bulwark', () => {
+    const moved = name => {
+      const [g, e] = ahead(name, 5);
+      const x = e.x;
+      hold(g, ['KeyD'], 0.6);
+      return e.x - x;
+    };
+    expect(moved('darter')).toBeGreaterThan(moved('bulwark'));
+    expect(moved('bulwark')).toBeGreaterThan(0);
+  });
+
+  it('banks no speed against a body, as against an edge', () => {
+    const [g] = ahead('bulwark', 5);
+    hold(g, ['KeyD'], 1);
+    expect(Math.abs(g.player.vx)).toBeLessThan(1);
+  });
+
+  it('lets the dash through', () => {
+    const [g, e] = ahead('bulwark', 5);
+    g.player.facing = 0;
+    g.justPressed.add('Space');
+    hold(g, ['KeyD'], 0.5);
+    expect(g.player.x).toBeGreaterThan(e.x);
+  });
+
+  it('holds the diver in view against an edge, the fish pressing it taking the push', () => {
+    const g = still();
+    g.immortal = true;
+    g.player.x = g.player.r;
+    g.placeEnemy('bulwark', g.player.x + g.player.r + g.enemyType('bulwark').r - 10, g.player.y);
+    const e = g.enemies[0];
+    hold(g, [], 2);
+    expect(g.player.x).toBeGreaterThanOrEqual(g.player.r);
+    expect(overlap(e, g.player)).toBeLessThan(e.speed * g.FIXED_DT + 1e-9);
+  });
+
+  it('never pushes a lunger off its line once it winds up (D64)', () => {
+    const g = still();
+    g.immortal = true;
+    g.placeEnemy('mini-boss', g.player.x + 40, g.player.y);
+    const e = g.enemies[0];
+    Object.assign(e, { phase: 'windup', attack: 'lunge', aimX: -1, aimY: 0, phaseTime: 0 });
+    const at = [e.x, e.y];
+    hold(g, ['KeyD'], e.lunge.windup / 2);
+    expect([e.x, e.y]).toEqual(at);
+  });
+
+  it('never lets a fish push a lunger off its line once it winds up (D64)', () => {
+    const g = still();
+    g.placeEnemy('mini-boss', g.player.x + 200, g.player.y);
+    const e = g.enemies[0];
+    Object.assign(e, { phase: 'windup', attack: 'lunge', aimX: -1, aimY: 0, phaseTime: 0 });
+    g.placeEnemy('bulwark', e.x, e.y + 30);
+    const at = [e.x, e.y];
+    hold(g, [], e.lunge.windup / 2);
+    // Its weight is huge, not infinite: a nudge far below a pixel is allowed.
+    expect(Math.hypot(e.x - at[0], e.y - at[1])).toBeLessThan(1e-6);
+    expect(Math.hypot(g.enemies[1].x - e.x, g.enemies[1].y - e.y)).toBeGreaterThan(30);
+  });
+
+  it('keeps fish apart in view however a batch crowds the diver', () => {
+    // In view: two fish can arrive on one spot past the edge, and part there at
+    // the capped rate.
+    for (const seed of [1, 7, 42]) {
+      const g = loadGame();
+      g.reset(seed);
+      g.immortal = true;
+      g.queuePaused = true;
+      g.spawnBatch({ enemies: [['drifter', 20], ['bulwark', 4], ['darter', 10]] });
+      const inView = o => { const [x, y] = g.viewClamp(o); return x === o.x && y === o.y; };
+      let worst = 0;
+      for (let i = 0, n = ticks(g, 12); i < n; i++) {
+        g.update(g.FIXED_DT);
+        const bodies = [...g.enemies, g.player].filter(inView);
+        for (let a = 0; a < bodies.length; a++) {
+          for (let b = a + 1; b < bodies.length; b++) {
+            worst = Math.max(worst, overlap(bodies[a], bodies[b]) / Math.min(bodies[a].r, bodies[b].r));
+          }
+        }
+      }
+      expect(worst).toBeLessThan(1);
+    }
+  });
+
+  // At the top edge, a fish half out of view pressing the diver, its chase
+  // done: it must still come to attack.
+  it('leaves the diver no safe corner: a boss pinning it there still winds up', () => {
+    const g = still();
+    g.immortal = true;
+    Object.assign(g.player, { x: g.ARENA_W - g.player.r, y: g.cameraY + g.player.r });
+    g.placeEnemy('boss', g.player.x - 90, g.player.y + 55);
+    const e = g.enemies[0];
+    e.phaseTime = e.lunge.chase;
+    expect(until(g, 5, () => e.phase === 'windup')).toBe(true);
+  });
+
+  it('leaves the diver no safe edge: a puffer pressing it there still lights', () => {
+    const g = still();
+    g.immortal = true;
+    g.player.y = g.cameraY + g.player.r;
+    g.placeEnemy('puffer', g.player.x + g.player.r + g.enemyType('puffer').r + 2, g.player.y);
+    const e = g.enemies[0];
+    e.phaseTime = e.fuse.chase;
+    expect(until(g, 3, () => e.phase === 'fuse')).toBe(true);
   });
 });

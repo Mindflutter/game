@@ -4045,3 +4045,62 @@ held within the grades; a setup's fish arriving at its grade in every wave and
 named on the gate line; a save taken with graded fish still to come playing on
 identically. `tests/docs.test.js` — `entities/enemies.md`'s grades table
 against `GRADES`. Each verified by breaking it.
+
+## D120 — Bodies are solid · 2026-10-19
+The pass before S6 (balance). Igor, 2026-10-15: "balance issue: i can freely
+swim thru red & purple enemies without a bite. not necessarily always bad, but
+need to be addressed". Since D108 (fish bite) touching a fish is harmless, and
+nothing stopped two bodies overlapping, so a diver at full swim was through a
+drifter or a bulwark and out before its jaws shut. Where it belonged — Igor,
+2026-10-19: "your choice". **Claude's call, delegated, and open to Igor to
+reopen**: this pass, since whether bodies block is a rule of the fight, which
+changes what S6 (balance) tunes — bite reach and wind-up, crowd sizes, what the
+dash is worth, `footwork`.
+
+**Decided, by Claude.**
+- **Every body is solid**, the diver's and every fish's: what overlaps is
+  pushed apart after the fish move, the heavier by area moving less — the
+  diver shoves a darter aside, a bulwark barely gives, and the boss moves the
+  diver. Fish keep apart from each other too, so a crowd stops stacking into
+  one blob and becomes a wall.
+- **The dash passes through.** It is what the help has always said it does —
+  "through the swarm unharmed, shoving it aside" — and now it is the way
+  through a crowd. `footwork` (D109 (micro-tasks are ladders; steps cost more
+  as they rise)) becomes the feat Igor asked of it.
+- **Contact attacks land where bodies meet**: the eel's touch and the lunge's
+  charge, judged in the same pass, since bodies pushed apart only ever touch.
+- **A lunger out of its chase is not pushed**: its lane is its tell (D64 (the
+  boss lunges)). A charge that pins the diver against an edge passes over it.
+- **Bodies part at most at `BODY_PUSH`, 600 px/s** — Claude's pick — so a deep
+  overlap, a diver let go from under a charge, eases apart instead of jumping.
+- **Against an edge the diver holds**, and the fish pressing it takes the whole
+  push; no swim banks up against a body, as none does against an edge (D107
+  (the diver swims and faces; fish with a ramp)).
+- **A fish that attacks only wholly in view chases the nearest point to the
+  diver where its body fits in view** — the lunger and the puffer. Found by
+  the boss's property check, on a rare draw: kept off
+  at its radius plus the diver's, a boss pinning the diver in a corner sat
+  half out of view and never wound up again — a safe spot — and a puffer
+  pressing a diver at an edge never lit. Away from the edges, that point is
+  the diver.
+
+**Rejected**: contact that slows the swim — fish still stack, and the
+slowdown has no tell; a bite at once on any overlap — contact damage again,
+which D108 (fish bite) retired.
+
+**Cost**, measured: every pair, every tick, within the budget (`roadmap.md` →
+Health); `ideas.md` → Spatial grid for collision is
+the way up if it ever is not.
+
+**Guarded by**: `tests/enemies.test.js` → the bite — a diver swimming at full
+speed into a drifter, and into a bulwark, never through it and bitten (seen
+failing first). `tests/movement.test.js` → bodies — the diver shoving a darter
+further than a bulwark; no speed banked against a body; the dash through; the
+diver held in view at an edge, the fish taking the push; a lunger not pushed
+once it winds up, by the diver or by a fish; no body's centre ever inside
+another however a batch crowds the diver; a boss pinning the diver in a corner
+still winding up, a puffer pressing it at an edge still lighting.
+`tests/combat.test.js` and `tests/boss.test.js` — the touch and the charge
+landing on contact. Each verified by breaking it. Two checks that
+stacked fish on one spot — a fish on the diver's very centre, drifters 6px
+apart under the Knife — were given setups bodies allow, their rules unchanged.

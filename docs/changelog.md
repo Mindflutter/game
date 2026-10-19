@@ -6,6 +6,20 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-19
 
+**Bodies are solid** (D120 (bodies are solid))
+Igor: "i can freely swim thru red & purple enemies without a bite", and on
+where it goes, "your choice". Seen failing first: a diver at full swim came out
+the far side of a drifter and of a bulwark. Now every pair of bodies that
+overlaps is pushed apart, by area, so the diver shoves a darter and barely
+moves a bulwark, and fish no longer stack; the dash passes through. The eel's
+touch and the lunge's charge land where bodies meet; a lunger out of its chase
+holds its lane; bodies part at most at `BODY_PUSH`; a lunger and a puffer
+chase the nearest point where their body fits in view — the boss's property
+check, on a rare draw, found a boss pinning the diver in a corner, half out
+of view, never winding up again; its cost is in `roadmap.md` → Health. Two checks that stacked fish on one spot got setups bodies allow, their
+rules unchanged. Every new check was seen failing against the rule it guards
+broken.
+
 **Grades** (D119 (grades))
 Igor: "enemies should have levels of their own. same behavior but different
 attrs", and "grade is fine for wording at least for now". A grade steps a

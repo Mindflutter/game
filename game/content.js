@@ -36,6 +36,7 @@ const DASH_ARC       = 0.2;   // cos of the half-angle: 0.2 is a 156-degree fron
 const DASH_END       = 0.18;  // seconds of the ring that closes the dash
 const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
 const PUSH_DRAG      = 0.02;  // ...with this fraction of it left after a second
+const BODY_PUSH      = 600;   // px/s at most that overlapping bodies part (D120): Claude's pick
 // Water (D107): the share of a change of speed still to go after a body's
 // `ramp` seconds -- so `ramp` is its time to full speed, near enough.
 const RAMP_LEFT      = 0.05;

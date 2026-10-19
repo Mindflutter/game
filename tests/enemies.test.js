@@ -1,7 +1,7 @@
 // The ordinary enemies' behaviours beyond the chase (D95), each checked on its
 // state transitions. The lunge's are in boss.test.js.
 import { describe, it, expect } from 'vitest';
-import { loadGame, ticks, play } from './harness.js';
+import { loadGame, ticks, play, fishAt } from './harness.js';
 
 // One fish of `name`, `dist` px straight right of a diver standing in the
 // middle of the view, nothing else arriving and nothing fired.
@@ -263,10 +263,7 @@ describe('the bite (D108)', () => {
     const g = loadGame();
     g.reset(1);
     g.queuePaused = true;
-    g.placeEnemy(name, g.player.x + g.player.r + g.enemyType(name).r + gap, g.player.y);
-    const e = g.enemies[0];
-    e.speed = 0;
-    return [g, e];
+    return [g, fishAt(g, name, gap)];
   };
 
   it('chases until its body is within reach, then stops and opens its jaws', () => {
@@ -299,6 +296,23 @@ describe('the bite (D108)', () => {
     play(far, B.windup + 0.02);
     expect([far.player.hp, f.phase]).toEqual([far.player.maxHp, 'rest']);   // it snapped on water
   });
+
+  // Igor, 2026-10-15: "i can freely swim thru red & purple enemies without a
+  // bite" -- the drifter and the bulwark (D120).
+  for (const name of ['drifter', 'bulwark']) {
+    it(`stops a diver swimming at full speed into a ${name}, and bites it`, () => {
+      const [g, e] = at(150, name);
+      g.player.vx = g.player.speed;                // already at full swim
+      g.keys.add('KeyD');
+      let past = false;
+      for (let i = 0, n = ticks(g, 1.5); i < n; i++) {
+        g.update(g.FIXED_DT);
+        past ||= g.player.x > e.x;
+      }
+      expect(past).toBe(false);
+      expect(g.player.hp).toBeLessThan(g.player.maxHp);
+    });
+  }
 
   it('rests before it can bite again', () => {
     const B = bite('drifter');

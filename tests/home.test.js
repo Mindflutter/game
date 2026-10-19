@@ -249,8 +249,9 @@ describe('the weapons (D97)', () => {
 
   // The Knife's swing (D105): fish at `dist` px from the diver at `deg`
   // degrees off the aim, then one swing aimed straight right.
-  const swingAt = (g, fish) => {
+  const swingAt = (g, fish, kit = () => {}) => {
     expect(g.applyScenario('knife', 1)).toBe(true);
+    kit(g.player);
     g.queuePaused = true;
     g.immortal = true;
     for (const [name, dist, deg] of fish) {
@@ -290,13 +291,15 @@ describe('the weapons (D97)', () => {
   });
 
   it('cuts pierce + 1 fish at most, nearest first', () => {
+    // Bodies are solid (D120), so five darters that fit side by side within
+    // its reach, three near and two behind them, cut with pierce 2.
     const g = loadGame();
-    const n = knife(g).pierce + 1;
-    const fish = Array.from({ length: n + 2 }, (_, i) => ['drifter', 30 + i * 6, i % 2 ? 20 : -20]);
-    swingAt(g, fish);
-    expect(g.kills).toBe(n);
+    const fish = [['darter', 36, -40], ['darter', 36, 0], ['darter', 36, 40],
+                  ['darter', 64, -20], ['darter', 64, 20]];
+    swingAt(g, fish, p => { p.pierce = 2; });
+    expect(g.kills).toBe(3);
     const left = g.enemies.map(e => Math.round(Math.hypot(e.x - g.player.x, e.y - g.player.y)));
-    expect(left.sort()).toEqual(fish.slice(n).map(f => f[1]));
+    expect(left).toEqual([64, 64]);
   });
 
   it('swings again only after its cooldown', () => {

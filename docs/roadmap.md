@@ -31,9 +31,9 @@ boss's a crowd that keeps coming until it dies (D116 (bosses bring escorts))
 the mini-boss only lunges (D117 (the boss's fan)) — and hits of varying
 damage, every amount 1 until S6 (balance) (D118 (hits vary in damage)) — and
 grades, the same fish stronger, chosen by S6 (balance)'s threat system and
-seen today only in the debug mode (D119 (grades)). Next: swimming
-through biters (`ideas.md` → Swimming through biters costs nothing), Igor's to
-place.
+seen today only in the debug mode (D119 (grades)) — and solid bodies, the dash
+the way through a crowd (D120 (bodies are solid)). Next: Igor playing it,
+then his word on what else joins this pass, or S6 (balance) opens.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and
@@ -79,6 +79,11 @@ are a regression signal for their build only. S6 (balance) measures afresh.
   batch; Igor clears the same batches easily. These figures are a **regression
   signal** — comparable to themselves across builds and seeds, and silent on
   whether a human is challenged.
+- **Solid bodies** (D120 (bodies are solid)), every pair every tick: 500
+  drifters cost 0.44ms a tick in Node, 2026-10-19 — two ticks a frame, about
+  0.9ms of 16.7ms. With them, a batch of 34 crowding a standing diver left no
+  body's centre inside another in view; the deepest overlap was 0.35 of the smaller
+  radius.
 - **Simulation rate**: `FIXED_DT` 1/120 since D53, banked by the frame loop.
   Doubling the tick rate costs ~1.1ms of a 16.7ms frame at the 500-entity
   budget, from D43's 0.55ms measurement of `update()`.

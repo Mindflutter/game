@@ -5,9 +5,11 @@ mirror `ENEMY_TYPES` in `game/content.js`, and `npm test` fails when the two
 disagree. Which enemies a dive meets, and how many at once, is the batches'
 business: `game/content.js` → batches and layers.
 
-True of every type: it hurts only by its attack, each attack costing its own `damage`
-(D118 (hits vary in damage)), then the player's i-frames — a guard charge
-takes a hit whole; the dash shoves it, and hurts it once `dashDamage` is bought (D51
+True of every type: its body is solid — the diver cannot swim through it, nor
+another fish sit inside it, and the lighter of two is pushed further (D120
+(bodies are solid)); it hurts only by its attack, each attack costing its own
+`damage` (D118 (hits vary in damage)), then the player's i-frames — a guard
+charge takes a hit whole; the dash passes through it and shoves it, and hurts it once `dashDamage` is bought (D51
 (the dash is bought)); and it drops its `value` in gems when it dies, which are
 pulled to the player (D78 (gems are pulled to the player)).
 
@@ -134,13 +136,16 @@ electric body. Every other fish hurts only by its attack — a bite, a spit, a
 burst, or the lunge's charge (D108 (fish bite)).
 
 **Lunge** — chase, wind up, charge, rest, then chase again (`lungeStep()`).
-After `chase` seconds, within `reach` of the player and wholly inside the view,
+It chases the nearest point to the player where its body fits in view, so a
+player at an edge cannot keep it half out (D120 (bodies are solid)). After
+`chase` seconds, within `reach` of the player and wholly inside the view,
 it stops and winds up for `windup` seconds with its line locked at where the
 player was. That is the tell: it swells, glows harder and lays a lane as wide
 as its radius along the line. Then it charges along the line at `speed`, for
 `reach` px or to the edge of the view, and rests for `rest` seconds — the
 opening. The charge is its attack: contact costs its `damage` while it
-charges, and only then (D108 (fish bite)). From the wind-up on, the view holds it, so a charge never takes the
+charges, and only then (D108 (fish bite)). From the wind-up to the end of its
+rest no body pushes it, so its lane holds (D120 (bodies are solid)). From the wind-up on, the view holds it, so a charge never takes the
 fight off screen. In one sentence, per the pillar: when it swells, get out of
 its line.
 
@@ -167,7 +172,8 @@ invulnerability lets it through unspent. In one sentence: the blue ones spit,
 so keep moving.
 
 **Fuse** — chase, swell, burst, chase again (`fuseStep()`, D106 (the puffer
-bursts and comes on again)). Once it has chased for `chase` seconds — since it
+bursts and comes on again)). It chases as a lunger does, to the nearest point
+where its body fits in view. Once it has chased for `chase` seconds — since it
 arrived, or since its last burst — within `trigger` of the player and wholly
 inside the view, it stops and swells for `time` seconds — the tell: it puffs
 up and draws the ring its burst will reach — then bursts, costing its `damage`
