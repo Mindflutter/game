@@ -58,7 +58,6 @@ copy.
 | An entity's numbers, role and behaviour | its doc in `entities/` |
 | How a system works — the gate, the descent, the drops, the pick, the save | `design.md` |
 | Measured bot figures | `roadmap.md` → Health |
-| The check count | `design.md` → Verification |
 | A decision's reasons | its entry in `decisions.md` |
 | An open bug | `bugs.md` |
 
@@ -77,6 +76,8 @@ copy.
   newest has a changelog entry;
 - no living doc, nor the code, calls a challenge by its old name (D110
   (challenges));
+- no doc quotes how many checks there are (D123 (nothing rewritten every
+  session));
 - this map names every doc, and every doc it — or `CLAUDE.md` — names exists.
 
 What no check can see is whether prose is still true. That is the consistency

@@ -849,7 +849,7 @@ port does the same with whatever its language offers.
 reset with everything else.
 
 **Verified by breaking it** — a single `Math.random()` put back at the spawn-edge
-pick made the suite report `1 of 89 checks FAILED`. Restored: 89 pass. Also
+pick made the suite report `1 of N checks FAILED`. Restored: all pass. Also
 confirmed independently outside the suite that seed 777 replays identically and
 differs from 778.
 
@@ -905,7 +905,7 @@ state-only checking cannot see.
 `spawnPaused` gates the spawn timer and is `false` after every `reset()`, so
 normal play is untouched — S0's "zero gameplay change" holds.
 
-15 checks added (104 total, was 89). The load-bearing one is that a paused
+15 checks added. The load-bearing one is that a paused
 scenario never gains an enemy; without it a scenario is just a normal dive with
 a head start.
 
@@ -979,7 +979,7 @@ D18 had all said six since 2026-09-12.
 Which key means which action is *content* — the game decides dashing is Space,
 while reading a keyboard is platform's job — so this is D6 applied, and it makes
 the seam genuinely six. `content.js` loads first, so `input.js` and `render.js`
-still see them. Pure move, no behaviour change: 104 browser checks still pass.
+still see them. Pure move, no behaviour change: every browser check still passes.
 
 **Six invariants, each guarding a decision**: the seam loads (D18); no NaN or
 Infinity ever (D39); hp within `[0, maxHp]` and no dead enemy survives a sweep
@@ -1054,14 +1054,13 @@ failure mode, a file I did not think to grep.
 
 **Adding that row then broke the help screen's layout**, because `HELP_BLURB`
 started at a hardcoded `y` that assumed eight key rows. The list ran straight
-through the paragraph beneath it. Every one of the 107 checks passed while the
+through the paragraph beneath it. Every check passed while the
 screen was unreadable; a screenshot caught it. `drawHelp()` now derives the
 blurb's top from `HELP_KEYS.length`, so the data can grow without the layout
 lying. Second time today that a state-only pass hid a visual break -- the first
 was the stepped scenario rendering nothing (D42).
 
-107 browser checks pass (was 104: +5 new, −2 deleted). The six Node invariants
-are unaffected.
+Five browser checks new, two deleted. The Node invariants are unaffected.
 
 ## D46 — The consistency sweep is part of every change · 2026-09-27
 Igor: "check and update everything every time a change is made -- i dont want a
@@ -1078,7 +1077,7 @@ length** (adding one help row pushed the list through the blurb beneath it).
 **Surface 5 is now executable.** `HINT_Y` and `helpBottom` are exposed from
 `render.js`, and a check asserts the help screen ends above the hint. Verified
 by padding `HELP_KEYS` with eight rows: `helpBottom` 975 against a limit of 726,
-guard fires. 108 checks (was 107).
+guard fires.
 
 **Surfaces 4 and 6 stay human.** No check can read prose and decide it still
 describes the behaviour, and memory lives outside the repo. Those are caught by
@@ -1124,7 +1123,7 @@ the arming logic gets its own check that exercises the real path: a menu click
 fires nothing, then a release and a fresh press fires exactly one shot.
 
 **Test written before the fix**, and it failed for the right reason
-(`got 1 shots`). 111 checks (was 108).
+(`got 1 shots`).
 
 ## D48 — The batch queue and the gate · 2026-09-27
 S1 (Combat core), implementing D27. **The spawn director is deleted.** Enemies
@@ -1159,7 +1158,7 @@ so the same trap cannot recur silently.
 
 **Verified by breaking it**: dropping the `enemies.length === 0` condition —
 the gate's one job — fails four checks, reporting "45 enemies, batchIndex 9",
-which is the endless director returning. 119 checks (was 111).
+which is the endless director returning.
 
 **Measured**, bot, 5 seeds, clears truncated at the first level-up: mean 14.1s
 per batch, range 4.5–35.9s. `foundations.md` wants 10–45s, so this is roughly
@@ -1285,7 +1284,7 @@ and nothing else: ranking up in `killEnemy()` instead of the sweep (5 failures,
 including "a kill mid-batch must not rank you up"), dropping the
 `screen === 'playing'` guard (2), `rollMods` ignoring `max` (1, naming all four
 capped mods), `Mend` healing without the `Math.min` clamp (1, "hp 4/3"), and
-deleting the `Lull` line (1). 144 checks, was 119.
+deleting the `Lull` line (1).
 
 **Two mod descriptions ran off their cards**, found by screenshotting the
 screen rather than by any check — the renderer centres the text, so nothing in
@@ -1344,7 +1343,7 @@ now 100% at every Fins count and every `dt` tested; the only remaining misses
 are enemies genuinely beyond the dash's reach.
 
 **Verified by breaking it**: restoring the point test fails the new check and
-only it — "hp=5 after passing through it at speed 620". 145 checks, was 144.
+only it — "hp=5 after passing through it at speed 620".
 
 **Bullets have the same hole and it is not fixed here.** 430px/s is 21.5px on a
 20fps frame against a darter's 10px reach; measured, that is 9% of shots passing
@@ -1434,7 +1433,7 @@ before the cards appear.
 offer must not land on the frame of the kill" and "no cards exist yet during
 the beat"; restoring free dash damage fails six, including "an unbought dash
 must not wound what it throws" and "a dash that did no damage must not flash
-the enemy white". 151 checks, was 145.
+the enemy white".
 
 **The bot cannot see either change.** Its clear times are byte-identical before
 and after, because `kiteAndShoot` never presses Space — it has no dash policy
@@ -1617,7 +1616,7 @@ lands, an arrival guard becomes meaningful and this entry is what to reopen.
 
 One of its two checks stayed. "A batch arrives with no grace" was the control
 half of the pair, and it is still the rule — it is precisely what a re-added
-arrival guard would have to break on purpose. 165 checks, was 166.
+arrival guard would have to break on purpose.
 
 ## D56 — The dash is a fixed, committed lunge · 2026-09-28
 Two bugs from Igor, both in the dash, both fixed at the root.
@@ -1667,7 +1666,6 @@ backwards.
 
 **Verified by breaking both**: restoring live-input travel fails the three
 steering checks; putting dash speed back on `player.speed` fails the Fins one.
-171 checks, was 165.
 
 **Two defects were in my own checks, not the game**, and both are the same trap
 this suite keeps falling into. `dashDistance` tested `player.dashTime > 0` as
@@ -1707,7 +1705,7 @@ single day, none of them visible to anyone reading the files:
 **Verified by breaking it**: a citation of a decision that was never written,
 a stripped decision name, and the newest decision removed from the changelog
 each fail their own check and no others — four failures across three
-mutations. 13 Node tests, was 8. It then caught a real one immediately: this
+mutations. It then caught a real one immediately: this
 entry originally spelled out the fake citation used in that first mutation,
 and the check flagged its own decision file.
 
@@ -4210,3 +4208,31 @@ Checks that built the eel's touch as a number now build its record; a bite's
 rest, and a hurt fish's sparks, are checked with the knock out of their way;
 the crowd check judges bodies in view, where two fish arriving on one spot
 past the edge part at the capped rate.
+
+## D123 — Nothing kept that every session rewrites · 2026-10-20
+Igor, 2026-10-19, on a sweep that had fixed the browser suite's count in
+`design.md`: "i dont want these useless numbers anywhere ever in the project.
+who cares how many checks exist at this point in time? can you please wipe out
+useless info that gets rewritten anyway?" And 2026-10-20: "anything that
+requires rewrites on every session and is not set by a decision or a fix should
+be wiped out. the idea is you not doing pointless iterations."
+
+**Decided, by Igor.** A fact the docs would have to rewrite every session, and
+that no decision or fix sets, is not kept. D92 (no line counts in the docs) was
+the first case. Check counts go everywhere, the logs included.
+
+**Claude's reading**, open to Igor — what it wiped:
+- every count of checks and tests, today's or a total in an old changelog or
+  decision entry. What one change added or broke is the change, not the suite,
+  and stays — "15 checks added", "fails four of them" — as does the suite's
+  output format, written `1 of N checks FAILED`;
+- `design.md` → Tests' list of every Node check, and Verification's of every
+  browser check: each decision names its own guard;
+- `roadmap.md` → Next's recap of the pass, decision by decision — the
+  decisions and the changelog hold it;
+- the window-size check's dive time, re-measured with every change to the fish:
+  the check needs the three windows identical, not a figure.
+
+**Guarded by**: `tests/docs.test.js` — no doc, `CLAUDE.md`, the root `README.md`
+or the content skill quotes a number of checks or tests. Verified by breaking
+it. The rest is a judgement no check can make: `CLAUDE.md`'s sweep's.

@@ -129,10 +129,10 @@ of a challenge (D110).
 - **Game feel is Igor's call and is never asserted.**
 - Hard-refresh (Cmd+Shift+R) after edits. Several script files mean a partial
   cache serves a mix of old and new, which produces baffling bugs.
-- Every number the docs quote about the code is regenerable, and they quote no
-  line counts (D92). **The check count is whatever the suite reports**, not a
-  grep — `grep -c` counts lines containing an assertion,
-  which undercounts because some call sites sit inside loops.
+- **Nothing that every session would rewrite is kept, unless a decision or a
+  fix sets it** (D123) — no line counts (D92), no check counts, no list of every
+  check, no recap of the pass, no figure re-measured with each change. The
+  point is no pointless iterations.
 
 ## Working agreement
 
@@ -239,7 +239,7 @@ of a challenge (D110).
   6. **Layout coupled to data** — adding a row to any table can push a fixed
      `y` through the text below it. Positions must be derived from
      `.length`, never hardcoded. *Missed: the help list ran straight through
-     its own blurb while all 107 checks passed.*
+     its own blurb while every check passed.*
   7. **Memory** (`~/.claude/projects/.../memory/`) — it is auto-loaded before
      any file is read, so a stale line there misleads the next session first.
 
@@ -254,8 +254,8 @@ of a challenge (D110).
   **Then look at it.** State checks are blind to a blank screen and to
   overlapping text — both have happened. If a change touches anything drawn,
   screenshot it before claiming done.
-- **Every measured number lives in exactly one doc.** Check counts, bot
-  survival times. A number copied into a second
+- **Every measured number lives in exactly one doc.** Bot survival
+  times, for one. A number copied into a second
   file is a number that will disagree with itself — every stale figure found
   so far was a copy. Cite the owning doc instead: survival times are
   `roadmap.md` → Health, and nowhere else. The same holds for every fact —

@@ -16,29 +16,9 @@ and footwork, Barbs and three boosts, three layers (D93–D103), built to the
 Igor playing it, the debug mode (root `README.md` → Debug mode) and New game.
 Every design call in it is Claude's, delegated, and open. **Next**, before
 S6 (balance), the notes from playing S5 (content) that move the numbers it
-tunes — Igor, 2026-10-14: "if no questions for me, start working". Done: the
-status bar, the two wordings, the sizes (D104 (bodies doubled)) and the Knife's
-swing (D105 (the Knife swings)), the puffer that comes on again (D106 (the
-puffer bursts and comes on again)), the swim and the facing (D107 (the diver
-swims and faces; fish with a ramp)), fish that bite (D108 (fish bite)),
-challenges as ladders (D109 (micro-tasks are ladders; steps cost more as they
-rise), D110 (challenges)), the shorter dash (D111 (the dash a third
-shorter)) and weapons and equipment on screens of their own (D114 (weapons and
-equipment on screens of their own)), batches arriving in waves (D115
-(batches arrive in waves)) and escorts for the boss and the mini-boss — the
-boss's a crowd that keeps coming until it dies (D116 (bosses bring escorts))
-— and the two made different: the boss spits a fan in turn with its lunge,
-the mini-boss only lunges (D117 (the boss's fan)) — and hits of varying
-damage, every amount 1 until S6 (balance) (D118 (hits vary in damage)) — and
-grades, the same fish stronger, chosen by S6 (balance)'s threat system and
-seen today only in the debug mode (D119 (grades)) — and solid bodies, the dash
-the way through a crowd (D120 (bodies are solid)). From Igor playing that:
-only a hit blinks, a hurt fish carries a bar, immortal shows its hits (D121
-(only a hit blinks; a hurt fish carries a bar)), and the debug Grade reaches
-every fish; then real knockback, both ways (D122 (knockback)). Every item
-placed in this pass is built; open from playing it, the pile-up (`ideas.md` →
-Crowds), the diver's knock (`ideas.md` → Feel), and the dash's shove, earned
-(`ideas.md` → The dash). S6 (balance) opens on Igor's word.
+tunes — Igor, 2026-10-14: "if no questions for me, start working". Every one is
+built, as decisions from D104 (bodies doubled) on; what playing them left open
+is in `ideas.md`. S6 (balance) opens on Igor's word.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and
@@ -70,8 +50,7 @@ This section owns the measured bot figures. Nothing else quotes them.
 before D104 (bodies doubled) — the diver and the fish twice the radius since —
 are a regression signal for their build only. S6 (balance) measures afresh.
 
-- All `?test` checks passing, and `npm test` green (count in `design.md` →
-  Verification).
+- All `?test` checks passing, and `npm test` green.
 - **Difficulty, from Igor playing it, 2026-09-27: batches are too easy.**
   "nothing breaks the target, currently batches are very easy to complete."
   This is the number that counts, and the direction is that batches must get
@@ -112,19 +91,12 @@ are a regression signal for their build only. S6 (balance) measures afresh.
   clears batches far faster, so a human layer is likely well under the 4–8 min
   pillar — which is S6's problem.
 - **Difficulty is invariant to window size, with the camera** (D29, D58): seed
-  4471 reaches the bottom of the dive — three layers — in the same time at 1280×800,
-  1920×1080 and 3440×1440 alike (stationary, invulnerable, aiming at the first
-  fish), driven through real mouse events aimed on a 20px grid that all three
-  scales put on whole pixels — measured 2026-10-18, with the boss's fan
-  (D117 (the boss's fan)): 1032.24s at all three. The `?test` check requires the three to be identical; dropping the
-  input's `/ scale` leaves the two larger windows short of the bottom. With
-  escorts, before the fan, 1035.55s the same day; with waves, before escorts,
-  1010.34s on 2026-10-17; with bites, before waves,
-  844.46s on 2026-10-14. Before
-  bites the aim went to the nearest whole pixel and the check allowed 2%:
-  811.02 / 809.82 / 802.58s on 2026-10-13; on the build with mods from drops,
-  two layers, 562.24s at all three; on the S3 build, one layer, 296.34s; on the
-  S2 layer, dropping `/ scale` failed it at 217.03 / 228.71 / 227.51.
+  4471 reaches the bottom of the dive in the same time at 1280×800, 1920×1080
+  and 3440×1440 alike (stationary, invulnerable, aiming at the first fish),
+  driven through real mouse events aimed on a 20px grid that all three scales
+  put on whole pixels. The `?test` check requires the three to be identical;
+  dropping the input's `/ scale` leaves the two larger windows short of the
+  bottom.
 - **The boss fight** (S3 DoD, D63), at the starting kit — no gear, no mods —
   from `last-batch`, seeds 1, 7, 42, 4471, 90210, timed from the scenario's
   start, 300s cap; re-measured 2026-10-18 with the boss's fan (D117 (the

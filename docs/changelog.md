@@ -4,6 +4,17 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-20
+
+**Nothing kept that every session rewrites** (D123 (nothing rewritten every session))
+Igor: "anything that requires rewrites on every session and is not set by a
+decision or a fix should be wiped out. the idea is you not doing pointless
+iterations." Gone: every count of checks and tests — `design.md`'s, the
+roadmap's pointer to it, the map's row, `CLAUDE.md`'s rule, the totals in old
+changelog and decision entries — and with them `design.md`'s lists of every
+Node and browser check, `roadmap.md` → Next's recap of the pass, and the
+window-size dive's time. `tests/docs.test.js` fails on a new check count.
+
 ## 2026-10-19
 
 **Knockback** (D122 (knockback))
@@ -314,8 +325,7 @@ mark, that turns toward the keys — a fifth of a second for half a circle — a
 the dash goes along it: at any angle, and from a standstill too. Out of a dash
 the swim carries on along it. Drifters, darters and bulwarks ease their chase
 the same way, each its own weight, so they overshoot a sidestep. The save goes
-to version 5. Found on the way: `design.md` quoted 191 browser checks where the
-suite runs 194.
+to version 5.
 
 **The puffer bursts and comes on again** (D106 (the puffer bursts and comes on
 again))
@@ -741,8 +751,8 @@ reach and the "untouched" micro-task; a versioned save holding the dive in
 progress, written on pause, purchase, dive end and page hide, refused loudly
 and kept aside when unreadable, with `persist` as the seam's seventh name
 (D70, D77). `BATCHES`, `GEM_LIFE` and `pickupRange` are gone; `GEM_PULL` is
-600. Checks: `tests/meta.test.js` new, 59 Node tests and 178 `?test` checks
-pass, every new rule broken once to see its check fail — 24 breaks, 23 in
+600. Checks: `tests/meta.test.js` new, every new rule broken once to see its
+check fail — 24 breaks, 23 in
 Node and `home`'s layout in `?test`, all caught, one only after its test was
 tightened. Found and fixed on the way: killing a
 scenario's hand-placed enemy crashed (`?dev=one-drifter&play`), and a gem
@@ -836,7 +846,7 @@ outside this diff.
 fix now". Esc pauses over the cards as it does in play, and Resume — or Esc
 again — brings the same cards back: the pause menu remembers which screen
 opened it (`resumeTo`). A test failed first (Esc left the cards up) and fails
-again if the menu's Resume goes back to play; 38 Node tests.
+again if the menu's Resume goes back to play.
 
 **Recorded: art will be bigger** — Igor: "enemies and the player will look
 significantly bigger with all assets. record for info." In `ideas.md` →
@@ -856,7 +866,7 @@ can start from a scenario (D63). Every number of the lunge is Claude's pick.
 
 Checks: `tests/boss.test.js` (five tests — the tell, as a property over seeds
 and both lungers, is the S3 exit's telegraph check) and a bot test, each
-verified by breaking what it guards; 37 Node tests, `?test` 174. The
+verified by breaking what it guards. The
 window-size check now plays the whole layer, boss included — identical at all
 three sizes. Three comments reworded: two Igor approved, and the layer-end one,
 which this build made false ("a stop, not a win … S3 owns endings").
@@ -876,7 +886,7 @@ Igor: "give me also dev urls for big damage and invincibility. also
 instructions how to combine these args". Both ride on any URL, with a scenario
 or without, and survive R: `main.js` reads them, and they live in game state
 that `reset()` leaves alone. A bare `&damage` is 100 — Claude's pick, one shot
-for anything. Two Node tests, each verified by breaking its rule: 31 tests.
+for anything. Two Node tests, each verified by breaking its rule.
 `design.md` and `README.md` explain how to combine arguments. The same sweep
 found both files stale on scenarios, fixed: `design.md` still named the
 `elapsed` field, `spawnPaused` and the ramp — all gone or renamed when the
@@ -954,7 +964,7 @@ depth formula repeated in three files; `edgeSpawnPoint` is back in view
 coordinates. Tests share the bot's own input step, measure in seconds rather
 than a hardcoded 120 ticks, and assert once instead of on every tick. The hook
 no longer stops at system messages it mistook for the prompt. Two waits in
-`?test` now pass through `runAlive`'s stopped-simulation check: 174 checks.
+`?test` now pass through `runAlive`'s stopped-simulation check.
 
 **"Dive", not "run"** (D61)
 Igor: "run -> dive". The help screen says "Restart a dive"; `foundations.md`
@@ -981,7 +991,7 @@ on the pick and stops on the end screens; the water drifts on behind all three,
 at the fight-time speed. Pause alone freezes it, and `update()` moves the
 water once, outside `step()`. D58 (the descent) says so; each screen has a test that fails
 if the water stops there, and the end-screen test also fails if the water
-rushes on at travel speed. Node 30 tests.
+rushes on at travel speed.
 
 **No mods at the layer end** (D59)
 The last batch of a layer pays no rank and offers no mods — Igor: "let it stay
@@ -992,7 +1002,7 @@ is a rank and a pick of three mods, until the layer ends."
 Also closed, from the S2 review: a test that pausing mid-descent freezes the
 camera and the water from the first tick (fails with Escape handled after the
 gate block), and the D29 window-size check now plays the whole layer rather
-than four gates, in 100ms (figures in `roadmap.md` → Health). Node 28 tests.
+than four gates, in 100ms (figures in `roadmap.md` → Health).
 
 **S2 — The descent** (D58)
 One layer now scrolls. A current carries the camera and the player between
@@ -1005,10 +1015,10 @@ tint are the only canvas work, and both are placeholder graphics.
 Reworked the same day on Igor's play: the first build braked to a dead stop,
 took ~12s between batches, ran "way too fast", and let swimming down hurry the
 current; its dim screens also left bright bands down the letterbox margins.
-Node 26 tests (was 13: +10 in `tests/descent.test.js`, +3 in
+New Node tests in `tests/descent.test.js`, and three in
 `tests/docs.test.js` that regenerate the line counts, platform share and
 balance constants `design.md` quotes, and fail on a doc naming a constant the
-code no longer has); `?test` 173 checks,
+code no longer has; new `?test` checks,
 including the margin dim and the D29 check, which plays seed 4471 to gate 4 at
 1280×800, 1920×1080 and 3440×1440 through real mouse events and needs them to
 agree (figures in `roadmap.md` → Health). Verified by breaking each rule: no
@@ -1041,7 +1051,7 @@ written, and decisions cited as bare numbers. `tests/docs.test.js` checks that
 every decision has a name, that numbering is gapless, that no doc cites a
 decision that does not exist, that the newest decision reached the changelog,
 and that the docs `CLAUDE.md` names still exist. Verified by breaking each.
-13 Node tests, was 8. It cannot check whether prose is *true* — that stays the
+It cannot check whether prose is *true* — that stays the
 consistency sweep's job.
 
 **`Lull` stays out, and five misreadings corrected**
@@ -1078,7 +1088,7 @@ nothing), and *releasing* everything stopped you dead after 7px while
 `dashTime` ran on — a free 0.31s of invulnerability for standing still, 31%
 uptime with three `Reflex`. Travel now follows the frozen direction.
 
-Verified by breaking both. 171 checks, was 165. Two of the new checks were
+Verified by breaking both. Two of the new checks were
 themselves wrong first: one looped on `dashTime > 0` before the dash had
 started so it never ran, and one inherited the previous case's held key and
 dashed diagonally, which nearly read as a game bug.
@@ -1095,7 +1105,7 @@ its readout row. The pool is six and comfort is down to one, since two of D34's
 three comfort candidates are now dead (the currency magnet by D35, this by
 measurement). Recorded with the condition that revives it: arrivals that begin
 near the player, which is Igor's "fish from behind the screen" idea, now in
-`ideas.md`. 165 checks, was 166.
+`ideas.md`.
 
 **S1 — Combat core: the batches, re-derived from scratch**
 D54, closing the last S1 work item. Igor played it: batches were "very easy".
@@ -1131,8 +1141,6 @@ This is why `Impact` offered twice looked like a bug — five of seven mods stac
 and the card was identical on a repeat. Partially overrides D34 on presentation,
 deliberately and only for development.
 
-166 checks, was 151. `npm test` 8, was 7.
-
 **S1 — Combat core: the dash is bought, and the offer waits for the death**
 D51, both from Igor playing D50. `player.dashDamage` starts at 0 and the new
 `Impact` mod (body, max 3) buys it — the dash still moves, grants i-frames and
@@ -1146,7 +1154,7 @@ The mod cards no longer land on the frame of the kill: the kill burst lives
 the offer — and the batch queue — until the death has played. The rank is still
 banked on the kill.
 
-151 checks, was 145. Verified by breaking both: opening on the kill frame fails
+Verified by breaking both: opening on the kill frame fails
 2, restoring free dash damage fails 6. The bot's numbers are unchanged, because
 it has no dash policy and cannot see either change (D50).
 
@@ -1158,7 +1166,7 @@ grew all dive (147px at 0 Fins, 402px at 10) and it flew straight through
 enemies: 54% of positions connected at 8 Fins on a 30fps frame, 27% at 20fps,
 worst of all against an enemy right next to you. Now swept along the segment
 travelled, with facing judged from where the frame started. 100% at every speed
-and frame time tested. 145 checks, was 144, verified by restoring the point test.
+and frame time tested. Verified by restoring the point test.
 
 Bullets have the same hole — measured at 9% of shots passing through a darter
 at the 20fps `dt` cap, clean at 30fps and above — and are deliberately left for
@@ -1193,7 +1201,7 @@ been husks with a known expiry date. Recorded as a correction to D34.
 **Verified by breaking it**: five mutations, each failing exactly its own
 checks — ranking up per kill instead of per batch (5 failures), dropping the
 death-outranks-rank-up guard (2), ignoring a mod's `max` (1), healing without
-the clamp (1), deleting `Lull` (1). 144 checks, was 119.
+the clamp (1), deleting `Lull` (1).
 
 Two mod descriptions overflowed their cards — caught by looking at the screen,
 not by a check, because the renderer centres the text. Shortened and guarded:
@@ -1220,8 +1228,8 @@ and its final `console.log('checks done')` ran *before* the async sound checks
 had even started, so it never described them. `report()` now runs once, last,
 after the awaits.
 
-**Verified by breaking it**: one check inverted → `1 of 86 checks FAILED` in red
-with the failure listed; reverted → `86 checks passed`. Also confirmed `?test`
+**Verified by breaking it**: one check inverted → `1 of N checks FAILED` in red
+with the failure listed; reverted → `N checks passed`. Also confirmed `?test`
 still matches exactly — `?test&cachebust=1` correctly ran nothing.
 
 **S0 — Foundations & spike: seeded RNG**
@@ -1229,8 +1237,8 @@ D41. mulberry32 in `game/state.js`; all 14 `Math.random()` sites in `game/` now
 call `rng()`. `reset(seed)` reseeds, `main.js` passes `?seed=<n>` in so `game/`
 stays browser-free, and `currentSeed` records what was used. Fixed a latent hole:
 `reset()` never cleared `bulletId`, so same-seed dives handed out different ids.
-Three determinism checks added (89 total, was 86), **verified by putting one
-`Math.random()` back** → `1 of 89 checks FAILED`.
+Three determinism checks added, **verified by putting one
+`Math.random()` back** → `1 of N checks FAILED`.
 
 **S1 — Combat core: the batch queue and the gate**
 D48, implementing D27. The spawn director is deleted. Enemies arrive one batch
@@ -1249,7 +1257,7 @@ now run with the player kept alive and assert the screen is still `playing`.
 Verified by breaking the gate — four failures, "45 enemies, batchIndex 9".
 
 Bot: mean 14.1s per batch over 5 seeds (range 4.5–35.9s), truncated because the
-prototype's level-up screen still interrupts. 119 checks (was 111).
+prototype's level-up screen still interrupts.
 `late-swarm` redefined to start at batch 5; scenarios gained a `batch` field.
 
 **Fix: clicking Start fired the weapon**
@@ -1259,14 +1267,14 @@ it. Regression from D45. Fixed in `update()`, which every screen passes through:
 menus disarm the trigger and it re-arms only on a frame with the button
 released. That covered two more routes nobody had reported — taking a level-up
 card and restarting from the death screen. Verified at 10/60/150/400ms holds.
-Test written first and failed for the right reason. 111 checks (was 108).
+Test written first and failed for the right reason.
 
 **The consistency sweep, made concrete**
 D46. CLAUDE.md now names the six surfaces a change can leave stale instead of
 saying "update the docs", with the three that have actually been missed marked
 as such. The layout-vs-data one is now a check: `render.js` exposes `HINT_Y` and
 `helpBottom`, and the suite asserts the help screen ends above the hint —
-verified by padding `HELP_KEYS` until it overflows. 108 checks (was 107).
+verified by padding `HELP_KEYS` until it overflows.
 
 **S1 — Combat core: the weapon is manual**
 D45, implementing D28. Shots leave while `Mouse0` is held, along the cursor.
@@ -1279,7 +1287,7 @@ Seven existing checks turned out to depend on auto-fire; they now pull the
 trigger. Holding `Mouse0` then leaked into a later check and broke the
 bullet-range assertion — held input is shared mutable state like any other.
 Five new checks; auto-fire fails four of them, verified by putting it back.
-107 checks (was 104: +5, −2 deleted).
+Two older checks deleted.
 
 Balance untouched on purpose: no point tuning `fireRate` against a spawn
 director that batches will delete.
@@ -1299,8 +1307,8 @@ in a Node `vm` with only the six seam names stubbed — D18's grep made executab
 It found the seam had been **eleven names, not six**, since 2026-09-12: `LEFT`,
 `RIGHT`, `GO`, `DASH` and `CLICK` were read from `platform/input.js`. Fixed by
 moving all seven binding constants into `game/content.js` — which key means which
-action is content (D6) — rather than by correcting the docs. Pure move; 104
-browser checks unchanged.
+action is content (D6) — rather than by correcting the docs. Pure move; every
+browser check still passes.
 
 Each invariant verified by breaking it. One was a fraud: deleting a `|| 1`
 divide-by-zero guard passed all six, because the generator never aimed exactly
@@ -1324,7 +1332,7 @@ D42, implementing D37. `?dev=<name>` loads a named setup from `SCENARIOS` and
 holds it frozen; `&play` runs it live; `advance(n)` steps exactly n ticks. Three
 scenarios to start: `one-drifter`, `three-types`, `late-swarm`. `spawnEnemy()`
 split into `makeEnemy()` + `placeEnemy()` so a scenario can put a named type at
-a known spot at nominal speed. 15 checks added (104 total, was 89).
+a known spot at nominal speed. 15 checks added.
 
 Two bugs caught while building it: naming the stepper `step()` shadowed
 `logic.js`'s own `step(dt)` and recursed infinitely, and a stepped scenario
@@ -1367,7 +1375,7 @@ and options take hover and clicks; help and death take a click as "go on".
 Mouse buttons ride in `keys`/`justPressed` as `'Mouse0'`, so clicks cost the
 seam nothing.
 
-79 checks passing, up from 47. Every new one was verified to fail with the rule
+Every new check was verified to fail with the rule
 it guards broken. Four *older* checks were found passing by luck — they
 expected shots to hit while never setting `aim`, inheriting whatever the
 previous check left behind — and now place the cursor explicitly.
@@ -1459,7 +1467,7 @@ i-frames; death and restart.
 **`6d114bf` Initial commit.** Canvas, a glowing circle, WASD movement.
 
 **Cleanup pass (`/simplify`, four angles)**
-Quality only, no behaviour change; 165 checks and `npm test` 8 throughout, and
+Quality only, no behaviour change; every check passing throughout, and
 both sweeps re-verified by reverting them to point tests (2 failures, exactly
 theirs). The findings worth naming:
 

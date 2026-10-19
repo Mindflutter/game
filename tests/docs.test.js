@@ -90,6 +90,15 @@ describe('docs/', () => {
     expect([...said, ...coded]).toEqual([]);
   });
 
+  it('quotes no count of checks, not even in the logs (D123)', () => {
+    // What a change added stays: "15 checks added" is the change, not the suite.
+    const COUNT = /(?<![\w.-])\**\d+\**\s+(?:[\w`?]+\s+)?(?:checks|tests)\b(?! added)/;
+    const files = [...readdirSync(new URL('docs/', ROOT), { recursive: true })
+      .filter(f => f.endsWith('.md')).map(f => 'docs/' + f),
+                   'CLAUDE.md', 'README.md', '.claude/skills/abyss-content/SKILL.md'];
+    expect(files.filter(f => COUNT.test(src(f)))).toEqual([]);
+  });
+
   it('keeps the docs CLAUDE.md tells the reader to open', () => {
     // A doc CLAUDE.md or the map in docs/README.md names must exist, or a cold
     // session is sent somewhere that is not there -- and the other way: a doc
