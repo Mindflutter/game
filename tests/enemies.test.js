@@ -384,3 +384,36 @@ describe('damage (D118)', () => {
   });
 
 });
+
+describe('grades (D119)', () => {
+  // A fish of type `t` at `grade`, standing in the middle, nothing else about.
+  const made = (g, t, grade) => g.makeEnemy(t, g.player.x, g.player.y, t.speed, grade);
+
+  it('makes grade 1 the type as written, and every step whole in damage', () => {
+    const g = loadGame();
+    expect(g.GRADES[0]).toEqual({ hp: 1, speed: 1, value: 1, damage: 0 });
+    for (const G of g.GRADES) expect(Number.isInteger(G.damage) && G.damage >= 0).toBe(true);
+  });
+
+  it('steps every number a grade names and nothing else, leaving the type alone', () => {
+    const g = loadGame();
+    g.reset(1);
+    const types = JSON.stringify(g.ENEMY_TYPES);
+    for (const t of g.ENEMY_TYPES) {
+      const base = made(g, t, 1);
+      g.GRADES.forEach((G, i) => {
+        const e = made(g, t, i + 1);
+        expect(Object.keys(e)).toEqual(Object.keys(base));          // the same behaviour
+        expect([e.grade, e.hp, e.maxHp, e.speed, e.value])
+          .toEqual([i + 1, t.hp * G.hp, t.hp * G.hp, t.speed * G.speed, Math.round(t.value * G.value)]);
+        for (const [k, v] of Object.entries(t)) {
+          if (typeof v === 'object' && 'damage' in v) expect(e[k]).toEqual({ ...v, damage: v.damage + G.damage });
+          else if (typeof v === 'object') expect(e[k]).toEqual(v);
+        }
+        if (t.touch) expect(e.touch).toBe(t.touch + G.damage);
+      });
+    }
+    expect(JSON.stringify(g.ENEMY_TYPES)).toBe(types);
+  });
+});
+

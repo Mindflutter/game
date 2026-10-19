@@ -6,6 +6,20 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-19
 
+**Grades** (D119 (grades))
+Igor: "enemies should have levels of their own. same behavior but different
+attrs", and "grade is fine for wording at least for now". A grade steps a
+fish's numbers, never its behaviour: `GRADES` multiplies `hp`, `speed` and
+`value` and adds to every attack's `damage`, for every type at once. Which
+grade a fish arrives at is S6 (balance)'s threat system's — "it's a balanced
+system, you go further - more difficult enemies appear" — so every dive still
+plays at grade 1; the debug mode's Grade row sets one, written into its code
+as `Grade<n>`. A graded fish shows its grade as a small number on its body
+(Igor: "circles enlarge enemies visually"). `grade` joins the glossary, and
+`entities/enemies.md` has the table, held to the code. No new save version: a
+fish saved without a grade is grade 1. Every new check was seen failing
+against the rule it guards broken.
+
 **Hits vary in damage** (D118 (hits vary in damage))
 Igor: "hits worth two hearts - not limited to two, we are varying damage",
 then "if minimal damage is 1 (which it is), then it stays". Every attack's

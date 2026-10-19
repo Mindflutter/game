@@ -519,6 +519,16 @@ const ENEMY_TYPES = [
 const behaviourOf = t => ({ ramp: t.ramp, touch: t.touch,
   ...Object.fromEntries(Object.entries(t).filter(([, v]) => typeof v === 'object')) });
 
+// Grades (D119): the same fish, stronger -- its numbers, never its behaviour.
+// Grade 1 is the type as written; a step multiplies `hp`, `speed` and `value`
+// and adds to every attack's `damage`. Which grade a fish arrives at is S6's
+// threat system's. Claude's picks.
+const GRADES = [
+  { hp: 1, speed: 1,   value: 1, damage: 0 },
+  { hp: 2, speed: 1.1, value: 2, damage: 1 },
+  { hp: 3, speed: 1.2, value: 3, damage: 1 },
+];
+
 // Derived from how many layers `home` lists, or a fifth would run into the rows.
 const HOME_LAYERS_TOP = 326, HOME_LINE = 26;
 const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
@@ -541,7 +551,7 @@ const DEBUG_BEHAVIOURS = {
 };
 // `of` marks a cap that is the game's own, shown beside the count.
 const DEBUG_COUNTS = [
-  ...ENEMY_TYPES.map(e => ({ name: e.name, col: 1, max: DEBUG_FISH_MAX, tip: () => fishTip(e) })),
+  ...ENEMY_TYPES.map(e => ({ name: e.name, col: 1, max: DEBUG_FISH_MAX, tip: () => fishTip(e, debugSetup.grade) })),
   ...EQUIPMENT.map(g => ({ name: g.name, col: 2, max: g.tiers.length, of: true, tip: () => gearTip(g) })),
   ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: DEBUG_STEPS_MAX, tip: () => stepTip(a) })),
   ...MODS.map(m => ({ name: m.name, col: 3, max: m.max, of: true, tip: () => modTip(m) })),
@@ -758,6 +768,9 @@ const MENUS = {
       { label: 'One-shot', col: 0, tip: 'One-shot: every shot does ' + ONE_SHOT + ' damage, enough for anything',
         get value() { return debugSetup.oneShot ? 'on' : 'off'; },
         change: () => { debugSetup.oneShot = !debugSetup.oneShot; } },
+      { label: 'Grade', col: 1, tip: 'Grade: how strong the fish you set arrive; the same fish, stronger numbers',
+        get value() { return debugSetup.grade + ' / ' + GRADES.length; },
+        change: d => { debugSetup.grade = wrapStep(debugSetup.grade - 1, d, GRADES.length - 1) + 1; } },
       ...DEBUG_COUNTS.filter(c => c.col === 1).map(countRow),
       { label: 'Weapon', col: 2, get value() { return debugSetup.weapon; },
         get tip() { return weaponTip(WEAPONS.find(w => w.name === debugSetup.weapon)); },

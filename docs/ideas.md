@@ -391,8 +391,7 @@ discussed.
     so the boss's 60 hp show little progress. Claude's lean, unconfirmed: a
     small bar over any fish of more than 1 hp, once hurt, and a bar across the
     top for the boss and the mini-boss. One-hit fish stay bare, so a swarm
-    stays readable. It is also how a stronger version of a fish (Pace,
-    below) would read as tougher. A ring round the body was Claude's first lean; Igor:
+    stays readable. A ring round the body was Claude's first lean; Igor:
     "Health rings probably wont work on real assets well" — a ring hugs a
     circle, and a sprite has no clean edge to hug, where a bar over any shape
     works.
@@ -480,18 +479,6 @@ discussed.
   batch is too much beside a mini-boss, and whether the crowd should pay
   something after all. "According to the balance for current batch" is S6
   (balance)'s, once a fish has a threat number.
-
-- **Stronger versions of the same fish.** Igor, 2026-10-15: "enemies should
-  have levels of their own. same behavior but different attrs. this way we can
-  reach more diversity, higher layers & batches may get the same enemies as the
-  first ones, but stronger". It is D79 (a dive goes from easiest to hardest)'s
-  rise "in numbers and in enemy types" given a third axis: a drifter deep down
-  is a tougher drifter. It meets S6 (balance)'s threat system, which gives a
-  number per enemy type — each version would carry its own. The word needs
-  choosing: "level" is banned (D32 (the glossary)), and "tier" is gear's.
-  Open: the word, how many versions, what changes between them — hp, speed,
-  bite, size — and how a batch names one. **Home**: this pass — Igor,
-  2026-10-18, naming it in answer to the proposal.
 
 ## Suggested but not yet discussed
 

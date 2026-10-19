@@ -267,6 +267,16 @@ function drawField() {
     }
     circle(e.x, e.y, e.r * (0.7 + 0.3 * e.hp / e.maxHp) * (1 + (fusing ? 0.8 : 0.25) * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
+    // The grade on the body, above the first (D119). PLACEHOLDER GRAPHICS.
+    if (e.grade > 1) {
+      ctx.save();
+      ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.fillStyle = '#05080f';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(e.grade, e.x, e.y);
+      ctx.restore();
+    }
     // A biter's open jaws (D108). PLACEHOLDER GRAPHICS.
     if (e.phase === 'jaws') {
       const a = Math.atan2(player.y - e.y, player.x - e.x);

@@ -38,8 +38,8 @@ working doc.
 
 Check `decisions.md` and `ideas.md` before suggesting anything "new" — it is
 probably already there, possibly already declined with a reason. Use the
-glossary's words exactly: **layer, dive, mod, boost, gear, tier, batch, wave,
-home, attribute, challenge**. Never "level" or "upgrade" — each meant two things in the
+glossary's words exactly: **layer, dive, mod, boost, gear, tier, grade, batch,
+wave, home, attribute, challenge**. Never "level" or "upgrade" — each meant two things in the
 draft, which is why they are banned (D32) — and never "micro-task", the old name
 of a challenge (D110).
 

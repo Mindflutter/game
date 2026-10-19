@@ -8,13 +8,19 @@ function enemyType(name) {
   return t;
 }
 
-// Speed is passed in: a batch's arrivals jitter, a scenario's must not.
-function makeEnemy(t, x, y, speed) {
-  enemies.push({ name: t.name, x, y, r: t.r, speed, hp: t.hp, maxHp: t.hp, value: t.value,
-                 color: t.color, glow: t.glow, lastHitBy: 0,
-                 pushX: 0, pushY: 0, vx: 0, vy: 0,
-                 ...behaviourOf(t),
-                 phase: 'chase', phaseTime: 0 });
+// Speed is passed in: a batch's arrivals jitter, a scenario's must not. A
+// graded fish gets copies of its attacks, so its damage leaves the type's alone.
+function makeEnemy(t, x, y, speed, grade = 1) {
+  const G = GRADES[grade - 1], hp = t.hp * G.hp;
+  const behaviour = Object.fromEntries(Object.entries(behaviourOf(t)).map(([k, v]) =>
+    [k, typeof v === 'object' && 'damage' in v ? { ...v, damage: v.damage + G.damage } : v]));
+  if (behaviour.touch) behaviour.touch += G.damage;      // a touch is its damage alone
+  return { name: t.name, grade, x, y, r: t.r, speed: speed * G.speed, hp, maxHp: hp,
+           value: Math.round(t.value * G.value),
+           color: t.color, glow: t.glow, lastHitBy: 0,
+           pushX: 0, pushY: 0, vx: 0, vy: 0,
+           ...behaviour,
+           phase: 'chase', phaseTime: 0 };
 }
 
 // Just outside the view, in view coordinates: the caller adds the camera. The
@@ -31,35 +37,36 @@ function edgeSpawnPoint(t) {
 
 // One batch, dealt into waves (D115). With escorts (D116) its own fish lead:
 // a mini-boss's escorts follow in the waves, the boss's crowd at the gate.
+// An entry's grade (D119) is its third field, and grade 1 when it has none.
+const names = b => b.enemies.flatMap(([name, count, grade]) => Array(count).fill({ name, grade }));
 function spawnBatch(batch, escorts) {
-  const names = b => b.enemies.flatMap(([name, count]) => Array(count).fill(name));
   const lead = escorts ? names(batch) : [];
   const rest = !escorts ? names(batch) : batch.crowd ? [] : names(escorts);
   const fish = [...lead, ...drawDistinct(rest, rest.length)];
   const size = () => WAVE_MIN + Math.floor(rng() * (WAVE_MAX - WAVE_MIN + 1));
-  fish.splice(0, size()).forEach(name => arrive(name, batch.crowd && { lead: true }));
+  fish.splice(0, size()).forEach(f => arrive(f.name, batch.crowd && { lead: true }, f.grade));
   let start = elapsed;
   while (fish.length) {
     start += WAVE_GAP * (1 - WAVE_JITTER + rng() * 2 * WAVE_JITTER);
-    for (const name of fish.splice(0, size())) incoming.push({ name, at: start + rng() * WAVE_SPREAD });
+    for (const f of fish.splice(0, size())) incoming.push({ ...f, at: start + rng() * WAVE_SPREAD });
   }
   incoming.sort((a, b) => a.at - b.at);
 }
 
 // Jittered, so a wave does not arrive as a drill squad. `flags` mark a crowd's
 // lead or escort (D116).
-function arrive(name, flags) {
+function arrive(name, flags, grade) {
   const type = enemyType(name);
   if (!type) return;
   const { x, y } = edgeSpawnPoint(type);
-  makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER));
-  Object.assign(enemies.at(-1), flags);
+  enemies.push(Object.assign(
+    makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER), grade), flags));
 }
 
 // No jitter: a scenario watches one thing behave, so it must not vary.
 function placeEnemy(name, x, y) {
   const t = enemyType(name);
-  if (t) makeEnemy(t, x, y, t.speed);
+  if (t) enemies.push(makeEnemy(t, x, y, t.speed));
 }
 
 // Returns the pair rather than moving `o`, so "is it wholly inside?" is the
@@ -553,10 +560,11 @@ function openDebug(code, seed) {
 }
 
 // A setup as text, for the address bar and an issue:
-// `L2,G7,S4471,Harpoon2,puffer4,Dash_reach1,immortal`.
+// `L2,G7,S4471,Grade2,Harpoon2,puffer4,Dash_reach1,immortal`.
 function setupCode(s = debugSetup) {
   const token = (name, n) => name.replace(/ /g, '_') + n;
   return ['L' + (s.layer + 1), 'G' + (s.gate + 1), 'S' + s.seed,
+          ...(s.grade > 1 ? ['Grade' + s.grade] : []),
           token(s.weapon, s.counts[s.weapon] || 0),
           ...DEBUG_COUNTS.filter(c => c.col !== undefined && s.counts[c.name] > 0)
                          .map(c => token(c.name, s.counts[c.name])),
@@ -566,7 +574,7 @@ function setupCode(s = debugSetup) {
 // What it cannot name -- a typo, a record renamed since -- is shown in
 // `ignored`, never guessed at.
 function parseSetup(code, seed = newSeed()) {
-  const s = { layer: 0, gate: 0, seed, immortal: false, oneShot: false,
+  const s = { layer: 0, gate: 0, grade: 1, seed, immortal: false, oneShot: false,
               weapon: WEAPONS[0].name, counts: {}, ignored: [] };
   for (const token of (code || '').split(',').filter(Boolean)) {
     const [, word, digits] = token.match(/^(.*?)(\d*)$/);
@@ -577,6 +585,7 @@ function parseSetup(code, seed = newSeed()) {
     else if (name === 'L') s.layer = n - 1;
     else if (name === 'G') s.gate = n - 1;
     else if (name === 'S') s.seed = n >>> 0;
+    else if (name === 'Grade') s.grade = n;
     else if (DEBUG_COUNTS.some(c => c.name === name)) {
       s.counts[name] = n;
       if (WEAPONS.some(w => w.name === name)) s.weapon = name;
@@ -590,6 +599,7 @@ function clampSetup(s) {
   const within = (n, max) => Math.max(0, Math.min(max, n));
   s.layer = within(s.layer, LAYERS.length - 1);
   s.gate = within(s.gate, gatesIn(s.layer) - 1);
+  s.grade = Math.max(1, Math.min(GRADES.length, s.grade));
   for (const c of DEBUG_COUNTS) if (c.name in s.counts) s.counts[c.name] = within(s.counts[c.name], c.max);
   return s;
 }
@@ -607,7 +617,7 @@ function gatesIn(l) {
 }
 
 function setupFish(s) {
-  return ENEMY_TYPES.filter(e => s.counts[e.name] > 0).map(e => [e.name, s.counts[e.name]]);
+  return ENEMY_TYPES.filter(e => s.counts[e.name] > 0).map(e => [e.name, s.counts[e.name], s.grade]);
 }
 
 // It reseeds the randomness to draw the plan: harmless, since every dive
@@ -616,7 +626,7 @@ function gateLine() {
   const s = debugSetup, fish = setupFish(s);
   seedRng(s.seed);
   const drawn = drawPlan();
-  const list = batch => batch.map(([name, n]) => n + ' ' + name).join(', ');
+  const list = batch => batch.map(([name, n, grade]) => n + ' ' + name + (grade > 1 ? ' at grade ' + grade : '')).join(', ');
   const { batch, escorts } = drawn[drawn.findIndex(e => e.layer === s.layer) + s.gate];
   return LAYERS[s.layer].name + ', gate ' + (s.gate + 1) + ': ' + list(batch.enemies) +
          (escorts ? (batch.crowd ? ', its crowd from ' : ', escorted by ') + list(escorts.enemies) : '') +
@@ -632,13 +642,15 @@ function moves(apply, w = WEAPONS.find(x => x.name === debugSetup.weapon)) {
 }
 const needsLine = g => (g.requires ? '   owning it needs ' +
   Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', ') : '');
-function fishTip(e) {
+function fishTip(e, grade) {
+  const f = makeEnemy(e, 0, 0, e.speed, grade);
   const kinds = Object.keys(e).filter(k => typeof e[k] === 'object');
   return e.name + ': ' + (kinds.length ? kinds : ['chase']).map(k => DEBUG_BEHAVIOURS[k]).join('; then ') +
          (e.enters === 'bottom' ? '; rises from below' : '') +
          (e.carries === false ? '; never glows, so carries no mod' : '') +
          (e.touch ? '; hurts to touch' : '') +
-         '   hp ' + e.hp + ' \u00b7 speed ' + e.speed + ' \u00b7 ' + e.value + (e.value === 1 ? ' gem' : ' gems');
+         '   hp ' + f.hp + ' \u00b7 speed ' + Math.round(f.speed) + ' \u00b7 ' +
+         f.value + (f.value === 1 ? ' gem' : ' gems');
 }
 function tiersTip(g, w) {
   const each = g.tiers.map(t => moves(t.apply, w));
@@ -885,7 +897,7 @@ function step(dt) {
     }
     while (incoming.length && incoming[0].at <= elapsed) {
       const f = incoming.shift();
-      arrive(f.name, f.flags);
+      arrive(f.name, f.flags, f.grade);
     }
   } else if (!queuePaused && enemies.length === 0) {
     const target = gateDepth(batchIndex);

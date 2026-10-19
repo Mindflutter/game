@@ -217,6 +217,11 @@ describe('the entity docs', () => {
     for (const t of behaviourTables(g.ENEMY_TYPES, behaviours)) expectIn(doc('enemies.md'), t);
   });
 
+  it('lists every grade at its real numbers (D119)', () => {
+    const cols = Object.keys(g.GRADES[0]);
+    expectIn(doc('enemies.md'), table(['grade', ...cols], g.GRADES.map((G, i) => [i + 1, ...cols.map(k => G[k])])));
+  });
+
   it('lists every mod with what it does and its card text', () => {
     const cols = plain(g.MODS);
     // A weapon mod is counted on the first weapon it fits (D99), the rest on the Gun.
@@ -279,8 +284,9 @@ describe('the entity docs', () => {
 
   it('gives every item a section, and no section to an item the code lacks', () => {
     // Any other heading has to be one of the layout's own -- `Points` is the
-    // rule the challenges and the attributes share (D110).
-    const LAYOUT = ['Roster', 'Fields', 'Behaviours', 'Points', 'Adding one'];
+    // rule the challenges and the attributes share (D110), `Grades` every
+    // fish's (D119).
+    const LAYOUT = ['Roster', 'Grades', 'Fields', 'Behaviours', 'Points', 'Adding one'];
     const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS, 'boosts.md': g.BOOSTS,
                     'weapons.md': g.WEAPONS, 'equipment.md': g.EQUIPMENT,
                     'challenges.md': [...g.CHALLENGES, ...g.ATTRIBUTES] };

@@ -2,7 +2,7 @@
 // save, the kit, the place, the fish, the code, the keys and every way out.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks, play, die } from './harness.js';
+import { loadGame, ticks, play, die, until } from './harness.js';
 
 // A game in the debug mode, on its setup screen.
 function setup(code = '', seed = 7) {
@@ -139,6 +139,40 @@ describe('the code', () => {
     const code = 'L2,G7,S4471,Harpoon2,puffer4,mini-boss1,Mask1,Dash_reach3,Barbs3,immortal,oneshot';
     expect(g.setupCode(g.parseSetup(code))).toBe(code);
     expect(g.setupCode(g.parseSetup('', 9))).toBe('L1,G1,S9,Gun0');
+  });
+
+  it('writes a grade only above the first, and holds it within the grades (D119)', () => {
+    const g = setup();
+    expect(g.setupCode(g.parseSetup('L1,G1,S9,Grade2,Gun0'))).toBe('L1,G1,S9,Grade2,Gun0');
+    expect(g.setupCode(g.parseSetup('L1,G1,S9,Grade1,Gun0'))).toBe('L1,G1,S9,Gun0');
+    expect(g.parseSetup('Grade99').grade).toBe(g.GRADES.length);
+    expect(g.parseSetup('Grade0').grade).toBe(1);
+  });
+
+  it('brings its fish at its grade, later waves too, and names the grade (D119)', () => {
+    const g = setup('L1,G3,S7,Grade3,Gun0,drifter20,immortal');
+    expect(g.gateLine()).toContain('20 drifter at grade 3');
+    const t = g.enemyType('drifter'), G = g.GRADES[2];
+    expect(g.MENUS.debug.items[row(g, 'drifter')].tip)
+      .toContain('hp ' + t.hp * G.hp + ' \u00b7 speed ' + Math.round(t.speed * G.speed));
+    g.debugDive();
+    until(g, 30, () => !g.incoming.length && g.enemies.length > 0);
+    expect(g.incoming).toEqual([]);
+    expect(g.enemies.map(e => e.grade)).toEqual(Array(20).fill(3));
+  });
+
+  it('plays on identically from a save taken with graded fish still to come (D119)', () => {
+    const a = setup('L1,G3,S7,Grade2,Gun0,drifter20,immortal');
+    a.debugDive();
+    until(a, 30, () => a.enemies.length > 0);
+    expect(a.incoming.length).toBeGreaterThan(0);
+    const b = loadGame();
+    b.immortal = true;
+    expect(b.loadSave(a.saveText())).toBe('');
+    b.screen = b.resumeTo;
+    for (const g of [a, b]) play(g, 8);
+    expect(b.saveText()).toBe(a.saveText());
+    expect(b.enemies.length && b.enemies.every(e => e.grade === 2)).toBe(true);
   });
 
   it('ignores what it cannot name, and holds every value in range', () => {

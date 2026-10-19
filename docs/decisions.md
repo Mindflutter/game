@@ -3991,3 +3991,57 @@ HP left ending the dive at 0. `tests/boss.test.js` — the charge taking its
 own; the fan's shots carrying theirs. `tests/home.test.js` — one guard charge
 taking a hit of 2 whole. `tests/save.test.js` — a v8 dive's fish and shots at
 1; the v9 fixture playing on. Each verified by breaking it.
+
+## D119 — Grades: the same fish, stronger · 2026-10-19
+The pass before S6 (balance). Igor, 2026-10-15: "enemies should have levels of
+their own. same behavior but different attrs. this way we can reach more
+diversity, higher layers & batches may get the same enemies as the first ones,
+but stronger" — placed in this pass on 2026-10-18.
+
+**Decided, by Igor.**
+- **A grade changes a fish's numbers, never its behaviour**, so every fish's
+  tell holds at any grade.
+- **The balance system chooses a fish's grade — never a layer, never a
+  batch's table.** Claude asked whether a grade came from the layer or was
+  named per batch; Igor: "why would "grade" be even tied to any of layer's
+  waves or batches? it's a balanced system, you go further - more difficult
+  enemies appear. ofc, first time you meet for example extremely high-grade
+  enemy cant be on the first layer. this is about balancing the batches and
+  waves. remember, they are different but equally challenging at any given
+  batch/wave in the game." So choosing grades is S6 (balance)'s threat
+  system's (`plan.md` → S6 — Balance), and each type at each grade gets its own
+  threat number there.
+- **The word is "grade"** — "grade is fine for wording at least for now". It
+  joins the glossary; "level" stays banned (D32 (the glossary)) and "tier" is
+  gear's.
+- **Shown as a small number on the fish.** Claude drew rings, one a grade;
+  Igor: "instead of circles, put a small number for grade. circles enlarge
+  enemies visually". PLACEHOLDER GRAPHICS.
+
+**Delegated to Claude, and open to Igor to reopen.**
+- **One table of steps, `GRADES`, for every fish**: grade 1 is the type as
+  written; a step multiplies `hp`, `speed` and `value` and adds to every
+  attack's `damage` and to `touch`, whole numbers by D118 (hits vary in
+  damage). A new type has every grade at no cost (D6 (content is data)). Three
+  steps — ×2 and ×3 hp, ×1.1 and ×1.2 speed, ×2 and ×3 gems, +1 damage — are
+  placeholders for S6 (balance) to size.
+- **A batch entry carries a grade as its third field** at run time,
+  `[type, count, grade]`, grade 1 without one, and each fish takes it into the
+  waves. It is how a choice reaches the fish — the balance system's once it
+  exists, the debug mode's Grade row until then. Every authored pool stays
+  ungraded, so a dive today plays as before.
+- **No per-type override of a step.** Claude offered one in the sync, then
+  dropped it on building: no type needs it yet, it would read as a behaviour
+  everywhere a type's records are walked, and adding it later changes no data
+  already written.
+
+**Save**: no new version. A fish saved without a grade is grade 1.
+
+**Guarded by**: `tests/enemies.test.js` → grades — grade 1 the type as written,
+every step whole in damage; every type at every grade stepping only the
+numbers a grade names, its behaviour the same, the type's own records
+untouched. `tests/debug.test.js` — the grade written only above the first and
+held within the grades; a setup's fish arriving at its grade in every wave and
+named on the gate line; a save taken with graded fish still to come playing on
+identically. `tests/docs.test.js` — `entities/enemies.md`'s grades table
+against `GRADES`. Each verified by breaking it.

@@ -48,7 +48,7 @@ export function loadGame() {
                  'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps',
                  'fireArmed', 'offerTimer', 'optionIndex', 'returnTo'];
   // Constants are `const`, so they get a getter only.
-  const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'MODS', 'STAT_NAMES',
+  const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'GRADES', 'MODS', 'STAT_NAMES',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
                   'MOD_OFFER_DELAY', 'MOD_ROWS',
                   'GATE_SPACING', 'CURRENT_SPEED', 'CURRENT_CRAWL',
@@ -74,6 +74,15 @@ export function loadGame() {
 export const ticks = (g, seconds) => Math.round(seconds / g.FIXED_DT);
 
 export const play = (g, seconds) => { for (let i = 0, n = ticks(g, seconds); i < n; i++) g.update(g.FIXED_DT); };
+
+// Ticks until `done()` holds or `seconds` pass; whether it came.
+export function until(g, seconds, done) {
+  for (let i = 0, n = ticks(g, seconds); i < n; i++) {
+    g.update(g.FIXED_DT);
+    if (done()) return true;
+  }
+  return false;
+}
 
 // An eel on top: the fish that hurts on touch (D108).
 export function die(g) {

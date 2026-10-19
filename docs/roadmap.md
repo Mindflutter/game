@@ -29,9 +29,11 @@ equipment on screens of their own)), batches arriving in waves (D115
 boss's a crowd that keeps coming until it dies (D116 (bosses bring escorts))
 — and the two made different: the boss spits a fan in turn with its lunge,
 the mini-boss only lunges (D117 (the boss's fan)) — and hits of varying
-damage, every amount 1 until S6 (balance) (D118 (hits vary in damage)). Next: stronger
-versions of the same fish (`ideas.md` → Pace), which join this pass, Igor's
-word on 2026-10-18.
+damage, every amount 1 until S6 (balance) (D118 (hits vary in damage)) — and
+grades, the same fish stronger, chosen by S6 (balance)'s threat system and
+seen today only in the debug mode (D119 (grades)). Next: swimming
+through biters (`ideas.md` → Swimming through biters costs nothing), Igor's to
+place.
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and

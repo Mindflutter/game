@@ -70,6 +70,23 @@ layer end is a milestone)), every type S5 (content) brought (D95 (three
 enemy behaviours, and one way to be hurt)), and the ramps and bites (D107 (the
 diver swims and faces; fish with a ramp), D108 (fish bite)).
 
+## Grades
+
+The same fish, stronger (D119 (grades)): a grade changes its numbers, never
+its behaviour. Grade 1 is the type as written; each step multiplies `hp`,
+`speed` and `value`, and adds to every attack's `damage` and to `touch`. Every
+type has every grade, so a new type needs nothing here. Which grade a fish
+arrives at is S6 (balance)'s threat system's; until then every fish in a dive
+is grade 1, and the debug mode's Grade row sets one. A graded fish shows its
+grade as a small number on its body, above the first — Igor: "circles enlarge
+enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks.
+
+| grade | hp | speed | value | damage |
+|---|---|---|---|---|
+| 1 | 1 | 1 | 1 | 0 |
+| 2 | 2 | 1.1 | 2 | 1 |
+| 3 | 3 | 1.2 | 3 | 1 |
+
 ## Fields
 
 | Field | Unit | Meaning |

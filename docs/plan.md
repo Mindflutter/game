@@ -27,6 +27,7 @@ number before the numbers are tuned:
   different. this would belong to a completed s5, naturally we have to do it
   outside of it, so plan that too." Built as D117 (the boss's fan).
 
+
 Where it stands is `roadmap.md` → Next. **S6 — Balance** follows; its entry,
 S5 exiting, is met, and it opens on Igor's word.
 
@@ -65,7 +66,13 @@ hardest)); it replaces the hp bands D71 (batches are drawn from pools) sized
 stretches by. Every batch measured against its stretch, and each layer against
 the kit expected there — the mods from the layers above included (D66). Which
 enemies drop gems, and how many, is a lever here too (D78 (gems are pulled to
-the player)).
+the player)). **Grades** (D119 (grades)) are the system's too: each type at
+each grade its own threat number, and the grade a fish arrives at the
+system's choice — Igor, 2026-10-19: "you go further - more difficult enemies
+appear. ofc, first time you meet for example extremely high-grade enemy cant
+be on the first layer. this is about balancing the batches and waves.
+remember, they are different but equally challenging at any given batch/wave
+in the game".
 
 **Exit (DoD):**
 - No unbeatable batch. No batch cleared without moving.
