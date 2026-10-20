@@ -21,8 +21,9 @@ canvas layer, a sprite pipeline, or browser-specific polish.
 (D40 — Docs are tracked). Every session, first:
 
 1. **`foundations.md`** — the layer that does not change before alpha. The
-   binding glossary, the genre contract, the pillars as checkable statements,
-   the technical contract, the non-goals. **Read it first, every session.**
+   binding glossary, the genre contract, the diversity rule and the alpha
+   counts, the pillars as checkable statements, the technical contract, the
+   non-goals. **Read it first, every session.**
 2. **`plan.md`** — the stages S0–S7 (plus the passes between them), their
    definitions of done, and which one is active. The only doc that says "we
    are here".
@@ -39,15 +40,16 @@ working doc.
 Check `decisions.md` and `ideas.md` before suggesting anything "new" — it is
 probably already there, possibly already declined with a reason. Use the
 glossary's words exactly: **layer, dive, mod, boost, gear, tier, grade, batch,
-wave, home, attribute, challenge**. Never "level" or "upgrade" — each meant two things in the
-draft, which is why they are banned (D32) — and never "micro-task", the old name
-of a challenge (D110).
+wave, home, attribute, challenge, entity**. Never "level" or "upgrade" — each meant two things in the
+draft, which is why they are banned (D32) — never "micro-task", the old name
+of a challenge (D110), and never "entity" for a thing on screen: that is an
+object (D124).
 
 ## Hard constraints
 
 - No dependencies. Libraries were explicitly *permitted* by Igor and are still
   declined on measurement grounds (D30) — Canvas 2D plus an offscreen glow
-  cache covers the stated entity budget. Revisit only on a **measured** failure
+  cache covers the stated object budget. Revisit only on a **measured** failure
   against that budget, never on a hunch that it might be slow.
 - No asset files. Everything drawn or synthesised in code. Softened only by the
   condition Igor set: if enemies or layers become indistinguishable, art moves
@@ -77,7 +79,7 @@ of a challenge (D110).
   menus and options are flat lists of records. Adding one is a line and touches
   no other code. The alpha's content counts are only reachable if adding the
   fifteenth enemy costs what adding the second did. An enemy, mod, boost, weapon,
-  piece of equipment, challenge or attribute also gets its row and section in `docs/entities/` —
+  piece of equipment, challenge, attribute, layer or batch also gets its row and section in `docs/entities/` —
   `npm test` fails until they match the code (D81 — Entity docs). Adding any
   piece of content follows the `abyss-content` skill
   (`.claude/skills/abyss-content/`).

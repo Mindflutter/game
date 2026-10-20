@@ -4236,3 +4236,80 @@ the first case. Check counts go everywhere, the logs included.
 **Guarded by**: `tests/docs.test.js` — no doc, `CLAUDE.md`, the root `README.md`
 or the content skill quotes a number of checks or tests. Verified by breaking
 it. The rest is a judgement no check can make: `CLAUDE.md`'s sweep's.
+
+## D124 — Diversity, the main rule · 2026-10-20
+Igor, 2026-10-20, on the boosts: "again, i'll repeat my generic saying, no
+limits there, diversity is the main rule of the game." Shown that it was
+nowhere in `foundations.md` — only quoted in D108 (fish bite) — he wrote it
+out: "about the diversity, if it's not clear in the rules: it must be from the
+start. i might have worded it in high level design somehow vaguely. i'll try to
+rephrase it once again to be clear. i added real player positive thoughts
+examples in quotes ("") so that you have a better understanding of real-life
+scenarios.
+
+- definition. entities are: all game concepts that are included in gameplay
+  mechanics. for example: mods, enemies, attrs, boosts, layers etc. even the
+  player, despite being a single instance.
+- entities are clear to the player in a sense of mapping words and actions to
+  whatever happens on screen. "i click here now, so that i buy X that does Y so
+  i'd be better on layer N when Z enemy arrives"
+- should a new entity appear while designing, it must follow entity rules
+  immediately
+- ultimately, entities must be many. alpha version has defined numbers that
+  act like borders for a project mvp that tests and validates the project can
+  go any further. alpha numbers change as we seek for a solid game baseline.
+  "i really have a lot of build and upgrade possibilities, i want to explore
+  more. i feel like there's a lot to discover"
+- entities vary by any degree, radically or not, but the difference is always
+  clear to the player. "i know that right now i got these weapons and bonuses
+  and hp etc and i am fighting this guy unlike my previous run where i had that
+  setup"
+- entities may or may not be coupled / dependent on each other, but if a
+  gameplay contradiction arises because of coupling, raise and record an issue
+  immediately (like in a harpoon shoot-thru example) "ok this thing looks
+  similar but has a slightly different effect, i see it now"
+- entities are scalable: adding a new one must never break existing gameplay
+  or balance. "just tried this new bonus and it improved my dive a bit. just
+  met this new enemy and couldnt beat it now, but i got an idea and i will kill
+  it in the next run or two""
+
+Then, asked: an "Alpha counts" table, "yes"; and "differences can be small or
+large - i meant that".
+
+**Decided, by Igor.** `foundations.md` → Diversity — the main rule: what an
+entity is, and six rules every entity keeps — readable; a new kind keeps them
+at once; many; different by a little or a lot, always clearly; coupled or not,
+never contradicting; added without breaking. The alpha's counts, until now
+split between his draft, the glossary and D93 (the content stage's counts),
+move into one table there, provisional, changed in one line. "Small or large"
+is how big a difference is, so mods keep differing in kind, never only in
+amount (the genre contract, 5).
+
+**Claude's reading**, open to Igor — each stated before it was written, none
+objected to:
+- **The entities**: every kind with a table in `game/content.js` — fish,
+  weapons, equipment, mods, boosts, attributes, challenges, layers, batches —
+  and the diver. Grades, gates and currency are rules around them.
+- **"Entity" freed for it**: the budget of 500 (D43 (the glow cache is
+  cancelled; the entity budget is measured)) counts *objects*, things on
+  screen, renamed in `foundations.md`, `CLAUDE.md`, `design.md`, `roadmap.md`,
+  `plan.md` and the code's one comment. D32 (the glossary is binding) allows a
+  word one meaning.
+- **A new kind's rules include its doc** in `entities/` (D81 (entity docs)).
+- **Rule 6 is checked by bot dives** before and after a new entity, every
+  pillar target held — S6 (balance)'s bots.
+- **The fish count is types, the bosses aside** — the draft's "5-7 types of
+  enemies + bosses". The S5 (content) spec counted "enemy behaviours"
+  instead; no decision ever said so, and the slip was Claude's.
+- **Five challenges**: D93 (the content stage's counts) asked for three; D109
+  (micro-tasks are ladders) made five, under "invent more microtasks".
+
+Layers and their batches got `entities/layers.md` — two kinds in one doc, as
+`challenges.md` holds the attributes its challenges pay for — and the diver
+`entities/diver.md`, its numbers moved there from `design.md`. Igor: "if you
+lean to it. only useful structured info, no bullshit".
+
+**Guarded by**: `tests/docs.test.js` — every kind in the table against the
+content tables: a kind outside its range, or a counted kind missing from the
+table, fails; and the two new docs held to the code as every entity doc is —
+their tables, their fields, a section for every layer. Verified by breaking it.

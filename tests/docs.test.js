@@ -90,6 +90,27 @@ describe('docs/', () => {
     expect([...said, ...coded]).toEqual([]);
   });
 
+  it('holds every kind to its alpha count (D124)', () => {
+    const g = loadGame();
+    const bosses = [g.MINI_BOSS, g.BOSS].flatMap(b => b.enemies.map(([name]) => name));
+    const counted = {
+      layer: [g.LAYERS.length],
+      weapon: [g.WEAPONS.length],
+      equipment: [g.EQUIPMENT.length],
+      'tier, per weapon and per piece of equipment': [...g.WEAPONS, ...g.EQUIPMENT].map(t => t.tiers.length),
+      'fish type, the bosses aside': [g.ENEMY_TYPES.filter(t => !bosses.includes(t.name)).length],
+      mod: [g.MODS.length],
+      boost: [g.BOOSTS.length],
+      attribute: [g.ATTRIBUTES.length],
+      challenge: [g.CHALLENGES.length],
+    };
+    const table = read('foundations.md').split('### Alpha counts')[1].split('\n## ')[0];
+    const rows = [...table.matchAll(/^\| ([^|]+?) \| (\d+)(?:–(\d+))? \|/gm)].map(m => [m[1], +m[2], +(m[3] ?? m[2])]);
+    expect(rows.map(([kind]) => kind).sort()).toEqual(Object.keys(counted).sort());
+    expect(rows.flatMap(([kind, lo, hi]) => counted[kind].filter(n => n < lo || n > hi).map(n => kind + ' ' + n)))
+      .toEqual([]);
+  });
+
   it('quotes no count of checks, not even in the logs (D123)', () => {
     // What a change added stays: "15 checks added" is the change, not the suite.
     const COUNT = /(?<![\w.-])\**\d+\**\s+(?:[\w`?]+\s+)?(?:checks|tests)\b(?! added)/;
@@ -138,16 +159,6 @@ describe('numbers the docs quote about the code', () => {
       }
     }
     expect(wrong).toEqual([]);
-  });
-
-  it('quotes the diver at the start in full, at its real values', () => {
-    // `PLAYER_START` (k v, k v, ...) in design.md: every field, in order. The
-    // weapon's numbers are not among them -- they are entities/weapons.md's.
-    const section = design.slice(design.indexOf('## Balance constants'));
-    const listed = section.match(/`PLAYER_START`[^(]*\(([^)]*)\)/)[1]
-      .split(',').map(pair => pair.trim().split(/\s+/));
-    const want = Object.entries(loadGame().PLAYER_START).map(([k, v]) => [k, String(v)]);
-    expect(listed).toEqual(want);
   });
 
   it('lists every scenario in the README', () => {
@@ -256,6 +267,26 @@ describe('the entity docs', () => {
       g.ATTRIBUTES.map(a => [a.name, moved([a.apply], true)])));
   });
 
+  it('lists the diver at the start, every field in order (D124)', () => {
+    const cols = Object.keys(g.PLAYER_START);
+    expectIn(doc('diver.md'), table(cols, [cols.map(k => g.PLAYER_START[k])]));
+  });
+
+  it('lists every layer, its stretches, and each pool\'s batches with their hp (D124)', () => {
+    const fish = b => b.enemies.map(([n, c]) => n + ' ' + c).join(', ');
+    const hp = b => b.enemies.reduce((sum, [n, c]) => sum + c * g.enemyType(n).hp, 0);
+    const pools = l => [...new Set(l.stretches.filter(x => !x.escorts).map(x => x.pool))];
+    const stretches = l => l.stretches.map(x => x.escorts
+      ? x.pool[0].enemies[0][0] + ' with pool ' + (pools(l).indexOf(x.escorts) + 1)
+      : x.draw + ' of pool ' + (pools(l).indexOf(x.pool) + 1)).join(' · ');
+    expectIn(doc('layers.md'), table(['name', 'color', 'stretches'], g.LAYERS.map(l => [l.name, l.color, stretches(l)])));
+    expectIn(doc('layers.md'), table(['fish', 'crowd'], [g.MINI_BOSS, g.BOSS].map(b => [fish(b), b.crowd])));
+    for (const l of g.LAYERS) {
+      const section = doc('layers.md').split('\n## ' + l.name + '\n')[1].split('\n## ')[0];
+      expectIn(section, table(['pool', 'fish', 'hp'], pools(l).flatMap((p, i) => p.map(b => [i + 1, fish(b), hp(b)]))));
+    }
+  });
+
   it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
     for (const t of gear(g.WEAPONS)) expectIn(doc('weapons.md'), t);
     // Its behaviours, as the enemies' -- not the shop's `tiers` and `requires`.
@@ -276,6 +307,9 @@ describe('the entity docs', () => {
       'weapons.md': keysOf(g.WEAPONS),
       'equipment.md': [...new Set(['name', 'tiers', ...keysOf(g.EQUIPMENT)])],
       'challenges.md': keysOf([...g.CHALLENGES, ...g.ATTRIBUTES]),
+      'diver.md': keysOf([g.PLAYER_START]),
+      'layers.md': keysOf([...g.LAYERS, ...g.LAYERS.flatMap(l => l.stretches),
+                           ...g.LAYERS.flatMap(l => l.stretches.flatMap(x => x.pool))]),
     };
     const wrong = [];
     for (const [file, keys] of Object.entries(shapes)) {
@@ -298,7 +332,7 @@ describe('the entity docs', () => {
     const LAYOUT = ['Roster', 'Grades', 'Fields', 'Behaviours', 'Points', 'Adding one'];
     const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS, 'boosts.md': g.BOOSTS,
                     'weapons.md': g.WEAPONS, 'equipment.md': g.EQUIPMENT,
-                    'challenges.md': [...g.CHALLENGES, ...g.ATTRIBUTES] };
+                    'challenges.md': [...g.CHALLENGES, ...g.ATTRIBUTES], 'layers.md': g.LAYERS };
     const wrong = [];
     for (const [file, records] of Object.entries(items)) {
       const names = records.map(r => r.name);

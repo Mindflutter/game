@@ -516,7 +516,7 @@ save at once.
 `muted`, `shakeLevel`, `showFps`, beside `meta` so New game keeps them (D113) —
 and `dive`: `snapshot()` when a
 dive is under way (`diveLive`), else `null`. `snapshot()` copies every variable
-a dive owns — the player, every entity array (`drops` among them), the plan,
+a dive owns — the player, every object array (`drops` among them), the plan,
 the queue and the fish still to come (`incoming`), camera, current and water, the timers, currency, `modCounts`, the
 mod round, the boosts running and `sinceBoost`, `weaponName`, `guardLeft`,
 `batchDashed`, the challenges' counts (`tally`, `killTimes`, `firstKillAt`,
@@ -734,10 +734,10 @@ Chrome, 3440x1440 (scale 1.8), 60fps budget 16.7ms, 2026-09-27 (D43):
 
 | Load | `draw()` | of which glow | `update()` |
 |---|---|---|---|
-| 250 entities | 0.10ms | 0.02ms | — |
-| 500 entities | 0.20ms | 0.05ms | 0.55ms @ 100k pair checks |
-| 1000 entities | 0.58ms | 0.33ms | 1.22ms @ 400k pairs |
-| 2000 entities | 2.72ms | 2.18ms | 3.67ms @ 1.6M pairs |
+| 250 objects | 0.10ms | 0.02ms | — |
+| 500 objects | 0.20ms | 0.05ms | 0.55ms @ 100k pair checks |
+| 1000 objects | 0.58ms | 0.33ms | 1.22ms @ 400k pairs |
+| 2000 objects | 2.72ms | 2.18ms | 3.67ms @ 1.6M pairs |
 
 At the design budget of 500 a whole frame is under 1ms — about 5% of 16.7ms.
 `shadowBlur` is used directly per frame; the offscreen cache was cancelled
@@ -793,12 +793,10 @@ is not usable here. Double-clicking `index.html` still needs no server at all.
 
 All in `game/content.js` under `// balance`. These are the real product of the
 prototype — they transfer to any port verbatim. The entities' numbers — the
-weapons' among them — are in their docs in `entities/`; the rest are here, and
+weapons' and the diver's among them — are in their docs in `entities/`; the rest are here, and
 `npm test` holds them to the code.
 
-`PLAYER_START`, the diver (r 20, speed 260, ramp 0.25, turn 0.2, hp 3, maxHp 3,
-iframes 1, dashCooldown 2.2, dashSpeed 620, mendOnClear 0, dashDamage 0,
-guard 0) · `RAMP_LEFT 0.05` ·
+`RAMP_LEFT 0.05` ·
 `GEM_PULL 600` · `NOTICE_TIME 2.5` · `ENEMY_JITTER 0.3` ·
 `GATE_PAUSE 1.2` · `GATE_SPACING 400` · `CURRENT_SPEED 200` ·
 `CURRENT_CRAWL 30` · `CURRENT_EASE 0.05` · `MOD_OFFER_DELAY 0.6` ·

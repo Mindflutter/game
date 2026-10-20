@@ -41,7 +41,7 @@ the decisions listed say why.
 
 | Stage | Closed | Delivered | Decisions |
 |---|---|---|---|
-| S0 — Foundations & spike | 2026-09-27 | These docs, the check harness, seeded RNG, scenarios, the entity budget measured, the Node test stack | D27–D44 |
+| S0 — Foundations & spike | 2026-09-27 | These docs, the check harness, seeded RNG, scenarios, the object budget measured, the Node test stack | D27–D44 |
 | S1 — Combat core | 2026-09-28 | Manual fire, the batch queue and gate, one rank per batch with mods at the gate, the swept and bought dash, the fixed timestep | D45–D57 |
 | S2 — The dive: camera and descent | 2026-09-28 | A layer that scrolls under a camera, a current between gate depths that never stops | D58–D61 |
 | S3 — One boss, one complete layer | 2026-09-29 | The boss as the layer's last batch, two mini-bosses, the lunge — a layer that can be finished | D62–D65 |

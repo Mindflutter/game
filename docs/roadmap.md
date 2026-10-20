@@ -69,7 +69,7 @@ are a regression signal for their build only. S6 (balance) measures afresh.
   body's centre inside another in view; the deepest overlap was 0.35 of the smaller
   radius.
 - **Simulation rate**: `FIXED_DT` 1/120 since D53, banked by the frame loop.
-  Doubling the tick rate costs ~1.1ms of a 16.7ms frame at the 500-entity
+  Doubling the tick rate costs ~1.1ms of a 16.7ms frame at the 500-object
   budget, from D43's 0.55ms measurement of `update()`.
 - **The bot is blind to the dash.** `kiteAndShoot` never presses Space, so
   D51's change (dash damage now bought, not free) moved its clear times by

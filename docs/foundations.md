@@ -22,13 +22,13 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 
 | Term | Means | Not |
 |---|---|---|
-| **layer** | One section of the abyss you dive into. 3–5 of them at alpha. Unlocked by completing the previous one. | never "level" |
+| **layer** | One section of the abyss you dive into; how many at alpha is in Alpha counts. Unlocked by completing the previous one. | never "level" |
 | **dive** | One attempt, start to death or completion. It starts at the top of the first layer and runs on through the layers; completion is clearing the last one — the win (D66, D68). | "run" is its synonym; prefer **dive** |
 | **mod** | A dive-scoped power, gone at the end of the dive. A glowing fish carries one in every batch but a boss's or a mini-boss's — kill it and the mod flies to you (D84, D88) — and a layer end offers a pick of **valuable** mods: its own, or an ordinary one at a bigger step (D85). Every mod has a cap (D69). Momentum, not strategy. | never "upgrade" |
 | **boost** | A short power a kill drops (D86): switched on by touching it, gone after a few seconds, and gone from the floor if left lying. Not a mod — not counted, no cap, nothing kept. Igor's word. | not a "mod" |
 | **gear** | A persistent item bought with currency on the home screen. Weapons, suit, mask, flippers, trinkets. | never "upgrade" |
 | **equipment** | Gear that is not a weapon: the suit, mask, flippers and trinkets (D81). Igor's word, and the draft's. | not a weapon — **gear** is both |
-| **tier** | One of the 3–4 purchasable steps a piece of gear advances through. | never "level", never "upgrade" |
+| **tier** | One of the purchasable steps a piece of gear advances through; how many is in Alpha counts. | never "level", never "upgrade" |
 | **gate** | The depth where a batch waits. The descent stops there — no further in enemies until the batch is cleared, though the water keeps flowing (D27, D58). One of its fish glows from the moment it arrives and carries the batch's mod (D84, D88) — never in a mini-boss's batch, its escorts included (D116). Clearing it opens nothing: the current carries you straight on to the next gate. The layer's last batch is the exception — its clear is the layer end. | not a "wave", not a "batch", not the **layer end** |
 | **layer end** | The clear of a layer's last batch — the boss's (D62) — and the bottom the current then carries you to. **Not a gate but a milestone, bigger than one** (D68): it heals you fully, the boss drops a big haul of gems, and it offers a pick of valuable mods — the dive's one pause, ended by Continue (D85) — then the current carries you on into the next layer (D66). The last layer's end offers no pick — there is nothing to go on to — and is the win; its boss still drops its haul. Between layers there is no screen but the pick (D72). The term is Igor's: "or just call it layer end", kept as final (D73). | not a "gate" |
 | **boss** | A special enemy type, met in a layer's last batch (D62). It lunges, and spits a fan of shots in turn with the lunge (D64, D117). Its escorts keep coming while it lives — a crowd topped back up to a set size, paying no gems — and die with it, so killing it clears its batch: the **layer end** (D116). | not a "mini-boss" |
@@ -41,6 +41,8 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 | **attribute** | A **body** stat raised a **step** at a time by spending attribute points at home, each step a point dearer than the last (D109). Points are earned by in-dive challenges, never bought, and are capped at the source — the ladders hold a finite set of rungs (D36, D109). | not "gear", not a "mod"; a step is not a "tier" |
 | **point** | An attribute point (D36): paid by a rung of a challenge, once, ever, and spent at `home` to raise an attribute (D109). Never bought, and it buys no gear. | not currency, not a "mod point" (declined) |
 | **challenge** | An in-dive objective that pays attribute points, rewarding **mastery not quotas** — "clear a batch undamaged", never "kill 50 darters" (D36). Each is a ladder of **rungs**, harder up it, each a streak or one dive's feat, earned in any layer (D109). Igor's word (D110). | not an "achievement"; never "micro-task" or "task", its old names |
+| **entity** | Any concept the gameplay's mechanics use: a fish, a weapon, a piece of equipment, a mod, a boost, an attribute, a challenge, a layer, a batch, and the diver, though there is one. Every one keeps the diversity rule (D124). Igor's word. | not an **object** |
+| **object** | A thing on screen at once: a fish, a shot, a gem, a boost on the floor, a spark. The budget of 500 counts objects (D43). | not an "entity" |
 
 ## The genre contract
 
@@ -80,9 +82,59 @@ What this game *is*, stated so a branching session cannot drift off it.
    management while diving.
 7. **Content is data** (D6 — Content is data, not code). Every enemy, weapon, gear item, mod and batch is a
    record in a flat table. Adding one is a line and touches nothing else. This
-   is the property the whole alpha scope depends on — the DoD counts are only
-   achievable if adding the fifteenth enemy costs what the second did.
+   is the property the whole alpha scope depends on — the alpha counts are only
+   reachable if adding the fifteenth enemy costs what the second did.
 8. **2D, permanently** (D24 — Abyss is 2D, permanently). Not a phase.
+
+## Diversity — the main rule
+
+Igor, 2026-10-20: "diversity is the main rule of the game", and it holds from
+the start (D124). Every **entity** keeps these rules; the player's side of each
+is Igor's, in quotes.
+
+1. **Readable.** Words and actions map to what happens on screen. "i click
+   here now, so that i buy X that does Y so i'd be better on layer N when Z
+   enemy arrives"
+2. **A new kind keeps the rules at once**, the moment it appears in a design —
+   its doc in `entities/` included (D81).
+3. **Many.** Every kind reaches its alpha count, below: the borders of an MVP
+   that shows the project can go further, changed as the baseline is found.
+   "i really have a lot of build and upgrade possibilities, i want to explore
+   more. i feel like there's a lot to discover"
+4. **Different, always clearly.** Two entities may differ a little or a lot;
+   the player always sees how. "i know that right now i got these weapons and
+   bonuses and hp etc and i am fighting this guy unlike my previous run where i
+   had that setup". Mods still differ in kind, never only in amount (the genre
+   contract, 5).
+5. **Coupled or not, never contradicting.** Entities may depend on each other;
+   a gameplay contradiction the coupling causes is raised and recorded at
+   once — Lance on the Harpoon was one (`ideas.md`). "ok this thing looks
+   similar but has a slightly different effect, i see it now"
+6. **Added without breaking.** A new entity never breaks the gameplay or the
+   balance already there: bot dives before and after it hold every pillar
+   target (S6 (balance)'s bots). "just tried this new bonus and it improved my
+   dive a bit. just met this new enemy and couldnt beat it now, but i got an
+   idea and i will kill it in the next run or two"
+
+### Alpha counts
+
+How many of each kind the alpha has: its borders (rule 3). Provisional — a
+count changes here, in one line, and nowhere else.
+
+| kind | at alpha | set by |
+|---|---|---|
+| layer | 3–5 | Igor's draft |
+| weapon | 2–3 | Igor's draft |
+| equipment | 2–3 | Igor's draft |
+| tier, per weapon and per piece of equipment | 3–4 | Igor's draft |
+| fish type, the bosses aside | 5–7 | Igor's draft |
+| mod | 5–7 | D93 |
+| boost | 4–6 | D93 |
+| attribute | 3 | D93 |
+| challenge | 5 | D109 |
+| batch | not set | — |
+
+"Igor's draft" is `high level design.md` → its definition of done.
 
 ## Pillars, as things that can be checked
 
@@ -111,7 +163,7 @@ Igor's call and gets no check.
 
 - **Canvas 2D, zero *runtime* dependencies** (D30, D43). `shadowBlur` is used
   directly, per frame — the offscreen glow cache was cancelled once measurement
-  showed glow costs 0.05ms of a 16.7ms frame at the entity budget. `index.html`
+  showed glow costs 0.05ms of a 16.7ms frame at the object budget. `index.html`
   loads no libraries and stays double-clickable. Dev-only test tooling (Vitest,
   fast-check — D39) is exempt: it never ships and never loads at runtime.
 - **A check that cannot fail is not a check** (D39). The suite counts, groups
@@ -120,8 +172,8 @@ Igor's call and gets no check.
 - **Every recorded decision gets an invariant guarding it** (D39). A decision
   without a check erodes silently. This is what makes the suite covering; a
   coverage percentage is not.
-- **Entity budget: 500 simultaneous entities — a *design* limit, not a
-  technical one** (D43). Measured 2026-09-27: at 500 entities a whole frame
+- **Object budget: 500 objects on screen at once — a *design* limit, not a
+  technical one** (D43). Measured 2026-09-27: at 500 objects a whole frame
   costs under 1ms of a 16.7ms budget, and the headroom is roughly 4000. The
   number says how much should be on screen at once, not what the machine can
   bear. Dependencies are revisited only on a measured failure, and there is

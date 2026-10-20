@@ -1164,7 +1164,7 @@ function step(dt) {
 
   // --- bullets vs enemies ---
   // ponytail: every bullet against every enemy. Fine to a few hundred of each;
-  // if it ever chugs, bucket entities into a grid and only compare neighbours.
+  // if it ever chugs, bucket objects into a grid and only compare neighbours.
   for (const b of bullets) {
     if (b.gone || b.evil) continue;
     // Derived, not stored: unlike the diver, a bullet is never clamped.

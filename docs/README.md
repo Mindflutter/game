@@ -20,6 +20,8 @@ A change to them belongs in the same commit as the code it describes.
 | A weapon: its numbers and tiers | `entities/weapons.md` |
 | A piece of equipment | `entities/equipment.md` |
 | A challenge, the points it pays, and the attributes they buy | `entities/challenges.md` |
+| A layer, its stretches and the batches in its pools | `entities/layers.md` |
+| The diver's numbers at the start | `entities/diver.md` |
 | Why something was decided, and what was rejected | `decisions.md` |
 | Anything undecided: open questions, parked and declined ideas | `ideas.md` |
 | Something broken in the game — a real issue, not an idea | `bugs.md` |
@@ -58,6 +60,7 @@ copy.
 | An entity's numbers, role and behaviour | its doc in `entities/` |
 | How a system works — the gate, the descent, the drops, the pick, the save | `design.md` |
 | Measured bot figures | `roadmap.md` → Health |
+| How many of each kind the alpha has | `foundations.md` → Alpha counts |
 | A decision's reasons | its entry in `decisions.md` |
 | An open bug | `bugs.md` |
 
@@ -70,10 +73,11 @@ copy.
   its section;
 - every `` `NAME value` `` a doc quotes is the constant's real value, and no
   doc that describes the code names a constant the code has lost;
-- `design.md`'s list of the diver's starting numbers is complete and true;
 - the root `README.md` lists every scenario;
 - decisions are named, numbered without gaps, cited only if they exist, and the
   newest has a changelog entry;
+- every kind of entity is within its alpha count (D124 (diversity, the main
+  rule));
 - no living doc, nor the code, calls a challenge by its old name (D110
   (challenges));
 - no doc quotes how many checks there are (D123 (nothing rewritten every

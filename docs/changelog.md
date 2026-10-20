@@ -6,6 +6,17 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-20
 
+**Diversity, the main rule** (D124 (diversity, the main rule))
+Igor: "diversity is the main rule of the game" — "it must be from the start".
+`foundations.md` gains it: what an entity is, the six rules every entity
+keeps, and an Alpha counts table — the counts that were split between his
+draft, the glossary and D93 (the content stage's counts), now in one place.
+The budget of 500 counts objects, freeing "entity" for the rule.
+`tests/docs.test.js` holds every content table within its alpha count. New
+entity docs: `entities/layers.md` — every layer, its stretches, and each
+pool's batches with the hp they are sized on — and `entities/diver.md`, the
+diver's numbers at the start, moved out of `design.md`.
+
 **Nothing kept that every session rewrites** (D123 (nothing rewritten every session))
 Igor: "anything that requires rewrites on every session and is not set by a
 decision or a fix should be wiped out. the idea is you not doing pointless
