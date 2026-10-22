@@ -442,66 +442,22 @@ discussed.
 - **The Knife's arc halved.** Igor, 2026-10-15: "knife arc reduce by half" —
   120° to 60°, from D105 (the Knife swings)'s pick, given "for balance".
   **Home**: S6 (balance), his "for balance".
-- **Frenzy evens the weapons out.** Igor, 2026-10-20: "frenzy cant make all
-  weapons fire at the same range, rather boost by percentage". Its
-  `fireRate +3` is flat: the Gun from 2.5 shots a second to 5.5, the Knife from
-  3 to 6, the Harpoon from 0.8 to 3.8 — twice, twice and nearly five times — so
-  while it runs every weapon fires in one band, and the slow Harpoon is slow no
-  more ("range" read as the rates, all Frenzy touches). By a percentage, each
-  keeps its pace against the others. It meets `entities/boosts.md`'s "never
-  multiplies", cited to D74 (mods on top of gear and attributes) — which ruled
-  on mods; boosts came after, and the line was Claude's. Open: whether a
-  boost moves a weapon's numbers at all — Boosts and the weapons' nature,
-  below. **Home**: this pass, Claude's proposal — flat or percentage changes
-  what the number means, the pass's own test (`plan.md` → Active stage); the
-  percentage itself S6 (balance)'s.
-- **Bloom is questionable.** Igor, 2026-10-20, after playing it: "bloom is a
-  questionable bonus overall, needs polishing". Today a bigger shot for six
-  seconds — the Gun's and the Harpoon's hit 16–40% wider, most against small
-  fish, the Knife reaching 8% further (`entities/boosts.md`). Open: what is
-  questionable in it, and what polishing means — its effect, its size, or its
-  place among the boosts. **Home**: open, to discuss; Claude's proposal, this
-  pass beside Frenzy, the same boosts' design.
-- **Lance and the Harpoon don't play well together.** Igor, 2026-10-20: "lance
-  and harpoon dont play well together. likely a balance issue". The Harpoon
-  goes through 2 fish past the first — 3 at its top tier, and Barbs adds up to
-  3 more — and Lance adds 4: one shot through 7 fish, up to 11, at 3–4 damage
-  each. Which way, asked: "i mean same effect" — Lance gives the Harpoon more
-  of what it already is, pierce, which its top tier and Barbs add too.
-  **Home**: S6 (balance), his "likely a balance issue".
-- **Boosts and the weapons' nature.** Igor, 2026-10-20, on the three above:
-  "balance largely affect the decisions that are already in, so need to be
-  flexible. atm i dont have an answer on boosts vs weapon nature, but we might
-  want to untie entities to make it simpler overall and in terms of
-  scalability especially" — and, asked whether he meant a boost that never
-  touches the weapon: "yes i menat that". A lean, its meaning confirmed. What
-  ties them now: Frenzy, Lance and Bloom move the carried weapon's own numbers
-  (D99 (weapon mods, and more boosts)), so each meets each weapon's nature —
-  every new weapon a row to judge against every boost, every new boost a
-  column. D34 (mods: a lightweight choice, one per gate) reasoned exactly this
-  for mods — "+15% fire rate" means nothing on melee — and D99 (weapon mods,
-  and more boosts) did not carry it to boosts. Untied, a boost reads the same
-  with every weapon and is tuned once, not once per weapon.
-
-  The wider shape, Igor: "more complex idea: there are diver boosts, attr
-  boosts, individual weapon boosts, and totally new boosts - like an explosion
-  killing nearby, or launches shots in all directions, or poisons etc - ideas
-  only, incorporate when appropriate. i'd call them environmental. again, i'll
-  repeat my generic saying, no limits there, diversity is the main rule of the
-  game." Four kinds:
-  - **diver** — the diver's own numbers: swim speed (Rush's), the dash;
-  - **attribute** — Claude's reading: an attribute's step, for a while
-    (`entities/challenges.md`);
-  - **individual weapon** — one weapon's, dealt only while it is carried, as
-    `fits()` deals a weapon mod: tied on purpose to the weapon it suits, not to
-    every weapon by accident (Claude's reading of how it sits with the untie);
+- **More kinds of boost.** Igor, 2026-10-20: "more complex idea: there are
+  diver boosts, attr boosts, individual weapon boosts, and totally new boosts -
+  like an explosion killing nearby, or launches shots in all directions, or
+  poisons etc - ideas only, incorporate when appropriate. i'd call them
+  environmental. again, i'll repeat my generic saying, no limits there,
+  diversity is the main rule of the game." A weapon's own is built — Lance, the
+  Gun's (D125 (boosts keep each weapon's nature)). Still open:
+  - **diver** and **attribute** — Claude's reading, unconfirmed: one kind, both
+    the diver's own numbers — swim speed (Rush's), the dash, an attribute's
+    step for a while (`entities/challenges.md`);
   - **environmental**, his word — an effect of its own, not a number: an
     explosion killing what is near, shots in every direction, poison. Code
     rather than numbers, so the first one reopens D86 (boosts)'s "numbers, not
-    a function".
-  **Home**: ideas, "incorporate when appropriate". Claude's proposal,
-  unconfirmed: the untie in this pass, since it decides what a boost's number
-  means; the kinds as content comes.
+    a function"; Claude's proposal, unconfirmed: a field whose presence
+    switches on one branch, as an enemy's behaviour is.
+  **Home**: ideas, "incorporate when appropriate"; the kinds as content comes.
 
 **Feel**
 

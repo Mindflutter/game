@@ -6,6 +6,20 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-20
 
+**Boosts keep each weapon's nature** (D125 (boosts keep each weapon's nature))
+Igor, after playing them: Frenzy "cant make all weapons fire at the same
+range", Bloom is "questionable", Lance and the Harpoon "dont play well
+together"; what he was after, "to balance boosts across different weapon
+setups" — the call delegated, "go your way, whatever fits". A boost any weapon
+gets adds to no weapon's number, only raises one by a `percent`: **Frenzy**
+doubles the weapon's own rate, the Harpoon's no longer nearly quintupled.
+**Lance** is the Gun's own, dropped only while it is carried. **Bloom**
+splashes — "do the splash": a hit wounds the fish within 24px of the struck
+one, unknocked, never chaining. A running boost keeps what it added and takes
+exactly that back. The readout shows `splash`. Save version 11: a v10 dive's
+running boosts come off as they went on. Checks in `tests/drops.test.js`,
+`tests/combat.test.js` and `tests/save.test.js`, with the v11 fixture.
+
 **Diversity, the main rule** (D124 (diversity, the main rule))
 Igor: "diversity is the main rule of the game" — "it must be from the start".
 `foundations.md` gains it: what an entity is, the six rules every entity

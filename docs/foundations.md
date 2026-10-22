@@ -108,7 +108,7 @@ is Igor's, in quotes.
    contract, 5).
 5. **Coupled or not, never contradicting.** Entities may depend on each other;
    a gameplay contradiction the coupling causes is raised and recorded at
-   once — Lance on the Harpoon was one (`ideas.md`). "ok this thing looks
+   once — Lance on the Harpoon was one (D125 (boosts keep each weapon's nature)). "ok this thing looks
    similar but has a slightly different effect, i see it now"
 6. **Added without breaking.** A new entity never breaks the gameplay or the
    balance already there: bot dives before and after it hold every pillar

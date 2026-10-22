@@ -4313,3 +4313,76 @@ lean to it. only useful structured info, no bullshit".
 content tables: a kind outside its range, or a counted kind missing from the
 table, fails; and the two new docs held to the code as every entity doc is —
 their tables, their fields, a section for every layer. Verified by breaking it.
+
+## D125 — Boosts keep each weapon's nature · 2026-10-20
+Igor, 2026-10-20, after playing them: "frenzy cant make all weapons fire at the
+same range, rather boost by percentage"; "bloom is a questionable bonus
+overall, needs polishing"; "lance and harpoon dont play well together. likely a
+balance issue"; and, on all three, "we might want to untie entities to make it
+simpler overall and in terms of scalability especially". Shown the arithmetic
+— a flat `+3` makes the Gun fire 2.2 times as fast, the Knife twice, the
+Harpoon nearly five times; a share doubles each — he said what he was after:
+"my call was to balance boosts across different weapon setups. frenzy with
+different numbers is fine i guess. or go your way, whatever fits." On Bloom:
+"at this point without graphics i dont feel it's boosting anything. visually
+bullets are bigger and that's it"; offered a splash, "do the splash".
+
+**Decided, by Claude — delegated** ("go your way, whatever fits"), open to
+Igor to reopen:
+- **A boost any weapon can get keeps the weapons in their order.** It adds to
+  no weapon's number; it may raise one by a share of it, `percent`, worked out
+  as it is touched — a number every weapon has above zero, since a share of
+  nothing is nothing. Every weapon gains the same share, so the boost is
+  tuned once, never once per weapon, and a new weapon needs nothing from it.
+- **A boost that means something only on one weapon is that weapon's own**:
+  `weapons`, dropped only while one it names is carried, through the `fits()`
+  that deals a weapon mod (D99 (weapon mods, and more boosts)).
+- **Frenzy** raises the fire rate by 100% — Claude's pick, about what the Gun
+  and the Knife gained before; the Harpoon's rate doubles instead of nearly
+  quintupling.
+- **Lance is the Gun's own.** The Harpoon and the Knife already go through
+  fish, so on them it was more of the same — Igor's "same effect" — and a
+  share cannot carry it, the Gun's pierce being 0. Its `swingDesc` goes with
+  the Knife it can no longer meet. Lance and the Harpoon no longer meet.
+- **Running, a boost keeps what it added** and takes exactly that back, so a
+  share comes off as it went on.
+
+His earlier lean, a boost that never touches the weapon ("yes i menat that"),
+is kept in its aim — tuned once, the same with every weapon — not its letter:
+Frenzy touches the weapon's rate, by a share, as his "frenzy with different
+numbers is fine" allows.
+
+**Decided, by Igor** ("do the splash"): **Bloom splashes.** While it runs, a
+shot's or a swing's hit wounds every fish whose body is within `splash` of the
+struck one's, for the hit's damage. Claude's picks, stated with it: `splash`
+24px; the splash knocks nothing; a fish it wounds splashes nothing on, so a
+crowd cannot chain; it stays a number on the diver, read where a hit lands, so
+D86 (boosts)'s "numbers, not a function" holds. Flagged for S6 (balance): a
+Harpoon shot through three fish splashes three times, and every fish a Knife
+cuts splashes.
+
+**Supersedes in part** D99 (weapon mods, and more boosts): its three boosts on
+"the weapon's own numbers, so they serve every weapon" — Frenzy now by a
+share, Lance the Gun's, Bloom a splash. `entities/boosts.md`'s "never
+multiplies" was Claude's line, citing D74 (mods on top of gear and
+attributes), which ruled on mods; it goes. `foundations.md` → Diversity, rule
+5, cites this entry for the Lance example in place of `ideas.md`.
+
+**Not decided**: Igor's wider shape — diver, attribute, a weapon's own and
+"environmental" boosts — beyond the weapon's own, built here. Claude's
+reading, unconfirmed: a diver boost and an attribute boost are one kind, both
+the diver's numbers. Kept in `ideas.md`.
+
+**Save**: version 11. A v10 dive's running boosts take back what they added
+then, its diver gets `splash: 0`, and a Lance on the floor goes unless the
+Gun is carried.
+
+**Guarded by**: `tests/drops.test.js` — every boost on with a touch, with every
+weapon it fits, its share of that weapon's own number, and off after its time;
+no boost any weapon gets adding to a weapon's number, nor sharing one some
+weapon lacks; a weapon's own boost dropped with that weapon only.
+`tests/combat.test.js` — a shot's hit wounding the fish beside, unknocked, and
+none past it; a Knife cut's splash killing through the one path, no fish cut
+after it died, each paid once. `tests/save.test.js` — a v10 dive's Frenzy and
+Bloom taken back as they were added, its Lance kept with the Gun only, and
+the v11 fixture.

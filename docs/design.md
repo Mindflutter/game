@@ -234,7 +234,11 @@ instant. Every number of the shot — rate, damage, range, speed, hitbox,
 pierce — is the carried weapon's, on the player (D83): `entities/weapons.md`.
 A weapon with a `swing` fires no shot (D105): `swing()` cuts, at once, every
 fish whose body reaches into the arc toward the cursor, nearest first, and
-leaves `swingLeft` on the player for the renderer to draw the wedge.
+leaves `swingLeft` on the player for the renderer to draw the wedge. A shot's
+hit and a cut both end in `hit()`: the weapon's damage, and with a `splash` on
+the player — Bloom's (D125 (boosts keep each weapon's nature)) — the same
+wound to every fish whose body is within it of the struck one's, unknocked and
+splashing nothing on. A cut skips a fish a nearer cut's splash already killed.
 
 **Arrivals: the batch queue and the gate** (D27, D48, D54, D115). Enemies come one
 **batch** at a time — a record naming counts per type — and nothing of the next
@@ -449,15 +453,19 @@ Anything a mod raises is a field on `player` rather than a `const` — that is w
 **Boosts** (D86). Every kill counts toward the next boost in `sinceBoost`; the
 chance on the next kill is `BOOST_C × sinceBoost`, and a boost dropping starts
 the count again. The kill that empties the arena never drops one. Which boost
-is a seeded draw from `BOOSTS` (`entities/boosts.md`). It lies in `drops` where
-it fell, unpulled, for `BOOST_LIFE` seconds, blinking over the last of them
-(`BOOST_BLINK` in `render.js`), and touching it runs `startBoost()`: its `add`
-goes onto the player, `{ name, left }` into `boosts`, and its line onto the
+is a seeded draw from the `BOOSTS` that fit the weapon carried
+(`entities/boosts.md`): a weapon's own is drawn only with it, through the
+`fits()` the weapon mods use (D125 (boosts keep each weapon's nature)). It lies
+in `drops` where it fell, unpulled, for `BOOST_LIFE` seconds, blinking over the
+last of them (`BOOST_BLINK` in `render.js`), and touching it runs
+`startBoost()`: its `add`, and its `percent` of the player's own numbers as
+they stand, go onto the player, `{ name, left, add }` — what it added — into
+`boosts`, and its line onto the
 pickup line — its `swingDesc` instead of `desc`, where it has one, while the
 weapon carried swings (D105 (the Knife swings)). Touched again while it
 runs, its clock restarts and nothing more is added. Each tick of play counts
-`left` down and takes `add` off at zero, so the pause and the layer end's pick
-hold it. A boost never moves `hp`, which could not be taken back cleanly.
+`left` down and takes off what it added at zero, so the pause and the layer
+end's pick hold it. A boost never moves `hp`, which could not be taken back cleanly.
 
 **Currency.** Kills drop gems at the corpse, and every gem flies to you at
 `GEM_PULL` from wherever it dropped and never fades — nothing can be stranded,
@@ -529,7 +537,7 @@ read only keeps its default; `main.js` then copies the text
 aside under `abyss-save-rejected` and the title says why. Written through
 `saveNow()` on pause, on a purchase, when a dive ends, and — asked by `main.js`
 — when the page is hidden or closed; a setting is written as M is pressed and
-as the Options screen is left; never in the debug mode. `SAVE_VERSION` is 10. `migrate()` brings an older save up
+as the Options screen is left; never in the debug mode. `SAVE_VERSION` is 11. `migrate()` brings an older save up
 one version at a time as it loads: a v1 dive's player gains the Gun's shot
 speed and radius as they were then (D83); a v2 dive loses its rank, starts with
 nothing dropped or running and no fish lit in the batch it was in, and — saved
@@ -546,8 +554,10 @@ layer (D109); a v7 dive's batch came in whole, so it has no fish still to come
 1, as every hit was then — onto the records each fish has, so a boss saved
 before its fan still only lunges (D117, D118); a v9 dive's fish knock as their
 type's do now, an eel's touch becomes its record, a shot already in flight
-knocks nothing and the diver takes its weapon's knock (D122).
-`tests/fixtures/save-v1.json` to `save-v10.json`, each written by the first
+knocks nothing and the diver takes its weapon's knock (D122); a v10 dive's
+running boosts take back what they added then, its diver gets no splash, and a
+Lance on the floor goes unless the Gun is carried (D125).
+`tests/fixtures/save-v1.json` to `save-v11.json`, each written by the first
 build of its version, must all load in every later build.
 
 **Damage.** A bite, an eel's touch, a charge, an enemy's shot or a burst costs

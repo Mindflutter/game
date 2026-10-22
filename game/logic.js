@@ -351,15 +351,32 @@ function swing(ux, uy) {
   }
   cut.sort((a, b) => a[0] - b[0]);
   for (const [, e] of cut.slice(0, player.pierce + 1)) {
-    e.hp -= player.damage;
-    e.flash = 0.07;
+    if (e.gone) continue;                    // the splash of a nearer cut killed it
     knock(e, ux, uy);
     hitSparks(e, { vx: ux, vy: uy });
-    if (e.hp <= 0) killEnemy(e);
+    hit(e);
   }
   player.swingLeft = player.swing.time;      // what the renderer draws
   player.swingX = ux;
   player.swingY = uy;
+}
+
+// A shot's or a swing's damage. With Bloom running it wounds the fish beside
+// the struck one too (D125); a wound never splashes on, so a crowd cannot chain.
+function hit(e) {
+  wound(e);
+  if (!player.splash) return;
+  for (const x of enemies) {
+    if (x === e || x.gone) continue;
+    const dx = x.x - e.x, dy = x.y - e.y, reach = e.r + x.r + player.splash;
+    if (dx * dx + dy * dy < reach * reach) wound(x);
+  }
+}
+
+function wound(e) {
+  e.hp -= player.damage;
+  e.flash = 0.07;
+  if (e.hp <= 0) killEnemy(e);
 }
 
 // A hit knocks a fish along it (D122), as the bodies weigh: the heavier by
@@ -415,7 +432,7 @@ function killEnemy(e) {
   // you as the current carried you on. Between waves the fight goes on (D115).
   sinceBoost += 1;
   if ((enemies.some(x => !x.gone) || incoming.length) && rng() < BOOST_C * sinceBoost) {
-    drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS, 1)[0].name, life: BOOST_LIFE });
+    drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS.filter(fits), 1)[0].name, life: BOOST_LIFE });
     sinceBoost = 0;
   }
   burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
@@ -446,13 +463,16 @@ function collectMod(name) {
 }
 
 // Touched again while it runs, its clock restarts and nothing more is added.
+// What it added runs with it, so exactly that comes back off (D125).
 function startBoost(name) {
   const b = BOOSTS.find(x => x.name === name);
   const on = boosts.find(x => x.name === name);
   if (on) on.left = b.time;
   else {
-    for (const k in b.add) player[k] += b.add[k];
-    boosts.push({ name, left: b.time });
+    const add = { ...b.add };
+    for (const k in b.percent) add[k] = player[k] * b.percent[k] / 100;
+    for (const k in add) player[k] += add[k];
+    boosts.push({ name, left: b.time, add });
   }
   banner = b.name + ' \u2014 ' + ((player.swing && b.swingDesc) || b.desc);
   bannerTime = NOTICE_TIME;
@@ -947,8 +967,7 @@ function step(dt) {
   for (const a of boosts) {
     a.left -= dt;
     if (a.left > 0) continue;
-    const add = BOOSTS.find(x => x.name === a.name).add;
-    for (const k in add) player[k] -= add[k];
+    for (const k in a.add) player[k] -= a.add[k];
     a.gone = true;
   }
   boosts = boosts.filter(a => !a.gone);
@@ -1176,11 +1195,9 @@ function step(dt) {
       if (segDistanceSq(e.x, e.y, ax, ay, b.x, b.y) < reach * reach) {
         if (e.lastHitBy === b.id) continue;   // a shot hits each enemy at most once
         e.lastHitBy = b.id;
-        e.hp -= player.damage;
-        e.flash = 0.07;
         knock(e, b.vx / b.speed, b.vy / b.speed);
         hitSparks(e, b);
-        if (e.hp <= 0) killEnemy(e);
+        hit(e);
         if (b.pierce > 0) { b.pierce -= 1; }
         else { b.gone = true; break; }
       }

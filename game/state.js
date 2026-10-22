@@ -232,7 +232,7 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 10;
+const SAVE_VERSION = 11;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
@@ -366,6 +366,17 @@ function migrate(s) {
       d.player.knock = (WEAPONS.find(w => w.name === d.weaponName) || WEAPONS[0]).knock;
     }
     s.version = 10;
+  }
+  if (s && s.version === 10) {
+    const d = s.dive;
+    if (d) {
+      // What each boost added then, so one running comes off as it went on (D125).
+      const was = { Rush: { speed: 200 }, Frenzy: { fireRate: 3 }, Lance: { pierce: 4 }, Bloom: { shotRadius: 6 } };
+      for (const a of d.boosts) a.add = was[a.name];
+      d.drops = d.drops.filter(x => x.boost !== 'Lance' || d.weaponName === 'Gun');
+      d.player.splash = 0;
+    }
+    s.version = 11;
   }
   return s;
 }

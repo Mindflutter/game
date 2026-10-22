@@ -251,12 +251,12 @@ describe('the entity docs', () => {
   });
 
   it('lists every boost with what it adds, for how long, and its line', () => {
-    // `add` is numbers, so it is read straight off the record (D86).
+    // `add` and `percent` are numbers, so they are read straight off the record (D86, D125).
     const cols = plain(g.BOOSTS);
-    const adds = b => Object.entries(b.add)
-      .map(([k, v]) => k + ' ' + (v < 0 ? '-' : '+') + r3(Math.abs(v))).join(', ');
-    expectIn(doc('boosts.md'), table([...cols, 'adds'],
-      g.BOOSTS.map(b => [...cols.map(k => b[k]), adds(b)])));
+    const adds = b => [...Object.entries(b.add || {}).map(([k, v]) => k + ' ' + (v < 0 ? '-' : '+') + r3(Math.abs(v))),
+                       ...Object.entries(b.percent || {}).map(([k, v]) => k + ' +' + v + '%')].join(', ');
+    expectIn(doc('boosts.md'), table([...cols, 'for', 'adds'],
+      g.BOOSTS.map(b => [...cols.map(k => b[k]), (b.weapons || ['any']).join(', '), adds(b)])));
   });
 
   it('lists every challenge -- when it is judged, its rungs, what it asks -- and every attribute (D110)', () => {

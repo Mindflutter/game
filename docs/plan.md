@@ -29,6 +29,9 @@ number before the numbers are tuned:
 - **Real knockback** — Igor, 2026-10-19: "drawn bump stays for s7, real
   knockback - design and implement now":
   `specs/2026-10-19-knockback-design.md`, built as D122 (knockback).
+- **Boosts that keep each weapon's nature** — Igor, 2026-10-20: "to balance
+  boosts across different weapon setups": built as D125 (boosts keep each
+  weapon's nature).
 
 Where it stands is `roadmap.md` → Next. **S6 — Balance** follows; its entry,
 S5 exiting, is met, and it opens on Igor's word.

@@ -95,8 +95,9 @@ number is Claude's pick, S6 (balance)'s to tune.
 Melee (D105 (the Knife swings)): no shot — each pull of the trigger cuts an arc
 toward the cursor, and every fish whose body reaches into it is hit at once,
 nearest first, up to its `pierce` + 1. It trades the Gun's reach for closeness:
-you have to be where the fish are, and a crowd is where it pays. Bloom widens
-the blade and Lance lets it cut more, as they do a shot. Its tiers add reach,
+you have to be where the fish are, and a crowd is where it pays. With Bloom
+each cut splashes, as a shot does; Lance is the Gun's own and never comes with
+it (D125 (boosts keep each weapon's nature)). Its tiers add reach,
 then damage, then rate. Every number is Claude's pick, S6 (balance)'s to tune.
 
 ## Adding one

@@ -280,7 +280,7 @@ describe('the status bar', () => {
     g.reset();
     const shown = g.PLAYER_STATS.map(s => s.stat).concat(['hp', 'maxHp']);
     const moved = [...new Set([...g.MODS.flatMap(m => g.modPreview(m).map(c => c.stat)),
-                               ...g.BOOSTS.flatMap(b => Object.keys(b.add))])];
+                               ...g.BOOSTS.flatMap(b => Object.keys({ ...b.add, ...b.percent }))])];
     expect(moved.filter(k => !shown.includes(k))).toEqual([]);
     expect(g.PLAYER_STATS.filter(s => !(s.stat in g.player)).map(s => s.stat)).toEqual([]);
   });

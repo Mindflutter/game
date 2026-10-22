@@ -17,6 +17,10 @@ const ordinary = g => g.MODS.filter(m => !m.end && g.fits(m));
 // dive.test.js holds them to be.
 const STATS = [...loadGame().PLAYER_STATS.map(s => s.stat), 'hp', 'maxHp'];
 const stats = p => STATS.map(k => p[k]);
+// What a boost adds to diver `p`, read off its record: `add` as it stands, and
+// `percent` of the diver's own number (D125).
+const adds = (b, p) => ({ ...b.add,
+  ...Object.fromEntries(Object.entries(b.percent || {}).map(([k, v]) => [k, p[k] * v / 100])) });
 
 // The dive's first layer end, its boss arrived, the diver kept alive.
 function atLayerEnd() {
@@ -415,31 +419,58 @@ describe('boosts (D86)', () => {
     const base = { ...g.player };
     const name = boostAt(g, g.player.x, g.player.y).boost;
     const b = g.BOOSTS.find(x => x.name === name);
-    const on = () => Object.keys(b.add).map(k => g.player[k] - base[k]);
+    const want = adds(b, base);
+    const on = () => Object.keys(want).map(k => g.player[k] - base[k]);
     g.update(g.FIXED_DT);                                    // touched where it fell
-    expect(on()).toEqual(Object.values(b.add));
+    expect(on()).toEqual(Object.values(want));
     expect(g.banner).toContain(name);
     for (let i = 0, n = ticks(g, b.time / 2); i < n; i++) g.update(g.FIXED_DT);
     boostAt(g, g.player.x, g.player.y);                      // the same boost again
     g.update(g.FIXED_DT);
-    expect(on()).toEqual(Object.values(b.add));              // added once, not twice
+    expect(on()).toEqual(Object.values(want));               // added once, not twice
     for (let i = 0, n = ticks(g, b.time * 0.75); i < n; i++) g.update(g.FIXED_DT);
-    expect(on()).toEqual(Object.values(b.add));              // past the first's end: restarted
+    expect(on()).toEqual(Object.values(want));               // past the first's end: restarted
     for (let i = 0, n = ticks(g, b.time * 0.5); i < n; i++) g.update(g.FIXED_DT);
     expect(on().every(v => Math.abs(v) < 1e-9)).toBe(true); // and gone
   });
 
-  it('puts every boost\'s numbers on with a touch and takes them back after its time', () => {
+  it('puts every boost\'s numbers on with a touch, with every weapon it fits, and takes them back after its time', () => {
+    // A share of the weapon's own number, so each keeps its pace (D125).
     const g = loadGame();
-    for (const b of g.BOOSTS) {
-      g.reset(1);
-      g.queuePaused = true;
-      const base = { ...g.player };
-      g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: b.name, life: g.BOOST_LIFE });
-      g.update(g.FIXED_DT);
-      expect(Object.keys(b.add).map(k => g.player[k] - base[k])).toEqual(Object.values(b.add));
-      for (let i = 0, n = ticks(g, b.time + 0.05); i < n; i++) g.update(g.FIXED_DT);
-      expect(Object.keys(b.add).every(k => Math.abs(g.player[k] - base[k]) < 1e-9)).toBe(true);
+    for (const w of g.WEAPONS) {
+      for (const b of g.BOOSTS.filter(x => !x.weapons || x.weapons.includes(w.name))) {
+        g.reset(1, w);
+        g.queuePaused = true;
+        const base = { ...g.player }, want = adds(b, base);
+        g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: b.name, life: g.BOOST_LIFE });
+        g.update(g.FIXED_DT);
+        expect(Object.keys(want).map(k => g.player[k] - base[k])).toEqual(Object.values(want));
+        for (let i = 0, n = ticks(g, b.time + 0.05); i < n; i++) g.update(g.FIXED_DT);
+        expect(Object.keys(want).every(k => Math.abs(g.player[k] - base[k]) < 1e-9)).toBe(true);
+      }
+    }
+  });
+
+  it('keeps the weapons in their order: a boost any weapon can get adds to no weapon\'s number, only raises one by a share (D125)', () => {
+    const g = loadGame();
+    const numbers = [...new Set(g.WEAPONS.flatMap(w => Object.keys(w)
+      .filter(k => typeof w[k] === 'number' && k !== 'cost')))];
+    for (const b of g.BOOSTS.filter(x => !x.weapons)) {
+      expect(Object.keys(b.add || {}).filter(k => numbers.includes(k))).toEqual([]);
+      // A share of nothing is nothing: only of a number every weapon has.
+      for (const k in b.percent) expect(g.WEAPONS.filter(w => !(w[k] > 0)).map(w => w.name)).toEqual([]);
+    }
+  });
+
+  it('drops a weapon\'s own boost only while that weapon is carried (D125)', () => {
+    const g = loadGame();
+    const own = g.BOOSTS.filter(b => b.weapons);
+    expect(own.length).toBeGreaterThan(0);
+    for (const w of g.WEAPONS) {
+      g.reset(1, w);
+      const names = new Set();
+      for (let i = 0; i < 200; i++) names.add(boostAt(g, 100, g.cameraY + 100).boost);
+      for (const b of own) expect([w.name, b.name, names.has(b.name)]).toEqual([w.name, b.name, b.weapons.includes(w.name)]);
     }
   });
 
@@ -454,6 +485,7 @@ describe('boosts (D86)', () => {
     };
     for (const b of g.BOOSTS) {
       expect(touch(b, () => g.reset(1))).toContain(b.desc);              // the Gun shoots
+      if (b.weapons && !b.weapons.includes('Knife')) continue;          // never dropped for it (D125)
       expect(touch(b, () => g.applyScenario('knife', 1))).not.toMatch(/shot|fire/);
     }
   });
@@ -463,10 +495,11 @@ describe('boosts (D86)', () => {
     g.reset(1);
     const name = boostAt(g, g.player.x, g.player.y).boost;   // one drop, whichever it is
     const b = g.BOOSTS.find(x => x.name === name);
-    const k = Object.keys(b.add)[0], base = g.player[k];
+    const want = adds(b, g.player);
+    const k = Object.keys(want)[0], base = g.player[k];
     g.update(g.FIXED_DT);
     const boosted = g.player[k];
-    expect(boosted).toBe(base + b.add[k]);
+    expect(boosted).toBe(base + want[k]);
     g.justPressed.add('Escape');
     g.update(g.FIXED_DT);
     expect(g.screen).toBe('paused');

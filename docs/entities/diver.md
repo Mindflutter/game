@@ -12,9 +12,9 @@ when the two disagree.
 
 ## Roster
 
-| r | speed | ramp | turn | hp | maxHp | iframes | dashCooldown | dashSpeed | mendOnClear | dashDamage | guard |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 20 | 260 | 0.25 | 0.2 | 3 | 3 | 1 | 2.2 | 620 | 0 | 0 | 0 |
+| r | speed | ramp | turn | hp | maxHp | iframes | dashCooldown | dashSpeed | mendOnClear | dashDamage | guard | splash |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 20 | 260 | 0.25 | 0.2 | 3 | 3 | 1 | 2.2 | 620 | 0 | 0 | 0 | 0 |
 
 ## Fields
 
@@ -32,6 +32,7 @@ when the two disagree.
 | `mendOnClear` | HP | Healed per batch cleared; `Mend` grants it (`mods.md`). |
 | `dashDamage` | damage | What a dash does to each fish it passes: none until bought (D51 (the dash is bought)). It always shoves. |
 | `guard` | hits | Hits a batch can take without losing HP, refilled as each batch arrives — the Suit's (D100 (equipment: the Mask, the Suit and the Weights)). |
+| `splash` | px | How far from a struck fish's body its hit wounds the fish beside it too: none but while Bloom runs (D125 (boosts keep each weapon's nature)). |
 
 ## Adding a field
 

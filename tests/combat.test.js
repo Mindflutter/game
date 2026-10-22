@@ -502,3 +502,52 @@ describe('knockback (D122)', () => {
     expect(g.player.x).toBeGreaterThanOrEqual(g.player.r);
   });
 });
+
+describe('the splash (D125)', () => {
+  // Bloom touched, so the diver splashes as a dive's would.
+  const bloom = g => {
+    g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: 'Bloom', life: g.BOOST_LIFE });
+    g.update(g.FIXED_DT);
+    expect(g.player.splash).toBeGreaterThan(0);
+  };
+
+  it('wounds the fish beside the one a shot hits, without knocking it, and spreads no further', () => {
+    const hurt = splashing => {
+      const g = quiet();
+      g.immortal = true;
+      if (splashing) bloom(g);
+      g.player.fireTimer = 999;                  // silence the weapon
+      const gap = g.BOOSTS.find(b => b.name === 'Bloom').add.splash - 2;
+      // Beside the struck fish, inside its splash; and beside that one, out of it.
+      const struck = mob(g.player.x + 100, g.player.y, { hp: 9, maxHp: 9 });
+      const beside = mob(struck.x, struck.y + 18 + gap, { hp: 9, maxHp: 9 });
+      const next = mob(struck.x, beside.y + 18 + gap, { hp: 9, maxHp: 9 });
+      g.enemies.push(struck, beside, next);
+      shot(g);
+      run(g, 30);
+      return [struck, beside, next].map(e => [9 - e.hp, e.pushX !== 0 || e.pushY !== 0]);
+    };
+    expect(hurt(false)).toEqual([[1, true], [0, false], [0, false]]);
+    expect(hurt(true)).toEqual([[1, true], [1, false], [0, false]]);
+  });
+
+  it('kills through the one path: a fish its splash killed is not cut again, and pays once', () => {
+    const g = loadGame();
+    expect(g.applyScenario('knife', 1)).toBe(true);
+    g.queuePaused = true;
+    g.immortal = true;
+    bloom(g);
+    // Three in the blade's way, nearly touching: the nearest's cut splashes the others dead.
+    const x = g.player.x + g.player.r + 9 + 10;
+    const fish = [-20, 0, 20].map(dy => mob(x, g.player.y + dy));
+    g.enemies.push(...fish);
+    const [kills, paid] = [g.kills, g.gems.length + g.currency];
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    holdFire(g);
+    g.update(g.FIXED_DT);
+    g.keys.delete('Mouse0');
+    expect(fish.every(e => e.gone)).toBe(true);
+    expect([g.kills - kills, g.gems.length + g.currency - paid]).toEqual([3, 3]);
+  });
+});

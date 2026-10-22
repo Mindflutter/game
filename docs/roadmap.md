@@ -29,7 +29,7 @@ end's own (`entities/mods.md`), the boost chance, a boost's life on the floor
 and `Rush` (`entities/boosts.md`) — and S5 (content)'s: every number of the
 archer, the puffer and the eel (`entities/enemies.md`), of the Harpoon and the
 Knife (`entities/weapons.md`), of the three pieces of equipment
-(`entities/equipment.md`), of Barbs and the three boosts (`design.md`), and
+(`entities/equipment.md`), of Barbs and the three boosts (`entities/mods.md`, `entities/boosts.md`), and
 the layers' pools — and this pass's: every challenge's rungs, what a rung pays,
 what a step costs and what each attribute's step adds
 (`entities/challenges.md`), and the dash's 99px (D111) — all Claude's picks.

@@ -25,6 +25,7 @@ const PLAYER_START = {
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
   dashDamage: 0,     // pure movement until bought (D51); it always shoves
   guard: 0,          // hits a batch can take without losing HP -- the suit's (D100)
+  splash: 0,         // px from a struck fish's body that its hit wounds too -- Bloom's (D125)
 };
 
 const DASH_TIME      = 0.16;  // seconds of dash
@@ -143,16 +144,18 @@ const STAT_NAMES = {
 };
 
 // ---------- boosts ----------
-// Documented in docs/entities/boosts.md, held to it by `npm test`. `add` is
-// numbers, not a function, so it can be taken back -- and so never moves `hp`.
+// Documented in docs/entities/boosts.md, held to it by `npm test`. `add` and
+// `percent` are numbers, not a function, so they can be taken back -- and so
+// never move `hp`. A boost every weapon gets keeps the weapons in their order
+// (D125): it adds to no weapon's number, only raises one by `percent`.
 const BOOSTS = [
   { name: 'Rush',   desc: 'you swim much faster',  time: 5, add: { speed: 200 } },
   { name: 'Frenzy', desc: 'you fire much faster',  swingDesc: 'you swing much faster',
-    time: 5, add: { fireRate: 3 } },
-  { name: 'Lance',  desc: 'your shots go through', swingDesc: 'each swing cuts more fish',
+    time: 5, percent: { fireRate: 100 } },
+  { name: 'Lance',  desc: 'your shots go through', weapons: ['Gun'],
     time: 5, add: { pierce: 4 } },
-  { name: 'Bloom',  desc: 'your shots swell',      swingDesc: 'your blade grows',
-    time: 6, add: { shotRadius: 6 } },
+  { name: 'Bloom',  desc: 'your shots splash',     swingDesc: 'your cuts splash',
+    time: 6, add: { splash: 24 } },
 ];
 
 // ---------- gear, attributes, challenges ----------
@@ -242,6 +245,7 @@ const PLAYER_STATS = [
   { stat: 'damage',       label: 'dmg',     read: p => p.damage },
   { stat: 'pierce',       label: 'pierce',  read: p => p.pierce },
   { stat: 'shotRadius',   label: 'size',    read: p => p.shotRadius },
+  { stat: 'splash',       label: 'splash',  read: p => p.splash },
   { stat: 'knock',        label: 'knock',   read: p => p.knock },
   { stat: 'dashDamage',   label: 'dashdmg', read: p => p.dashDamage },
   { stat: 'dashCooldown', label: 'dashcd',  read: p => p.dashCooldown.toFixed(1) + 's' },
