@@ -4701,3 +4701,23 @@ npm run docs to write the tables automatically yes".
 
 **Guarded by**: `tests/docs.test.js` — both failures, each seen failing on a
 break: a number changed in the code, a marker with no table.
+
+## D134 — Lean docs · 2026-10-22
+
+Igor: "the whole game is 2.6k lines of javascript and a ton of docs around
+it. can we optimize it without losing important info?", then, to the four
+cuts offered: "do all proposed".
+
+- **`changelog.md` is frozen**: `git log` says what shipped, `decisions.md` why.
+- **A decision entry is short** — what, why in Igor's words, what it
+  supersedes, what guards it; about fifteen lines (`README.md` → Living docs
+  and logs).
+- **`design.md` keeps what the code cannot say** — the reasons, the traps,
+  how systems meet — not a retelling of the code.
+- **A closed stage's spec leaves the tree**; `git show 99d79ae:docs/specs/<file>`
+  reads one. Only the open stage's stays.
+
+**Supersedes**: D57 (`docs/` gets its own checks)'s check that the newest
+decision has a changelog entry, and the sweep's "`changelog.md` always".
+
+**Guarded by**: `tests/docs.test.js` — every doc the map names exists.

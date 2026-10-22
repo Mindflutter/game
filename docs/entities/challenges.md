@@ -12,7 +12,8 @@ earn any rung (D109 (micro-tasks are ladders; steps cost more as they rise),
 D110 (challenges)). A **point** is what a rung pays, spent at `home` to raise an
 **attribute** — a body stat — a **step** at a time. How a challenge is judged
 and where its count shows is `design.md` → What persists; why each rung sits
-where it does, in full, is `specs/2026-10-15-micro-task-ladders-design.md`.
+where it does, in full, is the ladders' spec, kept in git:
+`git show 99d79ae:docs/specs/2026-10-15-micro-task-ladders-design.md`.
 
 ## Roster
 

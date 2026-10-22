@@ -1,6 +1,5 @@
 // The save: a dive resumable at any tick, what persists, the settings, and
-// every older version migrated. Designed in
-// docs/specs/2026-09-30-s4-meta-loop-design.md.
+// every older version migrated.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';

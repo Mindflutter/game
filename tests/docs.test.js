@@ -67,12 +67,6 @@ describe('docs/', () => {
     expect([...new Set(dangling)]).toEqual([]);
   });
 
-  it('gives the newest decision a changelog entry', () => {
-    // The newest decision is the one most likely to be missing its entry.
-    const newest = 'D' + Math.max(...[...declared.keys()].map(d => +d.slice(1)));
-    expectIn(read('changelog.md'), newest);
-  });
-
   it('keeps superpowers switched off for this project (D94)', () => {
     const settings = JSON.parse(src('.claude/settings.json'));
     expect(settings.enabledPlugins?.['superpowers@claude-plugins-official']).toBe(false);

@@ -1,60 +1,53 @@
 # Design — how Abyss works today
 
-Describes the **present**, not the plan: how the systems work. Update it when
-reality changes. Nothing here is a statement of intent. What each stage built
-is `plan.md` → Closed stages; each enemy, mod, weapon and piece of equipment —
-its numbers and behaviour — is its doc in `entities/`.
+The **present**: how the systems fit together, and what the code cannot say
+for itself — why it is shaped so, and the traps it has met. It is not a
+retelling of the code, which is short and the source of truth (D134 (lean
+docs)). Each enemy, mod, boost, weapon and piece of equipment, its numbers and
+behaviour, is its doc in `entities/`.
 
 ## What it is
 
-A twin-stick action game, diving down through **layers** — three at present. You
-move with WASD, aim with the mouse and **fire by holding the left button**
+A twin-stick action game, diving down through **layers** — three at present.
+You move with WASD, aim with the mouse and **fire by holding the left button**
 (D45). The dive stops at each gate depth while a **batch** is alive — no
-further in enemies, though the water keeps flowing. One fish of each batch
-glows from the moment it arrives — never in a boss's or a mini-boss's batch —
-and carries the batch's **mod**, which flies to you when it dies (D84, D88). A
-mini-boss leads in one ordinary batch as escorts; the boss's escorts are a
-crowd that keeps coming until it dies (D116). Kills also drop **boosts**, short powers you touch before they fade
-(D86). Then a current carries you down to the next batch, about two seconds
-away and independent of anything the player does (D58). A layer's boss is its
-**layer end**: a full heal, a haul of gems and a pick of valuable mods — the
-dive's one pause, ended by Continue (D68, D85) — and the current carries you on
-into the next layer (D66). Kills drop gems, which fly to you (D35) and are
-banked when the dive ends. A dive ends in
-death, or in the win at the bottom of the last layer; then `home`, where gems
-buy gear and the points challenges pay raise attributes. The measured times live
-in `roadmap.md` → Health, and only there.
+further in enemies, though the water keeps flowing. One fish of each ordinary
+batch glows and carries its **mod**, which flies to you when it dies (D84,
+D88). A mini-boss leads in a batch as escorts; the boss's escorts are a crowd
+that keeps coming until it dies (D116). Kills drop gems, which fly to you (D35),
+and **boosts**, short powers you touch before they fade (D86). A current
+carries you down to the next batch (D58). A layer's boss is its **layer end**:
+a full heal, a haul of gems and a pick of valuable mods — the dive's one pause
+(D68, D85). A dive ends in death or in the win at the bottom of the last
+layer; then `home`, where gems buy gear and the points challenges pay raise
+attributes.
 
 ## Files
 
 ```
-index.html              shell: canvas, CSS, eight script tags in load order
+index.html              shell: canvas, CSS, the script tags in load order
 
 game/       content.js  every tuning number + all content tables
-            state.js    dive state, what persists (meta), reset(), the
-                        snapshot and the save text
-            logic.js    step() — arrivals, the gate, the descent, movement,
-                        collision; the plan; home's buying and banking;
-                        the debug mode's setup
+            state.js    dive state, what persists (meta), reset(), the save
+            logic.js    step(), the plan, home's buying, the debug setup
                         ── Survives the port.
 
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
             render.js   canvas, view scaling, the camera, every draw function
-main.js                 frame loop, dt, fps, boot, the save's storage
+main.js                 frame loop, boot, the save's storage
                         ── Rewritten on the port.
 
 checks.js               the ?test suite: only what a browser can check (D39)
 ```
 
-Plain `<script>` tags, not modules, so `file://` works. **Load order matters**
-and is documented in `index.html`.
+Plain `<script>` tags, not modules, so `file://` works; load order is
+documented in `index.html`.
 
 ### The port seam
 
-`game/` contains no `ctx.`, `canvas`, `document.`, `window.`, `AudioContext` or
-`addEventListener` — verified by grep, not assumed. It reaches into `platform/`
-for exactly seven names:
+`game/` reaches into `platform/` for exactly these names, and `npm test` loads
+it with only these stubbed (`foundations.md` → The technical contract):
 
 | Name | Owner | Rust/C++ equivalent |
 |---|---|---|
@@ -66,54 +59,37 @@ for exactly seven names:
 | `aim` | `platform/input.js` | cursor position in **view** coords, in whole 1/256ths of a pixel so every window size reads one point alike (D122); `game/` adds `cameraY` |
 | `persist(text)` | `main.js` | write a string to a file / the platform's storage |
 
-`persist` is S4's, and deliberate (D77): `game/` decides *when* the save is
-written and builds the text; keeping it is the platform's. Loading goes the
-other way — `main.js` reads the stored text at boot and calls `loadSave()` — so
-it needs no name. Under `?test` and `?dev=` it is a no-op, and nothing is
-loaded either, so no check ever reads or overwrites a player's save. Every
-write asks `saveNow()` in `game/` — `main.js`'s own on a hidden or closed page
-included — and it writes nothing in the debug mode (D102 (the debug mode)),
-which loads nothing either.
+`persist` (D77): `game/` decides *when* the save is written and builds the
+text, through `saveNow()`; keeping it is the platform's. Loading needs no
+name — `main.js` reads the text at boot and calls `loadSave()`. Under `?test`,
+`?dev=` and the debug mode nothing is loaded or written, so no check ever
+touches a player's save.
 
-Exactly seven, and **enforced rather than claimed**: `npm test` loads `game/`
-into a Node `vm` with only these seven stubbed, so reaching for an eighth fails
-the build — on any path a test drives. A path none drives can still hide one:
-the Volume option reached for platform's gain node until a test drove every
-option. That check found the seam had quietly grown to eleven — `LEFT`, `RIGHT`,
-`GO`, `DASH` and `CLICK` were being read from `platform/input.js`. They now live
-in `game/content.js` — M's `MUTE` too, since D113 (settings are kept with the
-save) — because which key means which action is content (D44).
+Mouse buttons ride in `keys` and `justPressed` as codes a keyboard cannot
+produce (`'Mouse0'`), so clicks needed no new name. Which key means which
+action is content, in `game/content.js` (D44): the seam once grew to eleven
+names by reading key constants from `platform/`, found only when a test drove
+that path.
 
 ## The frame
 
 ```
-frame(now)                        main.js -- only measures how long a frame took
-  advanceBy(elapsed)              game/logic.js: banks time into whole ticks
-    min(elapsed, MAX_FRAME_DT)    a minute in another tab is discarded, and the
-                                  same cap bounds catch-up to 6 ticks
-    update(FIXED_DT)  x0..6       0 ticks on a fast frame, 2 on a 60Hz one
-      step(FIXED_DT)              screen dispatch, then gameplay
-      shake fade                  outside step(): step() returns early on menus
-      justPressed.clear()
-  draw()                          platform/render.js -- every frame, regardless
+frame(now)                 main.js — measures how long a frame took
+  advanceBy(elapsed)       game/logic.js — banks time into whole ticks,
+                           capped at MAX_FRAME_DT, so a minute in another
+                           tab is dropped and catch-up is at most 6 ticks
+    update(FIXED_DT) ×0..6 step(), then the shake fade, then justPressed.clear()
+  draw()                   platform/render.js — every frame
 ```
 
-**The simulation runs at `FIXED_DT` (1/120) and nothing else** (D53). Leftover
-time is banked in an accumulator, so the same dive plays identically on a 60Hz
-and a 144Hz machine — with a variable `dt`, every collision test sampled at a
-distance set by the player's frame rate. There is no render interpolation: the
-picture is drawn wherever the last tick left things, at most 8ms stale, which
-is why the step is 1/120 rather than 1/60.
+**One tick length, `FIXED_DT` 1/120** (D53): the same dive plays identically
+at 60Hz and 144Hz. No render interpolation — the picture is at most 8ms stale,
+which is why the tick is 1/120, not 1/60. The clock lives in `game/`, not
+`main.js`, so the port keeps it and Node drives the same entry point the
+browser does. `update` changes numbers, `draw` only reads them.
 
-The clock lives in **`game/`**, not in the frame loop. A fixed timestep is a
-property of the simulation, so putting the accumulator in `main.js` would have
-meant the port re-deriving it and its check testing a file that gets thrown
-away. `main.js` now measures elapsed time and hands it over; `advanceBy()`
-owns the banking, the cap and the tick count, Node drives the same entry point
-the browser does, and the invariant guarding D53 runs in both suites.
-
-`update` / `draw` are strictly separated: `update` changes numbers, `draw`
-reads them. Nothing persists on screen — the arena is repainted every frame.
+The shake fade and the water run in `update()`, outside `step()`, because
+`step()` returns early on every screen but play.
 
 ## Screens
 
@@ -137,619 +113,222 @@ title ──New game──> newGame ──Erase everything and start──> home
              └──Setup / Esc── dead, won ──Again / R──> playing
 ```
 
-The mod screen is the layer end's pick (D85): a card is marked, then taken on
-Continue. `A`/`D` or the arrows move the mark, `choiceIndex` (it opens on the
-middle card), and a click on a card or its number `1`/`2`/`3` marks that card;
-you can switch freely. Continue — the button under the cards, `continueRect()`
-— or Enter or Space takes the marked one. A cursor passing over a card marks
-nothing, since on its way down to Continue it crosses the cards; the screen
-still reads `mouseMoved()` every frame, so the next menu does not mistake a
-still cursor for a moved one (`lastAimX`/`lastAimY`). With nothing left to
-offer, only Continue shows. Esc pauses here as it does in play, and Resume — or
-Esc again — brings the same cards back: the pause menu returns to whichever
-screen opened it (`resumeTo`).
+A screen is a menu exactly when `MENUS` has an entry for it; `step()`
+dispatches on it, and every way onto one is `openMenu()`. Anything that
+depends on state is a getter — Start or Continue, a price, a dim row — so a
+menu is data. Row rectangles come from `rowRect`/`rectOf()` in `content.js`,
+for the renderer and the hit-test alike. The water freezes on menus, help and
+options, except a menu that `flows` — the end screens (D58).
 
-The title, pause, `home` and options screens work the same way: hover moves the
-cursor, a click activates the row, and on options a click cycles the value
-exactly as Enter does. A screen is a menu exactly when `MENUS` has an entry for
-it — `step()` dispatches on `MENUS[screen]` — and the water freezes on menus,
-help and options, except a menu that `flows`. Anything that depends on state is a getter: the title's
-first row reads Start or Continue, `home`'s rows their prices, `dim` greys a
-row that cannot be taken, and `home.lines` are its layer lines. Each menu names
-its own `top`, and `back` is what Esc does on the ones that have it (pause
-resumes, `home` goes to the title, weapons, equipment and attributes go
-`home`).
-**`home` sells a screen deeper** (D96, D114): its rows are Dive, Weapons,
-Equipment, Attributes, Help and Options; Weapons lists the weapons and
-Equipment the equipment, each with the gems to spend, Attributes the
-attributes with the points, and each ends on a Back row. `draw()` names the
-menus it draws, and the browser suite holds every screen whose Back leads
-`home` to drawing as its menu, not falling through to the dive's field.
-Under the Attributes screen's rows and the pause menu's, a menu with
-`challenges` lists the challenges — `challengeLines()`, from `challengesTop()`,
-`CHALLENGE_LINE` apart (D109).
-The browser suite holds every menu's rows above the hint. Every way onto a menu is `openMenu()`,
-which also resets the cursor.
-Help takes a click as "go on". The end screens — `dead` and `won` — are one
-menu, `END_MENU`, under one draw function: **Dive again** and **Go home**, Go
-home opening marked so a stray Enter or Space — Space is the dash — does what
-any key did before, and a click only takes the button under it (D90). It
-`flows`: the water drifts on under it (D58). `won` is reached only by killing
-the last layer's boss (D68).
-Menu and options rows are full-width bands from `rowRect` in `content.js`; a
-menu with a grid of its own names it as `rect` — the debug setup's
-`debugRect` — and `rectOf()` reads either, for the renderer and the hit-test
-alike. A row with `change(d)` holds a value (the debug setup's): the arrows
-move it, five at a time with Shift, Enter steps it up, and a click on either
-side of it moves it that way (`clickStep()`); a step past either end comes
-round to the other (`wrapStep()`).
-
-**`home` exists only between dives** (D76). With a dive under way the title's
-Start reads Continue and goes straight back into it, to `resumeTo` — play, or
-the layer end's cards (D90); `home` is out of reach
-until the dive ends, so the shop never meets a dive in progress.
-
-**New game** is the title's last row (D103). It opens `newGame`, a warning in
-red — its sub-line names what goes, the dive in progress among it when there
-is one — with Cancel marked, so Enter and Esc erase nothing. Erase everything
-and start runs `newGame()`: a fresh `meta`, no dive, a fresh save written
-through `saveNow()` — which is what clearing it means, with one save kept —
-then `home`.
-
-Mouse buttons ride in `keys` and `justPressed` under codes a keyboard cannot
-produce (`'Mouse0'`), so `tapped()` works for either device and the port seam
-did not grow a name for clicks. Card rectangles live in `content.js`
-(`cardRect`), because the renderer draws them and the logic hit-tests them.
-
-`returnTo` remembers whether help/options was opened from the title or mid-dive.
-`reset()` sets `screen = 'playing'` and `diveLive`, so `home`'s Dive row is just
-`reset()`. Boot does not reset: the state's own starting values are the title
-with no dive, and the water shows the first layer's colour until a plan exists;
-`main.js` only loads the save.
+The traps the screens have met:
+- **A click is read twice** — a menu reads it as an edge, the weapon as held —
+  so the trigger is **armed** (D47): it counts only once the button has been
+  seen released in play.
+- **The layer end's cards** (D85) are marked, then taken on Continue; a cursor
+  passing over a card marks nothing, since on its way down to Continue it
+  crosses them.
+- **The end screens open on Go home** (D90), so a stray Enter or Space — Space
+  is the dash — does what any key did before.
+- **`home` exists only between dives** (D76): with a dive saved, Start reads
+  Continue and goes back to it (`resumeTo`), so the shop never meets a dive in
+  progress.
+- **New game** (D103) opens on Cancel, so Enter and Esc erase nothing; it
+  writes a fresh save, keeping the settings.
 
 ## Systems
 
-**Movement — in water** (D107). Direction from held keys, normalised so
-diagonals aren't 1.41× faster; the diver's velocity eases toward it times
-`player.speed` in `ease()`, with `RAMP_LEFT` of a change still to go after
-`player.ramp` seconds — `Math.pow` over `dt`, so a start eases up, a release
-glides to a stop and a reversal swings through, the same at any tick length.
-Movement still begins on the next tick; only full speed takes time. A raised
-speed is reached in the same `ramp`. The body's `facing` turns toward the held
-keys the shorter way round, `player.turn` seconds a half circle, and holds when
-they are let go; a dive starts facing down. Player clamped to the **view**,
-which is `ARENA_W × ARENA_H` from `cameraY` down (D58); an edge stops the
-velocity going into it. A fish with a `ramp` eases its chase through the same
-`ease()`, so it overshoots a sidestep (`entities/enemies.md`).
+**Movement — in water** (D107). The diver's and a chasing fish's velocity ease
+toward where they want to go in `ease()`, `Math.pow` over `dt`, so a start
+eases up, a release glides and a reversal swings through at any tick length;
+movement still begins on the next tick. The diver's `facing` turns toward the
+held keys and holds when they are let go — it aims the dash. The diver is
+clamped to the **view**, `ARENA_W × ARENA_H` from `cameraY` (D58).
 
-**Firing.** Manual since D45, and **armed** since D47: the trigger only counts
-once the button has been seen released while playing, and every non-playing
-screen disarms it. Without that, the click that picks *Start* is still held on
-the first gameplay frame and fires a shot — a menu reads a click as an edge,
-the weapon reads it as a held state, so one click was being read twice. While `Mouse0` is held and the cooldown has
-elapsed, a shot leaves along the cursor and dies at `player.range` (D8). The
-cooldown is clamped at zero rather than allowed to run negative, so holding the
-button gives an honest `fireRate` while the first click after a pause is always
-instant. Every number of the shot — rate, damage, range, speed, hitbox,
-pierce — is the carried weapon's, on the player (D83): `entities/weapons.md`.
-A weapon with a `swing` fires no shot (D105): `swing()` cuts, at once, every
-fish whose body reaches into the arc toward the cursor, nearest first, and
-leaves `swingLeft` on the player for the renderer to draw the wedge. A shot's
-hit and a cut both end in `hit()`: the weapon's damage, and with a `splash` on
-the player — Bloom's (D125 (boosts keep each weapon's nature)) — the same
-wound to every fish whose body is within it of the struck one's, unknocked and
-splashing nothing on. A cut skips a fish a nearer cut's splash already killed.
+**Firing.** Manual (D45) and armed (D47, above). The cooldown is clamped at
+zero, not let run negative, so holding gives an honest `fireRate` and the
+first click after a pause is instant. Every number of the shot is the carried
+weapon's, copied onto the player (D83). A weapon with a `swing` cuts every fish
+in its arc at once instead (D105). A shot's hit and a cut both end in `hit()`,
+which also splashes while Bloom runs (D125 (boosts keep each weapon's
+nature)); a splash wounds nothing further, so a crowd cannot chain.
 
-**Arrivals: the batch queue and the gate** (D27, D48, D54, D115). Enemies come one
-**batch** at a time — a record naming counts per type — and nothing of the next
-arrives until the batch is dead. D54 sized the batches on total hp: nothing a dive
-picks up raises damage, so hp *is* the clock. A batch arrives in **waves**
-(D115): `spawnBatch()` shuffles its fish and deals them into waves of
-`WAVE_MIN`–`WAVE_MAX`; the first arrives whole, and the rest wait in
-`incoming` (`{ name, at }`, soonest first, on `elapsed`'s clock) — each later
-wave `WAVE_GAP` after the one before, give or take `WAVE_JITTER` of it, its fish
-each at their own moment within `WAVE_SPREAD`. `update()` brings each in as its
-moment comes, whether or not the arena is empty; an empty arena brings the next
-at once and moves the rest of the schedule up with it. The batch lives while
-`batchLive()` — fish in the arena or still to come — so its clear, and the
-gate's opening, wait for the last wave. Each type arrives where its
-`enters` says (`entities/enemies.md`) — the boss from below the view, centred,
-everything else at a random edge. Batch `k` of the dive waits at depth `k × GATE_SPACING`; a dive opens with
-`GATE_PAUSE` (1.2s) of quiet before the first, and every later batch arrives the
-moment the camera reaches its depth. `batchIndex` counts batches begun. The
-list does not cycle: past the last batch the same arithmetic points at the
-bottom.
+**Arrivals: the batch queue and the gate** (D27, D115). Nothing of the next
+batch arrives until this one is dead. A batch arrives in **waves**: shuffled,
+dealt into waves of `WAVE_MIN`–`WAVE_MAX`, the first whole and the rest
+waiting in `incoming` on a schedule; an empty arena brings the next wave at
+once. The batch lives while `batchLive()` — fish in the arena or still to
+come — so the gate waits for the last wave. Batch `k` waits at
+`gateDepth(k)`; past the last, the same arithmetic points at the bottom.
+Fish enter just outside the view, past its edge by the whole body (D104), so
+they fade in from the dark.
 
 **Escorts** (D116). A mini-boss's or the boss's plan entry also holds
-`escorts`, one batch `drawPlan()` draws from the pool before it.
-`spawnBatch(batch, escorts)` brings the batch's own fish in first, whatever
-the draw. A mini-boss's escorts are dealt into the waves behind it and cleared
-like any batch. The boss's batch has a `crowd`: the boss arrives alone, marked
-`lead`, and while a `lead` lives `update()` tops `incoming` back up to `crowd`,
-each newcomer drawn at random from the escorts' mix, due within `WAVE_SPREAD`,
-with the `flags` it takes on arriving — `escort`, and a `value` of 0, so it
-pays no gems. `killEnemy()` on the last `lead` marks every escort gone and
-empties `incoming` before the boost roll, so the boss's kill clears its batch
-and drops no boost. A fish placed by hand is never a `lead` and brings no
-crowd; a plan saved before escorts has none, and its bosses come alone. The
-marks ride on the fish and the fish to come, so the save needed no new
-version.
+`escorts`, drawn from the pool before it. A mini-boss's are dealt into the
+waves behind it. The boss arrives alone as `lead`, and while it lives
+`incoming` is topped up to its `crowd`, each newcomer an `escort` paying no
+gems; the boss's kill clears them all before the boost roll, so it drops no
+boost. The marks ride on the fish, so the save needed no new version.
 
-**Layers and the plan** (D66, D71, D72). A layer is a record in `LAYERS`: a
-name, a water colour and a run of **stretches**, each `{ draw, pool }` — a
-mini-boss's and the boss's with `escorts` too, the pool before them. One
-shape for all of them — a mini-boss or the boss is a stretch whose pool holds
-one batch and draws one. Three layers, each with pools and batches of its own
-(D101), all in one shape that `layer()` builds: three from a pool of five, a
-mini-boss, three of five, a mini-boss, three of five, the boss — twelve gates
-a layer (D127 (the tuned numbers)). They meet the fish in turn: the archer in the
-first layer's last stretch, the puffer from the second, the eel in the third,
-with every type mixed by its end. The pools are sized by threat (D126
-(threat)) — Claude's picks.
+**Layers and the plan** (D66, D71, D72). `layer()` gives every layer one shape:
+three batches from a pool, a mini-boss, three, a mini-boss, three, the boss —
+twelve gates (D127 (the tuned numbers)). `reset()` draws the whole dive first,
+before anything else takes from the seed, so a seed is a dive: `drawPlan()`
+draws each stretch's batches without repeats into the flat `plan` and grades
+each up to its stretch's threat (D126 (threat), D129 (a gentle first layer)),
+never past the layer's top grade nor past `GRADE_KEEP` of a type left at
+grade 1. The pools reveal the fish a type at a time, in order of their threat
+(D130 (fish are revealed a type at a time)). The abyss is one tall strip
+(D72): depth adds up across layers, and the bottom is `plan.length`. The layer
+end heals, pays the boss's haul and opens the pick; the last layer's end
+carries you to the bottom, the win (D68).
 
-`reset()` draws the whole dive first thing, before anything else takes from the
-seed: `drawPlan()` walks every stretch of every layer and takes `draw` batches
-from its pool with `drawDistinct()` — the seeded draw without repeats the mod
-cards use too — into the flat `plan` of `{ layer, batch }`, plus `escorts` where a stretch names them,
-the last of each layer marked `end`. Each batch is graded as it is drawn (D126
-(threat)): every ordinary stretch of the dive has a target — the first's
-`THREAT_START`, each next one adding `THREAT_RISE` times what the last added
-(D129 (a gentle first layer)) — and `graded()` raises the batch's fish a grade
-at a time, drawn from the seed, until its threat — `batchThreat()`, its fish's
-`threat` summed — reaches it, never past the highest grade whose `from` the
-layer has reached, and never past `GRADE_KEEP` of a type left at grade 1. The
-pools hold each type no earlier than every type below it in threat (D130 (fish
-are revealed a type at a time)). A mini-boss or the boss comes at its layer's
-number as its grade, its escorts graded to the target less its threat. The abyss is one tall strip (D72), so
-entry `k` waits at `gateDepth(k)` whatever layer it is in, depth adds up across
-layers, and the bottom is `plan.length`. The layer end heals fully, drops the
-boss's haul (its `value`) and opens the pick of valuable mods (D85); the last
-layer's end opens no pick and the current carries you to the bottom, which is
-`won` (D68). `layerAt(y)` tells the renderer which
-layer a depth is in: the water takes that layer's `color` at its top and
-darkens to near-black at its end, and the layer's name shows while the current
-carries you into it — placeholder graphics, both (D72).
+**The descent** (D58). While a batch lives the camera holds; the **current
+never stops** — `waterY` flows on, at `CURRENT_CRAWL` under a fight and the
+end screens, so the water moves while the fight holds still. Cleared, the
+current carries the camera and the diver to the next gate, about two seconds
+away, whatever the player does: swimming moves you within the view, never the
+view. The gate block runs before the player moves, so the clamp sees this
+tick's camera. Difficulty is authored per batch, not ramped by the clock.
 
-**The descent** (D58). The world is a tall strip and the view is a fixed
-1280×800 window onto it at `cameraY`. While a batch lives the camera does not
-move — "at a gate" is `batchLive()`, waves still to come included — but the **current never stops**:
-`current` eases (by `CURRENT_EASE`, on a time base) toward `CURRENT_SPEED`
-while travelling and toward `CURRENT_CRAWL` otherwise, and `waterY` advances by
-it every tick. The background scrolls by `waterY`, so the water flows through a
-fight while the fight itself holds still — and behind the mod cards and under
-the death and layer-end screens too, where play stops but the water drifts on
-at `CURRENT_CRAWL`. `update()` moves it, once, outside `step()` — the same
-reason the shake decays there: `step()` returns early on every screen but
-play. The menus alone freeze it; pause is the player stepping out of the game.
-Once a batch is cleared — and, at a layer end, its pick taken — the gate block
-carries the camera and the player down at `current`, clamped to the next depth
-(`gateDepth()`), about two seconds away. The current is independent
-of the player: swimming moves you within the view, never the view. Reaching depth
-`plan.length × GATE_SPACING` opens the `won` screen. The gate block runs
-before the player moves, so the clamp always sees this tick's camera.
+**Enemies.** Each tick a fish chases, or steps by its behaviour field — the
+fields and what they do are `entities/enemies.md`. Then `separate()` makes
+bodies solid (D120): overlapping pairs pushed apart by area, at most
+`BODY_PUSH` a second; a dashing diver is not pushed, nor a lunger out of its
+chase, so it keeps its lane. A fish that attacks only wholly in view chases
+`towardInView()`, or one pinning the diver at an edge would never attack. A
+grade (D119) is a `GRADES` step on copies of the type's records — `hp`,
+`speed`, `value` multiplied, each attack's `damage` raised; it rides with each
+fish into `incoming`, and a fish saved without one is grade 1.
 
-Enemies enter just outside the **view**, past its edge by the whole body
-(D104), so they fade in from the dark, each at its type's speed spread by
-`ENEMY_JITTER`. Difficulty is authored per batch,
-not ramped by the clock.
+**Bullets** fly straight from their birth velocity, so shots can be dodged.
+Each has an `id`, and a fish remembers `lastHitBy`, so a piercing shot — and
+the dash, which takes its id from the same space — hurts a fish once. An enemy
+shot is a bullet with `evil` (D95), spent only by a hit that lands.
 
-**Enemies** (`ENEMY_TYPES`). Every type — its numbers, its role and its
-behaviour, a chase or one of its own — is `entities/enemies.md`; which types a
-batch holds is named per batch (D48). Each tick the enemy loop moves every
-enemy toward the player, or steps it by its behaviour field (`lungeStep()`, the boss's fan too, D117;
-`spitStep()`, `fuseStep()` and `weaveStep()`, D95; `biteStep()`, D108), and adds
-its push — the dash's shove and the knock of the diver's hits (D122). A fish
-hurts by its attack: a bite, a spit, a burst, a charge — and the eel by its
-`touch` (D108). Then `separate()` makes bodies solid (D120): every pair that
-overlaps is pushed apart, by area, at most `BODY_PUSH` a second — fish against
-fish, and the diver against each fish unless it is dashing, where a touch and a
-charge land; a lunger out of its chase is not pushed, and the diver against an
-edge leaves the whole push to the fish. A fish that attacks only wholly in view
-— the lunger, the puffer — chases `towardInView()`, the nearest point to the
-diver where its body fits, or one pinning the diver at an edge would stay half
-out and never attack. `makeEnemy()` copies a type's behaviour, `behaviourOf()`: every
-behaviour field, the eel's `touch` among them, and `ramp` — at a grade (D119), a step of `GRADES`
-multiplying `hp`, `speed` and `value` and adding to each attack's `damage`, on
-copies of the type's records. A batch entry's grade is its third field
-(`[type, count, grade]`), grade 1 without one; it rides with each fish into
-`incoming`, so a later wave arrives at its grade, and an escort entry's into
-the boss's crowd. The plan sets it (Layers and the plan, above), the debug
-mode's Grade row too. A fish saved without a grade is grade 1, so the save
-needed no new version.
+**The dash** (D50, D51, D56). Along the facing, never the cursor — usually the
+way you least want to go. **Committed**: the direction is frozen at its start,
+so input cannot turn, reverse or stop it; letting go was once a free 0.31s of
+invulnerability. Invulnerable for the dash and a moment after, on its own
+timer, `player.safe`, so it never blinks as a hit does (D121). It shoves
+everything in front of the line it swept this tick, judged from where the tick
+started — otherwise something it swept through reads as behind it. **The shove
+is free, the wound is bought** (D51): scattering a crowd has to work from the
+start, and the white flash shows only with damage, since a flash on a harmless
+push is a lie. Its reach is `dashSpeed × DASH_TIME`, and nothing a dive picks
+up lengthens it — `dashSpeed` is not a multiple of `speed`, so `Fins` does not
+feed it (D56).
 
-**Bullets** store velocity once at birth and fly straight — that's why shots can
-be dodged and why yours sail past into the dark. Each carries an `id`; enemies
-remember `lastHitBy`, so a piercing shot damages any given enemy at most once.
-An enemy's shot is a bullet with `evil: true` (D95): it skips the fish, sweeps
-its segment against the player, and is spent only by a hit that lands.
-
-**The dash.** `Space`, along the facing (D107) — where you swim, or from a
-standstill where you last faced — never the cursor, which is usually the
-direction you least want to travel in. It ends with the swim carrying on along
-it at full swim speed. 0.16s at
-`player.dashSpeed` (620px/s) on a `player.dashCooldown` (2.2s) leash,
-invulnerable for the dash plus a moment after, so landing inside what you flew
-through costs nothing — on its own timer, `player.safe`, so it never blinks as
-a hit's i-frames do (D121). **Committed**: travel follows the direction frozen when
-it started, so live input cannot turn it, reverse it, or stop it by letting go
-(D56) — the last of those was a free 0.31s of invulnerability for standing
-still. It
-pushes a wave ahead of it: everything within `DASH_REACH` of **the line it swept
-this frame** that the dash is facing (`DASH_ARC`, a 156-degree front) is shoved
-away at `DASH_PUSH`, bleeding off per second, and takes `player.dashDamage` —
-which is **0 until bought** (D51).
-The facing is frozen at the dash's start in `dashDx/dashDy`, so releasing the
-keys mid-lunge cannot spin the wave, and it is judged from where the frame
-started — otherwise something the dash swept through would read as "behind me"
-purely because the step overshot it (D50).
-
-**The shove is free; the wound is bought** (D51). `dashDamage` starts at 0 and
-the `Impact` mod buys it a point at a time. The push is never gated: scattering
-a crowd is what makes diving into one a play rather than a mistake, and that has
-to work at tier 0. The white hit flash *is* gated, because a flash reads as
-"that hurt" and firing it on a harmless push is a lie.
-
-Dash reach is `dashSpeed × DASH_TIME` — 99px at the start (D111) — and nothing a
-dive picks up lengthens it: `dashSpeed` is its own field, not a multiple of
-`speed`, so `Fins` does not feed it (D56). Only the Dash reach attribute does,
-at `home` (D75). The dash takes
-its id from the bullet id space, so `lastHitBy` stops it hitting the same enemy
-twice — the same trick as pierce. Enemies carry `pushX/pushY` for the shove,
-their only velocity; everything else about them is a fixed walk toward you,
-or a lunger's step (D64).
-
-The player never blinks while dashing even though `hurt` is set, because the
-i-frame blink is what made the dash read as a teleport. An afterimage spark each
-frame and a ring on landing (`dashEnd`) do the rest.
-
-**Collision.** Brute force, every bullet against every enemy, compared in
-**squared** space — which measured 8.3× faster than `Math.hypot` over 3.2M
-pairs. Fine to a few hundred per array; a spatial grid is the documented next
-step.
-
-Both fast hitboxes are **swept**, not sampled: `segDistanceSq()` measures an
-enemy against the segment the bullet or the dash crossed this frame, rather
-than the point it ended on (D50, D53). A point test misses whatever it stepped
-over, which is a function of speed, and speed is not bounded — a railgun is
-named in S1's own definition of done. The squared form is used because these
-are the per-frame loops and that rule does not lapse because the shape became a
-capsule.
+**Collision.** Brute force in **squared** space — 8.3× faster than
+`Math.hypot` over 3.2M pairs; a spatial grid is the next step if it is ever
+needed. The bullet and the dash are **swept**: `segDistanceSq()` tests the
+segment crossed this tick, not the end point, so nothing tunnels at any speed
+(D50, D53).
 
 **Mods: the glowing fish and the layer end's pick** (D84, D85, D87, D88).
-There is no rank, no XP bar and no curve. When a batch of the plan arrives,
-`light()` picks one of its fish at random and marks it `carrier` — the gold
-ring, from the start. Never in a batch a type with `carries: false` leads —
-the boss or a mini-boss — not even on its escorts (D116): a mini-boss's gate
-pays no mod, and the boss's batch is paid by its pick. Enemies placed by hand belong to no batch and carry nothing. Each enemy
-keeps its type's `name`, which is how `light()` reads `carries`. Killing the carrier drops its mod into `drops` —
-kept apart from `gems`, since currency has nothing to do with mods — and it
-flies to you at `GEM_PULL` and never fades. `collectMod()` takes it and names
-it on the pickup line, `banner`, with its numbers from `modPreview()` — a line
-of its own, so it never writes over a challenge's `notice`.
+There is no rank and no XP. As a batch arrives `light()` marks one fish
+`carrier`, never in a batch a `carries: false` type leads; its mod drops into
+`drops` — apart from `gems` — and flies to you. `drawCarried()` deals every
+ordinary mod still under its cap once before any comes again, and caps count a
+mod still flying (`held()`): nothing stops it landing. With every ordinary mod
+capped, no fish lights. Clearing a layer end waits `MOD_OFFER_DELAY` before
+the cards, because cards on the kill's frame read as a jump cut (D51); a
+pending offer holds the descent until Continue. If one tick kills the boss and
+the diver, death wins. Weapon mods are dealt only while a weapon they fit is
+carried (`fits()`, D99), every mod is capped (D69), and `takeMod()` is the one
+place a mod is applied. Mods add on top of gear and attributes, never
+multiplying (D74); anything a mod raises is a field on `player`, not a
+`const`.
 
-Which mod a fish carries is `drawCarried()`'s: an ordinary mod — not one of the
-layer end's own, `end` — still under its cap, every one once before any comes
-again. `modRound` holds the round, which refills once every mod still open has
-come in it. Both draws, this and the layer end's, measure the cap with
-`held()`, which counts a mod still flying to you: nothing stops it landing, so
-its slot is taken the moment it drops. With every ordinary mod capped it returns nothing and no fish
-lights: the easiest answer while caps are balance's question (Igor,
-2026-10-12).
+**Boosts** (D86). The chance on a kill is `BOOST_C` times the kills since the
+last boost, and the kill that empties the arena never drops one — it would
+fade behind you as the current carried you on. Which boost is a seeded draw
+from those that fit the weapon (D125). Touched, a boost puts its `add` and its
+`percent` of the diver's numbers on, and remembers what it added, to take back
+exactly that when it ends; touched again it restarts its clock. Its clock runs
+only in play, and it never moves `hp`, which could not be taken back cleanly.
 
-Clearing a batch pays the challenges and `Mend` (`mendOnClear`). At a layer
-end it also starts `offerTimer` at `MOD_OFFER_DELAY`, because the boss's kill
-burst lives 0.5s and cards landing on the frame of the kill read as a jump cut
-(D51). When it expires, `openModOffer()` deals `rollValuable()` — up to three
-distinct mods, each with room under its cap for what its card gives
-(`cardStep()`): one of the layer end's own once, an ordinary one `END_STEP`
-picks at once — and opens the `mods` screen, the middle card marked. That is
-the dive's one pause, and a pending offer holds the batch queue, so the descent
-waits for Continue. The last layer's end pays neither Mend nor a pick (D59,
-narrowed by D68). If the same frame kills the boss and the player, the death
-screen wins: `clearBatch()` is guarded by `screen === 'playing'`.
+**Currency.** Every kill drops its `value` in gems, times its grade's, and
+every gem flies to you from anywhere and never fades (D35, D78), so nothing is
+stranded by the descent. `endDive()` banks the dive's gems last in the tick, so
+a gem caught on the frame you die is yours (D67). Nothing names the currency:
+its name is open in `ideas.md`.
 
-The pool — every mod, its cap and its card — is `entities/mods.md`. It is
-**body and comfort**, and **weapon mods** dealt only while a weapon they fit
-is carried — `fits()`, read by both draws (D99) — and **every mod is capped**
-(D69).
-`takeMod()` is the one place a mod is applied and counted: a fish's, a card's
-(`cardStep()` times), a scenario's kit. Mods are dive-scoped: `reset()` clears
-them. They add on top of gear and attributes, never multiplying (D74).
+**What persists** (D31, D36, D75). `meta` holds the bank, gear tiers, attribute
+steps, challenge rungs, the deepest depth, the layers cleared and the weapons
+owned and carried. Points are **derived** — rungs earned less steps raised,
+each counted 1 + 2 + … + n (D109) — never stored. `reset()` builds the diver
+as `PLAYER_START` carrying the weapon, plus each tier, equipment and attribute
+step; mods then add on top. All sums. A weapon is owned, then carried (D97);
+`requires` on gear schedules it behind attribute steps, it never scales (D36,
+D98). A challenge's streak lives in `tally` for the dive and is judged on a
+clear, a kill or a layer end (D109, D110); a fish placed by hand belongs to no
+batch and counts for nothing. Buying and raising write the save at once.
 
-Anything a mod raises is a field on `player` rather than a `const` — that is why
-`iframes` and `dashCooldown` live in `PLAYER_START`.
+**The save** (D70, D77). `saveText()` is `meta`, the settings beside it — so
+New game keeps them (D113) — and the dive in progress, `snapshot()`: every
+variable a dive owns, the RNG's state included, so a dive resumes on the exact
+tick. `loadSave()` changes nothing on a save it cannot read, and `main.js`
+copies the text aside under `abyss-save-rejected`. Written on pause, a
+purchase, a dive's end and when the page is hidden; never in the debug mode.
+`migrate()` brings an older save up one version at a time, each step under
+the decision that made it; `tests/fixtures/save-v1.json` onward, each written
+by the first build of its version, must load in every later build.
 
-**Boosts** (D86). Every kill counts toward the next boost in `sinceBoost`; the
-chance on the next kill is `BOOST_C × sinceBoost`, and a boost dropping starts
-the count again. The kill that empties the arena never drops one. Which boost
-is a seeded draw from the `BOOSTS` that fit the weapon carried
-(`entities/boosts.md`): a weapon's own is drawn only with it, through the
-`fits()` the weapon mods use (D125 (boosts keep each weapon's nature)). It lies
-in `drops` where it fell, unpulled, for `BOOST_LIFE` seconds, blinking over the
-last of them (`BOOST_BLINK` in `render.js`), and touching it runs
-`startBoost()`: its `add`, and its `percent` of the player's own numbers as
-they stand, go onto the player, `{ name, left, add }` — what it added — into
-`boosts`, and its line onto the
-pickup line — its `swingDesc` instead of `desc`, where it has one, while the
-weapon carried swings (D105 (the Knife swings)). Touched again while it
-runs, its clock restarts and nothing more is added. Each tick of play counts
-`left` down and takes off what it added at zero, so the pause and the layer
-end's pick hold it. A boost never moves `hp`, which could not be taken back cleanly.
+**Damage** (D95, D118, D121, D122). Every hurt goes through `hurtPlayer()`:
+the i-frames and the dash's `safe`, `immortal`, the shake, death, and the
+suit's guard, which takes a whole hit instead of HP, refilled as each batch
+arrives (D100). Without the i-frames a touching eel drains 3 HP in 50ms.
 
-**Currency.** Kills drop gems at the corpse, and every gem flies to you at
-`GEM_PULL` from wherever it dropped and never fades — nothing can be stranded,
-by distance or by the descent (D35, as amended by D78). Every kill drops its
-`value` in gems, times its grade's; whether an enemy drops at all is a balance
-lever (D78), left alone: the prices carry the economy (D127 (the tuned
-numbers)). D35's `+N` popup is not built — feel, S7's. Collecting one adds to the dive's
-`currency`. When the dive ends, however it ends, `endDive()` banks it into
-`meta.bank` (D67) — last in the tick, after every gem that tick paid, so a gem
-caught on the frame you die is yours. Nothing in the code names the currency,
-because what it is called is still open in `ideas.md`.
+**Knockback** (D122). A hit pushes a fish by the weapon's `knock`, scaled by
+body size the way bodies push each other, onto the same `pushX`/`pushY` the
+dash's shove uses, fading by `PUSH_DRAG`.
 
-**What persists** (D31, D36, D75). `meta` in `state.js`: `version`, `bank`,
-`gear` (tiers owned, by name), `raised` (attribute steps raised, by name),
-`challenges` (rungs earned, by challenge name, D109, D110), `deepest` (the deepest
-camera depth reached, shown in metres at 10px each) and `cleared` (layers
-cleared, which is what unlocks the next at `home`), `owned` (the weapons owned,
-by name) and `carried` (the one a dive carries, D97). Points available are
-**derived** — `points()`, `tri()` of every ladder's rungs less `tri()` of
-every attribute's steps, `tri(n)` being 1 + 2 + … + n — never stored.
-`reset(seed, weapon)` builds the player as `PLAYER_START` carrying `weapon` —
-the one `carried` names, or the first if the save names one that is gone, or a
-scenario's — its numbers copied on (D83) and its name kept as `weaponName`,
-plus each tier of that weapon and of the equipment,
-plus each attribute step; mods then add on top as they are picked up. All sums. A weapon
-left at `home` adds nothing.
-
-- `WEAPONS` and `EQUIPMENT`: the gear for sale, a tier at a time, by name
-  (`entities/`). `buy()` refuses what the bank cannot pay, and past the top
-  tier. A weapon is owned first: `pickWeapon()` owns one for its `cost` and
-  carries it at once, carries an owned one for nothing, and raises the tier of
-  the one carried (D97). What costs nothing is owned from the start.
-- `ATTRIBUTES` — Dash reach, Heart and Strength; what a step adds is
-  `entities/challenges.md`'s. Each step applies once (D98), and step n costs n
-  points (D109): `raise()` refuses a step that costs more than is held.
-- `requires` on any piece of gear: `{ attribute: steps }`. `meets()` holds it
-  against the steps raised; unmet, `canOwn()` and `canBuy()` refuse, the row is
-  dim and says what it needs. Scheduling, not scaling (D36, D98).
-- `CHALLENGES`, each a ladder (D109, D110) — the roster, its rungs and what
-  each asks are `entities/challenges.md`'s. A `clear` challenge's streak lives
-  in `tally` for the dive, judged in `clearBatch()` before the layer end's
-  heal: `untouched` reads `batchHit`, `footwork` `batchDashed`, `beeline`
-  `glowAt` against `firstKillAt`, a batch with no glowing fish (`glowAt` null)
-  skipped. A `kill` challenge is judged in `killEnemy()` — `flurry` counts
-  `killTimes` within `FLURRY_TIME` — and an `end` one at a layer end: `swift`
-  reads `layerStart`, set as a layer's first batch arrives and cleared at its
-  end. `climb()` pays every rung a count now meets and puts it on a line over
-  play (`notice`, for `NOTICE_TIME`); challenges paying on one tick share it
-  (`paidNow`). A fish placed by hand (a scenario's) belongs to no plan entry
-  and counts for nothing. The status bar shows each count against its next
-  rung.
-
-All the numbers are Claude's picks, the prices tuned to the pillars (D127
-(the tuned numbers)). Buying and raising write the save at once.
-
-**The save** (D70, D77). `saveText()` is `meta`, the settings — `volume`,
-`muted`, `shakeLevel`, `showFps`, beside `meta` so New game keeps them (D113) —
-and `dive`: `snapshot()` when a
-dive is under way (`diveLive`), else `null`. `snapshot()` copies every variable
-a dive owns — the player, every object array (`drops` among them), the plan,
-the queue and the fish still to come (`incoming`), camera, current and water, the timers, currency, `modCounts`, the
-mod round, the boosts running and `sinceBoost`, `weaponName`, `guardLeft`,
-`batchDashed`, the challenges' counts (`tally`, `killTimes`, `firstKillAt`,
-`glowAt`, `layerStart`), the RNG's
-state and `bulletId` — with the offered cards by name and `at`, the screen play resumes
-to. `restore()` is the reverse and leaves `resumeTo` set, so Continue goes
-straight back to it (D90). `loadSave(text)` returns `''` when it loaded or found nothing,
-and otherwise a reason, having changed nothing — though a setting it cannot
-read only keeps its default; `main.js` then copies the text
-aside under `abyss-save-rejected` and the title says why. Written through
-`saveNow()` on pause, on a purchase, when a dive ends, and — asked by `main.js`
-— when the page is hidden or closed; a setting is written as M is pressed and
-as the Options screen is left; never in the debug mode. `SAVE_VERSION` is 11. `migrate()` brings an older save up
-one version at a time as it loads: a v1 dive's player gains the Gun's shot
-speed and radius as they were then (D83); a v2 dive loses its rank, starts with
-nothing dropped or running and no fish lit in the batch it was in, and — saved
-with the cards up — takes the card it had marked (D84); a v2 save's
-challenges move from the layers' old names to their numbers (D89); a v3 save
-owns and carries the Gun, and its dive carries it with no guard and its
-batch's clock starting as it loads (D97, D98, D100); a v4 dive's diver and fish
-load at rest, the diver facing down (D107); a v5 dive's fish get their type's
-behaviour again, so fish saved before bites bite (D108); a v6 save's `tasks`
-become as many rungs of each challenge as the layers each paid in, its steps come back as points,
-and its dive has no streaks, its batch's first kill unknown and no clock on its
-layer (D109); a v7 dive's batch came in whole, so it has no fish still to come
-(D115); every attack a v8 dive's fish has, and its enemy shots, get a `damage` of
-1, as every hit was then — onto the records each fish has, so a boss saved
-before its fan still only lunges (D117, D118); a v9 dive's fish knock as their
-type's do now, an eel's touch becomes its record, a shot already in flight
-knocks nothing and the diver takes its weapon's knock (D122); a v10 dive's
-running boosts take back what they added then, its diver gets no splash, and a
-Lance on the floor goes unless the Gun is carried (D125).
-`tests/fixtures/save-v1.json` to `save-v11.json`, each written by the first
-build of its version, must all load in every later build.
-
-**Damage.** A bite, an eel's touch, a charge, an enemy's shot or a burst costs
-the HP its attack's record names — `damage`, the eel's `touch` a record like
-the rest, a whole number of at least 1 (D118) — a touch and a charge where
-bodies meet (D120) — which an enemy shot carries from the record it was fired
-with, and knocks the diver by the record's `knock`, onto its swim, away from
-the fish or along the shot (D122) — behind 1s of invulnerability, during which the player
-blinks — without the i-frames a touching eel drains 3 HP in 50ms. HP stops at
-0. Every hurt goes through `hurtPlayer(hit, ux, uy)`
-(D95): the i-frames and the dash's `safe`, `immortal` — the hit lands and
-shows, without the HP (D121) — `batchHit`, the shake and death in one place
-— and the suit's guard, which takes a whole hit, whatever its damage and its knock, instead of HP while
-`guardLeft` lasts, refilled to `player.guard` as each batch arrives (D100).
-
-**Knockback** (D122). The diver's hits knock fish back: a shot along its
-travel, a swing along the swing, by the carried weapon's `knock` — the speed
-it gives a body the diver's size, so a fish of radius `r` gets
-`knock × (diver r / r)²`, by the same `weight()` the bodies use, a lunger out
-of its chase not at all. It adds to the fish's `pushX`/`pushY`, the dash's
-shove's velocity, which fades by `PUSH_DRAG`.
-
-**Feel.** Hit flash (0.07s white), sparks kicked back along the shot on every
-hit, a bigger burst on kills sized by enemy toughness, screen shake (7px on a
-hit, 38px on death) easing out exponentially to a still picture at ~2s.
-
-**Sound.** Every sound is one oscillator plus a volume envelope, defined as
-data (`freq, dur, type, vol, slide`). No audio files. Routed through a master
-gain and a compressor so a dozen simultaneous kills don't clip. The context is
-built on the first real key press and resumed on later ones; the HUD reports
-its state so a silent game can say why it's silent.
+**Sound.** One oscillator and an envelope per sound, as data; no audio files.
+A master gain and a compressor keep a dozen kills from clipping. The context
+starts on the first key press, and the HUD says why a silent game is silent.
 
 ## Randomness
 
-Every random number in a dive comes from `rng()` in `game/state.js` — mulberry32,
-seeded, so the same seed replays the same dive exactly (D41). `reset(seed)`
-reseeds; `currentSeed` records what was used. `main.js` reads `?seed=<n>` off the
-URL and passes it to a scenario (`?dev=`), because `game/` never touches a
-browser API; a dive begun from `home` always draws a fresh seed.
+Every random number in a dive comes from `rng()` — mulberry32, seeded — so a
+seed replays a dive exactly (D41): two balance runs can be of the *same* dive,
+and "it broke sometimes" becomes "it broke on seed 4471". The one
+`Math.random()` in `game/` picks a seed when none is given. `main.js` passes
+`?seed=` to a scenario; a dive from `home` always draws a fresh one.
 
-The one `Math.random()` left in `game/` is in `reset()`, choosing a seed when
-none is given — that choice is outside the deterministic sequence.
+## The status bar and the readout
 
-Why it matters: two balance measurements can now be of the *same* dive instead of
-two different ones, so a difference under a second is visible without averaging
-21 dives. And "it broke sometimes" becomes "it broke on seed 4471".
-
-## The development readout
-
-Two on-screen readouts exist to be looked at while building, not to ship
-(D52). Igor: "i'd always show all relevant numbers at least at the development
-stage."
-
-`PLAYER_STATS` (`content.js`) is a flat list of the player numbers worth
-watching, drawn dimmed as the status bar's last line (below); the fps line
-shifts below the bar from its `.length` rather than a hardcoded `y`. Each entry names the player field as
-well as its label, which is what lets a check prove the list is **complete**:
-every stat any mod or boost can change must be on screen, computed from the
-tables, so a new one touching a new field fails the suite rather than going
-unwatched (D99).
-
-## The status bar
-
-What a diver reads mid-fight, top-left, one line per kind, built by
-`statusLines()` in `content.js` — so its text ports, and a check reads it —
-and drawn by the renderer one row per entry, each in its own colour: hp, the
-suit's guard left (only with a suit), gems and the carried weapon with its tier,
-in bold; the layer, the batch within it — the one fought, or between gates the
-one ahead — the fish left, or while a boss lives that its escorts keep coming
-until it dies (D116), time and kills; the mods held and the boosts
-running with their seconds left (D86); each challenge's count against its
-next rung, or its badges once every rung is earned (D109);
-then the development readout, above. Built from Igor's note, 2026-10-14:
-"missing info for the status bar during dive, make sure to add everything" —
-how it looks is Claude's.
-
-Each mod card shows the change it makes and how many are held, and so does the
-pickup line when a fish's mod reaches you (D84). `modPreview(mod, n)` applies
-the mod `n` times to a copy of the player and diffs the numbers, so neither can
-advertise something `apply` does not do — the alternative, a written-out
-`preview` per record, is a second source of truth. The card reads held/max
-straight from `modCounts`. Without this a repeated card was identical to a
-fresh one, and four of the six mods stack. Each change prints through
-`statLine()`, the card's and the pickup line's alike: the stat named in words
-from `STAT_NAMES` — never the code's key — then from → to.
-
-This is instrumentation and it partly contradicts D34 (mods), which wants no
-numbers on a card. Scoped to development on purpose; revisit at S7.
+`statusLines()` in `content.js` builds the status bar, so its text ports and a
+check reads it — hp, guard, gems, the weapon, the layer and gate, fish left,
+mods and boosts, each challenge's count against its next rung — and the
+**development readout** under it, `PLAYER_STATS` (D52). Each readout entry
+names its field, so a check proves every stat a mod or boost moves is on
+screen (D99). A card and the pickup line show what a mod changes by applying
+it to a copy of the player (`modPreview()`), so neither can advertise what
+`apply` does not do. The numbers on cards contradict D34 (mods) on purpose,
+for development; revisit at S7 (alpha polish).
 
 ## Screens must fit
 
-Any screen that stacks rows from a data table derives its positions from
-`.length`, never a hardcoded `y`. `render.js` exposes `HINT_Y` (where the
-bottom hint sits) and `helpBottom` (where the help screen's last line ends), and
-a check asserts one is above the other — adding a row to `HELP_KEYS` once pushed
-the list straight through the blurb below while every check passed (D46).
+Rows stacked from a table take their positions from `.length`, never a fixed
+`y` — adding a row to `HELP_KEYS` once ran the list through the blurb while
+every check passed (D46). The browser suite holds help, the mod cards (their
+descriptions inside the card, D49), the layer end's hint, `home`'s layer list
+and rows, and every menu's rows above the hint.
 
-The same rule sideways: a mod description is prose in a fixed-width card, and
-the renderer centres it, so it cannot notice one overflowing. `widestModDesc()`
-measures the pool at `CARD_DESC_FONT` and a check holds it inside
-`CARD_W - 2 × CARD_PAD`. Two descriptions were over when it was written (D49),
-which is how it was found — from a screenshot, not from a check.
+## Scenarios and the debug mode
 
-The layer end's cards, Continue and its hint stack downwards from
-`cardRect()` and `continueRect()`, and a check holds the hint inside the view:
-taller cards push all three down (D85).
+`SCENARIOS` (D37, D42) — the URLs are the root `README.md`'s. `?dev=<name>`
+loads one **frozen**, advanced only by `advance(n)`, which runs n fixed ticks
+with no wall clock — what the tests and the bot drive; `&play` runs it live. A
+scenario never reads or writes the save. `immortal` and `damageOverride`
+survive Dive again; no URL sets them.
 
-Help, the mod cards and `home` are guarded — `home` twice: its layer list
-(`MENUS.home.lines`, with every layer shown) ends above its rows, and its rows,
-read from `rowRect()`, above the hint; `HOME_TOP` is derived from
-`LAYERS.length`. Every menu's rows are held above the hint too, wherever
-`rectOf()` puts them — the gear and attribute lists (D96) and the debug
-setup's grid (D102) grow from tables. Options stacks its rows the same way and
-is not.
-
-## Scenarios
-
-Named dev setups in `SCENARIOS` (`game/content.js`), loaded by URL (D37, D42).
-Every scenario and the URL for it, and how to combine arguments, are in the
-root `README.md` → Scenarios. `?dev=<name>` loads one **frozen** —
-nothing advances until `advance(n)` — and `&play` runs it live.
-
-`applyScenario(name, seed)` looks the record up and `startScenario(s, seed)`
-plays it — the debug mode's setup goes through it too. It resets, then applies
-the record: `batch` to start
-at that batch's depth — a number, or a function of the drawn plan where the
-place is only known once drawn — `spawn: false` to stop new arrivals
-(`queuePaused`), a list of `[type, x, y]` placed in the view at nominal speed
-with no jitter, and a `kit` of mod names taken as picks. An
-unknown name logs the known ones and does not throw. A scenario never reads or
-writes the save.
-
-The two dev flags, `immortal` and `damageOverride`, survive Dive again: the
-debug mode's setup sets them at every dive, and the tests and the bot set them
-directly; `reset()` leaves them alone and re-applies the damage. No URL sets
-them. `?test` runs only as the whole query.
-
-`advance(n)` runs exactly n fixed ticks and draws once — no wall clock involved.
-This is what the bot drives, and the same entries it selects by name, so there
-is no separate test harness. Adding a scenario is a line.
-
-## The debug mode
-
-For playtesting by hand (D102): `?debug` boots into `openDebug(code, seed)`
-instead of the title — a fresh `meta`, no dive, no save read, muted until M —
-and the `debug` screen, a menu of value rows in four columns built from the tables
-(`DEBUG_COUNTS`: the fish, equipment, attributes, mods and each weapon's tier,
-each with its cap), and a Grade row over the fish that sets the grade every
-fish of the dive arrives at — the gate's drawn batch and the ones after it,
-escorts and the boss's crowd included, as well as the setup's own (D119).
-At grade 1 it sets none, and the plan's own grades stand (D126 (threat)); the
-line under the columns names the gate's batch, each type once with its graded
-fish beside it. `debugSetup` holds the setup, and stays set for the
-session: while it is, `saveNow()` writes nothing.
-
-A setup is text too: `setupCode()` writes it — `L2,G7,S4471,Grade2,Harpoon2,puffer4`,
-the layer, gate, seed and weapon always, the rest only when set, a grade only
-above the first — and
-`parseSetup()` reads it back, keeping what it cannot name in `ignored`, shown on
-the screen, and holding every number in range (`clampSetup()`). `main.js`
-keeps the address bar on `?debug=<code>` as the setup changes, so the URL
-replays it exactly.
-
-`debugDive()` plays it: a `meta` standing in for what persists — the setup's
-gear, the carried weapon's tier and the attribute steps — so `reset()` applies them as a
-dive from `home` would; the setup's immortal and one-shot; then
-`startScenario()` to the chosen gate, with the mods as its kit — a weapon mod
-only with a weapon it fits. Fish set in the setup replace that gate's batch,
-its escorts included (D116), in a copy of its plan entry, never in the pool; the dive then runs on as drawn.
-`gateLine()` says on the screen what the gate drew — a mini-boss's escorts and the boss's crowd too (D116) — and what replaces it, and
-under it the marked row's `tip` says what the row is and what it moves:
-`fishTip()` from a fish's behaviour field — its words in `DEBUG_BEHAVIOURS`,
-one line per behaviour — and its numbers, off the fish `makeEnemy()` makes at the setup's grade; `gearTip()`, `pointTip()`,
-`modTip()` and the weapon's from what each tier, point or pick moves, worked
-out by `modPreview()` on the diver a dive starts with (`shotOf()` gives the
-carried weapon's numbers), so a tip cannot state a number the game does not
-deliver. A check holds every tip inside the view's width.
-
-`DEBUG_AGAIN` (R) plays the setup again from any screen, and `DEBUG_SETUP`
-(Backspace) goes back to it; neither does anything outside the debug mode.
-The pause menu's quit and the end screens' two buttons — Again and Setup
-there — lead back to the setup too, never to the title or `home`.
+The debug mode (D102) is a menu of value rows built from the tables. Its setup
+is text, `setupCode()` and `parseSetup()`, kept in the address bar, so a URL
+replays it exactly. `debugDive()` plays it through a stand-in `meta`, so
+`reset()` applies the setup as a dive from `home` would. Every tip is worked
+out by `modPreview()` on the diver a dive starts with, so a tip cannot state a
+number the game does not deliver.
 
 ## Performance, measured
 
@@ -762,63 +341,39 @@ Chrome, 3440x1440 (scale 1.8), 60fps budget 16.7ms, 2026-09-27 (D43):
 | 1000 objects | 0.58ms | 0.33ms | 1.22ms @ 400k pairs |
 | 2000 objects | 2.72ms | 2.18ms | 3.67ms @ 1.6M pairs |
 
-At the design budget of 500 a whole frame is under 1ms — about 5% of 16.7ms.
-`shadowBlur` is used directly per frame; the offscreen cache was cancelled
-because it would have saved 0.3% of a frame at the cost of a radius
-quantisation scheme and resize invalidation.
+A snapshot of one machine; re-measure with a stepped scenario before trusting
+it.
 
-Re-measure with a stepped scenario before trusting these; they are a snapshot of
-one machine.
+## Tests and measuring
 
-## Tests
+Which suite covers what, and how to run each, is the root `README.md` and
+`code.md` → Verification. What the code does not show:
 
-Two suites (D39, D44), and the balance checks beside them.
-
-| | Command | Covers |
-|---|---|---|
-| **Node** | `npm test` (`npm run test:watch`) | Everything `game/` does: the seam, invariants over generated seeds, deterministic simulation and soak, and every decision's guard — its entry in `decisions.md` names it (D39) — plus the docs against the code (D57). Vitest + fast-check, dev-only. |
-| **Balance** | `npm run balance` | The pillars, measured by the diver bot at the kit a career first meets each gate with (D127 (the tuned numbers)): slow, so apart from `npm test`. |
-| **Browser** | `index.html?test` | Only what Node cannot reach (D39): audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js` and its menu cursor, and the same seed played to the bottom of the dive at three window sizes through real `MouseEvent`s (D29). |
-
-`tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
-classic script are lexical bindings rather than properties of the global object,
-so the harness generates accessors to expose state and constants.
-
-**A property test is only as good as its generator.** The no-NaN invariant
-initially passed even with a divide-by-zero guard deleted, because the generator
-never put the cursor exactly on the player. It now does so 8% of the time. Treat
-an invariant as unproven until a deliberate break makes it fail.
-
-## Driven runs are silent
-
-`?test` and any `?dev=` scenario boot with `volume = 0`: those are the URLs
-Playwright drives, and a driven run should not make noise on the machine
-running it. Playing the game normally — no query string — is unaffected. The
-debug mode is played by hand, so it is muted rather than silenced: `muted`
-starts set, and M, as anywhere, turns the sound on (D102).
-
-It does not weaken the audio checks. They synthesise each sound in an
-`OfflineAudioContext` and measure its peak there, which never reaches the
-speakers and never reads the live master gain; all eight still pass muted. The
-headless bot has no audio at all, since `sound` is stubbed at the seam.
-
-The one trap: the options check drives the volume control, and `change()`
-plays a sound to preview the new level. It restores whatever the run booted
-with rather than a hardcoded 0.6 — the hardcode silently un-muted the whole
-remainder of the suite.
-
-## Local server
-
-`python3 serve.py 8222`. Needed only for Playwright, which refuses `file://`.
-It forbids caching and is threaded — see D41 for why the stock `http.server`
-is not usable here. Double-clicking `index.html` still needs no server at all.
+- **`tests/harness.js` runs `game/` in a Node `vm`.** `let` and `const` at a
+  classic script's top are not properties of the global object, so the
+  harness generates accessors for state and constants.
+- **A property test is only as good as its generator.** The no-NaN invariant
+  passed with a divide-by-zero guard deleted, because the cursor was never
+  exactly on the player; it now is 8% of the time.
+- **A check that expects a shot to land sets `aim` itself** (`fireAt()`):
+  four once passed only because the check before left the cursor on the line.
+- **Driven runs are silent**: `?test` and `?dev=` boot at volume 0, the debug
+  mode muted. The audio checks measure peaks in an `OfflineAudioContext`, so
+  muting weakens none; the options check restores the volume it booted with —
+  a hardcoded 0.6 once un-muted the rest of the suite.
+- **Three bots** (`tests/bot.js`, D128 (the balance suite)): `kiteAndShoot`,
+  the regression yardstick, comparable only to itself; the diver bot, which
+  plays from what the screen shows with a player's limits and its own random
+  generator, so it never moves the game's draws; and the standing bot.
+  `tests/measure.js` holds the runners, one worker thread a seed, and
+  `npm run measure fit` writes the pools' counts to the threat curve. The
+  figures live in `roadmap.md` → Health and only there.
 
 ## Balance constants
 
-All in `game/content.js` under `// balance`. These are the real product of the
-prototype — they transfer to any port verbatim. The entities' numbers — the
-weapons' and the diver's among them — are in their docs in `entities/`; the rest are here, and
-`npm test` holds them to the code.
+All in `game/content.js` under `// balance`: the real product of the
+prototype, carried to any port verbatim. The entities' numbers are their docs'
+in `entities/`; the rest are here, and `npm test` holds them to the code.
 
 `RAMP_LEFT 0.05` ·
 `GEM_PULL 600` · `NOTICE_TIME 2.5` · `ENEMY_JITTER 0.3` ·
@@ -831,41 +386,3 @@ weapons' and the diver's among them — are in their docs in `entities/`; the re
 `DASH_END 0.18` · `DASH_PUSH 320` · `PUSH_DRAG 0.02` · `SHAKE_FADE 0.02` ·
 `SHAKE_FLOOR 0.15` · `SHAKE_HURT 7` · `SHAKE_DEATH 38`. The challenges'
 and the attributes' numbers are `entities/challenges.md`'s.
-
-## Verification
-
-**`index.html?test`** runs the suite in the console. It holds only what Node
-cannot check (D39); the game's logic is tested in Node, above.
-A check that expects a shot to land must set `aim` itself (`fireAt()` in
-`tests/combat.test.js`). Four checks once passed only because the previous
-check happened to leave the cursor on the firing line.
-
-**Balance** is measured by driving `update()` faster than real time with a
-scripted bot, paired: the same seeds on both sides (D41). Three bots
-(`tests/bot.js`, D128 (the balance suite)): `kiteAndShoot`, the regression
-yardstick, comparable only to itself; the diver bot, the balance bot, which
-plays from what the screen shows with a player's limits and draws its noise
-from a generator of its own, so it never moves the game's draws; and the
-standing bot, the diver that never moves. `tests/measure.js` holds the
-runners — a gate's fight alone, a career diving and spending until the win,
-the threat fit, the pillars at the kit each gate is first met with, each
-weapon at matched kits — printed by `npm run measure <command>` and checked
-by `npm run balance` (`vitest.balance.config.js`, ten seeds, `*.balance.js`),
-slow, so never part of `npm test`. Seeds share nothing, so `seedReport()`
-measures one seed's career, gates and weapons in a worker thread of its own,
-and the balance suite's files, run in one unisolated process, read the one
-report. `npm run measure fit` rescales every pool batch to its stretch's
-target, its mix of fish kept, and writes the counts back into `LAYERS`: a
-change to the curve or to `GRADE_KEEP` is one constant and a refit, not a
-hand edit of every pool. The figures live in `roadmap.md` → Health
-and only there.
-
-**Feel is never asserted** — that judgement is Igor's.
-
-## Gotchas
-
-- **Cache.** Eight files means a hard refresh (⌘⇧R) matters; a partial cache
-  gives you a mix of old and new, which produces baffling bugs.
-- **`?test` is an exact match** on `location.search === '?test'`, so
-  `?v=whatever` cache-busting does not trigger the checks.
-- **Time-based decay must use `Math.pow(x, dt)`**, never a per-frame factor.

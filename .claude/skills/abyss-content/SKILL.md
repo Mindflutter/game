@@ -63,7 +63,7 @@ the fields and the checks that will hold it. The alpha's counts were S5
    readout (`PLAYER_STATS` for any stat it moves). Screenshot it.
 7. **Verify**: `npm test` and `index.html?test`, output filtered, both green;
    `npm run balance` too, before and after, for anything a fight meets.
-8. **Sweep** (`docs/working.md` → The consistency sweep): `changelog.md`; `design.md` if
+8. **Sweep** (`docs/working.md` → The consistency sweep): `design.md` if
    a system changed; `decisions.md` if something was decided; the idea leaves
    `ideas.md` (`docs/README.md` → How an item moves); `roadmap.md` → Health if
    a bot figure moved.

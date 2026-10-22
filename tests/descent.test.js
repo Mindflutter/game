@@ -1,5 +1,4 @@
 // The descent (D58): the camera, the current, the gate depths and the bottom.
-// Designed in docs/specs/2026-09-28-s2-descent-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { loadGame, ticks, ride, clearAndWait, atGate } from './harness.js';

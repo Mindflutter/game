@@ -1,6 +1,5 @@
 // Movement in water (D107): the diver's swim eased toward the held keys, its
-// facing and the dash along it, and the fish that ease their chase. Designed
-// in docs/specs/2026-10-14-movement-and-bites-design.md.
+// facing and the dash along it, and the fish that ease their chase.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { loadGame, ticks, until, fishAt } from './harness.js';

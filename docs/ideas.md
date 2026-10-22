@@ -5,7 +5,7 @@ one of: **open** (live, undecided) · **parked** (agreed direction, not now) ·
 **declined** (decided against — kept so we don't re-litigate it).
 
 An item leaves this file in the same step as a decision answers it, or when it
-is built: the decision, or the changelog, is its record from then on.
+is built: the decision, or the commit, is its record from then on.
 
 ---
 
@@ -444,7 +444,13 @@ discussed.
   fish carries a bar). A lean, not a decision: they should surround. The usual
   way is for each chaser to steer for its own spot on a ring round the diver,
   spread by angle, rather than for the diver itself, so a crowd closes as a
-  circle instead of a queue. **Home**: open — "maybe leave for now".
+  circle instead of a queue. Igor, 2026-10-22, for todo and discussion: "to
+  resolve enemies stacking problem they need to be smart enough to swim
+  around each other" — local avoidance: a fish that finds another in its way
+  steers past it rather than pushing into it. It and the ring are not the same
+  fix — one routes a fish round a body, the other gives each fish its own
+  place to go — and could be used alone or together. **Home**: to do, after a
+  discussion.
 - **A charging boss shoves the crowd.** Igor, 2026-10-20: "bosses dash pushes
   away other enemies (related to other solid-body problems)". From its wind-up
   to the end of its rest a lunger is pushed by nothing, so it keeps its lane

@@ -1,5 +1,4 @@
-// Challenge ladders (D109, D110). Designed in
-// docs/specs/2026-10-15-micro-task-ladders-design.md.
+// Challenge ladders (D109, D110).
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { loadGame, ticks, ride, clearAndWait, atGate } from './harness.js';

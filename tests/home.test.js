@@ -1,6 +1,5 @@
 // `home`'s economy: gear bought with gems, weapons owned and carried,
-// equipment, attributes and their points, a new game. Designed in
-// docs/specs/2026-09-30-s4-meta-loop-design.md.
+// equipment, attributes and their points, a new game.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { loadGame, ticks, ride, clearAndWait } from './harness.js';

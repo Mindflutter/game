@@ -22,8 +22,9 @@ Where it stands is `roadmap.md` → Next.
 ## Closed stages
 
 What each delivered, in one line. How each was closed — its definition of
-done, met, and Igor's word on it — is `changelog.md` on the closing date, and
-the decisions listed say why.
+done, met, and Igor's word on it — is `changelog.md` on the closing date, up
+to 2026-10-22, when it was frozen, and the decision closing it after; the
+decisions listed say why.
 
 | Stage | Closed | Delivered | Decisions |
 |---|---|---|---|
@@ -37,8 +38,9 @@ the decisions listed say why.
 | S5 — Content to the DoD numbers | 2026-10-14 | The archer, the puffer and the eel; the Harpoon and the Knife, owned and carried; three pieces of equipment, Heart and Strength, swift and footwork; Barbs and three boosts; three layers with pools of their own — and, from playing it, the debug mode and New game | D93–D103 |
 | The pass before S6 — from playing S5 | 2026-10-21 | Bodies doubled, the Knife's swing, the puffer's burst, swimming with a facing, fish that bite, challenges as ladders, waves, escorts, the boss's fan, hits that vary, grades, solid bodies, knockback, boosts that keep each weapon's nature | D104–D125 |
 
-Their designs, where a stage had one, are in `specs/` — history; where one
-disagrees with a decision, the decision wins.
+Their designs, where a stage had one, are kept in git, not the tree (D134
+(lean docs)): `git show 99d79ae:docs/specs/<file>` reads one. Where one disagrees with a decision,
+the decision wins.
 
 ## S6 — Balance
 

@@ -1,6 +1,7 @@
 # Changelog
 
-What actually shipped, newest first. Commit hashes are in this repo's history.
+What actually shipped, newest first, up to 2026-10-22. **Frozen** since (D134
+(lean docs)): `git log` says what shipped, and `decisions.md` why.
 
 ---
 

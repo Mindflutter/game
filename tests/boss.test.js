@@ -1,7 +1,6 @@
 // The boss and the mini-bosses: the lunge, the boss's fan, the layer's shape,
 // what a mini-boss's clear pays, and their escorts (D62, D63, D64, D65, D88,
 // D116, D117).
-// The design is in docs/specs/2026-09-29-s3-boss-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';

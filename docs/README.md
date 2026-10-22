@@ -28,9 +28,9 @@ A change to them belongs in the same commit as the code it describes.
 | Why something was decided, and what was rejected | `decisions.md` |
 | Anything undecided: open questions, parked and declined ideas | `ideas.md` |
 | Something broken in the game — a real issue, not an idea | `bugs.md` |
-| What shipped, and when | `changelog.md` |
+| What shipped, and when | `git log`; before 2026-10-22, `changelog.md` |
 | Igor's description of the whole game | `high level design.md` |
-| A stage's design, and its check against `foundations.md` | `specs/` |
+| The open stage's design, and its check against `foundations.md` | `specs/`; a closed stage's, `git show 99d79ae:docs/specs/<file>` |
 
 `decisions.md` is long. Find an entry by its heading — `grep '^## D'
 docs/decisions.md` lists them all — and read that one. D1–D26 describe the
@@ -47,8 +47,15 @@ something stops being true it is rewritten or deleted, and what happened goes
 to a log.
 
 **Logs** record what happened, and are only ever appended to: `decisions.md`,
-`changelog.md` and `specs/`. To reverse a decision, add one that
-supersedes it. `high level design.md` is neither — Igor's frozen input, never
+`changelog.md` — frozen on 2026-10-22, `git log` says what shipped since —
+and `specs/`, which holds only the open stage's spec: a closed stage's is
+removed, and git keeps it (D134 (lean docs)). To reverse a decision, add one
+that supersedes it.
+
+**A decision entry is short** — about fifteen lines: what was decided; why,
+in Igor's words; what it supersedes; what guards it. Numbers that are Claude's
+picks say so. The reasoning that led there stays in the conversation, not the
+entry. `high level design.md` is neither — Igor's frozen input, never
 edited.
 
 ## One home per fact
@@ -80,8 +87,7 @@ copy.
 - every `` `NAME value` `` a doc quotes is the constant's real value, and no
   doc that describes the code names a constant the code has lost;
 - the root `README.md` lists every scenario;
-- decisions are named, numbered without gaps, cited only if they exist, and the
-  newest has a changelog entry;
+- decisions are named, numbered without gaps, and cited only if they exist;
 - every kind of entity is within its alpha count (D124 (diversity, the main
   rule));
 - no living doc, nor the code, calls a challenge by its old name (D110
@@ -128,7 +134,7 @@ ideas.md ──decided──> decisions.md ──┬─> foundations.md   (if it
                                               │
                                            built
                                               ▼
-                         design.md  +  entities/  +  changelog.md
+                         design.md  +  entities/  +  the commit
 ```
 
 An answered question leaves `ideas.md` in the same step as its decision is

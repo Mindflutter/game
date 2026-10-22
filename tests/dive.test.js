@@ -1,6 +1,5 @@
 // The dive through the layers: batches drawn from pools, the layer end and on
-// into the next, mods and gems across a whole dive, the status bar. Designed
-// in docs/specs/2026-09-30-s4-meta-loop-design.md.
+// into the next, mods and gems across a whole dive, the status bar.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { loadGame, ticks, ride, clearAndWait, atGate, die, sameFish } from './harness.js';

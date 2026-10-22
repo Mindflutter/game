@@ -1,5 +1,4 @@
-// Mods from drops (D84, D85, D86, D87, D88). Designed in
-// docs/specs/2026-10-12-mods-from-drops-design.md.
+// Mods from drops (D84, D85, D86, D87, D88).
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';

@@ -93,8 +93,9 @@ what gets built and checks it against `foundations.md` and `plan.md`; it is
 kept, in `specs/`, as the design record decisions point to. The plan orders
 the tasks, each with its checks, and the log records each task as it is done;
 both are scaffolding, kept in the session's scratch space so the work survives
-a compacted context, and never in the repo — once built, the code, its checks,
-the changelog and the decisions say it all.
+a compacted context, and never in the repo — once built, the code, its checks
+and the decisions say it all. The spec leaves the tree when its stage closes;
+git keeps it (D134 (lean docs)).
 
 ## Commits
 
@@ -103,8 +104,6 @@ the changelog and the decisions say it all.
   about to be committed and wait. This applies even when the work is verified
   and the message is written — being finished is not permission to commit.
 - Commit messages: short subject line only. No body, no attribution trailers.
-- After a squash or rebase, re-check the changelog: it cites commits, and
-  rewriting history turns its entries into fiction.
 
 ## The consistency sweep
 
@@ -120,8 +119,8 @@ missed for real, which is why they are listed rather than implied:
    the old behaviour is not a failing test, it is a *wrong* test, and deleting
    one needs the same justification as writing one. *Missed: a check still
    asserted a scenario's old definition a full change after it was redefined.*
-2. **`docs/`** — `changelog.md` always; `decisions.md` for anything decided,
-   reopened or superseded; `design.md` for anything whose behaviour changed;
+2. **`docs/`** — `decisions.md` for anything decided, reopened or
+   superseded, a short entry (`README.md` → Living docs and logs); `design.md` for anything whose behaviour changed;
    `entities/` for any enemy, mod, boost, weapon, piece of equipment,
    challenge or attribute that changed — the check holds its numbers, never
    its prose; `plan.md` if a stage moved; `ideas.md` if an open question
