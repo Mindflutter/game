@@ -21,19 +21,23 @@ at (D119 (grades: the same fish, stronger)).
 
 ## Roster
 
+<!-- generated: layers -->
 | name | color | stretches |
 |---|---|---|
 | Layer 1 | 12 / 23 / 39 | 3 of pool 1 · mini-boss with pool 1 · 3 of pool 2 · mini-boss with pool 2 · 3 of pool 3 · boss with pool 3 |
 | Layer 2 | 24 / 12 / 40 | 3 of pool 1 · mini-boss with pool 1 · 3 of pool 2 · mini-boss with pool 2 · 3 of pool 3 · boss with pool 3 |
 | Layer 3 | 8 / 32 / 28 | 3 of pool 1 · mini-boss with pool 1 · 3 of pool 2 · mini-boss with pool 2 · 3 of pool 3 · boss with pool 3 |
+<!-- /generated -->
 
 The bosses' batches, one fish each, escorted from the pool before them (D116
 (bosses bring escorts)):
 
+<!-- generated: layers:bosses -->
 | fish | crowd |
 |---|---|
 | mini-boss 1 | — |
 | boss 1 | 4 |
+<!-- /generated -->
 
 ## Fields
 
@@ -50,6 +54,7 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
 
 ## Layer 1
 
+<!-- generated: layers:1 -->
 | pool | target | fish | threat | at top |
 |---|---|---|---|---|
 | 1 | 0.2 | drifter 38, darter 13 | 0.2 | 0.98 |
@@ -67,9 +72,11 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
 | 3 | 0.87 | bulwark 8, drifter 10, darter 8, archer 14 | 0.81 | 1.44 |
 | 3 | 0.87 | archer 16, bulwark 8, drifter 9 | 0.8 | 1.36 |
 | 3 | 0.87 | bulwark 7, darter 12, drifter 10, archer 17 | 0.81 | 1.49 |
+<!-- /generated -->
 
 ## Layer 2
 
+<!-- generated: layers:2 -->
 | pool | target | fish | threat | at top |
 |---|---|---|---|---|
 | 1 | 1.42 | drifter 12, archer 11, puffer 6 | 0.72 | 1.77 |
@@ -87,9 +94,11 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
 | 3 | 3.26 | puffer 19, archer 8, darter 10 | 1.72 | 3.93 |
 | 3 | 3.26 | bulwark 6, archer 8, darter 12, puffer 15 | 1.77 | 3.98 |
 | 3 | 3.26 | drifter 12, puffer 18, archer 11 | 1.69 | 3.98 |
+<!-- /generated -->
 
 ## Layer 3
 
+<!-- generated: layers:3 -->
 | pool | target | fish | threat | at top |
 |---|---|---|---|---|
 | 1 | 4.77 | eel 14, drifter 14, archer 7 | 1.77 | 6.19 |
@@ -107,6 +116,7 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
 | 3 | 9.83 | puffer 15, eel 22, archer 10 | 3.89 | 11.88 |
 | 3 | 9.83 | bulwark 7, archer 9, eel 27 | 3.67 | 11.96 |
 | 3 | 9.83 | drifter 8, eel 24, puffer 11 | 3.66 | 11.83 |
+<!-- /generated -->
 
 ## Adding one
 
@@ -114,6 +124,6 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
    batches, and `layer()` gives it the shape every layer shares. A batch: a line
    in a pool, naming only types in `ENEMY_TYPES`, written as the mix of fish
    it should be; `npm run measure fit` sizes its counts to its stretch.
-2. Its row in the roster and its section here, with its batches. `npm test`
-   fails until they match the code, and holds the count of layers to
+2. Its section here; `npm run docs` writes its rows from the code (D133 (the doc tables write themselves)); `npm test` fails
+   until they match the code, and holds the count of layers to
    `foundations.md` → Alpha counts.

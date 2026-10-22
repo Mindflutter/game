@@ -51,8 +51,8 @@ the fields and the checks that will hold it. The alpha's counts were S5
    are in `tests/boss.test.js`. Run it red.
 2. **The record.** A new tuning constant goes in the `// ---------- balance`
    block.
-3. **Its doc row and section.** `npm test` rebuilds the roster from the code
-   and shows the right table on a mismatch.
+3. **Its doc section, and `npm run docs`**, which writes its rows into the
+   roster tables; a new behaviour's table needs its markers placed first.
 4. **A scenario** if it can be met alone — every new enemy type gets one —
    and its row in the root `README.md`.
 5. **Player-facing text**: its `desc`, the pickup line, `HELP_KEYS`,

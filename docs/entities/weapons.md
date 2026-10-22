@@ -15,14 +15,17 @@ readout see them like any other stat, and everything adds, nothing multiplies
 
 ## Roster
 
+<!-- generated: weapons -->
 | name | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
 |---|---|---|---|---|---|---|---|---|---|
 | Gun | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
 | Harpoon | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 6000 | fireRate 1, damage 5, pierce 3 |
 | Knife | 3 | 2 | 60 | — | 18 | 6 | 40 | 4000 | fireRate 3.75, damage 3, range 72 |
+<!-- /generated -->
 
 Each weapon's tiers, in the order they are bought:
 
+<!-- generated: weapons:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
 | Gun | 1 | 1200 | fireRate +0.5 |
@@ -34,13 +37,16 @@ Each weapon's tiers, in the order they are bought:
 | Knife | 1 | 2400 | range +12 |
 | Knife | 2 | 5600 | damage +1 |
 | Knife | 3 | 10400 | fireRate +0.75 |
+<!-- /generated -->
 
 The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,
 in degrees and seconds.
 
+<!-- generated: weapons:swing -->
 | name | arc | time |
 |---|---|---|
 | Knife | 60 | 0.15 |
+<!-- /generated -->
 
 **at top** is the weapon with every tier bought; **adds** is what one tier
 adds. Both are worked out from the tiers' `apply` by the check.
@@ -106,8 +112,8 @@ numbers)).
 ## Adding one
 
 1. A line in `WEAPONS`: the fields above, and three or four `tiers`.
-2. A row in the roster, its rows in the tier table, and a section here under
-   its `name`. `npm test` fails until they match the code.
+2. A section here under its `name`; `npm run docs` writes its rows from the code (D133 (the doc tables write themselves)); `npm test`
+   fails until they match the code.
 3. Its `cost` is what owning it costs at `home`; 0 owns it from the start.
    A scenario carries it with `weapon:` (`game/content.js` → scenarios), so
    it can be met alone, and `npm run measure weapons` sets it beside the others

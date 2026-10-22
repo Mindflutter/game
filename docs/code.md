@@ -55,8 +55,9 @@ the rule stands unqualified.
   touches no other code. The alpha's content counts are only reachable if
   adding the fifteenth enemy costs what adding the second did. An enemy, mod,
   boost, weapon, piece of equipment, challenge, attribute, layer or batch also
-  gets its row and section in `entities/` — `npm test` fails until they match
-  the code (D81 — Entity docs). Adding any piece of content follows the
+  gets its section in `entities/`, and `npm run docs` writes its rows —
+  `npm test` fails until they match the code (D81 — Entity docs, D133 (the
+  doc tables write themselves)). Adding any piece of content follows the
   `abyss-content` skill (`.claude/skills/abyss-content/`).
 - **Comments amend the code; they never define or contradict it** (D91). The
   code is the source of truth for behaviour, `docs/` the spec for what it must

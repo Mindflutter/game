@@ -12,6 +12,7 @@ fish and the layer end's pick.
 
 ## Roster
 
+<!-- generated: mods -->
 | name | scope | desc | max | end | per pick | at max |
 |---|---|---|---|---|---|---|
 | Fins | body | you swim faster | 6 | — | speed +45 | speed 530 |
@@ -21,6 +22,7 @@ fish and the layer end's pick.
 | Impact | body | the dash wounds what it throws | 3 | — | dashDamage +1 | dashDamage 3 |
 | Mend | comfort | 1 HP back each batch | 1 | true | mendOnClear +1 | mendOnClear 1 |
 | Barbs | weapon | harpoons go through one more | 3 | — | pierce +1 | pierce 5 |
+<!-- /generated -->
 
 **per pick** is what taking it once changes; **at max** is the stat after
 `max` of them, from the starting kit — the diver carrying the Gun, or for a
@@ -93,8 +95,8 @@ numbers are Claude's picks, held by `npm run balance` (D127 (the tuned numbers))
    layer end's pick)). Anything a mod raises must be a field of
    `PLAYER_START`, not a bare constant — a line of data cannot edit a `const`
    (D34 (mods)).
-2. A row in the roster and a section here under its `name`. `npm test` fails
-   until both match the code.
+2. A section here under its `name`; `npm run docs` writes its rows from the code (D133 (the doc tables write themselves)); `npm test`
+   fails until both match the code.
 3. The checks that then hold it: a unique name, `scope` body or comfort — or
    weapon, naming real weapons in `weapons` — `max`
    an integer of at least 1, the card text inside the card, at most `MOD_ROWS`

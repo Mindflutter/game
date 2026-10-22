@@ -12,9 +12,11 @@ when the two disagree.
 
 ## Roster
 
+<!-- generated: diver -->
 | r | speed | ramp | turn | hp | maxHp | iframes | dashCooldown | dashSpeed | mendOnClear | dashDamage | guard | splash |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 20 | 260 | 0.25 | 0.2 | 3 | 3 | 1 | 2.2 | 620 | 0 | 0 | 0 | 0 |
+<!-- /generated -->
 
 ## Fields
 

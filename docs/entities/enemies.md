@@ -17,6 +17,7 @@ pulled to the player (D78 (gems are pulled to the player)).
 
 ## Roster
 
+<!-- generated: enemies -->
 | name | r | hp | speed | ramp | value | color | glow | carries | enters |
 |---|---|---|---|---|---|---|---|---|---|
 | drifter | 18 | 1 | 85 | 0.6 | 1 | #e8446e | #ff1e5a | — | — |
@@ -27,51 +28,66 @@ pulled to the player (D78 (gems are pulled to the player)).
 | eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | — | — |
 | mini-boss | 52 | 20 | 90 | — | 5 | #e2ff8a | #c6ff3c | false | — |
 | boss | 84 | 55 | 80 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
+<!-- /generated -->
 
 Each behaviour's numbers, a table per behaviour field. `bite`:
 
+<!-- generated: enemies:bite -->
 | name | reach | windup | rest | damage | knock |
 |---|---|---|---|---|---|
 | drifter | 10 | 0.3 | 0.8 | 1 | 240 |
 | darter | 6 | 0.15 | 0.6 | 1 | 180 |
 | bulwark | 40 | 0.6 | 1.2 | 1 | 420 |
+<!-- /generated -->
 
 `lunge`:
 
+<!-- generated: enemies:lunge -->
 | name | chase | windup | speed | reach | rest | damage | knock |
 |---|---|---|---|---|---|---|---|
 | mini-boss | 1 | 1.2 | 780 | 450 | 0.9 | 2 | 600 |
 | boss | 1 | 0.8 | 780 | 450 | 0.9 | 4 | 600 |
+<!-- /generated -->
 
 `fan`:
 
+<!-- generated: enemies:fan -->
 | name | chase | windup | reach | rest | count | arc | speed | r | travel | damage | knock |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | boss | 1 | 0.6 | 450 | 0.9 | 7 | 90 | 160 | 9 | 600 | 1 | 150 |
+<!-- /generated -->
 
 `spit`:
 
+<!-- generated: enemies:spit -->
 | name | range | near | every | speed | r | travel | damage | knock |
 |---|---|---|---|---|---|---|---|---|
 | archer | 240 | 170 | 2 | 210 | 6 | 420 | 1 | 150 |
+<!-- /generated -->
 
 `fuse`:
 
+<!-- generated: enemies:fuse -->
 | name | chase | trigger | time | blast | damage | knock |
 |---|---|---|---|---|---|---|
 | puffer | 1.5 | 90 | 0.5 | 110 | 2 | 480 |
+<!-- /generated -->
 
 `weave`:
 
+<!-- generated: enemies:weave -->
 | name | width | rate |
 |---|---|---|
 | eel | 50 | 0.9 |
+<!-- /generated -->
 
 `touch`:
 
+<!-- generated: enemies:touch -->
 | name | damage | knock |
 |---|---|---|
 | eel | 1 | 240 |
+<!-- /generated -->
 
 Every number is Claude's pick: the lungers' (D64 (the boss lunges)), the
 boss's fan (D117 (the boss's fan)), the boss's `value` (D68 (the layer end is
@@ -94,11 +110,13 @@ grade as a small number on its body, above the first — Igor: "circles enlarge
 enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks, tuned
 to the pillars (D127 (the tuned numbers)).
 
+<!-- generated: grades -->
 | grade | hp | speed | value | damage | from |
 |---|---|---|---|---|---|
 | 1 | 1 | 1 | 1 | 0 | 1 |
 | 2 | 1.25 | 1.1 | 2 | 1 | 1 |
 | 3 | 1.5 | 1.2 | 3 | 2 | 2 |
+<!-- /generated -->
 
 ## Threat
 
@@ -107,6 +125,7 @@ that grade and alone, that costs the diver bot one heart, at the reference kit
 — the Gun, no gear, no mods, no steps. A batch's threat is its fish's summed.
 Measured by `npm run measure threat`; the numbers are the fit, rounded.
 
+<!-- generated: enemies:threat -->
 | name | grade 1 | grade 2 | grade 3 |
 |---|---|---|---|
 | drifter | 0.004 | 0.021 | 0.026 |
@@ -117,6 +136,7 @@ Measured by `npm run measure threat`; the numbers are the fit, rounded.
 | eel | 0.114 | 0.239 | 0.4 |
 | mini-boss | 0.315 | 0.404 | 0.452 |
 | boss | 0.879 | 0.921 | 0.961 |
+<!-- /generated -->
 
 ## Fields
 
@@ -298,8 +318,8 @@ layer's last pool, graded with it, paying no gems, and dying with it.
    (the debug mode)).
 2. Its `threat`, measured: `npm run measure threat <name>` prints the line to
    paste (D126 (threat)).
-3. A row in the roster, in Threat — and in its behaviour's table, if it has
-   one — and a section here under its `name`. `npm test` fails until they
-   match the code.
+3. A section here under its `name`; `npm run docs` writes its rows from the code (D133 (the doc tables write themselves)); a new
+   behaviour's table needs its markers placed first, where it belongs.
+   `npm test` fails until they match the code.
 4. To meet it in a dive, a batch in a layer's pool names it
    (`game/content.js` → batches). A scenario can place it alone.

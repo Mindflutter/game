@@ -3,6 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { loadGame } from './harness.js';
+import { docTables, marked, keysOf } from './doctables.js';
 
 const ROOT = new URL('../', import.meta.url);
 const src = f => readFileSync(new URL(f, ROOT), 'utf8');
@@ -179,131 +180,23 @@ describe('numbers the docs quote about the code', () => {
 });
 
 // ---------- the entity docs ----------
-// The entity docs (D81): every table is rebuilt here from the code and must
-// appear in its doc verbatim. When one fails, the table it wanted is in the
-// diff: paste it in.
+// The entity docs (D81): every number table is built from the code and written
+// between its markers by `npm run docs` (D133); a stale one fails here.
 describe('the entity docs', () => {
   const g = loadGame();
   const doc = f => read('entities/' + f);
-  const cell = v => v === undefined ? '—' : Array.isArray(v) ? v.join(' / ') : String(v);
-  const table = (head, rows) => [
-    '| ' + head.join(' | ') + ' |',
-    '|' + head.map(() => '---').join('|') + '|',
-    ...rows.map(r => '| ' + r.map(cell).join(' | ') + ' |'),
-  ].join('\n');
-  // A table's fields in the order the code first uses them, so a field the
-  // code gains is a column the doc must gain.
-  const keysOf = records => [...new Set(records.flatMap(Object.keys))];
-  const plain = records => keysOf(records)
-    .filter(k => records.every(r => r[k] === undefined || typeof r[k] !== 'object' && typeof r[k] !== 'function'));
-  // The player a dive starts with: the diver carrying the first weapon, before
-  // any tier or attribute -- what every "at max" and "at top" is counted from.
-  g.reset(1);
-  const START = { ...g.player };
-  // The same player carrying weapon `w` instead -- its numbers, as reset() puts them.
-  const kit = ({ name, tiers, cost, requires, ...numbers }) => ({ ...START, ...numbers });
-  // What `applies` do to `base`, in order: the stats they moved, by how much
-  // ("speed +45") or to what ("speed 395").
-  const r3 = x => Number(x.toFixed(3));
-  const moved = (applies, by, base = START) => {
-    const to = { ...base };
-    for (const apply of applies) apply(to);
-    return Object.keys(to).filter(k => to[k] !== base[k]).map(k => k + ' ' + (by
-      ? (to[k] < base[k] ? '-' : '+') + r3(Math.abs(to[k] - base[k]))
-      : r3(to[k]))).join(', ');
-  };
-  const gear = records => {
-    const cols = ['name', ...plain(records).filter(k => k !== 'name')];
-    return [
-      table([...cols, 'at top'], records.map(x =>
-        [...cols.map(k => x[k]), moved(x.tiers.map(t => t.apply), false, kit(x))])),
-      table(['name', 'tier', 'cost', 'adds'], records.flatMap(x => x.tiers.map((t, i) =>
-        [x.name, i + 1, t.cost, moved([t.apply], true, kit(x))]))),
-    ];
-  };
+  const tables = docTables(g);
 
-  // A table per behaviour field -- `lunge`, `spit`, `swing`, ... -- a row per
-  // record that has it.
-  const behaviourTables = (records, fields) => fields.map(f => {
-    const have = records.filter(x => x[f]);
-    const sub = keysOf(have.map(x => x[f]));
-    return table(['name', ...sub], have.map(x => [x.name, ...sub.map(k => x[f][k])]));
+  it('holds every number table as the code makes it -- `npm run docs` writes them', () => {
+    const stale = tables.filter(t => marked(t.doc).get(t.id) !== t.text).map(t => t.doc + ': ' + t.id);
+    expect(stale).toEqual([]);
   });
 
-  it('lists every enemy type at its real numbers', () => {
-    const cols = plain(g.ENEMY_TYPES);
-    expectIn(doc('enemies.md'), table(cols, g.ENEMY_TYPES.map(t => cols.map(k => t[k]))));
-    const behaviours = keysOf(g.ENEMY_TYPES).filter(k => !cols.includes(k) && k !== 'threat');
-    for (const t of behaviourTables(g.ENEMY_TYPES, behaviours)) expectIn(doc('enemies.md'), t);
-    // A number per grade (D126).
-    expectIn(doc('enemies.md'), table(['name', ...g.GRADES.map((_, i) => 'grade ' + (i + 1))],
-      g.ENEMY_TYPES.map(t => [t.name, ...t.threat])));
-  });
-
-  it('lists every grade at its real numbers (D119)', () => {
-    const cols = Object.keys(g.GRADES[0]);
-    expectIn(doc('enemies.md'), table(['grade', ...cols], g.GRADES.map((G, i) => [i + 1, ...cols.map(k => G[k])])));
-  });
-
-  it('lists every mod with what it does and its card text', () => {
-    const cols = plain(g.MODS);
-    // A weapon mod is counted on the first weapon it fits (D99), the rest on the Gun.
-    const base = m => (m.weapons ? kit(g.WEAPONS.find(w => w.name === m.weapons[0])) : START);
-    expectIn(doc('mods.md'), table([...cols, 'per pick', 'at max'],
-      g.MODS.map(m => [...cols.map(k => m[k]), moved([m.apply], true), moved(Array(m.max).fill(m.apply), false, base(m))])));
-  });
-
-  it('lists every boost with what it adds, for how long, and its line', () => {
-    // `add` and `percent` are numbers, so they are read straight off the record (D86, D125).
-    const cols = plain(g.BOOSTS);
-    const adds = b => [...Object.entries(b.add || {}).map(([k, v]) => k + ' ' + (v < 0 ? '-' : '+') + r3(Math.abs(v))),
-                       ...Object.entries(b.percent || {}).map(([k, v]) => k + ' +' + v + '%')].join(', ');
-    expectIn(doc('boosts.md'), table([...cols, 'for', 'adds'],
-      g.BOOSTS.map(b => [...cols.map(k => b[k]), (b.weapons || ['any']).join(', '), adds(b)])));
-  });
-
-  it('lists every challenge -- when it is judged, its rungs, what it asks -- and every attribute (D110)', () => {
-    const judged = c => ['clear', 'kill', 'end'].find(k => c[k]);
-    expectIn(doc('challenges.md'), table(['name', 'judged', 'within', 'rungs', 'the first asks', 'the top asks'],
-      g.CHALLENGES.map(c => [c.name, judged(c), c.within, c.rungs, c.ask(c.rungs[0]), c.ask(c.rungs.at(-1))])));
-    expectIn(doc('challenges.md'), table(['name', 'a step adds'],
-      g.ATTRIBUTES.map(a => [a.name, moved([a.apply], true)])));
-  });
-
-  it('lists the diver at the start, every field in order (D124)', () => {
-    const cols = Object.keys(g.PLAYER_START);
-    expectIn(doc('diver.md'), table(cols, [cols.map(k => g.PLAYER_START[k])]));
-  });
-
-  it('lists every layer, its stretches, and each pool\'s batches with their threat (D126)', () => {
-    const fish = b => b.enemies.map(([n, c]) => n + ' ' + c).join(', ');
-    const pools = l => [...new Set(l.stretches.filter(x => !x.escorts).map(x => x.pool))];
-    // A pool's target, the batch's threat at grade 1 and at the layer's top:
-    // what grading works between.
-    const r2 = x => Number(x.toFixed(2));
-    let k = -1;
-    const targets = new Map(g.LAYERS.flatMap(l => l.stretches.filter(x => !x.escorts)
-      .map(x => [x.pool, r2(g.THREAT_START * (g.THREAT_RISE ** (++k + 1) - 1) / (g.THREAT_RISE - 1))])));
-    const top = l => g.GRADES.findLastIndex(G => G.from <= g.LAYERS.indexOf(l) + 1) + 1;
-    const stretches = l => l.stretches.map(x => x.escorts
-      ? x.pool[0].enemies[0][0] + ' with pool ' + (pools(l).indexOf(x.escorts) + 1)
-      : x.draw + ' of pool ' + (pools(l).indexOf(x.pool) + 1)).join(' · ');
-    expectIn(doc('layers.md'), table(['name', 'color', 'stretches'], g.LAYERS.map(l => [l.name, l.color, stretches(l)])));
-    expectIn(doc('layers.md'), table(['fish', 'crowd'], [g.MINI_BOSS, g.BOSS].map(b => [fish(b), b.crowd])));
-    for (const l of g.LAYERS) {
-      const section = doc('layers.md').split('\n## ' + l.name + '\n')[1].split('\n## ')[0];
-      expectIn(section, table(['pool', 'target', 'fish', 'threat', 'at top'], pools(l).flatMap((p, i) => p.map(b =>
-        [i + 1, targets.get(p), fish(b), r2(g.batchThreat(b)), r2(g.batchThreat(g.ofGrade(b, top(l))))]))));
-    }
-  });
-
-  it('lists every weapon and piece of equipment at its real numbers and tiers', () => {
-    for (const t of gear(g.WEAPONS)) expectIn(doc('weapons.md'), t);
-    // Its behaviours, as the enemies' -- not the shop's `tiers` and `requires`.
-    const behaviours = keysOf(g.WEAPONS)
-      .filter(k => !plain(g.WEAPONS).includes(k) && k !== 'tiers' && k !== 'requires');
-    for (const t of behaviourTables(g.WEAPONS, behaviours)) expectIn(doc('weapons.md'), t);
-    for (const t of gear(g.EQUIPMENT)) expectIn(doc('equipment.md'), t);
+  it('marks no table the code does not make', () => {
+    const ids = new Set(tables.map(t => t.doc + ': ' + t.id));
+    const orphans = ENTITY_DOCS.flatMap(f => [...marked(f).keys()].map(id => f + ': ' + id))
+      .filter(x => !ids.has(x));
+    expect(orphans).toEqual([]);
   });
 
   it('documents every field the code has, and only those or reserved ones', () => {

@@ -4680,3 +4680,24 @@ record bugs to be processed separately."
 
 **Guarded by**: nothing a machine can see — it is how the work is done
 (`code.md` → Verification).
+
+## D133 — The doc tables write themselves · 2026-10-22
+
+Igor, asked whether the entity docs' number tables could go, the numbers then
+living only in `game/content.js`: "numbers need to stay in docs for reference,
+it's the tests i dont understand the point of". The point: a table in a doc is
+a copy of the code, and the check is what keeps the copy from going stale. The
+cost was writing the copy by hand. Offered a command that writes them: "build
+npm run docs to write the tables automatically yes".
+
+- **`npm run docs` writes every number table** of `docs/entities/` from the
+  code (`tests/doctables.js`), each between its markers, `<!-- generated: id
+  -->` and `<!-- /generated -->`, which render as nothing.
+- **A table with no marker is reported, not placed**: where a new behaviour's
+  table goes in its doc is a human's call.
+- **`npm test` fails on a stale table and on a marker the code makes no table
+  for**; it builds the tables the same way, from the same module. The table
+  checks one per kind go — the stale-table check covers every table at once.
+
+**Guarded by**: `tests/docs.test.js` — both failures, each seen failing on a
+break: a number changed in the code, a marker with no table.

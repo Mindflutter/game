@@ -74,9 +74,9 @@ copy.
 
 `npm test` checks the docs as well as the game (`tests/docs.test.js`):
 
-- each entity doc's tables match `game/content.js` — every item, every number,
-  every card text — and every field of a record is documented, every item has
-  its section;
+- each entity doc's tables are as `npm run docs` writes them from
+  `game/content.js` — every item, every number, every card text — and every
+  field of a record is documented, every item has its section;
 - every `` `NAME value` `` a doc quotes is the constant's real value, and no
   doc that describes the code names a constant the code has lost;
 - the root `README.md` lists every scenario;
@@ -100,9 +100,10 @@ One doc per kind of entity, in `entities/`, all in the same layout (D81
 
 1. **What it is** — a few lines: the glossary's term, the table it mirrors in
    `game/content.js`, where the mechanism around it is described.
-2. **Roster** — one row per item, with every number. The docs check rebuilds it
-   from the code, so a wrong number fails `npm test` and the diff shows the
-   right table.
+2. **Roster** — one row per item, with every number. `npm run docs` writes it
+   from the code between its markers, `<!-- generated: id -->` and
+   `<!-- /generated -->`, and a stale one fails `npm test` (D133 (the doc
+   tables write themselves)).
 3. **Fields** — the record's shape: each field, its unit, what it means.
    A field the code does not have yet is marked **Reserved**, with the stage
    that adds it.

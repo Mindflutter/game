@@ -37,6 +37,7 @@ path a test drives.
 ```bash
 npm run measure careers   # or bots, threat, pillars, weapons: tables
 npm run measure fit       # resizes every pool batch to the threat curve
+npm run docs              # writes the entity docs' number tables from the code
 npm run balance           # the pillars as checks, ten seeds, under a minute
 ```
 

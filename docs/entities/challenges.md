@@ -16,6 +16,7 @@ where it does, in full, is `specs/2026-10-15-micro-task-ladders-design.md`.
 
 ## Roster
 
+<!-- generated: challenges -->
 | name | judged | within | rungs | the first asks | the top asks |
 |---|---|---|---|---|---|
 | untouched | clear | — | 1 / 3 / 6 / 10 | clear a batch without a hit | clear 10 batches in a row without a hit |
@@ -23,12 +24,15 @@ where it does, in full, is `specs/2026-10-15-micro-task-ladders-design.md`.
 | beeline | clear | — | 1 / 3 / 5 / 8 | kill a glowing fish before the rest of its batch | kill the glowing fish first, 8 batches in a row |
 | flurry | kill | — | 6 / 12 / 20 / 30 | kill 6 fish within 2 seconds | kill 30 fish within 2 seconds |
 | swift | end | true | 480 / 360 / 300 / 240 | clear a layer within 8 minutes | clear a layer within 4 minutes |
+<!-- /generated -->
 
+<!-- generated: attributes -->
 | name | a step adds |
 |---|---|
 | Dash reach | dashSpeed +150 |
 | Heart | hp +1, maxHp +1 |
 | Strength | dashDamage +1 |
+<!-- /generated -->
 
 **judged** is which of `clear`, `kill` and `end` the record has. Every number
 is Claude's pick, none tuned by S6 (balance): Dash reach and Strength are
@@ -133,7 +137,7 @@ A challenge:
    something no other challenge does.
 2. Its rungs sized as these were: each expected within about a dive at the
    level of play it marks (the spec, above).
-3. A row in the roster and a section here under its `name`. `npm test` fails
+3. A section here under its `name`; `npm run docs` writes its rows from the code (D133 (the doc tables write themselves)); `npm test` fails
    until both match the code; `checks.js` measures every rung's line and
    notice against the view.
 
@@ -141,4 +145,4 @@ An attribute:
 
 1. A line in `ATTRIBUTES`: `name` and `apply` — a body stat, health or the
    dash, never a combat one, which is gear's (D36 (attributes)).
-2. A row in the roster and a section here under its `name`.
+2. A section here under its `name`; `npm run docs` writes its row.

@@ -6,6 +6,13 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-22
 
+**The doc tables write themselves** (D133 (the doc tables write themselves))
+Igor: "numbers need to stay in docs for reference, it's the tests i dont
+understand the point of". `npm run docs` writes every number table in
+`docs/entities/` from the code, between markers that render as nothing, and
+`npm test` fails when one is stale, as before — but the fix is a command, not
+a table pasted by hand.
+
 **CLAUDE.md is an index; full runs on Igor's word** (D131 (CLAUDE.md is an
 index), D132 (full runs on Igor's word))
 Igor: "main file only points to other files, files read only if required by

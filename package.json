@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "measure": "node tests/measure.js",
+    "docs": "node tests/doctables.js",
     "balance": "vitest run --config vitest.balance.config.js"
   },
   "type": "module",

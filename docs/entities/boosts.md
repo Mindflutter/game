@@ -19,12 +19,14 @@ boosts)).
 
 ## Roster
 
+<!-- generated: boosts -->
 | name | desc | time | swingDesc | for | adds |
 |---|---|---|---|---|---|
 | Rush | you swim much faster | 5 | — | any | speed +200 |
 | Frenzy | you fire much faster | 5 | you swing much faster | any | fireRate +100% |
 | Lance | your shots go through | 5 | — | Gun | pierce +4 |
 | Bloom | your shots splash | 6 | your cuts splash | any | splash +24 |
+<!-- /generated -->
 
 **for** is read off `weapons`, **adds** off `add` and `percent`. Every number
 is Claude's pick, held by `npm run balance` (D127 (the tuned numbers)).
@@ -78,7 +80,7 @@ shot hit, when nearly every shot hits.
    carried weapon's numbers — since it is added to and taken back off the
    player. Moving a weapon's number, it is a `percent` of one every weapon has,
    or it names its `weapons`; `npm test` holds this.
-2. A row in the roster and a section here under its `name`. `npm test` fails
-   until both match the code.
+2. A section here under its `name`; `npm run docs` writes its rows from the code (D133 (the doc tables write themselves)); `npm test`
+   fails until both match the code.
 3. Every stat it moves shown on the development readout (`PLAYER_STATS`), so
    the change can be watched while it runs.
