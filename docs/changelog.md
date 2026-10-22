@@ -6,6 +6,16 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ## 2026-10-22
 
+**CLAUDE.md is an index; full runs on Igor's word** (D131 (CLAUDE.md is an
+index), D132 (full runs on Igor's word))
+Igor: "main file only points to other files, files read only if required by
+session". `CLAUDE.md` now names the three docs every session reads —
+`foundations.md`, `plan.md` and the new `working.md`, how Igor and Claude
+work — and where the rest is: the new `code.md` for writing and checking code,
+`README.md`s for running things and the map. And "only run tests on new
+functionality": a change runs its own checks; the whole suites run when Igor
+says, and what they find goes to `bugs.md`.
+
 **A gentle first layer, its fish revealed a type at a time** (D129 (a gentle
 first layer), D130 (fish are revealed a type at a time))
 Igor, playing the S6 (balance) build: "grade 2 fish appear immediately from

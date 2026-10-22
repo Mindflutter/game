@@ -1,6 +1,6 @@
 # Dev server for Abyss. Two things plain `python3 -m http.server` gets wrong here:
 #   1. It caches. Across eight script tags that means the browser runs a mix of
-#      old and new files -- the "baffling bugs" CLAUDE.md warns about. A human
+#      old and new files -- the "baffling bugs" docs/code.md warns about. A human
 #      hits Cmd+Shift+R; Claude cannot, so the server forbids caching instead.
 #   2. It is single-threaded, so a browser holding a keep-alive connection blocks
 #      every other request, including the curl you are using to check on it.

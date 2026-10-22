@@ -1,5 +1,5 @@
 // Stop hook: blocks a reply citing a decision (D58) or a stage (S2) without
-// its short name in brackets after it, as CLAUDE.md asks. "D58 — Name", the
+// its short name in brackets after it, as docs/working.md asks. "D58 — Name", the
 // docs' heading form, names it too.
 import { readFileSync } from 'node:fs';
 

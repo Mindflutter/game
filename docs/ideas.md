@@ -182,6 +182,10 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
 - **A shooter that flees.** Igor, 2026-10-15: "escaping range-shooting
   enemies". The archer already backs off inside its band (D95); one that runs
   from the diver and shoots as it goes would make the player chase.
+- **A fish that pulls you in.** Igor, 2026-10-22: "a guy that opens mouth and
+  pulls you in. motivates to escape and resist by swimming away from the
+  pull". Every fish now comes to the diver or shoots at it; this one moves the
+  diver, so the answer is to swim against it.
 
 ## Recorded future opportunities, explicitly not now
 

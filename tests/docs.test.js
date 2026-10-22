@@ -1,4 +1,4 @@
-// Checks on `docs/` itself: the parts of CLAUDE.md's consistency sweep a
+// Checks on `docs/` itself: the parts of the consistency sweep a
 // machine can do. A sweep is a habit, and habits fail quietly.
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -16,7 +16,7 @@ const ENTITY_DOCS = docNames.filter(f => f.startsWith('entities/'));
 // ideas.md, nor the logs -- decisions.md and changelog.md are history and may
 // name what a later change removed.
 const DESCRIBE_CODE = ['design.md', 'roadmap.md', 'plan.md', 'foundations.md',
-                       'README.md', ...ENTITY_DOCS];
+                       'code.md', 'working.md', 'README.md', ...ENTITY_DOCS];
 
 const decisions = read('decisions.md');
 

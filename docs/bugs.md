@@ -9,7 +9,7 @@ records the fix and the check that now holds it.
 Each issue says what happens, what should, how to see it — a `?debug=<code>`
 URL replays a setup exactly, seed and all (D102 (the debug mode)) — and, once
 found, why. A bug gets its root cause and a check that fails on it before any
-fix (`CLAUDE.md` → Verification).
+fix (`code.md` → Verification).
 
 ## Open
 

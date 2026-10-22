@@ -4644,3 +4644,39 @@ the opening. **Amends** `foundations.md` → Pillars, Nothing trivial, and
 
 **Guarded by**: `tests/dive.test.js` — the reveal, over every pool of the
 dive; `tests/pillars.balance.js` — the standing bar past the opening.
+
+## D131 — CLAUDE.md is an index · 2026-10-22
+
+Igor: "trim claude.md, delegate all info to a well structured documentation.
+main file only points to other files, files read only if required by session".
+
+- **`CLAUDE.md` only points.** Three docs are read every session, before the
+  first reply — `foundations.md`, `plan.md`, and `working.md`, since every
+  reply follows it; the rest only when the session needs them: `code.md` for
+  code, the `abyss-content` skill for content, the root `README.md` to run
+  things, `docs/README.md` for everything else.
+- **`working.md`** holds how Igor and Claude work: the reply, questions and
+  uncertainty, stage-sized work, commits, the consistency sweep, skills and
+  plugins. **`code.md`** holds what the browser build is, the constraints
+  beyond `foundations.md` → The technical contract, the conventions and
+  verification. What `foundations.md` already said — no runtime dependencies,
+  the seam, checks that can fail — is cited, not copied.
+- The file names and the split are Claude's picks.
+
+**Guarded by**: `tests/docs.test.js` — every doc `CLAUDE.md` or the map
+names exists, and the map names every doc.
+
+## D132 — Full runs on Igor's word · 2026-10-22
+
+Igor: "test runs apparently take long (correct me if im wrong). so, only run
+tests on new functionality. occasionally, i will tell you to run all, then we
+record bugs to be processed separately."
+
+- **A change runs the checks of what it touches**: its test files and its new
+  checks, each seen failing first.
+- **`npm test`, `index.html?test` and `npm run balance` run whole on Igor's
+  word.** What they find goes to `bugs.md`, processed apart from the change
+  that was running.
+
+**Guarded by**: nothing a machine can see — it is how the work is done
+(`code.md` → Verification).

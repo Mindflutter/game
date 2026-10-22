@@ -3,8 +3,9 @@
 Shared reference for Igor and Claude, tracked in git (D40 (docs are tracked)).
 A change to them belongs in the same commit as the code it describes.
 
-> **Start with `foundations.md`, then `plan.md`. Every session.**
+> **Start with `foundations.md`, `plan.md` and `working.md`. Every session.**
 > Everything else is looked up by question, below — not read front to back.
+> `CLAUDE.md` at the root only points here (D131 (CLAUDE.md is an index)).
 
 ## Where to look
 
@@ -12,6 +13,8 @@ A change to them belongs in the same commit as the code it describes.
 |---|---|
 | What a word means; what must stay true until alpha | `foundations.md` |
 | Which stage we are in, and what each stage must deliver | `plan.md` |
+| How Igor and Claude work: the reply, questions, commits, the consistency sweep | `working.md` |
+| The rules for writing and checking code | `code.md` |
 | The next steps inside the stage, and the measured bot figures | `roadmap.md` |
 | How the code works — systems, screens, the save, the tests | `design.md` |
 | An enemy: its numbers, role and behaviour | `entities/enemies.md` |
@@ -37,7 +40,8 @@ which of them still hold.
 ## Living docs and logs
 
 **Living docs** say what is true now, and are edited in place: `foundations.md`,
-`plan.md`, `roadmap.md`, `design.md`, `entities/`, `ideas.md` and `bugs.md`. They carry no
+`plan.md`, `working.md`, `code.md`, `roadmap.md`, `design.md`, `entities/`,
+`ideas.md` and `bugs.md`. They carry no
 history — no "used to", no struck-through items, no answered questions. When
 something stops being true it is rewritten or deleted, and what happened goes
 to a log.
@@ -57,6 +61,8 @@ copy.
 |---|---|
 | A term | `foundations.md` → the glossary |
 | Which stage is active, and what is next | `plan.md` |
+| A rule for how we work | `working.md` |
+| A rule for writing or checking code | `code.md` |
 | An entity's numbers, role and behaviour | its doc in `entities/` |
 | How a system works — the gate, the descent, the drops, the pick, the save | `design.md` |
 | Measured bot figures | `roadmap.md` → Health |
@@ -85,7 +91,7 @@ copy.
 - this map names every doc, and every doc it — or `CLAUDE.md` — names exists.
 
 What no check can see is whether prose is still true. That is the consistency
-sweep's job (`CLAUDE.md` → Working agreement).
+sweep's job (`working.md` → The consistency sweep).
 
 ## The entity docs
 
