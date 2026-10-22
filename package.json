@@ -7,7 +7,9 @@
   },
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "measure": "node tests/measure.js",
+    "balance": "vitest run --config vitest.balance.config.js"
   },
   "type": "module",
   "devDependencies": {

@@ -608,7 +608,7 @@ function drawDebug() {
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#7fb0c0';
-  ctx.font = '15px system-ui, sans-serif';
+  ctx.font = DEBUG_TIP_FONT;
   menu.lines.forEach((line, k) => ctx.fillText(line, ARENA_W / 2, debugBottom() + 14 + k * 22));
   ctx.fillStyle = '#bffcff';
   ctx.font = DEBUG_TIP_FONT;

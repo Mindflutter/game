@@ -26,7 +26,9 @@ describe('the descent', () => {
       // expect() on every tick was half this test's cost and caught nothing more.
       let moved = false, bad = null;
       g.immortal = true;                       // the bot kept alive
-      for (let i = 0, n = ticks(g, 60); i < n && g.batchIndex < 4 && !bad; i++) {
+      // 180s is headroom over what the yardstick takes on a first batch with
+      // archers, which it kites from rather than closes on (D128).
+      for (let i = 0, n = ticks(g, 180); i < n && g.batchIndex < 4 && !bad; i++) {
         botInput(g);                           // the bot's own tick
         const fighting = g.batchLive(), frozen = g.screen === 'mods';
         const before = g.cameraY;
@@ -315,6 +317,7 @@ describe('waves', () => {
   it('holds the gate and pays nothing between waves; clears once, on the last wave\'s last fish', () => {
     const g = loadGame();
     g.reset(1);
+    g.plan[0] = { layer: 0, batch: BIG };                       // several waves, whatever the pools hold
     g.immortal = true;
     ride(g);
     expect(g.incoming.length).toBeGreaterThan(0);

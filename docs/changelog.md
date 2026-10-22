@@ -4,6 +4,45 @@ What actually shipped, newest first. Commit hashes are in this repo's history.
 
 ---
 
+## 2026-10-22
+
+**A gentle first layer, its fish revealed a type at a time** (D129 (a gentle
+first layer), D130 (fish are revealed a type at a time))
+Igor, playing the S6 (balance) build: "grade 2 fish appear immediately from
+the start - clearly a flaw". The dive now starts at grade 1 and grades stay
+rare through the first layer: the curve adds a little more each stretch from
+a small start, and a fifth of each type in every graded batch stays at grade
+1. Then "we must reveal content to player iteratively": the first layer opens
+on drifters and darters, then archers, then bulwarks — a type is met no
+earlier than every fish below it in threat — and the opening may be cleared
+standing still. The boss's crowd 4. Completion time is no longer a bar —
+"dont focus on completion time". **The tooling**: `npm run measure fit` sizes
+every pool batch to the curve from its mix of fish, and every seed is measured
+in a worker thread of its own, `npm run balance` in under a minute. Figures in
+`roadmap.md` → Health.
+
+## 2026-10-21
+
+**S6 (balance): threat, the numbers, and the suite that holds them** (D126
+(threat), D127 (the tuned numbers), D128 (the balance suite))
+Igor: "start s6, no interruptions unless critical questions to me" — every
+call Claude's, delegated, open; the dash untouched — "leave dash for now,
+discussions needed". **Threat**: every type a number per grade, the hearts one
+of it costs the diver bot at the reference kit; a batch's threat the sum; each
+ordinary stretch of a dive a target, rising through it. The plan
+grades every drawn batch up to its target, from the seed, never to grade 3 in
+the first layer; a mini-boss or the boss at its layer's grade, its escorts to
+what is left. **The numbers**: twelve gates a layer; lighter grade steps with
+heavier hits; the lunges and the burst worth 2 and 4; the puffer faster, the
+bosses and mini-bosses quicker, the Knife's arc halved, the Harpoon harder,
+the Mask's step halved; prices ×40; `Fins` and `Vitality` capped at 6; every
+pool re-sized by threat. **The instruments**: a diver bot that plays from the
+screen with a player's limits, a standing bot, careers that dive and spend
+until the win, `npm run measure` and `npm run balance` — the pillars as
+checks on ten seeds. The kiting yardstick dies on graded batches, so the soak
+plays it immortal. Figures in `roadmap.md` → Health; spec
+`specs/2026-10-21-s6-balance-design.md`.
+
 ## 2026-10-20
 
 **Boosts keep each weapon's nature** (D125 (boosts keep each weapon's nature))

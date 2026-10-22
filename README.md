@@ -16,7 +16,7 @@ dash, `Esc` for the menu.
 
 ## Run the tests
 
-Two suites, because they reach different things.
+Two suites, because they reach different things, and the balance checks beside them.
 
 ### Node — logic, invariants, the port seam
 
@@ -31,6 +31,19 @@ bounds, the player stays in the view, a dive replays exactly from its seed, and
 decay is time-based rather than frame-based. It also loads `game/` with only the
 seven port-seam names stubbed, so reaching for an eighth fails the build on any
 path a test drives.
+
+### Balance — the pillars, measured
+
+```bash
+npm run measure careers   # or bots, threat, pillars, weapons: tables
+npm run measure fit       # resizes every pool batch to the threat curve
+npm run balance           # the pillars as checks, ten seeds, under a minute
+```
+
+A diver bot plays every gate at the kit a career first meets it with, and the
+checks hold the pillars in `docs/foundations.md` (D128 — The diver bot and the
+balance suite). Each seed runs in a worker thread of its own. The figures are
+`docs/roadmap.md` → Health.
 
 `test:watch` is the one to leave open while editing `game/`.
 

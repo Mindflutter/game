@@ -13,7 +13,12 @@ function setup(code = '', seed = 7) {
 }
 const press = (g, code) => { g.justPressed.add(code); g.update(g.FIXED_DT); };
 const row = (g, label) => g.MENUS.debug.items.findIndex(r => r.label === label);
-const counted = g => Object.fromEntries(g.enemies.reduce((m, e) => m.set(e.name, (m.get(e.name) || 0) + 1), new Map()));
+// The batch's fish: those in, and those its later waves still bring (D115).
+// The first layer's gates as a setup code numbers them: the first escorted one
+// a mini-boss's, the last the boss's, the one before the mini-boss plain.
+const GATES = loadGame().LAYERS[0].stretches.flatMap(s => Array(s.draw).fill(s));
+const MINI = GATES.findIndex(s => s.escorts) + 1, BOSS = GATES.length, PLAIN = MINI - 1;
+const counted = g => Object.fromEntries([...g.enemies, ...g.incoming].reduce((m, e) => m.set(e.name, (m.get(e.name) || 0) + 1), new Map()));
 
 describe('the save is never touched', () => {
   it('opens on a fresh kit, whatever the save held -- gear, gems or a dive', () => {
@@ -89,7 +94,7 @@ describe('the setup reaches the dive', () => {
   });
 
   it("puts its fish in place of a mini-boss's escorts too (D116)", () => {
-    const g = setup('L1,G5,S7,Gun0,puffer4');
+    const g = setup(`L1,G${MINI},S7,Gun0,puffer4`);
     g.debugDive();
     const drawn = loadGame();
     drawn.reset(7);
@@ -99,9 +104,9 @@ describe('the setup reaches the dive', () => {
   });
 
   it("says what a gate drew, a mini-boss's escorts and the boss's crowd included (D116)", () => {
-    expect(setup('L1,G4,S7').gateLine()).not.toMatch(/escorted|crowd/);
-    expect(setup('L1,G5,S7').gateLine()).toMatch(/1 mini-boss, escorted by \d+ \w+/);
-    expect(setup('L1,G15,S7').gateLine()).toMatch(/1 boss, its crowd from \d+ \w+/);
+    expect(setup(`L1,G${PLAIN},S7`).gateLine()).not.toMatch(/escorted|crowd/);
+    expect(setup(`L1,G${MINI},S7`).gateLine()).toMatch(/1 mini-boss, escorted by \d+ \w+/);
+    expect(setup(`L1,G${BOSS},S7`).gateLine()).toMatch(/1 boss, its crowd from \d+ \w+/);
   });
 
   it('no fish set: the gate brings what it drew', () => {
@@ -152,6 +157,8 @@ describe('the code', () => {
   it('brings its fish at its grade, later waves too, and names the grade (D119)', () => {
     const g = setup('L1,G3,S7,Grade3,Gun0,drifter20,immortal');
     expect(g.gateLine()).toContain('all at grade 3');
+    // A drawn batch's own grades, which the plan chose (D126).
+    expect(setup('L2,G1,S7').gateLine()).toMatch(/\d+ [\w-]+ (at grade [23]|\(\d+ grade [23])/);
     const t = g.enemyType('drifter'), G = g.GRADES[2];
     expect(g.MENUS.debug.items[row(g, 'drifter')].tip)
       .toContain('hp ' + t.hp * G.hp + ' \u00b7 speed ' + Math.round(t.speed * G.speed));
@@ -190,7 +197,7 @@ describe('the code', () => {
     const s = g.parseSetup('L9,G99,Gun7,Fins9,darter999,Lull3,nonsense', 5);
     expect(s.layer).toBe(g.LAYERS.length - 1);
     expect(s.gate).toBe(g.gatesIn(s.layer) - 1);
-    expect(s.counts).toEqual({ Gun: 3, Fins: 3, darter: g.DEBUG_FISH_MAX });
+    expect(s.counts).toEqual({ Gun: 3, Fins: g.MODS.find(m => m.name === 'Fins').max, darter: g.DEBUG_FISH_MAX });
     expect(s.ignored).toEqual(['Lull3', 'nonsense']);
     expect(s.seed).toBe(5);
   });
@@ -318,13 +325,18 @@ describe('the setup screen', () => {
     const g = setup();
     const tip = label => g.MENUS.debug.items[row(g, label)].tip;
     for (const item of g.MENUS.debug.items) expect(item.tip, item.label).toMatch(/\w/);
-    expect(tip('Mask')).toMatch(/range \+30/);
+    expect(tip('Mask')).toMatch(/range \+15/);
     expect(tip('Heart')).toMatch(/maxHp \+1/);
     expect(tip('Fins')).toMatch(/speed \+45/);
     expect(tip('darter')).toMatch(/hp 1\b/);
     expect(tip('puffer')).toMatch(/swells/);             // its behaviour, in words
     expect(tip('boss')).toContain(g.DEBUG_BEHAVIOURS.lunge);
     expect(tip('boss')).toContain(g.DEBUG_BEHAVIOURS.fan);
+    // Every step a behaviour in words: a `threat` list is a number, not one (D126).
+    for (const e of g.ENEMY_TYPES) {
+      const steps = tip(e.name).split('   ')[0].slice(e.name.length + 2).split(/; (?:then )?/);
+      expect([e.name, steps.every(Boolean)]).toEqual([e.name, true]);
+    }
     expect(tip('Strength')).toMatch(/Harpoon/);          // what needs it
     expect(tip('Tier')).toMatch(/fireRate \+0\.5/);      // the carried weapon's tiers
   });
@@ -339,12 +351,12 @@ describe('the setup screen', () => {
 
   it('has a line for every behaviour a fish can have', () => {
     const g = loadGame();
-    const behaviours = new Set(g.ENEMY_TYPES.flatMap(e => Object.keys(e).filter(k => typeof e[k] === 'object')));
+    const behaviours = new Set(g.ENEMY_TYPES.flatMap(e => Object.keys(e).filter(k => typeof e[k] === 'object' && !Array.isArray(e[k]))));
     for (const b of behaviours) expect(g.DEBUG_BEHAVIOURS[b], b).toMatch(/\w/);
   });
 
   it('names what the chosen gate drew, or the fish set in its place', () => {
-    const g = setup('L1,G5,S7,Gun0');
+    const g = setup(`L1,G${MINI},S7,Gun0`);
     expect(g.MENUS.debug.lines[0]).toMatch(/mini-boss/);
     g.debugSetup.counts.eel = 2;
     expect(g.MENUS.debug.lines[0]).toMatch(/2 eel/);

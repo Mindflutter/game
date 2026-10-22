@@ -34,7 +34,8 @@ function atLayerEnd() {
 // A drifter at (x, y) killed with the boost chance forced to certainty, so a
 // boost drops where it died. A second drifter is left alive in the corner,
 // because the kill that empties the arena never drops one.
-function boostAt(g, x, y) {
+// `name` makes it that boost, whatever the seed draws.
+function boostAt(g, x, y, name) {
   g.queuePaused = true;
   g.immortal = true;
   g.placeEnemy('drifter', x, y);
@@ -42,6 +43,7 @@ function boostAt(g, x, y) {
   g.placeEnemy('drifter', 60, g.cameraY + 60);
   g.sinceBoost = Math.ceil(1 / g.BOOST_C) - 1;
   g.killEnemy(victim);
+  if (name) g.drops.at(-1).boost = name;
   return g.drops.at(-1);
 }
 
@@ -126,10 +128,12 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
     // its mod is still flying in: the two lines must not overwrite each other.
     const g = loadGame();
     g.reset(1);
+    g.plan[0] = { layer: 0, batch: { enemies: [['drifter', g.WAVE_MIN]] } };   // one wave
     g.immortal = true;
     ride(g);
     for (const e of [...g.enemies]) g.killEnemy(e);
     g.update(g.FIXED_DT);                          // the clear: the challenge pays
+    expect(g.notice).toMatch(/^untouched/);
     const paid = g.notice;
     expect(paid).not.toBe('');
     for (let i = 0, n = ticks(g, 3); i < n && !held(g); i++) g.update(g.FIXED_DT);
@@ -425,7 +429,7 @@ describe('boosts (D86)', () => {
     expect(on()).toEqual(Object.values(want));
     expect(g.banner).toContain(name);
     for (let i = 0, n = ticks(g, b.time / 2); i < n; i++) g.update(g.FIXED_DT);
-    boostAt(g, g.player.x, g.player.y);                      // the same boost again
+    boostAt(g, g.player.x, g.player.y, name);                // the same boost again
     g.update(g.FIXED_DT);
     expect(on()).toEqual(Object.values(want));               // added once, not twice
     for (let i = 0, n = ticks(g, b.time * 0.75); i < n; i++) g.update(g.FIXED_DT);

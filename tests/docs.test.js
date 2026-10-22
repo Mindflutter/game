@@ -233,8 +233,11 @@ describe('the entity docs', () => {
   it('lists every enemy type at its real numbers', () => {
     const cols = plain(g.ENEMY_TYPES);
     expectIn(doc('enemies.md'), table(cols, g.ENEMY_TYPES.map(t => cols.map(k => t[k]))));
-    const behaviours = keysOf(g.ENEMY_TYPES).filter(k => !cols.includes(k));
+    const behaviours = keysOf(g.ENEMY_TYPES).filter(k => !cols.includes(k) && k !== 'threat');
     for (const t of behaviourTables(g.ENEMY_TYPES, behaviours)) expectIn(doc('enemies.md'), t);
+    // A number per grade (D126).
+    expectIn(doc('enemies.md'), table(['name', ...g.GRADES.map((_, i) => 'grade ' + (i + 1))],
+      g.ENEMY_TYPES.map(t => [t.name, ...t.threat])));
   });
 
   it('lists every grade at its real numbers (D119)', () => {
@@ -272,10 +275,16 @@ describe('the entity docs', () => {
     expectIn(doc('diver.md'), table(cols, [cols.map(k => g.PLAYER_START[k])]));
   });
 
-  it('lists every layer, its stretches, and each pool\'s batches with their hp (D124)', () => {
+  it('lists every layer, its stretches, and each pool\'s batches with their threat (D126)', () => {
     const fish = b => b.enemies.map(([n, c]) => n + ' ' + c).join(', ');
-    const hp = b => b.enemies.reduce((sum, [n, c]) => sum + c * g.enemyType(n).hp, 0);
     const pools = l => [...new Set(l.stretches.filter(x => !x.escorts).map(x => x.pool))];
+    // A pool's target, the batch's threat at grade 1 and at the layer's top:
+    // what grading works between.
+    const r2 = x => Number(x.toFixed(2));
+    let k = -1;
+    const targets = new Map(g.LAYERS.flatMap(l => l.stretches.filter(x => !x.escorts)
+      .map(x => [x.pool, r2(g.THREAT_START * (g.THREAT_RISE ** (++k + 1) - 1) / (g.THREAT_RISE - 1))])));
+    const top = l => g.GRADES.findLastIndex(G => G.from <= g.LAYERS.indexOf(l) + 1) + 1;
     const stretches = l => l.stretches.map(x => x.escorts
       ? x.pool[0].enemies[0][0] + ' with pool ' + (pools(l).indexOf(x.escorts) + 1)
       : x.draw + ' of pool ' + (pools(l).indexOf(x.pool) + 1)).join(' · ');
@@ -283,7 +292,8 @@ describe('the entity docs', () => {
     expectIn(doc('layers.md'), table(['fish', 'crowd'], [g.MINI_BOSS, g.BOSS].map(b => [fish(b), b.crowd])));
     for (const l of g.LAYERS) {
       const section = doc('layers.md').split('\n## ' + l.name + '\n')[1].split('\n## ')[0];
-      expectIn(section, table(['pool', 'fish', 'hp'], pools(l).flatMap((p, i) => p.map(b => [i + 1, fish(b), hp(b)]))));
+      expectIn(section, table(['pool', 'target', 'fish', 'threat', 'at top'], pools(l).flatMap((p, i) => p.map(b =>
+        [i + 1, targets.get(p), fish(b), r2(g.batchThreat(b)), r2(g.batchThreat(g.ofGrade(b, top(l))))]))));
     }
   });
 
@@ -327,9 +337,9 @@ describe('the entity docs', () => {
 
   it('gives every item a section, and no section to an item the code lacks', () => {
     // Any other heading has to be one of the layout's own -- `Points` is the
-    // rule the challenges and the attributes share (D110), `Grades` every
-    // fish's (D119).
-    const LAYOUT = ['Roster', 'Grades', 'Fields', 'Behaviours', 'Points', 'Adding one'];
+    // rule the challenges and the attributes share (D110), `Grades` and
+    // `Threat` every fish's (D119, D126).
+    const LAYOUT = ['Roster', 'Grades', 'Threat', 'Fields', 'Behaviours', 'Points', 'Adding one'];
     const items = { 'enemies.md': g.ENEMY_TYPES, 'mods.md': g.MODS, 'boosts.md': g.BOOSTS,
                     'weapons.md': g.WEAPONS, 'equipment.md': g.EQUIPMENT,
                     'challenges.md': [...g.CHALLENGES, ...g.ATTRIBUTES], 'layers.md': g.LAYERS };

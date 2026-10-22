@@ -313,6 +313,21 @@ describe('the save (D70)', () => {
     expect(shots.every(finite)).toBe(true);
   });
 
+  it("plays a version 11 dive's plan on ungraded, as it was drawn (D126)", () => {
+    const text = readFileSync(new URL('./fixtures/save-v11.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    const next = g.plan[g.batchIndex + 1];
+    expect(next.batch.enemies.every(e => e.length === 2)).toBe(true);   // no grade in it
+    g.enemies = [];
+    g.incoming = [];
+    g.spawnBatch(next.batch, next.escorts);
+    const fish = [...g.enemies, ...g.incoming];
+    expect(fish.length).toBe(next.batch.enemies.reduce((a, [, n]) => a + n, 0));
+    for (let i = 0; i < 30 / g.FIXED_DT && g.incoming.length; i++) g.update(g.FIXED_DT);
+    expect(g.enemies.every(e => e.grade === 1 && e.maxHp === g.ENEMY_TYPES.find(t => t.name === e.name).hp)).toBe(true);
+  });
+
   it('loads a save written by the first build of version 3, and plays it on', () => {
     // Saved mid-batch with its fish lit and a boost on the floor (D84, D86).
     const text = readFileSync(new URL('./fixtures/save-v3.json', import.meta.url), 'utf8');

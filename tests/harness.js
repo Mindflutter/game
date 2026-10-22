@@ -46,7 +46,7 @@ export function loadGame() {
                  'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
                  'batchDashed', 'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
                  'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps',
-                 'fireArmed', 'offerTimer', 'optionIndex', 'returnTo'];
+                 'fireArmed', 'offerTimer', 'optionIndex', 'returnTo', 'rngState'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'GRADES', 'MODS', 'MINI_BOSS', 'BOSS', 'STAT_NAMES',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
@@ -57,7 +57,8 @@ export function loadGame() {
                   'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'CHALLENGES',
                   'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK',
                   'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT', 'HELP_BLURB',
-                  'DASH_TIME', 'DASH_GRACE', 'SHAKE_LEVELS', 'MENU_TOP', 'OPTION_TOP', 'HOME_TOP', 'PLAYER_STATS'];
+                  'DASH_TIME', 'DASH_GRACE', 'SHAKE_LEVELS', 'MENU_TOP', 'OPTION_TOP', 'HOME_TOP', 'PLAYER_STATS',
+                  'THREAT_START', 'THREAT_RISE', 'GRADE_KEEP', 'batchThreat', 'ofGrade'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [
     ...STATE.map(n => `${n}: { get: () => ${n}, set: v => { ${n} = v; }, configurable: true }`),
@@ -134,3 +135,8 @@ export function clearAndWait(g, seconds = 5) {
   for (let i = 0, n = ticks(g, seconds); i < n && g.screen === 'playing'; i++) g.update(g.FIXED_DT);
   return g.screen;
 }
+
+// Whether two batches hold the same fish, whatever their grades: a plan's batch
+// is its pool's, graded (D126).
+const fishOf = b => b.enemies.reduce((m, [name, n]) => ({ ...m, [name]: (m[name] || 0) + n }), {});
+export const sameFish = (a, b) => JSON.stringify(Object.entries(fishOf(a)).sort()) === JSON.stringify(Object.entries(fishOf(b)).sort());

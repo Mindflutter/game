@@ -23,10 +23,10 @@ pulled to the player (D78 (gems are pulled to the player)).
 | darter | 12 | 1 | 190 | 0.9 | 1 | #ffb648 | #ff8a00 | — | — |
 | bulwark | 34 | 6 | 52 | 1.2 | 3 | #a05cff | #7b2fff | — | — |
 | archer | 16 | 2 | 75 | — | 2 | #5aa9ff | #1f6fff | — | — |
-| puffer | 22 | 3 | 95 | — | 2 | #ffee58 | #ffc800 | — | — |
+| puffer | 22 | 3 | 125 | — | 2 | #ffee58 | #ffc800 | — | — |
 | eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | — | — |
-| mini-boss | 52 | 24 | 70 | — | 5 | #e2ff8a | #c6ff3c | false | — |
-| boss | 84 | 60 | 60 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
+| mini-boss | 52 | 20 | 90 | — | 5 | #e2ff8a | #c6ff3c | false | — |
+| boss | 84 | 55 | 80 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
 
 Each behaviour's numbers, a table per behaviour field. `bite`:
 
@@ -40,14 +40,14 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 
 | name | chase | windup | speed | reach | rest | damage | knock |
 |---|---|---|---|---|---|---|---|
-| mini-boss | 1 | 1.5 | 780 | 450 | 1.2 | 1 | 600 |
-| boss | 1 | 1 | 780 | 450 | 1.2 | 1 | 600 |
+| mini-boss | 1 | 1.2 | 780 | 450 | 0.9 | 2 | 600 |
+| boss | 1 | 0.8 | 780 | 450 | 0.9 | 4 | 600 |
 
 `fan`:
 
 | name | chase | windup | reach | rest | count | arc | speed | r | travel | damage | knock |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| boss | 1 | 0.8 | 450 | 1.2 | 7 | 90 | 160 | 9 | 600 | 1 | 150 |
+| boss | 1 | 0.6 | 450 | 0.9 | 7 | 90 | 160 | 9 | 600 | 1 | 150 |
 
 `spit`:
 
@@ -59,7 +59,7 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 
 | name | chase | trigger | time | blast | damage | knock |
 |---|---|---|---|---|---|---|
-| puffer | 1.5 | 90 | 0.5 | 110 | 1 | 480 |
+| puffer | 1.5 | 90 | 0.5 | 110 | 2 | 480 |
 
 `weave`:
 
@@ -73,29 +73,50 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 |---|---|---|
 | eel | 1 | 240 |
 
-Every number is S6 (balance)'s to tune. Marked in the code as Claude's picks:
-the lungers' numbers (D64 (the boss lunges)), the boss's fan (D117 (the
-boss's fan)), the boss's `value` (D68 (the
-layer end is a milestone)), every type S5 (content) brought (D95 (three
-enemy behaviours, and one way to be hurt)), and the ramps and bites (D107 (the
-diver swims and faces; fish with a ramp), D108 (fish bite)).
+Every number is Claude's pick: the lungers' (D64 (the boss lunges)), the
+boss's fan (D117 (the boss's fan)), the boss's `value` (D68 (the layer end is
+a milestone)), every type S5 (content) brought (D95 (three enemy behaviours,
+and one way to be hurt)), and the ramps and bites (D107 (the diver swims and
+faces; fish with a ramp), D108 (fish bite)) — the puffer's, the mini-boss's
+and the boss's tuned to the pillars (D127 (the tuned numbers)).
 
 ## Grades
 
 The same fish, stronger (D119 (grades)): a grade changes its numbers, never
 its behaviour. Grade 1 is the type as written; each step multiplies `hp`,
 `speed` and `value`, and adds to every attack's `damage` and to `touch`. Every
-type has every grade, so a new type needs nothing here. Which grade a fish
-arrives at is S6 (balance)'s threat system's; until then every fish in a dive
-is grade 1, and the debug mode's Grade row sets one. A graded fish shows its
+type has every grade, so a new type needs nothing here but its threat at
+each (below). Which grade a fish arrives at is the plan's, drawn from the
+seed: each batch is graded up to its stretch's threat (D126 (threat)), and
+`from` is the first layer a grade arrives in, so the first layer never meets
+the top one. The debug mode's Grade row sets one. A graded fish shows its
 grade as a small number on its body, above the first — Igor: "circles enlarge
-enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks.
+enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks, tuned
+to the pillars (D127 (the tuned numbers)).
 
-| grade | hp | speed | value | damage |
-|---|---|---|---|---|
-| 1 | 1 | 1 | 1 | 0 |
-| 2 | 2 | 1.1 | 2 | 1 |
-| 3 | 3 | 1.2 | 3 | 1 |
+| grade | hp | speed | value | damage | from |
+|---|---|---|---|---|---|
+| 1 | 1 | 1 | 1 | 0 | 1 |
+| 2 | 1.25 | 1.1 | 2 | 1 | 1 |
+| 3 | 1.5 | 1.2 | 3 | 2 | 2 |
+
+## Threat
+
+What a fish costs, in hearts (D126 (threat)): one over the number of it, at
+that grade and alone, that costs the diver bot one heart, at the reference kit
+— the Gun, no gear, no mods, no steps. A batch's threat is its fish's summed.
+Measured by `npm run measure threat`; the numbers are the fit, rounded.
+
+| name | grade 1 | grade 2 | grade 3 |
+|---|---|---|---|
+| drifter | 0.004 | 0.021 | 0.026 |
+| darter | 0.004 | 0.014 | 0.018 |
+| bulwark | 0.062 | 0.091 | 0.125 |
+| archer | 0.017 | 0.028 | 0.032 |
+| puffer | 0.081 | 0.131 | 0.184 |
+| eel | 0.114 | 0.239 | 0.4 |
+| mini-boss | 0.315 | 0.404 | 0.452 |
+| boss | 0.879 | 0.921 | 0.961 |
 
 ## Fields
 
@@ -106,7 +127,7 @@ enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks.
 | `speed` | px/s | How fast it swims at the player. A batch arrival spreads it by `ENEMY_JITTER 0.3` — ±15%; a scenario places it at exactly this. |
 | `r` | px | Body radius, and the hitbox: the circle drawn is what collides. |
 | `ramp` | s | Eases its chase as the diver's swim is eased (D107 (the diver swims and faces; fish with a ramp)): seconds to full speed, near enough, and to turn — so it overshoots a sidestep. Absent, it turns on the spot. Only the plain chase reads it; a behaviour that moves the fish its own way keeps its own movement. |
-| `value` | gems | Dropped on death. Whether an enemy drops at all is S6 (balance)'s lever (D78 (gems are pulled to the player)); today every kill drops its `value`. |
+| `value` | gems | Dropped on death. Times its grade's `value`. Whether an enemy drops at all is a balance lever (D78 (gems are pulled to the player)); every kill drops, and the prices carry the economy (D127 (the tuned numbers)). |
 | `enters` | — | Where a batch brings it in. Absent: just outside a random edge of the view. `bottom`: below the view, centred. |
 | `color` | hex | Body colour. Placeholder graphics (D4 (no assets, ever)). |
 | `glow` | hex | Glow colour, the same placeholder. |
@@ -118,7 +139,7 @@ enemies visually"; PLACEHOLDER GRAPHICS. The steps are Claude's picks.
 | `spit` | — | Its presence is the behaviour: the type keeps its distance and spits (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: it closes to `range` px and backs off inside `near` px; it spits every `every` seconds, a shot of radius `r` px flying at `speed` px/s for `travel` px. |
 | `fuse` | — | Its presence is the behaviour: the type swells, bursts and chases on (D95 (three enemy behaviours, and one way to be hurt), D106 (the puffer bursts and comes on again)). Holds the numbers in its table above: after chasing for at least `chase` seconds, within `trigger` px it stops and swells for `time` seconds, then bursts, reaching `blast` px, and chases again. |
 | `weave` | — | Its presence is the behaviour: the type sways as it closes in (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: `width` px either side of its heading, `rate` sways a second. |
-| `threat` | — | **Reserved** for S6 (balance): the type's threat number, from which a batch's threat is computed (D79 (a dive goes from easiest to hardest)). Not in the code; S6 adds it to every type at once, so S5 (content) writes its enemies on a shape that will not change (D80 (entity docs and mods from drops come first)). |
+| `threat` | hearts | One number per grade, in the table above: what one of it costs the diver bot at the reference kit (D126 (threat)). A batch's threat is the sum, and what the plan grades it by. A new type is measured once and joins. |
 
 ## Behaviours
 
@@ -232,8 +253,8 @@ on again)): the draft's "exploding after a short time". Igor's shape: "chases,
 stops for a brief moment, explodes quickly, continues chasing". It gives a
 batch a fish that must die first, and makes standing your ground in a crowd
 cost; waiting one out no longer clears it. Harmless to touch: only its burst
-hurts (D108 (fish bite)). Every number is Claude's pick, S6 (balance)'s to
-tune.
+hurts (D108 (fish bite)). Every number is Claude's pick, tuned to the
+pillars (D127 (the tuned numbers)).
 
 ## eel
 
@@ -266,7 +287,7 @@ haul of gems (D68 (the layer end is a milestone)). It never glows: the layer
 end's pick pays its batch (D85 (the layer end's pick), D88 (the fish glows
 from the start)). Its escorts are a crowd (D116 (bosses bring escorts)):
 topped back up to `BOSS_CROWD` while it lives, drawn from one batch of the
-layer's last pool, paying no gems, and dying with it.
+layer's last pool, graded with it, paying no gems, and dying with it.
 
 ## Adding one
 
@@ -275,7 +296,10 @@ layer's last pool, paying no gems, and dying with it.
    transitions in `tests/enemies.test.js` — and its line in
    `DEBUG_BEHAVIOURS`, which says what it does on the debug setup's tip (D102
    (the debug mode)).
-2. A row in the roster — and in its behaviour's table, if it has one — and a
-   section here under its `name`. `npm test` fails until both match the code.
-3. To meet it in a dive, a batch in a layer's pool names it
+2. Its `threat`, measured: `npm run measure threat <name>` prints the line to
+   paste (D126 (threat)).
+3. A row in the roster, in Threat — and in its behaviour's table, if it has
+   one — and a section here under its `name`. `npm test` fails until they
+   match the code.
+4. To meet it in a dive, a batch in a layer's pool names it
    (`game/content.js` → batches). A scenario can place it alone.

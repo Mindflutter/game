@@ -112,7 +112,7 @@ is Igor's, in quotes.
    similar but has a slightly different effect, i see it now"
 6. **Added without breaking.** A new entity never breaks the gameplay or the
    balance already there: bot dives before and after it hold every pillar
-   target (S6 (balance)'s bots). "just tried this new bonus and it improved my
+   target — `npm run balance` (D128 (the balance suite)). "just tried this new bonus and it improved my
    dive a bit. just met this new enemy and couldnt beat it now, but i got an
    idea and i will kill it in the next run or two"
 
@@ -139,16 +139,20 @@ count changes here, in one line, and nowhere else.
 ## Pillars, as things that can be checked
 
 The draft's philosophy section, converted from prose into statements that can
-fail. Prose cannot be verified; these can. **The numbers are provisional
-targets, validated or replaced at S6** — they exist so that "is this balanced"
-has an answer.
+fail. Prose cannot be verified; these can. **The numbers are targets, each
+measured at S6 (balance) and met** on the diver bot's figures — `npm run
+balance` holds them, read across seeds as D127 (the tuned numbers) records; how
+strictly is open to Igor (`ideas.md` → Open — from S6 (balance)). The two
+times are printed, not held: a player's clock will not match the bot's (D129
+(a gentle first layer)). They exist
+so that "is this balanced" has an answer.
 
 | Pillar | Stated as | Target |
 |---|---|---|
 | Fast-paced | Time to clear one batch | 10–45s |
 | Dives are a session, not a sitting | Time to complete one layer; a dive runs until death but can be put down at any point and resumed (D70) | 4–8 min |
 | Nothing unbeatable | Every batch is clearable at the gear level expected when it is first met | must hold |
-| Nothing trivial | No batch is cleared without the player moving | must hold |
+| Nothing trivial | No batch past the opening is cleared without the player moving — the opening, its harmless fish, may be (D130 (fish are revealed a type at a time)) | must hold |
 | Relaxed only at home | `home` has no timer, no threat, no fail state | must hold |
 | Responsive control | Input to on-screen response | ≤ 2 frames |
 | Addictive, not grindy | Dives needed before the first meaningful purchase | ≤ 3 |

@@ -18,29 +18,29 @@ readout see them like any other stat, and everything adds, nothing multiplies
 | name | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
 |---|---|---|---|---|---|---|---|---|---|
 | Gun | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
-| Harpoon | 0.8 | 3 | 420 | 950 | 3 | 2 | 200 | 150 | fireRate 1, damage 4, pierce 3 |
-| Knife | 3 | 2 | 56 | — | 18 | 6 | 40 | 100 | fireRate 3.75, damage 3, range 68 |
+| Harpoon | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 6000 | fireRate 1, damage 5, pierce 3 |
+| Knife | 3 | 2 | 60 | — | 18 | 6 | 40 | 4000 | fireRate 3.75, damage 3, range 72 |
 
 Each weapon's tiers, in the order they are bought:
 
 | name | tier | cost | adds |
 |---|---|---|---|
-| Gun | 1 | 40 | fireRate +0.5 |
-| Gun | 2 | 100 | fireRate +0.5 |
-| Gun | 3 | 200 | fireRate +0.5 |
-| Harpoon | 1 | 80 | damage +1 |
-| Harpoon | 2 | 160 | fireRate +0.2 |
-| Harpoon | 3 | 300 | pierce +1 |
-| Knife | 1 | 60 | range +12 |
-| Knife | 2 | 140 | damage +1 |
-| Knife | 3 | 260 | fireRate +0.75 |
+| Gun | 1 | 1200 | fireRate +0.5 |
+| Gun | 2 | 4000 | fireRate +0.5 |
+| Gun | 3 | 8000 | fireRate +0.5 |
+| Harpoon | 1 | 3200 | damage +1 |
+| Harpoon | 2 | 6400 | fireRate +0.2 |
+| Harpoon | 3 | 12000 | pierce +1 |
+| Knife | 1 | 2400 | range +12 |
+| Knife | 2 | 5600 | damage +1 |
+| Knife | 3 | 10400 | fireRate +0.75 |
 
 The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,
 in degrees and seconds.
 
 | name | arc | time |
 |---|---|---|
-| Knife | 120 | 0.15 |
+| Knife | 60 | 0.15 |
 
 **at top** is the weapon with every tier bought; **adds** is what one tier
 adds. Both are worked out from the tiers' `apply` by the check.
@@ -78,7 +78,8 @@ so they can miss and sail on into the dark until `range` runs out.
 Its tiers add fire rate: the one stat that helps against every enemy, where
 damage would be wasted on the one-hit fish that make up most batches (D75 (the
 gun's tiers, dash reach, a clean batch)). The prices and the step are Claude's
-picks, S6 (balance)'s to tune; the base numbers predate the tiers.
+picks, the prices tuned to the pillars (D127 (the tuned numbers)); the base
+numbers predate the tiers.
 
 ## Harpoon
 
@@ -88,7 +89,7 @@ bit, flying fast and far, that hits hard and passes through two fish into a
 third — so it wastes damage on the one-hit swarm and lines up the rest. It
 requires a step of Strength: heavy gear waits for a strong diver, D36
 (attributes)'s own example. Its tiers add damage, then rate, then pierce. Every
-number is Claude's pick, S6 (balance)'s to tune.
+number is Claude's pick, tuned to the pillars (D127 (the tuned numbers)).
 
 ## Knife
 
@@ -98,7 +99,9 @@ nearest first, up to its `pierce` + 1. It trades the Gun's reach for closeness:
 you have to be where the fish are, and a crowd is where it pays. With Bloom
 each cut splashes, as a shot does; Lance is the Gun's own and never comes with
 it (D125 (boosts keep each weapon's nature)). Its tiers add reach,
-then damage, then rate. Every number is Claude's pick, S6 (balance)'s to tune.
+then damage, then rate. Every number is Claude's pick, tuned to the pillars,
+but its arc, halved by Igor: "knife arc reduce by half" (D127 (the tuned
+numbers)).
 
 ## Adding one
 
@@ -107,4 +110,5 @@ then damage, then rate. Every number is Claude's pick, S6 (balance)'s to tune.
    its `name`. `npm test` fails until they match the code.
 3. Its `cost` is what owning it costs at `home`; 0 owns it from the start.
    A scenario carries it with `weapon:` (`game/content.js` → scenarios), so
-   S6 (balance) can measure it alone.
+   it can be met alone, and `npm run measure weapons` sets it beside the others
+   (D128 (the balance suite)).

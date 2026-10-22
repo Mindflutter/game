@@ -280,18 +280,27 @@ name, a water colour and a run of **stretches**, each `{ draw, pool }` — a
 mini-boss's and the boss's with `escorts` too, the pool before them. One
 shape for all of them — a mini-boss or the boss is a stretch whose pool holds
 one batch and draws one. Three layers, each with pools and batches of its own
-(D101), all in one shape that `layer()` builds: four from a pool of five, a
-mini-boss, four of five, a mini-boss, four of five, the boss — fifteen gates a
-layer. They meet the fish in turn: the archer in the first layer's last
-stretch, the puffer from the second, the eel in the third, with every type
-mixed by its end. The pools are sized by total hp, growing down the dive, until
-S6 (balance)'s threat number — Claude's picks.
+(D101), all in one shape that `layer()` builds: three from a pool of five, a
+mini-boss, three of five, a mini-boss, three of five, the boss — twelve gates
+a layer (D127 (the tuned numbers)). They meet the fish in turn: the archer in the
+first layer's last stretch, the puffer from the second, the eel in the third,
+with every type mixed by its end. The pools are sized by threat (D126
+(threat)) — Claude's picks.
 
 `reset()` draws the whole dive first thing, before anything else takes from the
 seed: `drawPlan()` walks every stretch of every layer and takes `draw` batches
 from its pool with `drawDistinct()` — the seeded draw without repeats the mod
 cards use too — into the flat `plan` of `{ layer, batch }`, plus `escorts` where a stretch names them,
-the last of each layer marked `end`. The abyss is one tall strip (D72), so
+the last of each layer marked `end`. Each batch is graded as it is drawn (D126
+(threat)): every ordinary stretch of the dive has a target — the first's
+`THREAT_START`, each next one adding `THREAT_RISE` times what the last added
+(D129 (a gentle first layer)) — and `graded()` raises the batch's fish a grade
+at a time, drawn from the seed, until its threat — `batchThreat()`, its fish's
+`threat` summed — reaches it, never past the highest grade whose `from` the
+layer has reached, and never past `GRADE_KEEP` of a type left at grade 1. The
+pools hold each type no earlier than every type below it in threat (D130 (fish
+are revealed a type at a time)). A mini-boss or the boss comes at its layer's
+number as its grade, its escorts graded to the target less its threat. The abyss is one tall strip (D72), so
 entry `k` waits at `gateDepth(k)` whatever layer it is in, depth adds up across
 layers, and the bottom is `plan.length`. The layer end heals fully, drops the
 boss's haul (its `value`) and opens the pick of valuable mods (D85); the last
@@ -344,9 +353,9 @@ multiplying `hp`, `speed` and `value` and adding to each attack's `damage`, on
 copies of the type's records. A batch entry's grade is its third field
 (`[type, count, grade]`), grade 1 without one; it rides with each fish into
 `incoming`, so a later wave arrives at its grade, and an escort entry's into
-the boss's crowd. Nothing sets one yet but the
-debug mode: which grade a fish arrives at is S6 (balance)'s threat system's.
-A fish saved without a grade is grade 1, so the save needed no new version.
+the boss's crowd. The plan sets it (Layers and the plan, above), the debug
+mode's Grade row too. A fish saved without a grade is grade 1, so the save
+needed no new version.
 
 **Bullets** store velocity once at birth and fly straight — that's why shots can
 be dodged and why yours sail past into the dark. Each carries an `id`; enemies
@@ -470,8 +479,9 @@ end's pick hold it. A boost never moves `hp`, which could not be taken back clea
 **Currency.** Kills drop gems at the corpse, and every gem flies to you at
 `GEM_PULL` from wherever it dropped and never fades — nothing can be stranded,
 by distance or by the descent (D35, as amended by D78). Every kill drops its
-`value` in gems today; whether an enemy drops at all is a balance lever, S6's
-(D78). D35's `+N` popup is not built — feel, S7's. Collecting one adds to the dive's
+`value` in gems, times its grade's; whether an enemy drops at all is a balance
+lever (D78), left alone: the prices carry the economy (D127 (the tuned
+numbers)). D35's `+N` popup is not built — feel, S7's. Collecting one adds to the dive's
 `currency`. When the dive ends, however it ends, `endDive()` banks it into
 `meta.bank` (D67) — last in the tick, after every gem that tick paid, so a gem
 caught on the frame you die is yours. Nothing in the code names the currency,
@@ -517,8 +527,8 @@ left at `home` adds nothing.
   and counts for nothing. The status bar shows each count against its next
   rung.
 
-All the numbers are Claude's picks, S6's to tune. Buying and raising write the
-save at once.
+All the numbers are Claude's picks, the prices tuned to the pillars (D127
+(the tuned numbers)). Buying and raising write the save at once.
 
 **The save** (D70, D77). `saveText()` is `meta`, the settings — `volume`,
 `muted`, `shakeLevel`, `showFps`, beside `meta` so New game keeps them (D113) —
@@ -707,7 +717,10 @@ and the `debug` screen, a menu of value rows in four columns built from the tabl
 (`DEBUG_COUNTS`: the fish, equipment, attributes, mods and each weapon's tier,
 each with its cap), and a Grade row over the fish that sets the grade every
 fish of the dive arrives at — the gate's drawn batch and the ones after it,
-escorts and the boss's crowd included, as well as the setup's own (D119). `debugSetup` holds the setup, and stays set for the
+escorts and the boss's crowd included, as well as the setup's own (D119).
+At grade 1 it sets none, and the plan's own grades stand (D126 (threat)); the
+line under the columns names the gate's batch, each type once with its graded
+fish beside it. `debugSetup` holds the setup, and stays set for the
 session: while it is, `saveNow()` writes nothing.
 
 A setup is text too: `setupCode()` writes it — `L2,G7,S4471,Grade2,Harpoon2,puffer4`,
@@ -759,11 +772,12 @@ one machine.
 
 ## Tests
 
-Two suites (D39, D44).
+Two suites (D39, D44), and the balance checks beside them.
 
 | | Command | Covers |
 |---|---|---|
 | **Node** | `npm test` (`npm run test:watch`) | Everything `game/` does: the seam, invariants over generated seeds, deterministic simulation and soak, and every decision's guard — its entry in `decisions.md` names it (D39) — plus the docs against the code (D57). Vitest + fast-check, dev-only. |
+| **Balance** | `npm run balance` | The pillars, measured by the diver bot at the kit a career first meets each gate with (D127 (the tuned numbers)): slow, so apart from `npm test`. |
 | **Browser** | `index.html?test` | Only what Node cannot reach (D39): audio peak levels, canvas, real `KeyboardEvent`s through `platform/input.js` and its menu cursor, and the same seed played to the bottom of the dive at three window sizes through real `MouseEvent`s (D29). |
 
 `tests/harness.js` runs `game/` in a Node `vm`. `let` and `const` at the top of a
@@ -827,9 +841,24 @@ A check that expects a shot to land must set `aim` itself (`fireAt()` in
 check happened to leave the cursor on the firing line.
 
 **Balance** is measured by driving `update()` faster than real time with a
-scripted bot, on the same five seeds per configuration, paired (D41). The
-figures live in `roadmap.md` → Health and only there, along with the caveat that the current bot is a weaker
-driver than the pre-mouse-aim one and is comparable only to itself.
+scripted bot, paired: the same seeds on both sides (D41). Three bots
+(`tests/bot.js`, D128 (the balance suite)): `kiteAndShoot`, the regression
+yardstick, comparable only to itself; the diver bot, the balance bot, which
+plays from what the screen shows with a player's limits and draws its noise
+from a generator of its own, so it never moves the game's draws; and the
+standing bot, the diver that never moves. `tests/measure.js` holds the
+runners — a gate's fight alone, a career diving and spending until the win,
+the threat fit, the pillars at the kit each gate is first met with, each
+weapon at matched kits — printed by `npm run measure <command>` and checked
+by `npm run balance` (`vitest.balance.config.js`, ten seeds, `*.balance.js`),
+slow, so never part of `npm test`. Seeds share nothing, so `seedReport()`
+measures one seed's career, gates and weapons in a worker thread of its own,
+and the balance suite's files, run in one unisolated process, read the one
+report. `npm run measure fit` rescales every pool batch to its stretch's
+target, its mix of fish kept, and writes the counts back into `LAYERS`: a
+change to the curve or to `GRADE_KEEP` is one constant and a refit, not a
+hand edit of every pool. The figures live in `roadmap.md` → Health
+and only there.
 
 **Feel is never asserted** — that judgement is Igor's.
 

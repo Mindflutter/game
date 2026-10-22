@@ -3,8 +3,9 @@
 // guards a recorded decision (D39).
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { loadGame, SEAM, ticks } from './harness.js';
-import { diveReport } from './bot.js';
+import { loadGame, SEAM, ticks, ride } from './harness.js';
+import { diveReport, makeDiver } from './bot.js';
+import { fight } from './measure.js';
 
 // Seed-derived input, so a failing case replays exactly.
 function dive(seed, ticks, inputSeed = seed) {
@@ -89,19 +90,53 @@ describe('the bot', () => {
   it('plays a dive and reproduces it exactly from the seed', () => {
     // The bot is the instrument every balance number comes from (D16), so it
     // needs a caller: without one it can rot silently and nothing would say so.
-    const a = diveReport(4471, 3);
-    // Not '=== 3': that moves with the batch table. It must clear *something*,
-    // deterministically.
+    // Immortal: it dies on the first graded batch (D128), and a ruler
+    // needs only to be the same twice. Not '=== 3': that moves with the batch
+    // table. It must clear *something*, deterministically.
+    const a = diveReport(4471, 3, 180, true);
     expect(a.clearTimes.length).toBeGreaterThan(0);
-    expect(diveReport(4471, 3)).toEqual(a);
+    expect(diveReport(4471, 3, 180, true)).toEqual(a);
   });
 
   it('starts from a scenario and records only the fights it plays (D63)', () => {
     // One clear, then the win: a report from the top, or a zero-second "clear"
     // from a scenario's batchIndex not starting at 0, fails one of the two.
-    const r = diveReport(4471, 2, 300, true, 'last-batch');
+    // 600s is headroom over what a starting Gun takes on the last gate.
+    const r = diveReport(4471, 2, 600, true, 'last-batch');
     expect(r.clearTimes.length).toBe(1);
     expect(r.won).toBe(true);
+  });
+
+  // The diver bot measures S6 (balance): a comparison is paired only if a seed
+  // replays exactly and the bot never moves the game's own draws.
+  it('replays a fight exactly from its seed (D128)', () => {
+    const entry = { layer: 0, batch: { enemies: [['drifter', 8], ['archer', 3]] } };
+    const a = fight(7, {}, entry);
+    expect(a.cleared).toBe(true);
+    expect(fight(7, {}, entry)).toEqual(a);
+  });
+
+  it('draws nothing from the game\'s generator (D128)', () => {
+    const g = loadGame();
+    g.reset(42);
+    ride(g);
+    const bot = makeDiver(42), was = g.rngState;
+    for (let i = 0; i < 300; i++) bot(g);
+    expect(g.enemies.length).toBeGreaterThan(0);
+    expect(g.rngState).toBe(was);
+  });
+
+  it('standing, never swims and never dashes (D128)', () => {
+    const g = loadGame();
+    g.reset(42);
+    const bot = makeDiver(42, { stand: true });
+    const moves = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'];
+    for (let i = 0; i < 2400; i++) {
+      bot(g);
+      expect(moves.some(k => g.keys.has(k) || g.justPressed.has(k))).toBe(false);
+      g.update(g.FIXED_DT);
+    }
+    expect(g.kills).toBeGreaterThan(0);
   });
 });
 

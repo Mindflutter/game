@@ -19,8 +19,10 @@ to work around.
 - **Look first**: `ideas.md` (Parked, Mod ideas, Declined) and `decisions.md`
   by heading. It may be agreed, parked, or declined with a reason.
 - **Its numbers are Claude's picks**, said so in the entity doc, never
-  presented as derived. Balance — batch difficulty, `threat`, mod caps — is
-  S6 (balance)'s; do not tune here.
+  presented as derived. An enemy's `threat` is measured, never picked. The
+  rest of balance — batch difficulty, mod caps — is held by `npm run balance`
+  (D128 (the balance suite)): it runs before and after the addition
+  (`foundations.md` → Diversity, rule 6); do not tune here.
 - **Glossary words only** (`foundations.md`): never "level" or "upgrade".
 
 ## 2. Where each kind lives
@@ -31,14 +33,14 @@ the fields and the checks that will hold it. The alpha's counts were S5
 
 | Kind | Table | Doc | Rules it must meet |
 |---|---|---|---|
-| enemy | `ENEMY_TYPES` | `entities/enemies.md` | A behaviour is a field whose presence switches it on, plus one branch in `step()` (`game/logic.js`) — never a class (D26 (disciplines installed)). A new behaviour also gets its line in `DEBUG_BEHAVIOURS`, the debug setup's words for it (D102 (the debug mode)). An attack's record carries its `damage` and its `knock`, the record itself passed to `hurtPlayer()` (D118 (hits vary in damage), D122 (knockback)); grades need nothing from a new type — `GRADES` steps every one (D119 (grades)); a behaviour that only moves a fish is left out of `attacks` in `tests/enemies.test.js`. A boss or mini-boss has `carries: false` (D88 (the fish glows from the start)). `threat` stays unwritten: S6 adds it to every type at once (D79 (a dive goes from easiest to hardest)). |
+| enemy | `ENEMY_TYPES` | `entities/enemies.md` | A behaviour is a field whose presence switches it on, plus one branch in `step()` (`game/logic.js`) — never a class (D26 (disciplines installed)). A new behaviour also gets its line in `DEBUG_BEHAVIOURS`, the debug setup's words for it (D102 (the debug mode)). An attack's record carries its `damage` and its `knock`, the record itself passed to `hurtPlayer()` (D118 (hits vary in damage), D122 (knockback)); grades need nothing from a new type — `GRADES` steps every one (D119 (grades)); a behaviour that only moves a fish is left out of `attacks` in `tests/enemies.test.js`. A boss or mini-boss has `carries: false` (D88 (the fish glows from the start)). Its `threat`, one number per grade, is measured: `npm run measure threat <name>` prints the line (D126 (threat)). |
 | mod | `MODS` | `entities/mods.md` | Differs in kind, not degree, readable in one line (`foundations.md` → genre contract 5). Raises only player fields. Capped (D69 (every mod capped)). |
 | boost | `BOOSTS` | `entities/boosts.md` | On when touched, off after `time`; no cap, nothing kept (D86 (boosts)). One any weapon gets adds to no weapon's number, only raises one by `percent`; one that suits a single weapon names its `weapons` (D125 (boosts keep each weapon's nature)). |
 | weapon | `WEAPONS` | `entities/weapons.md` | Three or four `tiers`; combat stats (D83 (the weapon record)). |
 | equipment | `EQUIPMENT` | `entities/equipment.md` | Three or four `tiers`; combat stats — body stats are attributes' (D36 (attributes)). |
 | attribute | `ATTRIBUTES` | `entities/challenges.md` | A body stat, raised a step at a time, step n costing n points; sums with gear, never multiplies (D36 (attributes), D109 (micro-tasks are ladders; steps cost more as they rise)). Permanent dash improvements live here (D74 (dash improvements are attributes)). |
 | challenge | `CHALLENGES` | `entities/challenges.md` | Mastery, never a quota (D36 (attributes)): a ladder of rungs, each a streak or one dive's feat, earned in any layer, rung k paying k points (D109 (micro-tasks are ladders; steps cost more as they rise)). Judged on a clear, a kill or a layer end. Never called "micro-task" (D110 (challenges)). |
-| batch, layer | the pools, `layer()`, `LAYERS` | `entities/layers.md`; how they work, `design.md` → Arrivals, Escorts, Layers and the plan | A layer owns its pools; no fixed lists (D71 (batches are drawn from pools)). A batch arrives in waves, the fish still to come telegraphed (D115 (batches arrive in waves)); a mini-boss's or the boss's stretch names the pool its escorts come from (D116 (bosses bring escorts)). Sized by total hp until S6 (balance). Numbered until named (D89 (layers are numbered until they are named)). |
+| batch, layer | the pools, `layer()`, `LAYERS` | `entities/layers.md`; how they work, `design.md` → Arrivals, Escorts, Layers and the plan | A layer owns its pools; no fixed lists (D71 (batches are drawn from pools)). A batch arrives in waves, the fish still to come telegraphed (D115 (batches arrive in waves)); a mini-boss's or the boss's stretch names the pool its escorts come from (D116 (bosses bring escorts)). Sized by threat: written as its mix of fish, its counts fitted to its stretch by `npm run measure fit` (D126 (threat)). Numbered until named (D89 (layers are numbered until they are named)). |
 | scenario | `SCENARIOS` | root `README.md` → Scenarios | One thing in isolation (D37 (scenarios)). |
 
 ## 3. Build it — in this order
@@ -59,7 +61,8 @@ the fields and the checks that will hold it. The alpha's counts were S5
    of shots needs a `swingDesc`, for the Knife.
 6. **Every screen drawn from a list it grew** — `home` rows, the cards, the
    readout (`PLAYER_STATS` for any stat it moves). Screenshot it.
-7. **Verify**: `npm test` and `index.html?test`, output filtered, both green.
+7. **Verify**: `npm test` and `index.html?test`, output filtered, both green;
+   `npm run balance` too, before and after, for anything a fight meets.
 8. **Sweep** (`CLAUDE.md` → Working agreement): `changelog.md`; `design.md` if
    a system changed; `decisions.md` if something was decided; the idea leaves
    `ideas.md` (`docs/README.md` → How an item moves); `roadmap.md` → Health if

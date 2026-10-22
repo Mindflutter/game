@@ -721,7 +721,14 @@ function gateLine() {
   const s = debugSetup, fish = setupFish(s);
   seedRng(s.seed);
   const drawn = drawPlan();
-  const list = batch => batch.map(([name, n]) => n + ' ' + name).join(', ');
+  // A type once, its graded fish counted beside it: a graded batch holds a
+  // type at up to three grades.
+  const list = batch => Object.entries(Object.groupBy(batch, ([name]) => name)).map(([name, es]) => {
+    const n = es.reduce((a, [, c]) => a + c, 0), g = es[0][2] || 1;
+    if (es.length === 1) return n + ' ' + name + (g > 1 ? ' at grade ' + g : '');
+    const up = es.filter(([, , h = 1]) => h > 1).sort((a, b) => a[2] - b[2]).map(([, c, h]) => c + ' grade ' + h);
+    return n + ' ' + name + ' (' + up.join(', ') + ')';
+  }).join(', ');
   const { batch, escorts } = drawn[drawn.findIndex(e => e.layer === s.layer) + s.gate];
   return LAYERS[s.layer].name + ', gate ' + (s.gate + 1) + ': ' + list(batch.enemies) +
          (escorts ? (batch.crowd ? ', its crowd from ' : ', escorted by ') + list(escorts.enemies) : '') +
@@ -741,7 +748,7 @@ const needsLine = g => (g.requires ? '   owning it needs ' +
 function fishTip(e, grade) {
   const f = makeEnemy(e, 0, 0, e.speed, grade);
   // A touch is not a step after the others: it hurts all along.
-  const kinds = Object.keys(e).filter(k => typeof e[k] === 'object' && k !== 'touch');
+  const kinds = Object.keys(behaviourOf(e)).filter(k => k !== 'ramp' && k !== 'touch');
   return e.name + ': ' + (kinds.length ? kinds : ['chase']).map(k => DEBUG_BEHAVIOURS[k]).join('; then ') +
          (e.enters === 'bottom' ? '; rises from below' : '') +
          (e.carries === false ? '; never glows, so carries no mod' : '') +
@@ -827,19 +834,64 @@ function gateDepth(k) {
   return k * GATE_SPACING;
 }
 
-// Drawn from the seed (D71, D116). reset() calls it before anything else
-// draws, so the plan is the first thing a seed decides.
+// Drawn from the seed (D71, D116), and graded (D126): each ordinary stretch of
+// the dive adds to the last one's threat, a ratio more each time, and every
+// batch drawn there is graded up to it. A mini-boss or the boss arrives at its layer's number, its
+// escorts graded so the gate, lead and escorts, comes to the stretch's threat.
+// reset() calls it before anything else draws, so the plan is the first thing
+// a seed decides.
 function drawPlan() {
   const out = [];
+  let k = -1;
   LAYERS.forEach((layer, l) => {
+    const top = GRADES.findLastIndex(g => g.from <= l + 1) + 1;
     for (const s of layer.stretches) {
+      if (!s.escorts) k += 1;
+      const target = THREAT_START * (THREAT_RISE ** (k + 1) - 1) / (THREAT_RISE - 1);
       for (const batch of drawDistinct(s.pool, s.draw)) {
-        out.push({ layer: l, batch, ...(s.escorts && { escorts: drawDistinct(s.escorts, 1)[0] }) });
+        const lead = s.escorts && ofGrade(batch, Math.min(l + 1, top));
+        out.push(lead
+          ? { layer: l, batch: lead, escorts: graded(drawDistinct(s.escorts, 1)[0], target - batchThreat(lead), top) }
+          : { layer: l, batch: graded(batch, target, top) });
       }
     }
     out[out.length - 1].end = true;
   });
   return out;
+}
+
+// A batch's threat, its fish's summed: about one heart lost at the knee (D126).
+const batchThreat = b => b.enemies.reduce((a, [name, n, g = 1]) => a + n * enemyType(name).threat[g - 1], 0);
+const ofGrade = (b, g) => ({ ...b, enemies: b.enemies.map(([name, n]) => [name, n, g]) });
+
+// Up to `target`, one fish and one grade at a time, drawn from the seed, never
+// past `top`, and never past GRADE_KEEP of a type left at grade 1. A step that
+// fits what is left is drawn first; past that, the smallest step, only while it
+// lands nearer the target than stopping.
+function graded(batch, target, top) {
+  const fish = names(batch).map(f => ({ name: f.name, grade: f.grade || 1 }));
+  const room = f => f.grade > 1 || fish.filter(x => x.name === f.name && x.grade > 1).length
+    < Math.floor((1 - GRADE_KEEP) * fish.filter(x => x.name === f.name).length);
+  let left = target - batchThreat(batch);
+  while (left > 0) {
+    const up = fish.filter(f => f.grade < top && room(f)).map(f => {
+      const t = enemyType(f.name).threat;
+      return [f, t[f.grade] - t[f.grade - 1]];
+    });
+    const fits = up.filter(([, d]) => d <= left);
+    const least = up.reduce((a, b) => (!a || b[1] < a[1] ? b : a), null);
+    const [f, d] = fits.length ? fits[Math.floor(rng() * fits.length)] : least && least[1] < 2 * left ? least : [];
+    if (!f) break;
+    f.grade += 1;
+    left -= d;
+  }
+  const enemies = [];
+  for (const f of fish) {
+    const e = enemies.find(([n, , g]) => n === f.name && g === f.grade);
+    if (e) e[1] += 1;
+    else enemies.push([f.name, 1, f.grade]);
+  }
+  return { ...batch, enemies };
 }
 
 // The renderer asks, for the water's colour (D72); here because it is the

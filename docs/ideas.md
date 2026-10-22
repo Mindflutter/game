@@ -122,33 +122,24 @@ Recorded here so they are not silently decided by accident.
 ## There are three bots, not one
 
 Raised 2026-09-27 when Igor asked whether a bot could play the game. It can —
-one already does (D16) — but conflating three different jobs is why the current
-bot's numbers are hard to trust. Open work; `roadmap.md` → Health notes that
-every existing bot figure goes void at S1 (Combat core), because manual fire
-(D28) means the bot now needs aim, fire, dash **and** movement policies where it
-previously needed only movement.
+one already does (D16) — but conflating three different jobs is why the old
+bot's numbers were hard to trust. The yardstick and the balance bot are built,
+with a standing bot as the cheapest exploit finder (D128 (the balance suite));
+the lookahead search is open.
 
 | Job | How good must it be | Shape |
 |---|---|---|
 | **Regression yardstick** | Consistency matters, skill does not. A *dumb* deterministic bot is better than a strong one — you want a fixed ruler, not a good player. | Scripted policy. Exists. |
-| **Balance measurement** | Must play roughly like the intended player, or the numbers do not transfer. This is where today's bot fails: `roadmap.md` says it is "only comparable to itself". | Threat-field navigation: danger gradient from enemy positions and velocities, move down it, aim at highest-value target, dash when cornered. The `disciplines:game-ai` steering material covers this. |
+| **Balance measurement** | Must play roughly like the intended player, or the numbers do not transfer. | Threat-field navigation: danger gradient from enemy positions and velocities, move down it, aim at highest-value target, dash when cornered. Built: the diver bot (D128 (the balance suite)). |
 | **Exploit finder** | Should *optimise*, not imitate. Its job is to find the cheese — "stand in this corner, never move, win" — which is exactly the balance bug worth catching. | Lookahead search. Viable **because** the game is deterministic after S0: fork the sim, roll out candidate actions, pick the best. |
 
 **Declined:** a learned/RL bot. Needs a training harness and compute, and would
 be a research project that teaches nothing about this game.
 
-**The balance bot is Igor's wish, left for now.** Igor, 2026-09-29: "well write
-a good bot. nor sure it's worth it, but would be nice and handy to have a bot
-mimicking real player's behavior. leave it now if complicated (i assume so)."
-It is — threat-field navigation plus dash timing is a project of its own — so
-S3 (one boss, one complete layer) measures around the gap instead: the win
-rate is taken on the boss fight alone (D63 — the win rate is the boss
-fight's).
-
 **Found building S3, 2026-09-29: the kiting bot backs out of its own range.**
 Against a lone slow enemy it holds it inside its 250px range 1% to 18% of the
 time, so its shots never land — the mini-boss outlasts it for minutes, and the
-immortal layer time trebled (figures in `roadmap.md` → Health). Backing off
+immortal layer time trebled, on the S3 build. Backing off
 only while closer than the range, and closing in otherwise, is a few lines —
 but it moves every bot baseline. Not taken in S3 — Igor, closing it: "let's
 just focus on what the stage DoD says".
@@ -293,33 +284,15 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
   graphics, to be replaced** — Igor: "if it's a graphics matter, state it and
   document that it's going to be modified later". What stays open is the art.
 
-## Open — raised during S4 (meta loop skeleton)
-
-- **How batches grow, balance-wise — S6 (balance)'s.** Igor, 2026-09-30:
-  "right now the batches are hard coded and are shitty because of that - you
-  know no level of difficulty, we havent settled how batches grow
-  balance-wise." Then, placing it: "develop a complex mathematical system for
-  enemies that impact the game and player feel - yes, of course. is it part of
-  balance? yes." Its direction is chosen — approach A, a threat number per
-  enemy type, a batch's threat computed from its enemies, measurement
-  correcting the numbers — and so is the shape it serves: an overall, gradual,
-  non-linear rise, "in numbers and in enemy types" (D79 (a dive goes from
-  easiest to hardest)). Everything else is S6's: the system itself, and how
-  batches are written against it. D54 (the batches, re-derived) and D71
-  (batches are drawn from pools) size by total hp until then, and 14 darters
-  against 10 drifters shows hp is not it.
 
 ## Open — raised before S5 (content)
 
-- **Mod caps: removed, or bigger — S6 (balance)'s.** 5–7 mods (D93 (the
-  content stage's counts)) at today's caps hold at most 19 picks, and a dive of
-  3–5 layers lights 36–60 fish — twelve a layer — so the pool runs dry
-  by the second layer and every fish after that stays dark. Igor, 2026-10-13:
-  "i dont feel like limiting mods is a problem now. we can remove the limit
-  entirely and see how it affects balance. or bigger caps, yes. dont really
-  matter at this point". Until then the caps stand (D69 (every mod capped)).
-  Removing them would reopen the glossary's "every mod has a cap" in
-  `foundations.md`.
+- **Mod caps: removed?** Igor, 2026-10-13: "i dont feel like limiting mods
+  is a problem now. we can remove the limit entirely and see how it affects
+  balance. or bigger caps, yes. dont really matter at this point". Bigger caps
+  are built — `Fins` and `Vitality` at 6 (D127 (the tuned numbers)); the dash's,
+  `Reflex` and `Impact`, wait on its discussion. Still open: removing them,
+  which would reopen the glossary's "every mod has a cap" in `foundations.md`.
 
 ## Open — from playing S5 (content)
 
@@ -379,7 +352,8 @@ discussed.
   what earns it — an attribute, a mod, gear — and how strong. Kin: the next
   note's lock on the dash itself, and the dash economy under Recorded future
   opportunities. **Home**: the mechanics and attributes design, Igor's
-  words; untouched until then.
+  words; untouched until then. Igor, 2026-10-21, opening S6 (balance): "leave
+  dash for now, discussions needed".
 - **Locked at the start?** Igor, 2026-10-15, with the dash cut by a third (D111
   (the dash a third shorter)): "maybe dash shouldnt be available at the start?"
   A lean. What it would touch: the dash is the second verb since D20 (mouse aim
@@ -387,22 +361,15 @@ discussed.
   attributes and the `Reflex` and `Impact` mods would buy nothing, so a draw
   would have to hold them back; and `footwork` would pay for not dashing with
   no dash to use. Open: whether, and what opens it — gear, a step, a layer, a
-  challenge's rung. **Home**: open.
-- **`footwork` must be a feat.** Igor, 2026-10-15, asked whether a player who
-  never dashes should earn it: "never dashing needs to be justified - being
-  fast enough to avoid most of enemies. i'd say yes, it all comes to balance."
-  So `footwork` stays any run of batches without a dash (D109 (micro-tasks are
-  ladders; steps cost more as they rise)), and staying clear of most fish
-  without one has to take skill. **Home**: S6 (balance), his "it all comes to
-  balance".
+  challenge's rung. **Home**: open — Igor, 2026-10-21: "leave dash for now,
+  discussions needed".
 
 **Health**
 
 - **Bars, hearts, and hits worth more than one.** Igor, 2026-10-15: "should
   enemies have hp bars? shouls the player? damage exceeding 1?" Hits vary in
-  damage, the unit unchanged, is D118 (hits vary in damage); every amount is 1
-  until S6 (balance) sizes them — Claude's lean, unconfirmed, the heavy
-  attacks with a long tell (the lunge, the burst) above the swarm's bites.
+  damage, the unit unchanged, is D118 (hits vary in damage); the amounts are
+  D127 (the tuned numbers)'s — the attacks with a long tell above the swarm's bites.
   Still open:
   - **The diver's readout.** Igor, 2026-10-19: "half hearts is confusing.
     either enough hearts or a bar", leaning to "proper hp system"; then, on a
@@ -415,14 +382,12 @@ discussed.
     mini-boss too. Claude's lean, unconfirmed: theirs across the top of the
     view instead, where 60 hp of progress reads.
 
-  **Home**: the amounts S6 (balance)'s; the boss's bar after Igor's word.
+  **Home**: the boss's bar after Igor's word.
 
 **The stage's content**
 
 - **The eel is hard to hit** — "a problem of schematic circles, not necessarily
   a bad design." Its behaviour stands; it goes with the graphics, below.
-- **The archer works** — "shooting enemies are quite good atm. just a positive
-  commentary". Its behaviour stands; its numbers stay S6 (balance)'s.
 - **The puffer still feels clumsy.** Igor, 2026-10-15, playing the build with
   D106 (the puffer bursts and comes on again): "exploding guy still feels
   clumsy. maybe acceleration or making it faster would help." A lean, given
@@ -431,17 +396,9 @@ discussed.
   the plain chasers but not the puffer — it chases at full speed from its
   first tick and stops dead to swell. A D107 ramp would make it smoother but
   slower off the mark, not quicker, and changes its step rather than adding a
-  line to `game/content.js`. Open: which acceleration — that ramp, or a
-  puffer that gathers pace as it chases. **Home**: S6 (balance), his "for
-  balance".
-- **Bosses and mini-bosses quicker.** Igor, 2026-10-18: "note for balance:
-  make bosses & mini bosses quicker". What there is to turn: their `speed`,
-  the lunge's chase, wind-up, charge speed and rest, and the boss's fan
-  (`entities/enemies.md`). Open: which of them. **Home**: S6 (balance), his
-  "note for balance".
-- **The Knife's arc halved.** Igor, 2026-10-15: "knife arc reduce by half" —
-  120° to 60°, from D105 (the Knife swings)'s pick, given "for balance".
-  **Home**: S6 (balance), his "for balance".
+  line to `game/content.js`. Faster is built — D127 (the tuned numbers). Open:
+  whether it still wants acceleration, and which — that ramp, or a puffer that
+  gathers pace as it chases. **Home**: open, to Igor's play.
 - **More kinds of boost.** Igor, 2026-10-20: "more complex idea: there are
   diver boosts, attr boosts, individual weapon boosts, and totally new boosts -
   like an explosion killing nearby, or launches shots in all directions, or
@@ -513,9 +470,10 @@ discussed.
   Claude's shape and numbers — 5–10 fish a wave, 4s ± 40% apart, 2s of
   trickle, an empty arena calling the next. Igor's aim was "a sense of nervous
   rush and inevitability ... not scare him away - motivate instead", with
-  Crimsonland as the reference for being overwhelmed. With today's batch sizes
-  the waves put fewer fish on screen at once than a whole batch did, and the
-  kiting bot lasts longer for it (`roadmap.md` → Health). Open, to Igor's play:
+  Crimsonland as the reference for being overwhelmed. With the batch sizes
+  before S6 (balance) the waves put fewer fish on screen at once than a whole
+  batch did, and the kiting bot lasted longer for it; the batches of S6 (balance) are bigger
+  (D127 (the tuned numbers)). Open, to Igor's play:
   whether it rushes; if not, the levers are the clock and the batch sizes.
   Also open: whether the status bar's `(12 coming)` is telegraph enough, or a
   wave wants a sound or a mark at the edge it enters by; and where waves enter
@@ -524,12 +482,52 @@ discussed.
 
 - **Escorts: do they feel right?** Built as D116 (bosses bring escorts), Igor
   handing the shape over ("on boss question go your way"): the boss's crowd
-  refills to 6 while it lives, each newcomer within 2s of the gap, paying no
+  refills to `BOSS_CROWD` while it lives, each newcomer within 2s of the gap, paying no
   gems, dying with the boss; a mini-boss leads in a whole batch from the pool
   before it. Open, to Igor's play: the crowd's size and pace, whether a whole
   batch is too much beside a mini-boss, and whether the crowd should pay
-  something after all. "According to the balance for current batch" is S6
-  (balance)'s, once a fish has a threat number.
+  something after all. "According to the balance for current batch" — built
+  as Claude's reading, unconfirmed (D126 (threat)): the crowd refills from its
+  graded escorts, so it is the batch, sized as every batch is; its size is 4
+  since D129 (a gentle first layer).
+
+## Open — from S6 (balance)
+
+- **How strict the bars are.** The pillars say "every batch", "no batch",
+  "one batch"; a bot's figure scatters by seed, so the balance suite reads
+  them loosely, Claude's picks (D127 (the tuned numbers)): a gate lost on no
+  more than half the seeds, cleared standing on no more than one in ten past
+  the opening, and no weapon dominating over layers 2 and 3 together, though
+  the Knife is worse in the one and better in the other. Completion time is
+  out of the bars (D129 (a gentle first layer)). Open: whether these stand,
+  or every seed and every batch must pass — which would move the numbers
+  again. **Home**: S6 (balance), on Igor's word.
+- **How big the opening is, and how soon the first purchase comes.** Since
+  D130 (fish are revealed a type at a time) the opening holds only drifters
+  and darters, which cost almost no hearts, so the curve's first target takes
+  about 50 of them a batch, where the first-layer batches held 11–19 before;
+  the bot takes about 30s on one. Each pays a gem a fish: a diver who dies
+  after four batches banks about 205 gems, and the Gun's first tier, 1200,
+  comes on the sixth dive — against "Addictive, not grindy"'s three, which
+  the career bot meets only by diving deeper. Smaller openings, 15–20 fish,
+  would cut it to about 110 gems and the eleventh dive, so the opening and
+  the first price move together. Open: the opening's size, and the pace of
+  the first purchase. **Home**: S6 (balance), on Igor's word.
+- **`footwork` no longer takes twice the hearts.** D127 (the tuned numbers)'s
+  bar: the diver bot without its dash loses more than twice the hearts it
+  does with it. On the D130 (fish are revealed a type at a time) build it
+  holds in the first layer and falls short in the second and third
+  (`roadmap.md` → Health); it is measured by hand, not in the suite.
+  The dash and everything feeding it are Igor's to discuss ("leave dash for
+  now, discussions needed"). Open: whether the bar stands, and what moves if
+  it does. **Home**: S6 (balance), on Igor's word.
+- **Challenge rungs on the shorter dive.** The ladders were sized on fifteen
+  gates a layer (D109 (micro-tasks are ladders; steps cost more as they
+  rise)); twelve since D127 (the tuned numbers), so a dive has 36 gates and 27
+  glowing batches, and every streak's rung is a little harder to meet than its
+  rate says — `footwork`'s top, fifteen batches, more than a layer. Open:
+  re-size them to the new shape, or keep them. **Home**: open; the rungs are
+  Claude's picks either way.
 
 ## Suggested but not yet discussed
 

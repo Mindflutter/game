@@ -13,14 +13,15 @@ describe('home: gear, points, challenges (D31, D36)', () => {
     const g = loadGame();
     g.buy(gun(g));
     expect(g.meta.gear).toEqual({});             // 0 gems buys nothing
-    g.meta.bank = 1000;
+    const purse = gun(g).tiers.reduce((a, t) => a + t.cost, 0) + 100;   // every tier, and change
+    g.meta.bank = purse;
     g.buy(gun(g));
-    expect(g.meta.bank).toBe(1000 - gun(g).tiers[0].cost);
+    expect(g.meta.bank).toBe(purse - gun(g).tiers[0].cost);
     g.reset(1);
     expect(g.player.fireRate).toBeCloseTo(gun(g).fireRate + 0.5);
     for (let i = 0; i < 5; i++) g.buy(gun(g));
     expect(g.meta.gear.Gun).toBe(gun(g).tiers.length);
-    expect(g.meta.bank).toBe(1000 - gun(g).tiers.reduce((a, t) => a + t.cost, 0));
+    expect(g.meta.bank).toBe(100);
     expect(JSON.parse(g.saved).gear.Gun).toBe(gun(g).tiers.length);   // written at once
   });
 
@@ -316,7 +317,7 @@ describe('the weapons (D97)', () => {
 
   it('the Harpoon waits for a step of Strength, and its row says so', () => {
     const g = loadGame();
-    g.meta.bank = 1000;
+    g.meta.bank = g.WEAPONS.find(w => w.name === 'Harpoon').cost;
     expect(row(g, 'Harpoon').label).toContain('needs Strength 1');
     expect(row(g, 'Harpoon').dim).toBe(true);
     row(g, 'Harpoon').run();
@@ -354,7 +355,7 @@ describe('equipment (D100)', () => {
   it('puts each piece\'s tiers on the diver: the mask\'s reach, the weights\' damage, the suit\'s guard', () => {
     const g = wearing({ Mask: 2, Weights: 3, Suit: 1 });
     const gun = g.WEAPONS[0];
-    expect([g.player.range, g.player.damage, g.player.guard]).toEqual([gun.range + 60, gun.damage + 1.5, 1]);
+    expect([g.player.range, g.player.damage, g.player.guard]).toEqual([gun.range + 30, gun.damage + 1.5, 1]);
   });
 
   it('takes the first hit of a batch on the suit: no HP, the i-frames, the batch marked hit', () => {

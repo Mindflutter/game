@@ -31,7 +31,10 @@ where it does, in full, is `specs/2026-10-15-micro-task-ladders-design.md`.
 | Strength | dashDamage +1 |
 
 **judged** is which of `clear`, `kill` and `end` the record has. Every number
-is Claude's pick, S6 (balance)'s to tune.
+is Claude's pick, none tuned by S6 (balance): Dash reach and Strength are
+the dash's, which waits on its discussion (`ideas.md`), and the rungs are
+sized on fifteen gates a layer, not the twelve a layer has (D127 (the tuned
+numbers)) — open, `ideas.md` → Challenge rungs on the shorter dive.
 
 ## Fields
 
@@ -51,17 +54,19 @@ is Claude's pick, S6 (balance)'s to tune.
 Evasion: batches cleared in a row without a hit. The suit's guard taking one
 still counts as a hit (D100 (equipment: the Mask, the Suit and the Weights)).
 Its first rung is a single clean batch, D36 (attributes)'s own example. The
-others mark how cleanly a player plays: 3, 6 and 10 are each expected within a
-dive at 32%, 62% and 79% of batches clean, so the top asks a good player for
-about a dive, never several.
+others mark how cleanly a player plays: 3, 6 and 10 are each expected within
+a dive of fifteen-gate layers at 32%, 62% and 79% of batches clean, so the top
+asks a good player for about a dive, never several; a dive's layers have
+twelve (above).
 
 ## footwork
 
 Restraint: batches cleared in a row without dashing. Not dashing is a choice,
-not luck, so its rungs follow the dive's shape: three batches, a stretch and
-its mini-boss (six), two of each (ten), a whole layer with its boss (fifteen).
-It is a feat only while staying clear of most fish takes the dash — which is
-S6 (balance)'s to make true (`ideas.md` → The dash).
+not luck, so its rungs follow the dive's shape, sized on fifteen gates a
+layer: three batches, then six, ten, and fifteen — more than the twelve a
+layer has (above). It is a feat only while staying clear of most fish takes
+the dash, and measured it does: the diver bot without its dash loses more
+than twice the hearts (`roadmap.md` → Health).
 
 ## beeline
 
@@ -69,7 +74,8 @@ Priority: batches in a row whose glowing fish dies first. A batch with no
 glowing fish — a lunger's, or any once every mod is capped — neither counts
 nor breaks it. A fish killed on the same tick as the glowing one died with it:
 one swing, one shot through a line or one dash is one moment. 3, 5 and 8 are
-each expected within a dive's thirty-six glowing batches at 34%, 57% and 75%.
+each expected within thirty-six glowing batches at 34%, 57% and 75% — a dive
+of fifteen-gate layers; a dive has twenty-seven (above).
 
 ## flurry
 

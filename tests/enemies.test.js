@@ -374,8 +374,8 @@ describe('the bite (D108)', () => {
     const names = ['drifter', 'darter', 'bulwark', 'archer', 'puffer', 'eel', 'mini-boss', 'boss'];
     expect(names.map(n => [n, touched(n)])).toEqual(names.map(n => [n, n === 'eel' ? 1 : 0]));
     const charge = { aimX: 1, aimY: 0 };
-    expect(['charge', 'windup', 'rest'].map(phase => touched('mini-boss', { ...charge, phase })))
-      .toEqual([1, 0, 0]);                       // the lunge hurts only as it charges
+    expect(['charge', 'windup', 'rest'].map(phase => touched('mini-boss', { ...charge, phase }) > 0))
+      .toEqual([true, false, false]);            // the lunge hurts only as it charges
   });
 });
 
@@ -398,7 +398,7 @@ describe('arrivals', () => {
 describe('damage (D118)', () => {
   // Every attack as [type, behaviour, record]; weave only moves a fish.
   const attacks = g => g.ENEMY_TYPES.flatMap(t => Object.entries(t)
-    .filter(([k, v]) => typeof v === 'object' && k !== 'weave').map(([k, v]) => [t.name, k, v]));
+    .filter(([k, v]) => typeof v === 'object' && !Array.isArray(v) && k !== 'weave').map(([k, v]) => [t.name, k, v]));
 
   it('gives every attack a whole damage of at least 1', () => {
     const g = loadGame();
@@ -419,7 +419,7 @@ describe('grades (D119)', () => {
 
   it('makes grade 1 the type as written, and every step whole in damage', () => {
     const g = loadGame();
-    expect(g.GRADES[0]).toEqual({ hp: 1, speed: 1, value: 1, damage: 0 });
+    expect(g.GRADES[0]).toEqual({ hp: 1, speed: 1, value: 1, damage: 0, from: 1 });
     for (const G of g.GRADES) expect(Number.isInteger(G.damage) && G.damage >= 0).toBe(true);
   });
 
@@ -436,7 +436,7 @@ describe('grades (D119)', () => {
           .toEqual([i + 1, t.hp * G.hp, t.hp * G.hp, t.speed * G.speed, Math.round(t.value * G.value)]);
         for (const [k, v] of Object.entries(t)) {
           if (typeof v === 'object' && 'damage' in v) expect(e[k]).toEqual({ ...v, damage: v.damage + G.damage });
-          else if (typeof v === 'object') expect(e[k]).toEqual(v);
+          else if (typeof v === 'object' && !Array.isArray(v)) expect(e[k]).toEqual(v);
         }
       });
     }

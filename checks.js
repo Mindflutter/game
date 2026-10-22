@@ -45,8 +45,9 @@ if (location.search === '?test') {
   const traverse = (w, h) => {
     resize(w, h);
     reset(4471);
-    // 450s a layer is headroom, so another layer cannot fail this.
-    for (let i = 0; i < LAYERS.length * 450 / FIXED_DT && screen !== 'won'; i++) {
+    // 900s a layer is headroom over what a stationary starting Gun takes, so
+    // another layer cannot fail this.
+    for (let i = 0; i < LAYERS.length * 900 / FIXED_DT && screen !== 'won'; i++) {
       player.hurt = player.iframes;
       if (screen === 'mods') { justPressed.add('Digit1'); justPressed.add('Enter'); }
       else if (enemies.length) {
@@ -259,6 +260,23 @@ if (location.search === '?test') {
     }
     debugSetup = was;
     check(widest < ARENA_W - 32, 'debug: every tip must fit the view, the widest is ' +
+      Math.round(widest) + 'px: ' + which);
+  }
+
+  // The gate line above them, in the same font: a drawn gate names each type
+  // with its grades (D126), so its width is the pools', on many seeds.
+  {
+    const was = debugSetup;
+    let widest = 0, which = '';
+    for (let seed = 1; seed <= 100; seed++) for (let layer = 0; layer < LAYERS.length; layer++) {
+      for (let gate = 0; gate < LAYERS[layer].stretches.reduce((a, s) => a + s.draw, 0); gate++) {
+        debugSetup = { ...parseSetup('', 1), seed, layer, gate };
+        const line = gateLine(), width = ctx.measureText(line).width;
+        if (width > widest) { widest = width; which = line; }
+      }
+    }
+    debugSetup = was;
+    check(widest < ARENA_W - 32, 'debug: every gate line must fit the view, the widest is ' +
       Math.round(widest) + 'px: ' + which);
   }
 

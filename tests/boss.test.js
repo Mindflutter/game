@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks, ride, clearAndWait } from './harness.js';
+import { loadGame, ticks, ride, clearAndWait, sameFish } from './harness.js';
 
 // Wholly inside the view -- the one place a tell can be read.
 const inView = (g, e) => e.x - e.r >= 0 && e.x + e.r <= g.ARENA_W &&
@@ -134,11 +134,12 @@ describe('the layer (D62, D65)', () => {
       const layer = g.plan.filter(e => e.layer === l);
       const escorted = layer.filter(e => e.escorts);
       expect(escorted).toEqual(layer.filter(e => has('mini-boss')(e) || has('boss')(e)));
-      escorted.forEach((e, i) => expect(L.stretches[2 * i].pool).toContain(e.escorts));
-      expect(layer.at(-1).batch.enemies).toEqual([['boss', 1]]);
+      escorted.forEach((e, i) => expect(L.stretches[2 * i].pool.some(b => sameFish(b, e.escorts))).toBe(true));
+      // At the grade of the layer's number (D126).
+      expect(layer.at(-1).batch.enemies).toEqual([['boss', 1, l + 1]]);
       expect(layer.at(-1).end).toBe(true);
       expect(layer.filter(has('mini-boss')).map(e => e.batch.enemies))
-        .toEqual([[['mini-boss', 1]], [['mini-boss', 1]]]);
+        .toEqual([[['mini-boss', 1, l + 1]], [['mini-boss', 1, l + 1]]]);
       expect(layer.slice(0, -1).some(has('boss'))).toBe(false);
       expect(layer.slice(0, -1).some(e => e.end)).toBe(false);
     });
@@ -159,10 +160,11 @@ describe('the layer (D62, D65)', () => {
 describe('escorts (D116)', () => {
   // A dive's first boss or mini-boss, arrived; the diver kept alive and never
   // firing, so the fight lasts as long as the test wants.
-  const fight = (seed, name) => {
+  // `last`: the deepest, whose escorts the plan grades (D126).
+  const fight = (seed, name, last = false) => {
     const g = loadGame();
     g.immortal = true;
-    g.startScenario({ batch: p => p.findIndex(e => e.batch.enemies.some(([n]) => n === name)) }, seed);
+    g.startScenario({ batch: p => p[last ? 'findLastIndex' : 'findIndex'](e => e.batch.enemies.some(([n]) => n === name)) }, seed);
     ride(g);
     return g;
   };
@@ -172,7 +174,7 @@ describe('escorts (D116)', () => {
 
   it('keeps the boss\'s crowd topped up to its size while the boss lives, from its own mix, never past it', () => {
     fc.assert(fc.property(seed, s => {
-      const g = fight(s, 'boss');
+      const g = fight(s, 'boss', true);
       const { batch, escorts } = g.plan[g.batchIndex - 1];
       let over = false;
       for (let i = 0, n = ticks(g, 6); i < n; i++) {
@@ -182,7 +184,8 @@ describe('escorts (D116)', () => {
       }
       expect(over).toBe(false);
       expect(crowd(g)).toHaveLength(batch.crowd);
-      expect(crowd(g).every(e => escorts.enemies.some(([n]) => n === e.name))).toBe(true);
+      // Its fish and their grades, the plan's (D126).
+      expect(crowd(g).every(e => escorts.enemies.some(([n, , gr = 1]) => n === e.name && gr === e.grade))).toBe(true);
     }), { numRuns: 10 });
   });
 

@@ -27,7 +27,7 @@ boosts)).
 | Bloom | your shots splash | 6 | your cuts splash | any | splash +24 |
 
 **for** is read off `weapons`, **adds** off `add` and `percent`. Every number
-is Claude's pick, S6 (balance)'s to tune.
+is Claude's pick, held by `npm run balance` (D127 (the tuned numbers)).
 
 ## Fields
 

@@ -14,8 +14,8 @@ fish and the layer end's pick.
 
 | name | scope | desc | max | end | per pick | at max |
 |---|---|---|---|---|---|---|
-| Fins | body | you swim faster | 3 | — | speed +45 | speed 395 |
-| Vitality | body | 1 more max HP, it comes full | 3 | — | hp +1, maxHp +1 | hp 6, maxHp 6 |
+| Fins | body | you swim faster | 6 | — | speed +45 | speed 530 |
+| Vitality | body | 1 more max HP, it comes full | 6 | — | hp +1, maxHp +1 | hp 9, maxHp 9 |
 | Reflex | body | the dash comes back sooner | 3 | — | dashCooldown -0.4 | dashCooldown 1 |
 | Nerve | body | hits leave you safe longer | 3 | — | iframes +0.3 | iframes 1.9 |
 | Impact | body | the dash wounds what it throws | 3 | — | dashDamage +1 | dashDamage 3 |
@@ -26,7 +26,9 @@ fish and the layer end's pick.
 `max` of them, from the starting kit — the diver carrying the Gun, or for a
 weapon mod the first weapon it fits, before any tier or attribute. Both are worked out from `apply` by the check, so they
 cannot advertise a number the mod does not deliver. A layer end's card gives an
-ordinary mod `END_STEP 2` picks at once. Every number is S6 (balance)'s to tune.
+ordinary mod `END_STEP 2` picks at once. Every number is Claude's pick; the
+caps of `Fins` and `Vitality` are tuned to the pillars (D127 (the tuned numbers)),
+and the dash's, `Reflex` and `Impact`, wait on its discussion (`ideas.md`).
 
 ## Fields
 
@@ -35,7 +37,7 @@ ordinary mod `END_STEP 2` picks at once. Every number is S6 (balance)'s to tune.
 | `name` | — | The key and the card's title. A saved dive keeps its mods, the cards on offer and the round of fish-carried mods by name, and a scenario's kit names them, so renaming one breaks all three. |
 | `scope` | — | `body`: a stat of the diver, worth the same whatever weapon is carried. `comfort`: feel and friction, near-zero balance risk. `weapon`: a mod that fits only some weapons, named in `weapons` (D31 (two-tier progression), D99 (weapon mods, and more boosts)). It changes the carried weapon's numbers on the player like any mod. A check holds every mod to these three, and a weapon mod to naming real weapons. |
 | `desc` | — | The card's one line, and the pickup line's. A kind, not a degree: a pickup has to be felt and recognised mid-fight (D34 (mods), D84 (mods are dropped)). A check holds it inside the card's width. |
-| `max` | picks | How many times one dive can take it (D69 (every mod capped)): a switch caps at 1, anything that stacks at 3. No fish carries a mod at its max, and no layer end offers one without room for what its card gives. Where the caps sit is S6 (balance)'s. |
+| `max` | picks | How many times one dive can take it (D69 (every mod capped)): a switch caps at 1, anything that stacks at 3 or 6. No fish carries a mod at its max, and no layer end offers one without room for what its card gives. Where the caps sit is S6 (balance)'s (D127 (the tuned numbers)); whether they go is open (`ideas.md`). |
 | `end` | — | `true` marks one of the layer end's own mods (D85 (the layer end's pick)): offered only on its cards, once a card, and never carried by a fish. Without it the mod is ordinary — carried by fish, and on a layer end's card at the bigger step, `END_STEP` picks at once. |
 | `weapons` | — | The weapons a `weapon`-scoped mod fits, by name (D83 (the weapon record)): it is dealt — by a glowing fish or on a layer end's card — only while one of them is carried (D99 (weapon mods, and more boosts)). |
 | `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The "from → to" rows on a card and on the pickup line are worked out from it, at most `MOD_ROWS 2` of them, each stat named in words from `STAT_NAMES`. |
@@ -81,7 +83,7 @@ The first weapon mod (D99 (weapon mods, and more boosts)): the Harpoon's shot
 goes through one more fish a pick. A mod of the Harpoon's own kind — it
 already passes through two — so it is dealt only while the Harpoon is carried;
 with the Gun or the Knife no fish carries it and no card offers it. Its
-numbers are Claude's picks, S6 (balance)'s to tune.
+numbers are Claude's picks, held by `npm run balance` (D127 (the tuned numbers)).
 
 ## Adding one
 

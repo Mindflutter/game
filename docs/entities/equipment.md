@@ -8,14 +8,15 @@ with gems at `home`, kept between dives, and raises combat stats (D36
 or four tiers.
 
 The tables mirror `EQUIPMENT` in `game/content.js`, and `npm test` fails when
-the two disagree. Every number is Claude's pick, S6 (balance)'s to tune (D100
-(equipment: the Mask, the Suit and the Weights)).
+the two disagree. Every number is Claude's pick (D100 (equipment: the Mask, the
+Suit and the Weights)), the prices and the Mask's step tuned to the pillars
+(D127 (the tuned numbers)).
 
 ## Roster
 
 | name | at top |
 |---|---|
-| Mask | range 340 |
+| Mask | range 295 |
 | Suit | guard 3 |
 | Weights | damage 2.5 |
 
@@ -23,15 +24,15 @@ Each piece's tiers, in the order they are bought:
 
 | name | tier | cost | adds |
 |---|---|---|---|
-| Mask | 1 | 50 | range +30 |
-| Mask | 2 | 120 | range +30 |
-| Mask | 3 | 240 | range +30 |
-| Suit | 1 | 90 | guard +1 |
-| Suit | 2 | 200 | guard +1 |
-| Suit | 3 | 380 | guard +1 |
-| Weights | 1 | 70 | damage +0.5 |
-| Weights | 2 | 150 | damage +0.5 |
-| Weights | 3 | 280 | damage +0.5 |
+| Mask | 1 | 2000 | range +15 |
+| Mask | 2 | 4800 | range +15 |
+| Mask | 3 | 9600 | range +15 |
+| Suit | 1 | 3600 | guard +1 |
+| Suit | 2 | 8000 | guard +1 |
+| Suit | 3 | 15200 | guard +1 |
+| Weights | 1 | 2800 | damage +0.5 |
+| Weights | 2 | 6000 | damage +0.5 |
+| Weights | 3 | 11200 | damage +0.5 |
 
 **at top** is what every tier bought adds up to; **adds** is what one tier
 adds. Both are worked out from the tiers' `apply` by the check.

@@ -10,31 +10,14 @@ must stay true while doing it.
 
 ## Active stage
 
-**The pass before S6 (balance): from playing S5 (content).** S5 (content)
-closed 2026-10-14 — Igor: "close s5" — and his notes from playing it opened
-this pass the same day: "if no questions for me, start working". It holds
-what S6 (balance) would otherwise tune twice — what changes the meaning of a
-number before the numbers are tuned:
-
-- Igor's notes from playing S5 (content) proposed for before S6 (balance)
-  (`ideas.md` → Open — from playing S5 (content)). What challenges pay is
-  settled: ladders (D109 (micro-tasks are ladders; steps cost more as they
-  rise)), `specs/2026-10-15-micro-task-ladders-design.md`.
-- **Movement with acceleration and a facing, and fish that bite** — Igor,
-  2026-10-14: `specs/2026-10-14-movement-and-bites-design.md`.
-- **The boss and the mini-boss made different** — Igor, 2026-10-14:
-  "mini-boss and boss have one kind of behavior. we need to make them
-  different. this would belong to a completed s5, naturally we have to do it
-  outside of it, so plan that too." Built as D117 (the boss's fan).
-- **Real knockback** — Igor, 2026-10-19: "drawn bump stays for s7, real
-  knockback - design and implement now":
-  `specs/2026-10-19-knockback-design.md`, built as D122 (knockback).
-- **Boosts that keep each weapon's nature** — Igor, 2026-10-20: "to balance
-  boosts across different weapon setups": built as D125 (boosts keep each
-  weapon's nature).
-
-Where it stands is `roadmap.md` → Next. **S6 — Balance** follows; its entry,
-S5 exiting, is met, and it opens on Igor's word.
+**S6 — Balance**, opened 2026-10-21 — Igor: "start s6, no interruptions
+unless critical questions to me". Its design is
+`specs/2026-10-21-s6-balance-design.md`. The dash is held still while it runs
+— Igor, the same day: "leave dash for now, discussions needed". Built: D126
+(threat) to D130 (fish are revealed a type at a time), every exit item met on
+the diver bot's figures; it closes on Igor's word — how strict the bars are,
+the opening's size, `footwork`, and his play.
+Where it stands is `roadmap.md` → Next.
 
 ## Closed stages
 
@@ -52,6 +35,7 @@ the decisions listed say why.
 | S4 — Meta loop skeleton | 2026-09-30 | Two layers drawn from pools, the layer end and the win, every mod capped, `home` with the gun's tiers and dash reach, a challenge, the versioned save | D74–D79 |
 | Before S5 — two requirements | 2026-10-13 | A doc for every kind of entity, held to the code; the weapon record; mods dropped by a glowing fish, the layer end's pick, boosts, rank retired | D80–D92 |
 | S5 — Content to the DoD numbers | 2026-10-14 | The archer, the puffer and the eel; the Harpoon and the Knife, owned and carried; three pieces of equipment, Heart and Strength, swift and footwork; Barbs and three boosts; three layers with pools of their own — and, from playing it, the debug mode and New game | D93–D103 |
+| The pass before S6 — from playing S5 | 2026-10-21 | Bodies doubled, the Knife's swing, the puffer's burst, swimming with a facing, fish that bite, challenges as ladders, waves, escorts, the boss's fan, hits that vary, grades, solid bodies, knockback, boosts that keep each weapon's nature | D104–D125 |
 
 Their designs, where a stage had one, are in `specs/` — history; where one
 disagrees with a decision, the decision wins.
@@ -80,7 +64,8 @@ remember, they are different but equally challenging at any given batch/wave
 in the game".
 
 **Exit (DoD):**
-- No unbeatable batch. No batch cleared without moving.
+- No unbeatable batch. No batch past the opening cleared without moving
+  (D130 (fish are revealed a type at a time)).
 - No weapon strictly dominates another in mid-to-late game — measured, per the
   draft's explicit requirement.
 - Every provisional target in `foundations.md` is now a measured one.

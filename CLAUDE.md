@@ -127,7 +127,11 @@ object (D124).
   pieces interacting: S5 (content)'s review found a puffer that burst on the
   tick a dash killed it, and paid for both.
 - Balance is measured by driving `update()` faster than real time with a
-  scripted bot, and reported as numbers, not impressions.
+  scripted bot, and reported as numbers, not impressions (D128 — The diver
+  bot and the balance suite). `npm run measure <command>` prints the tables,
+  and `npm run measure fit` resizes the pools to the threat curve;
+  `npm run balance` holds the pillars as checks, slow, so never inside
+  `npm test` — run it for any change a fight meets.
 - **Game feel is Igor's call and is never asserted.**
 - Hard-refresh (Cmd+Shift+R) after edits. Several script files mean a partial
   cache serves a mix of old and new, which produces baffling bugs.

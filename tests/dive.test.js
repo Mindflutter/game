@@ -3,7 +3,7 @@
 // in docs/specs/2026-09-30-s4-meta-loop-design.md.
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { loadGame, ticks, ride, clearAndWait, atGate, die } from './harness.js';
+import { loadGame, ticks, ride, clearAndWait, atGate, die, sameFish } from './harness.js';
 
 const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
 
@@ -13,6 +13,141 @@ function pick(g) {
   g.justPressed.add('Enter');
   g.update(g.FIXED_DT);
 }
+
+// Threat (D126): the dive's ordinary stretches, each with its target
+// and the top grade its layer allows. Walked here, not read from the game, so
+// the rule is checked rather than copied.
+function stretches(g) {
+  let k = -1;
+  return g.LAYERS.flatMap((L, l) => L.stretches.map(s => {
+    if (!s.escorts) k += 1;
+    return { l, s, target: g.THREAT_START * (g.THREAT_RISE ** (k + 1) - 1) / (g.THREAT_RISE - 1),
+             top: g.GRADES.findLastIndex(G => G.from <= l + 1) + 1 };
+  }));
+}
+const atGrade = (b, grade) => ({ enemies: b.enemies.map(([n, c]) => [n, c, grade]) });
+// The most of a type `graded()` may raise: the rest stay at grade 1.
+const most = (g, n) => Math.floor((1 - g.GRADE_KEEP) * n);
+// Every graded batch of a plan, a gate's or its escorts', its fish counted by type.
+const gradedOf = (g, sd) => {
+  g.reset(sd);
+  return g.plan.flatMap(e => (e.escorts ? [e.escorts] : [e.batch]).map(b =>
+    Object.values(Object.groupBy(b.enemies, ([n]) => n))));
+};
+
+describe('threat (D126)', () => {
+  it('gives every type a threat at every grade, higher at each', () => {
+    const g = loadGame();
+    for (const t of g.ENEMY_TYPES) {
+      expect([t.name, t.threat.length]).toEqual([t.name, g.GRADES.length]);
+      expect([t.name, t.threat.every((v, i) => v > (t.threat[i - 1] ?? 0))]).toEqual([t.name, true]);
+    }
+  });
+
+  it('sits every pool batch at or under its stretch, and able to reach it', () => {
+    // At most of each type at the top grade, the rest at grade 1: the most
+    // grading can reach. The dive's first stretch meets its target ungraded.
+    const g = loadGame();
+    for (const { l, s, target, top } of stretches(g)) {
+      for (const b of s.escorts ? [] : s.pool) {
+        const reach = g.batchThreat({ enemies: b.enemies.flatMap(([n, c]) => [[n, most(g, c), top], [n, c - most(g, c)]]) });
+        const under = target === g.THREAT_START ? g.batchThreat(b) >= target : g.batchThreat(b) <= target;
+        expect([l, b.enemies, under, reach >= target]).toEqual([l, b.enemies, true, true]);
+      }
+    }
+  });
+
+  it('keeps a share of each type at grade 1 in every graded batch', () => {
+    const g = loadGame();
+    fc.assert(fc.property(seed, sd => {
+      for (const types of gradedOf(g, sd)) {
+        for (const es of types) {
+          const n = es.reduce((a, [, c]) => a + c, 0);
+          const up = es.filter(([, , gr = 1]) => gr > 1).reduce((a, [, c]) => a + c, 0);
+          expect([es[0][0], n, up <= most(g, n)]).toEqual([es[0][0], n, true]);
+        }
+      }
+    }), { numRuns: 30 });
+  });
+
+  it('starts the dive at grade 1, and keeps grades above it rare in the first layer', () => {
+    // Rare is a tenth of the layer's fish, Claude's pick.
+    const g = loadGame();
+    const draw = g.LAYERS[0].stretches[0].draw;
+    let fish = 0, up = 0;
+    for (let sd = 1; sd <= 30; sd++) {
+      g.reset(sd);
+      expect(g.plan.slice(0, draw).flatMap(e => e.batch.enemies).filter(([, , gr = 1]) => gr > 1)).toEqual([]);
+      for (const [, c, gr = 1] of g.plan.filter(e => e.layer === 0).flatMap(e => [...e.batch.enemies, ...(e.escorts?.enemies ?? [])])) {
+        fish += c;
+        if (gr > 1) up += c;
+      }
+    }
+    expect(up / fish).toBeLessThanOrEqual(0.1);
+  });
+
+  it('grades every drawn batch to its stretch, never past its layer (D119)', () => {
+    const g = loadGame();
+    const all = stretches(g);
+    fc.assert(fc.property(seed, sd => {
+      g.reset(sd);
+      let k = 0;
+      for (const { s, target, top } of all) {
+        for (const e of g.plan.slice(k, k += s.draw)) {
+          const fish = [...e.batch.enemies, ...(e.escorts?.enemies ?? [])];
+          expect(fish.every(([, , grade]) => grade >= 1 && grade <= top)).toBe(true);
+          // The gate, lead and escorts, within half the graded batch's biggest
+          // step of the target: what one fish more or less costs.
+          const b = s.escorts ? e.escorts : e.batch;
+          const step = Math.max(...b.enemies.map(([n]) => {
+            const t = g.ENEMY_TYPES.find(x => x.name === n).threat;
+            return Math.max(...t.slice(1).map((v, i) => v - t[i]));
+          }));
+          // Escorts that pass alone what the lead leaves come ungraded.
+          const gate = g.batchThreat(e.batch) + (e.escorts ? g.batchThreat(e.escorts) : 0);
+          const near = Math.abs(gate - target) <= step / 2 + 1e-9;
+          expect(near || gate > target && b.enemies.every(([, , grade]) => grade === 1)).toBe(true);
+        }
+      }
+    }), { numRuns: 30 });
+  });
+
+  it('never meets the top grade in the first layer (D119)', () => {
+    const g = loadGame();
+    expect(g.GRADES.findIndex(G => G.from > 1)).toBeGreaterThan(0);
+    fc.assert(fc.property(seed, sd => {
+      g.reset(sd);
+      const first = g.plan.filter(e => e.layer === 0).flatMap(e => [...e.batch.enemies, ...(e.escorts?.enemies ?? [])]);
+      expect(first.every(([, , grade]) => g.GRADES[grade - 1].from <= 1)).toBe(true);
+    }), { numRuns: 30 });
+  });
+
+  it('rises through the dive: each stretch harder than the last (D79)', () => {
+    const g = loadGame();
+    g.reset(1);
+    let k = 0;
+    const means = [];
+    for (const { s } of stretches(g)) {
+      const drawn = g.plan.slice(k, k += s.draw);
+      if (!s.escorts) means.push(drawn.reduce((a, e) => a + g.batchThreat(e.batch), 0) / drawn.length);
+    }
+    expect(means.every((m, i) => m > (means[i - 1] ?? 0))).toBe(true);
+  });
+
+  // One new type a stretch, two to open the dive: Claude's picks.
+  it('reveals the fish a type at a time, the harder ones later', () => {
+    const g = loadGame(), met = new Set(), threat = n => g.ENEMY_TYPES.find(t => t.name === n).threat[0];
+    const brought = stretches(g).filter(x => !x.s.escorts).map(({ s }) => {
+      const fresh = [...new Set(s.pool.flatMap(b => b.enemies.map(([n]) => n)))].filter(n => !met.has(n));
+      fresh.forEach(n => met.add(n));
+      return fresh;
+    });
+    expect(brought.map((fresh, k) => fresh.length <= (k ? 1 : 2))).not.toContain(false);
+    // No type below the threat of one an earlier stretch brought.
+    expect(brought.every((fresh, k) => fresh.every(n => brought.slice(0, k).flat().every(m => threat(m) <= threat(n)))))
+      .toBe(true);
+  });
+});
 
 describe('batches drawn from pools (D71)', () => {
   it('draws the same batches from the same seed, and different ones from two', () => {
@@ -37,8 +172,10 @@ describe('batches drawn from pools (D71)', () => {
         for (const st of layer.stretches) {
           const drawn = g.plan.slice(k, k + st.draw);
           k += st.draw;
-          expect(drawn.every(e => e.layer === l && st.pool.includes(e.batch))).toBe(true);
-          expect(new Set(drawn.map(e => e.batch)).size).toBe(st.draw);
+          // Graded copies (D126): the pool's batch is its fish, any grade.
+          const from = drawn.map(e => st.pool.findIndex(b => sameFish(b, e.batch)));
+          expect(drawn.every(e => e.layer === l) && from.every(i => i >= 0)).toBe(true);
+          expect(new Set(from).size).toBe(st.draw);
         }
       }
       expect(k).toBe(g.plan.length);
@@ -229,7 +366,7 @@ describe('the content stage\'s counts (D93)', () => {
   it('holds the counts S5 (content) asks for', () => {
     const g = loadGame();
     const within = (what, n, lo, hi) => expect([what, n >= lo && n <= hi]).toEqual([what, true]);
-    const behaviour = t => Object.keys(t).find(k => typeof t[k] === 'object') ?? 'chase';
+    const behaviour = t => Object.keys(t).find(k => typeof t[k] === 'object' && !Array.isArray(t[k])) ?? 'chase';
     within('behaviours', new Set(g.ENEMY_TYPES.map(behaviour)).size, 5, 7);
     within('ordinary types', g.ENEMY_TYPES.filter(t => t.carries !== false).length, 5, 7);
     within('weapons', g.WEAPONS.length, 2, 3);

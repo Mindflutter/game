@@ -4386,3 +4386,261 @@ none past it; a Knife cut's splash killing through the one path, no fish cut
 after it died, each paid once. `tests/save.test.js` — a v10 dive's Frenzy and
 Bloom taken back as they were added, its Lance kept with the Gun only, and
 the v11 fixture.
+
+## D126 — Threat: the hearts a batch costs, rising through a dive · 2026-10-21
+
+S6 (balance)'s threat system, in the direction Igor chose: a number per enemy
+type, a batch's threat computed from its fish, measurement correcting the
+numbers, and threat rising "overall and gradually" (D79 (a dive goes from
+easiest to hardest)). Grades are the system's (D119 (grades)): "you go further
+- more difficult enemies appear … extremely high-grade enemy cant be on the
+first layer … they are different but equally challenging at any given
+batch/wave". Opening the stage: "start s6, no interruptions unless critical
+questions to me" — so everything below that is not quoted is **Claude's call,
+delegated**, open to Igor. Its design is `specs/2026-10-21-s6-balance-design.md`.
+
+- **A fish's threat is hearts.** One over the count of its type, at a grade
+  and alone, that costs the diver bot (D128 (the balance suite)) one heart, at
+  the reference kit — the Gun, nothing bought, no mods. One number per grade,
+  `threat` on the type's record, so a new type is measured once
+  (`npm run measure threat`) and joins.
+- **A batch's threat is its fish's summed.** Read at the knee, where hearts
+  start to go, it is about the hearts the batch costs there; far past it,
+  hearts grow faster than the count, which the curve's ratio absorbs. The sum
+  is Claude's pick; the spec's crowd term was not built.
+- **The dive's curve**: each ordinary stretch, counted through the whole dive,
+  has a target `THREAT_START × THREAT_RISE^k` — a ratio, since a dive's mods
+  and a career's gear compound. Two constants in the balance block, so a
+  fourth layer extends it with no new number. A mini-boss's stretch shares
+  the target of the stretch before it.
+- **A drawn batch is graded up to its target**, in `drawPlan()`, from the
+  seed: one fish and one grade at a time, a step that fits what is left drawn
+  first, then the smallest step while it lands nearer the target than
+  stopping. So a stretch's batches are different and come to the same threat,
+  and deeper stretches meet harder grades.
+- **A grade's `from`** is the first layer it arrives in: grade 3 from the
+  second, so the first layer never meets the top grade.
+- **A mini-boss or the boss** arrives at its layer's number as its grade,
+  capped by `from`; its escorts are graded to what is left of the target once
+  the lead's threat is taken, so the gate, lead and escorts, comes to the
+  stretch's. Escorts whose threat at grade 1 already passes it come ungraded.
+- **The boss's crowd** refills from its graded escorts, grades and all, to
+  `BOSS_CROWD` as before. That is Claude's reading of Igor's "according to the
+  balance for current batch", unconfirmed: the crowd is the batch, sized as
+  every batch is, not a number of its own.
+- **Pools are sized by threat.** A pool batch's threat at grade 1 is at or
+  under its stretch's target, and at the layer's top grade past it, so grading
+  can always reach it. `entities/layers.md` shows all three.
+- **The save needs no new version.** A plan entry's grade is the third field
+  a fish already had (D119 (grades)); a v11 dive's plan, drawn ungraded, plays
+  on ungraded.
+
+**Supersedes** D71 (batches are drawn from pools)'s "comparable threat is
+hp" — the hp bands, and with them D54 (the batches, re-derived from
+scratch)'s sizing on hp — and D119 (grades)'s "until S6 every fish in a dive
+is grade 1".
+
+**Guarded by**: `tests/dive.test.js` — every type a threat at every grade,
+higher at each; every pool batch at or under its stretch and able to reach
+it; every drawn gate graded to its stretch, never past its layer; the top
+grade never in the first layer; each stretch's target above the last.
+`tests/boss.test.js` — the mini-bosses and the boss at their layer's number,
+and the deepest boss's crowd at its escorts' grades. `tests/save.test.js` — a
+version 11 dive's plan played on ungraded, as it was drawn.
+`tests/debug.test.js` — the gate line naming a drawn batch's grades, and no
+fish's tip reading `threat` as a behaviour. `tests/docs.test.js` — the threat
+table and every pool's target, threat and threat at top.
+
+## D127 — The numbers S6 tuned, and the bars they are held to · 2026-10-21
+
+What S6 (balance) moved to meet the pillars, measured by the diver bot at the
+kit a career first meets each gate with (D128 (the balance suite)). Every
+number is **Claude's pick, delegated** — "start s6, no interruptions unless
+critical questions to me" — and the figures they produced are `roadmap.md` →
+Health. The dash and everything feeding it are untouched — Igor: "leave dash
+for now, discussions needed": its numbers, `Reflex`, `Impact`, Strength, Dash
+reach.
+
+- **Twelve gates a layer**: a stretch draws three batches from its pool, not
+  four. A batch's time follows its threat, so fifteen gates could not meet the
+  4–8 minute layer and the 10–45 second batch at once.
+- **The curve**: `THREAT_START` 0.55, `THREAT_RISE` 1.4.
+- **Grades**: `hp` ×1.25 and ×1.5 (from ×2 and ×3), each attack +1 and +2
+  (from +1 and +1); `speed` and `value` as they were; grade 3 from layer 2.
+- **Hits worth more than one**, Igor's "damage exceeding 1?": the attacks with
+  a long tell — Claude's lean in `ideas.md`, now built. The puffer's burst 2,
+  the mini-boss's lunge 2, the boss's 4; bites, spit and the fan stay 1, and
+  every grade adds to them all.
+- **The puffer faster** — Igor: "maybe acceleration or making it faster would
+  help": `speed` 95 to 125. Acceleration is left open.
+- **Bosses and mini-bosses quicker** — Igor: "make bosses & mini bosses
+  quicker": the mini-boss's `speed` 70 to 90, its lunge's wind-up 1.5 to 1.2s
+  and rest 1.2 to 0.9s, `hp` 24 to 20; the boss's `speed` 60 to 80, its
+  lunge's wind-up 1.0 to 0.8s, its fan's 0.8 to 0.6s, both rests 1.2 to 0.9s,
+  `hp` 60 to 55.
+- **The Knife's arc halved** — Igor: "knife arc reduce by half": 120° to 60°,
+  its `range` 56 to 60. **The Harpoon's damage** 3 to 4. The Mask's step +30
+  to +15 range. The archer is untouched — Igor: "shooting enemies are quite
+  good atm".
+- **Prices ×40** across every weapon and piece of equipment, the Gun's first
+  tier ×30 (1200): graded fish pay double and triple and batches are bigger,
+  and at five times the old prices a career still bought everything in two
+  dives. Which fish
+  drop gems, D78 (gems are pulled to the player)'s lever, is left as it was —
+  every kill pays its `value`.
+- **Bigger mod caps** — Igor: "bigger caps, yes": `Fins` and `Vitality` 3 to
+  6; `Nerve` stays 3; `Reflex` and `Impact` are the dash's. Removing caps is
+  left open.
+- **The pools**, every batch re-sized by threat, no batch above twelve
+  archers.
+
+**The bars**, Claude's readings of the pillars, the open question to Igor:
+- **Nothing unbeatable**: no gate lost — died or uncleared — on more than half
+  the seeds.
+- **Nothing trivial**: no gate cleared by the standing bot on more than one
+  seed in ten. The one that clears comes out with a sliver of HP — luck, not a
+  way to play.
+- **Fast-paced**: each stretch's batches take 10–45s on average; a single
+  batch may run past.
+- **Dives are a session**: a career's first clear of a layer takes 4–8
+  minutes, nine times in ten.
+- **Rising**: a batch's hearts, averaged over a layer, higher in the last
+  layer than the first, each layer at least 0.9 of the one above — D79 (a dive
+  goes from easiest to hardest)'s "some later batches might be easier".
+- **No weapon dominating** in the mid-to-late game: over layers 2 and 3
+  together — a dive carries one weapon through both — no weapon faster by 5%
+  and cheaper by 10% in hearts, with no fewer clears, than another, each at
+  the kit a Gun career meets layer 2 with, its tiers the Gun's. Per layer one
+  does: the Knife is worse in layer 2, where it chases archers and steps into
+  bursts, and better in layer 3, where eels charge onto it.
+- **`footwork` takes skill**, Igor's "it all comes to balance": the diver bot
+  without its dash loses more than twice the hearts (`roadmap.md` → Health).
+
+**Supersedes in part**: D69 (every mod capped)'s caps for `Fins` and
+`Vitality`; the prices of D75 (the gun's tiers, dash reach, a clean batch),
+D97 (weapons are owned, and one is carried) and D100 (equipment); the Mask's
+step (D100 (equipment)); the Knife's arc (D105 (the Knife swings)); the
+lungers' timings and damage (D64 (the boss lunges), D65 (a mini-boss is a
+smaller boss), D117 (the boss's fan)); the puffer's speed and burst (D106 (the
+puffer bursts and comes on again)); D119 (grades)'s steps.
+
+**Guarded by**: `npm run balance` — every bar above a check but `footwork`,
+measured by hand; each was seen failing on a break of what it guards (the
+curve raised, the Gun quickened, the boss's hp raised, the gear priced out of
+reach). `npm test` holds the
+numbers to the entity docs.
+
+## D128 — The diver bot and the balance suite · 2026-10-21
+
+S6 (balance)'s instruments, as the spec set them. Bot figures stay a floor —
+D50 (the bot is not a difficulty instrument) stands: Igor's play overrules
+any figure. Every limit is Claude's pick.
+
+- **`kiteAndShoot` stays the regression yardstick**, unchanged. Graded
+  batches kill it at the first one, so the soak plays it immortal, and the
+  descent check waits 180s for it: it kites archers rather than closing on
+  them.
+- **The diver bot** (`makeDiver` in `tests/bot.js`), the balance bot, playing
+  from what the screen shows: every 0.1s it scores the eight ways and
+  standing by each fish's reach and attack, every shot, a fusing puffer, a
+  lunger's lane, over the next 0.4s, against the pull of where its weapon
+  wants it; it shoots the fish that threatens most for the time it takes to
+  kill, the glowing one first, aimed ahead; it dashes when every way still
+  lands a hit; it takes a boost lying near; at a layer end, the first card.
+  Its limits: it watches only the six nearest fish, misses one thought in
+  ten, and scatters its aim by a couple of degrees — drawn from a generator of its
+  own, so a seed replays exactly and the game's draws are untouched.
+- **The standing bot** is the diver bot that never swims and never dashes: a
+  gate it clears is a gate cleared without moving.
+- **A career** (`tests/measure.js`): a fresh save diving and spending until
+  the win — attribute points first, the step its weapon requires before the
+  cheapest; then the weapon, if not owned; then, again and again, the cheapest
+  tier of the weapon or the equipment it can afford — Claude's order. **The kit
+  a gate is first met with** is the career's kit on the dive that first
+  reaches it: what "the gear level expected when it is first met" means here.
+- **`npm run measure <bots|careers|threat|pillars|weapons|fit>`** prints the
+  tables, `fit` rewriting the pools' counts to the curve; each seed is
+  measured in a worker thread of its own, and the balance suite's files share
+  the one report; **`npm run balance`** runs the bars of D127 (the tuned numbers) as
+  checks on ten seeds — slow, so never in `npm test`. It is also what
+  `foundations.md` → Diversity, rule 6 asks of a new entity: bot dives before
+  and after, every pillar held.
+
+**Guarded by**: `tests/invariants.test.js` and `tests/descent.test.js` for the
+yardstick; the balance suite for the rest, each check seen failing.
+
+## D129 — A gentle first layer · 2026-10-22
+
+Igor, 2026-10-21, playing the S6 (balance) build: "first layer already feels
+way more complex. maybe need to make a smoother difficulty curve. grade 2 fish
+appear immediately from the start - clearly a flaw". Offered a dive that
+starts at grade 1 with the first batches near their old size: "i guess B, my
+feel is that first death happens +- at batch 3-4. grades higher than 1 must be
+quite rare in layer 1 overall. also, havent checked it, but make sure that
+lower graders still appear in mid and late game, while keeping batches
+balanced". On the time bars: "dont focus on completion time, it's going to be
+different for players. focus on enemies and batches instead."
+
+- **The curve compounds what each stretch adds.** Stretch k's target is
+  `THREAT_START × (THREAT_RISE^(k+1) − 1) / (THREAT_RISE − 1)`: the first
+  stretch's is `THREAT_START`, and each next one adds `THREAT_RISE` times what
+  the last added. A ratio of the target itself could not start small without
+  leaving the deep layers easy. `THREAT_START` 0.2, `THREAT_RISE` 1.4 —
+  Claude's picks.
+- **The dive starts at grade 1.** The first stretch's pool batches meet its
+  target at grade 1, so it grades nothing; the rest of the first layer's carry
+  about nine tenths of theirs (`FIT_FIRST`, Claude's pick), so grades above 1
+  stay rare there — a tenth of its fish at most, Claude's reading of "quite
+  rare".
+- **Every graded batch keeps lower grades.** `GRADE_KEEP` of each type in a
+  batch, a fifth, stays at grade 1 however deep — Claude's pick.
+- **The pools are fitted, not hand-sized**: each batch is written as its mix
+  of fish, and `npm run measure fit` sets its counts — in the first layer to
+  carry its target at grade 1, deeper to the fewest fish grading can bring to
+  it under `GRADE_KEEP`.
+- **`BOSS_CROWD` 4**, from 6: puffer-heavy crowds held the boss's stretches
+  far past the rest. **The Knife's reach** stays 60.
+- **Completion time is no longer a bar.** The bot's batch and layer times are
+  printed by `npm run measure`, never checked: a player's will differ. The
+  pillars in `foundations.md` are untouched.
+- **"First death happens +- at batch 3-4"** is read as what Igor met on the
+  S6 (balance) build, not a target — Claude's reading, unconfirmed.
+
+**Supersedes in part**: D126 (threat)'s curve, a ratio of the target, and its
+"every pool batch at or under its target" for the dive's first stretch; D127
+(the tuned numbers)'s curve numbers and its Fast-paced and Dives are a session
+bars; D116 (bosses bring escorts)'s crowd of 6. **Amends** `foundations.md` →
+Pillars: the two times are printed, not held.
+
+**Guarded by**: `tests/dive.test.js` — every pool batch at or under its
+stretch and able to reach it under `GRADE_KEEP`, the first stretch at it at
+grade 1; a share of each type at grade 1 in every graded batch; the dive
+starting at grade 1, grades above it rare in the first layer.
+`tests/docs.test.js` — every pool's target. `npm run balance` for the rest.
+
+## D130 — Fish are revealed a type at a time · 2026-10-22
+
+Igor, 2026-10-21: "more difficult enemies appear later in game. hard to do for
+a small enemy pool now, but must work for future scaling"; playing the
+D129 (a gentle first layer) build, which put every first-layer type in the
+first stretch to keep it from being cleared standing: "now i meet all kinds of
+enemies at once. it may be balanced, but we must reveal content to player
+iteratively". Asked whether the stretches holding only harmless fish may then
+be cleared standing still: "opening stretches may be clearable standing
+still".
+
+- **A type is first met no earlier than every type below it in threat** at
+  grade 1, so a harder fish comes later, and a new type slots in by its
+  measured threat.
+- **A stretch brings at most one new type, the dive's first two** — Claude's
+  picks. The first layer opens on drifters and darters, then archers, then
+  bulwarks; the second brings puffers, the third eels.
+- **The opening may be cleared standing.** It is the stretches holding only
+  the types the dive opens with; the standing bar starts past it.
+
+**Supersedes in part**: D127 (the tuned numbers)'s Nothing trivial bar, for
+the opening. **Amends** `foundations.md` → Pillars, Nothing trivial, and
+`plan.md`'s exit for S6 (balance), to past the opening.
+
+**Guarded by**: `tests/dive.test.js` — the reveal, over every pool of the
+dive; `tests/pillars.balance.js` — the standing bar past the opening.
