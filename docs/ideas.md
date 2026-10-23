@@ -538,6 +538,14 @@ discussed.
   rate says — `footwork`'s top, fifteen batches, more than a layer. Open:
   re-size them to the new shape, or keep them. **Home**: open; the rungs are
   Claude's picks either way.
+- **A boost touched extends every boost running.** Igor, 2026-10-23:
+  "multiple boost pick can extend the overall effect time", confirmed as this
+  reading over a boost adding only to its own clock: Rush running with 2s
+  left, Frenzy touched — Frenzy runs its 5s, and Rush gains 5s too. It
+  reopens D86 (boosts)'s "touched again while it runs, its clock restarts and
+  nothing stacks". Open: what a second touch of the same boost does, and
+  whether a clock has a ceiling — Claude's questions, not raised yet.
+  **Home**: open, an idea to record.
 
 ## Suggested but not yet discussed
 
