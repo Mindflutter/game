@@ -103,6 +103,9 @@ git keeps it (D134 (lean docs)).
   Igor has had the chance to run `/simplify` on the working tree. Say what is
   about to be committed and wait. This applies even when the work is verified
   and the message is written — being finished is not permission to commit.
+- **The one exception: an issue Igor reports is committed at once** once it is
+  recorded, unless there is a question for him about it (D135 (reported
+  issues commit at once)). Only the record. A fix still stops first.
 - Commit messages: short subject line only. No body, no attribution trailers.
 
 ## The consistency sweep

@@ -4721,3 +4721,16 @@ cuts offered: "do all proposed".
 decision has a changelog entry, and the sweep's "`changelog.md` always".
 
 **Guarded by**: `tests/docs.test.js` — every doc the map names exists.
+
+## D135 — Reported issues commit at once · 2026-10-24
+
+Igor: "rule: when i report a bug or an issue, commit automatically unless
+there are clarifying questions for me".
+
+- **An issue Igor reports is committed as soon as it is recorded**, in
+  `bugs.md`, `ideas.md` or wherever it belongs, with no stop for `/simplify`.
+- **A question for him about it holds the commit** until he answers.
+- **Only the record.** A fix, or any other change, still stops before its
+  commit (`working.md` → Commits).
+
+**Guarded by**: nothing a machine can see — it is how the work is done.
