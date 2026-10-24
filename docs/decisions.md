@@ -4734,3 +4734,21 @@ there are clarifying questions for me".
   commit (`working.md` → Commits).
 
 **Guarded by**: nothing a machine can see — it is how the work is done.
+
+## D136 — Prices halved · 2026-10-24
+
+Igor: "i'd focus on currency system. right now it takes too long to earn
+enough gems for first upgrades. halve the prices."
+
+- **Every gem price is half what D127 (the tuned numbers) set**: each tier of
+  every weapon and piece of equipment, and the Harpoon's and the Knife's own
+  price. The Gun's first tier is 600.
+- A diver who dies after four batches, about 205 gems a dive, now buys it on
+  the third dive, which meets "Addictive, not grindy". Before, it was the
+  sixth.
+- The opening's size stays open (`ideas.md` → Open — from S6 (balance)).
+
+**Supersedes**: D127 (the tuned numbers)'s prices.
+
+**Guarded by**: `tests/docs.test.js` holds the price tables to the code;
+`npm run balance`'s career check holds the first purchase within three dives.

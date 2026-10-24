@@ -19,8 +19,8 @@ readout see them like any other stat, and everything adds, nothing multiplies
 | name | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
 |---|---|---|---|---|---|---|---|---|---|
 | Gun | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
-| Harpoon | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 6000 | fireRate 1, damage 5, pierce 3 |
-| Knife | 3 | 2 | 60 | — | 18 | 6 | 40 | 4000 | fireRate 3.75, damage 3, range 72 |
+| Harpoon | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 3000 | fireRate 1, damage 5, pierce 3 |
+| Knife | 3 | 2 | 60 | — | 18 | 6 | 40 | 2000 | fireRate 3.75, damage 3, range 72 |
 <!-- /generated -->
 
 Each weapon's tiers, in the order they are bought:
@@ -28,15 +28,15 @@ Each weapon's tiers, in the order they are bought:
 <!-- generated: weapons:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
-| Gun | 1 | 1200 | fireRate +0.5 |
-| Gun | 2 | 4000 | fireRate +0.5 |
-| Gun | 3 | 8000 | fireRate +0.5 |
-| Harpoon | 1 | 3200 | damage +1 |
-| Harpoon | 2 | 6400 | fireRate +0.2 |
-| Harpoon | 3 | 12000 | pierce +1 |
-| Knife | 1 | 2400 | range +12 |
-| Knife | 2 | 5600 | damage +1 |
-| Knife | 3 | 10400 | fireRate +0.75 |
+| Gun | 1 | 600 | fireRate +0.5 |
+| Gun | 2 | 2000 | fireRate +0.5 |
+| Gun | 3 | 4000 | fireRate +0.5 |
+| Harpoon | 1 | 1600 | damage +1 |
+| Harpoon | 2 | 3200 | fireRate +0.2 |
+| Harpoon | 3 | 6000 | pierce +1 |
+| Knife | 1 | 1200 | range +12 |
+| Knife | 2 | 2800 | damage +1 |
+| Knife | 3 | 5200 | fireRate +0.75 |
 <!-- /generated -->
 
 The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,
@@ -84,7 +84,8 @@ so they can miss and sail on into the dark until `range` runs out.
 Its tiers add fire rate: the one stat that helps against every enemy, where
 damage would be wasted on the one-hit fish that make up most batches (D75 (the
 gun's tiers, dash reach, a clean batch)). The prices and the step are Claude's
-picks, the prices tuned to the pillars (D127 (the tuned numbers)); the base
+picks, the prices tuned to the pillars (D127 (the tuned numbers)) and then
+halved by Igor (D136 (prices halved)); the base
 numbers predate the tiers.
 
 ## Harpoon

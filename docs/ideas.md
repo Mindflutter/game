@@ -512,17 +512,16 @@ discussed.
   out of the bars (D129 (a gentle first layer)). Open: whether these stand,
   or every seed and every batch must pass — which would move the numbers
   again. **Home**: S6 (balance), on Igor's word.
-- **How big the opening is, and how soon the first purchase comes.** Since
-  D130 (fish are revealed a type at a time) the opening holds only drifters
-  and darters, which cost almost no hearts, so the curve's first target takes
-  about 50 of them a batch, where the first-layer batches held 11–19 before;
-  the bot takes about 30s on one. Each pays a gem a fish: a diver who dies
-  after four batches banks about 205 gems, and the Gun's first tier, 1200,
-  comes on the sixth dive — against "Addictive, not grindy"'s three, which
-  the career bot meets only by diving deeper. Smaller openings, 15–20 fish,
-  would cut it to about 110 gems and the eleventh dive, so the opening and
-  the first price move together. Open: the opening's size, and the pace of
-  the first purchase. **Home**: S6 (balance), on Igor's word.
+- **How big the opening is.** Since D130 (fish are revealed a type at a
+  time) the opening holds only drifters and darters, which cost almost no
+  hearts, so the curve's first target takes about 50 of them a batch, where
+  the first-layer batches held 11–19 before; the bot takes about 30s on one.
+  Each pays a gem a fish: a diver who dies after four batches banks about 205
+  gems, so the Gun's first tier, 600 since D136 (prices halved), comes on the
+  third dive. Smaller openings, 15–20 fish, would cut a dive to about 110 gems
+  and the first tier to the sixth, so a smaller opening would need cheaper
+  prices again. Open: the opening's size. **Home**: S6 (balance), on Igor's
+  word.
 - **`footwork` no longer takes twice the hearts.** D127 (the tuned numbers)'s
   bar: the diver bot without its dash loses more than twice the hearts it
   does with it. On the D130 (fish are revealed a type at a time) build it

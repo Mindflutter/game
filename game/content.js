@@ -177,36 +177,36 @@ const BOOSTS = [
 // Documented in docs/entities/weapons.md, held to it by `npm test`.
 const WEAPONS = [
   { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, knock: 60, cost: 0,
-    tiers: [{ cost: 1200,  apply: p => p.fireRate += 0.5 },
-            { cost: 4000, apply: p => p.fireRate += 0.5 },
-            { cost: 8000, apply: p => p.fireRate += 0.5 }] },
+    tiers: [{ cost: 600,  apply: p => p.fireRate += 0.5 },
+            { cost: 2000, apply: p => p.fireRate += 0.5 },
+            { cost: 4000, apply: p => p.fireRate += 0.5 }] },
   // The draft's railgun (D97), needing Strength (D98).
   { name: 'Harpoon', fireRate: 0.8, damage: 4, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2, knock: 200,
-    cost: 6000, requires: { Strength: 1 },
-    tiers: [{ cost: 3200,  apply: p => p.damage += 1 },
-            { cost: 6400, apply: p => p.fireRate += 0.2 },
-            { cost: 12000, apply: p => p.pierce += 1 }] },
+    cost: 3000, requires: { Strength: 1 },
+    tiers: [{ cost: 1600,  apply: p => p.damage += 1 },
+            { cost: 3200, apply: p => p.fireRate += 0.2 },
+            { cost: 6000, apply: p => p.pierce += 1 }] },
   // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
   // swing at pierce + 1 fish, nearest first.
   { name: 'Knife', fireRate: 3, damage: 2, range: 60, shotRadius: 18, pierce: 6, knock: 40,
-    swing: { arc: 60, time: 0.15 }, cost: 4000,
-    tiers: [{ cost: 2400,  apply: p => p.range += 12 },
-            { cost: 5600, apply: p => p.damage += 1 },
-            { cost: 10400, apply: p => p.fireRate += 0.75 }] },
+    swing: { arc: 60, time: 0.15 }, cost: 2000,
+    tiers: [{ cost: 1200,  apply: p => p.range += 12 },
+            { cost: 2800, apply: p => p.damage += 1 },
+            { cost: 5200, apply: p => p.fireRate += 0.75 }] },
 ];
 
 // Combat numbers only; body stats are attributes' (D36). Documented in
 // docs/entities/equipment.md.
 const EQUIPMENT = [
-  { name: 'Mask',    tiers: [{ cost: 2000,  apply: p => p.range += 15 },
-                             { cost: 4800, apply: p => p.range += 15 },
-                             { cost: 9600, apply: p => p.range += 15 }] },
-  { name: 'Suit',    tiers: [{ cost: 3600,  apply: p => p.guard += 1 },
-                             { cost: 8000, apply: p => p.guard += 1 },
-                             { cost: 15200, apply: p => p.guard += 1 }] },
-  { name: 'Weights', tiers: [{ cost: 2800,  apply: p => p.damage += 0.5 },
-                             { cost: 6000, apply: p => p.damage += 0.5 },
-                             { cost: 11200, apply: p => p.damage += 0.5 }] },
+  { name: 'Mask',    tiers: [{ cost: 1000,  apply: p => p.range += 15 },
+                             { cost: 2400, apply: p => p.range += 15 },
+                             { cost: 4800, apply: p => p.range += 15 }] },
+  { name: 'Suit',    tiers: [{ cost: 1800,  apply: p => p.guard += 1 },
+                             { cost: 4000, apply: p => p.guard += 1 },
+                             { cost: 7600, apply: p => p.guard += 1 }] },
+  { name: 'Weights', tiers: [{ cost: 1400,  apply: p => p.damage += 0.5 },
+                             { cost: 3000, apply: p => p.damage += 0.5 },
+                             { cost: 5600, apply: p => p.damage += 0.5 }] },
 ];
 
 // Uncapped here: the challenges' finite rungs cap them at the source (D36).

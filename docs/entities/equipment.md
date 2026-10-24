@@ -9,8 +9,8 @@ or four tiers.
 
 The tables mirror `EQUIPMENT` in `game/content.js`, and `npm test` fails when
 the two disagree. Every number is Claude's pick (D100 (equipment: the Mask, the
-Suit and the Weights)), the prices and the Mask's step tuned to the pillars
-(D127 (the tuned numbers)).
+Suit and the Weights)), the Mask's step tuned to the pillars (D127 (the tuned numbers)), the
+prices tuned there and then halved by Igor (D136 (prices halved)).
 
 ## Roster
 
@@ -27,15 +27,15 @@ Each piece's tiers, in the order they are bought:
 <!-- generated: equipment:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
-| Mask | 1 | 2000 | range +15 |
-| Mask | 2 | 4800 | range +15 |
-| Mask | 3 | 9600 | range +15 |
-| Suit | 1 | 3600 | guard +1 |
-| Suit | 2 | 8000 | guard +1 |
-| Suit | 3 | 15200 | guard +1 |
-| Weights | 1 | 2800 | damage +0.5 |
-| Weights | 2 | 6000 | damage +0.5 |
-| Weights | 3 | 11200 | damage +0.5 |
+| Mask | 1 | 1000 | range +15 |
+| Mask | 2 | 2400 | range +15 |
+| Mask | 3 | 4800 | range +15 |
+| Suit | 1 | 1800 | guard +1 |
+| Suit | 2 | 4000 | guard +1 |
+| Suit | 3 | 7600 | guard +1 |
+| Weights | 1 | 1400 | damage +0.5 |
+| Weights | 2 | 3000 | damage +0.5 |
+| Weights | 3 | 5600 | damage +0.5 |
 <!-- /generated -->
 
 **at top** is what every tier bought adds up to; **adds** is what one tier
