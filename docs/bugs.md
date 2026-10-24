@@ -13,4 +13,11 @@ fix (`code.md` → Verification).
 
 ## Open
 
-Nothing open.
+- **Bloom's splash cannot be seen.** Igor, 2026-10-24: "splash shot should be
+  visible". While Bloom runs, a hit also wounds every fish within `splash` of
+  the struck one (D125 (boosts keep each weapon's nature)). But the only sign
+  of it is the white flash each wounded fish gets, the same flash a direct hit
+  gives. Nothing draws the splash itself, so a player cannot tell that Bloom is
+  doing anything, or how far it reaches. It should show where it lands, and how
+  far. To see it: touch a Bloom in any dive and shoot into a crowd. The debug
+  mode cannot set up a boost.
