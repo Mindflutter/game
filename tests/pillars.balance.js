@@ -28,6 +28,16 @@ describe('every batch at the kit it is first met with', () => {
     expect(rows.filter(r => !opening(r) && r.stood > r.kits / 10).map(named)).toEqual([]);
   });
 
+  it('takes seconds at the start of a dive and over a minute at its deepest (D137)', () => {
+    // The bot's clock, which runs ahead of a player's: 15s and 60s are
+    // Claude's picks for its share of the 10-15s start and the ~90s end.
+    const ordinary = rows.filter(r => r.i % 2 === 0);
+    const at = (l, i) => ordinary.filter(r => r.l === l && r.i === i).reduce((a, r, _, rs) => a + r.time / rs.length, 0);
+    const last = ordinary.at(-1);
+    expect(at(0, 0)).toBeLessThan(15);
+    expect(at(last.l, last.i)).toBeGreaterThan(60);
+  });
+
   it('costs more hearts deeper, overall rather than every step (D79)', () => {
     const layers = Object.values(Object.groupBy(rows, r => r.l)).map(rs => rs.reduce((a, r) => a + r.hearts, 0) / rs.length);
     expect(layers.at(-1)).toBeGreaterThan(layers[0]);

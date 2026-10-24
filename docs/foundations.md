@@ -149,7 +149,7 @@ so that "is this balanced" has an answer.
 
 | Pillar | Stated as | Target |
 |---|---|---|
-| Fast-paced | Time to clear one batch | 10–45s |
+| Fast-paced | Time to clear one batch: short at the start of a dive, growing slowly to its deepest (D137 (batches grow from seconds to a minute and a half)) | 10–15s, to about 90s |
 | Dives are a session, not a sitting | Time to complete one layer; a dive runs until death but can be put down at any point and resumed (D70) | 4–8 min |
 | Nothing unbeatable | Every batch is clearable at the gear level expected when it is first met | must hold |
 | Nothing trivial | No batch past the opening is cleared without the player moving — the opening, its harmless fish, may be (D130 (fish are revealed a type at a time)) | must hold |

@@ -4752,3 +4752,43 @@ enough gems for first upgrades. halve the prices."
 
 **Guarded by**: `tests/docs.test.js` holds the price tables to the code;
 `npm run balance`'s career check holds the first purchase within three dives.
+
+## D137 — Batches grow from seconds to a minute and a half · 2026-10-24
+
+Igor: "first batches take me about 40s … i want first batches to be smaller,
+finishable at 10-15s, then gradually become harder, with more enemies. so
+like a slowly growing curve from near zero to say 1.5 minutes in latest
+batches now (layer 3) … make this change more visible. everything else stays
+… tune numbers. alpha must be finishable, player upgrades should be at about
+top tier when he reaches the end". Then: "threat follows time
+(approximately). make it 10 gates for every layer now". The numbers are
+Claude's picks.
+
+- **Ten gates a layer**: three batches, a mini-boss, two, a mini-boss, two,
+  the boss.
+- **The curve**: `THREAT_START` 0.05, about a dozen drifters and darters;
+  `THREAT_RISE` 1.8. The bot clears the first batches in about 10s and the
+  deepest ordinary ones in about 70s. Igor took 40s where the bot took 30s, so
+  the bot is aimed at about three quarters of his times.
+- **More fish, not only higher grades**: past the first layer, grade 1 now
+  carries at least 60% of a pool batch's target (`FIT_DEEP`), where it used to
+  carry the least it could. Fish per batch go from 12 to about 90.
+- **Prices to 0.4×** of D136 (prices halved)'s: the Gun's tiers 240, 800,
+  1600.
+- **The boss's `hp` 55 to 100.** Its escorts are mostly grade 1 now, so it was
+  cleared standing still in layer 3.
+- Two of layer 2's first batches and two of layer 1's gained archers: they
+  were cleared standing still.
+- **The gear at the win**: the career wins on dive 4–6 holding 5–9 of the 12
+  tiers, the Gun at 2–3 and each piece of equipment at 1–2. Asked whether
+  that is "about top tier": "good enough".
+
+**Supersedes**: D127 (the tuned numbers)'s twelve gates and boss hp, D129 (a
+gentle first layer)'s curve numbers and its deeper pools of the fewest fish,
+and D136 (prices halved)'s prices. **Amends** `foundations.md` → Pillars,
+Fast-paced.
+
+**Guarded by**: `tests/dive.test.js` — ten gates a layer, the dive's deepest
+batches five times its first in fish, each layer more than the last;
+`tests/pillars.balance.js` — the first batches under 15s, the deepest ordinary
+over 60s. Both were seen failing on the old build.

@@ -170,8 +170,8 @@ gems; the boss's kill clears them all before the boost roll, so it drops no
 boost. The marks ride on the fish, so the save needed no new version.
 
 **Layers and the plan** (D66, D71, D72). `layer()` gives every layer one shape:
-three batches from a pool, a mini-boss, three, a mini-boss, three, the boss —
-twelve gates (D127 (the tuned numbers)). `reset()` draws the whole dive first,
+three batches from a pool, a mini-boss, two, a mini-boss, two, the boss — ten
+gates (D137 (batches grow from seconds to a minute and a half)). `reset()` draws the whole dive first,
 before anything else takes from the seed, so a seed is a dive: `drawPlan()`
 draws each stretch's batches without repeats into the flat `plan` and grades
 each up to its stretch's threat (D126 (threat), D129 (a gentle first layer)),

@@ -238,9 +238,8 @@ stays seeded, and the bots draw from their own generator.
 Where the build left the design above, the decisions say what was built: D126
 (threat), D127 (the tuned numbers), D128 (the balance suite). In short:
 
-- **A layer has twelve gates**, not fifteen: three batches a stretch. A
-  batch's time follows its threat, so fifteen could not meet both time
-  pillars.
+- **A layer has ten gates**, not fifteen: three batches, then two, then two
+  (D137 (batches grow from seconds to a minute and a half)); twelve before it.
 - **A batch's threat is a plain sum**; no crowd term was needed at the knee.
 - **A mini-boss's stretch** shares the target of the stretch before it, and
   its escorts — the boss's too — are graded to what is left once the lead's
@@ -261,6 +260,9 @@ Where the build left the design above, the decisions say what was built: D126
   at grade 1, the pools are fitted by `npm run measure fit`, the fish arrive a
   type at a time and the opening may be cleared standing; completion time
   left the bars.
+- **Reshaped after his play again**, D137 (batches grow from seconds to a
+  minute and a half): a dive's batches grow from about 10s to about 70s on the
+  bot's clock, and from a dozen fish to about ninety, with ten gates a layer.
 
 ## Build
 

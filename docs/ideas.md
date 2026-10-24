@@ -509,19 +509,11 @@ discussed.
   more than half the seeds, cleared standing on no more than one in ten past
   the opening, and no weapon dominating over layers 2 and 3 together, though
   the Knife is worse in the one and better in the other. Completion time is
-  out of the bars (D129 (a gentle first layer)). Open: whether these stand,
+  out of the bars (D129 (a gentle first layer)), but for the shape D137
+  (batches grow from seconds to a minute and a half) holds: the first batches
+  under 15s on the bot's clock, the deepest ordinary ones over 60s. Open: whether these stand,
   or every seed and every batch must pass — which would move the numbers
   again. **Home**: S6 (balance), on Igor's word.
-- **How big the opening is.** Since D130 (fish are revealed a type at a
-  time) the opening holds only drifters and darters, which cost almost no
-  hearts, so the curve's first target takes about 50 of them a batch, where
-  the first-layer batches held 11–19 before; the bot takes about 30s on one.
-  Each pays a gem a fish: a diver who dies after four batches banks about 205
-  gems, so the Gun's first tier, 600 since D136 (prices halved), comes on the
-  third dive. Smaller openings, 15–20 fish, would cut a dive to about 110 gems
-  and the first tier to the sixth, so a smaller opening would need cheaper
-  prices again. Open: the opening's size. **Home**: S6 (balance), on Igor's
-  word.
 - **`footwork` no longer takes twice the hearts.** D127 (the tuned numbers)'s
   bar: the diver bot without its dash loses more than twice the hearts it
   does with it. On the D130 (fish are revealed a type at a time) build it
@@ -532,11 +524,23 @@ discussed.
   it does. **Home**: S6 (balance), on Igor's word.
 - **Challenge rungs on the shorter dive.** The ladders were sized on fifteen
   gates a layer (D109 (micro-tasks are ladders; steps cost more as they
-  rise)); twelve since D127 (the tuned numbers), so a dive has 36 gates and 27
-  glowing batches, and every streak's rung is a little harder to meet than its
-  rate says — `footwork`'s top, fifteen batches, more than a layer. Open:
+  rise)); ten since D137 (batches grow from seconds to a minute and a half),
+  so a dive has 30 gates and 21 glowing batches, and every streak's rung is
+  harder to meet than its rate says — `footwork`'s top, fifteen batches, a
+  layer and a half. Open:
   re-size them to the new shape, or keep them. **Home**: open; the rungs are
   Claude's picks either way.
+- **Gates a layer, layer by layer.** Igor, 2026-10-24, setting ten for every
+  layer (D137 (batches grow from seconds to a minute and a half)): "may change
+  to different value for layers later". **Home**: S6 (balance), or later
+  balance.
+- **One boss for three layers.** The kit a career meets the boss with grows
+  about three times over the dive; the boss grows half again, by its grade. At
+  `hp` 100 (D137 (batches grow from seconds to a minute and a half)) the bot
+  takes about 63s on layer 1's boss and loses it on up to half the seeds,
+  about 110s on layer 2's and 49s on layer 3's; at 55 it was cleared standing
+  still in layer 3. Open: whether each layer's boss should grow in a way of
+  its own. Claude's, not raised yet. **Home**: open.
 - **A boost touched extends every boost running.** Igor, 2026-10-23:
   "multiple boost pick can extend the overall effect time", confirmed as this
   reading over a boost adding only to its own clock: Rush running with 2s

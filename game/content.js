@@ -61,8 +61,8 @@ const BOSS_CROWD     = 4;
 // A batch's threat, at the reference kit, is about the hearts it costs at the
 // knee (`entities/enemies.md` -> Threat). Claude's picks, tuned by careers of
 // dives (D127).
-const THREAT_START   = 0.2;
-const THREAT_RISE    = 1.4;
+const THREAT_START   = 0.05;
+const THREAT_RISE    = 1.8;
 // The share of each type in a batch that grading leaves at grade 1, so a deep
 // batch still shows its lower grades. Claude's pick.
 const GRADE_KEEP     = 1 / 5;
@@ -177,36 +177,36 @@ const BOOSTS = [
 // Documented in docs/entities/weapons.md, held to it by `npm test`.
 const WEAPONS = [
   { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, knock: 60, cost: 0,
-    tiers: [{ cost: 600,  apply: p => p.fireRate += 0.5 },
-            { cost: 2000, apply: p => p.fireRate += 0.5 },
-            { cost: 4000, apply: p => p.fireRate += 0.5 }] },
+    tiers: [{ cost: 240,  apply: p => p.fireRate += 0.5 },
+            { cost: 800, apply: p => p.fireRate += 0.5 },
+            { cost: 1600, apply: p => p.fireRate += 0.5 }] },
   // The draft's railgun (D97), needing Strength (D98).
   { name: 'Harpoon', fireRate: 0.8, damage: 4, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2, knock: 200,
-    cost: 3000, requires: { Strength: 1 },
-    tiers: [{ cost: 1600,  apply: p => p.damage += 1 },
-            { cost: 3200, apply: p => p.fireRate += 0.2 },
-            { cost: 6000, apply: p => p.pierce += 1 }] },
+    cost: 1200, requires: { Strength: 1 },
+    tiers: [{ cost: 640,  apply: p => p.damage += 1 },
+            { cost: 1280, apply: p => p.fireRate += 0.2 },
+            { cost: 2400, apply: p => p.pierce += 1 }] },
   // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
   // swing at pierce + 1 fish, nearest first.
   { name: 'Knife', fireRate: 3, damage: 2, range: 60, shotRadius: 18, pierce: 6, knock: 40,
-    swing: { arc: 60, time: 0.15 }, cost: 2000,
-    tiers: [{ cost: 1200,  apply: p => p.range += 12 },
-            { cost: 2800, apply: p => p.damage += 1 },
-            { cost: 5200, apply: p => p.fireRate += 0.75 }] },
+    swing: { arc: 60, time: 0.15 }, cost: 800,
+    tiers: [{ cost: 480,  apply: p => p.range += 12 },
+            { cost: 1120, apply: p => p.damage += 1 },
+            { cost: 2080, apply: p => p.fireRate += 0.75 }] },
 ];
 
 // Combat numbers only; body stats are attributes' (D36). Documented in
 // docs/entities/equipment.md.
 const EQUIPMENT = [
-  { name: 'Mask',    tiers: [{ cost: 1000,  apply: p => p.range += 15 },
-                             { cost: 2400, apply: p => p.range += 15 },
-                             { cost: 4800, apply: p => p.range += 15 }] },
-  { name: 'Suit',    tiers: [{ cost: 1800,  apply: p => p.guard += 1 },
-                             { cost: 4000, apply: p => p.guard += 1 },
-                             { cost: 7600, apply: p => p.guard += 1 }] },
-  { name: 'Weights', tiers: [{ cost: 1400,  apply: p => p.damage += 0.5 },
-                             { cost: 3000, apply: p => p.damage += 0.5 },
-                             { cost: 5600, apply: p => p.damage += 0.5 }] },
+  { name: 'Mask',    tiers: [{ cost: 400,  apply: p => p.range += 15 },
+                             { cost: 960, apply: p => p.range += 15 },
+                             { cost: 1920, apply: p => p.range += 15 }] },
+  { name: 'Suit',    tiers: [{ cost: 720,  apply: p => p.guard += 1 },
+                             { cost: 1600, apply: p => p.guard += 1 },
+                             { cost: 3040, apply: p => p.guard += 1 }] },
+  { name: 'Weights', tiers: [{ cost: 560,  apply: p => p.damage += 0.5 },
+                             { cost: 1200, apply: p => p.damage += 0.5 },
+                             { cost: 2240, apply: p => p.damage += 0.5 }] },
 ];
 
 // Uncapped here: the challenges' finite rungs cap them at the source (D36).
@@ -403,60 +403,60 @@ const BOSS      = { enemies: [['boss', 1]], crowd: BOSS_CROWD };
 // PLACEHOLDER GRAPHICS (D72), Claude's picks. Numbered until named (D89).
 const layer = (name, color, [a, b, c]) => ({ name, color, stretches: [
   { draw: 3, pool: a }, { draw: 1, pool: [MINI_BOSS], escorts: a },
-  { draw: 3, pool: b }, { draw: 1, pool: [MINI_BOSS], escorts: b },
-  { draw: 3, pool: c }, { draw: 1, pool: [BOSS], escorts: c },
+  { draw: 2, pool: b }, { draw: 1, pool: [MINI_BOSS], escorts: b },
+  { draw: 2, pool: c }, { draw: 1, pool: [BOSS], escorts: c },
 ] });
 const LAYERS = [
   layer('Layer 1', [12, 23, 39], [
-    [{ enemies: [['drifter', 38], ['darter', 13]] },
-     { enemies: [['drifter', 31], ['darter', 19]] },
-     { enemies: [['drifter', 28], ['darter', 22]] },
-     { enemies: [['darter', 29], ['drifter', 21]] },
-     { enemies: [['darter', 36], ['drifter', 14]] }],
-    [{ enemies: [['archer', 18], ['drifter', 35]] },
-     { enemies: [['archer', 20], ['darter', 26]] },
-     { enemies: [['archer', 15], ['drifter', 24], ['darter', 24]] },
-     { enemies: [['archer', 23], ['drifter', 14]] },
-     { enemies: [['archer', 19], ['darter', 16], ['drifter', 16]] }],
-    [{ enemies: [['bulwark', 9], ['drifter', 15], ['archer', 11]] },
-     { enemies: [['archer', 22], ['bulwark', 6], ['drifter', 13], ['darter', 5]] },
-     { enemies: [['bulwark', 8], ['drifter', 10], ['darter', 8], ['archer', 14]] },
-     { enemies: [['archer', 16], ['bulwark', 8], ['drifter', 9]] },
-     { enemies: [['bulwark', 7], ['darter', 12], ['drifter', 10], ['archer', 17]] }],
+    [{ enemies: [['drifter', 9], ['darter', 3]] },
+     { enemies: [['drifter', 7], ['darter', 5]] },
+     { enemies: [['drifter', 6], ['darter', 6]] },
+     { enemies: [['darter', 7], ['drifter', 5]] },
+     { enemies: [['darter', 9], ['drifter', 3]] }],
+    [{ enemies: [['archer', 5], ['drifter', 11]] },
+     { enemies: [['archer', 7], ['darter', 4]] },
+     { enemies: [['archer', 6], ['drifter', 4], ['darter', 4]] },
+     { enemies: [['archer', 7], ['drifter', 4]] },
+     { enemies: [['archer', 5], ['darter', 5], ['drifter', 5]] }],
+    [{ enemies: [['bulwark', 3], ['drifter', 6], ['archer', 4]] },
+     { enemies: [['archer', 8], ['bulwark', 2], ['drifter', 4], ['darter', 2]] },
+     { enemies: [['bulwark', 3], ['drifter', 3], ['darter', 3], ['archer', 4]] },
+     { enemies: [['archer', 5], ['bulwark', 3], ['drifter', 3]] },
+     { enemies: [['bulwark', 2], ['darter', 5], ['drifter', 5], ['archer', 7]] }],
   ]),
   layer('Layer 2', [24, 12, 40], [
-    [{ enemies: [['drifter', 12], ['archer', 11], ['puffer', 6]] },
-     { enemies: [['darter', 13], ['archer', 7], ['bulwark', 4], ['puffer', 4]] },
-     { enemies: [['puffer', 8], ['drifter', 9]] },
-     { enemies: [['drifter', 23], ['darter', 10], ['puffer', 5]] },
-     { enemies: [['puffer', 8], ['darter', 13]] }],
-    [{ enemies: [['bulwark', 6], ['archer', 7], ['drifter', 11], ['puffer', 8]] },
-     { enemies: [['puffer', 13], ['darter', 12]] },
-     { enemies: [['archer', 8], ['puffer', 12], ['drifter', 10]] },
-     { enemies: [['bulwark', 5], ['puffer', 9], ['drifter', 12]] },
-     { enemies: [['drifter', 13], ['archer', 6], ['bulwark', 6], ['puffer', 8]] }],
-    [{ enemies: [['bulwark', 9], ['puffer', 14], ['drifter', 12]] },
-     { enemies: [['archer', 6], ['darter', 11], ['puffer', 15], ['bulwark', 6]] },
-     { enemies: [['puffer', 19], ['archer', 8], ['darter', 10]] },
-     { enemies: [['bulwark', 6], ['archer', 8], ['darter', 12], ['puffer', 15]] },
-     { enemies: [['drifter', 12], ['puffer', 18], ['archer', 11]] }],
+    [{ enemies: [['drifter', 6], ['archer', 6], ['puffer', 3]] },
+     { enemies: [['darter', 5], ['archer', 3], ['bulwark', 2], ['puffer', 2]] },
+     { enemies: [['puffer', 4], ['drifter', 4], ['archer', 3]] },
+     { enemies: [['drifter', 11], ['darter', 5], ['puffer', 3], ['archer', 3]] },
+     { enemies: [['puffer', 5], ['darter', 5]] }],
+    [{ enemies: [['bulwark', 3], ['archer', 4], ['drifter', 5], ['puffer', 5]] },
+     { enemies: [['puffer', 8], ['darter', 7]] },
+     { enemies: [['archer', 5], ['puffer', 7], ['drifter', 6]] },
+     { enemies: [['bulwark', 3], ['puffer', 6], ['drifter', 6]] },
+     { enemies: [['drifter', 8], ['archer', 3], ['bulwark', 3], ['puffer', 5]] }],
+    [{ enemies: [['bulwark', 7], ['puffer', 10], ['drifter', 9]] },
+     { enemies: [['archer', 4], ['darter', 8], ['puffer', 11], ['bulwark', 4]] },
+     { enemies: [['puffer', 14], ['archer', 6], ['darter', 7]] },
+     { enemies: [['bulwark', 4], ['archer', 6], ['darter', 8], ['puffer', 11]] },
+     { enemies: [['drifter', 9], ['puffer', 14], ['archer', 8]] }],
   ]),
   layer('Layer 3', [8, 32, 28], [
-    [{ enemies: [['eel', 14], ['drifter', 14], ['archer', 7]] },
-     { enemies: [['eel', 14], ['archer', 10], ['darter', 13]] },
-     { enemies: [['eel', 12], ['puffer', 7], ['archer', 8]] },
-     { enemies: [['puffer', 10], ['drifter', 14], ['eel', 9], ['archer', 5]] },
-     { enemies: [['eel', 14], ['archer', 10]] }],
-    [{ enemies: [['bulwark', 8], ['eel', 18], ['archer', 8]] },
-     { enemies: [['eel', 16], ['puffer', 10], ['darter', 12]] },
-     { enemies: [['archer', 10], ['eel', 20]] },
-     { enemies: [['bulwark', 6], ['puffer', 12], ['eel', 14]] },
-     { enemies: [['drifter', 19], ['eel', 19], ['archer', 10]] }],
-    [{ enemies: [['bulwark', 10], ['eel', 22], ['puffer', 12]] },
-     { enemies: [['archer', 11], ['eel', 29], ['darter', 7]] },
-     { enemies: [['puffer', 15], ['eel', 22], ['archer', 10]] },
-     { enemies: [['bulwark', 7], ['archer', 9], ['eel', 27]] },
-     { enemies: [['drifter', 8], ['eel', 24], ['puffer', 11]] }],
+    [{ enemies: [['eel', 18], ['drifter', 18], ['archer', 9]] },
+     { enemies: [['eel', 18], ['archer', 13], ['darter', 16]] },
+     { enemies: [['eel', 13], ['puffer', 8], ['archer', 9]] },
+     { enemies: [['puffer', 12], ['drifter', 14], ['eel', 10], ['archer', 6]] },
+     { enemies: [['eel', 18], ['archer', 13]] }],
+    [{ enemies: [['bulwark', 12], ['eel', 28], ['archer', 12]] },
+     { enemies: [['eel', 25], ['puffer', 15], ['darter', 18]] },
+     { enemies: [['archer', 17], ['eel', 34]] },
+     { enemies: [['bulwark', 8], ['puffer', 17], ['eel', 20]] },
+     { enemies: [['drifter', 33], ['eel', 33], ['archer', 17]] }],
+    [{ enemies: [['bulwark', 18], ['eel', 40], ['puffer', 22]] },
+     { enemies: [['archer', 23], ['eel', 61], ['darter', 15]] },
+     { enemies: [['puffer', 29], ['eel', 42], ['archer', 19]] },
+     { enemies: [['bulwark', 14], ['archer', 18], ['eel', 55]] },
+     { enemies: [['drifter', 16], ['eel', 49], ['puffer', 22]] }],
   ]),
 ];
 
@@ -525,7 +525,7 @@ const ENEMY_TYPES = [
     lunge: { chase: 1, windup: 1.2, speed: 780, reach: 450, rest: 0.9, damage: 2, knock: 600 } },
   // The boss's `value` is the layer end's big haul of gems (D68); its `fan`,
   // D117's. Claude's picks.
-  { name: 'boss',      r: 84, hp: 55, speed: 80, value: 30, threat: [0.879, 0.921, 0.961], carries: false,
+  { name: 'boss',      r: 84, hp: 100, speed: 80, value: 30, threat: [0.879, 0.921, 0.961], carries: false,
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
     lunge: { chase: 1, windup: 0.8, speed: 780, reach: 450, rest: 0.9, damage: 4, knock: 600 },
     fan:   { chase: 1, windup: 0.6, reach: 450, rest: 0.9,

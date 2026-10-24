@@ -305,10 +305,12 @@ async function weapons() {
 // Every pool batch rescaled to its stretch's target, its mix of fish kept, and
 // written back into game/content.js: in the first layer, grade 1 carries the
 // target, so grading has little left to add -- all of it in the first stretch;
-// deeper, the fewest fish grading can bring to the target under GRADE_KEEP.
-// FIT_FIRST and FIT_REACH are Claude's picks: the share grade 1 carries in the
-// first layer, and the margin grading must clear. `npm test` holds the result.
-const FIT_FIRST = 0.92, FIT_REACH = 1.02;
+// deeper, grade 1 still carries most of it, so a batch grows in fish as it
+// grows in threat, and grading adds the rest under GRADE_KEEP.
+// FIT_FIRST, FIT_DEEP and FIT_REACH are Claude's picks: the share grade 1
+// carries in the first layer and deeper, and the margin grading must clear.
+// `npm test` holds the result.
+const FIT_FIRST = 0.92, FIT_DEEP = 0.6, FIT_REACH = 1.02;
 function fit() {
   const g = loadGame(), most = n => Math.floor((1 - g.GRADE_KEEP) * n);
   const th = (name, grade) => g.ENEMY_TYPES.find(t => t.name === name).threat[grade - 1];
@@ -317,11 +319,11 @@ function fit() {
   const scaled = (es, f) => es.map(([n, c]) => [n, Math.max(1, Math.round(c * f))]);
   const rows = [];
   const fitted = stretchesOf(g).filter(x => !x.s.escorts).flatMap(({ l, top, target, s }) => s.pool.map(b => {
-    const enough = l > 0 ? es => reach(es, top) >= FIT_REACH * target
+    const enough = l > 0 ? es => at1(es) >= FIT_DEEP * target && reach(es, top) >= FIT_REACH * target
       : es => at1(es) >= (target === g.THREAT_START ? 1 : FIT_FIRST) * target;
     // At or under the target past the first stretch: where a step of rounding
     // overshoots it, the last scale under it.
-    const under = es => l > 0 || target === g.THREAT_START || at1(es) <= target;
+    const under = es => target === g.THREAT_START || at1(es) <= target;
     let f = 0.1 * target / at1(b.enemies), es = scaled(b.enemies, f), last = es;
     for (; !enough(es); es = scaled(b.enemies, f *= 1.01)) last = es;
     if (!under(es)) es = last;

@@ -27,7 +27,7 @@ pulled to the player (D78 (gems are pulled to the player)).
 | puffer | 22 | 3 | 125 | — | 2 | #ffee58 | #ffc800 | — | — |
 | eel | 14 | 2 | 130 | — | 2 | #38f2c0 | #00c896 | — | — |
 | mini-boss | 52 | 20 | 90 | — | 5 | #e2ff8a | #c6ff3c | false | — |
-| boss | 84 | 55 | 80 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
+| boss | 84 | 100 | 80 | — | 30 | #c8ff3c | #9dff00 | false | bottom |
 <!-- /generated -->
 
 Each behaviour's numbers, a table per behaviour field. `bite`:
@@ -94,7 +94,9 @@ boss's fan (D117 (the boss's fan)), the boss's `value` (D68 (the layer end is
 a milestone)), every type S5 (content) brought (D95 (three enemy behaviours,
 and one way to be hurt)), and the ramps and bites (D107 (the diver swims and
 faces; fish with a ramp), D108 (fish bite)) — the puffer's, the mini-boss's
-and the boss's tuned to the pillars (D127 (the tuned numbers)).
+and the boss's tuned to the pillars (D127 (the tuned numbers)), the boss's
+`hp` raised again with the longer dive (D137 (batches grow from seconds to a
+minute and a half)).
 
 ## Grades
 

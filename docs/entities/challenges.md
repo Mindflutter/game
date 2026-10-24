@@ -38,8 +38,8 @@ where it does, in full, is the ladders' spec, kept in git:
 **judged** is which of `clear`, `kill` and `end` the record has. Every number
 is Claude's pick, none tuned by S6 (balance): Dash reach and Strength are
 the dash's, which waits on its discussion (`ideas.md`), and the rungs are
-sized on fifteen gates a layer, not the twelve a layer has (D127 (the tuned
-numbers)) — open, `ideas.md` → Challenge rungs on the shorter dive.
+sized on fifteen gates a layer, not the ten a layer has (D137 (batches grow
+from seconds to a minute and a half)) — open, `ideas.md` → Challenge rungs on the shorter dive.
 
 ## Fields
 
@@ -62,14 +62,14 @@ Its first rung is a single clean batch, D36 (attributes)'s own example. The
 others mark how cleanly a player plays: 3, 6 and 10 are each expected within
 a dive of fifteen-gate layers at 32%, 62% and 79% of batches clean, so the top
 asks a good player for about a dive, never several; a dive's layers have
-twelve (above).
+ten (above).
 
 ## footwork
 
 Restraint: batches cleared in a row without dashing. Not dashing is a choice,
 not luck, so its rungs follow the dive's shape, sized on fifteen gates a
-layer: three batches, then six, ten, and fifteen — more than the twelve a
-layer has (above). It is a feat only while staying clear of most fish takes
+layer: three batches, then six, ten, and fifteen — more than the ten a layer
+has (above). It is a feat only while staying clear of most fish takes
 the dash, and measured it does: the diver bot without its dash loses more
 than twice the hearts (`roadmap.md` → Health).
 
@@ -80,7 +80,7 @@ glowing fish — a lunger's, or any once every mod is capped — neither counts
 nor breaks it. A fish killed on the same tick as the glowing one died with it:
 one swing, one shot through a line or one dash is one moment. 3, 5 and 8 are
 each expected within thirty-six glowing batches at 34%, 57% and 75% — a dive
-of fifteen-gate layers; a dive has twenty-seven (above).
+of fifteen-gate layers; a dive has twenty-one (above).
 
 ## flurry
 

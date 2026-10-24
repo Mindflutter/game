@@ -52,34 +52,38 @@ older build is a regression signal for that build only.
   **harder**. **2026-09-29, the boss: "right now it's very easy for me."**
   S6 (balance) tuned both against the bot's figures below (D127 (the tuned
   numbers)); his play decides whether enough.
-- **Balance, the D130 (fish are revealed a type at a time) build, 2026-10-22**
-  (D127 (the tuned numbers), D128 (the balance suite), D129 (a gentle first
-  layer)): the diver bot, seeds 1, 7, 42, 4471, 90210, 3, 11, 77, 2024, 31337;
+- **Balance, the D137 (batches grow from seconds to a minute and a half)
+  build, 2026-10-24** (D127 (the tuned numbers), D128 (the balance suite)):
+  the diver bot, seeds 1, 7, 42, 4471, 90210, 3, 11, 77, 2024, 31337;
   `npm run balance` passes. A floor, never a human's experience (D50 (the bot
   is not a difficulty instrument)).
   - **Careers**, the Gun, spending in Claude's order: won on all ten, at dive
-    7–12. First purchase after 1–2 dives. Layer 2 first reached on dive 1–3,
-    layer 3 on 6–8. A layer's first clear, printed, no longer a bar: layer 1
-    7.1–8.2 min, layer 2 5.3–5.8, layer 3 6.9–8.5.
-  - **Every gate at the kit a career first meets it with**: a batch's mean
-    clear by layer 36.5 / 33.1 / 36.8s, the slowest 52.9s (layer 3, bulwark
-    10, eel 22, puffer 12). Hearts a batch, by layer, 0.56 / 2.29 / 3.03; the
-    costliest 8.0, layer 3's bulwark 6, puffer 12, eel 14, lost on 3 seeds of
-    10; the most lost, layer 2's archer 8, puffer 12, drifter 10, on 4.
-    Standing, the opening's five batches cleared on 7–10 seeds of ten; past
-    it, two of layer 3's boss gates on one, the rest on none.
+    4–6. First purchase after 1–2 dives. Layer 2 first reached on dive 1–2,
+    layer 3 on 2–4. A layer's first clear, printed: layer 1 3.4–4.0 min,
+    layer 2 3.6–6.2, layer 3 7.0–9.3. At the win it holds Gun 2–3 and each
+    piece of equipment at 1–2: 5–9 of the 12 tiers.
+  - **Every gate at the kit a career first meets it with**: the ordinary
+    stretches' mean clear 9.7 / 13.3 / 18.1s in layer 1, 16.3 / 23.6 / 38.3s
+    in layer 2, 41.9 / 57.9 / 69.9s in layer 3; the mini-bosses' 18–55s; the
+    bosses' 63.5 / 109.5 / 49.1s. Hearts a batch, by layer, 0.50 / 1.57 /
+    4.82; the costliest 8.2, layer 3's bulwark 14, archer 18, eel 55. The most
+    lost, on 4 seeds of 10: layer 1's boss with archer 8, bulwark 2, drifter
+    4, darter 2, and layer 2's archer 4, darter 8, puffer 11, bulwark 4.
+    Standing, the opening cleared on every seed; past it, three gates on
+    one seed, the rest on none.
   - **Per weapon**, each at the kit a Gun career first meets layer 2 with,
     the ordinary batches of layers 2 and 3, a fight capped at 150s:
 
     | | clear s | hearts | clears | layer 2 clear s / hearts | layer 3 clear s / hearts |
     |---|---|---|---|---|---|
-    | Gun | 39.8 | 5.09 | 0.77 | 40.26 / 6.02 | 39.35 / 4.17 |
-    | Harpoon | 40.7 | 4.92 | 0.75 | 33.66 / 5.21 | 47.74 / 4.63 |
-    | Knife | 41.34 | 4.19 | 0.68 | 55.33 / 7.52 | 27.35 / 0.87 |
+    | Gun | 43.5 | 5.67 | 0.73 | 26.39 / 1.84 | 60.62 / 9.51 |
+    | Harpoon | 42.48 | 4.45 | 0.73 | 23.02 / 2.14 | 61.94 / 6.76 |
+    | Knife | 45.26 | 3.5 | 0.74 | 44.4 / 3.81 | 46.12 / 3.19 |
 
     None dominates over both layers; in layer 2 the Gun and the Harpoon do
-    the Knife, in layer 3 the Knife does both and the Gun does the Harpoon.
-  - **Footwork**, five seeds, the ordinary batches at first-met kits: without
+    the Knife, in layer 3 the Knife does both.
+  - **Footwork**, on the D130 (fish are revealed a type at a time) build,
+    not measured since: five seeds, the ordinary batches at first-met kits: without
     its dash the diver bot loses 0.72 / 4.01 / 5.88 hearts a batch by layer,
     against 0.28 / 2.91 / 3.81 with it, and dies 4% / 17% / 19% of fights
     against 0% / 15% / 4% — short of D127 (the tuned numbers)'s twice in

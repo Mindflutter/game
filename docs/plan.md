@@ -15,8 +15,9 @@ unless critical questions to me". Its design is
 `specs/2026-10-21-s6-balance-design.md`. The dash is held still while it runs
 — Igor, the same day: "leave dash for now, discussions needed". Built: D126
 (threat) to D130 (fish are revealed a type at a time), every exit item met on
-the diver bot's figures; it closes on Igor's word — how strict the bars are,
-the opening's size, `footwork`, and his play.
+the diver bot's figures; D137 (batches grow from seconds to a minute and a
+half) reshaped the dive on his first play of it. It closes on Igor's word —
+how strict the bars are, `footwork`, and his play.
 Where it stands is `roadmap.md` → Next.
 
 ## Closed stages
