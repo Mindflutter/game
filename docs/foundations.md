@@ -141,10 +141,12 @@ count changes here, in one line, and nowhere else.
 The draft's philosophy section, converted from prose into statements that can
 fail. Prose cannot be verified; these can. **The numbers are targets, each
 measured at S6 (balance) and met** on the diver bot's figures — `npm run
-balance` holds them, read across seeds as D127 (the tuned numbers) records; how
-strictly is open to Igor (`ideas.md` → Open — from S6 (balance)). The two
-times are printed, not held: a player's clock will not match the bot's (D129
-(a gentle first layer)). They exist
+balance` holds them, read across seeds as D127 (the tuned numbers) records, and
+as strictly as it does (D138 (the bars stand)). The two times are not held
+as numbers: a player's clock will not match the bot's (D129 (a gentle first
+layer)). Only the batch time's shape is, seconds at a dive's start and over a
+minute at its deepest (D137 (batches grow from seconds to a minute and a
+half)). The layer time is printed. They exist
 so that "is this balanced" has an answer.
 
 | Pillar | Stated as | Target |

@@ -68,8 +68,8 @@ Your shots splash, for six seconds: a hit wounds every fish whose body is
 within `splash` of the struck one's, for the shot's damage — a crowd most of
 all (D125 (boosts keep each weapon's nature)). The splash does not knock, and a
 fish it wounds splashes nothing on, so a crowd cannot chain. With the Knife each
-cut splashes, and a Harpoon shot splashes at every fish it goes through — S6
-(balance)'s to watch. It replaced a bigger shot, which only decided whether a
+cut splashes, and a Harpoon shot splashes at every fish it goes through — a
+balance pass's to watch. It replaced a bigger shot, which only decided whether a
 shot hit, when nearly every shot hits.
 
 ## Adding one

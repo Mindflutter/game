@@ -10,15 +10,9 @@ must stay true while doing it.
 
 ## Active stage
 
-**S6 — Balance**, opened 2026-10-21 — Igor: "start s6, no interruptions
-unless critical questions to me". Its design is
-`specs/2026-10-21-s6-balance-design.md`. The dash is held still while it runs
-— Igor, the same day: "leave dash for now, discussions needed". Built: D126
-(threat) to D130 (fish are revealed a type at a time), every exit item met on
-the diver bot's figures; D137 (batches grow from seconds to a minute and a
-half) reshaped the dive on his first play of it. It closes on Igor's word —
-how strict the bars are, `footwork`, and his play.
-Where it stands is `roadmap.md` → Next.
+None. S6 (balance) closed 2026-10-24 (D139 (S6 closes)). S7 (alpha polish) is
+next: its entry is met, and it opens on Igor's word.
+Where things stand is `roadmap.md` → Next.
 
 ## Closed stages
 
@@ -38,41 +32,12 @@ decisions listed say why.
 | Before S5 — two requirements | 2026-10-13 | A doc for every kind of entity, held to the code; the weapon record; mods dropped by a glowing fish, the layer end's pick, boosts, rank retired | D80–D92 |
 | S5 — Content to the DoD numbers | 2026-10-14 | The archer, the puffer and the eel; the Harpoon and the Knife, owned and carried; three pieces of equipment, Heart and Strength, swift and footwork; Barbs and three boosts; three layers with pools of their own — and, from playing it, the debug mode and New game | D93–D103 |
 | The pass before S6 — from playing S5 | 2026-10-21 | Bodies doubled, the Knife's swing, the puffer's burst, swimming with a facing, fish that bite, challenges as ladders, waves, escorts, the boss's fan, hits that vary, grades, solid bodies, knockback, boosts that keep each weapon's nature | D104–D125 |
+| S6 — Balance | 2026-10-24 | The threat system and the grades it chooses, the diver bot and the balance suite, the numbers tuned to the pillars and the bars that hold them, fish revealed a type at a time, ten gates a layer with batches growing from seconds to a minute and a half, cheaper gear | D126–D139 |
 
 Their designs, where a stage had one, are kept in git, not the tree (D134
-(lean docs)): `git show 99d79ae:docs/specs/<file>` reads one. Where one disagrees with a decision,
+(lean docs)): `git show 99d79ae:docs/specs/<file>` reads one, and S6
+(balance)'s is `git show 11ba1ad:docs/specs/2026-10-21-s6-balance-design.md`. Where one disagrees with a decision,
 the decision wins.
-
-## S6 — Balance
-
-**Entry:** S5 exits.
-
-**Work:** Paired seeded bot dives per weapon, per layer, per gear level. Every
-numeric pillar in `foundations.md` measured and met or revised. **The threat
-system for enemies** — Igor, 2026-09-30: "develop a complex mathematical system
-for enemies that impact the game and player feel … is it part of balance? yes"
-— in the direction he chose: a threat number per enemy type, a batch's threat
-computed from its enemies, measurement correcting the numbers, and threat
-rising overall and gradually through a dive (D79 (a dive goes from easiest to
-hardest)); it replaces the hp bands D71 (batches are drawn from pools) sized
-stretches by. Every batch measured against its stretch, and each layer against
-the kit expected there — the mods from the layers above included (D66). Which
-enemies drop gems, and how many, is a lever here too (D78 (gems are pulled to
-the player)). **Grades** (D119 (grades)) are the system's too: each type at
-each grade its own threat number, and the grade a fish arrives at the
-system's choice — Igor, 2026-10-19: "you go further - more difficult enemies
-appear. ofc, first time you meet for example extremely high-grade enemy cant
-be on the first layer. this is about balancing the batches and waves.
-remember, they are different but equally challenging at any given batch/wave
-in the game".
-
-**Exit (DoD):**
-- No unbeatable batch. No batch past the opening cleared without moving
-  (D130 (fish are revealed a type at a time)).
-- No weapon strictly dominates another in mid-to-late game — measured, per the
-  draft's explicit requirement.
-- Every provisional target in `foundations.md` is now a measured one.
-- Playable: it is balanced, and the numbers say so.
 
 ## S7 — Alpha polish
 

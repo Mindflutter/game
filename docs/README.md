@@ -30,7 +30,7 @@ A change to them belongs in the same commit as the code it describes.
 | Something broken in the game — a real issue, not an idea | `bugs.md` |
 | What shipped, and when | `git log`; before 2026-10-22, `changelog.md` |
 | Igor's description of the whole game | `high level design.md` |
-| The open stage's design, and its check against `foundations.md` | `specs/`; a closed stage's, `git show 99d79ae:docs/specs/<file>` |
+| The open stage's design, and its check against `foundations.md` | `specs/`; a closed stage's, `git show` as `plan.md` → Closed stages gives it |
 
 `decisions.md` is long. Find an entry by its heading — `grep '^## D'
 docs/decisions.md` lists them all — and read that one. D1–D26 describe the

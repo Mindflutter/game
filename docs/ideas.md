@@ -230,7 +230,7 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
     pays. The D50 lesson applies — where the measurement and Igor's feel
     disagree, his feel wins.
 
-  **S6 — Balance owns the tuning.**
+  **A balance pass owns the tuning**, once the dash is discussed.
 
 - **Fish that arrive from behind the screen.** Igor, 2026-09-27: "make some
   fish appear slowly from 'behind the screen' - still 2d, but adds to the
@@ -503,25 +503,12 @@ discussed.
 
 ## Open — from S6 (balance)
 
-- **How strict the bars are.** The pillars say "every batch", "no batch",
-  "one batch"; a bot's figure scatters by seed, so the balance suite reads
-  them loosely, Claude's picks (D127 (the tuned numbers)): a gate lost on no
-  more than half the seeds, cleared standing on no more than one in ten past
-  the opening, and no weapon dominating over layers 2 and 3 together, though
-  the Knife is worse in the one and better in the other. Completion time is
-  out of the bars (D129 (a gentle first layer)), but for the shape D137
-  (batches grow from seconds to a minute and a half) holds: the first batches
-  under 15s on the bot's clock, the deepest ordinary ones over 60s. Open: whether these stand,
-  or every seed and every batch must pass — which would move the numbers
-  again. **Home**: S6 (balance), on Igor's word.
-- **`footwork` no longer takes twice the hearts.** D127 (the tuned numbers)'s
-  bar: the diver bot without its dash loses more than twice the hearts it
-  does with it. On the D130 (fish are revealed a type at a time) build it
-  holds in the first layer and falls short in the second and third
-  (`roadmap.md` → Health); it is measured by hand, not in the suite.
-  The dash and everything feeding it are Igor's to discuss ("leave dash for
-  now, discussions needed"). Open: whether the bar stands, and what moves if
-  it does. **Home**: S6 (balance), on Igor's word.
+- **`footwork`, reworked or dropped.** Igor, 2026-10-24: "footwork is
+  generally questionable thing, as it forces the player to withdraw an
+  essential ability. i'd rework it or drop completely." It pays for batches
+  cleared without dashing; D127 (the tuned numbers)'s bar on it left with S6
+  (balance)'s close (D139 (S6 closes)). Open: what it becomes, or whether it
+  goes. **Home**: open.
 - **Challenge rungs on the shorter dive.** The ladders were sized on fifteen
   gates a layer (D109 (micro-tasks are ladders; steps cost more as they
   rise)); ten since D137 (batches grow from seconds to a minute and a half),
@@ -532,8 +519,7 @@ discussed.
   Claude's picks either way.
 - **Gates a layer, layer by layer.** Igor, 2026-10-24, setting ten for every
   layer (D137 (batches grow from seconds to a minute and a half)): "may change
-  to different value for layers later". **Home**: S6 (balance), or later
-  balance.
+  to different value for layers later". **Home**: a later balance pass.
 - **One boss for three layers.** The kit a career meets the boss with grows
   about three times over the dive; the boss grows half again, by its grade. At
   `hp` 100 (D137 (batches grow from seconds to a minute and a half)) the bot

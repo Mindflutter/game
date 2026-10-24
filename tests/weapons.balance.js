@@ -1,5 +1,5 @@
-// No weapon strictly dominating another in the mid-to-late game: the stage's
-// exit (plan.md -> S6 (balance)), each weapon at matched kits.
+// No weapon strictly dominating another in the mid-to-late game: S6
+// (balance)'s exit (D127 (the tuned numbers)), each weapon at matched kits.
 import { it, expect } from 'vitest';
 import { weaponLayers, dominates } from './measure.js';
 

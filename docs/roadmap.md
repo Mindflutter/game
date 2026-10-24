@@ -9,15 +9,13 @@ The stages themselves live in `plan.md`; the rules that outlive them live in
 
 ## Next
 
-S6 (balance) opened 2026-10-21 (`plan.md`), on the pass before it — from
-Igor playing S5 (content), D104 (bodies doubled) to D125 (boosts keep each
-weapon's nature) — and is built: the threat system and the grades it chooses
-(D126 (threat)), the numbers against the pillars (D127 (the tuned numbers)), the
-bots and the balance suite that hold them (D128 (the balance suite)), to
-`specs/2026-10-21-s6-balance-design.md`. The dash is held still — Igor: "leave
-dash for now, discussions needed". **Next**: Igor's word on how strict the
-bars are (`ideas.md` → Open — from S6 (balance)), and his play, which
-overrules every bot figure; S6 (balance) closes on his word.
+S6 (balance) closed 2026-10-24 (D139 (S6 closes)): the threat system and the
+grades it chooses (D126 (threat)), the numbers against the pillars (D127 (the
+tuned numbers)), the bots and the balance suite that hold them (D128 (the
+balance suite)), and the dive reshaped on Igor's play (D129 (a gentle first
+layer), D130 (fish are revealed a type at a time), D137 (batches grow from
+seconds to a minute and a half)). **Next**: S7 (alpha polish), when Igor opens
+it. The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and
@@ -82,12 +80,6 @@ older build is a regression signal for that build only.
 
     None dominates over both layers; in layer 2 the Gun and the Harpoon do
     the Knife, in layer 3 the Knife does both.
-  - **Footwork**, on the D130 (fish are revealed a type at a time) build,
-    not measured since: five seeds, the ordinary batches at first-met kits: without
-    its dash the diver bot loses 0.72 / 4.01 / 5.88 hearts a batch by layer,
-    against 0.28 / 2.91 / 3.81 with it, and dies 4% / 17% / 19% of fights
-    against 0% / 15% / 4% — short of D127 (the tuned numbers)'s twice in
-    layers 2 and 3 (`ideas.md` → Open — from S6 (balance)).
 - **Solid bodies** (D120 (bodies are solid)), every pair every tick: 500
   drifters cost 0.44ms a tick in Node, 2026-10-19 — two ticks a frame, about
   0.9ms of 16.7ms. With them, a batch of 34 crowding a standing diver left no

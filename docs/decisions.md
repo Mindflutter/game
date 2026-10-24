@@ -4792,3 +4792,42 @@ Fast-paced.
 batches five times its first in fish, each layer more than the last;
 `tests/pillars.balance.js` — the first batches under 15s, the deepest ordinary
 over 60s. Both were seen failing on the old build.
+
+## D138 — The bars stand · 2026-10-24
+
+Asked how strictly the balance suite should hold the pillars, with layer 1's
+boss killing a fresh diver on about four seeds in ten: "keep all".
+
+- **The bars stay as D127 (the tuned numbers) set them**: a gate lost on no
+  more than half the seeds, cleared standing on no more than one in ten past
+  the opening, hearts higher deeper with a dip of a tenth allowed, and no
+  weapon dominating over layers 2 and 3 together. D137 (batches grow from
+  seconds to a minute and a half)'s time bar stays too.
+- **Layer 1's boss is a wall**: a fresh diver often dies there and buys past
+  it.
+
+**Supersedes**: nothing; it closes the question D127 left open.
+
+**Guarded by**: `npm run balance`, the bars themselves.
+
+## D139 — S6 closes · 2026-10-24
+
+Igor, on the `footwork` bar: "footwork is generally questionable thing, as it
+forces the player to withdraw an essential ability. i'd rework it or drop
+completely. wrap up s6, commit and close".
+
+- **S6 (balance) is closed**, on Igor's word. Its exit is met on the diver
+  bot's figures under the bars D138 (the bars stand) keeps: no gate lost on
+  more than half the seeds, none past the opening cleared standing on more
+  than one in ten, no weapon dominating over layers 2 and 3; every pillar in
+  `foundations.md` is measured (`roadmap.md` → Health).
+- **The `footwork` bar is dropped**: twice the hearts without the dash. The
+  `footwork` challenge itself is open, to be reworked or dropped (`ideas.md`).
+- **Carried past it, open**: one boss for three layers, the challenge rungs
+  on ten-gate layers, gates per layer, the Bloom splash (`bugs.md`), and the
+  dash.
+- **Its spec leaves the tree** (D134 (lean docs)).
+
+**Supersedes**: D127 (the tuned numbers)'s `footwork` bar.
+
+**Guarded by**: `npm run balance`.

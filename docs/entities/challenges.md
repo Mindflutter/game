@@ -69,9 +69,8 @@ ten (above).
 Restraint: batches cleared in a row without dashing. Not dashing is a choice,
 not luck, so its rungs follow the dive's shape, sized on fifteen gates a
 layer: three batches, then six, ten, and fifteen — more than the ten a layer
-has (above). It is a feat only while staying clear of most fish takes
-the dash, and measured it does: the diver bot without its dash loses more
-than twice the hearts (`roadmap.md` → Health).
+has (above). Whether it stays is open: it asks the player to give up the
+dash (`ideas.md` → `footwork`, reworked or dropped).
 
 ## beeline
 
