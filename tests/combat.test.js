@@ -503,6 +503,45 @@ describe('knockback (D122)', () => {
   });
 });
 
+// The drawn bump (S7): state only, as feel is never asserted (D16).
+describe('the bump', () => {
+  it('jolts a fish along the shot that hits it, for a moment', () => {
+    const g = quiet();
+    const e = fishAt(g, 'puffer', 100);
+    e.hp = e.maxHp = 99;
+    shot(g);
+    expect(until(g, 1, () => e.hp < 99)).toBe(true);
+    expect(e.bump).toBeGreaterThan(0);
+    expect(e.bumpX).toBeCloseTo(1);
+    expect(e.bumpY).toBeCloseTo(0);
+    play(g, g.BUMP_TIME + 0.02);
+    expect(e.bump).toBeLessThanOrEqual(0);
+  });
+
+  it('jolts a lunger the hit cannot knock off its line', () => {
+    const g = quiet();
+    const e = fishAt(g, 'mini-boss', 130);
+    Object.assign(e, { phase: 'windup', attack: 'lunge', aimX: -1, aimY: 0, phaseTime: 0 });
+    shot(g, { vx: 4000 });
+    play(g, 0.05);
+    expect(e.bump).toBeGreaterThan(0);
+  });
+
+  it('jolts the fish a swing cuts', () => {
+    const g = loadGame();
+    expect(g.applyScenario('knife', 1)).toBe(true);
+    g.queuePaused = true;
+    const e = fishAt(g, 'puffer', 20);
+    e.hp = e.maxHp = 99;
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    holdFire(g);
+    g.update(g.FIXED_DT);
+    expect(e.bump).toBeGreaterThan(0);
+    expect(e.bumpX).toBeGreaterThan(0.9);
+  });
+});
+
 describe('the splash (D125)', () => {
   // Bloom touched, so the diver splashes as a dive's would.
   const bloom = g => {
@@ -529,6 +568,28 @@ describe('the splash (D125)', () => {
     };
     expect(hurt(false)).toEqual([[1, true], [0, false], [0, false]]);
     expect(hurt(true)).toEqual([[1, true], [1, false], [0, false]]);
+  });
+
+  // The bug "Bloom's splash cannot be seen": a ring at the struck fish, as
+  // wide as the splash reaches, so what it touches is what it wounds.
+  it('shows where it lands and how far, on every hit, and never without Bloom', () => {
+    const rings = splashing => {
+      const g = quiet();
+      g.immortal = true;
+      if (splashing) bloom(g);
+      g.player.fireTimer = 999;
+      const struck = mob(g.player.x + 100, g.player.y, { hp: 9, maxHp: 9 });
+      g.enemies.push(struck);
+      shot(g);
+      expect(until(g, 1, () => struck.hp < 9)).toBe(true);
+      return g.particles.filter(p => p.ring !== undefined)
+        .map(p => [p.x, p.y, p.ring, p.r - struck.r - g.player.splash]);
+    };
+    expect(rings(false)).toEqual([]);
+    const [ring, ...more] = rings(true);
+    expect(more).toEqual([]);
+    expect(ring[2]).toBe(9);                                 // from the struck body's edge...
+    expect(ring[3]).toBe(0);                                 // ...out to the splash's reach
   });
 
   it('kills through the one path: a fish its splash killed is not cut again, and pays once', () => {

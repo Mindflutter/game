@@ -37,6 +37,10 @@ const DASH_ARC       = 0.2;   // cos of the half-angle: 0.2 is a 156-degree fron
 const DASH_END       = 0.18;  // seconds of the ring that closes the dash
 const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
 const PUSH_DRAG      = 0.02;  // ...with this fraction of it left after a second
+const BUMP_TIME      = 0.1;   // seconds a hit fish's body is drawn jolted along the hit: Claude's pick...
+const BUMP_SIZE      = 0.15;  // ...by this share of its radius, flattened along it as much
+const LEAP_TIME      = 0.08;  // seconds a biter's drawn leap takes out, and as long back: Claude's pick
+const SPLASH_SHOW    = 0.3;   // seconds Bloom's ring shows a splash's reach: Claude's pick
 const BODY_PUSH      = 600;   // px/s at most that overlapping bodies part (D120): Claude's pick
 // Water (D107): the share of a change of speed still to go after a body's
 // `ramp` seconds -- so `ramp` is its time to full speed, near enough.
@@ -503,7 +507,7 @@ const ENEMY_TYPES = [
     bite: { reach: 6, windup: 0.15, rest: 0.6, damage: 1, knock: 180 } },
   { name: 'bulwark', r: 34, hp: 6, speed: 52,  ramp: 1.2, value: 3, threat: [0.062, 0.091, 0.125],
     color: '#a05cff', glow: '#7b2fff',
-    bite: { reach: 40, windup: 0.6, rest: 1.2, damage: 1, knock: 420 } },
+    bite: { reach: 20, windup: 0.6, rest: 1.2, damage: 1, knock: 420 } },
   // The archer (D95). Its `range` sits under the Gun's, so the starting weapon
   // can always answer it. Claude's picks.
   { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2, threat: [0.017, 0.028, 0.032],

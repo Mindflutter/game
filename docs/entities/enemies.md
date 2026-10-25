@@ -37,7 +37,7 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 |---|---|---|---|---|---|
 | drifter | 10 | 0.3 | 0.8 | 1 | 240 |
 | darter | 6 | 0.15 | 0.6 | 1 | 180 |
-| bulwark | 40 | 0.6 | 1.2 | 1 | 420 |
+| bulwark | 20 | 0.6 | 1.2 | 1 | 420 |
 <!-- /generated -->
 
 `lunge`:
@@ -178,8 +178,9 @@ Today every type has a behaviour; the plain fish bite.
 It chases until its body is within `reach` px of the player's, then stops —
 easing to a halt with its `ramp`, so a heavy fish slides — and holds its jaws
 open for `windup` seconds: the tell, a dark wedge toward the player. They snap
-shut for its `damage` if the player is still within `reach`, and on water if not;
-then it chases on, `rest` seconds before it can bite again. A dash's shove
+shut for its `damage` if the player is still within `reach`, and on water if not,
+the body leaping at the player as they do — to its body, or to the reach's end
+(D141 (the bite leaps)); then it chases on, `rest` seconds before it can bite again. A dash's shove
 mid-wind-up moves it, and it bites from where it ends up. In one sentence:
 when the jaws open, get away.
 

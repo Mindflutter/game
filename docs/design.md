@@ -283,6 +283,11 @@ arrives (D100). Without the i-frames a touching eel drains 3 HP in 50ms.
 body size the way bodies push each other, onto the same `pushX`/`pushY` the
 dash's shove uses, fading by `PUSH_DRAG`.
 
+**The bump** (D140). A fish the diver's shot or swing hits is drawn jolted
+along the hit and flattened along it, by `BUMP_SIZE` of its radius, easing
+back over `BUMP_TIME`. Drawn only, so a lunger on its line jolts too; the
+diver has none, and a hit that kills shows the death instead.
+
 **Sound.** One oscillator and an envelope per sound, as data; no audio files.
 A master gain and a compressor keep a dozen kills from clipping. The context
 starts on the first key press, and the HUD says why a silent game is silent.

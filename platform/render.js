@@ -265,8 +265,27 @@ function drawField() {
       ctx.stroke();
       ctx.restore();
     }
-    circle(e.x, e.y, e.r * (1 + (fusing ? 0.8 : 0.25) * k),
+    // The bump: the body, and the mouth cut from it, jolted along the hit and
+    // flattened along it, easing back. Drawn about the body's centre, turned
+    // to the hit.
+    const b = e.bump > 0 ? BUMP_SIZE * e.bump / BUMP_TIME : 0;
+    const turn = b ? Math.atan2(e.bumpY, e.bumpX) : 0;
+    // Where the body is drawn: out along a biter's leap (D141), else at rest.
+    const toDiver = Math.atan2(player.y - e.y, player.x - e.x), leap = biteLeap(e);
+    const bx = e.x + Math.cos(toDiver) * leap, by = e.y + Math.sin(toDiver) * leap;
+    const onBody = () => {
+      ctx.save();
+      ctx.translate(bx, by);
+      if (b) {
+        ctx.translate(e.bumpX * b * e.r, e.bumpY * b * e.r);
+        ctx.rotate(turn);
+        ctx.scale(1 - b, 1 + b);
+      }
+    };
+    onBody();
+    circle(0, 0, e.r * (1 + (fusing ? 0.8 : 0.25) * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
+    ctx.restore();
     // The grade on the body, above the first (D119). PLACEHOLDER GRAPHICS.
     if (e.grade > 1) {
       ctx.save();
@@ -274,26 +293,28 @@ function drawField() {
       ctx.fillStyle = '#05080f';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(e.grade, e.x, e.y);
+      ctx.fillText(e.grade, bx, by);
       ctx.restore();
     }
     // Only once hurt, so a one-hit fish never has one. PLACEHOLDER GRAPHICS.
     if (e.hp < e.maxHp) {
       ctx.fillStyle = '#05080f';
-      ctx.fillRect(e.x - e.r, e.y - e.r - 9, 2 * e.r, 4);
+      ctx.fillRect(bx - e.r, by - e.r - 9, 2 * e.r, 4);
       ctx.fillStyle = e.glow;
-      ctx.fillRect(e.x - e.r, e.y - e.r - 9, 2 * e.r * e.hp / e.maxHp, 4);
+      ctx.fillRect(bx - e.r, by - e.r - 9, 2 * e.r * e.hp / e.maxHp, 4);
     }
     // A biter's open jaws (D108). PLACEHOLDER GRAPHICS.
     if (e.phase === 'jaws') {
-      const a = Math.atan2(player.y - e.y, player.x - e.x);
+      const a = toDiver - turn;
       const open = 0.9 * Math.min(1, e.phaseTime / e.bite.windup);
+      onBody();
       ctx.fillStyle = '#05080f';
       ctx.beginPath();
-      ctx.moveTo(e.x, e.y);
-      ctx.arc(e.x, e.y, e.r, a - open, a + open);
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, e.r, a - open, a + open);
       ctx.closePath();
       ctx.fill();
+      ctx.restore();
     }
     // The fish carrying the batch's mod (D84). PLACEHOLDER GRAPHICS.
     if (e.carrier) {
@@ -304,14 +325,26 @@ function drawField() {
       ctx.shadowBlur = 24;
       ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.arc(e.x, e.y, e.r + 6, 0, Math.PI * 2);
+      ctx.arc(bx, by, e.r + 6, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     }
   }
 
   for (const p of particles) {
-    circle(p.x, p.y, p.r * (p.life / p.maxLife), p.color, p.glow, 10);
+    const t = p.life / p.maxLife;                    // 1 -> 0
+    if (p.ring === undefined) { circle(p.x, p.y, p.r * t, p.color, p.glow, 10); continue; }
+    // A splash's ring (D125): out to its reach fast, then fading there.
+    ctx.save();
+    ctx.globalAlpha = 0.7 * t;
+    ctx.strokeStyle = p.color;
+    ctx.shadowColor = p.glow;
+    ctx.shadowBlur = 12;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.ring + (p.r - p.ring) * Math.sqrt(Math.min(1, 3 * (1 - t))), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
 
   // Streaks, not dots: a shot never reads as a gem, and shows its heading.

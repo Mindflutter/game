@@ -4831,3 +4831,56 @@ completely. wrap up s6, commit and close".
 **Supersedes**: D127 (the tuned numbers)'s `footwork` bar.
 
 **Guarded by**: `npm run balance`.
+
+## D140 — The drawn bump · 2026-10-24
+
+S7 (alpha polish)'s first item. Igor: "go ahead with the bump"; the bump
+itself was his, kept for this stage by D122 (knockback): "drawn bump stays
+for s7".
+
+- **A fish the diver's shot or swing hits is drawn jolted**, over the real
+  knock: pushed along the hit and flattened along it, easing back over
+  `BUMP_TIME`. Drawn only, so a lunger the knock leaves on its line jolts too.
+  A hit that kills shows the death instead: the fish is gone that tick.
+- **Fish only.** The diver's knock is real since D122 (knockback) and his to
+  keep or drop; a drawn one for it waits for his word. A splash's wound has
+  no hit to jolt along, and the dash's shove is its own.
+- **The numbers**: `BUMP_TIME` 0.1s, Claude's pick; `BUMP_SIZE` 0.15 of the
+  radius, pushed and flattened alike — Igor, after playing Claude's 0.3:
+  "halve the bump radius".
+- **An open mouth jolts with its body.** Igor: "when fish mouth open, no bump
+  happens". The mouth was cut at the body's resting place, over the very edge
+  the jolt moves, so a biter hit with its jaws open looked unmoved. It is
+  drawn in the body's jolted frame.
+
+**Guarded by**: `tests/combat.test.js` → the bump: a shot's, a swing's and a
+pinned lunger's set it along the hit, and it runs out. Seen failing before
+it was built, and with the bump set after the lunger's return. `checks.js` —
+an open mouth jolts with its body, seen failing on the mouth left at rest.
+
+## D141 — The bite leaps, and the bulwark's reach is halved · 2026-10-25
+
+Igor, playing the bump: "adjust bite range. triggers damage when i'm already
+half the fish away. for biting fish it may be good to add a short leap
+forward-backward during a bite to feel more natural. do now if the change is
+small".
+
+- **The bulwark's `reach` is 20**, from 40 — Claude's pick, half. At 40 a
+  body 34 in radius bit across more than half its own width of open water.
+  The drifter's 10 and the darter's 6 stand.
+- **A biter leaps on its snap**, drawn: over the jaws' last `LEAP_TIME` its
+  body stretches at the diver, to the diver's body or to the reach's end,
+  whichever is nearer, full on the snap, and back over the rest's first. So
+  a bite that lands is seen to touch, and one that misses snaps on water.
+  Drawn only: where it bites from and whether it lands are D108 (fish
+  bite)'s, unchanged. `LEAP_TIME` 0.08s is Claude's pick.
+- **Not re-measured**: a shorter reach makes the bulwark milder, and its
+  threat numbers were fitted at 40; `npm run balance` runs on Igor's word
+  (D132 (full runs on Igor's word)).
+
+**Supersedes**: D108 (fish bite)'s bulwark reach of 40px.
+
+**Guarded by**: `tests/enemies.test.js` → the bite — it leaps out to the
+diver's body on the snap, home after, and only to its reach at a diver who
+got away; seen failing before it was built, and with the reach's cap
+removed.

@@ -223,6 +223,19 @@ function biteStep(e, ux, uy, d, dt) {
   e.y += (e.vy + e.pushY) * dt;
 }
 
+// The drawn leap (D141): over the jaws' last `LEAP_TIME` the body stretches at
+// the diver, to its body or to the reach's end, whichever is nearer -- full on
+// the snap -- and back over the rest's first. In px from where the fish is.
+function biteLeap(e) {
+  if (!e.bite) return 0;
+  const B = e.bite;
+  const k = e.phase === 'jaws' ? 1 - (B.windup - e.phaseTime) / LEAP_TIME
+          : e.phase === 'rest' ? 1 - e.phaseTime / LEAP_TIME : 0;
+  if (k <= 0) return 0;
+  const gap = Math.hypot(player.x - e.x, player.y - e.y) - e.r - player.r;
+  return Math.min(1, k) * Math.max(0, Math.min(B.reach, gap));
+}
+
 // ---------- the weave ----------
 // The eel's (D95): `width` px either side, `rate` sways a second. `phaseTime`
 // is the sway's clock, so a batch's eels sway in step, as a school.
@@ -366,6 +379,10 @@ function swing(ux, uy) {
 function hit(e) {
   wound(e);
   if (!player.splash) return;
+  // Its reach, seen: whatever the ring touches, the splash wounds. `ring` is
+  // the radius it grows from.
+  particles.push({ x: e.x, y: e.y, vx: 0, vy: 0, life: SPLASH_SHOW, maxLife: SPLASH_SHOW,
+                   r: e.r + player.splash, ring: e.r, color: '#eaffff', glow: '#9ef7ff' });
   for (const x of enemies) {
     if (x === e || x.gone) continue;
     const dx = x.x - e.x, dy = x.y - e.y, reach = e.r + x.r + player.splash;
@@ -380,8 +397,12 @@ function wound(e) {
 }
 
 // A hit knocks a fish along it (D122), as the bodies weigh: the heavier by
-// area less, a lunger out of its chase not at all.
+// area less, a lunger out of its chase not at all. The drawn bump moves
+// nothing, so even a lunger jolts.
 function knock(e, ux, uy) {
+  e.bump = BUMP_TIME;
+  e.bumpX = ux;
+  e.bumpY = uy;
   if (pinned(e)) return;
   const k = player.knock * player.r * player.r / weight(e);
   e.pushX += ux * k;
@@ -1309,7 +1330,10 @@ function step(dt) {
     p.life -= dt;
   }
 
-  for (const e of enemies) if (e.flash > 0) e.flash -= dt;
+  for (const e of enemies) {
+    if (e.flash > 0) e.flash -= dt;
+    if (e.bump > 0) e.bump -= dt;
+  }
 
   const wasFighting = batchLive();
   enemies = enemies.filter(e => !e.gone);

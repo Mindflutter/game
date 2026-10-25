@@ -70,7 +70,10 @@ all (D125 (boosts keep each weapon's nature)). The splash does not knock, and a
 fish it wounds splashes nothing on, so a crowd cannot chain. With the Knife each
 cut splashes, and a Harpoon shot splashes at every fish it goes through — a
 balance pass's to watch. It replaced a bigger shot, which only decided whether a
-shot hit, when nearly every shot hits.
+shot hit, when nearly every shot hits. Each splash shows its reach: a ring
+grows from the struck fish's body out `splash` past it and fades in
+`SPLASH_SHOW`, so whatever it touches is what it wounds. Claude's shape and
+number.
 
 ## Adding one
 

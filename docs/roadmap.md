@@ -14,8 +14,9 @@ grades it chooses (D126 (threat)), the numbers against the pillars (D127 (the
 tuned numbers)), the bots and the balance suite that hold them (D128 (the
 balance suite)), and the dive reshaped on Igor's play (D129 (a gentle first
 layer), D130 (fish are revealed a type at a time), D137 (batches grow from
-seconds to a minute and a half)). **Next**: S7 (alpha polish), when Igor opens
-it. The dash is held still — Igor: "leave dash for now, discussions needed".
+seconds to a minute and a half)). **Now**: S7 (alpha polish), opened
+2026-10-24; its work, in order, is `specs/2026-10-24-s7-alpha-polish-design.md`.
+The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and
@@ -29,7 +30,10 @@ Knife (`entities/weapons.md`), of the three pieces of equipment
 (`entities/equipment.md`), of Barbs and the three boosts (`entities/mods.md`, `entities/boosts.md`), and
 the layers' pools — and this pass's: every challenge's rungs, what a rung pays,
 what a step costs and what each attribute's step adds
-(`entities/challenges.md`), and the dash's 99px (D111) — all Claude's picks.
+(`entities/challenges.md`), and the dash's 99px (D111) — and S7 (alpha
+polish)'s: the bump's (`design.md`), the leap's and the bulwark's reach
+(`entities/enemies.md`), the splash's ring (`entities/boosts.md`) — all
+Claude's picks.
 The
 scenarios that start next to each — one fish of each kind, every ordinary type
 in a row, a weapon carried from the top, the second and third layers with a

@@ -106,6 +106,18 @@ if (location.search === '?test') {
   check(near(at(f.x - f.r + 3, f.y - f.r - 7), hex(f.glow)),
     'a hurt fish must carry its bar: ' + at(f.x - f.r + 3, f.y - f.r - 7));
 
+  // --- an open mouth jolts with its body (D140) ---
+  // The bump stretched to 0.6 of the radius, so the jolted mouth's edge and
+  // the one left at rest sit pixels apart: halfway along the jolt, a mouth
+  // moved with the body is open water, one left behind is body.
+  // The diver level with it on its left, so the mouth opens straight at it.
+  Object.assign(player, { x: f.x - 200, y: f.y });
+  Object.assign(f, { hp: f.maxHp, flash: 0, phase: 'jaws', phaseTime: f.bite.windup - LEAP_TIME,
+                     bump: BUMP_TIME * 0.6 / BUMP_SIZE, bumpX: 1, bumpY: 0 });
+  draw();
+  const mid = at(f.x + 0.3 * f.r, f.y);
+  check(!near(mid, hex(f.color)), 'an open mouth must jolt with its body: ' + mid);
+
   // Sound is a no-op before the player has pressed anything, not a crash.
   check(audio === null, 'no audio context before a key press');
   sound('shoot');

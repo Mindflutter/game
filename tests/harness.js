@@ -57,7 +57,7 @@ export function loadGame() {
                   'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'CHALLENGES',
                   'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK',
                   'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT', 'HELP_BLURB',
-                  'DASH_TIME', 'DASH_GRACE', 'SHAKE_LEVELS', 'MENU_TOP', 'OPTION_TOP', 'HOME_TOP', 'PLAYER_STATS',
+                  'DASH_TIME', 'DASH_GRACE', 'BUMP_TIME', 'LEAP_TIME', 'SHAKE_LEVELS', 'MENU_TOP', 'OPTION_TOP', 'HOME_TOP', 'PLAYER_STATS',
                   'THREAT_START', 'THREAT_RISE', 'GRADE_KEEP', 'batchThreat', 'ofGrade'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [

@@ -426,8 +426,8 @@ discussed.
   (for fish and for player both maybe?) for a hit to feel more naturally. like
   visual representation of impact along with player blinking". Then: "drawn
   bump stays for s7, real knockback - design and implement now". Real
-  knockback is built, both ways (D122 (knockback)); the drawn bump is in
-  `plan.md` under S7 (alpha polish)'s game feel, a jolt over the top. Still
+  knockback is built, both ways (D122 (knockback)), and the drawn bump on a
+  fish over the top of it (D140 (the drawn bump)). Still
   open: **the diver's knock** — his "maybe", built so he can play it, his to
   keep or drop. Kin: "Shake when enemies take damage", under Suggested,
   below.

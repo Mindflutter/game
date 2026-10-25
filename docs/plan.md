@@ -10,8 +10,8 @@ must stay true while doing it.
 
 ## Active stage
 
-None. S6 (balance) closed 2026-10-24 (D139 (S6 closes)). S7 (alpha polish) is
-next: its entry is met, and it opens on Igor's word.
+S7 (alpha polish), opened 2026-10-24 on Igor's word: "start working on s7".
+Its design is `specs/2026-10-24-s7-alpha-polish-design.md`.
 Where things stand is `roadmap.md` → Next.
 
 ## Closed stages

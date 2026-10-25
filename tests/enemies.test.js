@@ -307,6 +307,28 @@ describe('the bite (D108)', () => {
     expect([far.player.hp, f.phase]).toEqual([far.player.maxHp, 'rest']);   // it snapped on water
   });
 
+  // The leap is drawn (D141): state only, as feel is never asserted (D16).
+  it('leaps at the diver on the snap and back, as far as the gap, never past its reach', () => {
+    const B = bite('bulwark');
+    const snapAt = (g, e) => {
+      g.update(g.FIXED_DT);
+      expect([e.phase, g.biteLeap(e)]).toEqual(['jaws', 0]);
+      let before = 0;
+      while (e.phase === 'jaws') { before = g.biteLeap(e); g.update(g.FIXED_DT); }
+      return before;
+    };
+    const [g, e] = at(B.reach / 2, 'bulwark');
+    expect(snapAt(g, e)).toBeGreaterThan(0);              // on its way out
+    expect(g.biteLeap(e)).toBeCloseTo(B.reach / 2, 0);    // at the diver's body on the snap
+    play(g, g.LEAP_TIME + 0.02);
+    expect(g.biteLeap(e)).toBe(0);                        // and home again
+    const [far, f] = at(B.reach / 2, 'bulwark');
+    far.update(far.FIXED_DT);
+    far.player.x -= 100;                                  // got away: it leaps into water
+    snapAt(far, f);
+    expect(far.biteLeap(f)).toBeCloseTo(B.reach, 5);
+  });
+
   // Igor, 2026-10-15: "i can freely swim thru red & purple enemies without a
   // bite" -- the drifter and the bulwark (D120).
   for (const name of ['drifter', 'bulwark']) {

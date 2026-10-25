@@ -41,6 +41,12 @@ working doc.
   **Enforced, not remembered**: a Stop hook (`.claude/hooks/check-citations.mjs`,
   wired in `.claude/settings.json`) refuses any reply with a bare `D<n>` or
   `S<n>` — added 2026-09-28 after Igor asked for this a fourth time.
+- **A finished thing the debug mode can show comes with its link** — a
+  `?debug=<code>` URL (D102 (the debug mode)), driven in Node first to prove
+  the thing shows in it. Igor, 2026-10-24: "if you finish a thing that can be
+  tested in debug mode right away, generate and provide a debug link".
+  *Missed: the drawn bump was handed over with a link to a fish one shot
+  kills, which vanishes before any bump can draw.*
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
 - Small steps: one playable change, then stop and explain what changed.
