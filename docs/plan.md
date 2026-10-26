@@ -48,7 +48,9 @@ the decision wins.
 `ideas.md` → Feel). Sound. Assets **only if** the condition is hit —
 indistinguishable enemies, indistinguishable layers, or visual clumsiness.
 UX fixing — `ideas.md` → Screens, among it what a tier does for the player
-(Igor, 2026-10-19).
+(Igor, 2026-10-19), built (D143 (every row at home says what it does)).
+Proper UX waits past alpha — Igor, 2026-10-25: "we leave proper ux out of
+alpha. now - just clarity of all player actions".
 D35's `+N` popup over collected gems is feel, and was kept for here (D78
 (gems are pulled to the player)); built, summed over the diver and flown to
 the counter (D142 (the +N)).

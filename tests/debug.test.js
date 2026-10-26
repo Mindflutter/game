@@ -326,7 +326,7 @@ describe('the setup screen', () => {
     const tip = label => g.MENUS.debug.items[row(g, label)].tip;
     for (const item of g.MENUS.debug.items) expect(item.tip, item.label).toMatch(/\w/);
     expect(tip('Mask')).toMatch(/range \+15/);
-    expect(tip('Heart')).toMatch(/maxHp \+1/);
+    expect(tip('Heart')).toMatch(/max HP \+1/);
     expect(tip('Fins')).toMatch(/speed \+45/);
     expect(tip('darter')).toMatch(/hp 1\b/);
     expect(tip('puffer')).toMatch(/swells/);             // its behaviour, in words
@@ -338,7 +338,7 @@ describe('the setup screen', () => {
       expect([e.name, steps.every(Boolean)]).toEqual([e.name, true]);
     }
     expect(tip('Strength')).toMatch(/Harpoon/);          // what needs it
-    expect(tip('Tier')).toMatch(/fireRate \+0\.5/);      // the carried weapon's tiers
+    expect(tip('Tier')).toMatch(/fire rate \+0\.5/);      // the carried weapon's tiers
   });
 
   it("says why a weapon mod is dim: it goes only with another weapon", () => {

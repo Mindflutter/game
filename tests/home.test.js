@@ -24,6 +24,25 @@ describe('home: gear, points, challenges (D31, D36)', () => {
     expect(JSON.parse(g.saved).gear.Gun).toBe(gun(g).tiers.length);   // written at once
   });
 
+  it('says in words what the next tier or step changes, until the top, and what a weapon is', () => {
+    const g = loadGame();
+    const row = (menu, name) => g.MENUS[menu].items.find(i => i.label.startsWith(name)).label;
+    expect(row('weapons', 'Gun')).toContain('tier 0 → 1   fire rate +0.5   ');
+    const mask = g.EQUIPMENT.find(x => x.name === 'Mask');
+    expect(row('equipment', 'Mask')).toContain('tier 0 → 1   range +15   ');
+    g.meta.gear.Mask = mask.tiers.length;
+    expect(row('equipment', 'Mask')).not.toContain('range');
+    g.meta.owned = ['Gun', 'Harpoon'];
+    for (const w of g.WEAPONS.slice(1)) expect(row('weapons', w.name), w.name).toContain(w.desc);   // owned, and not
+    for (const piece of [...g.WEAPONS, ...g.EQUIPMENT, ...g.ATTRIBUTES.map(a => ({ name: a.name, tiers: [a] }))]) {
+      for (const t of piece.tiers) {
+        for (const { stat } of g.modPreview(t, 1, { ...g.PLAYER_START, ...g.shotOf(gun(g)) })) {
+          expect(g.STAT_NAMES[stat], piece.name + ' ' + stat).toBeTruthy();
+        }
+      }
+    }
+  });
+
   it('pays a clean batch\'s rung, and spends its point on a step', () => {
     const g = loadGame();
     g.reset(1);
@@ -448,11 +467,11 @@ describe('attributes and requirements (D98)', () => {
     expect(g.points()).toBe(4);
     const heart = attr(g, 'Heart');
     const row = () => g.MENUS.attributes.items.find(i => i.label.startsWith('Heart'));
-    expect(row().label).toContain('0 → 1   1 point');
+    expect(row().label).toContain('0 → 1   max HP +1   1 point');
     g.raise(heart);
     g.raise(heart);                              // 1, then 2
     expect([g.points(), g.meta.raised.Heart]).toEqual([1, 2]);
-    expect(row().label).toContain('2 → 3   3 points');
+    expect(row().label).toContain('2 → 3   max HP +1   3 points');
     expect(row().dim).toBe(true);
     g.raise(heart);                              // the third costs 3: refused
     expect([g.points(), g.meta.raised.Heart]).toEqual([1, 2]);

@@ -16,11 +16,11 @@ readout see them like any other stat, and everything adds, nothing multiplies
 ## Roster
 
 <!-- generated: weapons -->
-| name | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
-|---|---|---|---|---|---|---|---|---|---|
-| Gun | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
-| Harpoon | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 1200 | fireRate 1, damage 5, pierce 3 |
-| Knife | 3 | 2 | 60 | — | 18 | 6 | 40 | 800 | fireRate 3.75, damage 3, range 72 |
+| name | desc | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Gun | quick, light shots | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
+| Harpoon | slow, heavy shots that go through fish | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 1200 | fireRate 1, damage 5, pierce 3 |
+| Knife | swings close, cutting several fish at once | 3 | 2 | 60 | — | 18 | 6 | 40 | 800 | fireRate 3.75, damage 3, range 72 |
 <!-- /generated -->
 
 Each weapon's tiers, in the order they are bought:
@@ -56,6 +56,7 @@ adds. Both are worked out from the tiers' `apply` by the check.
 | Field | Unit | Meaning |
 |---|---|---|
 | `name` | — | The key. The save keeps the tiers owned by it, so renaming one orphans what players own. |
+| `desc` | — | Its one line on the Weapons screen, what it is, on every row but the carried one's (D143 (every row at home says what it does)). A kind, not a number. |
 | `fireRate` | shots/s | Holding the button fires at this rate; the first click after a pause is instant. |
 | `damage` | hp | Taken off an enemy's `hp` per hit. |
 | `range` | px | A shot that hits nothing dies after flying this far — a real range (D8 (the weapon has a bounded firing range)). A swing's blade reaches this far from the diver's centre. |

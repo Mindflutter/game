@@ -81,6 +81,9 @@ them: the pile-up (`ideas.md` → Crowds), music.
 - 7: where a hint shows — at a fish's first arrival, at `home`, in the help.
 - 8: answered — Igor, 2026-10-24: "A". The screens stay; a row says in
   words what its next tier does, and `home` shows the kit, read-only.
+  Then, 2026-10-25: "we leave proper ux out of alpha. now - just clarity of
+  all player actions" — whether the kit panel stays in S7 is asked when it
+  comes up.
 - 9: whether the bar moves to the top.
 - 10: whether the numbers and the readout stay through alpha.
 

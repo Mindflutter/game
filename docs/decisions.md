@@ -4912,3 +4912,32 @@ one, held after the last, then from one again; flown to the counter, which
 holds it back until it lands and then bumps; all shown once the dive is over.
 Each seen failing before it was built, and with the hold not restarting, the
 bump not set, and the dive's end not counted.
+
+## D143 — Every row at home says what it does · 2026-10-25
+
+S7 (alpha polish)'s fourth item. Igor, 2026-10-19: "player has no idea what
+tier-up means for him"; then, 2026-10-25: "all rows must provide info. i
+still feel the menu is a bit clumsy, but we leave proper ux out of alpha. now
+- just clarity of all player actions".
+
+- **A tier or a step says what it changes.** A Weapons or Equipment row reads
+  `Mask   tier 0 → 1   range +15   400 gems`, an Attributes row
+  `Strength   0 → 1   dash damage +1   1 point`: the change sits between the
+  step and its price, worked out from the tier or step itself as the debug
+  mode's tips are (D102 (the debug mode)), so one added or retuned says so
+  with no text to edit. At the top tier nothing follows "the top". HP is full
+  before a dive, so a step of max HP says only that.
+- **A weapon not carried says what it is**, in its `desc` line: "slow, heavy
+  shots that go through fish". The carried weapon's row has its tier to say
+  instead.
+- **In words** — a stat's name from `STAT_NAMES`, the words the mod cards
+  use. The new names (range, damage, fire rate — the Knife's swings too —
+  guard, dash speed) and the three weapons' lines are Claude's.
+- **The change, not where it ends** — `range +15`, not `range 265 → 280`.
+  Claude's.
+
+**Guarded by**: `tests/home.test.js` → says in words what the next tier or
+step changes — the Gun's, the Mask's and Heart's rows, the top's, each weapon
+not carried showing its line, and every tier and step moving only named
+stats. Seen failing before it was built, and with a stat's name, a weapon's
+line, and the max-HP-only rule each taken away.

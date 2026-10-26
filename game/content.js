@@ -158,7 +158,8 @@ const MODS = [
 const STAT_NAMES = {
   speed: 'swim speed', maxHp: 'max HP', hp: 'HP', dashCooldown: 'dash cooldown',
   iframes: 'safe after a hit', dashDamage: 'dash damage', mendOnClear: 'HP back each batch',
-  pierce: 'pierce',
+  pierce: 'pierce', range: 'range', damage: 'damage', fireRate: 'fire rate', guard: 'guard',
+  dashSpeed: 'dash speed',
 };
 
 // ---------- boosts ----------
@@ -183,20 +184,20 @@ const BOOSTS = [
 
 // Documented in docs/entities/weapons.md, held to it by `npm test`.
 const WEAPONS = [
-  { name: 'Gun', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, knock: 60, cost: 0,
+  { name: 'Gun', desc: 'quick, light shots', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, knock: 60, cost: 0,
     tiers: [{ cost: 240,  apply: p => p.fireRate += 0.5 },
             { cost: 800, apply: p => p.fireRate += 0.5 },
             { cost: 1600, apply: p => p.fireRate += 0.5 }] },
   // The draft's railgun (D97), needing Strength (D98).
   { name: 'Harpoon', fireRate: 0.8, damage: 4, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2, knock: 200,
-    cost: 1200, requires: { Strength: 1 },
+    desc: 'slow, heavy shots that go through fish', cost: 1200, requires: { Strength: 1 },
     tiers: [{ cost: 640,  apply: p => p.damage += 1 },
             { cost: 1280, apply: p => p.fireRate += 0.2 },
             { cost: 2400, apply: p => p.pierce += 1 }] },
   // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
   // swing at pierce + 1 fish, nearest first.
   { name: 'Knife', fireRate: 3, damage: 2, range: 60, shotRadius: 18, pierce: 6, knock: 40,
-    swing: { arc: 60, time: 0.15 }, cost: 800,
+    desc: 'swings close, cutting several fish at once', swing: { arc: 60, time: 0.15 }, cost: 800,
     tiers: [{ cost: 480,  apply: p => p.range += 12 },
             { cost: 1120, apply: p => p.damage += 1 },
             { cost: 2080, apply: p => p.fireRate += 0.75 }] },
@@ -632,7 +633,9 @@ const needs = g => (meets(g) ? '' : '   needs ' +
   Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', '));
 const tierLabel = g => {
   const t = meta.gear[g.name] || 0, cost = nextCost(g);
-  return 'tier ' + t + (cost === undefined ? ', the top' : ' → ' + (t + 1) + '   ' + cost + ' gems');
+  // What the next tier changes, in words (D143).
+  return 'tier ' + t + (cost === undefined ? ', the top' : ' → ' + (t + 1) + '   ' +
+    moves(g.tiers[t].apply, WEAPONS.find(w => w.name === meta.carried)) + '   ' + cost + ' gems');
 };
 const END_MENU = {
   top: END_TOP,
@@ -727,7 +730,7 @@ const MENUS = {
       ...WEAPONS.map(w => ({
         get label() {
           if (meta.carried === w.name) return w.name + '   equipped   ' + tierLabel(w);
-          return w.name + (meta.owned.includes(w.name)
+          return w.name + '   ' + w.desc + (meta.owned.includes(w.name)
             ? '   tier ' + (meta.gear[w.name] || 0) + '   equip'
             : '   buy & equip   ' + w.cost + ' gems' + needs(w));
         },
@@ -764,7 +767,8 @@ const MENUS = {
       ...ATTRIBUTES.map(a => ({
         get label() {
           const n = meta.raised[a.name] || 0;
-          return a.name + '   ' + n + ' → ' + (n + 1) + '   ' + (n + 1) + (n ? ' points' : ' point');
+          return a.name + '   ' + n + ' → ' + (n + 1) + '   ' +
+                 moves(a.apply, WEAPONS.find(w => w.name === meta.carried)) + '   ' + (n + 1) + (n ? ' points' : ' point');
         },
         get dim() { return points() < (meta.raised[a.name] || 0) + 1; },
         run: () => raise(a) })),

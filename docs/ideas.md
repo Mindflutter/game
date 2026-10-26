@@ -313,14 +313,6 @@ discussed.
 
 **Screens**
 
-- **What a tier does.** Igor, 2026-10-19: "player has no idea what tier-up
-  means for him. put this point into ux / polish plan to address". A row on
-  the Weapons or Equipment screen reads `tier 1 → 2   140 gems`, and nothing
-  says what the next tier changes — the Mask's reach, the Weights' damage, the
-  Suit's guard, a weapon's step. The words exist: the debug mode works out
-  what a tier moves from the game itself (`gearTip()`, D102 (the debug mode)).
-  Kin to the next note's "refer to classics for tier up". **Home**: S7 (alpha
-  polish)'s UX fixing, Igor's word.
 - **`home` shows the character; gear and attributes stop being lists.** "gear
   & attributes submenus are really hard to use. on home screen i want to see
   the character - what's equipped, what weapon is on, attrs, tiers. submenus
@@ -331,7 +323,11 @@ discussed.
   amended it. What `home` shows and how a tier is bought carry over to the
   port; the drawing does not, and the canvas gets no investment (D17 (the
   browser build is a throwaway prototype)), so how much is built here is part
-  of the question. **Home**: S7 (alpha polish)'s UX fixing.
+  of the question. **Home**: S7 (alpha polish)'s UX fixing — then Igor,
+  2026-10-25, once every row said what it does (D143 (every row at home says
+  what it does)): "i still feel the menu is a bit clumsy, but we leave proper
+  ux out of alpha. now - just clarity of all player actions". Whether `home`
+  showing the kit is still S7's is asked when it comes up.
 - **Home from the pause menu.** "ability to go home from pause". `home` exists
   only between dives (D76 (`home` exists only between dives)), so this ends the
   dive, its gems banked as at any end (D67 (currency is kept on death)). Kin to

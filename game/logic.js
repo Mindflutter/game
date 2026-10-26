@@ -761,8 +761,9 @@ function gateLine() {
 // tip cannot tell a number the game does not deliver.
 const signed = n => (n < 0 ? '-' : '+') + +Math.abs(n).toFixed(2);
 function moves(apply, w = WEAPONS.find(x => x.name === debugSetup.weapon)) {
-  return modPreview({ apply }, 1, { ...PLAYER_START, ...shotOf(w) })
-    .map(c => c.stat + ' ' + signed(c.to - c.from)).join(', ');
+  // Before a dive HP is full, so a step of max HP is all that needs saying.
+  return modPreview({ apply }, 1, { ...PLAYER_START, ...shotOf(w) }).filter(c => c.stat !== 'hp')
+    .map(c => (STAT_NAMES[c.stat] || c.stat) + ' ' + signed(c.to - c.from)).join(', ');
 }
 const needsLine = g => (g.requires ? '   owning it needs ' +
   Object.entries(g.requires).map(([a, n]) => a + ' ' + n).join(', ') : '');
