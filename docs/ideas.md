@@ -552,6 +552,13 @@ balanced for alpha".
   upgrade system, gems and points together. **Home**: S8 (the economy: gems
   and points).
 
+- **Bloom's splash without a hit.** Igor, 2026-10-26: "i feel like shot
+  splash should happen even if you dont hit directly". Today a shot splashes
+  only where it strikes a fish (D125 (boosts keep each weapon's nature)); a
+  miss splashes nothing. Open: where a missed shot splashes — where it ends
+  its range, or as it passes a fish within `splash` — and whether a cut's
+  splash follows. **Home**: open.
+
 ## Suggested but not yet discussed
 
 - **A rank only play can earn.** Claude, 2026-10-01, in the mods rework, when
