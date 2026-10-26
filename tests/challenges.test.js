@@ -10,11 +10,13 @@ describe('challenge ladders (D109, D110)', () => {
   // A dive from the top, the diver kept alive.
   const diving = s => { const g = loadGame(); g.reset(s); g.immortal = true; return g; };
   const cleanBatches = (g, n) => { for (let i = 0; i < n; i++) { ride(g); clearAndWait(g, 0.1); } };
+  const rung = (g, name, k) => g.CHALLENGES.find(c => c.name === name).rungs[k - 1];
 
   it('counts clean batches in a row, pays each rung once, ever, and starts again after a hit -- the guard\'s too', () => {
     const g = diving(1);
-    cleanBatches(g, 3);
-    expect([g.tally.untouched, g.meta.challenges.untouched]).toEqual([3, 2]);   // rungs 1 and 3
+    g.tally.untouched = rung(g, 'untouched', 2) - 2;
+    cleanBatches(g, 2);
+    expect([g.tally.untouched, g.meta.challenges.untouched]).toEqual([rung(g, 'untouched', 2), 2]);   // two at once
     ride(g);
     g.immortal = false;
     g.player.guard = 1;
@@ -30,26 +32,31 @@ describe('challenge ladders (D109, D110)', () => {
     expect(g.notice).not.toContain('untouched');
   });
 
-  it('counts batches cleared without a dash, and starts again after one', () => {
-    const g = diving(1);
-    cleanBatches(g, 3);
-    expect(g.meta.challenges.footwork).toBe(1);       // rung 1: three in a row
-    ride(g);
-    g.keys.add('KeyD');
-    g.justPressed.add('Space');
-    g.update(g.FIXED_DT);
-    expect(g.batchDashed).toBe(true);
-    g.keys.clear();
-    clearAndWait(g, 0.1);
-    expect([g.tally.footwork, g.meta.challenges.footwork]).toEqual([0, 1]);
+  it('counts the fish one dash shoves, each once, and starts again with the next dash', () => {
+    const g = fighting(0);
+    const n = rung(g, 'bowling', 1);
+    for (let i = 0; i < n; i++) g.placeEnemy('drifter', g.player.x + 30 + i * 12, g.player.y);
+    const dash = () => {
+      g.player.facing = 0;
+      g.player.dashCd = 0;
+      g.justPressed.add('Space');
+      for (let i = 0, t = ticks(g, g.DASH_TIME); i < t; i++) g.update(g.FIXED_DT);
+    };
+    dash();
+    expect(g.player.dashHits).toBeGreaterThanOrEqual(n);
+    expect(g.meta.challenges.bowling).toBe(1);
+    for (const e of g.enemies) e.x += 2000;      // nothing in reach of the next
+    dash();
+    expect([g.player.dashHits, g.meta.challenges.bowling]).toEqual([0, 1]);
   });
 
   it('counts a glowing fish killed first -- or on the same tick as the first -- and starts again after another first', () => {
     const same = fighting(0);
+    same.tally.beeline = rung(same, 'beeline', 1) - 1;
     same.killEnemy(same.enemies.find(e => !e.carrier));
     same.killEnemy(same.enemies.find(e => e.carrier));   // the same tick: together
     clearAndWait(same, 0.1);
-    expect([same.tally.beeline, same.meta.challenges.beeline]).toEqual([1, 1]);
+    expect([same.tally.beeline, same.meta.challenges.beeline]).toEqual([rung(same, 'beeline', 1), 1]);
     const late = fighting(0);
     late.tally.beeline = 2;
     late.killEnemy(late.enemies.find(e => !e.carrier));
@@ -68,24 +75,26 @@ describe('challenge ladders (D109, D110)', () => {
 
   it('counts kills within two seconds, the older dropping out, and pays several rungs at once', () => {
     const g = fighting(0);
-    while (g.enemies.length < 14) g.placeEnemy('drifter', g.player.x + 300, g.player.y);
+    const first = rung(g, 'flurry', 1), second = rung(g, 'flurry', 2);
+    while (g.enemies.length < 2 * first) g.placeEnemy('drifter', g.player.x + 300, g.player.y);
     const kill = n => { for (const e of g.enemies.filter(x => !x.gone).slice(0, n)) g.killEnemy(e); };
-    kill(5);
+    kill(first - 1);
     for (let i = 0, n = ticks(g, 2.1); i < n; i++) g.update(g.FIXED_DT);
-    expect(g.statusLines().map(l => l.text).join()).toContain('flurry 0/6');   // the bar forgets too
-    kill(5);                                     // five in the window, the first five gone from it
-    expect([g.meta.challenges.flurry, g.killTimes.length]).toEqual([undefined, 5]);   // and the save
+    expect(g.statusLines().map(l => l.text).join()).toContain('flurry 0/' + first);   // the bar forgets too
+    kill(first - 1);                             // the first ones gone from the window
+    expect([g.meta.challenges.flurry, g.killTimes.length]).toEqual([undefined, first - 1]);   // and the save
     kill(1);
-    expect(g.meta.challenges.flurry).toBe(1);         // six within two seconds
+    expect(g.meta.challenges.flurry).toBe(1);
     const at = fighting(0);
-    while (at.enemies.length < 12) at.placeEnemy('drifter', at.player.x + 300, at.player.y);
+    while (at.enemies.length < second) at.placeEnemy('drifter', at.player.x + 300, at.player.y);
     for (const e of [...at.enemies]) at.killEnemy(e);
-    expect(at.meta.challenges.flurry).toBe(2);        // 6 and 12 at once: 1 + 2 points
-    expect(at.notice).toBe('flurry: kill 12 fish within 2 seconds \u2014 3 points');
+    expect(at.meta.challenges.flurry).toBe(2);        // two rungs at once: a point each
+    expect(at.notice).toBe('flurry: kill ' + second + ' fish within 2 seconds \u2014 2 points');
   });
 
   it('lets challenges paying on one tick share the notice', () => {
     const g = fighting(0);
+    g.tally = { untouched: rung(g, 'untouched', 1) - 1, beeline: rung(g, 'beeline', 1) - 1 };
     clearAndWait(g, 0.1);                        // all at once: clean, and the glowing fish first
     expect(g.notice).toBe('untouched, beeline \u2014 2 points');
   });
@@ -96,9 +105,9 @@ describe('challenge ladders (D109, D110)', () => {
     ride(g);
     expect(g.layerStart).toBe(g.elapsed);
     for (let i = 0; i < boss; i++) { clearAndWait(g, 0.1); ride(g); }
-    g.layerStart = g.elapsed - 330;              // five and a half minutes in
+    g.layerStart = g.elapsed - 190;              // 3:10 in
     expect(clearAndWait(g, 1)).toBe('mods');     // the boss down, the layer end's cards
-    expect([g.meta.challenges.swift, g.layerStart]).toEqual([2, null]);   // within 8 and 6, not 5
+    expect([g.meta.challenges.swift, g.layerStart]).toEqual([2, null]);   // within 3:45 and 3:20, not 3:00
   });
 
   it('never times a layer the dive began partway into', () => {
@@ -110,14 +119,15 @@ describe('challenge ladders (D109, D110)', () => {
     expect(g.meta.challenges.swift).toBe(undefined);
   });
 
-  it('keeps the batch\'s dash and every count with a saved dive', () => {
+  it('keeps every count with a saved dive', () => {
     const a = fighting(0);
-    Object.assign(a, { batchDashed: true, tally: { untouched: 4, beeline: 1 }, killTimes: [a.elapsed],
+    a.player.dashHits = 3;
+    Object.assign(a, { tally: { untouched: 4, beeline: 1 }, killTimes: [a.elapsed],
                        firstKillAt: a.elapsed, glowAt: null, layerStart: 1.5 });
     const b = loadGame();
     expect(b.loadSave(a.saveText())).toBe('');
-    expect([b.batchDashed, b.tally, b.killTimes, b.firstKillAt, b.glowAt, b.layerStart])
-      .toEqual([true, { untouched: 4, beeline: 1 }, [a.elapsed], a.elapsed, null, 1.5]);
+    expect([b.player.dashHits, b.tally, b.killTimes, b.firstKillAt, b.glowAt, b.layerStart])
+      .toEqual([3, { untouched: 4, beeline: 1 }, [a.elapsed], a.elapsed, null, 1.5]);
   });
 
   it('calls them challenges on every screen, line and notice the player reads (D110)', () => {
@@ -133,12 +143,12 @@ describe('challenge ladders (D109, D110)', () => {
 
   it('lists every challenge on the Attributes and pause screens: its badges, then its next rung', () => {
     const g = loadGame();
-    g.meta.challenges = { untouched: 4, beeline: 1 };
+    g.meta.challenges = { untouched: 9, beeline: 1 };
     const lines = g.challengeLines();
     expect(lines).toHaveLength(g.CHALLENGES.length + 1);
-    expect(lines).toContain('untouched   ●●●●   every rung earned');
-    expect(lines).toContain('beeline   ●○○○   kill the glowing fish first, 3 batches in a row  —  2 points');
-    expect(lines).toContain('footwork   ○○○○   clear 3 batches in a row without dashing  —  1 point');
+    expect(lines).toContain('untouched   ●●●●●●●●●   every rung earned');
+    expect(lines).toContain('beeline   ●○○○○○○○○   kill the glowing fish first, ' + rung(g, 'beeline', 2) + ' batches in a row');
+    expect(lines).toContain('bowling   ○○○○○○○○○   dash through ' + rung(g, 'bowling', 1) + ' fish at once');
     expect([g.MENUS.attributes.challenges, g.MENUS.paused.challenges]).toEqual([true, true]);
   });
 
@@ -148,8 +158,10 @@ describe('challenge ladders (D109, D110)', () => {
                         spent: { Heart: 3, Strength: 1 }, owned: ['Gun', 'Harpoon'], carried: 'Harpoon' });
     const g = loadGame();
     expect(g.loadSave(JSON.stringify(v6))).toBe('');
-    expect(g.meta.challenges).toEqual({ untouched: 2, swift: 1, footwork: 1 });
-    expect([g.meta.raised, g.points()]).toEqual([{}, 5]);   // it had earned 4
+    // Its rungs come to v7 as { untouched: 2, swift: 1, footwork: 1 }; none of
+    // them meets a rung of the nine-rung ladders (D152).
+    expect(g.meta.challenges).toEqual({});
+    expect([g.meta.raised, g.points()]).toEqual([{}, 0]);
     expect([g.meta.owned, g.meta.carried]).toEqual([['Gun', 'Harpoon'], 'Harpoon']);
     g.reset(1);
     expect(g.weaponName).toBe('Harpoon');

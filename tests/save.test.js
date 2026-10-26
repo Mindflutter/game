@@ -64,7 +64,7 @@ describe('the save (D70)', () => {
     const h = loadGame();
     expect(h.loadSave(g.saveText())).toBe('');
     expect(h.meta).toEqual(g.meta);
-    expect(h.points()).toBe(3);
+    expect(h.points()).toBe(2);
     expect(h.diveLive).toBe(false);
   });
 
@@ -103,10 +103,10 @@ describe('the save (D70)', () => {
     // shot as it was then, and is written back as the current version.
     expect([g.player.shotSpeed, g.player.shotRadius]).toEqual([430, 4]);
     expect(JSON.parse(g.saveText()).version).toBe(g.freshMeta().version);
-    // Its challenges were kept by layer name, then by number (D89), and come
-    // back as rungs (D109).
-    expect(g.meta.challenges).toEqual({ untouched: 1 });
-    expect(g.points()).toBe(1);
+    // Its challenges were kept by layer name, then by number (D89), came back
+    // as rungs (D109), and meet none of the nine-rung ladders (D152).
+    expect(g.meta.challenges).toEqual({});
+    expect(g.points()).toBe(0);
     g.screen = g.resumeTo;
     g.immortal = true;
     const shots = shotsSeen(g, 600);
@@ -163,9 +163,10 @@ describe('the save (D70)', () => {
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
     expect(g.enemies.some(e => e.phase === 'jaws') && g.enemies.some(e => e.touch)).toBe(true);
-    // Paid once in layer 3, a rung now; mid-layer and mid-batch, it waits for
-    // the next batch's first kill and the next layer's clock (D109).
-    expect([g.meta.challenges, g.meta.raised, g.points()]).toEqual([{ untouched: 1 }, {}, 1]);
+    // Paid once in layer 3, a rung, then none on the nine-rung ladders (D152);
+    // mid-layer and mid-batch, it waits for the next batch's first kill and the
+    // next layer's clock (D109).
+    expect([g.meta.challenges, g.meta.raised, g.points()]).toEqual([{}, {}, 0]);
     expect([g.tally, g.firstKillAt, g.layerStart]).toEqual([{}, -1, null]);
     g.screen = g.resumeTo;
     g.immortal = true;
@@ -180,12 +181,14 @@ describe('the save (D70)', () => {
     // (D109).
     const text = readFileSync(new URL('./fixtures/save-v7.json', import.meta.url), 'utf8');
     const saved = JSON.parse(text).dive;
+    const without = (o, k) => Object.fromEntries(Object.entries(o).filter(([x]) => x !== k));   // gone (D152)
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
-    expect([g.meta.challenges, g.meta.raised, g.points()])
-      .toEqual([{ untouched: 2, beeline: 1, flurry: 1 }, { Heart: 1, Strength: 1 }, 3]);
+    // Its rungs meet none of the nine-rung ladders, and its steps come back
+    // (D152).
+    expect([g.meta.challenges, g.meta.raised, g.points()]).toEqual([{}, {}, 0]);
     expect([g.tally, g.killTimes, g.firstKillAt, g.layerStart])
-      .toEqual([saved.tally, saved.killTimes, saved.firstKillAt, saved.layerStart]);
+      .toEqual([without(saved.tally, 'footwork'), saved.killTimes, saved.firstKillAt, saved.layerStart]);
     expect(g.muted).toBe(true);                  // its settings too (D113)
     expect(g.incoming).toEqual([]);              // its batch came in whole (D115)
     g.screen = g.resumeTo;
@@ -333,6 +336,32 @@ describe('the save (D70)', () => {
     expect(g.meta.seen.slice(0, 2)).toEqual(['drifter', 'darter']);
   });
 
+  it('re-counts a version 12 save\'s rungs on the nine-rung ladders and gives its steps back (D152)', () => {
+    const v12 = JSON.parse(readFileSync(new URL('./fixtures/save-v12.json', import.meta.url), 'utf8'));
+    Object.assign(v12, { challenges: { untouched: 4, beeline: 2, flurry: 4, swift: 4, footwork: 3 },
+                         raised: { Heart: 3 } });
+    v12.dive.tally = { untouched: 2, footwork: 5 };
+    const g = loadGame();
+    expect(g.loadSave(JSON.stringify(v12))).toBe('');
+    // Ten clean, three glowing first, thirty within two seconds, a layer
+    // within four minutes -- slower than the slowest rung now.
+    expect(g.meta.challenges).toEqual({ untouched: 1, beeline: 1, flurry: 9 });
+    expect([g.meta.raised, g.points()]).toEqual([{}, 11]);
+    expect([g.tally, g.player.dashHits]).toEqual([{ untouched: 2 }, 0]);
+  });
+
+  it('loads a save written by the first build of version 13, and plays it on', () => {
+    // Saved mid-dash, two fish shoved (D152).
+    const text = readFileSync(new URL('./fixtures/save-v13.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect([g.meta.challenges, g.meta.raised, g.player.dashHits]).toEqual([{ untouched: 2, bowling: 1 }, { Heart: 1 }, 2]);
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    for (let i = 0; i < 3 / g.FIXED_DT; i++) g.update(g.FIXED_DT);
+    expect(g.screen).toBe('playing');
+  });
+
   it("plays a version 11 dive's plan on ungraded, as it was drawn (D126)", () => {
     const text = readFileSync(new URL('./fixtures/save-v11.json', import.meta.url), 'utf8');
     const g = loadGame();
@@ -369,7 +398,7 @@ describe('the save (D70)', () => {
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
     expect(g.meta.bank).toBeGreaterThan(0);
-    expect(g.meta.challenges).toEqual({ untouched: 1 });          // a rung now (D109)
+    expect(g.meta.challenges).toEqual({});          // a rung (D109), none on nine (D152)
     expect(g.diveLive).toBe(true);
     g.screen = g.resumeTo;
     g.immortal = true;

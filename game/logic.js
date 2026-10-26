@@ -594,7 +594,7 @@ function takeMod(mod) {
   modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
 }
 
-// Every rung `v` now meets pays, once ever, rung k paying k points (D109).
+// Every rung `v` now meets pays, once ever, a point each (D109, D152).
 function climb(c, v) {
   const was = meta.challenges[c.name] || 0;
   let k = was;
@@ -604,7 +604,7 @@ function climb(c, v) {
   // A challenge paying twice in a tick -- a swing's kills -- is one entry.
   let now = paidNow.find(p => p.c === c);
   if (!now) paidNow.push(now = { c, paid: 0 });
-  now.paid += tri(k) - tri(was);
+  now.paid += k - was;
   const total = paidNow.reduce((a, p) => a + p.paid, 0);
   notice = (paidNow.length === 1 ? c.name + ': ' + c.ask(c.rungs[k - 1]) : paidNow.map(p => p.c.name).join(', ')) +
            ' \u2014 ' + total + (total === 1 ? ' point' : ' points');
@@ -614,7 +614,7 @@ function climb(c, v) {
 // ---------- home ----------
 // Derived every time, so paid and spent can never disagree (D36, D109).
 function points() {
-  return CHALLENGES.reduce((a, c) => a + tri(meta.challenges[c.name] || 0), 0) -
+  return CHALLENGES.reduce((a, c) => a + (meta.challenges[c.name] || 0), 0) -
          ATTRIBUTES.reduce((a, x) => a + tri(meta.raised[x.name] || 0), 0);
 }
 
@@ -647,7 +647,7 @@ function buy(g) {
 
 function raise(a) {
   const step = (meta.raised[a.name] || 0) + 1;
-  if (points() < step) return;
+  if (step > a.max || points() < step) return;
   meta.raised[a.name] = step;
   saveNow();
 }
@@ -1110,7 +1110,6 @@ function step(dt) {
         light();
         batchHit = false;
         guardLeft = player.guard;
-        batchDashed = false;
         firstKillAt = null;
         glowAt = null;
         // A layer's first batch starts `swift`'s clock (D109).
@@ -1153,12 +1152,12 @@ function step(dt) {
     player.dashTime = DASH_TIME;
     player.dashCd = player.dashCooldown;
     player.dashId = ++bulletId;          // one dash hits each enemy once
+    player.dashHits = 0;                 // `bowling`'s count (D152)
     player.dashDx = Math.cos(player.facing);
     player.dashDy = Math.sin(player.facing);
     // Invulnerable for the dash plus a moment after, so finishing it inside
     // something you flew through doesn't cost an hp.
     player.safe = DASH_TIME + DASH_GRACE;
-    batchDashed = true;
     sound('dash');
   }
   // A dash is committed (D56): with the keys steering it, letting go would stop
@@ -1248,6 +1247,9 @@ function step(dt) {
       if (segDistanceSq(e.x, e.y, fromX, fromY, player.x, player.y) < dashReach * dashReach &&
           dot > 0 && dot * dot > DASH_ARC * DASH_ARC * (fx * fx + fy * fy)) {
         e.lastHitBy = player.dashId;
+        player.dashHits += 1;
+        // A fish placed by hand pays no challenge (D109).
+        if (plan[batchIndex - 1]) for (const c of CHALLENGES) if (c.dash) climb(c, c.dash());
         // The shove is never bought: it is what makes diving into a crowd a
         // play, and must survive `dashDamage` being zero.
         e.pushX = -ux * DASH_PUSH;

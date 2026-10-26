@@ -46,8 +46,9 @@ describe('home: gear, points, challenges (D31, D36)', () => {
   it('pays a clean batch\'s rung, and spends its point on a step', () => {
     const g = loadGame();
     g.reset(1);
+    g.tally.untouched = g.CHALLENGES[0].rungs[0] - 1;
     ride(g);
-    clearAndWait(g, 0.1);                        // the first batch, untouched
+    clearAndWait(g, 0.1);                        // the streak's first rung, untouched
     expect(g.meta.challenges.untouched).toBe(1);
     expect(g.notice).toContain('untouched');
     g.meta.challenges = { untouched: 1 };             // its point alone
@@ -450,7 +451,7 @@ describe('attributes and requirements (D98)', () => {
     g.pickWeapon(w);
     g.buy(piece);
     expect([g.meta.owned, g.meta.gear.Belt, g.meta.bank]).toEqual([['Gun'], undefined, 100]);
-    earn(g, 3);
+    earn(g, 4);
     g.raise(attr(g, 'Strength'));
     g.raise(attr(g, 'Heart'));
     g.buy(piece);                                // Heart 1 of the 2 it needs
@@ -463,7 +464,7 @@ describe('attributes and requirements (D98)', () => {
 
   it('prices step n of an attribute at n points, against what the rungs paid', () => {
     const g = loadGame();
-    g.meta.challenges = { untouched: 2, flurry: 1 };   // 1 + 2, and 1
+    g.meta.challenges = { untouched: 3, flurry: 1 };   // a point a rung (D152)
     expect(g.points()).toBe(4);
     const heart = attr(g, 'Heart');
     const row = () => g.MENUS.attributes.items.find(i => i.label.startsWith('Heart'));
@@ -475,6 +476,17 @@ describe('attributes and requirements (D98)', () => {
     expect(row().dim).toBe(true);
     g.raise(heart);                              // the third costs 3: refused
     expect([g.points(), g.meta.raised.Heart]).toEqual([1, 2]);
+  });
+
+  it('stops an attribute at its top, however many points are held (D152)', () => {
+    const g = loadGame();
+    const heart = attr(g, 'Heart');
+    earn(g, 99);
+    g.meta.raised.Heart = heart.max;
+    g.raise(heart);
+    expect(g.meta.raised.Heart).toBe(heart.max);
+    const row = g.MENUS.attributes.items.find(i => i.label.startsWith('Heart'));
+    expect([row.label, row.dim]).toEqual(['Heart   ' + heart.max + ', the top', true]);
   });
 });
 

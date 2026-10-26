@@ -352,8 +352,8 @@ discussed.
   A lean. What it would touch: the dash is the second verb since D20 (mouse aim
   and an offensive dash); until it opens, the Dash reach and Strength
   attributes and the `Reflex` and `Impact` mods would buy nothing, so a draw
-  would have to hold them back; and `footwork` would pay for not dashing with
-  no dash to use. Open: whether, and what opens it — gear, a step, a layer, a
+  would have to hold them back; and `bowling` would have no dash to count.
+  Open: whether, and what opens it — gear, a step, a layer, a
   challenge's rung. **Home**: open — Igor, 2026-10-21: "leave dash for now,
   discussions needed".
 
@@ -499,21 +499,6 @@ discussed.
 
 ## Open — from S6 (balance)
 
-- **`footwork`, reworked or dropped.** Igor, 2026-10-24: "footwork is
-  generally questionable thing, as it forces the player to withdraw an
-  essential ability. i'd rework it or drop completely." It pays for batches
-  cleared without dashing; D127 (the tuned numbers)'s bar on it left with S6
-  (balance)'s close (D139 (S6 closes)). Open: what it becomes, or whether it
-  goes. Igor, 2026-10-26, playing alpha: "footwork still makes no sense".
-  **Home**: S8 (the economy: gems and points).
-- **Challenge rungs on the shorter dive.** The ladders were sized on fifteen
-  gates a layer (D109 (micro-tasks are ladders; steps cost more as they
-  rise)); ten since D137 (batches grow from seconds to a minute and a half),
-  so a dive has 30 gates and 21 glowing batches, and every streak's rung is
-  harder to meet than its rate says — `footwork`'s top, fifteen batches, a
-  layer and a half. Open:
-  re-size them to the new shape, or keep them. **Home**: S8 (the economy:
-  gems and points); the rungs are Claude's picks either way.
 - **Gates a layer, layer by layer.** Igor, 2026-10-24, setting ten for every
   layer (D137 (batches grow from seconds to a minute and a half)): "may change
   to different value for layers later". **Home**: a later balance pass.
@@ -548,9 +533,9 @@ balanced for alpha".
   kills (D78 (gems are pulled to the player)); the prices were halved once
   (D136 (prices halved)).
   On a first dive the points outrun what they buy and the gems fall short of
-  every price but the Gun's first tier (240). Open: retune, or rework the
-  upgrade system, gems and points together. **Home**: S8 (the economy: gems
-  and points).
+  every price but the Gun's first tier (240). **Built** as D152 (nine rungs
+  a ladder, a point a rung), waiting on Igor's play of a fresh save — S8 (the
+  economy: gems and points)'s exit.
 
 - **Bloom's splash without a hit.** Igor, 2026-10-26: "i feel like shot
   splash should happen even if you dont hit directly". Today a shot splashes

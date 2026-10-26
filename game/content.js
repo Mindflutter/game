@@ -194,71 +194,71 @@ const BOOSTS = [
 // Documented in docs/entities/weapons.md, held to it by `npm test`.
 const WEAPONS = [
   { name: 'Gun', desc: 'quick, light shots', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, knock: 60, cost: 0,
-    tiers: [{ cost: 240,  apply: p => p.fireRate += 0.5 },
-            { cost: 800, apply: p => p.fireRate += 0.5 },
-            { cost: 1600, apply: p => p.fireRate += 0.5 }] },
+    tiers: [{ cost: 150,  apply: p => p.fireRate += 0.5 },
+            { cost: 900, apply: p => p.fireRate += 0.5 },
+            { cost: 2600, apply: p => p.fireRate += 0.5 }] },
   // The draft's railgun (D97), needing Strength (D98).
   { name: 'Harpoon', fireRate: 0.8, damage: 4, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2, knock: 200,
-    desc: 'slow, heavy shots that go through fish', cost: 1200, requires: { Strength: 1 },
-    tiers: [{ cost: 640,  apply: p => p.damage += 1 },
-            { cost: 1280, apply: p => p.fireRate += 0.2 },
-            { cost: 2400, apply: p => p.pierce += 1 }] },
+    desc: 'slow, heavy shots that go through fish', cost: 800, requires: { Strength: 1 },
+    tiers: [{ cost: 400,  apply: p => p.damage += 1 },
+            { cost: 1600, apply: p => p.fireRate += 0.2 },
+            { cost: 4000, apply: p => p.pierce += 1 }] },
   // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
   // swing at pierce + 1 fish, nearest first.
   { name: 'Knife', fireRate: 3, damage: 2, range: 60, shotRadius: 18, pierce: 6, knock: 40,
-    desc: 'swings close, cutting several fish at once', swing: { arc: 60, time: 0.15 }, cost: 800,
-    tiers: [{ cost: 480,  apply: p => p.range += 12 },
-            { cost: 1120, apply: p => p.damage += 1 },
-            { cost: 2080, apply: p => p.fireRate += 0.75 }] },
+    desc: 'swings close, cutting several fish at once', swing: { arc: 60, time: 0.15 }, cost: 500,
+    tiers: [{ cost: 300,  apply: p => p.range += 12 },
+            { cost: 1400, apply: p => p.damage += 1 },
+            { cost: 3600, apply: p => p.fireRate += 0.75 }] },
 ];
 
 // Combat numbers only; body stats are attributes' (D36). Documented in
 // docs/entities/equipment.md.
 const EQUIPMENT = [
-  { name: 'Mask',    tiers: [{ cost: 400,  apply: p => p.range += 15 },
-                             { cost: 960, apply: p => p.range += 15 },
-                             { cost: 1920, apply: p => p.range += 15 }] },
-  { name: 'Suit',    tiers: [{ cost: 720,  apply: p => p.guard += 1 },
-                             { cost: 1600, apply: p => p.guard += 1 },
-                             { cost: 3040, apply: p => p.guard += 1 }] },
-  { name: 'Weights', tiers: [{ cost: 560,  apply: p => p.damage += 0.5 },
+  { name: 'Mask',    tiers: [{ cost: 150,  apply: p => p.range += 15 },
+                             { cost: 1000, apply: p => p.range += 15 },
+                             { cost: 3000, apply: p => p.range += 15 }] },
+  { name: 'Suit',    tiers: [{ cost: 250,  apply: p => p.guard += 1 },
+                             { cost: 1400, apply: p => p.guard += 1 },
+                             { cost: 3800, apply: p => p.guard += 1 }] },
+  { name: 'Weights', tiers: [{ cost: 200,  apply: p => p.damage += 0.5 },
                              { cost: 1200, apply: p => p.damage += 0.5 },
-                             { cost: 2240, apply: p => p.damage += 0.5 }] },
+                             { cost: 3400, apply: p => p.damage += 0.5 }] },
 ];
 
-// Uncapped here: the challenges' finite rungs cap them at the source (D36).
-// Step n costs n points (D109).
+// Step n costs n points (D109); `max` steps each, whose cost is what the
+// ladders pay (D152).
 const ATTRIBUTES = [
-  { name: 'Dash reach', apply: p => p.dashSpeed += 150 },
-  { name: 'Heart',      apply: p => { p.maxHp += 1; p.hp += 1; } },
-  { name: 'Strength',   apply: p => p.dashDamage += 1 },
+  { name: 'Dash reach', max: 5, apply: p => p.dashSpeed += 150 },
+  { name: 'Heart',      max: 5, apply: p => { p.maxHp += 1; p.hp += 1; } },
+  { name: 'Strength',   max: 5, apply: p => p.dashDamage += 1 },
 ];
 
-// What a ladder's first n rungs pay, and an attribute's first n steps cost (D109).
+// What an attribute's first n steps cost (D109).
 const tri = n => n * (n + 1) / 2;
 
 // Judged at one moment: `clear` takes the streak and returns it after the
-// batch just cleared, `kill` counts after a kill, `end` reads a layer at its
-// end. With `within`, a rung is a time to beat (D109). Claude's picks.
+// batch just cleared, `kill` counts after a kill, `dash` as a dash shoves a
+// fish, `end` reads a layer at its end. With `within`, a rung is a time to beat
+// (D109). Every rung pays one point (D152). Claude's picks.
 const CHALLENGES = [
-  { name: 'untouched', rungs: [1, 3, 6, 10],
-    ask: n => (n === 1 ? 'clear a batch without a hit' : 'clear ' + n + ' batches in a row without a hit'),
+  { name: 'untouched', rungs: [10, 14, 18, 21, 24, 26, 28, 29, 30],
+    ask: n => 'clear ' + n + ' batches in a row without a hit',
     clear: n => (batchHit ? 0 : n + 1) },
-  { name: 'footwork',  rungs: [3, 6, 10, 15],
-    ask: n => 'clear ' + n + ' batches in a row without dashing',
-    clear: n => (batchDashed ? 0 : n + 1) },
+  { name: 'bowling',   rungs: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    ask: n => 'dash through ' + n + ' fish at once',
+    dash: () => player.dashHits },
   // A batch with no glowing fish neither counts nor breaks it. A kill on the
   // glowing fish's tick ties with it: one swing or dash is one moment.
-  { name: 'beeline',   rungs: [1, 3, 5, 8],
-    ask: n => (n === 1 ? 'kill a glowing fish before the rest of its batch'
-                       : 'kill the glowing fish first, ' + n + ' batches in a row'),
+  { name: 'beeline',   rungs: [3, 5, 7, 9, 11, 13, 15, 18, 21],
+    ask: n => 'kill the glowing fish first, ' + n + ' batches in a row',
     clear: n => (glowAt === null ? n : glowAt === firstKillAt ? n + 1 : 0) },
-  { name: 'flurry',    rungs: [6, 12, 20, 30],
+  { name: 'flurry',    rungs: [7, 9, 11, 13, 15, 18, 21, 25, 30],
     ask: n => 'kill ' + n + ' fish within ' + FLURRY_TIME + ' seconds',
     kill: () => killTimes.filter(t => elapsed - t <= FLURRY_TIME).length },
   // A dive begun partway into a layer has no start for it: not judged.
-  { name: 'swift',     rungs: [480, 360, 300, 240], within: true,
-    ask: s => 'clear a layer within ' + s / 60 + ' minutes',
+  { name: 'swift',     rungs: [225, 200, 180, 165, 150, 140, 130, 120, 110], within: true,
+    ask: s => 'clear a layer within ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'),
     end: () => (layerStart === null ? Infinity : elapsed - layerStart) },
 ];
 
@@ -320,18 +320,17 @@ const clock = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStar
 function challengeStatus(c) {
   const k = meta.challenges[c.name] || 0;
   if (k === c.rungs.length) return c.name + ' ' + '●'.repeat(k);
-  const now = c.clear ? (tally[c.name] || 0) : (c.kill || c.end)(), rung = c.rungs[k];
+  const now = c.clear ? (tally[c.name] || 0) : (c.kill || c.dash || c.end)(), rung = c.rungs[k];
   return c.name + ' ' + (c.within ? (now === Infinity ? '–' : clock(now)) + '/' + clock(rung) : now + '/' + rung);
 }
 
 const CHALLENGE_LINE = 24;
 const challengesTop = menu => menu.top + menu.items.length * ROW_STEP + 10;
 function challengeLines() {
-  return ['Challenges pay the points, each rung once, in any layer', ...CHALLENGES.map(c => {
+  return ['Challenges pay the points, a point a rung, once, in any layer', ...CHALLENGES.map(c => {
     const k = meta.challenges[c.name] || 0;
     return c.name + '   ' + '●'.repeat(k) + '○'.repeat(c.rungs.length - k) + '   ' +
-           (k < c.rungs.length ? c.ask(c.rungs[k]) + '  —  ' + (k + 1) + (k ? ' points' : ' point')
-                               : 'every rung earned');
+           (k < c.rungs.length ? c.ask(c.rungs[k]) : 'every rung earned');
   })];
 }
 
@@ -591,7 +590,6 @@ const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 // with nothing to write.
 const ONE_SHOT         = 100;   // damage that kills anything here in one shot
 const DEBUG_FISH_MAX   = 50;    // of one type in the setup's batch: Claude's pick
-const DEBUG_STEPS_MAX  = 9;     // of one attribute: Claude's pick
 // A fish's tip: one line per behaviour field, which `npm test` asks for.
 const DEBUG_BEHAVIOURS = {
   chase: 'swims straight at you',
@@ -607,7 +605,7 @@ const DEBUG_BEHAVIOURS = {
 const DEBUG_COUNTS = [
   ...ENEMY_TYPES.map(e => ({ name: e.name, col: 1, max: DEBUG_FISH_MAX, tip: () => fishTip(e, debugSetup.grade) })),
   ...EQUIPMENT.map(g => ({ name: g.name, col: 2, max: g.tiers.length, of: true, tip: () => gearTip(g) })),
-  ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: DEBUG_STEPS_MAX, tip: () => stepTip(a) })),
+  ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: a.max, tip: () => stepTip(a) })),
   ...MODS.map(m => ({ name: m.name, col: 3, max: m.max, of: true, tip: () => modTip(m) })),
   ...WEAPONS.map(w => ({ name: w.name, max: w.tiers.length, of: true })),
 ];
@@ -821,10 +819,11 @@ const MENUS = {
       ...ATTRIBUTES.map(a => ({
         get label() {
           const n = meta.raised[a.name] || 0;
+          if (n === a.max) return a.name + '   ' + n + ', the top';
           return a.name + '   ' + n + ' → ' + (n + 1) + '   ' +
                  moves(a.apply, WEAPONS.find(w => w.name === meta.carried)) + '   ' + (n + 1) + (n ? ' points' : ' point');
         },
-        get dim() { return points() < (meta.raised[a.name] || 0) + 1; },
+        get dim() { const n = meta.raised[a.name] || 0; return n === a.max || points() < n + 1; },
         run: () => raise(a) })),
       BACK_HOME,
     ],

@@ -22,9 +22,8 @@ function batchLive() { return enemies.length > 0 || incoming.length > 0; }
 // per gate, each layer's last marked `end`. Entry k waits at `gateDepth(k)`.
 let plan = [];
 
-// Hit, or dashed, since the batch arrived: `untouched` and `footwork` (D109).
+// Hit since the batch arrived: `untouched`'s (D109).
 let batchHit = false;
-let batchDashed = false;
 // Hits the suit can still take this batch (D100).
 let guardLeft = 0;
 // The challenges' counts (D109): streaks by name, recent kill times for
@@ -145,6 +144,7 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
     fireTimer: 0,      // seconds until the next shot
     dashTime: 0,       // seconds of dash left, 0 when not dashing
     dashCd: 0,         // seconds until the dash is ready again
+    dashHits: 0,       // fish this dash has shoved, `bowling`'s (D152)
     dashId: 0,         // shares the bullet id space, so one dash hits an
                        // enemy at most once (same trick as pierce)
     dashDx: 1,         // direction the wave faces, frozen at the dash's start
@@ -183,7 +183,6 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   modCounts = {};
   choiceIndex = 0;
   batchHit = false;
-  batchDashed = false;
   tally = {};
   killTimes = [];
   firstKillAt = null;
@@ -243,7 +242,7 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 12;
+const SAVE_VERSION = 13;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
@@ -263,7 +262,7 @@ function snapshot() {
            choices: choices.map(c => c.name), accumulator, rngState,
            currentSeed, bulletId, plan, batchHit, notice, noticeTime,
            banner, bannerTime, met, metTime, modRound, boosts, sinceBoost, weaponName, guardLeft,
-           batchDashed, tally, killTimes, firstKillAt, glowAt, layerStart,
+           tally, killTimes, firstKillAt, glowAt, layerStart,
            at: screen === 'playing' || screen === 'mods' ? screen : resumeTo };
 }
 
@@ -273,7 +272,7 @@ function restore(d) {
      fireArmed, currency, modCounts, offerTimer, choiceIndex,
      accumulator, rngState, currentSeed, bulletId, plan, batchHit, notice,
      noticeTime, banner, bannerTime, met, metTime, modRound, boosts, sinceBoost, weaponName,
-     guardLeft, batchDashed, tally, killTimes, firstKillAt, glowAt, layerStart } = d);
+     guardLeft, tally, killTimes, firstKillAt, glowAt, layerStart } = d);
   choices = d.choices.map(n => MODS.find(m => m.name === n));
   resumeTo = d.at;
   diveLive = true;
@@ -394,6 +393,28 @@ function migrate(s) {
     // it is met again.
     if (s.dive) { s.dive.met = []; s.dive.metTime = 0; }
     s.version = 12;
+  }
+  if (s && s.version === 12) {
+    // `footwork` gives way to `bowling`, and the ladders grow to nine rungs of
+    // a point each (D152): a ladder's old top rung met becomes the new rungs
+    // it meets, and every step comes back as points, so none is lost to the
+    // new pay or a ceiling. The old rungs, as v12 had them:
+    const old = { untouched: [1, 3, 6, 10], beeline: [1, 3, 5, 8], flurry: [6, 12, 20, 30],
+                  swift: [480, 360, 300, 240] };
+    delete s.challenges.footwork;
+    for (const [name, k] of Object.entries(s.challenges)) {
+      const c = CHALLENGES.find(x => x.name === name), v = old[name][k - 1];
+      const now = c.rungs.filter(r => (c.within ? v <= r : v >= r)).length;
+      if (now) s.challenges[name] = now; else delete s.challenges[name];
+    }
+    s.raised = {};
+    const d = s.dive;
+    if (d) {
+      d.player.dashHits = 0;
+      delete d.batchDashed;
+      delete d.tally.footwork;
+    }
+    s.version = 13;
   }
   return s;
 }

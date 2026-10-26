@@ -267,7 +267,7 @@ if (location.search === '?test') {
         if (k) measure(NOTICE_FONT, t.name + ': ' + t.ask(t.rungs[k - 1]) + ' \u2014 10 points');
       }
     }
-    measure(NOTICE_FONT, CHALLENGES.map(t => t.name).join(', ') + ' \u2014 50 points');
+    measure(NOTICE_FONT, CHALLENGES.map(t => t.name).join(', ') + ' \u2014 45 points');
     meta = metaWas;
     check(widest < ARENA_W - 32, 'challenges: every line and notice must fit the view, the widest is ' +
       Math.round(widest) + 'px: ' + which);

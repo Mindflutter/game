@@ -66,9 +66,9 @@ function spend(g, weapon) {
   const w = g.WEAPONS.find(x => x.name === weapon);
   for (;;) {
     const need = Object.keys(w.requires || {}).find(a => (g.meta.raised[a] || 0) < w.requires[a]);
-    const steps = g.ATTRIBUTES.map(a => [a, (g.meta.raised[a.name] || 0) + 1])
+    const steps = g.ATTRIBUTES.map(a => [a, (g.meta.raised[a.name] || 0) + 1]).filter(([a, n]) => n <= a.max)
       .sort((a, b) => (a[0].name === need ? -1 : 0) - (b[0].name === need ? -1 : 0) || a[1] - b[1]);
-    if (g.points() < steps[0][1]) break;
+    if (!steps.length || g.points() < steps[0][1]) break;
     g.raise(steps[0][0]);
   }
   if (!g.meta.owned.includes(weapon)) g.pickWeapon(w);

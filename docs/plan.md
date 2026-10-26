@@ -12,7 +12,8 @@ must stay true while doing it.
 
 S8 (the economy: gems and points), opened 2026-10-26 on Igor's word: "close
 s7, check plan and ideas, decompose into tasks, start working on what can be
-done". S7 (alpha polish) closed the same day (D150 (S7 closes)).
+done". S7 (alpha polish) closed the same day (D150 (S7 closes)). Its design
+is `specs/2026-10-26-s8-economy-design.md`.
 Where things stand is `roadmap.md` → Next.
 
 ## Closed stages
@@ -53,19 +54,20 @@ upgrade system. really major issue. maybe even rework the whole gem&points
 system, very imbalanced. footwork still makes no sense" (`ideas.md` → Open —
 from playing alpha). In order:
 
-1. **The economy measured as it stands** — what a fresh save earns, gems and
+1. **Done. The economy measured as it stands** — what a fresh save earns, gems and
    points, dive by dive and gate by gate, against every price and step: the
    figures any rework is judged by. Claude's; needs no decision.
-2. **The shape, with Igor** — retune or rework: how gems and points are each
+2. **Done, D152 (nine rungs a ladder, a point a rung). The shape, with
+   Igor** — retune or rework: how gems and points are each
    earned and what each buys; `footwork` reworked or dropped; the challenge
    rungs on ten-gate layers (`ideas.md` → Open — from S6 (balance)). Igor's
    decisions, one question at a time.
-3. **The spec**, checked against `foundations.md`, then built and tuned, the
-   careers measuring it.
+3. **Built, D152. The spec**, checked against `foundations.md`, then built and
+   tuned, the careers measuring it. Left: Igor's play of a fresh save.
 
 Beside it, small: the bulwark's bite as quick as the other fish's, built
-(D151 (the bulwark bites as quick as the drifter)). Task 1's first figures
-are `roadmap.md` → Health.
+(D151 (the bulwark bites as quick as the drifter)). The figures, before and
+after, are `roadmap.md` → Health.
 
 **Exit (DoD):** Igor plays a fresh save and says gems and points are in
 balance, and the career bot's figures agree.

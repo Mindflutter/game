@@ -28,15 +28,15 @@ Each piece's tiers, in the order they are bought:
 <!-- generated: equipment:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
-| Mask | 1 | 400 | range +15 |
-| Mask | 2 | 960 | range +15 |
-| Mask | 3 | 1920 | range +15 |
-| Suit | 1 | 720 | guard +1 |
-| Suit | 2 | 1600 | guard +1 |
-| Suit | 3 | 3040 | guard +1 |
-| Weights | 1 | 560 | damage +0.5 |
+| Mask | 1 | 150 | range +15 |
+| Mask | 2 | 1000 | range +15 |
+| Mask | 3 | 3000 | range +15 |
+| Suit | 1 | 250 | guard +1 |
+| Suit | 2 | 1400 | guard +1 |
+| Suit | 3 | 3800 | guard +1 |
+| Weights | 1 | 200 | damage +0.5 |
 | Weights | 2 | 1200 | damage +0.5 |
-| Weights | 3 | 2240 | damage +0.5 |
+| Weights | 3 | 3400 | damage +0.5 |
 <!-- /generated -->
 
 **at top** is what every tier bought adds up to; **adds** is what one tier

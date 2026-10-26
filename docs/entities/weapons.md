@@ -19,8 +19,8 @@ readout see them like any other stat, and everything adds, nothing multiplies
 | name | desc | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Gun | quick, light shots | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
-| Harpoon | slow, heavy shots that go through fish | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 1200 | fireRate 1, damage 5, pierce 3 |
-| Knife | swings close, cutting several fish at once | 3 | 2 | 60 | — | 18 | 6 | 40 | 800 | fireRate 3.75, damage 3, range 72 |
+| Harpoon | slow, heavy shots that go through fish | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 800 | fireRate 1, damage 5, pierce 3 |
+| Knife | swings close, cutting several fish at once | 3 | 2 | 60 | — | 18 | 6 | 40 | 500 | fireRate 3.75, damage 3, range 72 |
 <!-- /generated -->
 
 Each weapon's tiers, in the order they are bought:
@@ -28,15 +28,15 @@ Each weapon's tiers, in the order they are bought:
 <!-- generated: weapons:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
-| Gun | 1 | 240 | fireRate +0.5 |
-| Gun | 2 | 800 | fireRate +0.5 |
-| Gun | 3 | 1600 | fireRate +0.5 |
-| Harpoon | 1 | 640 | damage +1 |
-| Harpoon | 2 | 1280 | fireRate +0.2 |
-| Harpoon | 3 | 2400 | pierce +1 |
-| Knife | 1 | 480 | range +12 |
-| Knife | 2 | 1120 | damage +1 |
-| Knife | 3 | 2080 | fireRate +0.75 |
+| Gun | 1 | 150 | fireRate +0.5 |
+| Gun | 2 | 900 | fireRate +0.5 |
+| Gun | 3 | 2600 | fireRate +0.5 |
+| Harpoon | 1 | 400 | damage +1 |
+| Harpoon | 2 | 1600 | fireRate +0.2 |
+| Harpoon | 3 | 4000 | pierce +1 |
+| Knife | 1 | 300 | range +12 |
+| Knife | 2 | 1400 | damage +1 |
+| Knife | 3 | 3600 | fireRate +0.75 |
 <!-- /generated -->
 
 The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,

@@ -16,7 +16,8 @@ balance suite)), and the dive reshaped on Igor's play (D129 (a gentle first
 layer), D130 (fish are revealed a type at a time), D137 (batches grow from
 seconds to a minute and a half)). S7 (alpha polish) closed 2026-10-26, the
 alpha on Igor's word (D150 (S7 closes)). **Now**: S8 (the economy: gems and
-points), its tasks in `plan.md`; first, the economy measured as it stands.
+points), its tasks in `plan.md`; built as D152 (nine rungs a ladder, a point
+a rung), waiting on Igor's play of a fresh save.
 The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
@@ -52,22 +53,22 @@ This section owns the measured bot figures. Nothing else quotes them.
 older build is a regression signal for that build only.
 
 - All `?test` checks passing, and `npm test` green.
-- **The economy, the D150 (S7 closes) build, 2026-10-26** — S8 (the economy:
-  gems and points)'s first figures: five fresh saves (seeds 1–5) of ten dives
-  each, the diver bot carrying the Gun and spending as `tests/measure.js` does,
-  points into the cheapest step, gems into the cheapest tier.
-  - **The first dive** reaches gate 6–19 of 30 (four of five in layer 2),
-    earns 99–723 gems and 5–23 points — of the 50 the challenges pay ever. It
-    buys the Gun's first tier and, on three seeds of five, the Mask's.
-  - **Points** reach 32–39 by the fifth dive and stop: the top rungs pay none
-    of the last 11–18 in ten dives. Attributes stop growing from then.
-  - **Gems** grow with depth: about 2,500 a dive to the last gate, four to six
-    times the first dive's. Every tier of the Gun and the equipment, 15,280
-    gems, is bought by the ninth or tenth dive; then gems pile up unspent.
-  - The bot reaches the last gate from the fifth to the eighth dive and loses
-    the last boss every time after.
-  - Igor's own first dive, for scale: mid layer 2, 12 points, the Gun's first
-    tier the only purchase.
+- **The economy, the D152 (nine rungs a ladder, a point a rung) build,
+  2026-10-26** — eight fresh saves (seeds 1–8) of fifteen dives each, the
+  diver bot carrying the Gun, points into the cheapest step, gems into the
+  cheapest tier; medians.
+  - **The first dive** reaches gate 18 of 30, earns 656 gems and 2 points, and
+    buys three things: the Gun's, the Mask's and the Weights' first tiers.
+  - **Points** run 2, 9, 11, 15, 18 over the first five dives, then 19–21 to
+    the fifteenth, where the bot's best stops growing — 21 of the 45 ever.
+  - **Gems**: half the kit's tiers by the third dive, the kit (the Gun's tiers
+    and the equipment, 18,050) by the ninth, enough for everything (30,650) by
+    the fourteenth. About 2,500 a dive to the last gate, as before.
+  - The bot reaches the last gate from the fifth dive and loses the last boss.
+  - **Before**, on the D150 (S7 closes) build: a first dive bought one thing
+    and earned 5–23 of 50 points; points stopped by the fifth dive, the kit
+    was bought by the tenth. Igor's own first dive: mid layer 2, 12 points,
+    the Gun's first tier the only purchase.
 - **Difficulty, from Igor playing it, 2026-09-27: batches are too easy.**
   "nothing breaks the target, currently batches are very easy to complete."
   This is the number that counts, and the direction is that batches must get

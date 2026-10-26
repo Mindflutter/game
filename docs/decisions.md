@@ -5115,3 +5115,42 @@ enemies".
 **Guarded by**: the threat line and the pools are measured, not picked
 (D126 (threat)); `npm run balance` holds the pillars over them, not yet run on
 this build.
+
+## D152 — Nine rungs a ladder, a point a rung · 2026-10-26
+
+Igor, playing alpha: "point upgrades come easy, at first run i earned 12
+points … i couldnt get enough gems for any purchase, except a gun upgrade …
+footwork still makes no sense". Settled with him one question at a time, each
+on Claude's recommendation — "do recommended", "recommended", "recommended to
+all": a career of about fifteen dives to buy everything, gems and points
+running out together; nothing for gems once everything is bought; longer
+ladders of a point a rung, attributes with a top; `footwork` replaced by a
+challenge for the dash used well. The design and its check against
+`foundations.md`: `specs/2026-10-26-s8-economy-design.md`.
+
+**Claude's call, delegated**, open to Igor:
+- **Nine rungs a ladder, each paying one point**: 45 ever. Rungs sized on the
+  career bot over fifteen fresh dives (D50 (the bot measures its own policy)):
+  about 2 rungs on a first dive, about 3 a dive to the fifth, about 22 by the
+  fifteenth, where the bot's best stopped growing; the rest is for a player's
+  skill. `swift` reads its rungs as minutes and seconds.
+- **`bowling` replaces `footwork`**: "dash through N fish at once", the fish one
+  dash shoves, each once, 4 to 12; a hand-placed fish counts for none.
+- **Each attribute stops at five steps** (`max`): step n still costs n, so the
+  fifteen steps cost the 45 points.
+- **Prices: cheap first tiers, dear tops.** First tiers 150–250 gems, so the
+  bot's first dive buys three things; top tiers 2,600–4,000. Everything — all
+  three weapons, their tiers and the equipment — costs 30,650, from 25,280; the
+  bot buys its kit by the ninth dive and could buy everything by the
+  fourteenth. Gems per depth unchanged: the prices alone fit.
+- **The save goes to version 13**: a ladder's rungs re-counted by the old top
+  rung's threshold met, `footwork`'s dropped, every step back as points.
+
+**Supersedes** D109 (micro-tasks are ladders; steps cost more as they rise)'s
+four rungs, rung k paying k, `footwork`, and attributes without a top; the
+rest of D109 stands. Ends `ideas.md`'s `footwork` and the rungs on the
+shorter dive.
+
+**Guarded by**: `tests/challenges.test.js` — every rung read from the code,
+`bowling` counting one dash; `tests/home.test.js` — an attribute's top;
+`tests/save.test.js` — the re-count and the v13 fixture.

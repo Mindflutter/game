@@ -44,7 +44,7 @@ export function loadGame() {
                  'screen', 'currentSeed', 'bulletId', 'shakeLevel',
                  'immortal', 'damageOverride', 'plan', 'meta', 'diveLive',
                  'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
-                 'batchDashed', 'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
+                 'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
                  'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps',
                  'fireArmed', 'gemPop', 'offerTimer', 'optionIndex', 'returnTo', 'rngState'];
   // Constants are `const`, so they get a getter only.

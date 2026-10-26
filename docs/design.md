@@ -261,13 +261,13 @@ its name is open in `ideas.md`.
 
 **What persists** (D31, D36, D75). `meta` holds the bank, gear tiers, attribute
 steps, challenge rungs, the deepest depth, the layers cleared and the weapons
-owned and carried. Points are **derived** — rungs earned less steps raised,
-each counted 1 + 2 + … + n (D109) — never stored. `reset()` builds the diver
+owned and carried. Points are **derived** — rungs earned, a point each,
+less steps raised, step n costing n (D109, D152) — never stored. `reset()` builds the diver
 as `PLAYER_START` carrying the weapon, plus each tier, equipment and attribute
 step; mods then add on top. All sums. A weapon is owned, then carried (D97);
 `requires` on gear schedules it behind attribute steps, it never scales (D36,
 D98). A challenge's streak lives in `tally` for the dive and is judged on a
-clear, a kill or a layer end (D109, D110); a fish placed by hand belongs to no
+clear, a kill, a dash's shove or a layer end (D109, D110, D152); a fish placed by hand belongs to no
 batch and counts for nothing. Buying and raising write the save at once.
 
 **The save** (D70, D77). `saveText()` is `meta`, the settings beside it — so
