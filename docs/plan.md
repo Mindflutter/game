@@ -63,8 +63,8 @@ from playing alpha). In order:
 3. **The spec**, checked against `foundations.md`, then built and tuned, the
    careers measuring it.
 
-Beside it, small: the bulwark's bite as quick as the other fish's (`ideas.md`
-→ Open — from playing alpha).
+Beside it, small: the bulwark's bite as quick as the other fish's, built
+(D151 (the bulwark bites as quick as the drifter)).
 
 **Exit (DoD):** Igor plays a fresh save and says gems and points are in
 balance, and the career bot's figures agree.

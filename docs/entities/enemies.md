@@ -37,7 +37,7 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 |---|---|---|---|---|---|
 | drifter | 10 | 0.3 | 0.8 | 1 | 240 |
 | darter | 6 | 0.15 | 0.6 | 1 | 180 |
-| bulwark | 20 | 0.6 | 1.2 | 1 | 420 |
+| bulwark | 20 | 0.3 | 1.2 | 1 | 420 |
 <!-- /generated -->
 
 `lunge`:
@@ -132,7 +132,7 @@ Measured by `npm run measure threat`; the numbers are the fit, rounded.
 |---|---|---|---|
 | drifter | 0.004 | 0.021 | 0.026 |
 | darter | 0.004 | 0.014 | 0.018 |
-| bulwark | 0.062 | 0.091 | 0.125 |
+| bulwark | 0.053 | 0.085 | 0.101 |
 | archer | 0.017 | 0.028 | 0.032 |
 | puffer | 0.081 | 0.131 | 0.184 |
 | eel | 0.114 | 0.239 | 0.4 |

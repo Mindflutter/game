@@ -5095,3 +5095,23 @@ decompose into tasks, start working on what can be done".
 - **S8 (the economy: gems and points) opens** on the same word, to rework or
   retune what gems and points earn and buy (`plan.md`).
 - **Its spec leaves the tree** (D134 (lean docs)).
+
+## D151 — The bulwark bites as quick as the drifter · 2026-10-26
+
+Igor, playing alpha: "purple guy bite should be faster, probably like other
+enemies".
+
+- **The bulwark's `windup` is 0.3s**, the drifter's, from 0.6s. Its reach,
+  rest and knock stand.
+- **Its threat, measured again** (`npm run measure threat bulwark`): 0.053 /
+  0.085 / 0.101 by grade, from 0.062 / 0.091 / 0.125. The bot never feels the
+  quicker bite — the old one measures 0.053 / 0.083 / 0.102 on the same
+  build, since it steps out inside either tell. The drop is D141 (the bite's
+  leap)'s: the bulwark's reach changed in S7 (alpha polish)'s first commit and
+  its threat was not measured again then.
+- **The pools fitted again** (`npm run measure fit`): a batch with bulwarks
+  holds a fish or so more, layer by layer (`entities/layers.md`).
+
+**Guarded by**: the threat line and the pools are measured, not picked
+(D126 (threat)); `npm run balance` holds the pillars over them, not yet run on
+this build.

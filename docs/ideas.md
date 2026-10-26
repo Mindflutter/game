@@ -551,11 +551,6 @@ balanced for alpha".
   every price but the Gun's first tier (240). Open: retune, or rework the
   upgrade system, gems and points together. **Home**: S8 (the economy: gems
   and points).
-- **The bulwark's bite is slow.** "purple guy bite should be faster, probably
-  like other enemies". Its `windup` is 0.6s; the drifter's 0.3s, the darter's
-  0.15s (`entities/enemies.md`). A faster bite moves its measured threat (D126
-  (threat)), and the batches fitted to it. **Home**: S8 (the economy: gems
-  and points), beside its main work.
 
 ## Suggested but not yet discussed
 
