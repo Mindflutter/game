@@ -217,16 +217,17 @@ if (location.search === '?test') {
 
   // A screen draw() does not name falls through to the dive's field (D114).
   {
-    const was = { screen, drawMenu };
+    const was = { screen, drawRows };
     const drawn = [];
-    drawMenu = m => drawn.push(m);
-    const homes = Object.entries(MENUS).filter(([, m]) => m.back === BACK_HOME.run);
+    drawRows = m => drawn.push(m);   // every menu's rows, whatever draws the rest
+    // The setup screen has a drawing of its own, and wants a setup to draw.
+    const homes = Object.entries(MENUS).filter(([name]) => name !== 'debug');
     for (const [name] of homes) { screen = name; draw(); }
     screen = was.screen;
-    drawMenu = was.drawMenu;
+    drawRows = was.drawRows;
     const missed = homes.filter(([, m]) => !drawn.includes(m)).map(([name]) => name);
     check(homes.length > 0 && missed.length === 0,
-      'every screen Back leads home from must draw as its menu, drawn as something else: ' + missed.join(','));
+      'every menu must draw its rows, drawn as something else: ' + missed.join(','));
   }
 
   // Challenge lines (D109) grow with CHALLENGES and their asks: the stack ends

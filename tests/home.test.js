@@ -530,3 +530,45 @@ describe('a new game (D103)', () => {
     expect(g.MENUS.title.items[0].label).toBe('Start');
   });
 });
+
+describe('home from the pause menu (D145)', () => {
+  // Mid-dive, gems in hand, paused.
+  function paused() {
+    const g = loadGame();
+    g.meta.bank = 100;
+    g.reset(5);
+    g.currency = 40;
+    g.cameraY = 900;
+    g.justPressed.add('Escape');
+    g.update(g.FIXED_DT);
+    if (g.screen !== 'paused') throw new Error('paused(): on ' + g.screen);
+    return g;
+  }
+  const press = (g, code) => { g.justPressed.add(code); g.update(g.FIXED_DT); };
+  const goHome = g => g.MENUS.paused.items.find(i => i.label === 'Go home');
+
+  it('asks first, Cancel marked, and a stray Enter or Esc keeps the dive', () => {
+    const g = paused();
+    goHome(g).run();
+    expect(g.screen).toBe('goHome');
+    expect(g.MENUS.goHome.items[0].label).toBe('Cancel');
+    expect(g.MENUS.goHome.sub).toContain('40 gems');
+    press(g, 'Enter');
+    expect(g.screen).toBe('paused');
+    goHome(g).run();
+    press(g, 'Escape');
+    expect(g.screen).toBe('paused');
+    expect([g.diveLive, g.meta.bank, g.currency]).toEqual([true, 100, 40]);
+  });
+
+  it('once confirmed ends the dive as any end does -- its gems banked, the dive out of the save -- and goes home', () => {
+    const g = paused();
+    goHome(g).run();
+    g.MENUS.goHome.items[1].run();
+    expect(g.screen).toBe('home');
+    expect([g.diveLive, g.meta.bank, g.meta.deepest]).toEqual([false, 140, 900]);
+    const reloaded = loadGame();
+    reloaded.loadSave(g.saved);
+    expect([reloaded.diveLive, reloaded.meta.bank]).toEqual([false, 140]);
+  });
+});

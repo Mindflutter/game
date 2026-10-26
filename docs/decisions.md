@@ -4962,3 +4962,28 @@ leave sound design out of alpha".
 and the kill, each wave once and the lead's own, the clear and the layer's
 end; each wire seen failing when taken away. `checks.js` holds every sound
 loud enough to hear.
+
+## D145 — Home from the pause menu, asked first · 2026-10-26
+
+S7 (alpha polish)'s sixth item. Igor: "ability to go home from pause"; asked
+whether it asks first, 2026-10-26: "do next item, with confirmation".
+
+- **Go home**, on the pause menu above Quit to title, ends the dive as any
+  end does: its gems banked (D67 (currency is kept on death)), the depth
+  counted, the dive out of the save — `home` exists only between dives (D76
+  (`home` exists only between dives)). Quit to title still keeps the dive to
+  come back to.
+- **Asked first**, as a new game is (D103 (new game erases the save, after a
+  warning)): END THE DIVE? over the dimmed dive, saying how many gems are
+  kept, Cancel marked, so a stray Enter or Esc goes back to the pause menu.
+- In the debug mode it leads to the setup, as every way out of a debug dive
+  does (D102 (the debug mode)).
+- The pause menu's rows rise a row, into the room its missing sub leaves, so
+  the challenges under them stay clear of the hint.
+
+**Guarded by**: `tests/home.test.js` → home from the pause menu — asked
+first, Cancel and Esc keep the dive, confirmed it banks and goes home;
+`tests/debug.test.js` → every way out of a debug dive. Each path seen failing
+when broken. `checks.js` → every menu draws its rows: it watched only the
+screens Back leads home from, missed this one drawn as nothing, and now
+watches every menu but the setup.

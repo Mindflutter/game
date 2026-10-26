@@ -108,6 +108,9 @@ title ──Start──> home ──Dive──> playing ──Esc──> paused 
 title ──New game──> newGame ──Erase everything and start──> home     (D103)
                       └──Cancel / Esc──> title
 
+paused ──Go home──> goHome ──End the dive──> home (banked, as at any end)   (D145)
+                      └──Cancel / Esc──> paused
+
 ?debug ──> debug ──Dive / R──> playing ──Backspace──> debug     (D102)
              ▲                   └──Esc──> paused ──Quit to setup──> debug
              └──Setup / Esc── dead, won ──Again / R──> playing

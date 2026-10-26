@@ -680,18 +680,34 @@ const MENUS = {
       { label: 'Erase everything and start', run: () => newGame() },
     ],
   },
+  // Ending a dive by choice (D145): banked as any end (D67), asked first, as
+  // a new game is.
+  goHome: {
+    heading: 'END THE DIVE?',
+    get sub() { return 'The dive ends here. Its ' + currency + ' gems are kept.'; },
+    warn: true,
+    top: MENU_TOP,
+    back: () => openMenu('paused'),
+    items: [
+      { label: 'Cancel', run: () => openMenu('paused') },
+      { label: 'End the dive', run: () => { endDive(); GO_HOME.run(); } },
+    ],
+  },
   dead: END_MENU,
   won: END_MENU,
   paused: {
     heading: 'PAUSED',
     sub: '',
-    top: MENU_TOP,
+    // No sub, so its rows rise a row into the room, and the challenges under
+    // them stay clear of the hint.
+    top: MENU_TOP - ROW_STEP,
     challenges: true,
     back: () => { screen = resumeTo; },
     items: [
       { label: 'Resume',        run: () => { screen = resumeTo; } },
       { label: 'Help',          run: () => openScreen('help') },
       { label: 'Options',       run: () => openScreen('options') },
+      { get label() { return GO_HOME.label; }, run: () => openMenu('goHome') },
       // Pausing saved the dive, and the title offers it back. The debug mode
       // saved nothing (D102).
       { get label() { return debugSetup ? 'Quit to setup' : 'Quit to title'; },

@@ -78,7 +78,7 @@ them: the pile-up (`ideas.md` → Crowds), music.
 - 3: which place the `+N` keeps, once both are built.
 - 5: answered — Igor, 2026-10-25: "do sounds for all, no music. leave sound
   design out of alpha".
-- 6: whether it asks first.
+- 6: answered — Igor, 2026-10-26: "do next item, with confirmation".
 - 7: where a hint shows — at a fish's first arrival, at `home`, in the help.
 - 8: answered — Igor, 2026-10-24: "A". The screens stay; a row says in
   words what its next tier does, and `home` shows the kit, read-only.

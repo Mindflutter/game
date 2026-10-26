@@ -82,7 +82,7 @@ let boosts = [];
 let sinceBoost = 0;
 
 // 'title' | 'home' | 'weapons' | 'equipment' | 'attributes' | 'playing' | 'mods' |
-// 'paused' | 'help' | 'options' | 'dead' | 'won' | 'newGame' | 'debug'
+// 'paused' | 'help' | 'options' | 'dead' | 'won' | 'goHome' | 'newGame' | 'debug'
 let screen = 'title';
 let menuIndex = 0;          // cursor in whichever menu is up
 let choiceIndex = 0;        // the marked card at a layer end (D85)

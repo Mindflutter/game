@@ -250,6 +250,11 @@ describe('the keys and the ways out', () => {
     quit.run();
     expect(g.screen).toBe('debug');
     g.debugDive();
+    press(g, 'Escape');
+    g.MENUS.paused.items.find(i => i.label === 'Setup').run();
+    g.MENUS.goHome.items[1].run();
+    expect(g.screen).toBe('debug');
+    g.debugDive();
     die(g);
     const [again, back] = g.MENUS.dead.items;
     expect([again.label, back.label]).toEqual(['Again', 'Setup']);

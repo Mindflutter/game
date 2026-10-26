@@ -328,12 +328,6 @@ discussed.
   what it does)): "i still feel the menu is a bit clumsy, but we leave proper
   ux out of alpha. now - just clarity of all player actions". Whether `home`
   showing the kit is still S7's is asked when it comes up.
-- **Home from the pause menu.** "ability to go home from pause". `home` exists
-  only between dives (D76 (`home` exists only between dives)), so this ends the
-  dive, its gems banked as at any end (D67 (currency is kept on death)). Kin to
-  New game on the title (D103 (new game erases the save, after a warning)),
-  which erases everything; this would end the dive alone. Open: whether it
-  asks first. **Home**: S7 (alpha polish)'s UX fixing.
 - **Hints for every fish and pickup.** "no hints for entities at all - think
   player perspective again". The help's one line on the fish covers the archer
   and the puffer; a mod or boost is named with its line as it lands; nothing

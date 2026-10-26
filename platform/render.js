@@ -782,7 +782,7 @@ function draw() {
     drawField();
     coverMargins();
     if (screen === 'mods')        drawModCards();
-    else if (screen === 'paused') { dimArena(); drawMenu(MENUS.paused); }
+    else if (screen === 'paused' || screen === 'goHome') { dimArena(); drawMenu(MENUS[screen]); }
     else if (screen === 'dead' || screen === 'won') drawEnd();
   }
 
