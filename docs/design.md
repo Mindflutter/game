@@ -291,6 +291,10 @@ diver has none, and a hit that kills shows the death instead.
 **Sound.** One oscillator and an envelope per sound, as data; no audio files.
 A master gain and a compressor keep a dozen kills from clipping. The context
 starts on the first key press, and the HUD says why a silent game is silent.
+Every moment of a dive has one (D144 (every moment of a dive has a sound)):
+the shot, a hit, a kill, a gem, the dash, being hurt, guarded and dying, a wave
+arriving and a batch led by a mini-boss or the boss, a batch cleared and a
+layer's end, a mod, a boost, and the fish's own attacks.
 
 ## Randomness
 

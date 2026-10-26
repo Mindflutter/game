@@ -44,10 +44,12 @@ function spawnBatch(batch, escorts) {
   const fish = [...lead, ...drawDistinct(rest, rest.length)];
   const size = () => WAVE_MIN + Math.floor(rng() * (WAVE_MAX - WAVE_MIN + 1));
   fish.splice(0, size()).forEach(f => arrive(f.name, batch.crowd && { lead: true }, f.grade));
+  sound(escorts ? 'lead' : 'wave');
   let start = elapsed;
   while (fish.length) {
     start += WAVE_GAP * (1 - WAVE_JITTER + rng() * 2 * WAVE_JITTER);
-    for (const f of fish.splice(0, size())) incoming.push({ ...f, at: start + rng() * WAVE_SPREAD });
+    // `first` calls its wave in as it arrives, once.
+    fish.splice(0, size()).forEach((f, i) => incoming.push({ ...f, at: start + rng() * WAVE_SPREAD, first: !i }));
   }
   incoming.sort((a, b) => a.at - b.at);
 }
@@ -378,6 +380,7 @@ function swing(ux, uy) {
 // the struck one too (D125); a wound never splashes on, so a crowd cannot chain.
 function hit(e) {
   wound(e);
+  if (e.hp > 0) sound('hit');
   if (!player.splash) return;
   // Its reach, seen: whatever the ring touches, the splash wounds. `ring` is
   // the radius it grows from.
@@ -527,6 +530,7 @@ function clearBatch() {
   // A scenario's hand-placed fish (D37) have no entry: they pay Mend, and
   // nothing that belongs to a layer.
   const entry = plan[batchIndex - 1];
+  sound(entry?.end ? 'layer' : 'clear');
   if (entry) {
     // Challenges first, so the layer end's heal cannot read as a clean batch (D109).
     for (const c of CHALLENGES) {
@@ -1072,6 +1076,7 @@ function step(dt) {
     while (incoming.length && incoming[0].at <= elapsed) {
       const f = incoming.shift();
       arrive(f.name, f.flags, f.grade);
+      if (f.first) sound('wave');
     }
   } else if (!queuePaused && enemies.length === 0) {
     const target = gateDepth(batchIndex);

@@ -485,8 +485,9 @@ discussed.
   batch did, and the kiting bot lasted longer for it; the batches of S6 (balance) are bigger
   (D127 (the tuned numbers)). Open, to Igor's play:
   whether it rushes; if not, the levers are the clock and the batch sizes.
-  Also open: whether the status bar's `(12 coming)` is telegraph enough, or a
-  wave wants a sound or a mark at the edge it enters by; and where waves enter
+  A wave now sounds as it arrives (D144 (every moment of a dive has a
+  sound)). Also open: whether that and the status bar's `(12 coming)` are
+  telegraph enough, or a wave wants a mark at the edge it enters by; and where waves enter
   — still a random edge, the kin idea being fish from behind the screen,
   above, arriving near the diver with the fade-in as their telegraph.
 

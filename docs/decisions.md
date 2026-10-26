@@ -4941,3 +4941,24 @@ step changes — the Gun's, the Mask's and Heart's rows, the top's, each weapon
 not carried showing its line, and every tier and step moving only named
 stats. Seen failing before it was built, and with a stat's name, a weapon's
 line, and the max-HP-only rule each taken away.
+
+## D144 — Every moment of a dive has a sound · 2026-10-25
+
+S7 (alpha polish)'s fifth item. Asked whether the moments silent until now
+should each get a voice, Igor, 2026-10-25: "do sounds for all, no music.
+leave sound design out of alpha".
+
+- **Five new `SOUNDS`**, each one oscillator and an envelope as every other:
+  `hit` for a fish hit but not killed (a kill keeps its own); `wave` as a
+  batch's first fish come and as each later wave's first arrives, once a
+  wave; `lead` instead of it for a batch a mini-boss or the boss leads;
+  `clear` for a batch cleared; `layer` instead of it for a layer's end, the
+  pick's chime following as the cards open.
+- **No music, no sound design** past this synthesis, through alpha
+  (`foundations.md` → non-goals). Every voice — pitch, length, shape,
+  loudness — is Claude's.
+
+**Guarded by**: `tests/combat.test.js` → what the dive sounds like — the hit
+and the kill, each wave once and the lead's own, the clear and the layer's
+end; each wire seen failing when taken away. `checks.js` holds every sound
+loud enough to hear.

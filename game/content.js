@@ -131,6 +131,11 @@ const SOUNDS = {
   spit:   { freq: 330,  dur: 0.08, type: 'triangle', vol: 0.30, slide: 1.5  },
   pop:    { freq: 150,  dur: 0.22, type: 'square',   vol: 0.40, slide: 0.5  },
   guard:  { freq: 880,  dur: 0.12, type: 'square',   vol: 0.30, slide: 0.6  },
+  hit:    { freq: 240,  dur: 0.06, type: 'triangle', vol: 0.30, slide: 0.7  },
+  wave:   { freq: 300,  dur: 0.35, type: 'sine',     vol: 0.35, slide: 1.4  },
+  lead:   { freq: 90,   dur: 0.70, type: 'sawtooth', vol: 0.45, slide: 1.2  },
+  clear:  { freq: 660,  dur: 0.20, type: 'sine',     vol: 0.35, slide: 1.5  },
+  layer:  { freq: 440,  dur: 0.50, type: 'triangle', vol: 0.40, slide: 2    },
 };
 
 // ---------- mods ----------

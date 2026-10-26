@@ -1,7 +1,7 @@
 // The fight itself: the trigger, shots, the dash, touch, gems, and what a
 // clear or a death does on the tick it lands.
 import { describe, it, expect } from 'vitest';
-import { loadGame, play, until, fishAt } from './harness.js';
+import { loadGame, play, until, fishAt, atGate, clearAndWait } from './harness.js';
 
 // A fish that hurts on touch (D108): these checks are about touch, i-frames
 // and the dash, not any one attack.
@@ -237,6 +237,50 @@ describe('the +N (D35)', () => {
     pay(g, 3);
     g.screen = 'dead';
     expect(g.statusLines()[0].text).toContain('GEMS 3 ');
+  });
+});
+
+describe('what the dive sounds like', () => {
+  const ear = g => { const heard = []; g.sound = n => heard.push(n); return heard; };
+
+  it('thuds on a hit that does not kill, and only kills on one that does', () => {
+    const g = quiet();
+    const heard = ear(g);
+    const e = fishAt(g, 'bulwark', 100);
+    g.hit(e);
+    expect(heard).toEqual(['hit']);
+    heard.length = 0;
+    e.hp = g.player.damage;
+    g.hit(e);
+    expect(heard).toEqual(['kill']);
+  });
+
+  it('calls each wave once as it arrives, and a batch led by a mini-boss or the boss with its own', () => {
+    const g = quiet();
+    g.immortal = true;
+    const heard = ear(g);
+    g.spawnBatch({ enemies: [['drifter', 30]] });
+    expect(heard).toEqual(['wave']);
+    const later = g.incoming.filter(f => f.first).length;
+    expect(later).toBeGreaterThanOrEqual(2);
+    play(g, 30);
+    expect(heard.filter(n => n === 'wave').length).toBe(1 + later);
+    const h = quiet();
+    const heardH = ear(h);
+    h.spawnBatch({ enemies: [['boss', 1]] }, { enemies: [['drifter', 10]] });
+    expect(heardH).toEqual(['lead']);
+  });
+
+  it('rings a batch cleared, and a layer\'s end its own way', () => {
+    const plan = atGate(1).plan;
+    for (const end of [false, true]) {
+      const g = atGate(plan.findIndex(e => !!e.end === end) + 1);
+      const heard = ear(g);
+      g.spawnBatch(g.plan[g.batchIndex - 1].batch);
+      clearAndWait(g, 0.1);
+      expect(heard).toContain(end ? 'layer' : 'clear');
+      expect(heard).not.toContain(end ? 'clear' : 'layer');
+    }
   });
 });
 

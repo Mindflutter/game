@@ -33,7 +33,8 @@ what a step costs and what each attribute's step adds
 (`entities/challenges.md`), and the dash's 99px (D111) — and S7 (alpha
 polish)'s: the bump's (`design.md`), the leap's and the bulwark's reach
 (`entities/enemies.md`), the splash's ring (`entities/boosts.md`), the `+N`'s hold,
-flight and bump (D142 (the +N)) — all Claude's picks.
+flight and bump (D142 (the +N)), every sound's voice (D144 (every moment of a
+dive has a sound)) — all Claude's picks.
 The
 scenarios that start next to each — one fish of each kind, every ordinary type
 in a row, a weapon carried from the top, the second and third layers with a

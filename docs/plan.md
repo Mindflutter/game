@@ -45,7 +45,9 @@ the decision wins.
 
 **Work:** Game feel — among it a fish bumped by the shot that hits it (Igor,
 2026-10-19: "shooting causes bump - actually a good idea, put in the plan";
-`ideas.md` → Feel). Sound. Assets **only if** the condition is hit —
+`ideas.md` → Feel). Sound — every moment of a dive has one, no music
+(D144 (every moment of a dive has a sound)); sound design waits past alpha.
+Assets **only if** the condition is hit —
 indistinguishable enemies, indistinguishable layers, or visual clumsiness.
 UX fixing — `ideas.md` → Screens, among it what a tier does for the player
 (Igor, 2026-10-19), built (D143 (every row at home says what it does)).
