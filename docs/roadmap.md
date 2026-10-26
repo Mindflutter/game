@@ -14,8 +14,9 @@ grades it chooses (D126 (threat)), the numbers against the pillars (D127 (the
 tuned numbers)), the bots and the balance suite that hold them (D128 (the
 balance suite)), and the dive reshaped on Igor's play (D129 (a gentle first
 layer), D130 (fish are revealed a type at a time), D137 (batches grow from
-seconds to a minute and a half)). **Now**: S7 (alpha polish), opened
-2026-10-24; its work, in order, is `specs/2026-10-24-s7-alpha-polish-design.md`.
+seconds to a minute and a half)). S7 (alpha polish) closed 2026-10-26, the
+alpha on Igor's word (D150 (S7 closes)). **Now**: S8 (the economy: gems and
+points), its tasks in `plan.md`; first, the economy measured as it stands.
 The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,

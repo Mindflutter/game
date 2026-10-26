@@ -505,15 +505,15 @@ discussed.
   cleared without dashing; D127 (the tuned numbers)'s bar on it left with S6
   (balance)'s close (D139 (S6 closes)). Open: what it becomes, or whether it
   goes. Igor, 2026-10-26, playing alpha: "footwork still makes no sense".
-  **Home**: open, with the gems and points below.
+  **Home**: S8 (the economy: gems and points).
 - **Challenge rungs on the shorter dive.** The ladders were sized on fifteen
   gates a layer (D109 (micro-tasks are ladders; steps cost more as they
   rise)); ten since D137 (batches grow from seconds to a minute and a half),
   so a dive has 30 gates and 21 glowing batches, and every streak's rung is
   harder to meet than its rate says — `footwork`'s top, fifteen batches, a
   layer and a half. Open:
-  re-size them to the new shape, or keep them. **Home**: open; the rungs are
-  Claude's picks either way.
+  re-size them to the new shape, or keep them. **Home**: S8 (the economy:
+  gems and points); the rungs are Claude's picks either way.
 - **Gates a layer, layer by layer.** Igor, 2026-10-24, setting ten for every
   layer (D137 (batches grow from seconds to a minute and a half)): "may change
   to different value for layers later". **Home**: a later balance pass.
@@ -549,12 +549,13 @@ balanced for alpha".
   (D136 (prices halved)).
   On a first dive the points outrun what they buy and the gems fall short of
   every price but the Gun's first tier (240). Open: retune, or rework the
-  upgrade system, gems and points together. **Home**: Igor's call — where it
-  sits against alpha.
+  upgrade system, gems and points together. **Home**: S8 (the economy: gems
+  and points).
 - **The bulwark's bite is slow.** "purple guy bite should be faster, probably
   like other enemies". Its `windup` is 0.6s; the drifter's 0.3s, the darter's
   0.15s (`entities/enemies.md`). A faster bite moves its measured threat (D126
-  (threat)), and the batches fitted to it. **Home**: a balance pass, small.
+  (threat)), and the batches fitted to it. **Home**: S8 (the economy: gems
+  and points), beside its main work.
 
 ## Suggested but not yet discussed
 

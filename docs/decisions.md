@@ -5079,3 +5079,19 @@ drops".
 **Guarded by**: `tests/home.test.js` → the catalogue — a fish arriving adds
 nothing and its kill adds it, a boost dropping adds nothing and taking it adds
 it; each seen failing with its meeting taken away.
+
+## D150 — S7 closes · 2026-10-26
+
+Igor, playing its build: "we can call it alpha alright, but:" — gems and
+points out of balance, a major issue; then "close s7, check plan and ideas,
+decompose into tasks, start working on what can be done".
+
+- **S7 (alpha polish) is closed, and the game is at alpha**, on Igor's word,
+  its one exit. Its ten items were each built or decided, D140 (the drawn
+  bump) to D148 (the readout only in the debug mode); D149 (the catalogue
+  fills on a kill) came from playing it.
+- **Not built, Claude's suggestions he did not take up**: a shake when a fish
+  is hit and a hitstop on death (`ideas.md` → Suggested).
+- **S8 (the economy: gems and points) opens** on the same word, to rework or
+  retune what gems and points earn and buy (`plan.md`).
+- **Its spec leaves the tree** (D134 (lean docs)).

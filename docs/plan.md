@@ -10,8 +10,9 @@ must stay true while doing it.
 
 ## Active stage
 
-S7 (alpha polish), opened 2026-10-24 on Igor's word: "start working on s7".
-Its design is `specs/2026-10-24-s7-alpha-polish-design.md`.
+S8 (the economy: gems and points), opened 2026-10-26 on Igor's word: "close
+s7, check plan and ideas, decompose into tasks, start working on what can be
+done". S7 (alpha polish) closed the same day (D150 (S7 closes)).
 Where things stand is `roadmap.md` → Next.
 
 ## Closed stages
@@ -33,37 +34,40 @@ decisions listed say why.
 | S5 — Content to the DoD numbers | 2026-10-14 | The archer, the puffer and the eel; the Harpoon and the Knife, owned and carried; three pieces of equipment, Heart and Strength, swift and footwork; Barbs and three boosts; three layers with pools of their own — and, from playing it, the debug mode and New game | D93–D103 |
 | The pass before S6 — from playing S5 | 2026-10-21 | Bodies doubled, the Knife's swing, the puffer's burst, swimming with a facing, fish that bite, challenges as ladders, waves, escorts, the boss's fan, hits that vary, grades, solid bodies, knockback, boosts that keep each weapon's nature | D104–D125 |
 | S6 — Balance | 2026-10-24 | The threat system and the grades it chooses, the diver bot and the balance suite, the numbers tuned to the pillars and the bars that hold them, fish revealed a type at a time, ten gates a layer with batches growing from seconds to a minute and a half, cheaper gear | D126–D139 |
+| S7 — Alpha polish | 2026-10-26 | The alpha, on Igor's word: the drawn bump, the bite's leap, Bloom's ring, the `+N` flown to the counter, every row at home saying what it does, a sound for every moment, Go home from the pause menu, the catalogue, the kit on `home`, the readout only in the debug mode | D140–D150 |
 
 Their designs, where a stage had one, are kept in git, not the tree (D134
 (lean docs)): `git show 99d79ae:docs/specs/<file>` reads one, and S6
-(balance)'s is `git show 11ba1ad:docs/specs/2026-10-21-s6-balance-design.md`. Where one disagrees with a decision,
+(balance)'s is `git show 11ba1ad:docs/specs/2026-10-21-s6-balance-design.md`, S7 (alpha
+polish)'s `git show 6661b7c:docs/specs/2026-10-24-s7-alpha-polish-design.md`. Where one disagrees with a decision,
 the decision wins.
 
-## S7 — Alpha polish
+## S8 — The economy: gems and points
 
-**Entry:** S6 exits.
+**Entry:** S7 exits.
 
-**Work:** Game feel — among it a fish bumped by the shot that hits it (Igor,
-2026-10-19: "shooting causes bump - actually a good idea, put in the plan";
-`ideas.md` → Feel). Sound — every moment of a dive has one, no music
-(D144 (every moment of a dive has a sound)); sound design waits past alpha.
-Assets **only if** the condition is hit —
-indistinguishable enemies, indistinguishable layers, or visual clumsiness.
-UX fixing — `ideas.md` → Screens, among it what a tier does for the player
-(Igor, 2026-10-19), built (D143 (every row at home says what it does)); and
-a catalogue of every fish and boost, filled as each is first met, kept simple
-because names and meta may change after alpha (D146 (the catalogue)); and
-`home` showing the kit and the numbers a dive starts with (D147 (home shows
-the kit)); the numbers on mod cards kept, the development readout only in the
-debug mode (D148 (the readout only in the debug mode)).
-Proper UX waits past alpha — Igor, 2026-10-25: "we leave proper ux out of
-alpha. now - just clarity of all player actions".
-D35's `+N` popup over collected gems is feel, and was kept for here (D78
-(gems are pulled to the player)); built, summed over the diver and flown to
-the counter (D142 (the +N)).
+**Work:** From Igor's play of the alpha, 2026-10-26: "point upgrades come
+easy, at first run i earned 12 points, reached mid layer 2. i couldnt get
+enough gems for any purchase, except a gun upgrade. gotta do something with
+upgrade system. really major issue. maybe even rework the whole gem&points
+system, very imbalanced. footwork still makes no sense" (`ideas.md` → Open —
+from playing alpha). In order:
 
-**Exit (DoD):** Igor says it is alpha. This is the one stage whose DoD is a
-judgement, and that is correct.
+1. **The economy measured as it stands** — what a fresh save earns, gems and
+   points, dive by dive and gate by gate, against every price and step: the
+   figures any rework is judged by. Claude's; needs no decision.
+2. **The shape, with Igor** — retune or rework: how gems and points are each
+   earned and what each buys; `footwork` reworked or dropped; the challenge
+   rungs on ten-gate layers (`ideas.md` → Open — from S6 (balance)). Igor's
+   decisions, one question at a time.
+3. **The spec**, checked against `foundations.md`, then built and tuned, the
+   careers measuring it.
+
+Beside it, small: the bulwark's bite as quick as the other fish's (`ideas.md`
+→ Open — from playing alpha).
+
+**Exit (DoD):** Igor plays a fresh save and says gems and points are in
+balance, and the career bot's figures agree.
 
 ---
 
