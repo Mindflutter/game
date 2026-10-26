@@ -4978,8 +4978,9 @@ whether it asks first, 2026-10-26: "do next item, with confirmation".
   kept, Cancel marked, so a stray Enter or Esc goes back to the pause menu.
 - In the debug mode it leads to the setup, as every way out of a debug dive
   does (D102 (the debug mode)).
-- The pause menu's rows rise a row, into the room its missing sub leaves, so
-  the challenges under them stay clear of the hint.
+- The pause menu's rows rise into the room its missing sub leaves, so the
+  challenges under them stay clear of the hint; D146 (the catalogue)'s row
+  raised them a second row.
 
 **Guarded by**: `tests/home.test.js` → home from the pause menu — asked
 first, Cancel and Esc keep the dive, confirmed it banks and goes home;
@@ -4987,3 +4988,33 @@ first, Cancel and Esc keep the dive, confirmed it banks and goes home;
 when broken. `checks.js` → every menu draws its rows: it watched only the
 screens Back leads home from, missed this one drawn as nothing, and now
 watches every menu but the setup.
+
+## D146 — The catalogue, filled as things are met · 2026-10-26
+
+S7 (alpha polish)'s seventh item, hints for every fish and pickup. Igor,
+2026-10-26: "we need some sort of catalogue which updates on encounter. you
+can do a simple version now, maybe a small popup in a status bar saying that
+catalogue was updated. since enemy titles and meta are subject to change after
+alpha, dont do a complex catalogue now."
+
+- **What it holds**: every fish, then every boost (`CATALOGUE`), each with its
+  `desc`, one line of what it does. A fish's line is new; a boost's is the one
+  it already lands with. Mods name themselves on their cards; gems and the
+  glowing fish stay the help's.
+- **Met** the first time ever: a fish as it arrives, a boost as it drops. The
+  save keeps the names (`meta.seen`, version 12); a version 11 save starts it
+  empty, so what was met before is met again.
+- **Said** in the status bar, `CATALOGUE +eel` for `NOTICE_TIME`; things met
+  together share the line. Never modal (the genre contract, 5).
+- **The screen**, from `home` and the pause menu: every entry in its place,
+  what is not met yet `???`, so the list never reshuffles. Words only;
+  pictures and animation wait (`ideas.md` → Screens).
+- Room for its row: `home`'s layer list moved up under the sub, and the pause
+  menu's rows rose a second row.
+
+**Guarded by**: `tests/home.test.js` → the catalogue — every fish and boost
+with a line, met once and said a moment, a boost as it drops and the line
+started afresh, kept in the save, opened from both menus and left by Esc;
+`tests/save.test.js` → version 11 comes in empty, `save-v12.json` loads and
+plays on. Each rule seen failing when broken. `checks.js` → the catalogue ends
+above the hint, beside the help.

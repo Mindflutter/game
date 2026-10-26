@@ -60,8 +60,18 @@ function arrive(name, flags, grade) {
   const type = enemyType(name);
   if (!type) return;
   const { x, y } = edgeSpawnPoint(type);
+  meet(name);
   enemies.push(Object.assign(
     makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER), grade), flags));
+}
+
+// Into the catalogue the first time ever (D146); things met together share the line.
+function meet(name) {
+  if (meta.seen.includes(name)) return;
+  meta.seen.push(name);
+  if (metTime <= 0) met = [];
+  met.push(name);
+  metTime = NOTICE_TIME;
 }
 
 // No jitter: a scenario watches one thing behave, so it must not vary.
@@ -456,7 +466,9 @@ function killEnemy(e) {
   // you as the current carried you on. Between waves the fight goes on (D115).
   sinceBoost += 1;
   if ((enemies.some(x => !x.gone) || incoming.length) && rng() < BOOST_C * sinceBoost) {
-    drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS.filter(fits), 1)[0].name, life: BOOST_LIFE });
+    const boost = drawDistinct(BOOSTS.filter(fits), 1)[0].name;
+    drops.push({ x: e.x, y: e.y, r: 6, boost, life: BOOST_LIFE });
+    meet(boost);
     sinceBoost = 0;
   }
   burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
@@ -982,7 +994,7 @@ function step(dt) {
     return;
   }
 
-  if (screen === 'help') {
+  if (screen === 'help' || screen === 'catalogue') {
     if (justPressed.has('Escape') || tapped(GO) || tapped(CLICK)) screen = returnTo;
     return;
   }
@@ -1041,6 +1053,7 @@ function step(dt) {
   if (player.safe > 0) player.safe -= dt;
   if (noticeTime > 0) noticeTime -= dt;
   if (bannerTime > 0) bannerTime -= dt;
+  if (metTime > 0) metTime -= dt;
   // Boosts run on play's clock: every other screen returns above (D86).
   for (const a of boosts) {
     a.left -= dt;

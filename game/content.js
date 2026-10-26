@@ -87,7 +87,7 @@ const FIXED_DT       = 1 / 120;
 // The longest frame the simulation believes: a minute away must not teleport
 // everything, and it bounds the catch-up, so a slow frame cannot spiral.
 const MAX_FRAME_DT   = 0.05;
-const NOTICE_TIME    = 2.5;   // seconds a challenge's or a pickup's line stays
+const NOTICE_TIME    = 2.5;   // seconds a challenge's, a pickup's or the catalogue's line stays
                               // up. Claude's pick
 const MOD_OFFER_DELAY = 0.6;  // seconds between the boss dying and the layer
                               // end's cards appearing: the kill burst lives
@@ -306,6 +306,7 @@ function statusLines() {
     { color: '#a8ffd8', text: 'challenges ' + CHALLENGES.map(challengeStatus).join('   ') },
     { color: '#4d7a8a', small: true,
       text: PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') },
+    ...(metTime > 0 ? [{ bold: true, color: '#ffd27a', text: 'CATALOGUE +' + met.join(', ') }] : []),
   ];
 }
 
@@ -511,36 +512,44 @@ const SCENARIOS = {
 const ENEMY_TYPES = [
   // The plain fish bite (D108). Claude's picks.
   { name: 'drifter', r: 18, hp: 1, speed: 85,  ramp: 0.6, value: 1, threat: [0.004, 0.021, 0.026],
+    desc: 'slow, and bites when its jaws open',
     color: '#e8446e', glow: '#ff1e5a',
     bite: { reach: 10, windup: 0.3, rest: 0.8, damage: 1, knock: 240 } },
   { name: 'darter',  r: 12, hp: 1, speed: 190, ramp: 0.9, value: 1, threat: [0.004, 0.014, 0.018],
+    desc: 'small and quick, bites fast',
     color: '#ffb648', glow: '#ff8a00',
     bite: { reach: 6, windup: 0.15, rest: 0.6, damage: 1, knock: 180 } },
   { name: 'bulwark', r: 34, hp: 6, speed: 52,  ramp: 1.2, value: 3, threat: [0.062, 0.091, 0.125],
+    desc: 'big, slow and tough; its bite throws you far',
     color: '#a05cff', glow: '#7b2fff',
     bite: { reach: 20, windup: 0.6, rest: 1.2, damage: 1, knock: 420 } },
   // The archer (D95). Its `range` sits under the Gun's, so the starting weapon
   // can always answer it. Claude's picks.
   { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2, threat: [0.017, 0.028, 0.032],
+    desc: 'keeps its distance and spits',
     color: '#5aa9ff', glow: '#1f6fff',
     spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420, damage: 1, knock: 150 } },
   // The puffer (D95, D106). Claude's picks.
   { name: 'puffer',  r: 22, hp: 3, speed: 125, value: 2, threat: [0.081, 0.131, 0.184],
+    desc: 'chases you, swells up close, then bursts: get out of its ring',
     color: '#ffee58', glow: '#ffc800',
     fuse: { chase: 1.5, trigger: 90, time: 0.5, blast: 110, damage: 2, knock: 480 } },
   // The eel (D95), the one fish that hurts on touch (D108). Claude's picks.
   { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, threat: [0.114, 0.239, 0.400],
+    desc: 'weaves as it swims, and touching it hurts',
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 },
     touch: { damage: 1, knock: 240 } },
   // The boss, and the mini-boss that rehearses its lunge (D62, D64, D65).
   // Neither glows (D88). Claude's picks.
   { name: 'mini-boss', r: 52, hp: 20, speed: 90, value: 5, threat: [0.315, 0.404, 0.452], carries: false,
+    desc: 'winds up, then lunges a long way',
     color: '#e2ff8a', glow: '#c6ff3c',
     lunge: { chase: 1, windup: 1.2, speed: 780, reach: 450, rest: 0.9, damage: 2, knock: 600 } },
   // The boss's `value` is the layer end's big haul of gems (D68); its `fan`,
   // D117's. Claude's picks.
   { name: 'boss',      r: 84, hp: 100, speed: 80, value: 30, threat: [0.879, 0.921, 0.961], carries: false,
+    desc: 'lunges, fans out shots, and its escorts keep coming until it dies',
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
     lunge: { chase: 1, windup: 0.8, speed: 780, reach: 450, rest: 0.9, damage: 4, knock: 600 },
     fan:   { chase: 1, windup: 0.6, reach: 450, rest: 0.9,
@@ -551,6 +560,10 @@ const ENEMY_TYPES = [
 // nothing where fish are made; plus `ramp` (D107). `threat` is a list, not one.
 const behaviourOf = t => ({ ramp: t.ramp,
   ...Object.fromEntries(Object.entries(t).filter(([, v]) => typeof v === 'object' && !Array.isArray(v))) });
+
+// What the catalogue can hold (D146): every fish, then every boost, each with
+// its line, filled in as each is first met.
+const CATALOGUE = [...ENEMY_TYPES, ...BOOSTS];
 
 // Grades (D119): the same fish, stronger -- its numbers, never its behaviour.
 // Grade 1 is the type as written; a step multiplies `hp`, `speed` and `value`
@@ -565,7 +578,7 @@ const GRADES = [
 ];
 
 // Derived from how many layers `home` lists, or a fifth would run into the rows.
-const HOME_LAYERS_TOP = 326, HOME_LINE = 26;
+const HOME_LAYERS_TOP = 310, HOME_LINE = 26;
 const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 
 // ---------- the debug mode ----------
@@ -698,14 +711,15 @@ const MENUS = {
   paused: {
     heading: 'PAUSED',
     sub: '',
-    // No sub, so its rows rise a row into the room, and the challenges under
-    // them stay clear of the hint.
-    top: MENU_TOP - ROW_STEP,
+    // No sub, so its rows rise two rows into the room, and the challenges
+    // under them stay clear of the hint.
+    top: MENU_TOP - 2 * ROW_STEP,
     challenges: true,
     back: () => { screen = resumeTo; },
     items: [
       { label: 'Resume',        run: () => { screen = resumeTo; } },
       { label: 'Help',          run: () => openScreen('help') },
+      { label: 'Catalogue',     run: () => openScreen('catalogue') },
       { label: 'Options',       run: () => openScreen('options') },
       { get label() { return GO_HOME.label; }, run: () => openMenu('goHome') },
       // Pausing saved the dive, and the title offers it back. The debug mode
@@ -738,6 +752,7 @@ const MENUS = {
       { label: 'Weapons',    run: () => openMenu('weapons') },
       { label: 'Equipment',  run: () => openMenu('equipment') },
       { label: 'Attributes', run: () => openMenu('attributes') },
+      { label: 'Catalogue',  run: () => openScreen('catalogue') },
       { label: 'Help',    run: () => openScreen('help') },
       { label: 'Options', run: () => openScreen('options') },
     ],

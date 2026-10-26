@@ -187,11 +187,13 @@ if (location.search === '?test') {
   // No state check sees text running through text. A line's height, not ten
   // pixels: ten let the help's last line sit on the hint while this passed.
   const LINE_CLEAR = 24;
-  openScreen('help');
-  draw();
-  check(helpBottom < HINT_Y - LINE_CLEAR,
-    'the help screen must end above the hint: content ends at ' + helpBottom +
-    ', hint sits at ' + HINT_Y + ' -- add a row and it overflows');
+  for (const name of ['help', 'catalogue']) {
+    openScreen(name);
+    draw();
+    check(helpBottom < HINT_Y - LINE_CLEAR,
+      'the ' + name + ' screen must end above the hint: content ends at ' + helpBottom +
+      ', hint sits at ' + HINT_Y + ' -- add a row and it overflows');
+  }
   screen = 'title';
 
   // `home` with every layer shown, the tallest its list gets, measured from the

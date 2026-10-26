@@ -47,6 +47,9 @@ let paidNow = [];
 // cannot write over the challenge its clear just paid.
 let banner = '';
 let bannerTime = 0;
+// What was just added to the catalogue (D146), in the status bar `metTime` more seconds.
+let met = [];
+let metTime = 0;
 
 // Begun and not yet ended: what the save writes as the dive in progress (D70),
 // and what makes the title's Start a Continue.
@@ -82,7 +85,7 @@ let boosts = [];
 let sinceBoost = 0;
 
 // 'title' | 'home' | 'weapons' | 'equipment' | 'attributes' | 'playing' | 'mods' |
-// 'paused' | 'help' | 'options' | 'dead' | 'won' | 'goHome' | 'newGame' | 'debug'
+// 'paused' | 'help' | 'catalogue' | 'options' | 'dead' | 'won' | 'goHome' | 'newGame' | 'debug'
 let screen = 'title';
 let menuIndex = 0;          // cursor in whichever menu is up
 let choiceIndex = 0;        // the marked card at a layer end (D85)
@@ -200,6 +203,8 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   paidNow = [];
   banner = '';
   bannerTime = 0;
+  met = [];
+  metTime = 0;
   diveLive = true;
 }
 
@@ -234,11 +239,11 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 11;
+const SAVE_VERSION = 12;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
-           deepest: 0, cleared: 0,
+           deepest: 0, cleared: 0, seen: [],
            owned: WEAPONS.filter(w => !w.cost).map(w => w.name), carried: WEAPONS[0].name };
 }
 let meta = freshMeta();
@@ -253,7 +258,7 @@ function snapshot() {
            fireArmed, currency, modCounts, offerTimer, choiceIndex,
            choices: choices.map(c => c.name), accumulator, rngState,
            currentSeed, bulletId, plan, batchHit, notice, noticeTime,
-           banner, bannerTime, modRound, boosts, sinceBoost, weaponName, guardLeft,
+           banner, bannerTime, met, metTime, modRound, boosts, sinceBoost, weaponName, guardLeft,
            batchDashed, tally, killTimes, firstKillAt, glowAt, layerStart,
            at: screen === 'playing' || screen === 'mods' ? screen : resumeTo };
 }
@@ -263,7 +268,7 @@ function restore(d) {
      queuePaused, batchIndex, incoming, breathTimer, cameraY, current, waterY,
      fireArmed, currency, modCounts, offerTimer, choiceIndex,
      accumulator, rngState, currentSeed, bulletId, plan, batchHit, notice,
-     noticeTime, banner, bannerTime, modRound, boosts, sinceBoost, weaponName,
+     noticeTime, banner, bannerTime, met, metTime, modRound, boosts, sinceBoost, weaponName,
      guardLeft, batchDashed, tally, killTimes, firstKillAt, glowAt, layerStart } = d);
   choices = d.choices.map(n => MODS.find(m => m.name === n));
   resumeTo = d.at;
@@ -379,6 +384,12 @@ function migrate(s) {
       d.player.splash = 0;
     }
     s.version = 11;
+  }
+  if (s && s.version === 11) {
+    // The catalogue starts empty (D146), `freshMeta()`'s: what was met before
+    // it is met again.
+    if (s.dive) { s.dive.met = []; s.dive.metTime = 0; }
+    s.version = 12;
   }
   return s;
 }

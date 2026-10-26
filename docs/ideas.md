@@ -328,13 +328,11 @@ discussed.
   what it does)): "i still feel the menu is a bit clumsy, but we leave proper
   ux out of alpha. now - just clarity of all player actions". Whether `home`
   showing the kit is still S7's is asked when it comes up.
-- **Hints for every fish and pickup.** "no hints for entities at all - think
-  player perspective again". The help's one line on the fish covers the archer
-  and the puffer; a mod or boost is named with its line as it lands; nothing
-  says what a fish does when it is first met. Bound by the genre contract —
-  nothing modal mid-fight (5) — and by the pillar that no mechanic needs more
-  than a sentence. Open: where a hint shows — at a fish's first arrival, at
-  `home`, in the help. **Home**: S7 (alpha polish)'s UX fixing.
+- **The catalogue, grown.** Built simple (D146 (the catalogue)): a line of
+  words per fish and boost. Igor, 2026-10-26: "ideally the catalogue is the
+  place where player can go and check what enemy is, with an image or even
+  animation - for later on ideas". Waits until names and meta settle after
+  alpha. **Home**: past alpha.
 
 **The dash**
 

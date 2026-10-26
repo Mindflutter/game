@@ -571,7 +571,8 @@ function drawEnd() {
 // Rows stacked from data must end above the hint; a check asserts it.
 const HINT_Y = ARENA_H - 64;
 
-// Where help's last line ends, for the check: it can outgrow the screen.
+// Where help's or the catalogue's last line ends, for the check: either can
+// outgrow the screen.
 let helpBottom = 0;
 
 function drawHint(text) {
@@ -718,6 +719,32 @@ function drawHelp() {
   drawHint('Esc or click to go back');
 }
 
+// What is not met yet keeps its place, so the list never reshuffles. PLACEHOLDER: words only.
+function drawCatalogue() {
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9ef7ff';
+  ctx.font = '34px system-ui, sans-serif';
+  ctx.fillText('CATALOGUE', ARENA_W / 2, 150);
+  ctx.fillStyle = '#6f97a5';
+  ctx.font = '16px system-ui, sans-serif';
+  ctx.fillText(meta.seen.length + ' of ' + CATALOGUE.length + ' met', ARENA_W / 2, 186);
+
+  const top = 240, step = 30;
+  ctx.font = '16px system-ui, sans-serif';
+  CATALOGUE.forEach((c, i) => {
+    const y = top + i * step, seen = meta.seen.includes(c.name);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = seen ? '#bffcff' : '#3d5f6b';
+    ctx.fillText(seen ? c.name : '???', ARENA_W / 2 - 160, y);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#6f97a5';
+    if (seen) ctx.fillText(c.desc, ARENA_W / 2 - 130, y);
+  });
+  helpBottom = top + (CATALOGUE.length - 1) * step;
+
+  drawHint('Esc or click to go back');
+}
+
 function drawOptions() {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#9ef7ff';
@@ -776,6 +803,7 @@ function draw() {
   else if (screen === 'home')    drawHome();
   else if (['weapons', 'equipment', 'attributes', 'newGame'].includes(screen)) drawMenu(MENUS[screen]);
   else if (screen === 'help')    drawHelp();
+  else if (screen === 'catalogue') drawCatalogue();
   else if (screen === 'options') drawOptions();
   else if (screen === 'debug')   drawDebug();
   else {

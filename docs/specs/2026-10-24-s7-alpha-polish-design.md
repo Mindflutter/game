@@ -79,7 +79,9 @@ them: the pile-up (`ideas.md` → Crowds), music.
 - 5: answered — Igor, 2026-10-25: "do sounds for all, no music. leave sound
   design out of alpha".
 - 6: answered — Igor, 2026-10-26: "do next item, with confirmation".
-- 7: where a hint shows — at a fish's first arrival, at `home`, in the help.
+- 7: answered — Igor, 2026-10-26: "we need some sort of catalogue which
+  updates on encounter. you can do a simple version now" (D146 (the
+  catalogue)).
 - 8: answered — Igor, 2026-10-24: "A". The screens stay; a row says in
   words what its next tier does, and `home` shows the kit, read-only.
   Then, 2026-10-25: "we leave proper ux out of alpha. now - just clarity of
@@ -91,11 +93,11 @@ them: the pile-up (`ideas.md` → Crowds), music.
 ## Checked against `foundations.md` and `plan.md`
 
 - **Nothing interrupts combat** (the genre contract, 5): the `+N`, the
-  hints and the sounds are never modal; a hint mid-dive is a line, not a
-  pause.
+  catalogue and the sounds are never modal; the catalogue mid-dive is a line
+  in the status bar, not a pause.
 - **Currency is never chased** (6): the `+N` shows what was collected and
   asks nothing.
-- **No mechanic needs more than a sentence** (the pillars): each hint is one.
+- **No mechanic needs more than a sentence** (the pillars): each catalogue line is one.
 - **The technical contract**: no dependency and no asset file; sound stays
   synthesis through the seam's `sound`, so the seam does not grow. Splash
   rings and popups are objects under the budget of 500 (D43 (the object

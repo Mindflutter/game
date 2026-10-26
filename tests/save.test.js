@@ -312,6 +312,27 @@ describe('the save (D70)', () => {
     expect(shots.every(finite)).toBe(true);
   });
 
+  it('brings a version 11 save in with its catalogue empty (D146)', () => {
+    const text = readFileSync(new URL('./fixtures/save-v11.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect([g.meta.seen, g.met, g.metTime]).toEqual([[], [], 0]);
+  });
+
+  it('loads a save written by the first build of version 12, and plays it on', () => {
+    // Saved mid-wave, the catalogue's line still up (D146).
+    const text = readFileSync(new URL('./fixtures/save-v12.json', import.meta.url), 'utf8');
+    const g = loadGame();
+    expect(g.loadSave(text)).toBe('');
+    expect(g.meta.seen).toEqual(['drifter', 'darter']);
+    expect(g.statusLines().at(-1).text).toBe('CATALOGUE +drifter, darter');
+    g.screen = g.resumeTo;
+    g.immortal = true;
+    for (let i = 0; i < 3 / g.FIXED_DT; i++) g.update(g.FIXED_DT);
+    expect(g.statusLines().at(-1).text).not.toContain('CATALOGUE');
+    expect(g.meta.seen.slice(0, 2)).toEqual(['drifter', 'darter']);
+  });
+
   it("plays a version 11 dive's plan on ungraded, as it was drawn (D126)", () => {
     const text = readFileSync(new URL('./fixtures/save-v11.json', import.meta.url), 'utf8');
     const g = loadGame();

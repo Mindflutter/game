@@ -34,7 +34,8 @@ what a step costs and what each attribute's step adds
 polish)'s: the bump's (`design.md`), the leap's and the bulwark's reach
 (`entities/enemies.md`), the splash's ring (`entities/boosts.md`), the `+N`'s hold,
 flight and bump (D142 (the +N)), every sound's voice (D144 (every moment of a
-dive has a sound)) — all Claude's picks.
+dive has a sound)), each fish's catalogue line (D146 (the catalogue)) — all
+Claude's picks.
 The
 scenarios that start next to each — one fish of each kind, every ordinary type
 in a row, a weapon carried from the top, the second and third layers with a

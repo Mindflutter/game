@@ -99,7 +99,7 @@ describe('home: gear, points, challenges (D31, D36)', () => {
     // What each row is, its name, without the tier or price after it.
     const names = menu => g.MENUS[menu].items.map(i => i.label.split('   ')[0]);
     expect(g.MENUS.home.items.map(i => i.label))
-      .toEqual(['Dive', 'Weapons', 'Equipment', 'Attributes', 'Help', 'Options']);
+      .toEqual(['Dive', 'Weapons', 'Equipment', 'Attributes', 'Catalogue', 'Help', 'Options']);
     row('home', 'Weapons').run();
     expect(g.screen).toBe('weapons');
     expect(names('weapons')).toEqual([...g.WEAPONS.map(w => w.name), 'Back']);
@@ -570,5 +570,74 @@ describe('home from the pause menu (D145)', () => {
     const reloaded = loadGame();
     reloaded.loadSave(g.saved);
     expect([reloaded.diveLive, reloaded.meta.bank]).toEqual([false, 140]);
+  });
+});
+
+describe('the catalogue (D146)', () => {
+  const press = (g, code) => { g.justPressed.add(code); g.update(g.FIXED_DT); };
+  const line = g => g.statusLines().at(-1).text;
+  // Mid-dive, everything met but what the test names.
+  function diving(...unmet) {
+    const g = loadGame();
+    g.reset(5);
+    g.immortal = true;
+    g.meta.seen = g.CATALOGUE.map(c => c.name).filter(n => !unmet.includes(n));
+    return g;
+  }
+
+  it('holds every fish and every boost, each with its line', () => {
+    const g = loadGame();
+    expect(g.CATALOGUE.map(c => c.name)).toEqual([...g.ENEMY_TYPES, ...g.BOOSTS].map(t => t.name));
+    expect(g.CATALOGUE.every(c => typeof c.desc === 'string' && c.desc.length > 0)).toBe(true);
+  });
+
+  it('takes a fish the first time one ever comes, says so in the status bar a moment, and takes it once', () => {
+    const g = diving('eel', 'archer');
+    g.arrive('eel');
+    g.arrive('eel');
+    g.arrive('archer');
+    expect(g.meta.seen.slice(-2)).toEqual(['eel', 'archer']);
+    expect(line(g)).toBe('CATALOGUE +eel, archer');
+    for (let i = 0; i < g.NOTICE_TIME / g.FIXED_DT + 1; i++) g.update(g.FIXED_DT);
+    expect(line(g)).not.toContain('CATALOGUE');
+    g.arrive('eel');
+    expect(line(g)).not.toContain('CATALOGUE');
+  });
+
+  it('takes a boost as it first drops, and starts its line afresh once the last one faded', () => {
+    const g = diving('Rush', 'Frenzy', 'Bloom', 'Lance');
+    g.metTime = 0;
+    g.met = ['eel'];                           // an old line, gone
+    g.arrive('drifter');
+    g.arrive('drifter');                       // one left, or no boost drops
+    g.sinceBoost = 1e6;                        // the next roll is certain
+    g.killEnemy(g.enemies[0]);
+    const boost = g.drops.find(d => d.boost).boost;
+    expect(g.meta.seen).toContain(boost);
+    expect(line(g)).toBe('CATALOGUE +' + boost);
+  });
+
+  it('keeps what was met in the save, the dive over or not', () => {
+    const g = diving('eel');
+    g.arrive('eel');
+    g.saveNow();
+    const reloaded = loadGame();
+    expect(reloaded.loadSave(g.saved)).toBe('');
+    expect(reloaded.meta.seen).toContain('eel');
+  });
+
+  it('opens from home and from the pause menu, and Esc goes back where it was opened', () => {
+    const g = loadGame();
+    g.openMenu('home');
+    g.MENUS.home.items.find(i => i.label === 'Catalogue').run();
+    expect(g.screen).toBe('catalogue');
+    press(g, 'Escape');
+    expect(g.screen).toBe('home');
+    g.reset(5);
+    press(g, 'Escape');
+    g.MENUS.paused.items.find(i => i.label === 'Catalogue').run();
+    expect(g.screen).toBe('catalogue');
+    press(g, 'Escape');
+    expect(g.screen).toBe('paused');
   });
 });

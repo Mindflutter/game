@@ -97,6 +97,7 @@ The shake fade and the water run in `update()`, outside `step()`, because
 title ──Start──> home ──Dive──> playing ──Esc──> paused ──Quit──> title
   │ (a dive saved:              │ ▲              │ (the dive stays saved)
   │  Continue ──> playing)      │ │ Continue     ├──> help ───Esc──> back to caller
+  │                             │ │              ├──> catalogue ─Esc──> back to caller
   │                    layer end▼ │              └──> options ─Esc──> back to caller
   │                           mods
   │                             │
@@ -104,6 +105,7 @@ title ──Start──> home ──Dive──> playing ──Esc──> paused 
               │ ▲              won
               │ └──Back / Esc── weapons, equipment, attributes
               └──Weapons, Equipment, Attributes──┘
+home ──Catalogue──> catalogue ──Esc──> home     (D146)
 
 title ──New game──> newGame ──Erase everything and start──> home     (D103)
                       └──Cancel / Esc──> title
@@ -313,7 +315,8 @@ and "it broke sometimes" becomes "it broke on seed 4471". The one
 check reads it — hp, guard, gems less the `+N` still on its way to them
 (D142 (the +N)), the weapon, the layer and gate, fish left,
 mods and boosts, each challenge's count against its next rung — and the
-**development readout** under it, `PLAYER_STATS` (D52). Each readout entry
+**development readout** under it, `PLAYER_STATS` (D52); under that, for
+`NOTICE_TIME`, what was just added to the catalogue (D146 (the catalogue)). Each readout entry
 names its field, so a check proves every stat a mod or boost moves is on
 screen (D99). A card and the pickup line show what a mod changes by applying
 it to a copy of the player (`modPreview()`), so neither can advertise what
@@ -324,7 +327,7 @@ for development; revisit at S7 (alpha polish).
 
 Rows stacked from a table take their positions from `.length`, never a fixed
 `y` — adding a row to `HELP_KEYS` once ran the list through the blurb while
-every check passed (D46). The browser suite holds help, the mod cards (their
+every check passed (D46). The browser suite holds help, the catalogue, the mod cards (their
 descriptions inside the card, D49), the layer end's hint, `home`'s layer list
 and rows, and every menu's rows above the hint.
 
