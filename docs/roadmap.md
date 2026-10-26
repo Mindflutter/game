@@ -52,6 +52,22 @@ This section owns the measured bot figures. Nothing else quotes them.
 older build is a regression signal for that build only.
 
 - All `?test` checks passing, and `npm test` green.
+- **The economy, the D150 (S7 closes) build, 2026-10-26** — S8 (the economy:
+  gems and points)'s first figures: five fresh saves (seeds 1–5) of ten dives
+  each, the diver bot carrying the Gun and spending as `tests/measure.js` does,
+  points into the cheapest step, gems into the cheapest tier.
+  - **The first dive** reaches gate 6–19 of 30 (four of five in layer 2),
+    earns 99–723 gems and 5–23 points — of the 50 the challenges pay ever. It
+    buys the Gun's first tier and, on three seeds of five, the Mask's.
+  - **Points** reach 32–39 by the fifth dive and stop: the top rungs pay none
+    of the last 11–18 in ten dives. Attributes stop growing from then.
+  - **Gems** grow with depth: about 2,500 a dive to the last gate, four to six
+    times the first dive's. Every tier of the Gun and the equipment, 15,280
+    gems, is bought by the ninth or tenth dive; then gems pile up unspent.
+  - The bot reaches the last gate from the fifth to the eighth dive and loses
+    the last boss every time after.
+  - Igor's own first dive, for scale: mid layer 2, 12 points, the Gun's first
+    tier the only purchase.
 - **Difficulty, from Igor playing it, 2026-09-27: batches are too easy.**
   "nothing breaks the target, currently batches are very easy to complete."
   This is the number that counts, and the direction is that batches must get

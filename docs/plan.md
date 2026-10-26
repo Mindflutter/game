@@ -64,7 +64,8 @@ from playing alpha). In order:
    careers measuring it.
 
 Beside it, small: the bulwark's bite as quick as the other fish's, built
-(D151 (the bulwark bites as quick as the drifter)).
+(D151 (the bulwark bites as quick as the drifter)). Task 1's first figures
+are `roadmap.md` → Health.
 
 **Exit (DoD):** Igor plays a fresh save and says gems and points are in
 balance, and the career bot's figures agree.
