@@ -591,20 +591,22 @@ describe('the catalogue (D146)', () => {
     expect(g.CATALOGUE.every(c => typeof c.desc === 'string' && c.desc.length > 0)).toBe(true);
   });
 
-  it('takes a fish the first time one ever comes, says so in the status bar a moment, and takes it once', () => {
+  it('takes a fish the first time one is killed, not as it comes, says so in the status bar a moment, and takes it once', () => {
     const g = diving('eel', 'archer');
-    g.arrive('eel');
-    g.arrive('eel');
-    g.arrive('archer');
+    for (const name of ['eel', 'eel', 'archer']) g.arrive(name);
+    expect(g.meta.seen).not.toContain('eel');
+    expect(line(g)).not.toContain('CATALOGUE');
+    for (const e of [...g.enemies]) g.killEnemy(e);
     expect(g.meta.seen.slice(-2)).toEqual(['eel', 'archer']);
     expect(line(g)).toBe('CATALOGUE +eel, archer');
     for (let i = 0; i < g.NOTICE_TIME / g.FIXED_DT + 1; i++) g.update(g.FIXED_DT);
     expect(line(g)).not.toContain('CATALOGUE');
     g.arrive('eel');
+    g.killEnemy(g.enemies.at(-1));
     expect(line(g)).not.toContain('CATALOGUE');
   });
 
-  it('takes a boost as it first drops, and starts its line afresh once the last one faded', () => {
+  it('takes a boost as it is first taken, not as it drops, and starts its line afresh once the last one faded', () => {
     const g = diving('Rush', 'Frenzy', 'Bloom', 'Lance');
     g.metTime = 0;
     g.met = ['eel'];                           // an old line, gone
@@ -613,6 +615,8 @@ describe('the catalogue (D146)', () => {
     g.sinceBoost = 1e6;                        // the next roll is certain
     g.killEnemy(g.enemies[0]);
     const boost = g.drops.find(d => d.boost).boost;
+    expect(g.meta.seen).not.toContain(boost);
+    g.startBoost(boost);
     expect(g.meta.seen).toContain(boost);
     expect(line(g)).toBe('CATALOGUE +' + boost);
   });
@@ -620,6 +624,7 @@ describe('the catalogue (D146)', () => {
   it('keeps what was met in the save, the dive over or not', () => {
     const g = diving('eel');
     g.arrive('eel');
+    g.killEnemy(g.enemies.at(-1));
     g.saveNow();
     const reloaded = loadGame();
     expect(reloaded.loadSave(g.saved)).toBe('');

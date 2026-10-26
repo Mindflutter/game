@@ -5061,3 +5061,21 @@ Igor, 2026-10-26: "keep card numbers, readout only in debug".
 
 **Guarded by**: `tests/dive.test.js` → the status bar — the readout only in
 the debug mode, seen failing when shown always.
+
+## D149 — The catalogue fills on a kill · 2026-10-26
+
+Igor, 2026-10-26, playing alpha: "catalogue should be updated on kill, not
+appearance".
+
+- **A fish enters the catalogue when one is first killed**, not as it comes
+  in; **a boost when one is first taken**, not as it drops — the same rule
+  for both: met is what the diver did, not what it saw.
+- The status bar's line, the screen and the save are D146 (the catalogue)'s,
+  unchanged.
+
+**Supersedes**: D146 (the catalogue)'s "a fish as it arrives, a boost as it
+drops".
+
+**Guarded by**: `tests/home.test.js` → the catalogue — a fish arriving adds
+nothing and its kill adds it, a boost dropping adds nothing and taking it adds
+it; each seen failing with its meeting taken away.

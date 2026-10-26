@@ -60,12 +60,12 @@ function arrive(name, flags, grade) {
   const type = enemyType(name);
   if (!type) return;
   const { x, y } = edgeSpawnPoint(type);
-  meet(name);
   enemies.push(Object.assign(
     makeEnemy(type, x, cameraY + y, type.speed * (1 - ENEMY_JITTER / 2 + rng() * ENEMY_JITTER), grade), flags));
 }
 
-// Into the catalogue the first time ever (D146); things met together share the line.
+// Into the catalogue the first time ever (D146): a fish killed, a boost taken.
+// Things met together share the line.
 function meet(name) {
   if (meta.seen.includes(name)) return;
   meta.seen.push(name);
@@ -439,6 +439,7 @@ function hitSparks(e, b) {
 function killEnemy(e) {
   e.gone = true;
   kills += 1;
+  meet(e.name);
   // A fish placed by hand pays no challenge (D109).
   if (plan[batchIndex - 1]) {
     if (firstKillAt === null) firstKillAt = elapsed;
@@ -466,9 +467,7 @@ function killEnemy(e) {
   // you as the current carried you on. Between waves the fight goes on (D115).
   sinceBoost += 1;
   if ((enemies.some(x => !x.gone) || incoming.length) && rng() < BOOST_C * sinceBoost) {
-    const boost = drawDistinct(BOOSTS.filter(fits), 1)[0].name;
-    drops.push({ x: e.x, y: e.y, r: 6, boost, life: BOOST_LIFE });
-    meet(boost);
+    drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS.filter(fits), 1)[0].name, life: BOOST_LIFE });
     sinceBoost = 0;
   }
   burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
@@ -501,6 +500,7 @@ function collectMod(name) {
 // Touched again while it runs, its clock restarts and nothing more is added.
 // What it added runs with it, so exactly that comes back off (D125).
 function startBoost(name) {
+  meet(name);
   const b = BOOSTS.find(x => x.name === name);
   const on = boosts.find(x => x.name === name);
   if (on) on.left = b.time;
