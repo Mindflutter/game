@@ -491,6 +491,14 @@ discussed.
   — still a random edge, the kin idea being fish from behind the screen,
   above, arriving near the diver with the fade-in as their telegraph.
 
+- **A mark where a fish is about to come in.** Igor, 2026-10-26: "shortly
+  before enemy emerges to screen, add a small color indicator at that place
+  (optionally flashing). goal: show the player what's coming from where, time
+  to avoid if he is close to the screen edge". An idea, not yet built or
+  scheduled. It answers the mark at the edge from the note above; how long
+  before, what colour (each fish's own, so it says *what* as well as
+  *where*), and whether it flashes are open.
+
 - **Escorts: do they feel right?** Built as D116 (bosses bring escorts), Igor
   handing the shape over ("on boss question go your way"): the boss's crowd
   refills to `BOSS_CROWD` while it lives, each newcomer within 2s of the gap, paying no
