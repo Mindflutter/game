@@ -315,14 +315,15 @@ and "it broke sometimes" becomes "it broke on seed 4471". The one
 `statusLines()` in `content.js` builds the status bar, so its text ports and a
 check reads it — hp, guard, gems less the `+N` still on its way to them
 (D142 (the +N)), the weapon, the layer and gate, fish left,
-mods and boosts, each challenge's count against its next rung — and the
-**development readout** under it, `PLAYER_STATS` (D52); under that, for
-`NOTICE_TIME`, what was just added to the catalogue (D146 (the catalogue)). Each readout entry
+mods and boosts, each challenge's count against its next rung — then, in the
+debug mode only (D148 (the readout only in the debug mode)), the
+**development readout**, `PLAYER_STATS` (D52); last, for `NOTICE_TIME`, what
+was just added to the catalogue (D146 (the catalogue)). Each readout entry
 names its field, so a check proves every stat a mod or boost moves is on
 screen (D99). A card and the pickup line show what a mod changes by applying
 it to a copy of the player (`modPreview()`), so neither can advertise what
-`apply` does not do. The numbers on cards contradict D34 (mods) on purpose,
-for development; revisit at S7 (alpha polish).
+`apply` does not do. The numbers on cards go beyond D34 (mods)'s words, and
+stay through alpha (D148).
 
 ## Screens must fit
 

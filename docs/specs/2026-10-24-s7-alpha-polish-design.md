@@ -90,7 +90,8 @@ them: the pile-up (`ideas.md` → Crowds), music.
   player sees what he's diving with" (D147 (home shows the kit)).
 - 9: answered — Igor, 2026-10-26: "health bar stays". Over the body, as
   every hurt fish's (`ideas.md` → Declined).
-- 10: whether the numbers and the readout stay through alpha.
+- 10: answered — Igor, 2026-10-26: "keep card numbers, readout only in
+  debug" (D148 (the readout only in the debug mode)).
 
 ## Checked against `foundations.md` and `plan.md`
 

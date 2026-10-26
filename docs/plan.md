@@ -54,7 +54,8 @@ UX fixing — `ideas.md` → Screens, among it what a tier does for the player
 a catalogue of every fish and boost, filled as each is first met, kept simple
 because names and meta may change after alpha (D146 (the catalogue)); and
 `home` showing the kit and the numbers a dive starts with (D147 (home shows
-the kit)).
+the kit)); the numbers on mod cards kept, the development readout only in the
+debug mode (D148 (the readout only in the debug mode)).
 Proper UX waits past alpha — Igor, 2026-10-25: "we leave proper ux out of
 alpha. now - just clarity of all player actions".
 D35's `+N` popup over collected gems is feel, and was kept for here (D78

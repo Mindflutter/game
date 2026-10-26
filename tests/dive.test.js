@@ -423,6 +423,15 @@ describe('the status bar', () => {
     expect(text(g)).toContain(coming + ' fish left (' + coming + ' coming)');
   });
 
+  it('shows the readout only in the debug mode (D148)', () => {
+    const g = loadGame();
+    g.reset(1);
+    expect(text(g)).not.toContain('rng ');
+    g.openDebug('', 1);
+    g.debugDive();
+    expect(text(g)).toContain('rng ' + g.player.range);
+  });
+
   it('shows on the readout every stat a mod or a boost moves, each a real field of the diver (D52)', () => {
     // hp and maxHp are the `HP 3/4` on the line above.
     const g = loadGame();

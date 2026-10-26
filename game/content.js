@@ -308,8 +308,9 @@ function statusLines() {
       text: 'mods ' + (mods.join('  ') || 'none') +
             boosts.map(b => '   ' + b.name + ' ' + b.left.toFixed(1) + 's').join('') },
     { color: '#a8ffd8', text: 'challenges ' + CHALLENGES.map(challengeStatus).join('   ') },
-    { color: '#4d7a8a', small: true,
-      text: PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') },
+    // The development readout (D52), only in the debug mode (D148).
+    ...(debugSetup ? [{ color: '#4d7a8a', small: true,
+                        text: PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') }] : []),
     ...(metTime > 0 ? [{ bold: true, color: '#ffd27a', text: 'CATALOGUE +' + met.join(', ') }] : []),
   ];
 }

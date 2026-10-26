@@ -5044,3 +5044,20 @@ dim while unbought, the numbers equal to the diver `reset()` builds; every
 stat a tier or step moves is named. Each seen failing when broken.
 `checks.js` → the kit, at its widest, sits between the rows and the edge and
 ends above the hint.
+
+## D148 — The readout only in the debug mode · 2026-10-26
+
+S7 (alpha polish)'s tenth item: the numbers on mod cards and the development
+readout, both left on for development against D34 (mods), "revisit at S7".
+Igor, 2026-10-26: "keep card numbers, readout only in debug".
+
+- **The cards and the pickup line keep their numbers** — `swim speed 260 →
+  290` beside the words — through alpha: what a pick does, said exactly, as
+  `home` now says what a dive starts with (D147 (home shows the kit)). D34's
+  "no number the player must compare" gives way here.
+- **The readout** (`PLAYER_STATS`, D52) shows only in the debug mode (D102
+  (the debug mode)); its rule that every stat a mod or boost moves is on it
+  stands, for that mode.
+
+**Guarded by**: `tests/dive.test.js` → the status bar — the readout only in
+the debug mode, seen failing when shown always.
