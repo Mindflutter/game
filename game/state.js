@@ -2,6 +2,7 @@
 
 // ---------- game state ----------
 let player, enemies, bullets, gems, drops, particles;
+let gemPop = { n: 0, left: 0, flyN: 0, fly: 0, bump: 0 };   // the +N (D35): gems summed over the diver, then flown to the counter
 let elapsed, kills, shake;
 let queuePaused = false;    // a scenario can stop the batch queue (D37)
 
@@ -163,6 +164,7 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   gems = [];
   drops = [];
   particles = [];
+  gemPop = { n: 0, left: 0, flyN: 0, fly: 0, bump: 0 };
   elapsed = 0;         // seconds survived
   kills = 0;
   queuePaused = false;

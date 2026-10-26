@@ -46,7 +46,7 @@ export function loadGame() {
                  'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
                  'batchDashed', 'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
                  'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps',
-                 'fireArmed', 'offerTimer', 'optionIndex', 'returnTo', 'rngState'];
+                 'fireArmed', 'gemPop', 'offerTimer', 'optionIndex', 'returnTo', 'rngState'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'GRADES', 'MODS', 'MINI_BOSS', 'BOSS', 'STAT_NAMES',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
@@ -57,7 +57,7 @@ export function loadGame() {
                   'WEAPONS', 'EQUIPMENT', 'ATTRIBUTES', 'CHALLENGES',
                   'MENUS', 'OPTIONS', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'GO', 'DASH', 'CLICK',
                   'DEBUG_COUNTS', 'DEBUG_FISH_MAX', 'DEBUG_BEHAVIOURS', 'ONE_SHOT', 'HELP_BLURB',
-                  'DASH_TIME', 'DASH_GRACE', 'BUMP_TIME', 'LEAP_TIME', 'SHAKE_LEVELS', 'MENU_TOP', 'OPTION_TOP', 'HOME_TOP', 'PLAYER_STATS',
+                  'DASH_TIME', 'DASH_GRACE', 'BUMP_TIME', 'LEAP_TIME', 'GEM_POP', 'GEM_FLY', 'GEM_BUMP', 'SHAKE_LEVELS', 'MENU_TOP', 'OPTION_TOP', 'HOME_TOP', 'PLAYER_STATS',
                   'THREAT_START', 'THREAT_RISE', 'GRADE_KEEP', 'batchThreat', 'ofGrade'];
 
   const bridge = 'Object.defineProperties(globalThis, {' + [

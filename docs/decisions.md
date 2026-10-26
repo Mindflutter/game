@@ -4884,3 +4884,31 @@ small".
 diver's body on the snap, home after, and only to its reach at a diver who
 got away; seen failing before it was built, and with the reach's cap
 removed.
+
+## D142 — The +N, summed over the diver, flown to the counter · 2026-10-25
+
+S7 (alpha polish)'s third item: D35 (currency is auto-collected)'s debounced
+`+N`, kept for this stage by D78 (gems are pulled to the player). Both of
+D35's places were built for Igor to pick; he combined them — Igor,
+2026-10-25: "combine both. accumulate gems over player, then swift animation
+to status bar with a bump there".
+
+- **Summed, never one per gem** (D35): each gem collected adds one to a
+  running `+N` over the diver and starts its hold again, so a fight's stream
+  of gems is one climbing number.
+- **Then it flies to the counter**: `GEM_POP` after the last gem it leaves
+  the diver and speeds up to the status bar's `GEMS`, in `GEM_FLY`; as it
+  lands the counter's number swells and settles, in `GEM_BUMP`. A gem
+  collected meanwhile starts a new `+N` over the diver.
+- **The counter counts it as it lands**: `currency` is the gems collected,
+  for the save and the end of the dive; the counter shows it less what is
+  still over the diver or in the air — except once the dive is over, when it
+  shows all.
+- `GEM_POP` 1s, `GEM_FLY` 0.25s, `GEM_BUMP` 0.15s and the swell are Claude's
+  picks.
+
+**Guarded by**: `tests/combat.test.js` → the +N — a run of gems summed into
+one, held after the last, then from one again; flown to the counter, which
+holds it back until it lands and then bumps; all shown once the dive is over.
+Each seen failing before it was built, and with the hold not restarting, the
+bump not set, and the dive's end not counted.

@@ -199,6 +199,47 @@ describe('touch and gems', () => {
   });
 });
 
+describe('the +N (D35)', () => {
+  const pay = (g, n) => {
+    for (let i = 0; i < n; i++) g.gems.push({ x: g.player.x, y: g.player.y, r: 4 });
+    g.update(g.FIXED_DT);
+  };
+
+  it('sums a run of gems into one, held a while after the last, then starts again from one', () => {
+    const g = quiet();
+    pay(g, 3);
+    expect([g.currency, g.gemPop.n]).toEqual([3, 3]);
+    play(g, g.GEM_POP / 2);
+    pay(g, 1);                                   // the hold starts again
+    play(g, g.GEM_POP / 2 + 0.05);
+    expect(g.gemPop.n).toBe(4);
+    play(g, g.GEM_POP / 2);
+    expect(g.gemPop.n).toBe(0);
+    pay(g, 1);
+    expect(g.gemPop.n).toBe(1);
+  });
+
+  it('flies to the counter when its hold ends; the counter holds it back until it lands, then bumps', () => {
+    const g = quiet();
+    pay(g, 3);
+    expect(g.statusLines()[0].text).toContain('GEMS 0 ');
+    play(g, g.GEM_POP + 0.01);
+    expect([g.gemPop.n, g.gemPop.flyN]).toEqual([0, 3]);
+    expect(g.statusLines()[0].text).toContain('GEMS 0 ');
+    play(g, g.GEM_FLY);
+    expect(g.gemPop.flyN).toBe(0);
+    expect(g.gemPop.bump).toBeGreaterThan(0);
+    expect(g.statusLines()[0].text).toContain('GEMS 3 ');
+  });
+
+  it('shows every gem at once when the dive ends mid-flight', () => {
+    const g = quiet();
+    pay(g, 3);
+    g.screen = 'dead';
+    expect(g.statusLines()[0].text).toContain('GEMS 3 ');
+  });
+});
+
 describe('the dash (D50, D51, D56)', () => {
   it('throws what it passes through without wounding it until bought, and the diver comes through whole', () => {
     const g = loadGame();

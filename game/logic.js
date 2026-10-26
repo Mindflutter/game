@@ -1298,8 +1298,20 @@ function step(dt) {
       g.gone = true;
       sound('gem');
       currency += 1;
+      gemPop.n += 1;
+      gemPop.left = GEM_POP;
     }
   }
+  if (gemPop.left > 0 && (gemPop.left -= dt) <= 0) {
+    gemPop.flyN += gemPop.n;
+    gemPop.n = 0;
+    gemPop.fly = GEM_FLY;
+  }
+  if (gemPop.fly > 0 && (gemPop.fly -= dt) <= 0) {
+    gemPop.flyN = 0;
+    gemPop.bump = GEM_BUMP;
+  }
+  gemPop.bump = Math.max(0, gemPop.bump - dt);
 
   // --- what kills drop besides gems (D84, D86) ---
   for (const d of drops) {

@@ -303,7 +303,8 @@ and "it broke sometimes" becomes "it broke on seed 4471". The one
 ## The status bar and the readout
 
 `statusLines()` in `content.js` builds the status bar, so its text ports and a
-check reads it — hp, guard, gems, the weapon, the layer and gate, fish left,
+check reads it — hp, guard, gems less the `+N` still on its way to them
+(D142 (the +N)), the weapon, the layer and gate, fish left,
 mods and boosts, each challenge's count against its next rung — and the
 **development readout** under it, `PLAYER_STATS` (D52). Each readout entry
 names its field, so a check proves every stat a mod or boost moves is on

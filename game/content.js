@@ -48,6 +48,9 @@ const RAMP_LEFT      = 0.05;
 
 // Fast enough to outrun the swimming diver (D35, D78). Claude's pick.
 const GEM_PULL       = 600;   // px/s a gem flies toward you
+const GEM_POP        = 1;     // seconds the +N holds over the diver after its last gem: Claude's pick
+const GEM_FLY        = 0.25;  // seconds it then takes to fly to the counter: Claude's pick
+const GEM_BUMP       = 0.15;  // seconds the counter's number swells as it lands: Claude's pick
 const ENEMY_JITTER   = 0.3;   // spread of speeds around a type's nominal speed
 const GATE_PAUSE     = 1.2;   // seconds of quiet before a dive's first batch;
                               // later ones wait on the descent
@@ -280,7 +283,9 @@ function statusLines() {
     { bold: true, color: '#d8f6ff',
       text: 'HP ' + player.hp + '/' + player.maxHp +
             (player.guard ? '   GUARD ' + guardLeft + '/' + player.guard : '') +
-            '   GEMS ' + currency + '   ' + weaponName + ' tier ' + (meta.gear[weaponName] || 0) },
+            // What is still on its way is not counted yet, unless the dive is over.
+            '   GEMS ' + (currency - (screen === 'dead' || screen === 'won' ? 0 : gemPop.n + gemPop.flyN)) +
+            '   ' + weaponName + ' tier ' + (meta.gear[weaponName] || 0) },
     { color: '#9ef7ff',
       text: LAYERS[entry.layer].name + '   batch ' + (layer.indexOf(entry) + 1) + '/' + layer.length +
             // Fish to come count, so an arena that fills again reads as a wave,

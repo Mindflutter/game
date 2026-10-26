@@ -431,6 +431,10 @@ discussed.
   open: **the diver's knock** — his "maybe", built so he can play it, his to
   keep or drop. Kin: "Shake when enemies take damage", under Suggested,
   below.
+- **The gems' flight to the diver.** Igor, 2026-10-25, as the `+N` came to
+  fly to the counter (D142 (the +N)): "maybe the animation from enemy to
+  player should go away". A minor open question, his word: the pull stays,
+  D78 (gems are pulled to the player), until he says.
 
 **Crowds**
 

@@ -49,8 +49,9 @@ the decision wins.
 indistinguishable enemies, indistinguishable layers, or visual clumsiness.
 UX fixing — `ideas.md` → Screens, among it what a tier does for the player
 (Igor, 2026-10-19).
-D35's `+N` popup over collected gems is feel, and waits here, unbuilt (D78
-(gems are pulled to the player)).
+D35's `+N` popup over collected gems is feel, and was kept for here (D78
+(gems are pulled to the player)); built, summed over the diver and flown to
+the counter (D142 (the +N)).
 
 **Exit (DoD):** Igor says it is alpha. This is the one stage whose DoD is a
 judgement, and that is correct.

@@ -154,6 +154,18 @@ function audioStatus() {
   return '';
 }
 
+// The +N (D35): over the diver while gems come, then on its way to the counter.
+function gemText(n, x, y) {
+  ctx.save();
+  ctx.font = 'bold 16px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#a8ffd8';
+  ctx.shadowColor = '#2affb0';
+  ctx.shadowBlur = 10;
+  ctx.fillText('+' + n, x, y);
+  ctx.restore();
+}
+
 // Dims the whole window, margin included: the margin is painted the water's
 // colour, so a dim limited to the view would leave it as bright bands.
 function dimArena(alpha = 0.82) {
@@ -440,6 +452,8 @@ function drawField() {
     ctx.stroke();
   }
 
+  if (gemPop.n) gemText(gemPop.n, player.x, player.y - player.r - 14);
+
   ctx.restore();
 
   // --- HUD ---
@@ -447,11 +461,33 @@ function drawField() {
   // The sound's state rides on the first line: only the platform knows it.
   ctx.textAlign = 'left';
   const status = statusLines();
+  let counter;
   status.forEach((line, i) => {
     ctx.fillStyle = line.color;
     ctx.font = (line.bold ? 'bold 15px' : line.small ? '13px' : '14px') + ' system-ui, sans-serif';
-    ctx.fillText(line.text + (i === 0 ? audioStatus() : ''), 16, 30 + i * STATUS_STEP);
+    const text = line.text + (i === 0 ? audioStatus() : ''), y = 30 + i * STATUS_STEP;
+    // The gems' number drawn apart, so the +N has somewhere to land and it
+    // can swell as it does.
+    const m = /^(.*GEMS )(\d+)(.*)$/.exec(text);
+    if (!m) return ctx.fillText(text, 16, y);
+    const w = ctx.measureText(m[2]).width, x = 16 + ctx.measureText(m[1]).width;
+    ctx.fillText(m[1], 16, y);
+    ctx.fillText(m[3], x + w, y);
+    counter = { x: x + w / 2, y: y - 5 };
+    const s = 1 + 0.4 * gemPop.bump / GEM_BUMP;
+    ctx.save();
+    ctx.translate(counter.x, counter.y);
+    ctx.scale(s, s);
+    ctx.textAlign = 'center';
+    ctx.fillText(m[2], 0, 5);
+    ctx.restore();
   });
+  // In flight it speeds up from the diver to the counter.
+  if (gemPop.flyN && counter) {
+    const k = (1 - gemPop.fly / GEM_FLY) ** 2;
+    const fx = player.x, fy = player.y - cameraY - player.r - 14;
+    gemText(gemPop.flyN, fx + (counter.x - fx) * k, fy + (counter.y + 5 - fy) * k);
+  }
 
   // The layer's name while the current carries you into it (D72): the next
   // batch is a layer's first and has not arrived. PLACEHOLDER GRAPHICS.
