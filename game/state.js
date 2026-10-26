@@ -132,12 +132,9 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   seedRng(seed === undefined ? newSeed() : seed);
   // First, before anything else draws: the whole dive's batches (D71).
   plan = drawPlan();
-  // The weapon's numbers go onto the player, where mods and the readout find them.
-  const shot = shotOf(weapon);
   weaponName = weapon.name;
   player = {
-    ...PLAYER_START,
-    ...shot,
+    ...kitted(weapon),
     x: ARENA_W / 2,
     y: ARENA_H / 2,
     vx: 0,             // the swim's velocity, eased toward the keys (D107)
@@ -154,12 +151,6 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
     dashDy: 0,         // so letting go of the keys can't spin it
     dashEnd: 0,        // seconds of the closing ring left
   };
-  // What persists, added once (D36): the carried weapon's and the equipment's
-  // tiers, each attribute's steps. Mods add on top; nothing multiplies.
-  for (const g of [weapon, ...EQUIPMENT]) {
-    for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.tiers[i].apply(player);
-  }
-  for (const a of ATTRIBUTES) for (let i = 0; i < (meta.raised[a.name] || 0); i++) a.apply(player);
   if (damageOverride > 0) player.damage = damageOverride;   // a dev flag
   guardLeft = player.guard;
   enemies = [];
@@ -208,8 +199,21 @@ function reset(seed, weapon = WEAPONS.find(w => w.name === meta.carried) || WEAP
   diveLive = true;
 }
 
-function shotOf({ name, tiers, cost, requires, ...shot }) {
+function shotOf({ name, desc, tiers, cost, requires, ...shot }) {
   return shot;
+}
+
+// The numbers a dive starts with, which `home` shows (D147). The weapon's go
+// onto the player, where mods and the readout find them; then what persists,
+// added once (D36): the carried weapon's and the equipment's tiers, each
+// attribute's steps. Mods add on top; nothing multiplies.
+function kitted(weapon) {
+  const p = { ...PLAYER_START, ...shotOf(weapon) };
+  for (const g of [weapon, ...EQUIPMENT]) {
+    for (let i = 0; i < (meta.gear[g.name] || 0); i++) g.tiers[i].apply(p);
+  }
+  for (const a of ATTRIBUTES) for (let i = 0; i < (meta.raised[a.name] || 0); i++) a.apply(p);
+  return p;
 }
 
 function applyScenario(name, seed) {

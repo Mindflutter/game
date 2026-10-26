@@ -20,7 +20,8 @@ carries you down to the next batch (D58). A layer's boss is its **layer end**:
 a full heal, a haul of gems and a pick of valuable mods — the dive's one pause
 (D68, D85). A dive ends in death or in the win at the bottom of the last
 layer; then `home`, where gems buy gear and the points challenges pay raise
-attributes.
+attributes, and the kit beside the rows shows what the next dive starts with
+(D147 (home shows the kit)).
 
 ## Files
 

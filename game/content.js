@@ -166,6 +166,10 @@ const STAT_NAMES = {
   pierce: 'pierce', range: 'range', damage: 'damage', fireRate: 'fire rate', guard: 'guard',
   dashSpeed: 'dash speed',
 };
+// The numbers `home` shows the next dive starting with (D147), and their units.
+// A check holds every stat a tier or a step moves to being here.
+const KIT_STATS = [['maxHp', ''], ['guard', ''], ['damage', ''], ['fireRate', '/s'], ['range', ''],
+                   ['pierce', ''], ['speed', ''], ['dashSpeed', ''], ['dashCooldown', 's'], ['dashDamage', '']];
 
 // ---------- boosts ----------
 // Documented in docs/entities/boosts.md, held to it by `npm test`. `add` and
@@ -742,6 +746,19 @@ const MENUS = {
       return LAYERS.slice(0, meta.cleared + 2).map((layer, l) => l > meta.cleared
         ? { text: '???', locked: true }
         : { text: layer.name + (l < meta.cleared ? '   cleared' : '') });
+    },
+    // What the next dive starts with (D147), read-only: what is carried and
+    // owned, dim while unbought, then the numbers it all adds up to.
+    get kit() {
+      const w = WEAPONS.find(x => x.name === meta.carried) || WEAPONS[0], p = kitted(w);
+      const tier = g => 'tier ' + (meta.gear[g.name] || 0);
+      return [
+        { name: w.name, value: tier(w) },
+        ...EQUIPMENT.map(g => ({ name: g.name, value: tier(g), dim: !meta.gear[g.name] })),
+        ...ATTRIBUTES.map(a => ({ name: a.name, value: String(meta.raised[a.name] || 0), dim: !meta.raised[a.name] })),
+        null,
+        ...KIT_STATS.map(([stat, unit]) => ({ name: STAT_NAMES[stat], value: +p[stat].toFixed(2) + unit })),
+      ];
     },
     top: HOME_TOP,
     back: () => openMenu('title'),

@@ -209,6 +209,19 @@ if (location.search === '?test') {
   check(lastRow.y + lastRow.h < HINT_Y - 10,
     'home: the rows must end above the hint, rows end at ' + (lastRow.y + lastRow.h) +
     ', hint at ' + HINT_Y);
+  // The kit beside the rows (D147), at its widest: every tier at the top.
+  meta = { ...freshMeta(), cleared: LAYERS.length, carried: 'Harpoon',
+           gear: Object.fromEntries([...WEAPONS, ...EQUIPMENT].map(g => [g.name, g.tiers.length])),
+           raised: Object.fromEntries(ATTRIBUTES.map(a => [a.name, 10])) };   // steps have no top; two digits
+  openMenu('home');
+  draw();
+  ctx.font = '15px system-ui, sans-serif';
+  const kitWidest = Math.max(...MENUS.home.kit.filter(Boolean).map(l => ctx.measureText(l.name + '   ' + l.value).width));
+  meta = metaWas;
+  check(kitBottom < HINT_Y - LINE_CLEAR,
+    'home: the kit must end above the hint, it ends at ' + kitBottom + ', hint at ' + HINT_Y);
+  check(KIT_LEFT > ARENA_W / 2 + ROW_W / 2 + 20 && KIT_LEFT + kitWidest < KIT_RIGHT && KIT_RIGHT < ARENA_W - 20,
+    'home: the kit must sit between the rows and the edge, its lines whole: ' + kitWidest + 'px wide');
   // Every menu's rows too: the weapons, equipment, attribute and debug (D102)
   // screens grow from tables.
   for (const [name, menu] of Object.entries(MENUS)) {

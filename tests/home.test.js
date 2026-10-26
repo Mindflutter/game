@@ -641,3 +641,36 @@ describe('the catalogue (D146)', () => {
     expect(g.screen).toBe('paused');
   });
 });
+
+describe('home shows the kit (D147)', () => {
+  const kit = g => Object.fromEntries(g.MENUS.home.kit.filter(Boolean).map(l => [l.name, l]));
+
+  it('shows what is carried and owned, dim while unbought, and the numbers the dive starts with', () => {
+    const g = loadGame();
+    g.meta.carried = 'Harpoon';
+    g.meta.owned.push('Harpoon');
+    g.meta.gear = { Harpoon: 1, Suit: 1 };
+    g.meta.raised = { Heart: 2 };
+    const k = kit(g);
+    expect(k.Harpoon.value).toBe('tier 1');
+    expect(k.Gun).toBeUndefined();                       // only what is carried
+    expect([k.Suit.value, k.Suit.dim, k.Mask.dim]).toEqual(['tier 1', false, true]);
+    expect([k.Heart.value, k.Heart.dim, k.Strength.dim]).toEqual(['2', false, true]);
+    g.reset(1);
+    for (const [stat, unit] of g.KIT_STATS) {
+      expect(k[g.STAT_NAMES[stat]].value).toBe(+g.player[stat].toFixed(2) + unit);
+    }
+  });
+
+  it('names every stat a weapon, a tier or a step moves, so buying one always shows', () => {
+    const g = loadGame();
+    const shown = new Set(g.KIT_STATS.map(([stat]) => stat));
+    const steps = [...g.WEAPONS, ...g.EQUIPMENT].flatMap(x => x.tiers.map(t => t.apply)).concat(g.ATTRIBUTES.map(a => a.apply));
+    for (const w of g.WEAPONS) {
+      const base = { ...g.PLAYER_START, ...g.shotOf(w) };
+      for (const apply of steps) {
+        for (const c of g.modPreview({ apply }, 1, base)) if (c.stat !== 'hp') expect(shown).toContain(c.stat);
+      }
+    }
+  });
+});

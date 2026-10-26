@@ -5018,3 +5018,29 @@ started afresh, kept in the save, opened from both menus and left by Esc;
 `tests/save.test.js` → version 11 comes in empty, `save-v12.json` loads and
 plays on. Each rule seen failing when broken. `checks.js` → the catalogue ends
 above the hint, beside the help.
+
+## D147 — Home shows the kit · 2026-10-26
+
+S7 (alpha polish)'s eighth item. Igor, 2026-10-26: "home showing your kit is
+absolutely needed in alpha. what's equipped and the numbers so that a player
+sees what he's diving with". Read-only, as answered 2026-10-24 ("A"): the
+weapons, equipment and attributes screens stay where buying is (D96 (gear and
+attributes on screens of their own), D114 (weapons and equipment on screens of
+their own)).
+
+- **What it shows**, in a column right of the rows: the carried weapon and
+  its tier, each piece of equipment's tier and each attribute's steps, dim
+  while unbought; then the numbers the next dive starts with, in words
+  (`KIT_STATS`: max HP, guard, damage, fire rate, range, pierce, swim speed,
+  dash speed, dash cooldown, dash damage — Claude's pick).
+- **The numbers are the dive's own**: `kitted()` builds the diver for both
+  `reset()` and `home`, so they cannot disagree.
+- Every stat a weapon's tier, equipment's tier or an attribute's step moves is
+  in `KIT_STATS`, so whatever is bought shows on `home`.
+- `shotOf()` leaves a weapon's `desc` off the diver, as it does its name.
+
+**Guarded by**: `tests/home.test.js` → home shows the kit — what is carried,
+dim while unbought, the numbers equal to the diver `reset()` builds; every
+stat a tier or step moves is named. Each seen failing when broken.
+`checks.js` → the kit, at its widest, sits between the rows and the edge and
+ends above the hint.

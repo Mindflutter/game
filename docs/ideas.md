@@ -326,8 +326,9 @@ discussed.
   of the question. **Home**: S7 (alpha polish)'s UX fixing — then Igor,
   2026-10-25, once every row said what it does (D143 (every row at home says
   what it does)): "i still feel the menu is a bit clumsy, but we leave proper
-  ux out of alpha. now - just clarity of all player actions". Whether `home`
-  showing the kit is still S7's is asked when it comes up.
+  ux out of alpha. now - just clarity of all player actions". The kit shown
+  on `home`, read-only, is built (D147 (home shows the kit)); what is left —
+  buying on `home` itself, past lists — is proper UX, past alpha.
 - **The catalogue, grown.** Built simple (D146 (the catalogue)): a line of
   words per fish and boost. Igor, 2026-10-26: "ideally the catalogue is the
   place where player can go and check what enemy is, with an image or even

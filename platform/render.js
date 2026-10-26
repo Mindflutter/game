@@ -571,6 +571,10 @@ function drawEnd() {
 // Rows stacked from data must end above the hint; a check asserts it.
 const HINT_Y = ARENA_H - 64;
 
+// The kit's column on `home` (D147), and where its last line ends, for the check.
+const KIT_LEFT = 930, KIT_RIGHT = 1160, KIT_LINE = 21;
+let kitBottom = 0;
+
 // Where help's or the catalogue's last line ends, for the check: either can
 // outgrow the screen.
 let helpBottom = 0;
@@ -632,6 +636,22 @@ function drawHome() {
   MENUS.home.lines.forEach((line, i) => {
     ctx.fillStyle = line.locked ? '#2f5563' : '#7fb0c0';
     ctx.fillText(line.text, ARENA_W / 2, HOME_LAYERS_TOP + i * HOME_LINE);
+  });
+  // The kit (D147), in a column right of the rows; a gap in its list stays a gap.
+  ctx.fillStyle = '#9ef7ff';
+  ctx.font = '17px system-ui, sans-serif';
+  ctx.fillText('KIT', (KIT_LEFT + KIT_RIGHT) / 2, HOME_LAYERS_TOP);
+  ctx.font = '15px system-ui, sans-serif';
+  MENUS.home.kit.forEach((line, i) => {
+    if (!line) return;
+    const y = HOME_LAYERS_TOP + 30 + i * KIT_LINE;
+    ctx.fillStyle = line.dim ? '#3d5f6b' : '#7fb0c0';
+    ctx.textAlign = 'left';
+    ctx.fillText(line.name, KIT_LEFT, y);
+    ctx.fillStyle = line.dim ? '#3d5f6b' : '#bffcff';
+    ctx.textAlign = 'right';
+    ctx.fillText(line.value, KIT_RIGHT, y);
+    kitBottom = y;
   });
 }
 
