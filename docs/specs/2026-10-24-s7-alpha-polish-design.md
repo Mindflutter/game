@@ -64,7 +64,7 @@ Settled items first, so building starts while the open ones are asked.
 8. **`home` shows the diver; gear and attributes stop being lists** —
    `ideas.md` → Screens; reopens D96 and D114 (weapons and equipment on
    screens of their own).
-9. **The boss's bar across the top** — `ideas.md` → Health, Claude's lean.
+9. **The boss's bar across the top** — `ideas.md` → Declined.
 10. **The numbers on mod cards, and the development readout** — `design.md`
     → the status bar: the numbers contradict D34 (mods) on purpose, for
     development, "revisit at S7".
@@ -88,7 +88,8 @@ them: the pile-up (`ideas.md` → Crowds), music.
   all player actions". Asked, 2026-10-26: "home showing your kit is
   absolutely needed in alpha. what's equipped and the numbers so that a
   player sees what he's diving with" (D147 (home shows the kit)).
-- 9: whether the bar moves to the top.
+- 9: answered — Igor, 2026-10-26: "health bar stays". Over the body, as
+  every hurt fish's (`ideas.md` → Declined).
 - 10: whether the numbers and the readout stay through alpha.
 
 ## Checked against `foundations.md` and `plan.md`

@@ -370,12 +370,6 @@ discussed.
     player itself changing appearance (for graphics later)". A lean: the
     status bar's `HP` stays the readout, and the diver's look showing its hurt
     waits for the graphics (below).
-  - **The boss's bar.** A hurt fish carries a small bar over its body (D121
-    (only a hit blinks; a hurt fish carries a bar)), the boss and the
-    mini-boss too. Claude's lean, unconfirmed: theirs across the top of the
-    view instead, where 60 hp of progress reads.
-
-  **Home**: the boss's bar after Igor's word.
 
 **The stage's content**
 
@@ -560,6 +554,12 @@ discussed.
 ---
 
 ## Declined
+
+### The boss's bar across the top
+Claude's lean: the boss's and the mini-boss's bar across the top of the view,
+where 100 hp of progress reads, instead of the small bar over the body every
+hurt fish carries (D121 (only a hit blinks; a hurt fish carries a bar)). Igor,
+2026-10-26: "health bar stays".
 
 ### Difficulty option in the options menu
 Offered as one of four candidate options 2026-09-12; Igor chose Volume, Screen
