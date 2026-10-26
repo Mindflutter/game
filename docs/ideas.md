@@ -504,7 +504,8 @@ discussed.
   essential ability. i'd rework it or drop completely." It pays for batches
   cleared without dashing; D127 (the tuned numbers)'s bar on it left with S6
   (balance)'s close (D139 (S6 closes)). Open: what it becomes, or whether it
-  goes. **Home**: open.
+  goes. Igor, 2026-10-26, playing alpha: "footwork still makes no sense".
+  **Home**: open, with the gems and points below.
 - **Challenge rungs on the shorter dive.** The ladders were sized on fifteen
   gates a layer (D109 (micro-tasks are ladders; steps cost more as they
   rise)); ten since D137 (batches grow from seconds to a minute and a half),
@@ -531,6 +532,29 @@ discussed.
   nothing stacks". Open: what a second touch of the same boost does, and
   whether a clock has a ceiling — Claude's questions, not raised yet.
   **Home**: open, an idea to record.
+
+## Open — from playing alpha
+
+Igor, 2026-10-26, on S7 (alpha polish)'s build: "we can call it alpha
+alright, but:" — the first two below. And: "alpha enemies are pretty well
+balanced for alpha".
+
+- **Gems and points, out of balance — a major issue.** "point upgrades come
+  easy, at first run i earned 12 points, reached mid layer 2. i couldnt get
+  enough gems for any purchase, except a gun upgrade. gotta do something with
+  upgrade system. really major issue. maybe even rework the whole gem&points
+  system, very imbalanced." Points come from challenge rungs
+  (D109 (micro-tasks are ladders; steps cost more as they rise)), gems from
+  kills (D78 (gems are pulled to the player)); the prices were halved once
+  (D136 (prices halved)).
+  On a first dive the points outrun what they buy and the gems fall short of
+  every price but the Gun's first tier (240). Open: retune, or rework the
+  upgrade system, gems and points together. **Home**: Igor's call — where it
+  sits against alpha.
+- **The bulwark's bite is slow.** "purple guy bite should be faster, probably
+  like other enemies". Its `windup` is 0.6s; the drifter's 0.3s, the darter's
+  0.15s (`entities/enemies.md`). A faster bite moves its measured threat (D126
+  (threat)), and the batches fitted to it. **Home**: a balance pass, small.
 
 ## Suggested but not yet discussed
 
