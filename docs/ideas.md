@@ -544,6 +544,21 @@ balanced for alpha".
   its range, or as it passes a fish within `splash` — and whether a cut's
   splash follows. **Home**: open.
 
+- **The economy, played on D152 (nine rungs a ladder, a point a rung)'s
+  build — still out.** Igor, 2026-10-27: "balance is still shitty as hell in
+  terms of economics. dives are long and useless and grindy, exactly the
+  grind i wanted to avoid. impossible to quickly earn gems for upgrades,
+  upgrades feel useless, points are near to impossible to get and the dont
+  really pay off". And: "the worst thing is i dont know how to fix it. we
+  tried some ways already." Two retunes so far — D136 (prices halved) and
+  D152. Next: reading on game economy and balance before a third attempt,
+  on his word. **Home**: open.
+- **Bosses: too easy and annoying.** Igor, 2026-10-27: "bosses are too easy
+  and annoying - you just stand near and fire until its huge hp numbers are
+  gone". **Home**: open.
+- **The archer needs more threat.** Igor, 2026-10-27: "archer needs to have
+  more threat". **Home**: open.
+
 ## Suggested but not yet discussed
 
 - **A rank only play can earn.** Claude, 2026-10-01, in the mods rework, when
