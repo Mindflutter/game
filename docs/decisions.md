@@ -5126,7 +5126,8 @@ all": a career of about fifteen dives to buy everything, gems and points
 running out together; nothing for gems once everything is bought; longer
 ladders of a point a rung, attributes with a top; `footwork` replaced by a
 challenge for the dash used well. The design and its check against
-`foundations.md`: `specs/2026-10-26-s8-economy-design.md`.
+`foundations.md`, kept in git:
+`git show cbbcf62:docs/specs/2026-10-26-s8-economy-design.md`.
 
 **Claude's call, delegated**, open to Igor:
 - **Nine rungs a ladder, each paying one point**: 45 ever. Rungs sized on the
@@ -5154,3 +5155,31 @@ shorter dive.
 **Guarded by**: `tests/challenges.test.js` — every rung read from the code,
 `bowling` counting one dash; `tests/home.test.js` — an attribute's top;
 `tests/save.test.js` — the re-count and the v13 fixture.
+
+## D153 — The economy stage closes · 2026-10-26
+
+Igor, on its build: "hard to say, requires more playtest time. let's move on".
+
+- **S8 (the economy: gems and points) is closed** on his word, its exit — Igor
+  saying gems and points are in balance — **not met but deferred**: built as
+  D152 (nine rungs a ladder, a point a rung), the career bot's figures
+  (`roadmap.md` → Health), the verdict waiting on more play (`ideas.md` → Open
+  — from playing alpha).
+- **No stage follows yet**: `plan.md` names none past this one; which comes
+  next is Igor's.
+- **Its spec leaves the tree** (D134 (lean docs)).
+
+## D154 — The port waits on the browser's limits · 2026-10-26
+
+Igor, offered the native port now that alpha is reached (D150 (S7 closes)):
+"we continue in the browser. the port is not worth now, we transition when
+browser is not enough for implementing all i want".
+
+- **The work goes on in the browser past alpha.** The port comes when
+  something Igor wants cannot be built in it — not at a stage boundary.
+- **D17 (the browser build is a throwaway prototype) and D30 (browser stays
+  throwaway) stand** but for their timing: the build is still the prototype,
+  the `game/` ⁄ `platform/` seam is still kept for the port, and the canvas
+  still gets no investment beyond what a stage needs.
+- **Supersedes** D30's "alpha is built in the browser and ported afterwards"
+  as a schedule; `foundations.md` → Non-goals says so.

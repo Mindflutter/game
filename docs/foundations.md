@@ -217,7 +217,9 @@ Igor's call and gets no check.
 
 Named so they stop being re-proposed.
 
-- The native port. After alpha (D17, D30), not during.
+- The native port. Not at alpha either: it comes when the browser can no longer
+  hold what Igor wants built (D17, D30, D154 (the port waits on the browser's
+  limits)).
 - Sprites and real art — **unless** the condition Igor set is hit: enemies
   indistinguishable, layers indistinguishable, or the experience reads as
   visually clumsy. Then it moves to S7 and D4 is revisited.

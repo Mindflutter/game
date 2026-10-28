@@ -10,11 +10,9 @@ must stay true while doing it.
 
 ## Active stage
 
-S8 (the economy: gems and points), opened 2026-10-26 on Igor's word: "close
-s7, check plan and ideas, decompose into tasks, start working on what can be
-done". S7 (alpha polish) closed the same day (D150 (S7 closes)). Its design
-is `specs/2026-10-26-s8-economy-design.md`.
-Where things stand is `roadmap.md` → Next.
+None. S8 (the economy: gems and points) closed 2026-10-26 (D153 (the economy stage closes));
+the next stage waits on Igor's choice. Where things stand is `roadmap.md` →
+Next.
 
 ## Closed stages
 
@@ -36,43 +34,13 @@ decisions listed say why.
 | The pass before S6 — from playing S5 | 2026-10-21 | Bodies doubled, the Knife's swing, the puffer's burst, swimming with a facing, fish that bite, challenges as ladders, waves, escorts, the boss's fan, hits that vary, grades, solid bodies, knockback, boosts that keep each weapon's nature | D104–D125 |
 | S6 — Balance | 2026-10-24 | The threat system and the grades it chooses, the diver bot and the balance suite, the numbers tuned to the pillars and the bars that hold them, fish revealed a type at a time, ten gates a layer with batches growing from seconds to a minute and a half, cheaper gear | D126–D139 |
 | S7 — Alpha polish | 2026-10-26 | The alpha, on Igor's word: the drawn bump, the bite's leap, Bloom's ring, the `+N` flown to the counter, every row at home saying what it does, a sound for every moment, Go home from the pause menu, the catalogue, the kit on `home`, the readout only in the debug mode | D140–D150 |
+| S8 — The economy: gems and points | 2026-10-26 | Nine rungs a ladder of a point each, `bowling` for `footwork`, attributes with a top, cheap first tiers and dear tops, the career bot measuring it; the balance verdict waits on more play | D151–D153 |
 
 Their designs, where a stage had one, are kept in git, not the tree (D134
 (lean docs)): `git show 99d79ae:docs/specs/<file>` reads one, and S6
 (balance)'s is `git show 11ba1ad:docs/specs/2026-10-21-s6-balance-design.md`, S7 (alpha
 polish)'s `git show 6661b7c:docs/specs/2026-10-24-s7-alpha-polish-design.md`. Where one disagrees with a decision,
 the decision wins.
-
-## S8 — The economy: gems and points
-
-**Entry:** S7 exits.
-
-**Work:** From Igor's play of the alpha, 2026-10-26: "point upgrades come
-easy, at first run i earned 12 points, reached mid layer 2. i couldnt get
-enough gems for any purchase, except a gun upgrade. gotta do something with
-upgrade system. really major issue. maybe even rework the whole gem&points
-system, very imbalanced. footwork still makes no sense" (`ideas.md` → Open —
-from playing alpha). In order:
-
-1. **Done. The economy measured as it stands** — what a fresh save earns, gems and
-   points, dive by dive and gate by gate, against every price and step: the
-   figures any rework is judged by. Claude's; needs no decision.
-2. **Done, D152 (nine rungs a ladder, a point a rung). The shape, with
-   Igor** — retune or rework: how gems and points are each
-   earned and what each buys; `footwork` reworked or dropped; the challenge
-   rungs on ten-gate layers (`ideas.md` → Open — from S6 (balance)). Igor's
-   decisions, one question at a time.
-3. **Built, D152. The spec**, checked against `foundations.md`, then built and
-   tuned, the careers measuring it. Left: Igor's play of a fresh save.
-
-Beside it, small: the bulwark's bite as quick as the other fish's, built
-(D151 (the bulwark bites as quick as the drifter)). The figures, before and
-after, are `roadmap.md` → Health.
-
-**Exit (DoD):** Igor plays a fresh save and says gems and points are in
-balance, and the career bot's figures agree.
-
----
 
 ## If scope has to be cut
 

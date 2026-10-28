@@ -56,7 +56,8 @@ what it collides with. D104 (bodies doubled) took the first, before S6
 
 ### Port to a native executable
 **Reaffirmed as post-alpha by D30**, after the question was reopened on
-2026-09-26 and answered "still throwaway". Rust or C++, dropping the browser
+2026-09-26 and answered "still throwaway"; **past alpha, it waits** on the
+browser's limits (D154 (the port waits on the browser's limits)). Rust or C++, dropping the browser
 build afterwards. Candidate frameworks, from
 closest-to-a-literal-port outward: **macroquad** (Rust) and **raylib** (C/C++)
 are near 1:1 with the current canvas code; **Bevy** (Rust, ECS) is a redesign
@@ -534,8 +535,9 @@ balanced for alpha".
   (D136 (prices halved)).
   On a first dive the points outrun what they buy and the gems fall short of
   every price but the Gun's first tier (240). **Built** as D152 (nine rungs
-  a ladder, a point a rung), waiting on Igor's play of a fresh save — S8 (the
-  economy: gems and points)'s exit.
+  a ladder, a point a rung). Igor, 2026-10-26, closing S8 (the economy: gems
+  and points): "hard to say, requires more playtest time". Open: whether it
+  is in balance, from more play. **Home**: whichever stage is next.
 
 - **Bloom's splash without a hit.** Igor, 2026-10-26: "i feel like shot
   splash should happen even if you dont hit directly". Today a shot splashes
