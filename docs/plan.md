@@ -10,9 +10,11 @@ must stay true while doing it.
 
 ## Active stage
 
-None. S8 (the economy: gems and points) closed 2026-10-26 (D153 (the economy stage closes));
-the next stage waits on Igor's choice. Where things stand is `roadmap.md` →
-Next.
+S9 (the balance rework), opened 2026-10-28 on Igor's word: "tell me when
+it's safe to start a new session on full balance rework". S8 (the economy:
+gems and points) closed 2026-10-26 (D153 (the economy stage closes)). Its
+design is `specs/2026-10-28-s9-balance-rework-design.md`. Where things stand
+is `roadmap.md` → Next.
 
 ## Closed stages
 

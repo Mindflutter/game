@@ -537,7 +537,7 @@ balanced for alpha".
   every price but the Gun's first tier (240). **Built** as D152 (nine rungs
   a ladder, a point a rung). Igor, 2026-10-26, closing S8 (the economy: gems
   and points): "hard to say, requires more playtest time". Open: whether it
-  is in balance, from more play. **Home**: whichever stage is next.
+  is in balance, from more play. **Home**: S9 (the balance rework).
 
 - **Bloom's splash without a hit.** Igor, 2026-10-26: "i feel like shot
   splash should happen even if you dont hit directly". Today a shot splashes
@@ -554,12 +554,12 @@ balanced for alpha".
   really pay off". And: "the worst thing is i dont know how to fix it. we
   tried some ways already." Two retunes so far — D136 (prices halved) and
   D152. Next: reading on game economy and balance before a third attempt,
-  on his word. **Home**: open.
+  on his word. **Home**: S9 (the balance rework).
 - **Bosses: too easy and annoying.** Igor, 2026-10-27: "bosses are too easy
   and annoying - you just stand near and fire until its huge hp numbers are
-  gone". **Home**: open.
+  gone". **Home**: S9 (the balance rework).
 - **The archer needs more threat.** Igor, 2026-10-27: "archer needs to have
-  more threat". **Home**: open.
+  more threat". **Home**: S9 (the balance rework).
 
 ## Suggested but not yet discussed
 

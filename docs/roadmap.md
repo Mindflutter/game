@@ -17,8 +17,11 @@ layer), D130 (fish are revealed a type at a time), D137 (batches grow from
 seconds to a minute and a half)). S7 (alpha polish) closed 2026-10-26, the
 alpha on Igor's word (D150 (S7 closes)). S8 (the economy: gems and points)
 closed the same day, built as D152 (nine rungs a ladder, a point a rung), its
-balance verdict waiting on more play (D153 (the economy stage closes)). **Now**: no stage;
-the next waits on Igor's choice.
+balance verdict waiting on more play (D153 (the economy stage closes)). **Now**:
+S9 (the balance rework), opened 2026-10-28. Settled: a 10-minute dive, 6
+gates a layer, each layer's shape its own data. Next: build that, then the
+boss, the archer and the economy, asked one at a time
+(`specs/2026-10-28-s9-balance-rework-design.md` → Where a new session starts).
 The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
