@@ -115,10 +115,12 @@ export function career(seed, { weapon = 'Gun', dives = 30, cap = 3600 } = {}) {
       }
     }
     if (g.screen === 'playing') g.endDive();
-    log.push({ dive: n, end: g.screen, gates: g.batchIndex - (g.batchLive() ? 1 : 0), gems: g.currency, time: t });
+    const rungs = Object.values(g.meta.challenges).reduce((a, k) => a + k, 0);
+    log.push({ dive: n, end: g.screen, gates: g.batchIndex - (g.batchLive() ? 1 : 0), gems: g.currency, time: t, rungs });
     if (g.screen === 'won') break;
     g.screen = 'home';
     spend(g, weapon);
+    log.at(-1).tiers = Object.values(g.meta.gear).reduce((a, k) => a + k, 0);
     if (firstBuy === null && JSON.stringify(g.meta.gear) !== before) firstBuy = n;
   }
   const firstLayer = l => firstAt.findIndex((_, k) => g.plan[k]?.layer === l);

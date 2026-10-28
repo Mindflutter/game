@@ -47,6 +47,15 @@ working doc.
   tested in debug mode right away, generate and provide a debug link".
   *Missed: the drawn bump was handed over with a link to a fish one shot
   kills, which vanishes before any bump can draw.*
+- **A change that needs Igor's play** comes with its full `?debug=` link —
+  `http://localhost:63342/game/index.html?debug=…`, the IDE's server — and
+  exactly what to check, how, and whether one gate or a whole layer or dive
+  must be played. Igor, 2026-10-28.
+- **Past alpha, content is open** (Igor, 2026-10-28): new abilities, fish
+  and mods are welcome if they keep the rules and the balance — each idea
+  goes to `ideas.md` and is named in the reply; anything found obsolete or
+  useless is proposed for removal. When something does not fit, try another
+  shape.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
 - Small steps: one playable change, then stop and explain what changed.

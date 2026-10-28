@@ -181,12 +181,34 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
   fan like the boss's (D117 (the boss's fan)), lands where the
   diver will be or covers a spread.
 - **A shooter that flees.** Igor, 2026-10-15: "escaping range-shooting
-  enemies". The archer already backs off inside its band (D95); one that runs
-  from the diver and shoots as it goes would make the player chase.
+  enemies"; 2026-10-28, taking the archer's back-off away: "leave that
+  mechanic for a more advanced enemy". One that runs from the diver and
+  shoots as it goes would make the player chase.
 - **A fish that pulls you in.** Igor, 2026-10-22: "a guy that opens mouth and
   pulls you in. motivates to escape and resist by swimming away from the
   pull". Every fish now comes to the diver or shoots at it; this one moves the
   diver, so the answer is to swim against it.
+- **A sniper: it aims where you are going.** Claude, 2026-10-28, built on the
+  archer by mistake in S9 (the balance rework) and taken back off it: it stops
+  for half a second with a thin line locked where the diver will be when the
+  shot lands if they keep swimming — always the whole tell — then spits a
+  quick shot along it. The answer: turn off the line. Built and checked once,
+  as a `spit` with an `aim` field: about a third more threat than the archer
+  on the bot, which reads lines at once.
+- **A shooter squad that spreads round you.** Claude, same build: each one
+  keeps a post on the side of the diver it came in from and follows it, so a
+  group surrounds the diver and its shots cross. Weak alone, a threat in a
+  squad (`reading.md` → The archer). Could ride on the sniper, or a fish of
+  its own.
+- **A shelled fish with an opening.** Claude, 2026-10-28, from the boss's
+  shell (D156 (the boss's shell and stages)): an ordinary fish whose shell
+  takes no hits but after its attack. A small one would teach the boss's
+  opening from layer 1.
+- **Diverse mini-bosses.** Igor, 2026-10-28: "diverse mini bosses, now at 10
+  gates they are almost like normal enemies". One mini-boss type for every
+  gate today; each could carry an ability of its own.
+- **A fish in stages.** Claude, same: an ordinary tough fish that changes its
+  attack as it is hurt — the boss's `stages` on a smaller body.
 
 ## Recorded future opportunities, explicitly not now
 
@@ -500,16 +522,11 @@ discussed.
 
 ## Open — from S6 (balance)
 
-- **Gates a layer, layer by layer.** Igor, 2026-10-24, setting ten for every
-  layer (D137 (batches grow from seconds to a minute and a half)): "may change
-  to different value for layers later". **Home**: a later balance pass.
 - **One boss for three layers.** The kit a career meets the boss with grows
-  about three times over the dive; the boss grows half again, by its grade. At
-  `hp` 100 (D137 (batches grow from seconds to a minute and a half)) the bot
-  takes about 63s on layer 1's boss and loses it on up to half the seeds,
-  about 110s on layer 2's and 49s on layer 3's; at 55 it was cleared standing
-  still in layer 3. Open: whether each layer's boss should grow in a way of
-  its own. Claude's, not raised yet. **Home**: open.
+  about three times over the dive; the boss grows half again, by its grade.
+  Shelled and in stages (D156 (the boss's shell and stages)), layer 3's boss
+  costs the bot no hearts and is sometimes cleared standing. Open: a boss of
+  its own per layer, or deeper stages by layer. Claude's. **Home**: S9.
 - **A boost touched extends every boost running.** Igor, 2026-10-23:
   "multiple boost pick can extend the overall effect time", confirmed as this
   reading over a boost adding only to its own clock: Rush running with 2s
@@ -525,20 +542,6 @@ Igor, 2026-10-26, on S7 (alpha polish)'s build: "we can call it alpha
 alright, but:" — the first two below. And: "alpha enemies are pretty well
 balanced for alpha".
 
-- **Gems and points, out of balance — a major issue.** "point upgrades come
-  easy, at first run i earned 12 points, reached mid layer 2. i couldnt get
-  enough gems for any purchase, except a gun upgrade. gotta do something with
-  upgrade system. really major issue. maybe even rework the whole gem&points
-  system, very imbalanced." Points come from challenge rungs
-  (D109 (micro-tasks are ladders; steps cost more as they rise)), gems from
-  kills (D78 (gems are pulled to the player)); the prices were halved once
-  (D136 (prices halved)).
-  On a first dive the points outrun what they buy and the gems fall short of
-  every price but the Gun's first tier (240). **Built** as D152 (nine rungs
-  a ladder, a point a rung). Igor, 2026-10-26, closing S8 (the economy: gems
-  and points): "hard to say, requires more playtest time". Open: whether it
-  is in balance, from more play. **Home**: S9 (the balance rework).
-
 - **Bloom's splash without a hit.** Igor, 2026-10-26: "i feel like shot
   splash should happen even if you dont hit directly". Today a shot splashes
   only where it strikes a fish (D125 (boosts keep each weapon's nature)); a
@@ -546,20 +549,40 @@ balanced for alpha".
   its range, or as it passes a fish within `splash` — and whether a cut's
   splash follows. **Home**: open.
 
-- **The economy, played on D152 (nine rungs a ladder, a point a rung)'s
-  build — still out.** Igor, 2026-10-27: "balance is still shitty as hell in
-  terms of economics. dives are long and useless and grindy, exactly the
-  grind i wanted to avoid. impossible to quickly earn gems for upgrades,
-  upgrades feel useless, points are near to impossible to get and the dont
-  really pay off". And: "the worst thing is i dont know how to fix it. we
-  tried some ways already." Two retunes so far — D136 (prices halved) and
-  D152. Next: reading on game economy and balance before a third attempt,
-  on his word. **Home**: S9 (the balance rework).
-- **Bosses: too easy and annoying.** Igor, 2026-10-27: "bosses are too easy
-  and annoying - you just stand near and fire until its huge hp numbers are
-  gone". **Home**: S9 (the balance rework).
-- **The archer needs more threat.** Igor, 2026-10-27: "archer needs to have
-  more threat". **Home**: S9 (the balance rework).
+- **The economy and the fights, reworked in S9 (the balance rework) — to
+  play.** Igor's 2026-10-27 report ("dives are long and useless and grindy
+  … upgrades feel useless, points are near to impossible … bosses are too
+  easy … archer") is built as D155 (six gates a layer), D156 (the boss's
+  shell and stages), D157 (the archer counts twice what the bot measures)
+  and D158 (prices in reach, ladders a dive long). Not built from the
+  reading yet: points from opt-in difficulty (`reading.md` → Points).
+  Igor's play, 2026-10-28 — the mini-boss "good"; layer 1's boss 75s, layer
+  3's 60s "hard but good"; three fresh dives: 135s and 78 gems, 150s and
+  75 gems, then dead at the second mini-boss with 40 gems; points only on the
+  first. He earns about a tenth of what the career bot does; the economy is
+  now set on his play (D160 (a layer-1 dive buys a thing every two)). Late
+  game, `?debug=L3,G4,S3351240973,Knife3,Mask3,Suit3`: "absolutely nailed it
+  in 42s, gameplay felt really good". Igor: "the whole game should be
+  finishable in 10-15 min and all upgrades need to be purchased … points are
+  still earned god knows how, so think about mechanics". Open:
+  - "still feel that threat grows fast. but maybe false feeling".
+  - The boss's stage cue: "sound and burst didnt make a difference" — a
+    stronger tell, or drop it. And "can hit unshielded max 3 times".
+  - "boss burst hitting screen edge, think thru".
+  - The archer's counts past layer 1, not yet played.
+  **Home**: S9.
+
+- **Studioigor's skills.** Igor, 2026-10-28: "check this repo and other
+  repos from this guy: https://github.com/studioigor/studioigor-skill … we
+  may adapt his skills & knowledge to our development, if they match our
+  goal". Open: read them, and adapt what fits the rules here. **Home**: open.
+
+- **Agent housekeeping.** Igor, 2026-10-28: "rename to agents.md required or
+  not? is our agent built well? subagents, skills, context optimized?".
+  Claude's findings: no rename needed for Claude Code; the global
+  `~/.claude/rules/` (Python-backend rules) load into every session here
+  and only collide; a balance pass re-measures by hand what one
+  `npm run measure bars` could print. **Home**: open, Igor's pick.
 
 ## Suggested but not yet discussed
 

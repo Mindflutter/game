@@ -99,15 +99,22 @@ describe('challenge ladders (D109, D110)', () => {
     expect(g.notice).toBe('untouched, beeline \u2014 2 points');
   });
 
+  it('tops each streak at what one dive holds: every gate unhit, every glowing fish first (D158)', () => {
+    const g = loadGame();
+    g.reset(1);
+    const top = name => g.CHALLENGES.find(c => c.name === name).rungs.at(-1);
+    expect([top('untouched'), top('beeline')]).toEqual([g.plan.length, g.plan.filter(e => !e.escorts).length]);
+  });
+
   it('times a layer from its first batch to its boss, and pays every rung it beats', () => {
     const g = diving(1);
     const boss = g.plan.findIndex(e => e.end);
     ride(g);
     expect(g.layerStart).toBe(g.elapsed);
     for (let i = 0; i < boss; i++) { clearAndWait(g, 0.1); ride(g); }
-    g.layerStart = g.elapsed - 190;              // 3:10 in
+    g.layerStart = g.elapsed - 115;              // 1:55 in
     expect(clearAndWait(g, 1)).toBe('mods');     // the boss down, the layer end's cards
-    expect([g.meta.challenges.swift, g.layerStart]).toEqual([2, null]);   // within 3:45 and 3:20, not 3:00
+    expect([g.meta.challenges.swift, g.layerStart]).toEqual([2, null]);   // within 2:15 and 2:00, not 1:50
   });
 
   it('never times a layer the dive began partway into', () => {

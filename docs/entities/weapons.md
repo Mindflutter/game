@@ -29,14 +29,14 @@ Each weapon's tiers, in the order they are bought:
 | name | tier | cost | adds |
 |---|---|---|---|
 | Gun | 1 | 150 | fireRate +0.5 |
-| Gun | 2 | 900 | fireRate +0.5 |
-| Gun | 3 | 2600 | fireRate +0.5 |
-| Harpoon | 1 | 400 | damage +1 |
-| Harpoon | 2 | 1600 | fireRate +0.2 |
-| Harpoon | 3 | 4000 | pierce +1 |
-| Knife | 1 | 300 | range +12 |
-| Knife | 2 | 1400 | damage +1 |
-| Knife | 3 | 3600 | fireRate +0.75 |
+| Gun | 2 | 400 | fireRate +0.5 |
+| Gun | 3 | 900 | fireRate +0.5 |
+| Harpoon | 1 | 300 | damage +1 |
+| Harpoon | 2 | 650 | fireRate +0.2 |
+| Harpoon | 3 | 1300 | pierce +1 |
+| Knife | 1 | 250 | range +12 |
+| Knife | 2 | 600 | damage +1 |
+| Knife | 3 | 1200 | fireRate +0.75 |
 <!-- /generated -->
 
 The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,
@@ -85,10 +85,9 @@ so they can miss and sail on into the dark until `range` runs out.
 Its tiers add fire rate: the one stat that helps against every enemy, where
 damage would be wasted on the one-hit fish that make up most batches (D75 (the
 gun's tiers, dash reach, a clean batch)). The prices and the step are Claude's
-picks, the prices tuned to the pillars (D127 (the tuned numbers)) and then
-cut to 0.2× (D136 (prices halved), D137 (batches grow from seconds to a
-minute and a half)); the base
-numbers predate the tiers.
+picks, the prices flattened so a top tier costs about six times its first
+(D158 (prices in reach, ladders a dive long)); the base numbers predate the
+tiers.
 
 ## Harpoon
 

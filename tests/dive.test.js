@@ -56,7 +56,7 @@ describe('threat (D126)', () => {
     }
   });
 
-  it('grows its batches in fish, not only in grade, through ten gates a layer (D137)', () => {
+  it('grows its batches in fish, not only in grade, through six gates a layer (D155)', () => {
     const g = loadGame();
     const fish = s => s.pool.reduce((a, b) => a + b.enemies.reduce((x, [, c]) => x + c, 0), 0) / s.pool.length;
     const ordinary = stretches(g).filter(x => !x.s.escorts);
@@ -64,7 +64,7 @@ describe('threat (D126)', () => {
       const own = ordinary.filter(x => x.l === l);
       return own.reduce((a, x) => a + fish(x.s), 0) / own.length;
     });
-    expect(g.LAYERS.map((_, l) => g.gatesIn(l))).toEqual(g.LAYERS.map(() => 10));
+    expect(g.LAYERS.map((_, l) => g.gatesIn(l))).toEqual(g.LAYERS.map(() => 6));
     expect(fish(ordinary.at(-1).s)).toBeGreaterThan(5 * fish(ordinary[0].s));
     expect(byLayer.every((n, l) => n > (byLayer[l - 1] ?? 0))).toBe(true);
   });

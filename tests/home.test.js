@@ -29,7 +29,7 @@ describe('home: gear, points, challenges (D31, D36)', () => {
     const row = (menu, name) => g.MENUS[menu].items.find(i => i.label.startsWith(name)).label;
     expect(row('weapons', 'Gun')).toContain('tier 0 → 1   fire rate +0.5   ');
     const mask = g.EQUIPMENT.find(x => x.name === 'Mask');
-    expect(row('equipment', 'Mask')).toContain('tier 0 → 1   range +15   ');
+    expect(row('equipment', 'Mask')).toContain('tier 0 → 1   range +30   ');
     g.meta.gear.Mask = mask.tiers.length;
     expect(row('equipment', 'Mask')).not.toContain('range');
     g.meta.owned = ['Gun', 'Harpoon'];
@@ -374,7 +374,7 @@ describe('equipment (D100)', () => {
   it('puts each piece\'s tiers on the diver: the mask\'s reach, the weights\' damage, the suit\'s guard', () => {
     const g = wearing({ Mask: 2, Weights: 3, Suit: 1 });
     const gun = g.WEAPONS[0];
-    expect([g.player.range, g.player.damage, g.player.guard]).toEqual([gun.range + 30, gun.damage + 1.5, 1]);
+    expect([g.player.range, g.player.damage, g.player.guard]).toEqual([gun.range + 60, gun.damage + 1.5, 1]);
   });
 
   it('takes the first hit of a batch on the suit: no HP, the i-frames, the batch marked hit', () => {

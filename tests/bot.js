@@ -205,6 +205,8 @@ function pick(p, fish) {
     const kill = Math.ceil(e.hp / p.damage) / p.fireRate;
     const reach = p.range + (p.swing ? p.shotRadius : 0) + e.r;
     let worth = (e.spit || e.fuse ? 2 : e.lunge ? 1.5 : 1) * (e.carrier ? 2 : 1) * (e.lead ? 4 : 1) * (lead && e.escort ? 0.5 : 1);
+    // A shut shell is seen: shots go elsewhere until it rests (D156).
+    if (e.shell && e.phase !== 'rest') worth *= 0.1;
     if (d > reach) worth *= 0.3;
     const score = worth / (kill + d / 400 + 0.2);
     if (score > top) { top = score; best = e; }

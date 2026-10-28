@@ -516,6 +516,7 @@ describe('knockback (D122)', () => {
   it('never knocks a lunger off its line once it winds up (D64)', () => {
     const g = quiet();
     const e = fishAt(g, 'mini-boss', 130);
+    delete e.shell;                              // so the shot lands (D156)
     Object.assign(e, { phase: 'windup', attack: 'lunge', aimX: -1, aimY: 0, phaseTime: 0 });
     const at = [e.x, e.y];
     shot(g, { vx: 4000 });
@@ -603,9 +604,19 @@ describe('the bump', () => {
     expect(e.bump).toBeLessThanOrEqual(0);
   });
 
+  it('neither jolts nor moves a shut shell: the hit glances off (D156)', () => {
+    const g = quiet();
+    const e = fishAt(g, 'mini-boss', 130);
+    const at = [e.x, e.y];
+    shot(g, { vx: 4000 });
+    play(g, 0.05);
+    expect([e.bump || 0, e.hp, e.x, e.y]).toEqual([0, e.maxHp, ...at]);
+  });
+
   it('jolts a lunger the hit cannot knock off its line', () => {
     const g = quiet();
     const e = fishAt(g, 'mini-boss', 130);
+    delete e.shell;                              // so the shot lands (D156)
     Object.assign(e, { phase: 'windup', attack: 'lunge', aimX: -1, aimY: 0, phaseTime: 0 });
     shot(g, { vx: 4000 });
     play(g, 0.05);

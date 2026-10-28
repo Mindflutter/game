@@ -157,10 +157,10 @@ describe('scenarios (D37)', () => {
   it('start deep in the queue with it running, and an unknown one says so', () => {
     const g = loadGame();
     expect(g.applyScenario('late-swarm')).toBe(true);
-    expect([g.batchIndex, g.queuePaused]).toEqual([5, false]);
+    expect([g.batchIndex, g.queuePaused]).toEqual([4, false]);
     g.immortal = true;
     for (let i = 0; i < 300; i++) g.update(1 / 60);
-    expect([g.batchIndex, g.enemies.length > 0]).toEqual([6, true]);
+    expect([g.batchIndex, g.enemies.length > 0]).toEqual([5, true]);
     expect(g.applyScenario('no-such-scenario')).toBe(false);
   });
 });

@@ -175,9 +175,10 @@ waves behind it. The boss arrives alone as `lead`, and while it lives
 gems; the boss's kill clears them all before the boost roll, so it drops no
 boost. The marks ride on the fish, so the save needed no new version.
 
-**Layers and the plan** (D66, D71, D72). `layer()` gives every layer one shape:
-three batches from a pool, a mini-boss, two, a mini-boss, two, the boss — ten
-gates (D137 (batches grow from seconds to a minute and a half)). `reset()` draws the whole dive first,
+**Layers and the plan** (D66, D71, D72). `layer()` builds a layer from its pools and
+its own draws: each stretch's batches, then a mini-boss escorted from that
+pool, the last pool's closed by the boss — today one batch a stretch, six
+gates (D155 (six gates a layer)). `reset()` draws the whole dive first,
 before anything else takes from the seed, so a seed is a dive: `drawPlan()`
 draws each stretch's batches without repeats into the flat `plan` and grades
 each up to its stretch's threat (D126 (threat), D129 (a gentle first layer)),

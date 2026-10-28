@@ -5183,3 +5183,114 @@ browser is not enough for implementing all i want".
   still gets no investment beyond what a stage needs.
 - **Supersedes** D30's "alpha is built in the browser and ported afterwards"
   as a schedule; `foundations.md` → Non-goals says so.
+
+## D155 — Six gates a layer, each layer's draws its own · 2026-10-28
+
+Igor, on the S9 (the balance rework) spec: "10 min is fine, let's keep it
+minimal. make sure it is still scalable", then the recommended option, fewer
+gates with the same fights, over "ten gates, every fight half as long".
+
+- **Six gates a layer**: a batch, a mini-boss, a batch, a mini-boss, a batch,
+  the boss. Each stretch draws one batch of its pool instead of 3 / 2 / 2.
+  The threat targets are per stretch, so every fight keeps its old target.
+- **Each layer carries its own draws**: `layer()` takes them as data and
+  builds a stretch and its mini-boss for every pool, the last pool's closed by
+  the boss — a layer may differ in length, and more pools need no code.
+- **A full dive of about 10 minutes**, split about 2 / 3 / 5 by layer —
+  Claude's split. `foundations.md` → Pillars, "Dives are a session", goes
+  from 4–8 to 2–5 minutes a layer.
+- **Supersedes** D137 (batches grow from seconds to a minute and a half)'s ten
+  gates a layer; its curve stands. Guarded by `tests/dive.test.js`.
+
+## D156 — The boss's shell and stages · 2026-10-28
+
+Igor: "bosses are too easy and annoying - you just stand near and fire until
+its huge hp numbers are gone". Then, on the reading (`reading.md` → Bosses):
+"complete everything according to what you learned from the book". The shape
+and every number are Claude's.
+
+- **A shell**: the boss and the mini-boss shrug off every shot, cut and dash
+  — a clink, and the bot looks elsewhere — but in the rest after each attack,
+  the opening, now 1.5s from 0.9s. Standing near and firing does nothing; the
+  answer is to dodge, then punish. The mini-boss teaches the opening as it
+  teaches the tell.
+- **Stages**: the boss fights a round of attacks a stage, an even share of
+  its hp each — lunges; a lunge and a fan in turn; two lunges to a fan. No
+  wound carries it past a stage's floor, and a new stage shuts it at once, so
+  each stage needs an opening of its own however strong the kit.
+- **Hp to fit**: the boss 100 to 30, the mini-boss 20 to 10.
+- **A fish alive in a saved dive keeps its record**: no shell and no stages, so
+  an old boss only lunges; no save version.
+- `foundations.md` → the glossary's boss and mini-boss say so.
+- **Supersedes** D117 (the boss's fan)'s fan "in turn with every lunge":
+  where it fans is now its stages'. Guarded by `tests/boss.test.js`.
+
+
+## D157 — The archer counts twice what the bot measures · 2026-10-28
+
+Igor: "archer needs to have more threat", then: "i meant that compared to
+other enemies archer felt harder to beat". So its `threat` — what the plan
+sizes a batch by (D126 (threat)) — was too low, and a batch with archers
+came out harder than its stretch. Its behaviour stays.
+
+- **The archer's threat is twice the bot's measure**, [0.034, 0.056, 0.064]:
+  Igor's pick of "harder than the drifter and the darter only", which keeps
+  it under the bulwark at every grade. The bot reads every shot as it leaves
+  the mouth, and at grade 1 hardly a fish touches it, so it cannot see what
+  a player does. The one threat set from play, not the fit.
+- **The pools refitted** (`npm run measure fit`): about half the archers.
+- Guarded by `tests/dive.test.js` (pools under their stretch) and the
+  archer's row in `entities/enemies.md` → Threat.
+
+## D158 — Prices in reach, ladders a dive long · 2026-10-28
+
+Igor, 2026-10-27: "impossible to quickly earn gems for upgrades, upgrades
+feel useless, points are near to impossible to get". The reading
+(`reading.md` → Dives, Upgrades): many small gains over one big price, and an
+upgrade the player can feel. The numbers are Claude's.
+
+- **Prices flattened**: a top tier about six times its first, not twenty —
+  the Gun 150, 400, 900; all twelve tiers of the Gun and the equipment from
+  18,050 gems to about 6,500, what a winning career earns. The career bot
+  buys one or two tiers almost every dive and wins on dive 6–8 holding 8–9.
+- **The Mask's step 15 to 30**: at the top the Gun reaches 340, far past the
+  archer's 240 — a step you can see.
+- **Streak ladders fit one dive**, since a dive is 18 gates (D155 (six gates a
+  layer)): `untouched` tops at every gate unhit, 18; `beeline` at every
+  glowing fish first, 9; `swift` scaled to the shorter layer, 2:15 to 1:05.
+  Rungs met in a save stay met. Guarded by `tests/challenges.test.js`.
+- **Supersedes** D152 (nine rungs a ladder, a point a rung)'s rungs for
+  `untouched`, `beeline` and `swift`, and the prices of D136 (prices halved)
+  and D137 (batches grow from seconds to a minute and a half).
+
+## D159 — The archer holds its ground; the mini-boss pays 10 · 2026-10-28
+
+Igor, on his play of S9 (the balance rework): "archer should not escape
+player, leave that mechanic for a more advanced enemy", and "miniboss threat
+is enough to pay at least 10 gems".
+
+- **The archer closes to its `range` and holds there**, never backing away;
+  `near` is gone with the back-off. Running from the diver is kept for a
+  fish of its own (`ideas.md` → A shooter that flees). Its threat stays
+  D157 (the archer counts twice what the bot measures)'s, not re-measured.
+- **The mini-boss's `value` 5 to 10**, times its grade's; the boss's 30 to
+  40, so its haul stays over three times any other fish's (D68 (the layer
+  end is a milestone)).
+- **Supersedes** D95 (three enemy behaviours, and one way to be hurt)'s
+  "backs off inside its band". Guarded by `tests/enemies.test.js`.
+
+## D160 — A layer-1 dive buys a thing every two · 2026-10-28
+
+Igor, after three fresh dives that died in layer 1 for 75, 75 and 40 gems
+and points only on the first: "every two is fine, depending on skill.
+consider me as mid-to-high skilled guy". The bot outearns him about tenfold,
+so the economy is set on his play, not the bot's.
+
+- **The target**: a mid-to-high skilled player whose dives die in layer 1
+  buys a tier or an attribute step about every two dives.
+- **Every first tier 150 gems** — the Suit's from 250, the Weights' from 200.
+- **The lowest rungs gentler**, the tops kept: `untouched` from 3 batches,
+  `flurry` from 5 kills, `bowling` from 3 fish. Claude's picks, for Igor's
+  play to confirm.
+- **Supersedes** those prices and rungs of D158 (prices in reach, ladders a
+  dive long).

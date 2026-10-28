@@ -12,19 +12,20 @@ earn any rung (D109 (micro-tasks are ladders; steps cost more as they rise),
 D110 (challenges)). A **point** is what a rung pays, spent at `home` to raise an
 **attribute** — a body stat — a **step** at a time. How a challenge is judged
 and where its count shows is `design.md` → What persists. The ladders' shape
-is D109's; their nine rungs of a point each, and where each sits, D152 (nine
-rungs a ladder, a point a rung).
+is D109's; their nine rungs of a point each, D152 (nine rungs a ladder, a
+point a rung); a streak's top, what one dive holds, D158 (prices in reach,
+ladders a dive long).
 
 ## Roster
 
 <!-- generated: challenges -->
 | name | judged | within | rungs | the first asks | the top asks |
 |---|---|---|---|---|---|
-| untouched | clear | — | 10 / 14 / 18 / 21 / 24 / 26 / 28 / 29 / 30 | clear 10 batches in a row without a hit | clear 30 batches in a row without a hit |
-| bowling | — | — | 4 / 5 / 6 / 7 / 8 / 9 / 10 / 11 / 12 | dash through 4 fish at once | dash through 12 fish at once |
-| beeline | clear | — | 3 / 5 / 7 / 9 / 11 / 13 / 15 / 18 / 21 | kill the glowing fish first, 3 batches in a row | kill the glowing fish first, 21 batches in a row |
-| flurry | kill | — | 7 / 9 / 11 / 13 / 15 / 18 / 21 / 25 / 30 | kill 7 fish within 2 seconds | kill 30 fish within 2 seconds |
-| swift | end | true | 225 / 200 / 180 / 165 / 150 / 140 / 130 / 120 / 110 | clear a layer within 3:45 | clear a layer within 1:50 |
+| untouched | clear | — | 3 / 5 / 7 / 9 / 11 / 13 / 15 / 17 / 18 | clear 3 batches in a row without a hit | clear 18 batches in a row without a hit |
+| bowling | — | — | 3 / 4 / 5 / 6 / 7 / 8 / 9 / 10 / 12 | dash through 3 fish at once | dash through 12 fish at once |
+| beeline | clear | — | 1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 | kill the glowing fish first, 1 batches in a row | kill the glowing fish first, 9 batches in a row |
+| flurry | kill | — | 5 / 7 / 9 / 11 / 13 / 16 / 20 / 25 / 30 | kill 5 fish within 2 seconds | kill 30 fish within 2 seconds |
+| swift | end | true | 135 / 120 / 110 / 100 / 90 / 85 / 80 / 75 / 65 | clear a layer within 2:15 | clear a layer within 1:05 |
 <!-- /generated -->
 
 <!-- generated: attributes -->
@@ -36,9 +37,11 @@ rungs a ladder, a point a rung).
 <!-- /generated -->
 
 **judged** is which of `clear`, `kill`, `dash` and `end` the record has.
-Every number is Claude's pick. The rungs are sized on the career bot (D50
+Every number is Claude's pick. The rungs were sized on the career bot (D50
 (the bot measures its own policy)) over fifteen fresh dives of ten-gate
-layers: about two rungs on a first dive, about three a dive to the fifth, and
+layers, `untouched`, `beeline` and `swift` rescaled to six-gate layers, and
+the lowest rungs eased for Igor's layer-1 dives (D160 (a layer-1 dive buys
+a thing every two)): about two rungs on a first dive, about three a dive to the fifth, and
 the bot's best, which stops growing by about the eighth, at about half of
 every ladder — the rest is for a player's skill (D152 (nine rungs a ladder, a
 point a rung)). Dash reach and Strength are the dash's, which waits on its

@@ -18,10 +18,15 @@ seconds to a minute and a half)). S7 (alpha polish) closed 2026-10-26, the
 alpha on Igor's word (D150 (S7 closes)). S8 (the economy: gems and points)
 closed the same day, built as D152 (nine rungs a ladder, a point a rung), its
 balance verdict waiting on more play (D153 (the economy stage closes)). **Now**:
-S9 (the balance rework), opened 2026-10-28. Settled: a 10-minute dive, 6
-gates a layer, each layer's shape its own data. Next: build that, then the
-boss, the archer and the economy, asked one at a time
-(`specs/2026-10-28-s9-balance-rework-design.md` → Where a new session starts).
+S9 (the balance rework), opened 2026-10-28. Built: six gates a layer (D155
+(six gates a layer)), the boss's shell and stages (D156 (the boss's shell and
+stages)), the archer's threat (D157 (the archer counts twice what the bot
+measures)), prices and ladders (D158 (prices in reach, ladders a dive long)).
+Next: Igor's new target, the whole game from New game to the win in about 15–20
+minutes with every upgrade bought (the spec → The new target); then the
+pillar bars it still fails (Health), whose
+cause is fewer mods a dive — 9 glowing fish, not 21 — so a career meets layer
+3 weaker; and points from opt-in difficulty (`ideas.md` → from playing alpha).
 The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
@@ -57,6 +62,16 @@ This section owns the measured bot figures. Nothing else quotes them.
 older build is a regression signal for that build only.
 
 - All `?test` checks passing, and `npm test` green.
+- **The S9 build (D155–D158), 2026-10-28**, five seeds, `npm run measure
+  pillars` and careers:
+  - **Fights per layer**, bot seconds summed: about 131 / 202 / 291 — a dive
+    of about 10 minutes. The boss: about 50s on layer 1 (165s before the
+    shell), 40s on layer 2, 28s on layer 3.
+  - **Careers** buy one or two tiers almost every dive and win on dive 6–8,
+    holding 8–9 of 12 tiers; points about 17–28 at the win.
+  - **Bars failing**: layer 1's archer stretch cleared standing on 3 of 5
+    seeds (half the archers now, D157); layer 3's boss standing on 1; seven
+    deeper batches lost on 3 of 5 — mostly layer 3, first met with fewer mods.
 - **The economy, the D152 (nine rungs a ladder, a point a rung) build,
   2026-10-26** — eight fresh saves (seeds 1–8) of fifteen dives each, the
   diver bot carrying the Gun, points into the cheapest step, gems into the

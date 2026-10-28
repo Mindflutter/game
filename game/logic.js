@@ -110,7 +110,7 @@ function ease(b, wantX, wantY, ramp, dt) {
 // view, so the tell is seen, and the view holds it after: a charge that left
 // would take the fight with it. No `attack` is the lunge, as saved before fans.
 function lungeStep(e, ux, uy, d, dt) {
-  const fanning = e.phase === 'chase' ? e.fan && e.attack === 'lunge' : e.attack === 'fan';
+  const fanning = (e.phase === 'chase' ? nextAttack(e) : e.attack) === 'fan';
   const A = fanning ? e.fan : e.lunge;
   e.phaseTime += dt;
   let vx = 0, vy = 0;
@@ -123,6 +123,7 @@ function lungeStep(e, ux, uy, d, dt) {
       e.phase = 'windup';
       e.phaseTime = 0;
       e.attack = fanning ? 'fan' : 'lunge';
+      e.turn = (e.turn || 0) + 1;
       e.aimX = ux;
       e.aimY = uy;
     }
@@ -154,6 +155,21 @@ function lungeStep(e, ux, uy, d, dt) {
   e.y = y;
 }
 
+// A lunger in stages fights a round of attacks a stage, the stage set by the
+// hp it has lost, and starts each new stage's round from its top (D156);
+// without stages it only lunges.
+function stageOf(e) {
+  const R = e.stages && e.stages.rounds;
+  // The nudge keeps a floor, `maxHp * (1 - k / n)`, inside stage k.
+  return R ? Math.min(R.length - 1, Math.floor((1 - e.hp / e.maxHp) * R.length + 1e-9)) : 0;
+}
+function nextAttack(e) {
+  if (!e.stages) return 'lunge';
+  const s = stageOf(e), round = e.stages.rounds[s];
+  if (s !== e.stage) { e.stage = s; e.turn = 0; }
+  return round[e.turn % round.length];
+}
+
 function fanAims(e) {
   const F = e.fan, centre = Math.atan2(e.aimY, e.aimX);
   const step = F.arc * Math.PI / 180 / (F.count - 1);
@@ -172,10 +188,9 @@ function spitStep(e, ux, uy, d, dt) {
   const S = e.spit;
   const [cx, cy] = viewClamp(e);
   const seen = cx === e.x && cy === e.y;
-  const way = !seen || d > S.range ? 1 : d < S.near ? -1 : 0;
+  const way = !seen || d > S.range ? 1 : 0;
   e.x += ux * e.speed * way * dt + e.pushX * dt;
   e.y += uy * e.speed * way * dt + e.pushY * dt;
-  if (way < 0) [e.x, e.y] = viewClamp(e);
   e.phaseTime += dt;
   if (seen && d <= S.range && e.phaseTime >= S.every) {
     e.phaseTime = 0;
@@ -389,8 +404,7 @@ function swing(ux, uy) {
 // A shot's or a swing's damage. With Bloom running it wounds the fish beside
 // the struck one too (D125); a wound never splashes on, so a crowd cannot chain.
 function hit(e) {
-  wound(e);
-  if (e.hp > 0) sound('hit');
+  if (wound(e) && e.hp > 0) sound('hit');
   if (!player.splash) return;
   // Its reach, seen: whatever the ring touches, the splash wounds. `ring` is
   // the radius it grows from.
@@ -403,16 +417,36 @@ function hit(e) {
   }
 }
 
-function wound(e) {
-  e.hp -= player.damage;
+// A shut shell takes only its share of a hit: a shelled lunger's opening is
+// its rest (D156). False when the hit glanced off.
+const shut = e => e.shell && e.phase !== 'rest';
+function wound(e, n = player.damage) {
+  if (shut(e) && !e.shell.takes) {
+    burst(e.x, e.y, '#eaf6ff', '#9fb8d0', 3, 90, 0.15);
+    sound('clink');
+    return false;
+  }
+  // No wound carries a lunger past its stage's floor, and a new stage shuts
+  // the shell, so each stage needs an opening of its own (D156).
+  const stage = stageOf(e), R = e.stages && e.stages.rounds;
+  const floor = R && stage < R.length - 1 ? e.maxHp * (1 - (stage + 1) / R.length) : 0;
+  e.hp = Math.max(floor, e.hp - n * (shut(e) ? e.shell.takes : 1));
   e.flash = 0.07;
   if (e.hp <= 0) killEnemy(e);
+  else if (stageOf(e) > stage) {
+    e.phase = 'chase';
+    e.phaseTime = 0;
+    burst(e.x, e.y, e.color, e.glow, 24, 260, 0.6);
+    sound('lead');
+  }
+  return true;
 }
 
 // A hit knocks a fish along it (D122), as the bodies weigh: the heavier by
 // area less, a lunger out of its chase not at all. The drawn bump moves
 // nothing, so even a lunger jolts.
 function knock(e, ux, uy) {
+  if (shut(e)) return;                       // a glancing hit moves nothing (D156)
   e.bump = BUMP_TIME;
   e.bumpX = ux;
   e.bumpY = uy;
@@ -1256,11 +1290,7 @@ function step(dt) {
         e.pushY = -uy * DASH_PUSH;
         burst(e.x, e.y, '#bffcff', '#4ff0ff', 6, 130, 0.3);
         // The flash reads as "that hurt", so not on a dash that only pushed (D51).
-        if (player.dashDamage > 0) {
-          e.hp -= player.dashDamage;
-          e.flash = 0.07;
-          if (e.hp <= 0) killEnemy(e);
-        }
+        if (player.dashDamage > 0) wound(e, player.dashDamage);
       }
     }
   }

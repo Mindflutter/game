@@ -129,6 +129,7 @@ const SOUNDS = {
   modB:   { freq: 780,  dur: 0.16, type: 'triangle', vol: 0.35, slide: 1.25 },
   boost:  { freq: 440,  dur: 0.14, type: 'square',   vol: 0.25, slide: 1.8  },
   spit:   { freq: 330,  dur: 0.08, type: 'triangle', vol: 0.30, slide: 1.5  },
+  clink:  { freq: 1400, dur: 0.04, type: 'square',   vol: 0.20, slide: 0.8  },
   pop:    { freq: 150,  dur: 0.22, type: 'square',   vol: 0.40, slide: 0.5  },
   guard:  { freq: 880,  dur: 0.12, type: 'square',   vol: 0.30, slide: 0.6  },
   hit:    { freq: 240,  dur: 0.06, type: 'triangle', vol: 0.30, slide: 0.7  },
@@ -195,35 +196,35 @@ const BOOSTS = [
 const WEAPONS = [
   { name: 'Gun', desc: 'quick, light shots', fireRate: 2.5, damage: 1, range: 250, shotSpeed: 430, shotRadius: 4, pierce: 0, knock: 60, cost: 0,
     tiers: [{ cost: 150,  apply: p => p.fireRate += 0.5 },
-            { cost: 900, apply: p => p.fireRate += 0.5 },
-            { cost: 2600, apply: p => p.fireRate += 0.5 }] },
+            { cost: 400, apply: p => p.fireRate += 0.5 },
+            { cost: 900, apply: p => p.fireRate += 0.5 }] },
   // The draft's railgun (D97), needing Strength (D98).
   { name: 'Harpoon', fireRate: 0.8, damage: 4, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2, knock: 200,
     desc: 'slow, heavy shots that go through fish', cost: 800, requires: { Strength: 1 },
-    tiers: [{ cost: 400,  apply: p => p.damage += 1 },
-            { cost: 1600, apply: p => p.fireRate += 0.2 },
-            { cost: 4000, apply: p => p.pierce += 1 }] },
+    tiers: [{ cost: 300,  apply: p => p.damage += 1 },
+            { cost: 650,  apply: p => p.fireRate += 0.2 },
+            { cost: 1300, apply: p => p.pierce += 1 }] },
   // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
   // swing at pierce + 1 fish, nearest first.
   { name: 'Knife', fireRate: 3, damage: 2, range: 60, shotRadius: 18, pierce: 6, knock: 40,
     desc: 'swings close, cutting several fish at once', swing: { arc: 60, time: 0.15 }, cost: 500,
-    tiers: [{ cost: 300,  apply: p => p.range += 12 },
-            { cost: 1400, apply: p => p.damage += 1 },
-            { cost: 3600, apply: p => p.fireRate += 0.75 }] },
+    tiers: [{ cost: 250,  apply: p => p.range += 12 },
+            { cost: 600,  apply: p => p.damage += 1 },
+            { cost: 1200, apply: p => p.fireRate += 0.75 }] },
 ];
 
 // Combat numbers only; body stats are attributes' (D36). Documented in
 // docs/entities/equipment.md.
 const EQUIPMENT = [
-  { name: 'Mask',    tiers: [{ cost: 150,  apply: p => p.range += 15 },
-                             { cost: 1000, apply: p => p.range += 15 },
-                             { cost: 3000, apply: p => p.range += 15 }] },
-  { name: 'Suit',    tiers: [{ cost: 250,  apply: p => p.guard += 1 },
-                             { cost: 1400, apply: p => p.guard += 1 },
-                             { cost: 3800, apply: p => p.guard += 1 }] },
-  { name: 'Weights', tiers: [{ cost: 200,  apply: p => p.damage += 0.5 },
-                             { cost: 1200, apply: p => p.damage += 0.5 },
-                             { cost: 3400, apply: p => p.damage += 0.5 }] },
+  { name: 'Mask',    tiers: [{ cost: 150,  apply: p => p.range += 30 },
+                             { cost: 400,  apply: p => p.range += 30 },
+                             { cost: 900,  apply: p => p.range += 30 }] },
+  { name: 'Suit',    tiers: [{ cost: 150,  apply: p => p.guard += 1 },
+                             { cost: 550,  apply: p => p.guard += 1 },
+                             { cost: 1200, apply: p => p.guard += 1 }] },
+  { name: 'Weights', tiers: [{ cost: 150,  apply: p => p.damage += 0.5 },
+                             { cost: 500,  apply: p => p.damage += 0.5 },
+                             { cost: 1100, apply: p => p.damage += 0.5 }] },
 ];
 
 // Step n costs n points (D109); `max` steps each, whose cost is what the
@@ -242,22 +243,22 @@ const tri = n => n * (n + 1) / 2;
 // fish, `end` reads a layer at its end. With `within`, a rung is a time to beat
 // (D109). Every rung pays one point (D152). Claude's picks.
 const CHALLENGES = [
-  { name: 'untouched', rungs: [10, 14, 18, 21, 24, 26, 28, 29, 30],
+  { name: 'untouched', rungs: [3, 5, 7, 9, 11, 13, 15, 17, 18],
     ask: n => 'clear ' + n + ' batches in a row without a hit',
     clear: n => (batchHit ? 0 : n + 1) },
-  { name: 'bowling',   rungs: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+  { name: 'bowling',   rungs: [3, 4, 5, 6, 7, 8, 9, 10, 12],
     ask: n => 'dash through ' + n + ' fish at once',
     dash: () => player.dashHits },
   // A batch with no glowing fish neither counts nor breaks it. A kill on the
   // glowing fish's tick ties with it: one swing or dash is one moment.
-  { name: 'beeline',   rungs: [3, 5, 7, 9, 11, 13, 15, 18, 21],
+  { name: 'beeline',   rungs: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     ask: n => 'kill the glowing fish first, ' + n + ' batches in a row',
     clear: n => (glowAt === null ? n : glowAt === firstKillAt ? n + 1 : 0) },
-  { name: 'flurry',    rungs: [7, 9, 11, 13, 15, 18, 21, 25, 30],
+  { name: 'flurry',    rungs: [5, 7, 9, 11, 13, 16, 20, 25, 30],
     ask: n => 'kill ' + n + ' fish within ' + FLURRY_TIME + ' seconds',
     kill: () => killTimes.filter(t => elapsed - t <= FLURRY_TIME).length },
   // A dive begun partway into a layer has no start for it: not judged.
-  { name: 'swift',     rungs: [225, 200, 180, 165, 150, 140, 130, 120, 110], within: true,
+  { name: 'swift',     rungs: [135, 120, 110, 100, 90, 85, 80, 75, 65], within: true,
     ask: s => 'clear a layer within ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'),
     end: () => (layerStart === null ? Infinity : elapsed - layerStart) },
 ];
@@ -418,64 +419,65 @@ const BOSS      = { enemies: [['boss', 1]], crowd: BOSS_CROWD };
 
 // ---------- layers ----------
 // A layer owns its batches (D71): stretches, each a pool and how many to
-// `draw`. A mini-boss or the boss is a stretch whose pool holds one batch, so
-// their places need no special case. `color` is the water at its top:
-// PLACEHOLDER GRAPHICS (D72), Claude's picks. Numbered until named (D89).
-const layer = (name, color, [a, b, c]) => ({ name, color, stretches: [
-  { draw: 3, pool: a }, { draw: 1, pool: [MINI_BOSS], escorts: a },
-  { draw: 2, pool: b }, { draw: 1, pool: [MINI_BOSS], escorts: b },
-  { draw: 2, pool: c }, { draw: 1, pool: [BOSS], escorts: c },
-] });
+// `draw` from it, the layer's own (D155), each followed by a mini-boss escorted
+// from that pool, the last by the boss. A mini-boss or the boss is a stretch
+// whose pool holds one batch, so their places need no special case. `color` is
+// the water at its top: PLACEHOLDER GRAPHICS (D72), Claude's picks. Numbered
+// until named (D89).
+const layer = (name, color, draws, pools) => ({ name, color, stretches: pools.flatMap((pool, i) => [
+  { draw: draws[i], pool },
+  { draw: 1, pool: [i === pools.length - 1 ? BOSS : MINI_BOSS], escorts: pool },
+]) });
 const LAYERS = [
-  layer('Layer 1', [12, 23, 39], [
+  layer('Layer 1', [12, 23, 39], [1, 1, 1], [
     [{ enemies: [['drifter', 9], ['darter', 3]] },
      { enemies: [['drifter', 7], ['darter', 5]] },
      { enemies: [['drifter', 6], ['darter', 6]] },
      { enemies: [['darter', 7], ['drifter', 5]] },
      { enemies: [['darter', 9], ['drifter', 3]] }],
-    [{ enemies: [['archer', 5], ['drifter', 11]] },
-     { enemies: [['archer', 7], ['darter', 4]] },
-     { enemies: [['archer', 6], ['drifter', 4], ['darter', 4]] },
-     { enemies: [['archer', 7], ['drifter', 4]] },
-     { enemies: [['archer', 5], ['darter', 5], ['drifter', 5]] }],
-    [{ enemies: [['bulwark', 3], ['drifter', 7], ['archer', 5]] },
-     { enemies: [['archer', 9], ['bulwark', 2], ['drifter', 4], ['darter', 2]] },
-     { enemies: [['bulwark', 3], ['drifter', 3], ['darter', 3], ['archer', 5]] },
-     { enemies: [['archer', 6], ['bulwark', 3], ['drifter', 3]] },
-     { enemies: [['bulwark', 2], ['darter', 5], ['drifter', 5], ['archer', 8]] }],
+    [{ enemies: [['archer', 3], ['drifter', 9]] },
+     { enemies: [['archer', 3], ['darter', 9]] },
+     { enemies: [['archer', 3], ['drifter', 7], ['darter', 2]] },
+     { enemies: [['archer', 3], ['drifter', 9]] },
+     { enemies: [['archer', 3], ['darter', 3], ['drifter', 6]] }],
+    [{ enemies: [['bulwark', 2], ['drifter', 15], ['archer', 4]] },
+     { enemies: [['archer', 6], ['bulwark', 1], ['drifter', 10], ['darter', 1]] },
+     { enemies: [['bulwark', 2], ['drifter', 13], ['darter', 2], ['archer', 4]] },
+     { enemies: [['archer', 5], ['bulwark', 2], ['drifter', 6]] },
+     { enemies: [['bulwark', 1], ['darter', 3], ['drifter', 8], ['archer', 6]] }],
   ]),
-  layer('Layer 2', [24, 12, 40], [
-    [{ enemies: [['drifter', 6], ['archer', 6], ['puffer', 3]] },
-     { enemies: [['darter', 6], ['archer', 4], ['bulwark', 2], ['puffer', 2]] },
-     { enemies: [['puffer', 4], ['drifter', 4], ['archer', 3]] },
-     { enemies: [['drifter', 11], ['darter', 5], ['puffer', 3], ['archer', 3]] },
+  layer('Layer 2', [24, 12, 40], [1, 1, 1], [
+    [{ enemies: [['drifter', 5], ['archer', 5], ['puffer', 3]] },
+     { enemies: [['darter', 5], ['archer', 3], ['bulwark', 2], ['puffer', 2]] },
+     { enemies: [['puffer', 3], ['drifter', 3], ['archer', 3]] },
+     { enemies: [['drifter', 9], ['darter', 4], ['puffer', 3], ['archer', 3]] },
      { enemies: [['puffer', 5], ['darter', 5]] }],
-    [{ enemies: [['bulwark', 3], ['archer', 4], ['drifter', 6], ['puffer', 6]] },
+    [{ enemies: [['bulwark', 3], ['archer', 3], ['drifter', 5], ['puffer', 5]] },
      { enemies: [['puffer', 8], ['darter', 7]] },
-     { enemies: [['archer', 5], ['puffer', 7], ['drifter', 6]] },
+     { enemies: [['archer', 5], ['puffer', 6], ['drifter', 5]] },
      { enemies: [['bulwark', 3], ['puffer', 7], ['drifter', 7]] },
-     { enemies: [['drifter', 9], ['archer', 3], ['bulwark', 3], ['puffer', 6]] }],
+     { enemies: [['drifter', 8], ['archer', 3], ['bulwark', 3], ['puffer', 5]] }],
     [{ enemies: [['bulwark', 7], ['puffer', 11], ['drifter', 10]] },
-     { enemies: [['archer', 4], ['darter', 8], ['puffer', 12], ['bulwark', 4]] },
-     { enemies: [['puffer', 14], ['archer', 6], ['darter', 7]] },
-     { enemies: [['bulwark', 4], ['archer', 6], ['darter', 8], ['puffer', 12]] },
-     { enemies: [['drifter', 9], ['puffer', 14], ['archer', 8]] }],
+     { enemies: [['archer', 4], ['darter', 7], ['puffer', 11], ['bulwark', 4]] },
+     { enemies: [['puffer', 13], ['archer', 5], ['darter', 6]] },
+     { enemies: [['bulwark', 4], ['archer', 5], ['darter', 7], ['puffer', 11]] },
+     { enemies: [['drifter', 7], ['puffer', 12], ['archer', 7]] }],
   ]),
-  layer('Layer 3', [8, 32, 28], [
-    [{ enemies: [['eel', 18], ['drifter', 18], ['archer', 9]] },
-     { enemies: [['eel', 18], ['archer', 13], ['darter', 16]] },
-     { enemies: [['eel', 13], ['puffer', 8], ['archer', 9]] },
-     { enemies: [['puffer', 12], ['drifter', 14], ['eel', 10], ['archer', 6]] },
-     { enemies: [['eel', 18], ['archer', 13]] }],
-    [{ enemies: [['bulwark', 12], ['eel', 29], ['archer', 12]] },
+  layer('Layer 3', [8, 32, 28], [1, 1, 1], [
+    [{ enemies: [['eel', 17], ['drifter', 17], ['archer', 8]] },
+     { enemies: [['eel', 16], ['archer', 12], ['darter', 14]] },
+     { enemies: [['eel', 12], ['puffer', 8], ['archer', 9]] },
+     { enemies: [['puffer', 11], ['drifter', 13], ['eel', 10], ['archer', 6]] },
+     { enemies: [['eel', 17], ['archer', 12]] }],
+    [{ enemies: [['bulwark', 11], ['eel', 28], ['archer', 11]] },
      { enemies: [['eel', 25], ['puffer', 15], ['darter', 18]] },
-     { enemies: [['archer', 17], ['eel', 34]] },
+     { enemies: [['archer', 16], ['eel', 32]] },
      { enemies: [['bulwark', 8], ['puffer', 18], ['eel', 21]] },
-     { enemies: [['drifter', 33], ['eel', 33], ['archer', 17]] }],
+     { enemies: [['drifter', 31], ['eel', 31], ['archer', 16]] }],
     [{ enemies: [['bulwark', 18], ['eel', 41], ['puffer', 22]] },
-     { enemies: [['archer', 23], ['eel', 61], ['darter', 15]] },
-     { enemies: [['puffer', 29], ['eel', 42], ['archer', 19]] },
-     { enemies: [['bulwark', 14], ['archer', 18], ['eel', 56]] },
+     { enemies: [['archer', 22], ['eel', 58], ['darter', 14]] },
+     { enemies: [['puffer', 28], ['eel', 40], ['archer', 18]] },
+     { enemies: [['bulwark', 13], ['archer', 17], ['eel', 54]] },
      { enemies: [['drifter', 16], ['eel', 49], ['puffer', 22]] }],
   ]),
 ];
@@ -494,7 +496,7 @@ const SCENARIOS = {
                      const t = ENEMY_TYPES.filter(e => e.carries !== false);
                      return t.map((e, i) => [e.name, ARENA_W * (i + 1) / (t.length + 1), 220]);
                    } },
-  'late-swarm':  { batch: 5 },
+  'late-swarm':  { batch: 4 },
   // `batch` may be a function of the drawn plan (D71): a place known only once drawn.
   'last-batch':  { batch: plan => plan.length - 1 },
   'mini-boss':   { batch: plan => plan.findIndex(e => e.batch.enemies[0][0] === 'mini-boss') },
@@ -528,11 +530,11 @@ const ENEMY_TYPES = [
     color: '#a05cff', glow: '#7b2fff',
     bite: { reach: 20, windup: 0.3, rest: 1.2, damage: 1, knock: 420 } },
   // The archer (D95). Its `range` sits under the Gun's, so the starting weapon
-  // can always answer it. Claude's picks.
-  { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2, threat: [0.017, 0.028, 0.032],
+  // can always answer it. Claude's picks; its threat twice the bot's (D157).
+  { name: 'archer',  r: 16, hp: 2, speed: 75,  value: 2, threat: [0.034, 0.056, 0.064],
     desc: 'keeps its distance and spits',
     color: '#5aa9ff', glow: '#1f6fff',
-    spit: { range: 240, near: 170, every: 2, speed: 210, r: 6, travel: 420, damage: 1, knock: 150 } },
+    spit: { range: 240, every: 2, speed: 210, r: 6, travel: 420, damage: 1, knock: 150 } },
   // The puffer (D95, D106). Claude's picks.
   { name: 'puffer',  r: 22, hp: 3, speed: 125, value: 2, threat: [0.081, 0.131, 0.184],
     desc: 'chases you, swells up close, then bursts: get out of its ring',
@@ -544,20 +546,24 @@ const ENEMY_TYPES = [
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 },
     touch: { damage: 1, knock: 240 } },
-  // The boss, and the mini-boss that rehearses its lunge (D62, D64, D65).
+  // The boss, and the mini-boss that rehearses its lunge and its opening (D62,
+  // D64, D65, D156): both shelled, open only in the rest after an attack.
   // Neither glows (D88). Claude's picks.
-  { name: 'mini-boss', r: 52, hp: 20, speed: 90, value: 5, threat: [0.315, 0.404, 0.452], carries: false,
-    desc: 'winds up, then lunges a long way',
+  { name: 'mini-boss', r: 52, hp: 10, speed: 90, value: 10, threat: [0.386, 0.452, 0.500], carries: false,
+    desc: 'winds up, lunges a long way, then rests: hit it then',
     color: '#e2ff8a', glow: '#c6ff3c',
-    lunge: { chase: 1, windup: 1.2, speed: 780, reach: 450, rest: 0.9, damage: 2, knock: 600 } },
+    lunge: { chase: 1, windup: 1.2, speed: 780, reach: 450, rest: 1.5, damage: 2, knock: 600 },
+    shell: { takes: 0 } },
   // The boss's `value` is the layer end's big haul of gems (D68); its `fan`,
-  // D117's. Claude's picks.
-  { name: 'boss',      r: 84, hp: 100, speed: 80, value: 30, threat: [0.879, 0.921, 0.961], carries: false,
-    desc: 'lunges, fans out shots, and its escorts keep coming until it dies',
+  // D117's; its stages, D156's, an even share of its hp each. Claude's picks.
+  { name: 'boss',      r: 84, hp: 30, speed: 80, value: 40, threat: [0.906, 0.946, 0.992], carries: false,
+    desc: 'lunges and fans out shots, open only as it rests, fiercer as it is hurt; its escorts keep coming until it dies',
     color: '#c8ff3c', glow: '#9dff00', enters: 'bottom',
-    lunge: { chase: 1, windup: 0.8, speed: 780, reach: 450, rest: 0.9, damage: 4, knock: 600 },
-    fan:   { chase: 1, windup: 0.6, reach: 450, rest: 0.9,
-             count: 7, arc: 90, speed: 160, r: 9, travel: 600, damage: 1, knock: 150 } },
+    lunge: { chase: 1, windup: 0.8, speed: 780, reach: 450, rest: 1.5, damage: 4, knock: 600 },
+    fan:   { chase: 1, windup: 0.6, reach: 450, rest: 1.5,
+             count: 7, arc: 90, speed: 160, r: 9, travel: 600, damage: 1, knock: 150 },
+    shell: { takes: 0 },
+    stages: { rounds: [['lunge'], ['lunge', 'fan'], ['lunge', 'lunge', 'fan']] } },
 ];
 
 // Behaviour records, whose presence is the behaviour (D26), so a new one costs
@@ -599,6 +605,8 @@ const DEBUG_BEHAVIOURS = {
   weave: 'sways side to side as it comes \u2014 aim where it will be',
   lunge: 'winds up, then lunges along its line \u2014 step aside',
   fan:   'spits a fan of shots \u2014 slip between them',
+  shell: 'shrugs hits off, but in the rest after each attack \u2014 hit it then',
+  stages: 'grows fiercer as it is hurt: lunges, then a fan in turn, then two lunges to a fan',
   touch: 'hurts to touch',
 };
 // `of` marks a cap that is the game's own, shown beside the count.

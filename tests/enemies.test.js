@@ -39,7 +39,7 @@ describe('the archer (spit)', () => {
 
   it('holds between near and its range, spitting every `every` seconds at the diver', () => {
     const S = spit();
-    const g = alone('archer', (S.near + S.range) / 2);
+    const g = alone('archer', S.range - 40);
     g.immortal = true;                           // so its shots fly on and can be counted
     const e = g.enemies[0], x = e.x, seen = new Set();
     for (let i = 0, n = ticks(g, 2 * S.every + 0.1); i < n; i++) {
@@ -54,16 +54,12 @@ describe('the archer (spit)', () => {
     }
   });
 
-  it('backs off inside near, and never out of the view', () => {
-    const S = spit();
-    const g = alone('archer', S.near / 2);
-    const e = g.enemies[0], before = distance(g, e);
-    g.update(g.FIXED_DT);
-    expect(distance(g, e)).toBeGreaterThan(before);
-    g.player.x = g.ARENA_W - 60;                 // backing off from here runs into the edge
-    e.x = g.ARENA_W - 30;
+  it('holds its ground as the diver closes in: it never swims away (D159)', () => {
+    const g = alone('archer', 60);
+    const e = g.enemies[0], at = [e.x, e.y];
+    g.player.safe = 99;
     play(g, 1);
-    expect(inView(g, e)).toBe(true);
+    expect([e.x, e.y]).toEqual(at);
   });
 
   it('comes into the view before it spits, though already in range', () => {
@@ -418,9 +414,10 @@ describe('arrivals', () => {
 });
 
 describe('damage (D118)', () => {
-  // Every attack as [type, behaviour, record]; weave only moves a fish.
+  // Every attack as [type, behaviour, record]; weave only moves a fish, and
+  // the shell and the stages only shape when it can be hurt and how it attacks.
   const attacks = g => g.ENEMY_TYPES.flatMap(t => Object.entries(t)
-    .filter(([k, v]) => typeof v === 'object' && !Array.isArray(v) && k !== 'weave').map(([k, v]) => [t.name, k, v]));
+    .filter(([k, v]) => typeof v === 'object' && !Array.isArray(v) && !['weave', 'shell', 'stages'].includes(k)).map(([k, v]) => [t.name, k, v]));
 
   it('gives every attack a whole damage of at least 1', () => {
     const g = loadGame();

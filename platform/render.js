@@ -297,6 +297,15 @@ function drawField() {
     onBody();
     circle(0, 0, e.r * (1 + (fusing ? 0.8 : 0.25) * k),
            hit ? '#ffffff' : e.color, hit ? '#ffffff' : e.glow, 18 + 30 * k);
+    // A shut shell (D156): a pale rim, gone while it rests. PLACEHOLDER GRAPHICS.
+    if (shut(e)) {
+      ctx.globalAlpha = 0.75;
+      ctx.strokeStyle = '#eaf6ff';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(0, 0, e.r * (1 + 0.25 * k) + 3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
     ctx.restore();
     // The grade on the body, above the first (D119). PLACEHOLDER GRAPHICS.
     if (e.grade > 1) {

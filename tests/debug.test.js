@@ -73,9 +73,9 @@ describe('the setup reaches the dive', () => {
   });
 
   it('the place: the chosen layer and gate, the camera at its depth', () => {
-    const g = setup('L2,G7,S7,Gun0');
+    const g = setup('L2,G5,S7,Gun0');
     g.debugDive();
-    const b = g.plan.findIndex(e => e.layer === 1) + 6;
+    const b = g.plan.findIndex(e => e.layer === 1) + 4;
     expect(g.batchIndex).toBe(b);
     expect(g.cameraY).toBe(g.gateDepth(b));
   });
@@ -141,7 +141,7 @@ describe('the setup reaches the dive', () => {
 describe('the code', () => {
   it('round-trips, and writes the place, the seed and the weapon always', () => {
     const g = setup();
-    const code = 'L2,G7,S4471,Harpoon2,puffer4,mini-boss1,Mask1,Dash_reach3,Barbs3,immortal,oneshot';
+    const code = 'L2,G5,S4471,Harpoon2,puffer4,mini-boss1,Mask1,Dash_reach3,Barbs3,immortal,oneshot';
     expect(g.setupCode(g.parseSetup(code))).toBe(code);
     expect(g.setupCode(g.parseSetup('', 9))).toBe('L1,G1,S9,Gun0');
   });
@@ -330,7 +330,7 @@ describe('the setup screen', () => {
     const g = setup();
     const tip = label => g.MENUS.debug.items[row(g, label)].tip;
     for (const item of g.MENUS.debug.items) expect(item.tip, item.label).toMatch(/\w/);
-    expect(tip('Mask')).toMatch(/range \+15/);
+    expect(tip('Mask')).toMatch(/range \+30/);
     expect(tip('Heart')).toMatch(/max HP \+1/);
     expect(tip('Fins')).toMatch(/speed \+45/);
     expect(tip('darter')).toMatch(/hp 1\b/);

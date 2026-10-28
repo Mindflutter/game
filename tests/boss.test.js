@@ -65,7 +65,9 @@ describe('the lunge (D64) and the fan (D117)', () => {
       expect(bad.slice(0, 3)).toEqual([]);          // the first three are enough to read
       expect(maxStep).toBeLessThanOrEqual(T.lunge.speed * g.FIXED_DT + 1e-9);
       expect(charges).toBeGreaterThan(0);          // or the rest is vacuous
-      expect(attacks).toEqual(attacks.map((_, k) => T.fan && k % 2 ? 'fan' : 'lunge'));
+      // Never hurt, so always its first stage's round (D156).
+      const round = T.stages ? T.stages.rounds[0] : ['lunge'];
+      expect(attacks).toEqual(attacks.map((_, k) => round[k % round.length]));
       expect(attacks.length).toBeGreaterThan(1);
     }), { numRuns: 20 });
   });
@@ -117,6 +119,76 @@ describe('the lunge (D64) and the fan (D117)', () => {
     const boss = g.enemies[0];
     expect(boss.x).toBe(g.ARENA_W / 2);
     expect(boss.y - boss.r).toBeGreaterThan(g.cameraY + g.ARENA_H);
+  });
+});
+
+describe('the shell and the stages (D156)', () => {
+  // One lunger alone, posed in a phase, the diver out of its way.
+  const posed = (name, phase) => {
+    const g = loadGame();
+    g.immortal = true;
+    g.reset(1);
+    g.queuePaused = true;
+    g.spawnBatch({ enemies: [[name, 1]] });
+    const e = g.enemies[0];
+    Object.assign(e, { x: g.ARENA_W / 2, y: g.cameraY + 200, phase, phaseTime: 0, aimX: 0, aimY: 1 });
+    return [g, e];
+  };
+
+  it('shrugs off a shot, a cut and a dash while shut, and takes each whole while it rests', () => {
+    for (const name of ['boss', 'mini-boss']) {
+      for (const phase of ['chase', 'windup', 'charge', 'rest']) {
+        const [g, e] = posed(name, phase);
+        g.player.dashDamage = 2;
+        const open = phase === 'rest';
+        expect([name, phase, g.wound(e)]).toEqual([name, phase, open]);
+        expect(e.hp).toBe(e.maxHp - (open ? g.player.damage : 0));
+        g.wound(e, g.player.dashDamage);
+        expect(e.hp).toBe(e.maxHp - (open ? g.player.damage + 2 : 0));
+      }
+    }
+  });
+
+  it('fights each stage\'s round from its top, the stage set by the hp it has lost', () => {
+    const [g, e] = posed('boss', 'chase');
+    const R = e.stages.rounds;
+    R.forEach((round, s) => {
+      e.hp = e.maxHp * (1 - (s + 0.5) / R.length);
+      const seen = [];
+      for (let k = 0; k < 2 * round.length; k++) {
+        seen.push(g.nextAttack(e));
+        e.turn += 1;
+      }
+      expect([s, seen]).toEqual([s, [...round, ...round]]);
+    });
+    expect(R.map(r => r.includes('fan'))).toEqual([false, true, true]);
+  });
+
+  it('stops a wound at its stage\'s floor and shuts at once, so each stage needs an opening of its own', () => {
+    const [g, e] = posed('boss', 'rest');
+    const n = e.stages.rounds.length;
+    g.wound(e, e.maxHp);
+    expect([e.hp, g.stageOf(e), e.phase]).toEqual([e.maxHp * (1 - 1 / n), 1, 'chase']);
+    expect(g.wound(e)).toBe(false);
+    e.phase = 'rest';
+    g.wound(e, e.maxHp);
+    expect(g.stageOf(e)).toBe(n - 1);
+    e.phase = 'rest';
+    g.wound(e, e.maxHp);
+    expect(e.gone).toBe(true);
+  });
+
+  it('sounds a new stage as a wound crosses into it, and only then', () => {
+    const [g, e] = posed('boss', 'rest');
+    const played = [];
+    g.sound = n => played.push(n);
+    const cross = e.maxHp * (1 - 1 / e.stages.rounds.length);
+    e.hp = cross + g.player.damage / 2;
+    g.wound(e);
+    expect(played).toEqual(['lead']);
+    e.phase = 'rest';
+    g.wound(e);
+    expect(played).toEqual(['lead']);
   });
 });
 
@@ -252,6 +324,7 @@ describe('escorts (D116)', () => {
   it('plays on identically from a save taken while the boss winds up a fan (D117)', () => {
     const a = fight(3, 'boss');
     const boss = () => a.enemies.find(e => e.lead);
+    boss().hp = boss().maxHp / 2;                // its second stage fans (D156)
     for (let i = 0; i < ticks(a, 60) && !(boss().phase === 'windup' && boss().attack === 'fan'); i++) {
       a.update(a.FIXED_DT);
     }

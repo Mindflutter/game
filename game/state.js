@@ -401,9 +401,14 @@ function migrate(s) {
     // new pay or a ceiling. The old rungs, as v12 had them:
     const old = { untouched: [1, 3, 6, 10], beeline: [1, 3, 5, 8], flurry: [6, 12, 20, 30],
                   swift: [480, 360, 300, 240] };
+    // The nine-rung ladders as v13 had them, before the shorter dive (D158).
+    const nine = { untouched: { rungs: [10, 14, 18, 21, 24, 26, 28, 29, 30] },
+                   beeline: { rungs: [3, 5, 7, 9, 11, 13, 15, 18, 21] },
+                   flurry: { rungs: [7, 9, 11, 13, 15, 18, 21, 25, 30] },
+                   swift: { rungs: [225, 200, 180, 165, 150, 140, 130, 120, 110], within: true } };
     delete s.challenges.footwork;
     for (const [name, k] of Object.entries(s.challenges)) {
-      const c = CHALLENGES.find(x => x.name === name), v = old[name][k - 1];
+      const c = nine[name], v = old[name][k - 1];
       const now = c.rungs.filter(r => (c.within ? v <= r : v >= r)).length;
       if (now) s.challenges[name] = now; else delete s.challenges[name];
     }

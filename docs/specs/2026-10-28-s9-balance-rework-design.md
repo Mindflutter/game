@@ -52,6 +52,11 @@ decision disagree, the decision wins.
 ## Open, asked one at a time
 
 In this order, Claude's. Each answer goes into this spec before it is built.
+Built on Igor's "complete everything according to what you learned from the
+book": 1 as D156 (the boss's shell and stages); 2 as D157 (the archer counts
+twice what the bot measures), Igor's meaning being that the archer was
+already the hardest; 3 as D158 (prices in reach, ladders a dive long). Points
+from opt-in difficulty and the dash are not built.
 
 1. **The boss.** "you just stand near and fire until its huge hp numbers are
    gone". The reading: a sponge raises only enemy power, long boss fights
@@ -81,6 +86,29 @@ one boss for three layers, a boost extending every boost (`ideas.md`).
    checks of what changed (D132 (test runs)). `npm run balance` and the career
    probe need Igor's word.
 3. Then question 1, the boss.
+
+## The new target, 2026-10-28
+
+Igor, after playing the S9 build: "the whole game should be finishable in
+10-15 min and all upgrades need to be purchased … not suggesting to dump all
+and start from scratch". Asked which clock: **from New game to the win**,
+deaths included; then "maybe 20 min ok, 10 is too short really" — about
+15–20. Claude's derivation, not built yet:
+
+- A mid-to-high skilled career (D160 (a layer-1 dive buys a thing every
+  two)) of about four or five dives: deaths in layers 1 and 2, then the win.
+- **The winning dive about 7 minutes**, layers about 1.5 / 2.5 / 3: the
+  threat curve flatter, the deepest batch about 45s, not 90s.
+- **Every tier bought by the win**: gem flow several times Igor's 75 a
+  dive — fish paying more rather than prices near zero.
+- **Points**, "earned god knows how": Igor took **depth + challenges** —
+  every gate cleared for the first time ever pays a point (18 in the game),
+  and the challenge ladders stay on top as extra points for skill, with fewer
+  rungs each. Changes `foundations.md` → the glossary's **attribute** and
+  **point** ("earned by in-dive challenges") and the genre contract, 4.
+- Changes `foundations.md` → Pillars: "Fast-paced" (to about 90s) and "Dives
+  are a session" (2–5 min a layer), and D137 (batches grow from seconds to a
+  minute and a half)'s curve.
 
 ## Checked against `foundations.md` and `plan.md`
 
