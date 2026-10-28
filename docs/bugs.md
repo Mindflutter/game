@@ -13,4 +13,16 @@ fix (`code.md` → Verification).
 
 ## Open
 
-Nothing open.
+### A key stays held after it is let go
+Igor, 2026-10-28, in the first Sonar play-test: "something broke, i can't
+swim up, probably browser window touched, and somehow affected", then "now
+i can, it fixed somehow". The recording (`logs/sonar/2026-10-28-suit-on/1/`)
+shows `KeyS` held from 119.9s to 148.8s with no key-up ever arriving, and no
+blur and no Cmd at the moment it stuck: W against a held S cancels out. It
+let go at 148.8s, when Cmd and the window losing focus cleared every key, as
+`platform/input.js` does on purpose.
+
+What should happen: a key let go is let go. Why the browser sent no key-up is
+not found yet. A guess to check: a trackpad gesture or a click on the
+window's own frame, which can swallow a key-up without taking the focus. The
+next time, Sonar has it on record.
