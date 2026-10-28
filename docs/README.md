@@ -27,6 +27,7 @@ A change to them belongs in the same commit as the code it describes.
 | The diver's numbers at the start | `entities/diver.md` |
 | Why something was decided, and what was rejected | `decisions.md` |
 | Anything undecided: open questions, parked and declined ideas | `ideas.md` |
+| What the books on economy and balance say, applied to Abyss | `reading.md` |
 | Something broken in the game — a real issue, not an idea | `bugs.md` |
 | What shipped, and when | `git log`; before 2026-10-22, `changelog.md` |
 | Igor's description of the whole game | `high level design.md` |
@@ -41,7 +42,7 @@ which of them still hold.
 
 **Living docs** say what is true now, and are edited in place: `foundations.md`,
 `plan.md`, `working.md`, `code.md`, `roadmap.md`, `design.md`, `entities/`,
-`ideas.md` and `bugs.md`. They carry no
+`ideas.md`, `reading.md` and `bugs.md`. They carry no
 history — no "used to", no struck-through items, no answered questions. When
 something stops being true it is rewritten or deleted, and what happened goes
 to a log.
