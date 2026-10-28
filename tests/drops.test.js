@@ -129,11 +129,11 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
     g.reset(1);
     g.plan[0] = { layer: 0, batch: { enemies: [['drifter', g.WAVE_MIN]] } };   // one wave
     g.immortal = true;
-    g.tally.untouched = g.CHALLENGES[0].rungs[0] - 1;
+    g.tally.untouched = g.CHALLENGES.find(c => c.name === 'untouched').rungs[0] - 1;
     ride(g);
     for (const e of [...g.enemies]) g.killEnemy(e);
     g.update(g.FIXED_DT);                          // the clear: the challenge pays
-    expect(g.notice).toMatch(/^untouched/);
+    expect(g.notice).toMatch(/untouched/);
     const paid = g.notice;
     expect(paid).not.toBe('');
     for (let i = 0, n = ticks(g, 3); i < n && !held(g); i++) g.update(g.FIXED_DT);

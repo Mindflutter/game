@@ -35,7 +35,7 @@ describe('every batch at the kit it is first met with', () => {
     const at = (l, i) => ordinary.filter(r => r.l === l && r.i === i).reduce((a, r, _, rs) => a + r.time / rs.length, 0);
     const last = ordinary.at(-1);
     expect(at(0, 0)).toBeLessThan(15);
-    expect(at(last.l, last.i)).toBeGreaterThan(60);
+    expect(at(last.l, last.i)).toBeGreaterThan(30);   // about 45s (D162)
   });
 
   it('costs more hearts deeper, overall rather than every step (D79)', () => {

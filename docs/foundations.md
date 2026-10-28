@@ -40,7 +40,7 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 | **home** | The surface screen: shop, the layers unlocked and the depth reached, launch. Every dive starts at the top — there is no layer select (D66). | "base", "backyard" are flavour, not terms |
 | **attribute** | A **body** stat raised a **step** at a time by spending attribute points at home, each step a point dearer than the last (D109). Points are earned by in-dive challenges, never bought, and are capped at the source — the ladders hold a finite set of rungs (D36, D109). | not "gear", not a "mod"; a step is not a "tier" |
 | **point** | An attribute point (D36): paid by a rung of a challenge, once, ever, and spent at `home` to raise an attribute (D109). Never bought, and it buys no gear. | not currency, not a "mod point" (declined) |
-| **challenge** | An in-dive objective that pays attribute points, rewarding **mastery not quotas** — "clear a batch undamaged", never "kill 50 darters" (D36). Each is a ladder of **rungs**, harder up it, each a streak or one dive's feat, earned in any layer (D109). Igor's word (D110). | not an "achievement"; never "micro-task" or "task", its old names |
+| **challenge** | An in-dive objective that pays attribute points, rewarding **mastery not quotas** — "clear a batch undamaged", never "kill 50 darters" (D36). Each is a ladder of **rungs**, harder up it, each a streak or one dive's feat, earned in any layer (D109). Igor's word (D110). One pays progress, not mastery: `depth`, a rung for each gate a dive first clears (D161). | not an "achievement"; never "micro-task" or "task", its old names |
 | **entity** | Any concept the gameplay's mechanics use: a fish, a weapon, a piece of equipment, a mod, a boost, an attribute, a challenge, a layer, a batch, and the diver, though there is one. Every one keeps the diversity rule (D124). Igor's word. | not an **object** |
 | **object** | A thing on screen at once: a fish, a shot, a gem, a boost on the floor, a spark. The budget of 500 counts objects (D43). | not an "entity" |
 
@@ -131,7 +131,7 @@ count changes here, in one line, and nowhere else.
 | mod | 5–7 | D93 |
 | boost | 4–6 | D93 |
 | attribute | 3 | D93 |
-| challenge | 5 | D109 |
+| challenge | 6 | D109, D161 |
 | batch | not set | — |
 
 "Igor's draft" is `high level design.md` → its definition of done.
@@ -151,8 +151,8 @@ so that "is this balanced" has an answer.
 
 | Pillar | Stated as | Target |
 |---|---|---|
-| Fast-paced | Time to clear one batch: short at the start of a dive, growing slowly to its deepest (D137 (batches grow from seconds to a minute and a half)) | 10–15s, to about 90s |
-| Dives are a session, not a sitting | Time to complete one layer; a dive runs until death but can be put down at any point and resumed (D70); a full dive about 10 minutes (D155 (six gates a layer)) | 2–5 min |
+| Fast-paced | Time to clear one batch: short at the start of a dive, growing slowly to its deepest (D137 (batches grow from seconds to a minute and a half), D162 (the whole game in fifteen to twenty minutes)) | 10–15s, to about 45s |
+| Dives are a session, not a sitting | Time to complete one layer; a dive runs until death but can be put down at any point and resumed (D70); a full dive about 8 minutes, the whole game from New game to the win about 15–20, every upgrade bought (D155 (six gates a layer), D162 (the whole game in fifteen to twenty minutes)) | 2–4 min |
 | Nothing unbeatable | Every batch is clearable at the gear level expected when it is first met | must hold |
 | Nothing trivial | No batch past the opening is cleared without the player moving — the opening, its harmless fish, may be (D130 (fish are revealed a type at a time)) | must hold |
 | Relaxed only at home | `home` has no timer, no threat, no fail state | must hold |

@@ -565,11 +565,26 @@ balanced for alpha".
   in 42s, gameplay felt really good". Igor: "the whole game should be
   finishable in 10-15 min and all upgrades need to be purchased … points are
   still earned god knows how, so think about mechanics". Open:
-  - "still feel that threat grows fast. but maybe false feeling".
+  - "still feel that threat grows fast. but maybe false feeling" — flatter
+    since D162 (the whole game in fifteen to twenty minutes); to replay.
   - The boss's stage cue: "sound and burst didnt make a difference" — a
     stronger tell, or drop it. And "can hit unshielded max 3 times".
   - "boss burst hitting screen edge, think thru".
   - The archer's counts past layer 1, not yet played.
+  - **The first logged career** (D163 (the career log)), 2026-10-28, the
+    D161 (depth pays points) and D162 (the whole game in fifteen to twenty
+    minutes) build: won on dive 4, 17 minutes by the wall clock (14 diving,
+    3 at `home`) — on target. But:
+    - **The winning dive was a stroll**: 5.5 minutes, no heart lost — all 11
+      hits taken by the guard. Suit 3 (210 gems, a guard of 3 a batch) took
+      18 of dive 3's 22 hits too. The strongest buy by far; the last dive
+      should be the hardest, not the easiest. A fix to propose: the guard
+      refilled per layer, not per batch, or fewer per tier.
+    - **Not everything bought**: no Harpoon, Gun 1 of 3, Knife and Weights 2
+      of 3; 9 of 12 steps (26 points earned, 30 to buy all); 1039 gems
+      unspent at the end. The skill ladders paid 8 of 20 — depth paid 18.
+    - Killed by archers (dive 1) and puffers (dives 2, 3: most killing
+      hits). Gates 10–40s; the bosses 11–39s with his kit.
   **Home**: S9.
 
 - **Studioigor's skills.** Igor, 2026-10-28: "check this repo and other

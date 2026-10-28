@@ -19,8 +19,8 @@ readout see them like any other stat, and everything adds, nothing multiplies
 | name | desc | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Gun | quick, light shots | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
-| Harpoon | slow, heavy shots that go through fish | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 800 | fireRate 1, damage 5, pierce 3 |
-| Knife | swings close, cutting several fish at once | 3 | 2 | 60 | — | 18 | 6 | 40 | 500 | fireRate 3.75, damage 3, range 72 |
+| Harpoon | slow, heavy shots that go through fish | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 90 | fireRate 1, damage 5, pierce 3 |
+| Knife | swings close, cutting several fish at once | 3 | 2 | 60 | — | 18 | 6 | 40 | 60 | fireRate 3.75, damage 3, range 72 |
 <!-- /generated -->
 
 Each weapon's tiers, in the order they are bought:
@@ -28,15 +28,15 @@ Each weapon's tiers, in the order they are bought:
 <!-- generated: weapons:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
-| Gun | 1 | 150 | fireRate +0.5 |
-| Gun | 2 | 400 | fireRate +0.5 |
-| Gun | 3 | 900 | fireRate +0.5 |
-| Harpoon | 1 | 300 | damage +1 |
-| Harpoon | 2 | 650 | fireRate +0.2 |
-| Harpoon | 3 | 1300 | pierce +1 |
-| Knife | 1 | 250 | range +12 |
-| Knife | 2 | 600 | damage +1 |
-| Knife | 3 | 1200 | fireRate +0.75 |
+| Gun | 1 | 20 | fireRate +0.5 |
+| Gun | 2 | 50 | fireRate +0.5 |
+| Gun | 3 | 100 | fireRate +0.5 |
+| Harpoon | 1 | 35 | damage +1 |
+| Harpoon | 2 | 75 | fireRate +0.2 |
+| Harpoon | 3 | 145 | pierce +1 |
+| Knife | 1 | 30 | range +12 |
+| Knife | 2 | 65 | damage +1 |
+| Knife | 3 | 135 | fireRate +0.75 |
 <!-- /generated -->
 
 The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,
@@ -85,9 +85,8 @@ so they can miss and sail on into the dark until `range` runs out.
 Its tiers add fire rate: the one stat that helps against every enemy, where
 damage would be wasted on the one-hit fish that make up most batches (D75 (the
 gun's tiers, dash reach, a clean batch)). The prices and the step are Claude's
-picks, the prices flattened so a top tier costs about six times its first
-(D158 (prices in reach, ladders a dive long)); the base numbers predate the
-tiers.
+picks, set so every weapon and tier is bought by the win (D162 (the whole
+game in fifteen to twenty minutes)); the base numbers predate the tiers.
 
 ## Harpoon
 

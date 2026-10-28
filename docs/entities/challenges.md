@@ -12,20 +12,20 @@ earn any rung (D109 (micro-tasks are ladders; steps cost more as they rise),
 D110 (challenges)). A **point** is what a rung pays, spent at `home` to raise an
 **attribute** — a body stat — a **step** at a time. How a challenge is judged
 and where its count shows is `design.md` → What persists. The ladders' shape
-is D109's; their nine rungs of a point each, D152 (nine rungs a ladder, a
-point a rung); a streak's top, what one dive holds, D158 (prices in reach,
-ladders a dive long).
+is D109's; a point a rung, D152 (nine rungs a ladder, a point a rung); four
+rungs a ladder and `depth` beside them, D161 (depth pays points).
 
 ## Roster
 
 <!-- generated: challenges -->
 | name | judged | within | rungs | the first asks | the top asks |
 |---|---|---|---|---|---|
-| untouched | clear | — | 3 / 5 / 7 / 9 / 11 / 13 / 15 / 17 / 18 | clear 3 batches in a row without a hit | clear 18 batches in a row without a hit |
-| bowling | — | — | 3 / 4 / 5 / 6 / 7 / 8 / 9 / 10 / 12 | dash through 3 fish at once | dash through 12 fish at once |
-| beeline | clear | — | 1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 | kill the glowing fish first, 1 batches in a row | kill the glowing fish first, 9 batches in a row |
-| flurry | kill | — | 5 / 7 / 9 / 11 / 13 / 16 / 20 / 25 / 30 | kill 5 fish within 2 seconds | kill 30 fish within 2 seconds |
-| swift | end | true | 135 / 120 / 110 / 100 / 90 / 85 / 80 / 75 / 65 | clear a layer within 2:15 | clear a layer within 1:05 |
+| depth | clear | — | 1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 / 10 / 11 / 12 / 13 / 14 / 15 / 16 / 17 / 18 | clear 1 gate in one dive | clear 18 gates in one dive |
+| untouched | clear | — | 3 / 6 / 9 / 12 | clear 3 batches in a row without a hit | clear 12 batches in a row without a hit |
+| bowling | — | — | 3 / 5 / 7 / 9 | dash through 3 fish at once | dash through 9 fish at once |
+| beeline | clear | — | 1 / 3 / 5 / 7 | kill the glowing fish first, 1 batches in a row | kill the glowing fish first, 7 batches in a row |
+| flurry | kill | — | 5 / 9 / 14 / 20 | kill 5 fish within 2 seconds | kill 20 fish within 2 seconds |
+| swift | end | true | 150 / 120 / 100 / 80 | clear a layer within 2:30 | clear a layer within 1:20 |
 <!-- /generated -->
 
 <!-- generated: attributes -->
@@ -37,14 +37,10 @@ ladders a dive long).
 <!-- /generated -->
 
 **judged** is which of `clear`, `kill`, `dash` and `end` the record has.
-Every number is Claude's pick. The rungs were sized on the career bot (D50
-(the bot measures its own policy)) over fifteen fresh dives of ten-gate
-layers, `untouched`, `beeline` and `swift` rescaled to six-gate layers, and
-the lowest rungs eased for Igor's layer-1 dives (D160 (a layer-1 dive buys
-a thing every two)): about two rungs on a first dive, about three a dive to the fifth, and
-the bot's best, which stops growing by about the eighth, at about half of
-every ladder — the rest is for a player's skill (D152 (nine rungs a ladder, a
-point a rung)). Dash reach and Strength are the dash's, which waits on its
+Every number is Claude's pick, set on Igor's play (D160 (a layer-1 dive buys
+a thing every two)): the first rung of each skill ladder is met in a dive
+that dies in layer 1, the fourth asks for a good dive (D161 (depth pays
+points)). Dash reach and Strength are the dash's, which waits on its
 discussion (`ideas.md`).
 
 ## Fields
@@ -52,7 +48,7 @@ discussion (`ideas.md`).
 | Field | Unit | Meaning |
 |---|---|---|
 | `name` | — | The key: the save keeps the rungs earned by it (`challenges`), so renaming one forgets them. The status bar, the lists and the notice show it. |
-| `rungs` | a count, or s with `within` | The thresholds, easiest first. A dive's count must reach rung k to pay it — or, `within`, come in at or under it. Nine each. |
+| `rungs` | a count, or s with `within` | The thresholds, easiest first. A dive's count must reach rung k to pay it — or, `within`, come in at or under it. Four each; `depth`'s one a gate. |
 | `ask` | — | A rung in one sentence, given its threshold: what the lists and the notice say. |
 | `clear` | — | Its presence judges it as each batch of the plan clears: it takes the streak so far and returns it after this batch — one on, or back to 0. |
 | `kill` | — | Its presence judges it after each kill in a batch of the plan: it returns the count. |
@@ -62,11 +58,17 @@ discussion (`ideas.md`).
 | `max` | steps | An attribute's: the steps it stops at. |
 | `apply` | — | An attribute's: what one step adds to the diver, applied once for each step raised as a dive starts. |
 
+## depth
+
+Progress: gates cleared in one dive, a rung each, so the deepest dive yet
+pays a point for every gate past the last best (D161 (depth pays points)).
+The one ladder that pays for going on rather than for skill: the steady
+points, the other five the extra.
+
 ## untouched
 
 Evasion: batches cleared in a row without a hit. The suit's guard taking one
 still counts as a hit (D100 (equipment: the Mask, the Suit and the Weights)).
-The top is thirty, a whole dive without a hit.
 
 ## bowling
 
@@ -96,16 +98,17 @@ a crowd.
 
 Speed: a layer cleared within a time, from its first batch arriving to its
 boss's clear. A dive begun partway into a layer is not judged on it. Its rungs
-are seconds: the bot clears its first layer 1 in about 3:40 and, fully
-kitted, in about 2:10.
+are seconds: the bot fights layer 1 through in about 2:07 (D162 (the whole
+game in fifteen to twenty minutes)).
 
 ## Points
 
-- **Every rung pays one point**: a ladder pays 9, the five 45 (D152 (nine
-  rungs a ladder, a point a rung)).
-- **Step n of an attribute costs n points**: 1, 2, 3, 4, 5, and an attribute
-  stops at five. The first step of each is cheap and depth is dear. The 45
-  points buy every step of all three — everything bought.
+- **Every rung pays one point** (D152 (nine rungs a ladder, a point a
+  rung)): `depth` 18, the five others 4 each — 38 in all (D161 (depth pays
+  points)).
+- **Step n of an attribute costs n points**: 1, 2, 3, 4, and an attribute
+  stops at four. Every step of all three costs 30: more than depth pays, so
+  buying everything by the win takes some challenges too.
 - Points held are what the rungs paid less what the steps cost — derived, never
   stored. Only challenges pay them: money cannot buy them, and they buy no gear
   (D36 (attributes)). A piece of gear may require steps of an attribute

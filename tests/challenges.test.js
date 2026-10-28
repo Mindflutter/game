@@ -96,14 +96,15 @@ describe('challenge ladders (D109, D110)', () => {
     const g = fighting(0);
     g.tally = { untouched: rung(g, 'untouched', 1) - 1, beeline: rung(g, 'beeline', 1) - 1 };
     clearAndWait(g, 0.1);                        // all at once: clean, and the glowing fish first
-    expect(g.notice).toBe('untouched, beeline \u2014 2 points');
+    expect(g.notice).toBe('depth, untouched, beeline \u2014 3 points');   // and the first gate (D161)
   });
 
-  it('tops each streak at what one dive holds: every gate unhit, every glowing fish first (D158)', () => {
+  it('tops each streak within what one dive holds (D158, D161)', () => {
     const g = loadGame();
     g.reset(1);
     const top = name => g.CHALLENGES.find(c => c.name === name).rungs.at(-1);
-    expect([top('untouched'), top('beeline')]).toEqual([g.plan.length, g.plan.filter(e => !e.escorts).length]);
+    expect(top('untouched')).toBeLessThanOrEqual(g.plan.length);
+    expect(top('beeline')).toBeLessThanOrEqual(g.plan.filter(e => !e.escorts).length);
   });
 
   it('times a layer from its first batch to its boss, and pays every rung it beats', () => {
@@ -150,12 +151,12 @@ describe('challenge ladders (D109, D110)', () => {
 
   it('lists every challenge on the Attributes and pause screens: its badges, then its next rung', () => {
     const g = loadGame();
-    g.meta.challenges = { untouched: 9, beeline: 1 };
+    g.meta.challenges = { untouched: 4, beeline: 1 };
     const lines = g.challengeLines();
     expect(lines).toHaveLength(g.CHALLENGES.length + 1);
-    expect(lines).toContain('untouched   ●●●●●●●●●   every rung earned');
-    expect(lines).toContain('beeline   ●○○○○○○○○   kill the glowing fish first, ' + rung(g, 'beeline', 2) + ' batches in a row');
-    expect(lines).toContain('bowling   ○○○○○○○○○   dash through ' + rung(g, 'bowling', 1) + ' fish at once');
+    expect(lines).toContain('untouched   ●●●●   every rung earned');
+    expect(lines).toContain('beeline   ●○○○   kill the glowing fish first, ' + rung(g, 'beeline', 2) + ' batches in a row');
+    expect(lines).toContain('bowling   ○○○○   dash through ' + rung(g, 'bowling', 1) + ' fish at once');
     expect([g.MENUS.attributes.challenges, g.MENUS.paused.challenges]).toEqual([true, true]);
   });
 
@@ -172,5 +173,32 @@ describe('challenge ladders (D109, D110)', () => {
     expect([g.meta.owned, g.meta.carried]).toEqual([['Gun', 'Harpoon'], 'Harpoon']);
     g.reset(1);
     expect(g.weaponName).toBe('Harpoon');
+  });
+});
+
+describe('depth pays points (D161)', () => {
+  const diving = s => { const g = loadGame(); g.reset(s); g.immortal = true; return g; };
+  const depth = g => g.meta.challenges.depth || 0;
+
+  it('pays a point for each gate a dive first clears deeper than any before, once ever', () => {
+    const g = diving(1);
+    ride(g);
+    clearAndWait(g, 0.1);
+    expect(depth(g)).toBe(1);
+    expect(g.notice).toContain('depth');
+    g.reset(2);
+    g.immortal = true;
+    ride(g);
+    clearAndWait(g, 0.1);                        // the same gate again pays nothing
+    expect(depth(g)).toBe(1);
+  });
+
+  it('has a rung at every gate, and needs the challenges too to buy every step', () => {
+    const g = diving(1);
+    const all = g.ATTRIBUTES.reduce((a, x) => a + x.max * (x.max + 1) / 2, 0);
+    const rungs = g.CHALLENGES.map(c => c.rungs.length);
+    expect(g.CHALLENGES.find(c => c.name === 'depth').rungs).toEqual(g.plan.map((_, k) => k + 1));
+    expect(all).toBeGreaterThan(rungs[0]);
+    expect(all).toBeLessThanOrEqual(rungs.reduce((a, n) => a + n, 0));
   });
 });

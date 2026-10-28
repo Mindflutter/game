@@ -50,7 +50,10 @@ working doc.
 - **A change that needs Igor's play** comes with its full `?debug=` link —
   `http://localhost:63342/game/index.html?debug=…`, the IDE's server — and
   exactly what to check, how, and whether one gate or a whole layer or dive
-  must be played. Igor, 2026-10-28.
+  must be played. Igor, 2026-10-28. A career or a whole dive is played
+  logged — `npm run play`, then `http://localhost:8765/` — and Claude reads
+  `logs/career.json`
+  rather than asking Igor to note it (D163 (the career log)).
 - **Past alpha, content is open** (Igor, 2026-10-28): new abilities, fish
   and mods are welcome if they keep the rules and the balance — each idea
   goes to `ideas.md` and is named in the reply; anything found obsolete or

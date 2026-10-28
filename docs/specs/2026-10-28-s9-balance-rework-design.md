@@ -93,7 +93,8 @@ Igor, after playing the S9 build: "the whole game should be finishable in
 10-15 min and all upgrades need to be purchased … not suggesting to dump all
 and start from scratch". Asked which clock: **from New game to the win**,
 deaths included; then "maybe 20 min ok, 10 is too short really" — about
-15–20. Claude's derivation, not built yet:
+15–20. Claude's derivation, built as D161 (depth pays points) and D162 (the
+whole game in fifteen to twenty minutes):
 
 - A mid-to-high skilled career (D160 (a layer-1 dive buys a thing every
   two)) of about four or five dives: deaths in layers 1 and 2, then the win.

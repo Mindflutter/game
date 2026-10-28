@@ -65,7 +65,7 @@ describe('threat (D126)', () => {
       return own.reduce((a, x) => a + fish(x.s), 0) / own.length;
     });
     expect(g.LAYERS.map((_, l) => g.gatesIn(l))).toEqual(g.LAYERS.map(() => 6));
-    expect(fish(ordinary.at(-1).s)).toBeGreaterThan(5 * fish(ordinary[0].s));
+    expect(fish(ordinary.at(-1).s)).toBeGreaterThan(3 * fish(ordinary[0].s));   // the flatter curve (D162)
     expect(byLayer.every((n, l) => n > (byLayer[l - 1] ?? 0))).toBe(true);
   });
 
@@ -387,7 +387,7 @@ describe('the content stage\'s counts (D93)', () => {
     for (const x of [...g.WEAPONS, ...g.EQUIPMENT]) within(x.name + ' tiers', x.tiers.length, 3, 4);
     within('mods', g.MODS.length, 5, 7);
     within('boosts', g.BOOSTS.length, 4, 6);     // Rush and 3-5 new
-    within('challenges', g.CHALLENGES.length, 5, 5);   // five since D109
+    within('challenges', g.CHALLENGES.length, 6, 6);   // five since D109, depth since D161
     within('attributes', g.ATTRIBUTES.length, 3, 3);
   });
 });
@@ -446,7 +446,7 @@ describe('the status bar', () => {
   it('shows the weapon and its tier, the guard left, the mods held and the challenges\' counts', () => {
     const g = loadGame();
     g.meta.gear.Gun = 2;
-    g.meta.challenges = { swift: 9, untouched: 1 };
+    g.meta.challenges = { swift: 4, untouched: 1 };
     g.reset(1);
     g.tally.untouched = 2;
     g.player.guard = 2;
@@ -457,7 +457,7 @@ describe('the status bar', () => {
     expect(t).toContain('GUARD 1/2');
     expect(t).toContain('Impact ×2');
     const next = name => g.CHALLENGES.find(c => c.name === name).rungs[name === 'untouched' ? 1 : 0];
-    expect(t).toContain('swift ●●●●●●●●●');       // every rung earned (D109)
+    expect(t).toContain('swift ●●●●');       // every rung earned (D109)
     expect(t).toContain('untouched 2/' + next('untouched'));   // the streak against its next rung
     expect(t).toContain('flurry 0/' + next('flurry'));
   });

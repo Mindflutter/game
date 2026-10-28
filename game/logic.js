@@ -177,7 +177,7 @@ function fanAims(e) {
 }
 
 function enemyShot(e, ux, uy, S) {
-  bullets.push({ evil: true, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
+  bullets.push({ evil: true, by: e.name, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
                  speed: S.speed, travelled: 0, maxTravel: S.travel, damage: S.damage, knock: S.knock });
 }
 
@@ -223,7 +223,7 @@ function fuseStep(e, ux, uy, d, dt) {
     e.phase = 'chase';
     e.phaseTime = 0;
     const bx = player.x - e.x, by = player.y - e.y, reach = F.blast + player.r;
-    if (bx * bx + by * by < reach * reach) hurtPlayer(F, ux, uy);
+    if (bx * bx + by * by < reach * reach) hurtPlayer(F, ux, uy, e.name);
     burst(e.x, e.y, e.color, e.glow, 24, 260, 0.45);
     sound('pop');
   }
@@ -237,7 +237,7 @@ function biteStep(e, ux, uy, d, dt) {
   if (e.phase === 'jaws') {
     ease(e, 0, 0, e.ramp, dt);
     if (e.phaseTime >= B.windup) {
-      if (d - e.r - player.r <= B.reach) hurtPlayer(B, ux, uy);
+      if (d - e.r - player.r <= B.reach) hurtPlayer(B, ux, uy, e.name);
       e.phase = 'rest';
       e.phaseTime = 0;
     }
@@ -277,12 +277,14 @@ function weaveStep(e, ux, uy, d, dt) {
 // so a shot that did not is not spent. The guard counts hits, not damage, and
 // takes the knock too (D122): `hit` is the attack's record, `ux, uy` the way
 // it knocks. Immortal, a hit lands and shows but takes no HP (D121).
-function hurtPlayer(hit, ux, uy) {
+function hurtPlayer(hit, ux, uy, by) {
   if (player.hurt > 0 || player.safe > 0) return false;
   player.hurt = player.iframes;
   batchHit = true;
+  note('hits', by);
   if (guardLeft > 0) {
     guardLeft -= 1;
+    note('guarded');
     burst(player.x, player.y, '#fff1b8', '#ffc400', 14, 170, 0.4);
     sound('guard');
     return true;
@@ -335,8 +337,8 @@ function separate(dt) {
     if (dd >= min * min) continue;
     const d = Math.sqrt(dd), nx = d ? dx / d : 1, ny = d ? dy / d : 0;
     const overlap = d ? Math.min(min - d, most) : most, we = weight(e);
-    if (e.touch) hurtPlayer(e.touch, nx, ny);
-    else if (e.phase === 'charge') hurtPlayer(e.lunge, nx, ny);
+    if (e.touch) hurtPlayer(e.touch, nx, ny, e.name);
+    else if (e.phase === 'charge') hurtPlayer(e.lunge, nx, ny, e.name);
     const share = overlap * we / (we + player.r * player.r);
     const [x, y] = viewClamp({ x: player.x + nx * share, y: player.y + ny * share, r: player.r });
     const moved = (x - player.x) * nx + (y - player.y) * ny;
@@ -546,6 +548,7 @@ function startBoost(name) {
   }
   banner = b.name + ' \u2014 ' + ((player.swing && b.swingDesc) || b.desc);
   bannerTime = NOTICE_TIME;
+  note('boosts', name);
   sound('boost');
 }
 
@@ -576,6 +579,7 @@ function clearBatch() {
   // A scenario's hand-placed fish (D37) have no entry: they pay Mend, and
   // nothing that belongs to a layer.
   const entry = plan[batchIndex - 1];
+  if (entry) closeGate(story.at(-1));
   sound(entry?.end ? 'layer' : 'clear');
   if (entry) {
     // Challenges first, so the layer end's heal cannot read as a clean batch (D109).
@@ -626,6 +630,22 @@ function openModOffer() {
 function takeMod(mod) {
   mod.apply(player);
   modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
+  note('mods', mod.name);
+}
+
+// Onto the last gate met, until the next arrives: a name to its list, or one
+// to its count (D163). Its mod flies in after the clear, and is still its.
+function note(key, name) {
+  const r = story.at(-1);
+  if (!r) return;
+  if (name) (r[key] = r[key] || []).push(name);
+  else r[key] = (r[key] || 0) + 1;
+}
+
+// Its time, HP and kills, as it clears or the dive ends on it (D163).
+function closeGate(r) {
+  if (!r || 'secs' in r) return;
+  Object.assign(r, { secs: Math.round((elapsed - r.at) * 10) / 10, hp: player.hp, kills: kills - r.kills });
 }
 
 // Every rung `v` now meets pays, once ever, a point each (D109, D152).
@@ -667,13 +687,16 @@ function pickWeapon(w) {
     if (!canOwn(w)) return;
     meta.bank -= w.cost;
     meta.owned.push(w.name);
+    meta.bought.push(w.name + ' (' + w.cost + ' gems)');
   }
   meta.carried = w.name;
+  meta.bought.push('carry ' + w.name);
   saveNow();
 }
 
 function buy(g) {
   if (!canBuy(g)) return;
+  meta.bought.push(g.name + ' ' + ((meta.gear[g.name] || 0) + 1) + ' (' + nextCost(g) + ' gems)');
   meta.bank -= nextCost(g);
   meta.gear[g.name] = (meta.gear[g.name] || 0) + 1;
   saveNow();
@@ -683,6 +706,7 @@ function raise(a) {
   const step = (meta.raised[a.name] || 0) + 1;
   if (step > a.max || points() < step) return;
   meta.raised[a.name] = step;
+  meta.bought.push(a.name + ' ' + step + ' (' + step + (step === 1 ? ' point)' : ' points)'));
   saveNow();
 }
 
@@ -690,6 +714,17 @@ function raise(a) {
 function endDive() {
   meta.bank += currency;
   meta.deepest = Math.max(meta.deepest, cameraY);
+  // The career, a dive a line, for reading a play-test back (D163).
+  if (!debugSetup) {
+    const open = story.at(-1);
+    if (open && !('secs' in open)) { closeGate(open); open.died = screen === 'dead'; }
+    meta.log.push({ end: screen === 'dead' || screen === 'won' ? screen : 'quit', seed: currentSeed,
+                    time: Math.round(elapsed), gates: tally.depth || 0, gems: currency, kills,
+                    mods: { ...modCounts }, carried: meta.carried, gear: { ...meta.gear },
+                    raised: { ...meta.raised }, challenges: { ...meta.challenges }, points: points(),
+                    bank: meta.bank, maxHp: player.maxHp, bought: meta.bought, story });
+    meta.bought = [];
+  }
   diveLive = false;
   menuIndex = END_MENU.items.indexOf(GO_HOME);   // the end screen opens on Go home (D90)
   saveNow();
@@ -1140,7 +1175,11 @@ function step(dt) {
       // Reaching the bottom is the win (D62, D68), banked at the end of this tick.
       if (batchIndex >= plan.length) screen = 'won';
       else {
-        spawnBatch(plan[batchIndex].batch, plan[batchIndex].escorts);
+        const { layer, batch, escorts } = plan[batchIndex];
+        story.push({ gate: batchIndex + 1, layer: layer + 1,
+                     fish: [...batch.enemies, ...(escorts?.enemies || [])].map(([n, c, gr = 1]) => n + ' ' + c + (gr > 1 ? '@' + gr : '')).join(', '),
+                     at: Math.round(elapsed * 10) / 10, kills, hits: [] });
+        spawnBatch(batch, escorts);
         light();
         batchHit = false;
         guardLeft = player.guard;
@@ -1192,6 +1231,7 @@ function step(dt) {
     // Invulnerable for the dash plus a moment after, so finishing it inside
     // something you flew through doesn't cost an hp.
     player.safe = DASH_TIME + DASH_GRACE;
+    note('dashes');
     sound('dash');
   }
   // A dash is committed (D56): with the keys steering it, letting go would stop
@@ -1245,6 +1285,7 @@ function step(dt) {
       maxTravel: player.range,
     });
     player.fireTimer = 1 / player.fireRate;
+    note('shots');
     sound('shoot');
   }
 
@@ -1334,7 +1375,7 @@ function step(dt) {
     if (b.gone || !b.evil) continue;
     const reach = player.r + b.r;
     if (segDistanceSq(player.x, player.y, b.x - b.vx * dt, b.y - b.vy * dt, b.x, b.y) < reach * reach &&
-        hurtPlayer(b, b.vx / b.speed, b.vy / b.speed)) b.gone = true;
+        hurtPlayer(b, b.vx / b.speed, b.vy / b.speed, b.by)) b.gone = true;
   }
 
   // --- gems fly to you, from anywhere, and never fade (D35, D78) ---

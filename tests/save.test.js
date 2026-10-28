@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks } from './harness.js';
+import { loadGame, ticks, die, ride, clearAndWait } from './harness.js';
 import { botInput } from './bot.js';
 
 const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
@@ -344,9 +344,10 @@ describe('the save (D70)', () => {
     const g = loadGame();
     expect(g.loadSave(JSON.stringify(v12))).toBe('');
     // Ten clean, three glowing first, thirty within two seconds, a layer
-    // within four minutes -- slower than the slowest rung now.
-    expect(g.meta.challenges).toEqual({ untouched: 1, beeline: 1, flurry: 9 });
-    expect([g.meta.raised, g.points()]).toEqual([{}, 11]);
+    // within four minutes -- slower than the slowest rung now; flurry then
+    // cut to its four rungs (D161).
+    expect(g.meta.challenges).toEqual({ untouched: 1, beeline: 1, flurry: 4 });
+    expect([g.meta.raised, g.points()]).toEqual([{}, 6]);
     expect([g.tally, g.player.dashHits]).toEqual([{ untouched: 2 }, 0]);
   });
 
@@ -355,7 +356,7 @@ describe('the save (D70)', () => {
     const text = readFileSync(new URL('./fixtures/save-v13.json', import.meta.url), 'utf8');
     const g = loadGame();
     expect(g.loadSave(text)).toBe('');
-    expect([g.meta.challenges, g.meta.raised, g.player.dashHits]).toEqual([{ untouched: 2, bowling: 1 }, { Heart: 1 }, 2]);
+    expect([g.meta.challenges, g.meta.raised, g.player.dashHits]).toEqual([{ untouched: 2, bowling: 1 }, {}, 2]);
     g.screen = g.resumeTo;
     g.immortal = true;
     for (let i = 0; i < 3 / g.FIXED_DT; i++) g.update(g.FIXED_DT);
@@ -455,5 +456,63 @@ describe('settings, kept with the save (D113)', () => {
     const h = loadGame();
     expect(h.loadSave(JSON.stringify(save))).toBe('');
     expect([h.meta.bank, h.muted, h.volume, h.shakeLevel, h.showFps]).toEqual([50, false, 0.6, 2, false]);
+  });
+});
+
+describe('a v13 save under depth points (D161)', () => {
+  it('cuts each ladder to its rungs now, counts a cleared layer\'s gates as depth, and gives the steps back', () => {
+    const g = loadGame();
+    const v13 = { version: 13, bank: 40, gear: {}, raised: { Heart: 5, Strength: 2 }, deepest: 0, cleared: 1, seen: [],
+                  challenges: { untouched: 9, flurry: 3 }, owned: ['Gun'], carried: 'Gun' };
+    expect(g.loadSave(JSON.stringify(v13))).toBe('');
+    expect([g.meta.challenges, g.meta.raised, g.meta.bank])
+      .toEqual([{ untouched: 4, flurry: 3, depth: 6 }, {}, 40]);
+  });
+});
+
+describe('the career log (D163)', () => {
+  it('keeps a record of every dive in the save, and New game starts it again', () => {
+    const g = loadGame();
+    g.reset(7);
+    die(g);
+    g.update(g.FIXED_DT);                        // the end screen banks the dive
+    expect(g.meta.log).toHaveLength(1);
+    expect(g.meta.log[0]).toMatchObject({ end: 'dead', seed: 7, gates: 0, carried: 'Gun' });
+    g.newGame();
+    expect(g.meta.log).toEqual([]);
+  });
+
+  it('lists what home bought before each dive, in order, with its price', () => {
+    const g = loadGame();
+    g.meta.bank = 1000;
+    g.meta.challenges = { depth: 3 };
+    const gun = g.WEAPONS[0], knife = g.WEAPONS.find(w => w.name === 'Knife'), heart = g.ATTRIBUTES.find(a => a.name === 'Heart');
+    g.buy(gun);
+    g.raise(heart);
+    g.pickWeapon(knife);
+    g.reset(7);
+    die(g);
+    g.update(g.FIXED_DT);
+    expect(g.meta.log[0].bought).toEqual(['Gun 1 (' + gun.tiers[0].cost + ' gems)', 'Heart 1 (1 point)',
+                                         'Knife (' + knife.cost + ' gems)', 'carry Knife']);
+    expect(g.meta.bought).toEqual([]);
+  });
+
+  it('tells each gate the dive met: its fish, time, kills, and what hit the diver', () => {
+    const g = loadGame();
+    g.reset(7);
+    g.immortal = true;
+    ride(g);
+    clearAndWait(g, 0.1);
+    ride(g);
+    g.immortal = false;
+    die(g);
+    g.update(g.FIXED_DT);
+    const [first, second] = g.meta.log[0].story;
+    expect(first).toMatchObject({ gate: 1, layer: 1, hits: [] });
+    expect(first.fish).toMatch(/^\w+ \d+/);
+    expect([first.kills > 0, first.secs >= 0, first.hp > 0]).toEqual([true, true, true]);
+    expect(second).toMatchObject({ gate: 2, died: true });
+    expect(second.hits.at(-1)).toBe('eel');
   });
 });

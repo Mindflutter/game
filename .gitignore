@@ -1,5 +1,6 @@
 .idea/
 *.png
 node_modules/
+logs/
 *.pdf
 .DS_Store

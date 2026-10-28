@@ -5294,3 +5294,66 @@ so the economy is set on his play, not the bot's.
   play to confirm.
 - **Supersedes** those prices and rungs of D158 (prices in reach, ladders a
   dive long).
+
+## D161 — Depth pays points · 2026-10-28
+
+Igor: "points are still earned god knows how, so think about mechanics", and
+the target "the whole game … finishable in [about 15–20] min and all upgrades
+need to be purchased". Asked, he took depth and the challenges together.
+
+- **`depth`, a sixth challenge**: a rung for each gate one dive clears, 18,
+  each paid once ever — so the deepest dive yet pays a point a gate past the
+  last best. One dive's feat, so the ladder machinery holds it whole.
+- **The five others four rungs each**, their bottoms where a dive that dies
+  in layer 1 meets them: 38 points in the game.
+- **Attributes stop at four steps**, step n still n points: 30 for all.
+  More than depth pays, so the win with everything bought takes challenges.
+- **Save v14**: a ladder keeps the rungs that still fit, a cleared layer
+  counts its six gates as depth, every step comes back as points.
+- **Supersedes** D152 (nine rungs a ladder, a point a rung)'s nine rungs
+  and D158 (prices in reach, ladders a dive long)'s streak tops of a whole
+  dive.
+
+## D162 — The whole game in fifteen to twenty minutes · 2026-10-28
+
+Igor: "at this point the whole game should be finishable in 10-15 min and all
+upgrades need to be purchased", then "maybe 20 min ok, 10 is too short
+really"; asked, the clock runs from New game to the win, deaths included.
+"not suggesting to dump all and start from scratch".
+
+- **A flatter dive**: `THREAT_RISE` 1.8 to 1.6, the pools refitted. The
+  deepest ordinary batch about 43s on the bot, not 65; the fights about
+  127 / 183 / 233s, a dive of about 9 minutes, and no batch lost on the bot.
+  The bosses keep their numbers — Igor found them "hard but good".
+- **Every weapon, tier and piece bought by the win**: all gear 1380 gems,
+  down from 12150 — more than one dive's 1181, within what dying once in
+  each layer banks (1844), which `tests/home.test.js` holds. Fish keep their
+  values: each gem is a pickup on screen.
+- **The pillars**: a batch grows to about 45s, a layer 2–4 minutes, a dive
+  about 8, the game 15–20. The bar on the deepest batch moves from over 60s
+  to over 30s.
+- **Supersedes** D137 (batches grow from seconds to a minute and a half)'s
+  ninety seconds, D158 (prices in reach, ladders a dive long)'s and D160 (a
+  layer-1 dive buys a thing every two)'s prices.
+
+## D163 — The career log · 2026-10-28
+
+Igor, asked to note each dive of a play-test: "maybe dump a debug file every
+dive? … then i can do playthrough, you analyze", and "keep it in project dir,
+easier to cleanup".
+
+- **The save keeps a line a dive** (`meta.log`), written as the dive ends:
+  how it ended, seed, time, gates cleared, gems, kills, mods, and the gear,
+  steps, rungs, points and bank it ended with. New game empties it. Igor:
+  "also record maximum data possible" — so each line carries the dive's
+  `story` too, a record a gate from its arrival to the next: fish, time, the
+  hits and what dealt them, the guard, HP, kills, shots, dashes, boosts, mod;
+  and `bought`, what `home` bought and carried before it, in order, priced.
+- **`npm run play` serves the game at `http://localhost:8765/`** and writes
+  what it sends back to `logs/career.json`, ignored by git: one command, one
+  link, and no way to play there unlogged. A browser cannot write into the
+  project on its own; the game still runs from a double-click without it.
+  Igor: "make our lives simpler always".
+- No clock in the save: a replayed dive must save the same bytes (D70 (the
+  dive, as data)). The server stamps each dive's arrival in
+  `logs/clock.txt`, so the career's length counts `home` too.

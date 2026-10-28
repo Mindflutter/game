@@ -14,6 +14,16 @@ hard constraint, not a convenience.
 WASD or arrows to move, mouse to aim, **hold left mouse to shoot**, `Space` to
 dash, `Esc` for the menu.
 
+**A logged play-test** (D163 (the career log)): `npm run play`, then
+`http://localhost:8765/`. Every dive's end writes the career so far, a dive a
+line, to `logs/career.json` (ignored by git): seed, how it ended, time, gates
+cleared, gems, kills, mods, the kit and points it ended with, what `home`
+bought before it, in order and with its price, and its story —
+every gate met, with its fish, arrival, time, hits and what dealt them, the
+guard, HP, kills, shots, dashes, boosts and mod. `logs/clock.txt` has the wall
+clock each dive came in at. Its save is its own — the browser keeps one per
+address.
+
 ## Run the tests
 
 Two suites, because they reach different things, and the balance checks beside them.

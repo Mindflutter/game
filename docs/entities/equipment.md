@@ -9,8 +9,9 @@ or four tiers.
 
 The tables mirror `EQUIPMENT` in `game/content.js`, and `npm test` fails when
 the two disagree. Every number is Claude's pick (D100 (equipment: the Mask, the
-Suit and the Weights)), the Mask's step doubled to one you can see and the prices flattened (D158
-(prices in reach, ladders a dive long)).
+Suit and the Weights)), the Mask's step doubled to one you can see (D158
+(prices in reach, ladders a dive long)), and the prices set so every piece is
+bought by the win (D162 (the whole game in fifteen to twenty minutes)).
 
 ## Roster
 
@@ -27,15 +28,15 @@ Each piece's tiers, in the order they are bought:
 <!-- generated: equipment:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
-| Mask | 1 | 150 | range +30 |
-| Mask | 2 | 400 | range +30 |
-| Mask | 3 | 900 | range +30 |
-| Suit | 1 | 150 | guard +1 |
-| Suit | 2 | 550 | guard +1 |
-| Suit | 3 | 1200 | guard +1 |
-| Weights | 1 | 150 | damage +0.5 |
-| Weights | 2 | 500 | damage +0.5 |
-| Weights | 3 | 1100 | damage +0.5 |
+| Mask | 1 | 20 | range +30 |
+| Mask | 2 | 50 | range +30 |
+| Mask | 3 | 100 | range +30 |
+| Suit | 1 | 20 | guard +1 |
+| Suit | 2 | 60 | guard +1 |
+| Suit | 3 | 130 | guard +1 |
+| Weights | 1 | 20 | damage +0.5 |
+| Weights | 2 | 55 | damage +0.5 |
+| Weights | 3 | 120 | damage +0.5 |
 <!-- /generated -->
 
 **at top** is what every tier bought adds up to; **adds** is what one tier

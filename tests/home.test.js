@@ -46,7 +46,7 @@ describe('home: gear, points, challenges (D31, D36)', () => {
   it('pays a clean batch\'s rung, and spends its point on a step', () => {
     const g = loadGame();
     g.reset(1);
-    g.tally.untouched = g.CHALLENGES[0].rungs[0] - 1;
+    g.tally.untouched = g.CHALLENGES.find(c => c.name === 'untouched').rungs[0] - 1;
     ride(g);
     clearAndWait(g, 0.1);                        // the streak's first rung, untouched
     expect(g.meta.challenges.untouched).toBe(1);
@@ -689,5 +689,20 @@ describe('home shows the kit (D147)', () => {
         for (const c of g.modPreview({ apply }, 1, base)) if (c.stat !== 'hp') expect(shown).toContain(c.stat);
       }
     }
+  });
+});
+
+describe('the price of everything (D162)', () => {
+  it('costs more than one dive holds, and no more than three deaths bank, one in each layer', () => {
+    const g = loadGame();
+    g.reset(1);
+    const held = [0, 0, 0];
+    for (const p of g.plan) for (const b of [p.batch, p.escorts]) if (b)
+      for (const [n, c, gr = 1] of b.enemies) held[p.layer] += c * g.enemyType(n).value * g.GRADES[gr - 1].value;
+    const dive = held.reduce((a, n) => a + n, 0);
+    const deaths = held[0] + (held[0] + held[1]) + dive;
+    const all = [...g.WEAPONS, ...g.EQUIPMENT].reduce((a, x) => a + (x.cost || 0) + x.tiers.reduce((b, t) => b + t.cost, 0), 0);
+    expect(all).toBeGreaterThan(dive);
+    expect(all).toBeLessThanOrEqual(deaths);
   });
 });
