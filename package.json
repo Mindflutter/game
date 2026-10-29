@@ -11,7 +11,8 @@
     "measure": "node tests/measure.js",
     "docs": "node tests/doctables.js",
     "balance": "vitest run --config vitest.balance.config.js",
-    "play": "node tests/play.js"
+    "play": "node tests/play.js",
+    "sonar": "node tests/sonar.js"
   },
   "type": "module",
   "devDependencies": {

@@ -1,0 +1,7 @@
+{ "purpose": "How much of the last dive's stroll is the Suit's? Your winning kit, Suit 3 — first of a pair; suit-off is the same dive without it.",
+  "start": { "debug": "L1,G1,S2026,Knife2,Mask3,Suit3,Weights2,Dash_reach3,Heart3,Strength3" },
+  "limit": { "dives": 1 },
+  "play": "One whole dive, top to win or death, played as you would play your last dive. Don't press R. Then play 2026-10-28-suit-off.",
+  "measures": ["hits a gate, and how many the guard took", "HP after each gate; the lowest HP of the dive", "time a gate and a layer; the bosses' times",
+               "where the dive ends", "dashes and shots a gate: how much the guard lets you stand and swing",
+               "compared gate by gate with suit-off: same seed, same batches"] }

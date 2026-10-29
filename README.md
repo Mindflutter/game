@@ -24,6 +24,13 @@ guard, HP, kills, shots, dashes, boosts and mod. `logs/clock.txt` has the wall
 clock each dive came in at. Its save is its own — the browser keeps one per
 address.
 
+**A Sonar play-test** (D164 (Sonar)): Claude writes one and gives its link;
+you run `npm run play` and open `http://localhost:8765/?sonar=<id>`. The
+corner tag says it is recording and when its limit is met. Every play is
+recorded whole — reload or play it again and that is a play of its own — and
+your save is never touched. Claude reads it with `npm run sonar <id>`; a
+moment of it is drawn at `…/logs/sonar/<id>/<play>/build/index.html?replay&at=<tick>`.
+
 ## Run the tests
 
 Two suites, because they reach different things, and the balance checks beside them.
@@ -138,7 +145,8 @@ game/          the simulation. Zero browser API. This is what survives a port.
 platform/      input, audio, canvas. Rewritten on a port.
 main.js        frame loop and boot
 checks.js      the browser suite
-tests/         the Node suite
+tests/         the Node suite, the bot, the play server and Sonar's reader
+logs/          the career log and Sonar's plays, ignored by git but for each play-test's setup
 serve.py       local dev server: no caching, threaded
 docs/          design, decisions, plan, every enemy, mod, boost, weapon and piece
                of equipment -- start at foundations.md; docs/README.md

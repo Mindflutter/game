@@ -31,7 +31,9 @@ A change to them belongs in the same commit as the code it describes.
 | Something broken in the game — a real issue, not an idea | `bugs.md` |
 | What shipped, and when | `git log`; before 2026-10-22, `changelog.md` |
 | Igor's description of the whole game | `high level design.md` |
-| The open stage's design, and its check against `foundations.md` | `specs/`; a closed stage's, `git show` as `plan.md` → Closed stages gives it |
+| The open stages' designs, and their checks against `foundations.md` | `specs/`; a closed stage's, `git show` as `plan.md` → Closed stages gives it |
+| Setting up a play-test for Igor, and reading one back | the `sonar` skill (`.claude/skills/sonar/`) |
+| Every play-test: its hypothesis, whether it was played, what it showed | `playtests.md` |
 
 `decisions.md` is long. Find an entry by its heading — `grep '^## D'
 docs/decisions.md` lists them all — and read that one. D1–D26 describe the
@@ -42,14 +44,14 @@ which of them still hold.
 
 **Living docs** say what is true now, and are edited in place: `foundations.md`,
 `plan.md`, `working.md`, `code.md`, `roadmap.md`, `design.md`, `entities/`,
-`ideas.md`, `reading.md` and `bugs.md`. They carry no
+`ideas.md`, `reading.md`, `bugs.md` and `playtests.md`. They carry no
 history — no "used to", no struck-through items, no answered questions. When
 something stops being true it is rewritten or deleted, and what happened goes
 to a log.
 
 **Logs** record what happened, and are only ever appended to: `decisions.md`,
 `changelog.md` — frozen on 2026-10-22, `git log` says what shipped since —
-and `specs/`, which holds only the open stage's spec: a closed stage's is
+and `specs/`, which holds only the open stages' specs: a closed stage's is
 removed, and git keeps it (D134 (lean docs)). To reverse a decision, add one
 that supersedes it.
 

@@ -821,12 +821,13 @@ function setupFish(s) {
   return ENEMY_TYPES.filter(e => s.counts[e.name] > 0).map(e => [e.name, s.counts[e.name]]);
 }
 
-// It reseeds the randomness to draw the plan: harmless, since every dive
-// reseeds it.
+// It reseeds the randomness to draw the plan, then puts it back: the renderer
+// calls it, and a draw that changed the state would not replay (D164).
 function gateLine() {
-  const s = debugSetup, fish = setupFish(s);
+  const s = debugSetup, fish = setupFish(s), was = [rngState, currentSeed];
   seedRng(s.seed);
   const drawn = drawPlan();
+  [rngState, currentSeed] = was;
   // A type once, its graded fish counted beside it: a graded batch holds a
   // type at up to three grades.
   const list = batch => Object.entries(Object.groupBy(batch, ([name]) => name)).map(([name, es]) => {

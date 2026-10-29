@@ -17,6 +17,12 @@ Nothing waits on a decision.
 
 ## Parked — agreed direction, deliberately not now
 
+### A UI for Sonar
+Igor, 2026-10-28, as Sonar (D164 (Sonar)) was built: "if you can make a ui
+for this, even greater. not required now." A page beside the game to list
+the play-tests, read a report and scrub a play's replay tick by tick. What
+exists meanwhile: `report.md` and its replay links, one moment each.
+
 ### Trade-off mods
 **Still parked, and now cheaper.** D31's `scope`/`apply(player, weapon)` shape
 makes a trade-off mod the same one-line record it always was.
@@ -580,6 +586,11 @@ balanced for alpha".
       18 of dive 3's 22 hits too. The strongest buy by far; the last dive
       should be the hardest, not the easiest. A fix to propose: the guard
       refilled per layer, not per batch, or fewer per tier.
+    - **The Suit pair** (`playtests.md`): the Suit is not what makes the
+      last dive easy — it lets a careless play off; the kit does, the Knife
+      most, and the boss's lunge (5, then 6 HP) is its one danger. Open:
+      what makes a late dive hard, and the lunge's place among the other
+      threats.
     - **Not everything bought**: no Harpoon, Gun 1 of 3, Knife and Weights 2
       of 3; 9 of 12 steps (26 points earned, 30 to buy all); 1039 gems
       unspent at the end. The skill ladders paid 8 of 20 — depth paid 18.
@@ -600,6 +611,12 @@ balanced for alpha".
   `npm run measure bars` could print. **Home**: open, Igor's pick.
 
 ## Suggested but not yet discussed
+
+- **Retire the career log once Sonar has carried a career.** Claude,
+  2026-10-28, in S10 (Sonar): a play-test from a save records everything the
+  career log does (D163 (the career log)) and more, so `meta.log`, the story
+  in the save and `logs/career.json` would go, and with them a save that
+  grows a line a dive.
 
 - **A rank only play can earn.** Claude, 2026-10-01, in the mods rework, when
   Igor asked whether rank "could be something more": a meter that climbs with

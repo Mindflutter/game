@@ -842,6 +842,13 @@ function draw() {
     else if (screen === 'paused' || screen === 'goHome') { dimArena(); drawMenu(MENUS[screen]); }
     else if (screen === 'dead' || screen === 'won') drawEnd();
   }
+  // A play-test says it is recording, and when its limit is met (S10).
+  if (sonarTag) {
+    ctx.font = '13px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#7fd4c8';
+    ctx.fillText(sonarTag, ARENA_W - 12, ARENA_H - 12);
+  }
 
   ctx.restore();
 }

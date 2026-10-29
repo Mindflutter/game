@@ -9,9 +9,10 @@ export const SEAM = ['sound', 'keys', 'justPressed', 'tapped', 'moveCursor', 'ai
 // No TICK constant: every caller has a loaded game in hand, and a copy of
 // FIXED_DT is a number that can disagree with itself. Read `g.FIXED_DT`.
 
-export function loadGame() {
-  const src = ['game/content.js', 'game/state.js', 'game/logic.js']
-    .map(f => readFileSync(new URL('../' + f, import.meta.url), 'utf8'))
+// `root` and `extra` for Sonar's replay: a copied build, and platform/sonar.js.
+export function loadGame(root = new URL('../', import.meta.url), extra = []) {
+  const src = ['game/content.js', 'game/state.js', 'game/logic.js', ...extra]
+    .map(f => readFileSync(new URL(f, root), 'utf8'))
     .join('\n;\n');
 
   const keys = new Set();
@@ -46,7 +47,7 @@ export function loadGame() {
                  'notice', 'resumeTo', 'weaponName', 'guardLeft', 'batchHit',
                  'tally', 'killTimes', 'firstKillAt', 'glowAt', 'layerStart',
                  'debugSetup', 'menuIndex', 'muted', 'volume', 'showFps',
-                 'fireArmed', 'gemPop', 'offerTimer', 'optionIndex', 'returnTo', 'rngState'];
+                 'fireArmed', 'gemPop', 'offerTimer', 'optionIndex', 'returnTo', 'rngState', 'story'];
   // Constants are `const`, so they get a getter only.
   const CONSTS = ['ARENA_W', 'ARENA_H', 'PLAYER_START', 'ENEMY_TYPES', 'GRADES', 'MODS', 'MINI_BOSS', 'BOSS', 'STAT_NAMES',
                   'SCENARIOS', 'LAYERS', 'GATE_PAUSE', 'FIXED_DT', 'MAX_FRAME_DT',
@@ -67,6 +68,15 @@ export function loadGame() {
 
   vm.runInContext(src + '\n;\n' + bridge, ctx, { filename: 'game-bundle.js' });
   return ctx;
+}
+
+// Sonar's replay (D164): the game from `root`, a play's copied build, and
+// this tree's replay beside it, so every recording reads alike; and the
+// platform's real menu cursor, since a recorded play goes through the menus.
+export function loadReplay(root) {
+  const g = loadGame(root, [new URL('../platform/sonar.js', import.meta.url).href]);
+  g.moveCursor = (i, n) => g.tapped(g.UP) ? (i + n - 1) % n : g.tapped(g.DOWN) ? (i + 1) % n : i;
+  return g;
 }
 
 // ---------- shared by the test files ----------

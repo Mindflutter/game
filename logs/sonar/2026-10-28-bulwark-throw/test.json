@@ -1,0 +1,15 @@
+{
+  "purpose": "Does a bulwark's bite throw the diver into the darters — another hit within a second?",
+  "start": {
+    "debug": "L1,G5,S1008,Knife0,darter8,bulwark3,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+  },
+  "limit": {
+    "gates": 1
+  },
+  "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+  "measures": [
+    "hits within a second after each bulwark hit",
+    "where the diver lands",
+    "time"
+  ]
+}

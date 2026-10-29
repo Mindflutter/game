@@ -1,0 +1,15 @@
+{
+  "purpose": "Are grade-3 archers behind drifters the Knife's hardest ordinary batch, hit while closing in?",
+  "start": {
+    "debug": "L3,G1,S1003,Grade3,Knife2,drifter6,archer8,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+  },
+  "limit": {
+    "gates": 1
+  },
+  "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+  "measures": [
+    "hits by archer and by drifter",
+    "distance to the nearest archer at each shot taken",
+    "time"
+  ]
+}

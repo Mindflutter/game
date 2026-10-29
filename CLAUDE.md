@@ -18,5 +18,6 @@ index)).
 |---|---|
 | Writing, changing or checking code | `docs/code.md` |
 | Adding or changing a piece of content | the `abyss-content` skill |
+| A change needs Igor's play, or a play-test was played | the `sonar` skill |
 | Running the game, the suites, a scenario, the debug mode | `README.md` |
 | Anything else | `docs/README.md`, the map of every doc |

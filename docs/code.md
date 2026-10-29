@@ -85,6 +85,8 @@ the rule stands unqualified.
 - `?debug` is the same idea for Igor's hands (D102): a setup screen for the
   place, the fish and the kit, muted until M, never touching the save. An
   issue that carries its `?debug=<code>` URL replays exactly, seed and all.
+- Sonar (D164 (Sonar)) is how Igor's play comes back: a play-test replays
+  his input on the build he played, so any moment can be read or drawn.
 - **Run the checks of what changed**, not the whole suites — the test files
   the change touches, and its new checks, seen failing first. The full runs —
   `npm test`, `index.html?test`, `npm run balance` — happen on Igor's word,

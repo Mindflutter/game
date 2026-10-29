@@ -1,0 +1,7 @@
+{ "purpose": "How much of the last dive's stroll is the Suit's? The same dive and kit as suit-on, with no Suit at all.",
+  "start": { "debug": "L1,G1,S2026,Knife2,Mask3,Weights2,Dash_reach3,Heart3,Strength3" },
+  "limit": { "dives": 1 },
+  "play": "Played after suit-on. The same whole dive, same batches, top to win or death. Don't press R.",
+  "measures": ["hits a gate, and HP after each — every hit now costs a heart", "the lowest HP of the dive, and where it ends",
+               "time a gate and a layer; the bosses' times", "dashes and shots a gate, against suit-on's",
+               "compared gate by gate with suit-on: same seed, same batches"] }

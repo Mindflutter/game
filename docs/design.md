@@ -36,6 +36,7 @@ game/       content.js  every tuning number + all content tables
 platform/   input.js    keyboard + mouse → keys / justPressed / aim
             audio.js    WebAudio synthesis
             render.js   canvas, view scaling, the camera, every draw function
+            sonar.js    the play-test recorder, and the replay it is read by
 main.js                 frame loop, boot, the save's storage
                         ── Rewritten on the port.
 
@@ -348,6 +349,20 @@ replays it exactly. `debugDive()` plays it through a stand-in `meta`, so
 `reset()` applies the setup as a dive from `home` would. Every tip is worked
 out by `modPreview()` on the diver a dive starts with, so a tip cannot state a
 number the game does not deliver.
+
+## Sonar
+
+A play-test (D164 (Sonar)) records what `game/` reads from the player — a
+line a frame that ran a tick: its tick count, wall-clock ms, and the aim,
+held keys and presses when they changed — plus every seed `newSeed()` draws,
+which `platform/sonar.js` wraps. `sonarReplay()` feeds the lines back to
+`update()` a tick at a time, the presses to a frame's first tick, as live, and
+compares a probe each second. `game/` is untouched, and the recorder sets no
+game state: a limit met only draws the corner tag, or the play would not
+replay — and no draw may either, so `gateLine()` puts back the randomness it
+reseeds. `npm run play` copies the build beside each play, and the game
+replays on that copy — in Node for `npm run sonar`, in the browser for
+`?replay&at=<tick>`.
 
 ## Performance, measured
 

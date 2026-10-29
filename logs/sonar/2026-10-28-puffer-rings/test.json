@@ -1,0 +1,15 @@
+{
+  "purpose": "Do puffers hurt through overlapping rings rather than one unread ring?",
+  "start": {
+    "debug": "L2,G1,S1002,Knife0,darter4,puffer5,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+  },
+  "limit": {
+    "gates": 1
+  },
+  "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Watch the puffers' rings.",
+  "measures": [
+    "hits by puffer",
+    "puffers swelling at each hit",
+    "time"
+  ]
+}

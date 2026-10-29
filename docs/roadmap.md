@@ -28,8 +28,9 @@ and the whole game in about 15–20 minutes, everything bought (D162 (the whole
 game in fifteen to twenty minutes)), and the career log (D163 (the career
 log)). Igor's first logged career is read (`ideas.md` → The economy and the
 fights, reworked in S9): on time, but the Suit makes the last dive a stroll.
-Next: **Sonar**, the play-test system (`specs/2026-10-28-sonar-brief.md`),
-its own session on Igor's word; then the Suit, the unbought gear, the stood
+**Sonar**, the play-test system, is built as S10 (Sonar) (D164 (Sonar));
+its first pair, the Suit's, is read, and short play-tests wait their turn in
+`playtests.md`. Next: the Suit, the unbought gear, the stood
 bars of layer 1 (Health), and points from opt-in difficulty.
 The dash is held still — Igor: "leave dash for now, discussions needed".
 

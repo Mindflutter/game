@@ -5357,3 +5357,35 @@ easier to cleanup".
 - No clock in the save: a replayed dive must save the same bytes (D70 (the
   dive, as data)). The server stamps each dive's arrival in
   `logs/clock.txt`, so the career's length counts `home` too.
+
+## D164 — Sonar, the play-test system · 2026-10-28
+
+Igor, after the first logged career: "develop a real-player debug system that
+would boost the game development in terms of rapid real player playthrough
+data analysis", its requirements in `specs/2026-10-28-sonar-brief.md`, and
+"its own stage": S10 (Sonar), opened beside S9 (the balance rework). The
+design is `specs/2026-10-28-sonar-design.md`.
+
+- **A play is recorded as its input** — the seam's `keys`, `justPressed` and
+  `aim` a frame at a time, and the seeds new dives draw — and **replayed** to
+  rebuild everything else: every moment, the state at any tick, a picture of
+  any of them. The game is deterministic (D53 (fixed timestep), D70 (a dive
+  can be saved at any point)), so nothing has to be chosen in advance — Igor:
+  "gather everything possible".
+- **A play-test** has a purpose, a start (a debug setup or a save, never
+  Igor's own), a limit that only draws, and measures; no pass or fail —
+  Igor: "it's a way to communicate real player experience to you". Each page
+  load is a play of its own, with the build copied beside it; one play-test
+  may be played many times — Igor: "the same play may not provide the same
+  output".
+- **One command** (Igor: "i only need clear cli commands"): `npm run play`,
+  then `?sonar=<id>`. `npm run sonar` reads one back.
+- **A skill, not an agent** (Igor: "your way"): `.claude/skills/sonar/` sets
+  a play-test up whenever a change needs Igor's play, and reads it back.
+- **Claude's picks**: the data in `logs/sonar/`, ignored by git; pictures
+  drawn on replay, never taken during play; a probe a second, sent every two.
+
+**Guarded by**: `tests/sonar.test.js` — a recorded play, through the menus
+and a debug setup, replays to the same game; presses in a frame with no tick;
+seeds drawn at random; a replay gone off its recording names the tick; the
+limit changes no game state.

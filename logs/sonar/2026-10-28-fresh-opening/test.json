@@ -1,0 +1,15 @@
+{
+  "purpose": "Does a fresh diver clear layer 1's first gates in 10–15s, and learn the mini-boss's lunge after its first?",
+  "start": {
+    "debug": "L1,G1,S1001,Gun0"
+  },
+  "limit": {
+    "gates": 3
+  },
+  "play": "Press Dive and play three gates — an ordinary one, the first mini-boss, the next — as a new player would. Watch the mini-boss's wind-up. Don't press R.",
+  "measures": [
+    "time a gate",
+    "hits and what dealt them",
+    "the mini-boss's lunges thrown and landed, in order"
+  ]
+}

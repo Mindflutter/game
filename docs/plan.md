@@ -16,6 +16,11 @@ gems and points) closed 2026-10-26 (D153 (the economy stage closes)). Its
 design is `specs/2026-10-28-s9-balance-rework-design.md`. Where things stand
 is `roadmap.md` → Next.
 
+S10 (Sonar), the play-test system, opened beside it the same day on Igor's
+word — "i'd say its own stage" (D164 (Sonar)). Its design is
+`specs/2026-10-28-sonar-design.md`; S9 (the balance rework)'s next play is
+read through it.
+
 ## Closed stages
 
 What each delivered, in one line. How each was closed — its definition of

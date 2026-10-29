@@ -47,13 +47,11 @@ working doc.
   tested in debug mode right away, generate and provide a debug link".
   *Missed: the drawn bump was handed over with a link to a fish one shot
   kills, which vanishes before any bump can draw.*
-- **A change that needs Igor's play** comes with its full `?debug=` link —
-  `http://localhost:63342/game/index.html?debug=…`, the IDE's server — and
-  exactly what to check, how, and whether one gate or a whole layer or dive
-  must be played. Igor, 2026-10-28. A career or a whole dive is played
-  logged — `npm run play`, then `http://localhost:8765/` — and Claude reads
-  `logs/career.json`
-  rather than asking Igor to note it (D163 (the career log)).
+- **A change that needs Igor's play** comes with a Sonar play-test (D164
+  (Sonar)), set up unasked by the `sonar` skill: its purpose, `npm run play`
+  and its `http://localhost:8765/?sonar=<id>` link, and exactly what to
+  check, how, and how much to play. Igor, 2026-10-28. Claude reads the play
+  back with `npm run sonar <id>` rather than asking Igor to note it.
 - **Past alpha, content is open** (Igor, 2026-10-28): new abilities, fish
   and mods are welcome if they keep the rules and the balance — each idea
   goes to `ideas.md` and is named in the reply; anything found obsolete or
@@ -62,6 +60,15 @@ working doc.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
 - Small steps: one playable change, then stop and explain what changed.
+- **Before work that higher effort would make clearly better, say so and
+  stop** — "switch to xhigh for this" — and start it only once Igor has.
+  Igor, 2026-10-28: "tell me to switch the effort before doing complex tasks,
+  every time that it could significantly benefit the work quality". It fits a
+  design pass whose rules interact (a stage's spec, a fix's shape checked
+  against `foundations.md`), a root cause that resists a first look, and a
+  review of a whole stage's diff; never running or reading a play-test,
+  a doc sweep or a one-file change. max only when xhigh has already
+  fallen short.
 
 ## Questions and uncertainty
 
