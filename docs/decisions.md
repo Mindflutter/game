@@ -5389,3 +5389,76 @@ design is `specs/2026-10-28-sonar-design.md`.
 and a debug setup, replays to the same game; presses in a frame with no tick;
 seeds drawn at random; a replay gone off its recording names the tick; the
 limit changes no game state.
+
+## D165 — Play-tests in one file, the logs disposable · 2026-10-30
+
+Igor, on the tree: "what's committed, doesnt need subfolders. logs dir can
+contain temporary items to be cleaned up etc. make it simple enough and easy
+to navigate. dont create stuff in repo unless required".
+
+- Every play-test's setup is a record of `tests/playtests.json`, under its id
+  — one committed file, beside the play server and the reader that use it.
+- `logs/` is ignored whole, and safe to delete: the career log, and each
+  play-test's plays and reading in `logs/<id>/`.
+- One local server, `npm run play`, which forbids caching; `serve.py`, from
+  D41 (seeded RNG, and a dev server that cannot cache), is gone: Node answers
+  every request on one loop, so a held connection blocks nothing either.
+
+**Supersedes** D164 (Sonar)'s pick of `logs/sonar/<id>/test.json`.
+
+**Guarded by**: `tests/sonar.test.js` — every play-test in the file has its
+purpose, start and play, and its debug setup names nothing the game ignores.
+
+## D166 — The puffer's burst stays; guide lines are no promise · 2026-10-30
+
+Two of Igor's deaths to the puffer came with his centre just outside the
+drawn ring — the burst reaches the diver's edge, 20px past it — and the ring
+starts faint (`playtests.md` → The threat unit by hand, at the unit).
+Proposed: a burst hurts only a centre inside the ring, and the ring drawn
+strong from its first tick. Igor: "no. and keep in mind that when real images
+come, rings and other guide lines might become invisible (not necessarily
+tho), and the player will have to adapt".
+
+**Decided, by Igor.** The burst and its ring stay as they are. A guide line —
+a ring, a wind-up's stroke — is a prototype's aid, not a promise of where an
+attack reaches: real art may drop it, and then the player reads the fish.
+A play lost at a guide line's edge is read as the player learning the fish,
+not as the game misleading; a fix is never sized to the line.
+
+## D167 — The puffer counts more, and gates carry fewer · 2026-10-30
+
+The puffer cost Igor far more than its threat says: both `unit-puffers`
+deaths, three of layer 2's four hits in `layer-jump`, and two puffer hits
+again once he knew the burst's reach — then with two or three swelling at
+once (`playtests.md` → The puffer, learned). The bot reads the burst's reach
+and turns in 0.1s. Offered a puffer that waits to swell while a neighbour
+swells, a heavier threat, or more play first, Igor: "i think B is the right
+choice here. taking turns would look unnatural". Then, told a heavier
+puffer shrinks its gates below layer 1's — against D137 (batches grow from
+seconds to a minute and a half)'s "more enemies" — he took the
+recommendation: fewer puffers, the gates' fish kept.
+
+- **The puffer's threat is 1.4 times the bot's measure**, [0.113, 0.183,
+  0.258]: Claude's pick, the most that keeps it under the eel, which a later
+  stretch brings — the rule that harder fish come later. The second threat
+  set from play, after D157 (the archer counts twice what the bot measures).
+- **Its pool batches keep about half their puffers**, and their other fish
+  grow, mix kept — in layer 3 all but the eels, which stay as they were — to
+  sit under the stretch and reach it as the fit requires; where half leaves
+  too little to reach — puffers with darters only — the fewest puffers that
+  keep the batch within half again its fish. Claude's picks. Puffers across
+  the pools 136 to 77; a layer-2 batch about 14 fish, up from 13, a layer-1
+  one 12. The eels were first grown with the rest, and `eels-deep` cost Igor
+  6 HP where `gun-deep` cost 4, three of four hits by eels
+  (`playtests.md` → Fewer puffers).
+- **Not refitted** by `npm run measure fit`, which drifts on every run
+  (`bugs.md`): every other batch is as it was.
+- **The bot cannot tell** (`npm run measure pillars`, ten careers): a layer's
+  hearts move by several between two runs of the same pools, as careers
+  reach it with other kits; layer 3's 25.5 hearts before, 22.9 after.
+- `tests/dive.test.js`'s status-bar check reads layer 3's first batch:
+  layer 2's no longer comes in waves.
+
+**Guarded by** `tests/dive.test.js` (pools under their stretch and able to
+reach it; each layer more fish than the last; harder types later) and the
+puffer's row in `entities/enemies.md` → Threat.

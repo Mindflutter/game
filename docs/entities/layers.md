@@ -82,21 +82,21 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
 <!-- generated: layers:2 -->
 | pool | target | fish | threat | at top |
 |---|---|---|---|---|
-| 1 | 0.46 | drifter 4, archer 4, puffer 2 | 0.31 | 0.73 |
-| 1 | 0.46 | darter 4, archer 2, bulwark 2, puffer 2 | 0.35 | 0.77 |
-| 1 | 0.46 | puffer 3, drifter 3, archer 3 | 0.36 | 0.82 |
-| 1 | 0.46 | drifter 8, darter 3, puffer 3, archer 3 | 0.39 | 1.01 |
-| 1 | 0.46 | puffer 4, darter 4 | 0.34 | 0.81 |
-| 2 | 0.79 | bulwark 2, archer 2, drifter 4, puffer 4 | 0.51 | 1.17 |
-| 2 | 0.79 | puffer 6, darter 5 | 0.51 | 1.19 |
-| 2 | 0.79 | archer 4, puffer 4, drifter 4 | 0.48 | 1.1 |
-| 2 | 0.79 | bulwark 2, puffer 5, drifter 5 | 0.53 | 1.25 |
-| 2 | 0.79 | drifter 6, archer 2, bulwark 2, puffer 4 | 0.52 | 1.22 |
-| 3 | 1.31 | bulwark 4, puffer 7, drifter 6 | 0.8 | 1.85 |
-| 3 | 1.31 | archer 3, darter 4, puffer 7, bulwark 3 | 0.84 | 1.85 |
-| 3 | 1.31 | puffer 9, archer 3, darter 4 | 0.85 | 1.92 |
-| 3 | 1.31 | bulwark 2, archer 3, darter 4, puffer 7 | 0.79 | 1.75 |
-| 3 | 1.31 | drifter 4, puffer 8, archer 4 | 0.8 | 1.83 |
+| 1 | 0.46 | drifter 5, archer 5, puffer 1 | 0.3 | 0.71 |
+| 1 | 0.46 | darter 5, archer 3, bulwark 3, puffer 1 | 0.39 | 0.84 |
+| 1 | 0.46 | puffer 2, drifter 3, archer 3 | 0.34 | 0.79 |
+| 1 | 0.46 | drifter 9, darter 3, puffer 2, archer 3 | 0.38 | 1 |
+| 1 | 0.46 | puffer 3, darter 5 | 0.36 | 0.86 |
+| 2 | 0.79 | bulwark 3, archer 3, drifter 5, puffer 2 | 0.51 | 1.14 |
+| 2 | 0.79 | puffer 4, darter 7 | 0.48 | 1.16 |
+| 2 | 0.79 | archer 7, puffer 2, drifter 7 | 0.49 | 1.15 |
+| 2 | 0.79 | bulwark 3, puffer 3, drifter 6 | 0.52 | 1.23 |
+| 2 | 0.79 | drifter 8, archer 3, bulwark 3, puffer 2 | 0.52 | 1.22 |
+| 3 | 1.31 | bulwark 6, puffer 4, drifter 8 | 0.8 | 1.85 |
+| 3 | 1.31 | archer 4, darter 5, puffer 4, bulwark 4 | 0.82 | 1.78 |
+| 3 | 1.31 | puffer 5, archer 6, darter 7 | 0.8 | 1.8 |
+| 3 | 1.31 | bulwark 3, archer 5, darter 6, puffer 4 | 0.81 | 1.76 |
+| 3 | 1.31 | drifter 9, puffer 4, archer 9 | 0.79 | 1.84 |
 <!-- /generated -->
 
 ## Layer 3
@@ -106,19 +106,19 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
 |---|---|---|---|---|
 | 1 | 2.15 | eel 10, drifter 10, archer 4 | 1.32 | 4.52 |
 | 1 | 2.15 | eel 9, archer 7, darter 8 | 1.3 | 4.19 |
-| 1 | 2.15 | eel 7, puffer 5, archer 5 | 1.37 | 4.04 |
-| 1 | 2.15 | puffer 6, drifter 7, eel 6, archer 3 | 1.3 | 3.88 |
+| 1 | 2.15 | eel 7, puffer 3, archer 7 | 1.38 | 4.02 |
+| 1 | 2.15 | puffer 3, drifter 15, eel 6, archer 7 | 1.32 | 4.01 |
 | 1 | 2.15 | eel 10, archer 7 | 1.38 | 4.45 |
 | 2 | 3.5 | bulwark 6, eel 14, archer 6 | 2.12 | 6.59 |
-| 2 | 3.5 | eel 13, puffer 8, darter 9 | 2.17 | 6.83 |
+| 2 | 3.5 | eel 13, puffer 5, darter 13 | 2.1 | 6.72 |
 | 2 | 3.5 | archer 8, eel 17 | 2.21 | 7.31 |
-| 2 | 3.5 | bulwark 4, puffer 9, eel 11 | 2.19 | 6.46 |
+| 2 | 3.5 | bulwark 8, puffer 5, eel 11 | 2.24 | 6.5 |
 | 2 | 3.5 | drifter 16, eel 16, archer 8 | 2.16 | 7.33 |
-| 3 | 5.64 | bulwark 8, eel 19, puffer 10 | 3.4 | 10.25 |
+| 3 | 5.64 | bulwark 13, eel 19, puffer 5 | 3.42 | 10.2 |
 | 3 | 5.64 | archer 10, eel 27, darter 6 | 3.44 | 11.55 |
-| 3 | 5.64 | puffer 13, eel 19, archer 8 | 3.49 | 10.5 |
+| 3 | 5.64 | puffer 7, eel 19, archer 14 | 3.43 | 10.3 |
 | 3 | 5.64 | bulwark 6, archer 8, eel 25 | 3.44 | 11.12 |
-| 3 | 5.64 | drifter 7, eel 23, puffer 10 | 3.46 | 11.22 |
+| 3 | 5.64 | drifter 22, eel 23, puffer 6 | 3.39 | 11.32 |
 <!-- /generated -->
 
 ## Adding one

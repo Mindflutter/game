@@ -26,7 +26,7 @@ would not do.
 
 ## The parts
 
-**A play-test** — `logs/sonar/<id>/test.json`, written by Claude:
+**A play-test** — a record of `tests/playtests.json`, under its id, written by Claude:
 
 ```json
 { "id": "2026-10-28-archer", "purpose": "...", "start": { "debug": "L1,G3,S4471,archer4" },
@@ -84,7 +84,7 @@ its copied build, checks the probes, and writes beside the recording:
 `npm run sonar <id> <seg> <tick>` prints the whole state at one tick, for a
 question about a moment. **A screenshot of any moment** is the replay drawn
 in the browser:
-`http://localhost:8765/logs/sonar/<id>/<seg>/build/index.html?replay&at=<tick>`
+`http://localhost:8765/logs/<id>/<seg>/build/index.html?replay&at=<tick>`
 — the copied build, so it draws what Igor saw. Igor can open one too.
 `npm run sonar` alone lists the play-tests.
 
@@ -100,9 +100,9 @@ a play.
 
 ## Claude's picks, open to Igor
 
-- The data in `logs/sonar/`, ignored by git like the career log — Igor:
-  "repo dir, structure it yourself". What a reading concludes goes to the
-  docs, where it is kept.
+- The plays in `logs/<id>/`, ignored by git like the career log and safe to
+  delete; the setups in one committed file (D165 (play-tests in one file)).
+  What a reading concludes goes to the docs, where it is kept.
 - Pictures are drawn on replay, never taken during play: free to the play,
   and any moment, after the fact.
 - A probe each second; segments sent every two seconds.

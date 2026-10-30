@@ -3,9 +3,9 @@
 Every Sonar play-test (D164 (Sonar)): what it supposes, whether it has been
 played, and what it showed. A living doc, and the one home of a play-test's
 outcome — what a reading concludes is written here in the response that
-reads it, so no session loses it. The raw plays stay in `logs/sonar/<id>/`,
-ignored by git, and replay any time with `npm run sonar <id>`; each
-play-test's setup, `test.json`, is kept in git beside them.
+reads it, so no session loses it. Every play-test's setup is a record in
+`tests/playtests.json`; the plays are in `logs/<id>/`, ignored by git and
+safe to delete, and replay any time with `npm run sonar <id>` while kept.
 
 Igor plays one with `npm run play`, then `http://localhost:8765/?sonar=<id>`.
 Short ones first: one or two gates, a minute or two, each a claim the play
@@ -27,7 +27,7 @@ picked up by then. The Suit is left out, so it hides nothing (the Suit pair).
 
 ## The roadmap
 
-Each `test.json` holds the exact code; below, `mid` and `late` stand for
+`tests/playtests.json` holds each exact code; below, `mid` and `late` stand for
 the kits' tokens.
 
 - [x] `2026-10-28-suit-on` + `2026-10-28-suit-off` — the Suit pair
@@ -47,11 +47,15 @@ quite easy". Four hits in twelve gates; fifteen lunges thrown by bosses and
 mini-bosses, none landed. Most hypotheses broke because nothing hurt enough
 to tell what hurts: the next play-tests have to find where it starts to.
 
-- [ ] `2026-10-29-knife-deep` + `gun-deep` + `harpoon-deep` — three
+- [x] `2026-10-29-knife-deep` + `gun-deep` + `harpoon-deep` — three
   weapons, one late batch
-- [ ] `2026-10-29-unit-puffers` — the threat unit by hand
-- [ ] `2026-10-29-dash-on-purpose` — the dash as a second weapon, used
-- [ ] `2026-10-29-layer-jump` — layer 1's end into layer 2
+- [x] `2026-10-29-unit-puffers` — the threat unit by hand, past the unit
+- [x] `2026-10-30-unit-puffers-12` — the threat unit by hand, at the unit
+- [x] `2026-10-29-dash-on-purpose` — the dash as a second weapon, used
+- [x] `2026-10-29-layer-jump` — layer 1's end into layer 2
+- [x] `2026-10-30-puffer-learned` + `2026-10-30-unit-puffers-12` again — the puffer, learned
+- [x] `2026-10-30-puffers-fewer` + `2026-10-30-eels-deep` — fewer puffers, layer 2 and layer 3
+- [x] `2026-10-30-deep-reshaped` — `gun-deep`'s batch with half its puffers
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -272,6 +276,15 @@ much as they do.
 
 **Measures**: time; hits by what, HP lost, lowest HP; shots and kills.
 
+**Outcome**, 2026-10-30 — **held, mostly**: the gap is the weapons'. The
+Knife cost 2 HP of 6, one eel's touch, 23.7s; the Gun 4, an eel and an
+archer, 26.5s; the Harpoon 4, two archers, 31.4s. No death. Against the
+bot's 0.3, 5.0 and 5.0, the Gun and the Harpoon cost Igor about what they
+cost it, the Knife more — one hit, where none was the guess. Faster than
+the bot each time (27s, 37s, 40s). With the Gun and the Harpoon the dash
+was a weapon unasked: 9 and 8 of the 40 kills, a fifth, at Strength 3 and
+Impact 1; with the Knife, two dashes and none.
+
 ## The threat unit by hand
 
 `2026-10-29-unit-puffers` · `L2,G1,S2004,Gun0,puffer25` · 1 gate.
@@ -287,6 +300,47 @@ a death.
 
 **Measures**: HP lost, lowest HP, or the death and when; hits by puffer and
 how many swelling at each; time.
+
+**Outcome**, 2026-10-30 — **broken: dead in 8.7s**, three kills of 25, two
+hits. At 5.3–7.2s five puffers swelled round Igor within 0.4s of each other
+from every side, their rings overlapping; the first burst took two hearts
+(7.5s, 14 alive), the next the last one (8.7s). Both hit at the ring's edge,
+the diver's body just inside: fair, the diver is drawn at the size that is
+hit. The bot dies the same way, later: six seeds of eight, at 12–17s, each
+with 12–18 puffers alive. So the play-test was set past the unit, not at
+it — the unit is one heart, 1/0.081 ≈ 12 puffers, and 25 is twice that: the
+sum says two hearts, the bot and Igor say a death. A puffer crowd costs more
+than its fish summed, because their bursts come together (D167 (the puffer
+counts more, and gates carry fewer)). The Gun at tier 0 kills one in 1.2s,
+so the crowd grows while it is fought. Played again at the unit: `2026-10-30-unit-puffers-12`.
+
+## The threat unit by hand, at the unit
+
+`2026-10-30-unit-puffers-12` · `L2,G1,S2004,Gun0,puffer12` · 1 gate.
+
+The unit itself: 12 puffers cost the bot one heart by the sum (0.97) and
+0.75 measured, no deaths in eight seeds, about 15.6s.
+
+**Hypothesis**: Igor loses one heart or none, as the bot does. **Broken
+by**: two hearts or a death — then the unit is set wrong for a human, not
+only past it.
+
+**Measures**: as `unit-puffers`.
+
+**Outcome**, 2026-10-30 — **broken: dead in 13.1s**, seven kills of 12, two
+hits, each a single puffer — no crowd this time; the bot loses 0.75 here and
+never dies. Both hits run the same way: the puffer swells with Igor 90px off,
+he swims on at full speed round it rather than away, and only turns away in
+the last 0.15–0.2s; at the burst his centre is 110.5px from the puffer —
+past the drawn ring, 110 — and the burst lands, because it reaches the
+diver's edge (110 + his radius, 20). By the eye he was out; by the rule he
+was 20px short. The ring starts faint (`platform/render.js`, a fifth of its
+full strength), which fits the late turn. The bot reads the true reach, and
+turns within 0.1s. Proposed: a burst that hurts only a centre inside the ring, and
+the ring strong from its first tick. Igor: no — guide lines may go with real
+art, and the player adapts (D166 (the puffer's burst stays; guide lines are
+no promise)). So the reading stands as one human's first meeting with the
+burst's true reach: the unit is not shown wrong by it.
 
 ## The dash, used
 
@@ -305,6 +359,12 @@ not the play's.
 **Measures**: dashes, the presses too early, kills by dash; the gaps
 between dashes; time.
 
+**Outcome**, 2026-10-30 — **held on kills, broken on pace**: 3 of 16 kills
+by dash, about a fifth; but five dashes in 13.7s, one in 2.7s against 1.0s
+of recharge, and one press too early. One hit, a darter. The dash is
+reached for as a weapon — here and in `gun-deep` and `harpoon-deep` — but
+about half as often as it is ready.
+
 ## Layer 1's end into layer 2
 
 `2026-10-29-layer-jump` · `L1,G5,S2006,`+`mid` · 4 gates: layer 1's last
@@ -321,3 +381,102 @@ puffers. **Broken by**: layer 2's two taking twice layer 1's hits or more.
 
 **Measures**: time, hits by what and HP lost, a gate; layer 1's two against
 layer 2's two; the first hits by a puffer.
+
+**Outcome**, 2026-10-30 — **broken on hurt, held on its cause**: layer 1's
+two gates took two hits, 2 HP, both archers — the boss lunged ten times and
+never landed; layer 2's two took four, 7 HP, three of them puffer bursts.
+Gate 8 — the mini-boss with puffers — left Igor on 1 HP of 5, where the bot
+loses 0.4. So the jump is the puffer, and it hurts more than the bot says.
+Taken with the two `unit-puffers` deaths: the puffer costs Igor far more
+than it costs the bot, which reads the burst's true reach and turns in
+0.1s. Its threat, measured by the bot, is a floor (D128 (the balance
+suite)); by D166 (the puffer's burst stays; guide lines are no promise)
+Igor learns its reach, so the next plays with puffers show whether the gap
+closes before any number moves.
+
+## The puffer, learned
+
+`2026-10-30-puffer-learned` · `L2,G1,S2006,`+`mid` · 2 gates: the very
+batches `layer-jump` met in layer 2 — 3 puffers among 14 fish, then the
+mini-boss with 4 puffers and 4 darters. Then `unit-puffers-12` played again.
+
+The puffer cost Igor three of layer 2's four hits and both `unit-puffers`
+deaths, where the bot loses little: it reads the burst's true reach. By D166
+(the puffer's burst stays; guide lines are no promise) the player learns it.
+The bot, from this start over eight seeds: 0.5 HP a gate, no death.
+
+**Hypothesis**: knowing the reach closes most of the gap — one puffer hit or
+none across the two gates (three before), and `unit-puffers-12` survived.
+**Broken by**: two puffer hits or more again, or a second death at the
+unit — then the puffer costs a human more than its threat says, and its
+number moves.
+
+**Measures**: hits by what and HP lost, a gate; at each puffer hit the
+diver's distance and which way he was swimming; time.
+
+**Outcome**, 2026-10-30 — **broken, while learning**. `puffer-learned`: 5 HP
+lost (7 before), an archer and one puffer a gate; gate 8 again ended on 1
+HP of 5; 40.2s for the two. `unit-puffers-12` again: dead again, but at
+16.9s with 10 kills of 12 (11.9s, 7 before). The edge of the ring is
+learned — no hit came at it now — and three of the four puffer hits came
+with two or three puffers swelling at once, the way out of one ring the way
+into the next; the fourth, standing nearly still by the mini-boss. So the
+puffer costs Igor more than its threat says, and what costs it is their
+bursts together. So it counts more now, and gates carry about half the
+puffers (D167 (the puffer counts more, and gates carry fewer)).
+
+## Fewer puffers
+
+`2026-10-30-puffers-fewer` · `puffer-learned`'s code · 2 gates;
+`2026-10-30-eels-deep` · `L3,G5,S2001,`+`late` with `Gun2`, its batch drawn
+· 1 gate.
+
+D167 (the puffer counts more, and gates carry fewer) halved the pools'
+puffers and grew their other fish. Layer 2's opening now draws 2 puffers
+among 17 fish, then the mini-boss with 3 puffers and 5 darters — 3 and 4
+before. Layer 3's deepest gate draws 5 puffers and 27 eels, graded
+(five careers had the stretch heavier for the bot; ten showed that was its
+spread). The bot from these starts: 0 and 1.1 HP; 1.9 HP of 6 and about 40s.
+
+**Hypothesis**: layer 2's two cost Igor two hearts or fewer, at most one by a
+puffer (5 and 7 before); the deep gate costs him no more than `gun-deep`'s
+4 HP. **Broken by**: a puffer hit in each gate again — the cut was not
+enough — or the deep gate costing 5 HP or a death: the eels took what the
+puffers gave.
+
+**Measures**: hits by what and HP lost, a gate; eels against puffers in the
+deep gate; time.
+
+**Outcome**, 2026-10-30 — **held in layer 2, broken in layer 3**.
+`puffers-fewer`: 4 HP lost (5 and 7 before), one puffer hit (two and three),
+an archer the other; 37.1s. `eels-deep`: 6 HP lost, the most of the deep
+plays (`gun-deep` 4), three eel hits and one puffer; 31.7s, 40 kills — the
+batch had grown eels where the puffers went (27, from 23). So the cut works
+on the puffer, and the eels took what it freed. D167 (the puffer counts
+more, and gates carry fewer) was redone the same day: layer 3's puffer
+batches keep their eels, and grow their other fish instead.
+
+## The deep batch, reshaped
+
+`2026-10-30-deep-reshaped` · `L3,G5,S2004,`+`late` with `Gun2`, drawn ·
+1 gate.
+
+`gun-deep`'s batch as D167 (the puffer counts more, and gates carry fewer)
+left it, drawn and graded: 7 puffers, 19 eels, 14 archers — 13, 19 and 8
+before. The bot, from this start: 2.9 HP of 6 a run, one death in eight,
+about 37s.
+
+**Hypothesis**: no worse than `gun-deep`: 4 HP or fewer, and fewer puffer
+hits than eel hits. **Broken by**: 5 HP or a death — then the archers took
+what the puffers gave, and the deep gate wants a lighter target, not
+another mix.
+
+**Measures**: HP lost and lowest; hits by what; time.
+
+**Outcome**, 2026-10-30 — **broken**: 8 HP lost of 9, down to 1; five hits,
+four by archers (1–2 each), one grade-3 eel for 3; no puffer hit; 34.2s, 40
+kills. The archers took what the puffers gave. Read with care: `gun-deep`
+held every fish at grade 2, and this batch is graded as a dive grades it —
+6 of its fish at grade 3, the eel that hit for 3 among them. Igor's three
+deep gates, one each: 4, 6 and 8 HP, never a death; the bot's from the
+same starts 5.0, 1.9 and 2.9.

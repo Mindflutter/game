@@ -407,19 +407,20 @@ describe('the status bar', () => {
   const text = g => g.statusLines().map(l => l.text).join('\n');
 
   it('names the layer, the batch within it and the fish left, while fighting and between gates', () => {
-    const k = atGate(0).plan.findIndex(e => e.layer === 1);
+    // Layer 3's first batch: big enough to come in waves.
+    const k = atGate(0).plan.findIndex(e => e.layer === 2);
     const g = atGate(k);
-    const inLayer = g.plan.filter(e => e.layer === 1).length;
-    expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);   // the one ahead
+    const inLayer = g.plan.filter(e => e.layer === 2).length;
+    expect(text(g)).toContain(g.LAYERS[2].name + '   batch 1/' + inLayer);   // the one ahead
     expect(text(g)).not.toContain('fish left');
     ride(g);
-    expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);   // the one fought
+    expect(text(g)).toContain(g.LAYERS[2].name + '   batch 1/' + inLayer);   // the one fought
     const coming = g.incoming.length;
     expect(coming).toBeGreaterThan(0);
     expect(text(g)).toContain((g.enemies.length + coming) + ' fish left (' + coming + ' coming)');
     // Between waves the arena is empty, and the bar still says the batch is on (D115).
     g.enemies = [];
-    expect(text(g)).toContain(g.LAYERS[1].name + '   batch 1/' + inLayer);
+    expect(text(g)).toContain(g.LAYERS[2].name + '   batch 1/' + inLayer);
     expect(text(g)).toContain(coming + ' fish left (' + coming + ' coming)');
   });
 

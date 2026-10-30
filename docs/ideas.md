@@ -600,7 +600,9 @@ balanced for alpha".
       tier, cost hearts. The Mask's flat 90px more than doubles a weapon
       that "swings close" — 72px to 162px — a coupling that may contradict
       its nature (the diversity rule's fifth). The threat and the career
-      bot are measured with the Gun. To play: three weapons, one late batch.
+      bot are measured with the Gun. Played, 2026-10-30 (`playtests.md` →
+      Three weapons, one late batch): Igor's Knife cost 2 HP of 6, the Gun
+      and the Harpoon 4 each — half, not near nothing as for the bot.
     - **Not everything bought**: no Harpoon, Gun 1 of 3, Knife and Weights 2
       of 3; 9 of 12 steps (26 points earned, 30 to buy all); 1039 gems
       unspent at the end. The skill ladders paid 8 of 20 — depth paid 18.

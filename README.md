@@ -29,7 +29,7 @@ you run `npm run play` and open `http://localhost:8765/?sonar=<id>`. The
 corner tag says it is recording and when its limit is met. Every play is
 recorded whole — reload or play it again and that is a play of its own — and
 your save is never touched. Claude reads it with `npm run sonar <id>`; a
-moment of it is drawn at `…/logs/sonar/<id>/<play>/build/index.html?replay&at=<tick>`.
+moment of it is drawn at `…/logs/<id>/<play>/build/index.html?replay&at=<tick>`.
 
 ## Run the tests
 
@@ -68,10 +68,10 @@ balance suite). Each seed runs in a worker thread of its own. The figures are
 ### Browser — the scripted checks
 
 ```bash
-python3 serve.py 8222
+npm run play
 ```
 
-Then open **`http://localhost:8222/index.html?test`** and read the console. The
+Then open **`http://localhost:8765/index.html?test`** and read the console. The
 last line is the verdict: `N checks passed` in green, or `N of M checks FAILED`
 in red with each failure listed under it.
 
@@ -81,7 +81,7 @@ keyboard events through the input layer, including non-Latin layouts.
 > `?test` is matched **exactly**, so `?test&anything` deliberately runs nothing.
 > That keeps a cache-busting query string from firing the suite by accident.
 
-> Hard-refresh (**Cmd+Shift+R**) after editing. `serve.py` forbids caching, but
+> Hard-refresh (**Cmd+Shift+R**) after editing. The play server forbids caching, but
 > several script tags mean a stale one serves a mix of old and new files, which
 > produces baffling bugs.
 
@@ -145,9 +145,8 @@ game/          the simulation. Zero browser API. This is what survives a port.
 platform/      input, audio, canvas. Rewritten on a port.
 main.js        frame loop and boot
 checks.js      the browser suite
-tests/         the Node suite, the bot, the play server and Sonar's reader
-logs/          the career log and Sonar's plays, ignored by git but for each play-test's setup
-serve.py       local dev server: no caching, threaded
+tests/         the Node suite, the bot, the play server, Sonar's reader and its play-tests
+logs/          the career log and Sonar's plays: ignored by git, safe to delete
 docs/          design, decisions, plan, every enemy, mod, boost, weapon and piece
                of equipment -- start at foundations.md; docs/README.md
                says where everything else is

@@ -144,7 +144,9 @@ that grade and alone, that costs the diver bot one heart, at the reference kit
 — the Gun, no gear, no mods, no steps. A batch's threat is its fish's summed.
 Measured by `npm run measure threat`; the numbers are the fit, rounded — but
 the archer's, twice the fit: the bot dodges shots a player cannot (D157 (the
-archer counts twice what the bot measures)).
+archer counts twice what the bot measures)); and the puffer's, 1.4 times the
+fit: the bot steps out of a burst a player is caught in (D167 (the puffer
+counts more, and gates carry fewer)).
 
 <!-- generated: enemies:threat -->
 | name | grade 1 | grade 2 | grade 3 |
@@ -153,7 +155,7 @@ archer counts twice what the bot measures)).
 | darter | 0.004 | 0.014 | 0.018 |
 | bulwark | 0.053 | 0.085 | 0.101 |
 | archer | 0.034 | 0.056 | 0.064 |
-| puffer | 0.081 | 0.131 | 0.184 |
+| puffer | 0.113 | 0.183 | 0.258 |
 | eel | 0.114 | 0.239 | 0.4 |
 | mini-boss | 0.386 | 0.452 | 0.5 |
 | boss | 0.906 | 0.946 | 0.992 |

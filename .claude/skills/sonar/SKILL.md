@@ -20,7 +20,7 @@ Short beats long: one or two gates that bear a claim out or break it are
 worth more than a whole dive, and Igor can play several in a sitting.
 
 1. Pick an id: `<date>-<short-name>`, e.g. `2026-10-28-archer-hold`.
-2. Write `logs/sonar/<id>/test.json`:
+2. Add it to `tests/playtests.json`, a record under its id:
    - `purpose`: the one question the play answers, in plain words.
    - `start`: `{ "debug": "<code>" }` — a debug setup (`README.md` → Debug
      mode), driven in Node first to prove it shows the thing — or
@@ -81,11 +81,19 @@ worth more than a whole dive, and Igor can play several in a sitting.
    itself (the recording's `j` presses: was the key pressed at all?) and in
    the other plays, and is said as that play's, never the game's. *Missed:
    one gate without a press of Space was written up as "the dash is never
-   used", while the other nine plays had dashed 31 times.*
+   used", while the other nine plays had dashed 31 times.* A hit at a
+   guide line's edge — a ring, a wind-up's stroke — is the player learning
+   the fish, not the game misleading: guide lines may go with real art
+   (D166 (the puffer's burst stays; guide lines are no promise)).
 7. Decide what changes, by the working rules: what is Igor's call is asked
    (one question), what is a balance number is Claude's pick and marked so.
    Findings go to the docs that own them (`ideas.md`, `bugs.md`, a
    decision), never only to the chat; the raw data stays in `logs/`.
+8. **A play-test the reading calls for is set up in the same response**,
+   unasked — a question a play can answer is never only proposed. Igor,
+   2026-10-30: "if you come up with new playtests that will contribute to
+   better understanding, setup them immediately". A play-test played again
+   needs no new record: its next play is kept apart and compared.
 
 ## Answering questions about a play
 

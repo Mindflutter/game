@@ -1,9 +1,6 @@
 .idea/
 *.png
 node_modules/
-logs/*
-!logs/sonar/
-logs/sonar/*/*
-!logs/sonar/*/test.json
+logs/
 *.pdf
 .DS_Store

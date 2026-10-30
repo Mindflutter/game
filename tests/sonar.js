@@ -9,15 +9,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadReplay, ticks } from './harness.js';
 import { table } from './measure.js';
 
-const SONAR = fileURLToPath(new URL('../logs/sonar/', import.meta.url));
-const URL_AT = (id, play, tick) => `http://localhost:8765/logs/sonar/${id}/${play}/build/index.html?replay&at=${tick}`;
-const plays = id => readdirSync(join(SONAR, id)).filter(f => /^\d+$/.test(f) && existsSync(join(SONAR, id, f, 'input.jsonl')))
-                                                 .sort((a, b) => a - b);
-const lines = (id, play) => readFileSync(join(SONAR, id, play, 'input.jsonl'), 'utf8').trim().split('\n').map(l => JSON.parse(l));
+const LOGS = fileURLToPath(new URL('../logs/', import.meta.url));
+const TESTS = () => JSON.parse(readFileSync(new URL('playtests.json', import.meta.url), 'utf8'));
+const URL_AT = (id, play, tick) => `http://localhost:8765/logs/${id}/${play}/build/index.html?replay&at=${tick}`;
+const plays = id => (existsSync(join(LOGS, id)) ? readdirSync(join(LOGS, id)) : [])
+  .filter(f => /^\d+$/.test(f) && existsSync(join(LOGS, id, f, 'input.jsonl'))).sort((a, b) => a - b);
+const lines = (id, play) => readFileSync(join(LOGS, id, play, 'input.jsonl'), 'utf8').trim().split('\n').map(l => JSON.parse(l));
 const r1 = n => Math.round(n * 10) / 10;
 const clock = ms => Math.floor(ms / 60000) + ':' + String(Math.floor(ms / 1000) % 60).padStart(2, '0');
 
-const game = (id, play) => loadReplay(pathToFileURL(join(SONAR, id, play, 'build') + '/'));
+const game = (id, play) => loadReplay(pathToFileURL(join(LOGS, id, play, 'build') + '/'));
 
 // Every moment of a play, found by watching the state change tick by tick:
 // `rec` replayed on `g`, a game loaded for it.
@@ -152,7 +153,7 @@ const gateRow = (r, d, i, s) => [r.play, i + 1 + ' ' + d.end, s.gate, s.layer, s
   s.shots || 0, s.dashes || 0, (s.boosts || []).join(', '), (s.mods || []).join(', ')];
 
 function report(id) {
-  const test = JSON.parse(readFileSync(join(SONAR, id, 'test.json'), 'utf8'));
+  const test = TESTS()[id];
   const reads = plays(id).map(play => read(game(id, play), lines(id, play), play));
   const md = ['# Sonar: ' + id, '', '**Purpose**: ' + test.purpose, '', '**Start**: `' + JSON.stringify(test.start).slice(0, 200) + '`',
               '**Limit**: `' + JSON.stringify(test.limit || null) + '`', '', '**Play**: ' + (test.play || ''), ''];
@@ -173,10 +174,10 @@ function report(id) {
     }
     md.push('');
   }
-  writeFileSync(join(SONAR, id, 'report.md'), md.join('\n') + '\n');
-  writeFileSync(join(SONAR, id, 'events.jsonl'), reads.flatMap(r => r.events.map(e => JSON.stringify({ play: r.play, ...e }))).join('\n') + '\n');
-  writeFileSync(join(SONAR, id, 'timeline.jsonl'), reads.flatMap(r => r.timeline.map(t => JSON.stringify({ play: r.play, ...t }))).join('\n') + '\n');
-  console.log('logs/sonar/' + id + '/report.md: ' + reads.length + ' plays, ' + reads.flatMap(r => r.dives).length + ' dives' +
+  writeFileSync(join(LOGS, id, 'report.md'), md.join('\n') + '\n');
+  writeFileSync(join(LOGS, id, 'events.jsonl'), reads.flatMap(r => r.events.map(e => JSON.stringify({ play: r.play, ...e }))).join('\n') + '\n');
+  writeFileSync(join(LOGS, id, 'timeline.jsonl'), reads.flatMap(r => r.timeline.map(t => JSON.stringify({ play: r.play, ...t }))).join('\n') + '\n');
+  console.log('logs/' + id + '/report.md: ' + reads.length + ' plays, ' + reads.flatMap(r => r.dives).length + ' dives' +
               reads.filter(r => r.offs.length).map(r => '; play ' + r.play + ': ' + replayCell(r).replace(/\*/g, '')).join(''));
 }
 
@@ -184,9 +185,7 @@ function report(id) {
 const [id, play, tick] = process.argv.slice(2);
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (!id) {
-    for (const t of existsSync(SONAR) ? readdirSync(SONAR).filter(f => existsSync(join(SONAR, f, 'test.json'))) : []) {
-      console.log(t + ': ' + plays(t).length + ' plays -- ' + JSON.parse(readFileSync(join(SONAR, t, 'test.json'), 'utf8')).purpose);
-    }
+    for (const [t, { purpose }] of Object.entries(TESTS())) console.log(t + ': ' + plays(t).length + ' plays -- ' + purpose);
   } else if (play === undefined) report(id);
   else {
     const g = game(id, play);

@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { loadReplay } from './harness.js';
 import { read } from './sonar.js';
+import PLAYTESTS from './playtests.json' with { type: 'json' };
 
 const MOVES = ['KeyW', 'KeyA', 'KeyS', 'KeyD'];
 // The recorder's own `let`s, which the harness does not bridge.
@@ -157,5 +158,15 @@ describe('Sonar reads a play back (S10)', () => {
     expect(read2.filter(e => e.kind === 'dash').length).toBeGreaterThan(10);
     expect(kills.length).toBeGreaterThan(0);
     expect(kills.filter(e => e.dash)).toEqual([]);
+  });
+});
+
+describe('the play-tests (D165 (play-tests in one file))', () => {
+  it.each(Object.entries(PLAYTESTS))('%s has its purpose, start and play, and a setup the game reads whole', (_, t) => {
+    expect(t.purpose && t.play && t.start).toBeTruthy();
+    if (!('debug' in t.start)) return;
+    const g = loadReplay();
+    g.openDebug(t.start.debug);
+    expect(g.debugSetup.ignored).toEqual([]);
   });
 });

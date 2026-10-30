@@ -1,0 +1,353 @@
+{
+  "2026-10-28-archer-deep": {
+    "purpose": "Are grade-3 archers behind drifters the Knife's hardest ordinary batch, hit while closing in?",
+    "start": {
+      "debug": "L3,G1,S1003,Grade3,Knife2,drifter6,archer8,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "hits by archer and by drifter",
+      "distance to the nearest archer at each shot taken",
+      "time"
+    ]
+  },
+  "2026-10-28-boss-cue": {
+    "purpose": "Does the boss's stage change go unread — hits gathering in the three seconds after it?",
+    "start": {
+      "debug": "L1,G6,S1009,Knife0,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Say afterwards whether you saw it turn fiercer, and when.",
+    "measures": [
+      "the boss's stage at each tick",
+      "hits by what and how soon after a change",
+      "its burst at the screen edge"
+    ]
+  },
+  "2026-10-28-boss-lunge-deep": {
+    "purpose": "Does the last boss's lunge (6 of 8 HP) decide a late fight on its own?",
+    "start": {
+      "debug": "L3,G6,S1010,Knife2,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "lunges thrown and landed",
+      "HP lost by source",
+      "time"
+    ]
+  },
+  "2026-10-28-bulwark-throw": {
+    "purpose": "Does a bulwark's bite throw the diver into the darters — another hit within a second?",
+    "start": {
+      "debug": "L1,G5,S1008,Knife0,darter8,bulwark3,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "hits within a second after each bulwark hit",
+      "where the diver lands",
+      "time"
+    ]
+  },
+  "2026-10-28-fresh-opening": {
+    "purpose": "Does a fresh diver clear layer 1's first gates in 10–15s, and learn the mini-boss's lunge after its first?",
+    "start": {
+      "debug": "L1,G1,S1001,Gun0"
+    },
+    "limit": {
+      "gates": 3
+    },
+    "play": "Press Dive and play three gates — an ordinary one, the first mini-boss, the next — as a new player would. Watch the mini-boss's wind-up. Don't press R.",
+    "measures": [
+      "time a gate",
+      "hits and what dealt them",
+      "the mini-boss's lunges thrown and landed, in order"
+    ]
+  },
+  "2026-10-28-harpoon-line": {
+    "purpose": "Is the Harpoon slower than the Knife on a mixed batch, paying only on a line of bulwarks? (Harpoon half; knife-line after.)",
+    "start": {
+      "debug": "L2,G1,S1005,Harpoon2,drifter8,bulwark3,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Then play 2026-10-28-knife-line.",
+    "measures": [
+      "time",
+      "hits",
+      "kills per shot",
+      "each bulwark's time to die"
+    ]
+  },
+  "2026-10-28-impact-dash": {
+    "purpose": "Do Impact 3 and Reflex 3 make the dash a second weapon — a fifth of the kills or more?",
+    "start": {
+      "debug": "L1,G3,S1007,Knife0,drifter6,darter10,Dash_reach1,Heart2,Strength2,Reflex3,Nerve1,Impact3,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Use the dash however feels right.",
+    "measures": [
+      "dashes",
+      "kills during a dash",
+      "gaps between dashes",
+      "time"
+    ]
+  },
+  "2026-10-28-knife-eels": {
+    "purpose": "Are eels the Knife's natural enemy — a hit for every three or four killed?",
+    "start": {
+      "debug": "L3,G1,S1004,Knife2,eel12,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "eel hits per eel killed",
+      "time"
+    ]
+  },
+  "2026-10-28-knife-line": {
+    "purpose": "Is the Harpoon slower than the Knife on a mixed batch? (Knife half; after harpoon-line.)",
+    "start": {
+      "debug": "L2,G1,S1005,Knife2,drifter8,bulwark3,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "time",
+      "hits",
+      "each bulwark's time to die"
+    ]
+  },
+  "2026-10-28-puffer-rings": {
+    "purpose": "Do puffers hurt through overlapping rings rather than one unread ring?",
+    "start": {
+      "debug": "L2,G1,S1002,Knife0,darter4,puffer5,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Watch the puffers' rings.",
+    "measures": [
+      "hits by puffer",
+      "puffers swelling at each hit",
+      "time"
+    ]
+  },
+  "2026-10-28-suit-off": {
+    "purpose": "How much of the last dive's stroll is the Suit's? The same dive and kit as suit-on, with no Suit at all.",
+    "start": {
+      "debug": "L1,G1,S2026,Knife2,Mask3,Weights2,Dash_reach3,Heart3,Strength3"
+    },
+    "limit": {
+      "dives": 1
+    },
+    "play": "Played after suit-on. The same whole dive, same batches, top to win or death. Don't press R.",
+    "measures": [
+      "hits a gate, and HP after each — every hit now costs a heart",
+      "the lowest HP of the dive, and where it ends",
+      "time a gate and a layer; the bosses' times",
+      "dashes and shots a gate, against suit-on's",
+      "compared gate by gate with suit-on: same seed, same batches"
+    ]
+  },
+  "2026-10-28-suit-on": {
+    "purpose": "How much of the last dive's stroll is the Suit's? Your winning kit, Suit 3 — first of a pair; suit-off is the same dive without it.",
+    "start": {
+      "debug": "L1,G1,S2026,Knife2,Mask3,Suit3,Weights2,Dash_reach3,Heart3,Strength3"
+    },
+    "limit": {
+      "dives": 1
+    },
+    "play": "One whole dive, top to win or death, played as you would play your last dive. Don't press R. Then play 2026-10-28-suit-off.",
+    "measures": [
+      "hits a gate, and how many the guard took",
+      "HP after each gate; the lowest HP of the dive",
+      "time a gate and a layer; the bosses' times",
+      "where the dive ends",
+      "dashes and shots a gate: how much the guard lets you stand and swing",
+      "compared gate by gate with suit-off: same seed, same batches"
+    ]
+  },
+  "2026-10-29-dash-on-purpose": {
+    "purpose": "impact-dash again, the dash used on purpose: with Impact 3 and Reflex 3, is the dash a second weapon — a fifth of the kills or more?",
+    "start": {
+      "debug": "L1,G3,S1007,Knife0,drifter6,darter10,Dash_reach1,Heart2,Strength2,Reflex3,Nerve1,Impact3,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Dash into the fish whenever the dash is ready, as a weapon, beside the Knife.",
+    "measures": [
+      "dashes, presses too early, kills by dash",
+      "gaps between dashes",
+      "time"
+    ]
+  },
+  "2026-10-29-gun-deep": {
+    "purpose": "The same late batch with the Gun at tier 2: does it cost hearts the Knife did not? (Second of three; harpoon-deep after.)",
+    "start": {
+      "debug": "L3,G5,S2001,Grade2,Gun2,archer8,puffer13,eel19,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Then play 2026-10-29-harpoon-deep.",
+    "measures": [
+      "time",
+      "hits by what, HP lost, lowest HP",
+      "shots and kills"
+    ]
+  },
+  "2026-10-29-harpoon-deep": {
+    "purpose": "The same late batch with the Harpoon at tier 2: does it cost hearts the Knife did not? (Last of three.)",
+    "start": {
+      "debug": "L3,G5,S2001,Grade2,Harpoon2,archer8,puffer13,eel19,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "time",
+      "hits by what, HP lost, lowest HP",
+      "shots and kills, kills per shot"
+    ]
+  },
+  "2026-10-29-knife-deep": {
+    "purpose": "Three weapons, one late batch: does the Knife clear layer 3's deepest ordinary batch untouched where the Gun and the Harpoon cost hearts? (Knife first; gun-deep, then harpoon-deep after.)",
+    "start": {
+      "debug": "L3,G5,S2001,Grade2,Knife2,archer8,puffer13,eel19,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Play it first, before the batch is known. Then play 2026-10-29-gun-deep.",
+    "measures": [
+      "time",
+      "hits by what, HP lost, lowest HP",
+      "shots and kills"
+    ]
+  },
+  "2026-10-29-layer-jump": {
+    "purpose": "Does the threat jump from layer 1 to layer 2? Layer 1's last ordinary gate and its boss, the pick, then layer 2's first two gates, with dive 2's kit.",
+    "start": {
+      "debug": "L1,G5,S2006,Knife0,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 4
+    },
+    "play": "Press Dive and play on through the boss and the pick into layer 2, until the tag says done (four gates). Pick whatever you like. Don't press R.",
+    "measures": [
+      "time, hits by what and HP lost, a gate",
+      "layer 1's two gates against layer 2's two",
+      "the first hits by a puffer"
+    ]
+  },
+  "2026-10-29-unit-puffers": {
+    "purpose": "The threat unit by hand: 25 puffers with the Gun and nothing bought cost the bot two hearts of three. What do they cost you?",
+    "start": {
+      "debug": "L2,G1,S2004,Gun0,puffer25"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "HP lost, lowest HP, or the death and when",
+      "hits by puffer, and how many swelling at each",
+      "time"
+    ]
+  },
+  "2026-10-30-unit-puffers-12": {
+    "purpose": "The threat unit by hand, at the unit: 12 puffers with the Gun and nothing bought cost the bot about one heart. What do they cost you?",
+    "start": {
+      "debug": "L2,G1,S2004,Gun0,puffer12"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "HP lost, lowest HP, or the death and when",
+      "hits by puffer, and how many swelling at each",
+      "time"
+    ]
+  },
+  "2026-10-30-puffer-learned": {
+    "purpose": "Now that you know how far a puffer's burst reaches: layer 2's first two gates, the ones that left you on 1 HP in layer-jump. Do the puffers still hurt you as much?",
+    "start": {
+      "debug": "L2,G1,S2006,Knife0,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 2
+    },
+    "play": "Press Dive and play both gates, the mini-boss's too, until the tag says done or you die. Don't press R.",
+    "measures": [
+      "hits by what, HP lost, a gate",
+      "puffer hits, and the diver's distance at each burst",
+      "time"
+    ]
+  },
+  "2026-10-30-puffers-fewer": {
+    "purpose": "Layer 2 opens with fewer puffers now: the same two gates as puffer-learned, the mini-boss's too, with about half the puffers and more of the other fish. Do they still cost you most of your hearts?",
+    "start": {
+      "debug": "L2,G1,S2006,Knife0,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 2
+    },
+    "play": "Press Dive and play both gates until the tag says done or you die. Don't press R.",
+    "measures": [
+      "hits by what, HP lost, a gate",
+      "puffer hits, and how many swelling at each",
+      "time"
+    ]
+  },
+  "2026-10-30-eels-deep": {
+    "purpose": "Layer 3's deepest gates trade puffers for eels now. With the Gun and the late kit, does the deep gate cost you more than gun-deep did?",
+    "start": {
+      "debug": "L3,G5,S2001,Gun2,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "HP lost, lowest HP, or the death and when",
+      "hits by what: eels against puffers",
+      "time"
+    ]
+  },
+  "2026-10-30-deep-reshaped": {
+    "purpose": "gun-deep's batch with half its puffers and more archers in their place (7 puffers, 19 eels, 14 archers; 13, 19 and 8 before). Does it cost you less than gun-deep's 4 HP?",
+    "start": {
+      "debug": "L3,G5,S2004,Gun2,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "HP lost, lowest HP, or the death and when",
+      "hits by what",
+      "time"
+    ]
+  }
+}
