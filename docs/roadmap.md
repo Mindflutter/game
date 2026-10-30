@@ -29,9 +29,17 @@ game in fifteen to twenty minutes)), and the career log (D163 (the career
 log)). Igor's first logged career is read (`ideas.md` → The economy and the
 fights, reworked in S9): on time, but the Suit makes the last dive a stroll.
 **Sonar**, the play-test system, is built as S10 (Sonar) (D164 (Sonar));
-its first pair, the Suit's, is read, and short play-tests wait their turn in
-`playtests.md`. Next: the Suit, the unbought gear, the stood
-bars of layer 1 (Health), and points from opt-in difficulty.
+its play-tests and their outcomes are `playtests.md`, the setups in one file
+(D165 (play-tests in one file, the logs disposable)). Read through it since:
+the puffer's burst stays (D166 (the puffer's burst stays; guide lines are no
+promise)), it counts more and gates carry half as many (D167 (the puffer
+counts more, and gates carry fewer)), and a second career, won on Suit 3
+again, made the guard last two gates (D168 (the guard lasts two gates)).
+Next: the guard's play-test (`suit-pairs`); the Harpoon, never bought and
+better than no weapon by the bot; the boss, whose lunge no longer lands; the
+unbought gear (1198 gems unspent at the second win); the stood bars of layer
+1 (Health); points from opt-in difficulty; and `npm run measure fit`'s drift
+(`bugs.md`).
 The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
