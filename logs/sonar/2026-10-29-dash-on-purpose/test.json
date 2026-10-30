@@ -1,0 +1,15 @@
+{
+  "purpose": "impact-dash again, the dash used on purpose: with Impact 3 and Reflex 3, is the dash a second weapon — a fifth of the kills or more?",
+  "start": {
+    "debug": "L1,G3,S1007,Knife0,drifter6,darter10,Dash_reach1,Heart2,Strength2,Reflex3,Nerve1,Impact3,Mend1"
+  },
+  "limit": {
+    "gates": 1
+  },
+  "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Dash into the fish whenever the dash is ready, as a weapon, beside the Knife.",
+  "measures": [
+    "dashes, presses too early, kills by dash",
+    "gaps between dashes",
+    "time"
+  ]
+}

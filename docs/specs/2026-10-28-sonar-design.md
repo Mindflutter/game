@@ -48,9 +48,9 @@ would not do.
 log)). `http://localhost:8765/?sonar=<id>` serves the game with the
 play-test written into the page, copies the build, and takes the recording
 as it comes, every two seconds and as the page closes. Every page load is a
-**segment**, `<n>.jsonl`, starting from its own state: a reload, Igor
-starting over, is recorded as one. Under a play-test the career log is not
-sent: the segments hold all of it.
+**segment**, `<n>/input.jsonl` with its build beside it, starting from its
+own state: a reload, Igor starting over, is recorded as one. Under a
+play-test the career log is not sent: the segments hold all of it.
 
 **The recorder** — `platform/sonar.js`, inert without a play-test, so a
 double-clicked `index.html` is unchanged. A segment's first line is its
@@ -67,20 +67,24 @@ its copied build, checks the probes, and writes beside the recording:
 - `report.md` — the play-test, then each segment: wall time, time on each
   screen, and whether its replay holds, every probe checked; a row a dive
   (its time, each layer's, the bosses', hits, guarded, HP lost, the lowest
-  HP, pauses); a row a gate (fish, time, hits and by what, guarded, HP,
+  HP, the dashes, the presses too early and the dash's kills, the lunges and
+  the boss hits, pauses); a row a gate (fish, time, hits and by what, guarded, HP,
   kills, shots, dashes, boosts, mods); every pause, restart, buy and key
   held ten seconds; and replay links for the moments that matter.
 - `events.jsonl` — every moment, at its tick, game time and wall time: a
   screen changed (pause, resume, a menu, death, the win, the pick, a debug
-  restart), a gate arrived or cleared, a kill (the fish and grade), a hit
-  taken (by what, HP after), a mod, a boost, a buy, the window away and back.
+  restart), a gate arrived or cleared, a kill (the fish and grade, and
+  whether the dash dealt it), a dash or a press too early for one, a hit
+  taken (by what, HP after, the puffers swelling), a fish's attack as it
+  starts (a lunge, a fan, a puffer's fuse, a boss's stage), a mod, a boost,
+  a buy, the window away and back.
 - `timeline.jsonl` — the state each second: the diver, every fish (name,
   grade, HP, place), the camera, the batch, the gems.
 
 `npm run sonar <id> <seg> <tick>` prints the whole state at one tick, for a
 question about a moment. **A screenshot of any moment** is the replay drawn
 in the browser:
-`http://localhost:8765/logs/sonar/<id>/build/index.html?replay=<seg>&at=<tick>`
+`http://localhost:8765/logs/sonar/<id>/<seg>/build/index.html?replay&at=<tick>`
 — the copied build, so it draws what Igor saw. Igor can open one too.
 `npm run sonar` alone lists the play-tests.
 

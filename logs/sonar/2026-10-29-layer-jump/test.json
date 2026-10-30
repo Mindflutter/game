@@ -1,0 +1,15 @@
+{
+  "purpose": "Does the threat jump from layer 1 to layer 2? Layer 1's last ordinary gate and its boss, the pick, then layer 2's first two gates, with dive 2's kit.",
+  "start": {
+    "debug": "L1,G5,S2006,Knife0,Dash_reach1,Heart2,Strength2,Reflex1,Nerve1,Impact1,Mend1"
+  },
+  "limit": {
+    "gates": 4
+  },
+  "play": "Press Dive and play on through the boss and the pick into layer 2, until the tag says done (four gates). Pick whatever you like. Don't press R.",
+  "measures": [
+    "time, hits by what and HP lost, a gate",
+    "layer 1's two gates against layer 2's two",
+    "the first hits by a puffer"
+  ]
+}

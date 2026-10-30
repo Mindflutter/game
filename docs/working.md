@@ -60,15 +60,16 @@ working doc.
 - Explain gamedev concepts, not JavaScript — Igor is an experienced backend
   developer with no prior gamedev experience.
 - Small steps: one playable change, then stop and explain what changed.
-- **Before work that higher effort would make clearly better, say so and
-  stop** — "switch to xhigh for this" — and start it only once Igor has.
-  Igor, 2026-10-28: "tell me to switch the effort before doing complex tasks,
-  every time that it could significantly benefit the work quality". It fits a
-  design pass whose rules interact (a stage's spec, a fix's shape checked
-  against `foundations.md`), a root cause that resists a first look, and a
-  review of a whole stage's diff; never running or reading a play-test,
-  a doc sweep or a one-file change. max only when xhigh has already
-  fallen short.
+- **High is the default effort; before a serious task, a different one is
+  named** — "xhigh recommended", or "medium recommended" — and the task
+  starts in the next reply, once Igor has picked: a switch counts only from
+  then. Igor, 2026-10-30: "default is high, then before any serious task
+  execution if an effort change is recommended, state: "<effort>
+  recommended"". xhigh fits a design pass whose rules interact (a stage's
+  spec, a fix's shape checked against `foundations.md`), a root cause that
+  resists a first look, and a review of a whole stage's diff; medium, work
+  that is running and reading alone — a play-test read back, a doc sweep.
+  max only when xhigh has already fallen short.
 
 ## Questions and uncertainty
 

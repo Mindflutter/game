@@ -50,8 +50,10 @@ worth more than a whole dive, and Igor can play several in a sitting.
    every probe. Off on the setup screen only, the dives hold; **off in
    play**, the reading is wrong past that tick: say so, never guess over it.
 2. Read `report.md` first: the plays; a row a dive (time, layers, bosses,
-   hits, guarded, HP lost, lowest HP, pauses); a row a gate; and the moments
-   — pauses, menus, restarts, hits, deaths, buys, the window away, and any
+   hits, guarded, HP lost, lowest HP, dashes with the presses too early for
+   one and the dash's kills, lunges and boss hits, pauses); a row a
+   gate; and the moments — pauses, menus, restarts, hits, deaths, buys,
+   lunges, fans, a boss's stages, the window away, and any
    key held ten seconds (a lost key-up looks like that: check it against
    what Igor said before reading the dive as played).
    Then `events.jsonl` and `timeline.jsonl` with `grep`/`jq` for what the
@@ -74,7 +76,12 @@ worth more than a whole dive, and Igor can play several in a sitting.
    play-tests (`npm run sonar` lists them), the bot's numbers (`npm run
    measure`, `roadmap.md` → Health) and the docs; where they disagree, say
    which and why. One play is one human's dive, not a measurement: say how
-   much it can carry.
+   much it can carry. **A zero is checked before it is read**: a thing a
+   play never did — no dash, no hit by a fish — is looked for in the input
+   itself (the recording's `j` presses: was the key pressed at all?) and in
+   the other plays, and is said as that play's, never the game's. *Missed:
+   one gate without a press of Space was written up as "the dash is never
+   used", while the other nine plays had dashed 31 times.*
 7. Decide what changes, by the working rules: what is Igor's call is asked
    (one question), what is a balance number is Claude's pick and marked so.
    Findings go to the docs that own them (`ideas.md`, `bugs.md`, a

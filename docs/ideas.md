@@ -575,8 +575,11 @@ balanced for alpha".
     since D162 (the whole game in fifteen to twenty minutes); to replay.
   - The boss's stage cue: "sound and burst didnt make a difference" — a
     stronger tell, or drop it. And "can hit unshielded max 3 times".
+    Played as `boss-cue` (`playtests.md`): two stage changes, "no changes
+    noticed in the boss", and no hit taken either.
   - "boss burst hitting screen edge, think thru".
-  - The archer's counts past layer 1, not yet played.
+  - The archer's counts past layer 1: played as `archer-deep`
+    (`playtests.md`), eight grade-3 archers for no hit with the late kit.
   - **The first logged career** (D163 (the career log)), 2026-10-28, the
     D161 (depth pays points) and D162 (the whole game in fifteen to twenty
     minutes) build: won on dive 4, 17 minutes by the wall clock (14 diving,
@@ -591,6 +594,13 @@ balanced for alpha".
       most, and the boss's lunge (5, then 6 HP) is its one danger. Open:
       what makes a late dive hard, and the lunge's place among the other
       threats.
+    - **The Knife, by the bot**, 2026-10-29 (`playtests.md` → Where it
+      starts to hurt): at the `late` kit the Knife clears layer 3's deepest
+      batch nearly untouched where the Gun and the Harpoon, at the same
+      tier, cost hearts. The Mask's flat 90px more than doubles a weapon
+      that "swings close" — 72px to 162px — a coupling that may contradict
+      its nature (the diversity rule's fifth). The threat and the career
+      bot are measured with the Gun. To play: three weapons, one late batch.
     - **Not everything bought**: no Harpoon, Gun 1 of 3, Knife and Weights 2
       of 3; 9 of 12 steps (26 points earned, 30 to buy all); 1039 gems
       unspent at the end. The skill ladders paid 8 of 20 — depth paid 18.

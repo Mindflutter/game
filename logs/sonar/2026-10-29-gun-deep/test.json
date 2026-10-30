@@ -1,0 +1,15 @@
+{
+  "purpose": "The same late batch with the Gun at tier 2: does it cost hearts the Knife did not? (Second of three; harpoon-deep after.)",
+  "start": {
+    "debug": "L3,G5,S2001,Grade2,Gun2,archer8,puffer13,eel19,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+  },
+  "limit": {
+    "gates": 1
+  },
+  "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Then play 2026-10-29-harpoon-deep.",
+  "measures": [
+    "time",
+    "hits by what, HP lost, lowest HP",
+    "shots and kills"
+  ]
+}
