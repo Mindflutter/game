@@ -5462,3 +5462,22 @@ recommendation: fewer puffers, the gates' fish kept.
 **Guarded by** `tests/dive.test.js` (pools under their stretch and able to
 reach it; each layer more fish than the last; harder types later) and the
 puffer's row in `entities/enemies.md` → Threat.
+
+## D168 — The guard lasts two gates · 2026-10-30
+
+Igor's second career (`playtests.md` → A whole career, after the puffer)
+won on Suit 3 again: the guard took 16 of the winning dive's 18 hits, as it
+took all 11 of the first career's; unguarded, those hits were more than his
+HP. Igor: "overall feels good, but i gained guard and hp bonuses which
+allowed me to take a lot of damage and not die". Offered the guard refilled
+every other gate, once a layer, or left: "do your recommended adjustment".
+
+- **The guard refills as the first gate of each pair arrives** — gates 1, 3
+  and 5 of a layer — not every gate: Suit 3 takes three hits for two gates.
+  Claude's pick. On the winning dive's hits it would have let about four
+  more through, most in layer 3: a finish on 1–2 HP, not 5.
+- The tiers and prices stand: the Suit still gives one hit a tier.
+- The career bot still wins on dive 2 or 3 (`npm run measure careers`).
+
+**Guarded by** `tests/combat.test.js` — the guard refills at the third gate
+and the fifth, not the second or the fourth.

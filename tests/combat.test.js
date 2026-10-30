@@ -1,7 +1,7 @@
 // The fight itself: the trigger, shots, the dash, touch, gems, and what a
 // clear or a death does on the tick it lands.
 import { describe, it, expect } from 'vitest';
-import { loadGame, play, until, fishAt, atGate, clearAndWait } from './harness.js';
+import { loadGame, play, until, fishAt, atGate, clearAndWait, ride } from './harness.js';
 
 // A fish that hurts on touch (D108): these checks are about touch, i-frames
 // and the dash, not any one attack.
@@ -483,6 +483,21 @@ describe('the clear and the death, on the tick they land', () => {
     const at = g.batchIndex;
     run(g, 300);
     expect([g.batchIndex, g.enemies.length, g.screen]).toEqual([at, 0, 'mods']);
+  });
+});
+
+describe("the suit's guard (D168)", () => {
+  // The diver comes to gate k with one guard of three left.
+  const arrive = k => {
+    const g = atGate(k);
+    g.player.guard = 3;
+    g.guardLeft = 1;
+    ride(g);
+    return g.guardLeft;
+  };
+
+  it('refills as every other gate arrives, the first of each pair', () => {
+    expect([arrive(1), arrive(2), arrive(3), arrive(4)]).toEqual([1, 3, 1, 3]);
   });
 });
 

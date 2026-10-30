@@ -587,7 +587,7 @@ balanced for alpha".
     - **The winning dive was a stroll**: 5.5 minutes, no heart lost — all 11
       hits taken by the guard. Suit 3 (210 gems, a guard of 3 a batch) took
       18 of dive 3's 22 hits too. The strongest buy by far; the last dive
-      should be the hardest, not the easiest. A fix to propose: the guard
+      should be the hardest, not the easiest. Built as D168 (the guard lasts two gates); proposed then: the guard
       refilled per layer, not per batch, or fewer per tier.
     - **The Suit pair** (`playtests.md`): the Suit is not what makes the
       last dive easy — it lets a careless play off; the kit does, the Knife
@@ -608,6 +608,24 @@ balanced for alpha".
       unspent at the end. The skill ladders paid 8 of 20 — depth paid 18.
     - Killed by archers (dive 1) and puffers (dives 2, 3: most killing
       hits). Gates 10–40s; the bosses 11–39s with his kit.
+  - **The second career**, 2026-10-30 (`playtests.md` → A whole career,
+    after the puffer): won on dive 4, 15 minutes — and again the Suit: 16 of
+    the winning dive's 18 hits guarded, nothing healed. Igor: "overall feels
+    good, but i gained guard and hp bonuses which allowed me to take a lot
+    of damage and not die". Twice now: the guard lasts two gates since, D168 (the guard lasts two
+    gates).
+    - "harpoon feels like a redundant weapon now" — the bot agrees: over
+      layers 2 and 3 it is better than neither the Gun nor the Knife, and
+      it was never bought in either career. Open: a reason to carry it, or
+      drop it.
+    - "boss is hardly a challenge, just time-consuming sometimes. escort
+      enemies help to keep it dynamic though" — no lunge landed in the
+      winning dive; the escorts are what it brings. Open, with the lunge's
+      place above.
+    - "would i be able to complete the game as fast if i chose different
+      upgrades? i dont know" — the career bot wins on dive 2 or 3 with any
+      weapon, the Harpoon a minute slower in layer 3; it cannot say what a
+      build without the Suit costs a human.
   **Home**: S9.
 
 - **Studioigor's skills.** Igor, 2026-10-28: "check this repo and other

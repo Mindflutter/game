@@ -24,7 +24,7 @@ const PLAYER_START = {
                      // `speed`, so swim speed never lengthens the dash (D56)
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
   dashDamage: 0,     // pure movement until bought (D51); it always shoves
-  guard: 0,          // hits a batch can take without losing HP -- the suit's (D100)
+  guard: 0,          // hits two gates can take without losing HP -- the suit's (D100, D168)
   splash: 0,         // px from a struck fish's body that its hit wounds too -- Bloom's (D125)
 };
 

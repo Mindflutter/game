@@ -1183,7 +1183,9 @@ function step(dt) {
         spawnBatch(batch, escorts);
         light();
         batchHit = false;
-        guardLeft = player.guard;
+        // The suit's guard lasts two gates, refilled at the first of each
+        // pair (D168): a layer's six gates are three pairs.
+        if (batchIndex % 2 === 0) guardLeft = player.guard;
         firstKillAt = null;
         glowAt = null;
         // A layer's first batch starts `swift`'s clock (D109).

@@ -56,6 +56,11 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-10-30-puffer-learned` + `2026-10-30-unit-puffers-12` again — the puffer, learned
 - [x] `2026-10-30-puffers-fewer` + `2026-10-30-eels-deep` — fewer puffers, layer 2 and layer 3
 - [x] `2026-10-30-deep-reshaped` — `gun-deep`'s batch with half its puffers
+- [x] `2026-10-30-unit-puffers-9` — the puffer's new unit
+- [x] `2026-10-30-layer2-whole` — layer 2 whole, fewer puffers
+- [x] `2026-10-30-layer2-dive3` — layer 2 with dive 3's kit
+- [x] `2026-10-30-career` — a whole career, after the puffer
+- [ ] `2026-10-30-suit-pairs` — layer 3 with the guard lasting two gates
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -480,3 +485,150 @@ held every fish at grade 2, and this batch is graded as a dive grades it —
 6 of its fish at grade 3, the eel that hit for 3 among them. Igor's three
 deep gates, one each: 4, 6 and 8 HP, never a death; the bot's from the
 same starts 5.0, 1.9 and 2.9.
+Igor, on the 1–4 HP a deep gate leaves: "it's fine, keep the deep gate as
+is".
+
+## The puffer's new unit
+
+`2026-10-30-unit-puffers-9` · `L2,G1,S2004,Gun0,puffer9` · 1 gate.
+
+D167 (the puffer counts more, and gates carry fewer) made 9 puffers one
+heart by the threat, not 12. The bot loses nothing to them, 12s, eight runs
+of eight. Igor died to 12 twice.
+
+**Hypothesis**: the threat now reads Igor: one burst at most, 2 HP, no death.
+**Broken by**: a death — the puffer still costs him more than it counts,
+though no pool gate holds more than 7 now.
+
+**Measures**: as `unit-puffers`.
+
+**Outcome**, 2026-10-30 — **held**: one burst, 2 HP, with three swelling;
+cleared in 13.2s, all nine. At 9 the threat now reads Igor; at 12 he died
+twice.
+
+## Layer 2 whole
+
+`2026-10-30-layer2-whole` · `L2,G1,S2010,`+`mid` · 6 gates: a batch, a
+mini-boss, a batch, a mini-boss, a batch, the boss — 17 puffers in all, 1
+to 5 a gate. A seed Igor has not played.
+
+The puffer was the jump from layer 1 (`layer-jump`), and D167 cut it; D162
+(the whole game in fifteen to twenty minutes) wants a layer in two to four
+minutes. The bot, eight runs: 0 HP for the first four gates, about 1.75 at
+the fifth (5 puffers, 6 archers, 7 darters), dead twice at the boss; about
+3:25 for the layer.
+
+**Hypothesis**: the layer is hard at its end and not before: Igor loses at
+most a heart a gate before the boss, under half of it to puffers, and the
+layer takes 2–4 minutes. **Broken by**: puffers again the most of his hits,
+or a death before the boss.
+
+**Measures**: time a gate and the layer; hits by what and HP lost a gate;
+puffer hits against the rest; deaths.
+
+**Outcome**, 2026-10-30 — **broken: dead twice before the boss**. Two dives
+in one play: dead at the first gate, 15.9s — a grade-3 archer's spit for 3
+of 5, then a grade-2's for 2 — and at the third, 48.2s — a grade-2 puffer's
+burst for 3, then a bulwark's throw. Five hits, one by a puffer: the cut
+held. What killed is grades: +1 and +2 to a hit (D119 (grades)) against 5
+HP, two hits a death. The bot lost nothing to the first four gates. Read
+against Igor's own career, the hypothesis was wrong, not the layer: his dive
+2 carried this very kit and died at gate 8, layer 2's second; dive 3 died at
+its boss; dive 4 won. A dive-2 kit is not meant to clear layer 2 — the
+career's deaths are its shape (D162 (the whole game in fifteen to twenty
+minutes)). Played again with dive 3's kit: `layer2-dive3`.
+
+## Layer 2 with dive 3's kit
+
+`2026-10-30-layer2-dive3` ·
+`L2,G1,S2011,Gun1,Suit3,Dash_reach2,Heart3,Strength3,Nerve1,Reflex3,Fins1`
+· 6 gates: layer 2 whole, on a seed Igor has not played.
+
+Igor's dive 3 entered layer 2 with this — the Gun at tier 1, the Suit at
+3, Heart and Strength at 3, its mods by then — sat on 1 HP from gate 8 on,
+and died at the boss, whose gate held 9 puffers that hit it three times.
+D167 (the puffer counts more, and gates carry fewer) halved them: this
+seed's boss comes with 4 puffers, 4 archers, 5 darters and 4 bulwarks. The
+bot, eight runs: no heart lost anywhere, about 2:45 for the layer.
+
+**Hypothesis**: the dive-3 kit now gets through layer 2, the boss too —
+where it died before — and not on 1 HP all the way. **Broken by**: a death
+in layer 2 again.
+
+**Measures**: time a gate and the layer; hits by what, guarded, HP lost a
+gate; the boss gate's hits.
+
+**Outcome**, 2026-10-30 — **held, and then some**: layer 2 cleared, boss
+and all, in 3:33, not a heart lost — four hits, every one taken by the
+Suit's guard, one of them a puffer's; the boss lunged 30 times and landed
+none, its two hits on him guarded too; 73.8s at its gate. 56 dashes, 11
+kills by them. Igor's dive 3 died here, on 1 HP from gate 8. Read with
+care: another seed, and a day of play-tests behind his hands — the puffer
+cut is one of three things that moved. Within D162 (the whole game in
+fifteen to twenty minutes)'s two to four minutes a layer.
+
+## A whole career, after the puffer
+
+`2026-10-30-career` · `{ "save": "fresh" }` · to the win, or 30 minutes.
+
+Igor's first career (D163 (the career log)) won on dive 4 in about 14
+minutes of dives: dead at gate 4, 8 and 11, then the win. Since then the
+puffer counts more and gates carry half as many (D167 (the puffer counts
+more, and gates carry fewer)), and a dive-3 kit cleared layer 2 without a
+heart lost (`layer2-dive3`). The career bot wins on dive 2 or 3, before the
+change and after. Igor now knows the game far better than on his first
+career, which this play cannot take apart from the change.
+
+**Hypothesis**: still a roguelite's shape — two deaths or more before the
+win, 15 to 20 minutes in all (D162 (the whole game in fifteen to twenty
+minutes)). **Broken by**: a win on dive 1 or 2, or under 12 minutes — the
+game is then too short for a player who knows it.
+
+**Measures**: dives to the win and where each ended; minutes a dive and in
+all; what was bought before each; hits by what, a layer.
+
+**Outcome**, 2026-10-30 — **held**: won on dive 4, at 15:21 on the wall
+clock (12.2 minutes diving); dead at layer 1's boss (dive 1, the Gun, an
+archer then the boss's lunge for 3), at gate 5 (dive 2, the Knife from
+here on), at layer 3's first gate (dive 3, four hits). Igor: "overall feels
+good, but i gained guard and hp bonuses which allowed me to take a lot of
+damage and not die".
+
+- **The Suit won it.** Bought 1 before dive 3, 2 and 3 before dive 4: a
+  guard of 3 a gate, refilled at each. Dive 4 took 18 hits and the guard
+  took 16; HP 6 to 8 by Heart 3 and three Vitality, and nothing healed it —
+  no Mend. Unguarded, those 18 hits are 18 HP or more. Only one gate of 18
+  saw more than three hits (the deepest ordinary, five, all archers). The
+  same as the first career (`ideas.md` → The first logged career).
+- **Bought by the win**: the Knife to 2, the Suit and the Mask to 3, the
+  Weights to 1, Heart, Strength and Dash reach to 3; never the Harpoon, the
+  Gun not past 0. 1198 gems unspent.
+- **Mods**, dive 4: Reflex 3, Impact 3, Vitality 3, Fins 2, Nerve 2 — the
+  dash's (84 dashes, 5 kills by them). Boosts: Rush, Frenzy and Bloom, the
+  Knife's three.
+- **The bosses**: 12s (dive 1's, which killed), then 21s, 21s, 12s, 22s and
+  13s; 20 lunges in dive 4, none landed. Igor: "boss is hardly a challenge,
+  just time-consuming sometimes. escort enemies help to keep it dynamic".
+- **Weapons**: "knife is my favorite, harpoon feels like a redundant weapon
+  now". The bot agrees on both (`npm run measure weapons`): over layers 2
+  and 3 the Knife the quickest and the safest, 22.8s and 0.6 hearts a
+  batch, and better than the Gun on both; the Harpoon 29.1s and 1.4,
+  better than neither. Careers by weapon (`npm run measure careers <w>`):
+  the Gun and the Knife win on dive 2 or 3, the Harpoon too but a minute
+  slower in layer 3.
+
+## The guard, two gates long
+
+`2026-10-30-suit-pairs` ·
+`L3,G1,S2012,Knife2,Mask3,Suit3,Weights1,Dash_reach3,Heart3,Strength3,Reflex3,Impact3,Vitality2,Fins2,Nerve2`
+· 6 gates: layer 3 whole, with the winning dive's gear and mods, 8 HP.
+
+D168 (the guard lasts two gates): the winning dive's 16 guarded hits of 18
+would have let about four more through. The bot, eight runs: not a hit
+taken, about 2:05 for the layer — it does not see this.
+
+**Hypothesis**: tense, not lost: Igor ends layer 3 on 1 to 4 HP, alive.
+**Broken by**: a death (too much) or 6 HP or more left (still a stroll).
+
+**Measures**: hits by what, guarded or not, a gate; HP after each gate and
+the lowest; time; deaths.
