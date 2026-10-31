@@ -2,7 +2,7 @@
 
 The most important ideas from the reading on economy and balance, mapped onto
 Igor's play report of 2026-10-27 (`ideas.md` → the economy, the bosses, the
-archer). Ideas only, no verdicts: what to build is decided with Igor.
+archer) and his ask of 2026-10-30, every weapon tried. Ideas only, no verdicts: what to build is decided with Igor.
 
 Sources, cited by short name and page:
 
@@ -11,6 +11,8 @@ Sources, cited by short name and page:
 - **GM** — Adams & Dormans, *Game Mechanics: Advanced Game Design* (2012):
   ch. 6 feedback structures, ch. 11 progression mechanisms, appendix B patterns.
 - **Cook** — Daniel Cook, [Value chains](https://lostgarden.com/2021/12/12/value-chains/) (2021).
+- Web pages, mostly guides and interviews rather than designers' own
+  writing, cited by link where used.
 
 "Inference" marks a link to Abyss that the source does not make itself.
 
@@ -117,6 +119,65 @@ since skill grows on its own, the game must keep getting harder in some way
   ease off when the player retreats to cover (GB 244).
 - **What the player ignores comes back worse.** In Super Crate Box, an enemy
   that reaches the bottom returns faster (GM B-25).
+
+## "Try out and upgrade each weapon"
+
+Igor, 2026-10-30: "for the future game expansion, we need to motivate the
+player to try out and upgrade each weapon". Two careers won without ever
+buying the Harpoon (`ideas.md` → The economy and the fights). Sources beyond
+the books are web pages, cited by link.
+
+- **A dominant option is no choice.** Two swords alike but for damage is a
+  "choice" with a clear best answer (GB 204–5). Doom Eternal's director built
+  its weak points and ammo caps because one gun, Doom 2016's Super Shotgun,
+  handled nearly everything, yet "we don't want to force people to use every
+  single weapon … you can have your favorites"
+  ([PC Gamer](https://www.pcgamer.com/doom-eternals-director-says-the-marauder-is-good-actually),
+  [Shacknews](https://www.shacknews.com/article/116635/hell-razer-the-making-of-doom-eternal?page=8)).
+  Inference: a reward for trying a weapon fails while one weapon is best at
+  everything the player meets.
+- **The cost of switching decides what wins.** Where weapons swap at once,
+  a pile of specialists beats an all-rounder; make the swap dear and "a single
+  general-purpose weapon may end up becoming more powerful than an entire
+  suite of situational weapons" (GB 561–2). A specialist chosen before the
+  player knows what comes is a blind guess (GB 565–6). Inference: Abyss sets
+  the swap at its dearest — one weapon a dive, chosen at `home` before the
+  batches are drawn (D97 (weapons are owned, and one is carried)) — so each
+  weapon has to be worth a whole dive. Not equal in every fight: equal over
+  a dive, with a different set of fights hard or easy, as two characters
+  built differently meet "a different set of encounters" (GB 561).
+- **A weapon changes how you play, not only how much.** Dead Cells' fifty
+  weapons each ask a play of their own: the dagger is weak from the front and
+  crits from behind, a sword crits while you are below half health; similar
+  weapons were cut as redundant
+  ([Game Developer](https://www.gamedeveloper.com/design/designing-each-of-the-50-weapons-in-i-dead-cells-i-to-feel-distinctive)).
+  With "Options over numbers" (above): a tier that adds a way to play is felt,
+  a tier that adds a number may not change a single hit to kill.
+- **Pay for trying, without forcing it.** Hades marks one weapon before a run;
+  carrying it pays more Darkness, the currency its powers are bought with.
+  Revita does the same with coins or materials. Neither forces the switch;
+  both make players "well-rounded with the game's mechanics"
+  ([Game Rant](https://gamerant.com/revita-hades-roguelike-roguelite-weapon-diversity-currency-bonus-rotation/)).
+- **Progress kept per weapon.** Returnal unlocks a weapon's traits, kept
+  forever, by kills with it (10–15 for the first, more for each next,
+  [PowerPyx](https://www.powerpyx.com/returnal-how-to-unlock-permanent-weapon-traits/)).
+  Nuclear Throne keeps a golden weapon carried through a portal as that
+  character's alternative start in later runs; doing so for every character is
+  an achievement ([TV Tropes](https://tvtropes.org/pmwiki/pmwiki.php/VideoGame/NuclearThrone)).
+  Rogue Company raises a gun's own mastery by challenges set for that gun
+  ([Gamepur](https://vip-develop.gamepur.com/?p=216168)). Inference: a kill
+  count is a quota, which D36 (attributes) rules out for points; a feat that
+  needs the weapon's own nature is not.
+- **Experimenting dies when it is dear.** Respec costs set too high made
+  players stop trying builds at all; a small cut "led to a significant
+  increase in … experimentation"
+  ([Wayline](https://www.wayline.io/blog/respec-your-game-respecing-without-restarting),
+  [GamesRadar on Path of Exile 2](https://www.gamesradar.com/games/action-rpg/path-of-exile-2-is-dropping-loot-more-generously-but-early-access-players-are-still-being-bankrupt-by-the-action-rpgs-high-respec-costs-why-am-i-being-punished-for-trying-out-things)).
+  Inference: a weapon's tiers are its own, so trying a new one mid-career is
+  a dive at tier 0 against a kit grown for another.
+- **The game should outgrow a weapon.** Dead Cells' curve rises so that
+  early weapons stop being enough, and "picks up along the way in order to
+  force you to make that choice" (Game Developer, above).
 
 ## For the economy's shape
 

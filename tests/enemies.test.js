@@ -261,6 +261,83 @@ describe('the eel (weave)', () => {
   });
 });
 
+describe('the lionfish (spines)', () => {
+  const spines = () => loadGame().enemyType('lionfish').spines;
+  const near = (gap, scenario) => {
+    const g = loadGame();
+    if (scenario) g.applyScenario(scenario, 1);
+    else g.reset(1);
+    g.queuePaused = true;
+    g.enemies.length = 0;
+    return [g, fishAt(g, 'lionfish', gap)];
+  };
+
+  const flying = g => g.bullets.filter(b => b.spine && !b.gone);
+
+  it('cocks its spines when the diver comes into its ring, and after its delay fires twelve out to the ring, one stinging it (D174, D176)', () => {
+    const S = spines();
+    const [g, e] = near(S.reach - 2);
+    play(g, S.delay - 0.05);
+    expect([e.phase, flying(g).length]).toEqual(['cock', 0]);
+    play(g, 0.1);
+    expect([e.phase, flying(g).length, g.player.hp]).toEqual(['bare', 12, g.player.maxHp]);
+    expect(flying(g).every(b => b.maxTravel === e.r + S.reach)).toBe(true);
+    play(g, (e.r + S.reach) / S.speed);
+    expect([flying(g).length, g.player.hp]).toEqual([0, g.player.maxHp - S.damage]);
+  });
+
+  it('stings only by a spine that touches: a diver in the ring between two goes untouched (D176)', () => {
+    const S = spines();
+    const [g, e] = near(S.reach - 2);
+    const d = e.r + S.reach - 5, a = Math.PI / 12;                // halfway between two, by the rim
+    Object.assign(e, { x: g.player.x - d * Math.cos(a), y: g.player.y - d * Math.sin(a) });
+    play(g, S.delay + (e.r + S.reach) / S.speed + 0.05);
+    expect([e.phase, g.player.hp]).toEqual(['bare', g.player.maxHp]);
+  });
+
+  it('flies them once cocked, whoever has left the ring, and cocks again only regrown (D174)', () => {
+    const S = spines();
+    const [g, e] = near(S.reach - 2);
+    play(g, S.delay / 2);
+    g.player.x -= 200;
+    play(g, S.delay / 2 + 0.05);
+    expect([e.phase, flying(g).length]).toEqual(['bare', 12]);
+    play(g, (e.r + S.reach) / S.speed);
+    expect(g.player.hp).toBe(g.player.maxHp);
+    g.player.x += 200;
+    play(g, S.regrow - 0.1 - (e.r + S.reach) / S.speed);
+    expect(e.phase).toBe('bare');
+    play(g, 0.15);
+    expect(e.phase).toBe('cock');
+  });
+
+  it('stings nothing through the dash, which kills it', () => {
+    const [g] = near(10);
+    Object.assign(g.player, { dashDamage: 100, facing: 0 });     // facing it (D107)
+    g.justPressed.add('Space');
+    play(g, 0.3);
+    expect([g.kills, g.player.hp]).toEqual([1, g.player.maxHp]);
+  });
+
+  it('takes a Knife cut from inside its ring, the diver out again before the spines fly; the cut stings nothing (D175)', () => {
+    const S = spines();
+    const g0 = loadGame(), w = g0.WEAPONS.find(x => x.name === 'Knife'), r = g0.PLAYER_START.r;
+    const blade = w.range + w.shotRadius - r;
+    expect(S.reach).toBeGreaterThan(blade);
+    const [g, e] = near(blade - 2, 'knife');
+    g.update(g.FIXED_DT);
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    g.keys.add('Mouse0');
+    g.update(g.FIXED_DT);
+    expect([e.hp < e.maxHp, g.player.hp, e.phase]).toEqual([true, g.player.maxHp, 'cock']);
+    g.keys.delete('Mouse0');
+    g.keys.add('KeyA');                                            // away from it
+    play(g, S.delay + (e.r + S.reach) / S.speed);
+    expect([e.phase, g.player.hp]).toEqual(['bare', g.player.maxHp]);
+  });
+});
+
 describe('the bite (D108)', () => {
   const bite = name => loadGame().enemyType(name).bite;
   // A fish whose body is `gap` px from the diver's, held where it is, so only

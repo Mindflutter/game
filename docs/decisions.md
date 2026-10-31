@@ -5481,3 +5481,227 @@ every other gate, once a layer, or left: "do your recommended adjustment".
 
 **Guarded by** `tests/combat.test.js` — the guard refills at the third gate
 and the fifth, not the second or the fourth.
+
+## D169 — A task runs until only Igor's answers are left · 2026-10-30
+
+Igor, after asking three times whether everything that needed no input was
+done: "if i give you a task, finish the task. do the necessary checks", then
+"add a self-check to rules. requirement: reprompt of the same thing doesnt
+yield new info or results".
+
+- **Every item in reach is walked before a reply that asks or stops** — the
+  task's plan, `roadmap.md` → Next, `bugs.md` → Open, a spec's proposals
+  whose time has come — and the part of each that needs no input is done in
+  that turn. Its plan and progress log live in the scratch space from the
+  first step.
+- **The self-check**: were the same prompt sent again, would the next turn
+  find anything new? A yes is done before the reply goes out.
+
+**Guarded by**: nothing a machine can see — it is how the work is done
+(`working.md` → Questions and uncertainty).
+
+## D170 — The Knife's lead closes by the fish it meets · 2026-10-30
+
+The Knife carries layer 3 at every kit measured — up to seven fish a cut,
+nothing to miss (`roadmap.md` → Health, the weapons). Most of the gap is the
+eel: it sways, so a shot misses it, and its touch lands on the Gun and the
+Harpoon, while the Knife's arc needs no aim. Layer 3 punishes fighting from
+afar, and nothing in it fighting up close. Claude offered (a) a fish whose
+answer is distance, (b) the Knife cut down, (c) the lead left. Igor: "do
+recommended (a) for the knife".
+
+- **The Knife stays as it is.** Layer 3 gets a fish whose answer is
+  distance; which fish is open (`ideas.md` → Fish ideas).
+- **Not by raising the Gun and the Harpoon**: Igor's winning dives were
+  already a stroll (`ideas.md` → The economy and the fights).
+
+**Guarded by**: nothing yet — the fish brings its checks; `npm run measure
+weapons <a kit's code>` reads the lead, and what deals each hit.
+
+## D171 — The lionfish · 2026-10-30
+
+D170 (the Knife's lead closes by the fish it meets) wanted a fish whose
+answer is distance. Of Claude's three, Igor took the spines always out: "do
+(a)", then "make sure it's not impossible to kill with a knife, only harder
+then others".
+
+- **Spines**: a hit landing on it — a shot, a cut, a splash — while the
+  diver's body is within their `reach` of its own stings the diver for their
+  `damage`. Out of that reach a hit costs nothing; the dash's invulnerability
+  takes the sting, so a dash that deals damage (D51 (the dash is bought,
+  and the offer waits for the death)) kills it unhurt. It chases and has no attack
+  of its own.
+- **Never out of the Knife's reach**: the spines' reach sits under the
+  Knife's shortest cut, so the end of the blade always strikes it unstung.
+  Harder for the Knife — never a cut into the crowd round it — not barred.
+- **The diver bot reads it** as a player would: it keeps the reach as room,
+  and fires nothing that would sting — the cut held while a lionfish is near
+  and in its arc. Its threat is measured with that bot.
+- **Met first in layer 3, past the threat order.** Its threat, measured with
+  the Gun, which barely meets its spines, is the archer's, and would place
+  it in layer 1, where the Knife is short and every stretch already brings a
+  type. Claude offered it so; Igor: "recommended". A type built against one
+  weapon names it in `against`, and the pools bring it where it counters
+  that weapon. One new type a stretch still holds: it comes in layer 3's
+  second stretch, after the eel's.
+- **Four of layer 3's fifteen batches**: it evens the Knife where a Gun
+  career meets layer 3, and keeps every weapon from being better than
+  another at everything; seven break that. It leaves the late kit's lead —
+  the Mask's reach outreaches the spines — to be closed by something else
+  (`roadmap.md` → Health).
+- Every number is Claude's pick.
+
+**Amends** D130 (fish are revealed a type at a time): a type with `against`
+is left out of the threat order.
+
+**Guarded by**: `tests/enemies.test.js` — a hit within the reach stings and
+one beyond does not; the dash kills it unstung; a Knife cut from the end of
+its shortest reach lands unstung, one from close stings; `tests/dive.test.js`
+— the reveal, the threat order but for a type with `against`.
+
+## D172 — The end screen marks what home can buy · 2026-10-31
+
+A new player's session (`playtests.md` → A new player's session): five of
+the first seven deaths dived again, and 119 gems and 4 points were banked by
+the first visit home. Claude offered the death screen saying what waits
+there, and a gentler opening. Igor: "the death screen shows whether any
+purchase is available, like a red notification dot or something, optionally
+the resources available"; the opening "not needed now".
+
+- **Go home on the death and the win screens carries a red dot** when the
+  bank or the points can buy something at `home`: a weapon, a tier of the
+  one carried, an equipment tier, an attribute step. Equipping a weapon
+  already owned is free, so it is not one.
+- **Beside it, what they hold**: "Go home   119 gems, 4 points", either left
+  out at none. Without the dot the row reads Go home.
+- **Not in a debug dive**, whose save is a throwaway (D102 (the debug
+  mode)); and not on the pause menu's Go home, whose bank lacks the dive's
+  gems.
+- Where the dot sits, its colour and the words are Claude's; placeholder
+  graphics.
+
+**Guarded by**: `tests/dive.test.js` — no dot with nothing to buy; the dot
+and the gems at the Gun's first tier; the dot and a point at an attribute's
+first step; none in a debug dive.
+
+## D173 — The sting is drawn, the ring kept · 2026-10-31
+
+`lionfish`'s second play (`playtests.md` → The lionfish, against a short
+Knife): two stings; before each the ring had shown about 0.3s, and one
+followed a press as a lionfish crossed the ring's outer edge, the cut firing
+short. Claude asked whether the stings were seen coming, and offered the
+ring fading in from the cut's reach instead. Igor: "you need to keep rings
+and draw stings".
+
+- **The ring stays as drawn** in D171 (the lionfish): fading in over the 60
+  px before the reach, bright inside.
+- **Every hit flies the spines off**: the twelve leave the fish and fly out
+  to the ring of its reach in a fifth of a second, there to vanish, and the
+  fish's own regrow over half a second. The ring is how far they fly; a
+  diver inside it is stung, as D171 (the lionfish) has it — the rule is
+  unchanged, the drawing shows it. Particles, so they fly on from a fish the
+  cut killed. Igor: "stings never come off the fish. they need to fly up to
+  the red circle and the regrow".
+- **Drawn twice before, and lost.** First as three spines from the fish to
+  the diver: a sting lands up close — 0 to 39 px in every play — so the
+  lines were about 40 px long, from a fish already dead, under the cut's
+  wedge, the death burst and the hurt sparks (`lionfish`'s third play; Igor:
+  "i dont see stings off the lionfish"). Then as a star out to the ring, but
+  still only for a sting that hurt: `lionfish`'s fourth play cut inside the
+  reach three times, each in the blink after an eel's bite, and nothing was
+  drawn at all.
+- **The regrowth is only drawn**: a fish hit again while regrowing flies
+  its spines again and stings as ever. Whether a bare fish should be
+  harmless is a rule, asked of Igor.
+- No rng: drawing it moves no random draw after it.
+- Its shape, colour and times are Claude's; placeholder graphics.
+
+**Guarded by**: `tests/enemies.test.js` — twelve spines out to the ring and
+the fish left bare, on a hit inside the reach, outside it, and in the blink
+of a hit.
+
+## D174 — The lionfish fires its spines · 2026-10-31
+
+Asked what the red ring is for and what should make the spines fly — when
+the fish is hit, or by itself — Igor: "i meant (b) from the start. you come
+into the ring, after a short delay it fires".
+
+- **A diver in the ring of the reach cocks the spines**; after `delay` they
+  fly out to the ring, stinging a diver still inside. Once cocked they fly,
+  whoever has left. Bare, they regrow over `regrow`, and cock again only
+  regrown.
+- **A hit on it stings nothing.** Supersedes D171 (the lionfish)'s sting on
+  a hit landing close, and D173 (the sting is drawn, the ring kept)'s spines
+  flying on every hit: they fly when they fire, and a bare fish cannot.
+- **It swims on through its tell**, the spines bristling as they cock; the
+  puffer must chase first, stops and swells, and bursts once a fuse (D106
+  (the puffer bursts and comes on again)).
+- **The reach stays under the Knife's shortest cut**: the end of its blade
+  never enters the ring (Igor, for D171 (the lionfish): "make sure it's not
+  impossible to kill with a knife, only harder").
+- **The ring is drawn where the spines stop**, the reach past the fish's
+  body, so a body touching it is in. It was drawn where the diver's centre
+  would be, half a body out, and the spines would have flown into a diver
+  they did not sting.
+- `delay` 0.4s and `regrow` 1s are Claude's picks, and its threat is
+  measured anew; placeholder graphics.
+
+**Guarded by**: `tests/enemies.test.js` — cocked in the ring and stinging
+inside after the delay, the spines out to the ring; flying once cocked
+though the diver left, cocking again only regrown; the Knife's far-end cut
+outside the ring, a hit from inside stinging nothing; the dash killing it
+unstung.
+
+## D175 — The lionfish drifts, its circle past the Knife's cut · 2026-10-31
+
+Firing by itself, D174 (the lionfish fires its spines), and chasing, the
+lionfish pressed every weapon, the Gun most, and the Knife still dominated
+layer 3 at the kit a Gun career meets it with. Claude offered it drifting,
+its circle past the short Knife's cut, the one shape measured to single out
+the Knife. Igor: "recommended".
+
+- **It drifts**, `speed` 30 against 80: a weapon that fights from afar
+  shoots it without meeting its circle.
+- **Its `reach` passes the Mask-less Knife's 70 px cut**, 80 against 40, so
+  the Knife comes in, cuts, and gets out within the delay. Supersedes D174's
+  reach under the Knife's shortest cut; the delay now keeps the Knife's kill
+  possible, D171 (the lionfish)'s "not impossible ... only harder".
+- **The Knife's bot darts in**: an armed circle costs a blade nothing to
+  enter, a cocked one does; a shooting bot keeps out of both. Kept out, the
+  Knife's cleared none of `lionfish-fires`' gate in 150s; darting, all eight
+  in 31.4s, nothing lost.
+- Its threat, measured, falls to 0.022 at grade 1, and the fit adds a fish
+  or two to three of its batches. At the kit a Gun career meets layer 3
+  with, the Knife 33.3s / 2.65 hearts, the Gun 45.45 / 5.79, the Harpoon
+  42.37 / 4.08; the bar holds over layers 2 and 3 (`roadmap.md` → Health).
+- `speed` and `reach` are Claude's picks.
+
+**Guarded by**: `tests/enemies.test.js` — the Knife cuts it from inside the
+circle and swims out unstung before the spines fly; a delay too short to get
+out in fails it.
+
+## D176 — The spines sting by touch · 2026-10-31
+
+In `lionfish-fires`' first play the fired spines stung any diver whose body
+overlapped the circle: twice Igor was stung with his diver's centre outside
+it, 109 and 115 px from the fish, the circle drawn at 100. Igor: "it damages
+although i get off the range. fix", "spikes should do the damage, not the
+fact that i'm in the circle", and "that's the whole difference with the
+puffer damaging behavior".
+
+- **Each spine is a shot**: the twelve fly out from the fish to the
+  circle as enemy shots, the archer's spit's kind, and sting only the diver
+  one touches. Supersedes D174 (the lionfish fires its spines)'s sting of
+  whatever is inside the circle; coming into the circle still cocks them.
+- **The puffer's burst hurts by area, the lionfish's spines by touch**: a
+  diver inside the circle between two spines goes unstung.
+- Drawn as the shot flies, its tip where it stings, so the sting is seen
+  where it lands; replaces D173 (the sting is drawn, the ring kept)'s
+  drawn-only flight.
+- The spine's `speed` 400 (out to the circle in 0.25s), its `r` 2 and the
+  `count` 12 are Claude's picks; its threat, measured, falls to 0.021 at
+  grade 1.
+
+**Guarded by**: `tests/enemies.test.js` — a diver on a spine's line is
+stung once it arrives, one between two inside the circle is not; stinging
+whatever is inside the circle fails both.

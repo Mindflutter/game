@@ -18,16 +18,17 @@ pulled to the player (D78 (gems are pulled to the player)).
 ## Roster
 
 <!-- generated: enemies -->
-| name | r | hp | speed | ramp | value | desc | color | glow | carries | enters |
-|---|---|---|---|---|---|---|---|---|---|---|
-| drifter | 18 | 1 | 85 | 0.6 | 1 | slow, and bites when its jaws open | #e8446e | #ff1e5a | — | — |
-| darter | 12 | 1 | 190 | 0.9 | 1 | small and quick, bites fast | #ffb648 | #ff8a00 | — | — |
-| bulwark | 34 | 6 | 52 | 1.2 | 3 | big, slow and tough; its bite throws you far | #a05cff | #7b2fff | — | — |
-| archer | 16 | 2 | 75 | — | 2 | keeps its distance and spits | #5aa9ff | #1f6fff | — | — |
-| puffer | 22 | 3 | 125 | — | 2 | chases you, swells up close, then bursts: get out of its ring | #ffee58 | #ffc800 | — | — |
-| eel | 14 | 2 | 130 | — | 2 | weaves as it swims, and touching it hurts | #38f2c0 | #00c896 | — | — |
-| mini-boss | 52 | 10 | 90 | — | 10 | winds up, lunges a long way, then rests: hit it then | #e2ff8a | #c6ff3c | false | — |
-| boss | 84 | 30 | 80 | — | 40 | lunges and fans out shots, open only as it rests, fiercer as it is hurt; its escorts keep coming until it dies | #c8ff3c | #9dff00 | false | bottom |
+| name | r | hp | speed | ramp | value | desc | color | glow | against | carries | enters |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| drifter | 18 | 1 | 85 | 0.6 | 1 | slow, and bites when its jaws open | #e8446e | #ff1e5a | — | — | — |
+| darter | 12 | 1 | 190 | 0.9 | 1 | small and quick, bites fast | #ffb648 | #ff8a00 | — | — | — |
+| bulwark | 34 | 6 | 52 | 1.2 | 3 | big, slow and tough; its bite throws you far | #a05cff | #7b2fff | — | — | — |
+| archer | 16 | 2 | 75 | — | 2 | keeps its distance and spits | #5aa9ff | #1f6fff | — | — | — |
+| puffer | 22 | 3 | 125 | — | 2 | chases you, swells up close, then bursts: get out of its ring | #ffee58 | #ffc800 | — | — | — |
+| eel | 14 | 2 | 130 | — | 2 | weaves as it swims, and touching it hurts | #38f2c0 | #00c896 | — | — | — |
+| lionfish | 20 | 3 | 30 | 0.8 | 2 | come into its ring and its spines fly out to it: strike from outside, or get out in time | #ffe9dc | #ff5a3c | Knife | — | — |
+| mini-boss | 52 | 10 | 90 | — | 10 | winds up, lunges a long way, then rests: hit it then | #e2ff8a | #c6ff3c | — | false | — |
+| boss | 84 | 30 | 80 | — | 40 | lunges and fans out shots, open only as it rests, fiercer as it is hurt; its escorts keep coming until it dies | #c8ff3c | #9dff00 | — | false | bottom |
 <!-- /generated -->
 
 Each behaviour's numbers, a table per behaviour field. `bite`:
@@ -89,6 +90,14 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 | eel | 1 | 240 |
 <!-- /generated -->
 
+`spines`:
+
+<!-- generated: enemies:spines -->
+| name | reach | delay | regrow | count | speed | r | damage | knock |
+|---|---|---|---|---|---|---|---|---|
+| lionfish | 80 | 0.4 | 1 | 12 | 400 | 2 | 1 | 300 |
+<!-- /generated -->
+
 `shell`:
 
 <!-- generated: enemies:shell -->
@@ -113,7 +122,7 @@ and one way to be hurt)), and the ramps and bites (D107 (the diver swims and
 faces; fish with a ramp), D108 (fish bite)) — the puffer's, the mini-boss's
 and the boss's tuned to the pillars (D127 (the tuned numbers)), the boss's
 `hp` raised again with the longer dive (D137 (batches grow from seconds to a
-minute and a half)).
+minute and a half)), and the lionfish's (D171 (the lionfish)).
 
 ## Grades
 
@@ -157,6 +166,7 @@ counts more, and gates carry fewer)).
 | archer | 0.034 | 0.056 | 0.064 |
 | puffer | 0.113 | 0.183 | 0.258 |
 | eel | 0.114 | 0.239 | 0.4 |
+| lionfish | 0.021 | 0.033 | 0.047 |
 | mini-boss | 0.386 | 0.452 | 0.5 |
 | boss | 0.906 | 0.946 | 0.992 |
 <!-- /generated -->
@@ -178,6 +188,7 @@ counts more, and gates carry fewer)).
 | `carries` | — | `false`: never the glowing fish that carries its batch's mod (D88 (the fish glows from the start)) — the boss and the mini-boss. Absent: it can be. |
 | `bite` | — | Its presence is the behaviour: the type bites (D108 (fish bite)). Holds the numbers in its table above: within `reach` px, body to body, it stops and opens its jaws for `windup` seconds, bites if the diver is still within `reach`, then chases `rest` seconds before it can bite again. |
 | `touch` | — | Its presence is the behaviour: its body hurts on contact — the eel's. Holds its `damage` and its `knock`, as every attack (D118 (hits vary in damage), D122 (knockback)). A fish without it hurts only by its attack (D108 (fish bite)). |
+| `spines` | — | Its presence is the behaviour: a diver whose body comes within `reach` px of its own cocks them; `delay` seconds later `count` of them fly out from its centre to the ring of that reach as enemy shots of radius `r` at `speed` px/s, stinging only the diver one touches (D176 (the spines sting by touch)), and regrow over `regrow` seconds before they can cock again (D174 (the lionfish fires its spines)). Holds its `damage` and its `knock`, as every attack. |
 | `lunge` | — | Its presence is the behaviour: the type lunges instead of only chasing (D64 (the boss lunges)). Holds the timings in the table above: `chase` seconds before a wind-up may start, `windup` and `rest` in seconds, the charge's `speed` in px/s and its `reach` in px. |
 | `fan` | — | A lunger's second attack (D117 (the boss's fan)), taken where its `stages` name it; read only beside a `lunge`. Holds the numbers in its table above: the lunge's `chase`, `windup`, `reach` and `rest`, then `count` shots spread evenly across `arc` degrees, each of radius `r` px flying at `speed` px/s for `travel` px. |
 | `shell` | — | Its presence is the behaviour: a lunger's shell, shut but in the `rest` after each attack — the opening (D156 (the boss's shell and stages)). Shut, a hit, a cut or the dash deals `takes` of its damage, and none glances off with a clink. |
@@ -185,6 +196,7 @@ counts more, and gates carry fewer)).
 | `spit` | — | Its presence is the behaviour: the type keeps its distance and spits (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: it closes to `range` px and holds its ground (D159 (the archer holds its ground)); it spits every `every` seconds, a shot of radius `r` px flying at `speed` px/s for `travel` px. |
 | `fuse` | — | Its presence is the behaviour: the type swells, bursts and chases on (D95 (three enemy behaviours, and one way to be hurt), D106 (the puffer bursts and comes on again)). Holds the numbers in its table above: after chasing for at least `chase` seconds, within `trigger` px it stops and swells for `time` seconds, then bursts, reaching `blast` px, and chases again. |
 | `weave` | — | Its presence is the behaviour: the type sways as it closes in (D95 (three enemy behaviours, and one way to be hurt)). Holds the numbers in its table above: `width` px either side of its heading, `rate` sways a second. |
+| `against` | — | The weapon the type is built against (D171 (the lionfish)). Its `threat`, measured with the Gun, cannot price it, so the pools bring it where it counters that weapon, past the threat order (D130 (fish are revealed a type at a time)). Absent: it keeps the order. |
 | `threat` | hearts | One number per grade, in the table above: what one of it costs the diver bot at the reference kit (D126 (threat)). A batch's threat is the sum, and what the plan grades it by. A new type is measured once and joins. |
 
 ## Behaviours
@@ -211,6 +223,24 @@ when the jaws open, get away.
 **Touch** — a fish with `touch` costs that much on contact: the eel's
 electric body. Every other fish hurts only by its attack — a bite, a spit, a
 burst, or the lunge's charge (D108 (fish bite)).
+
+**Spines** — a fish with `spines` fires them (`spinesStep()`): a diver whose
+body comes within their `reach` of its own cocks them, and `delay` later they
+fly out to the ring of that reach, whoever has left by then, as `count`
+enemy shots: one that touches the diver costs its `damage`, knocked along its
+flight, and one that misses costs nothing (D176 (the spines sting by
+touch)), the puffer's burst hurting by area instead; bare, they regrow over
+`regrow` before they can cock again (D174 (the lionfish fires its spines)).
+It swims on meanwhile. A hit on it costs nothing, and the dash's
+invulnerability takes the sting, so a dash that deals damage — bought, D51
+(the dash is bought, and the offer waits for the death) — kills it unhurt.
+It drifts, and its reach passes the Mask-less Knife's cut, so the Knife
+comes in, cuts, and gets out within the delay (D175 (the lionfish drifts,
+its circle past the Knife's cut)). It is drawn spiked, the spines bristling as they cock; the
+ring of its reach fades in as the diver nears it and brightens inside, and
+the spines fly out to it, each drawn where it can sting, and regrow (D173
+(the sting is drawn, the ring kept)). In one sentence: strike it from
+outside its ring, or get out before its spines fly.
 
 **Lunge** — chase, wind up, charge, rest, then chase again (`lungeStep()`).
 It chases the nearest point to the player where its body fits in view, so a
@@ -310,6 +340,22 @@ Closes in on a sway (D95 (three enemy behaviours, and one way to be hurt)):
 the draft's "moving in a peculiar way". Fast and slippery, it asks you to aim
 where it will be, not where it is. Its body shocks: the one fish that hurts on
 touch, and it never bites (D108 (fish bite)) — never touch it.
+
+## lionfish
+
+Spined and slow, and harmless while you keep out of its ring (D174 (the
+lionfish fires its spines)): come in and, a moment later, its spines fly out
+to the ring, stinging you if one touches you (D176 (the spines sting by
+touch)); then they regrow, and it
+fires again if you stay. It drifts (D175 (the lionfish drifts, its circle
+past the Knife's cut)), so a weapon that fights from afar never needs to
+meet it, and the Knife must go to it, dart in, cut, and get out before they
+fly — never a stand in the crowd around it. Unlike the puffer, which hunts
+you, stops and swells, and bursts once a fuse over its whole ring, it drifts
+on through its tell, fires each time it regrows, and hurts only where a
+spine lands.
+The eel's opposite: the eel punishes a shot that cannot aim, the lionfish a
+blade that stays close. Named for the fish whose spines sting.
 
 ## mini-boss
 

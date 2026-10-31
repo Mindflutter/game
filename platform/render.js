@@ -263,6 +263,19 @@ function drawField() {
       ctx.stroke();
       ctx.restore();
     }
+    // Where the spines stop (D174); a body touching it cocks them. PLACEHOLDER GRAPHICS.
+    const spineGap = e.spines ? Math.hypot(player.x - e.x, player.y - e.y) - e.r - player.r - e.spines.reach : Infinity;
+    if (spineGap < 60) {
+      const inside = spineGap < 0;
+      ctx.save();
+      ctx.globalAlpha = inside ? 0.6 : 0.35 * (1 - spineGap / 60);
+      ctx.strokeStyle = e.glow;
+      ctx.lineWidth = inside ? 2.5 : 1.5;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r + e.spines.reach, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
     if (winding) {
       ctx.save();
       ctx.globalAlpha = 0.1 + 0.25 * k;
@@ -304,6 +317,20 @@ function drawField() {
       ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.arc(0, 0, e.r * (1 + 0.25 * k) + 3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // Spines (D174), bristling as their tell. PLACEHOLDER GRAPHICS.
+    if (e.spines) {
+      const S = e.spines, cocked = e.phase === 'cock' ? Math.min(1, e.phaseTime / S.delay) : 0;
+      const grown = (e.phase === 'bare' ? Math.min(1, e.phaseTime / S.regrow) : 1) * (1 + 0.6 * cocked);
+      ctx.strokeStyle = e.glow;
+      ctx.lineWidth = 2.5 + 1.5 * cocked;
+      ctx.beginPath();
+      for (let i = 0; i < S.count; i++) {
+        const a = i * 2 * Math.PI / S.count;
+        ctx.moveTo(Math.cos(a) * e.r, Math.sin(a) * e.r);
+        ctx.lineTo(Math.cos(a) * (e.r + SPINE * grown), Math.sin(a) * (e.r + SPINE * grown));
+      }
       ctx.stroke();
     }
     ctx.restore();
@@ -385,7 +412,18 @@ function drawField() {
   ctx.shadowBlur = 0;
   // Round and blue, so an enemy's shot never reads as yours (D95).
   // PLACEHOLDER GRAPHICS.
-  for (const b of bullets) if (b.evil) circle(b.x, b.y, b.r, '#cfe3ff', '#1f6fff', 16);
+  // A lionfish's spine (D176) is a line, its tip where it stings.
+  for (const b of bullets) {
+    if (!b.spine) { if (b.evil) circle(b.x, b.y, b.r, '#cfe3ff', '#1f6fff', 16); continue; }
+    ctx.shadowBlur = 8;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = ctx.shadowColor = b.spine;
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(b.x - b.vx / b.speed * SPINE, b.y - b.vy / b.speed * SPINE);
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
 
   // A hit blinks; the dash's own invulnerability does not (D121). Not mid-dash
   // either: blinking out mid-flight made the dash read as a teleport.
@@ -631,8 +669,15 @@ function drawRows(menu) {
     const on = i === menuIndex;
     ctx.fillStyle = item.dim ? (on ? '#5d8b99' : '#2f5563') : (on ? '#bffcff' : '#547f8d');
     ctx.font = (on ? '23px' : '20px') + ' system-ui, sans-serif';
-    ctx.fillText(on ? '\u203a  ' + item.label + '  \u2039' : item.label,
-                 ARENA_W / 2, menu.top + i * ROW_STEP);
+    const text = on ? '\u203a  ' + item.label + '  \u2039' : item.label, y = menu.top + i * ROW_STEP;
+    ctx.fillText(text, ARENA_W / 2, y);
+    // The dot (D172). PLACEHOLDER GRAPHICS.
+    if (item.dot) {
+      ctx.fillStyle = '#ff4d5e';
+      ctx.beginPath();
+      ctx.arc(ARENA_W / 2 + ctx.measureText(text).width / 2 + 14, y - 7, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
   });
 
   drawHint('\u2191 \u2193 or mouse,  Enter or click to pick');

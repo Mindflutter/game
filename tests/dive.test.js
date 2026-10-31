@@ -3,6 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { loadGame, ticks, ride, clearAndWait, atGate, die, sameFish } from './harness.js';
+import { fitBatch, kitOf } from './measure.js';
 
 const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
 
@@ -54,6 +55,21 @@ describe('threat (D126)', () => {
         expect([l, b.enemies, under, reach >= target]).toEqual([l, b.enemies, true, true]);
       }
     }
+  });
+
+  it('fits a fitted batch to itself, so a refit with nothing changed writes the same pools', () => {
+    const g = loadGame();
+    for (const x of stretches(g)) {
+      for (const b of x.s.escorts ? [] : x.s.pool) {
+        const once = fitBatch(g, b.enemies, x).es;
+        expect([x.l, b.enemies, fitBatch(g, once, x).es]).toEqual([x.l, b.enemies, once]);
+      }
+    }
+  });
+
+  it('reads a kit from a debug code, as the play-tests write one', () => {
+    expect(kitOf(loadGame(), 'L3,Knife2,Mask3,Strength3,Reflex2,puffer4')).toEqual({ layer: 2,
+      kit: { weapon: 'Knife', gear: { Knife: 2, Mask: 3 }, raised: { Strength: 3 }, mods: ['Reflex', 'Reflex'] } });
   });
 
   it('grows its batches in fish, not only in grade, through six gates a layer (D155)', () => {
@@ -155,9 +171,11 @@ describe('threat (D126)', () => {
       return fresh;
     });
     expect(brought.map((fresh, k) => fresh.length <= (k ? 1 : 2))).not.toContain(false);
-    // No type below the threat of one an earlier stretch brought.
-    expect(brought.every((fresh, k) => fresh.every(n => brought.slice(0, k).flat().every(m => threat(m) <= threat(n)))))
-      .toBe(true);
+    // No type below the threat of one an earlier stretch brought, but those
+    // built against a weapon (D171).
+    const ordered = n => !g.ENEMY_TYPES.find(t => t.name === n).against;
+    expect(brought.every((fresh, k) => fresh.filter(ordered).every(n =>
+      brought.slice(0, k).flat().filter(ordered).every(m => threat(m) <= threat(n))))).toBe(true);
   });
 });
 
@@ -371,6 +389,28 @@ describe('gems (D35, D67)', () => {
     expect(click(g, 10, 10)).toBe('dead');       // a click off the buttons does nothing
     const r = again(g);
     expect(click(g, r.x + r.w / 2, r.y + r.h / 2)).toBe('playing');
+  });
+
+  it('marks Go home when the bank or the points can buy something there, with what they hold (D172)', () => {
+    const home = (bank, challenges = {}) => {
+      const g = loadGame();
+      g.meta.bank = bank;
+      g.meta.challenges = challenges;
+      g.reset(1);
+      g.queuePaused = true;
+      die(g);
+      return g.MENUS.dead.items[g.menuIndex];
+    };
+    expect(home(0)).toMatchObject({ label: 'Go home', dot: false });
+    expect(home(20)).toMatchObject({ label: 'Go home   20 gems', dot: true });   // the Gun's first tier
+    expect(home(0, { depth: 1 })).toMatchObject({ label: 'Go home   1 point', dot: true });
+    const g = loadGame();
+    g.openDebug('L1,G1,S1,Gun0', 1);
+    g.debugDive();
+    g.meta.bank = 500;
+    g.queuePaused = true;
+    die(g);
+    expect(g.MENUS.dead.items[g.menuIndex].dot).toBeFalsy();
   });
 });
 

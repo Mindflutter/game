@@ -39,6 +39,7 @@ const DASH_PUSH      = 320;   // px/s the wave shoves an enemy outward...
 const PUSH_DRAG      = 0.02;  // ...with this fraction of it left after a second
 const BUMP_TIME      = 0.1;   // seconds a hit fish's body is drawn jolted along the hit: Claude's pick...
 const BUMP_SIZE      = 0.15;  // ...by this share of its radius, flattened along it as much
+const SPINE          = 10;    // px a lionfish's spine stands off its body (D173): Claude's pick
 const LEAP_TIME      = 0.08;  // seconds a biter's drawn leap takes out, and as long back: Claude's pick
 const SPLASH_SHOW    = 0.3;   // seconds Bloom's ring shows a splash's reach: Claude's pick
 const BODY_PUSH      = 600;   // px/s at most that overlapping bodies part (D120): Claude's pick
@@ -475,14 +476,14 @@ const LAYERS = [
      { enemies: [['eel', 10], ['archer', 7]] }],
     [{ enemies: [['bulwark', 6], ['eel', 14], ['archer', 6]] },
      { enemies: [['eel', 13], ['puffer', 5], ['darter', 13]] },
-     { enemies: [['archer', 8], ['eel', 17]] },
+     { enemies: [['archer', 6], ['eel', 16], ['lionfish', 8]] },
      { enemies: [['bulwark', 8], ['puffer', 5], ['eel', 11]] },
-     { enemies: [['drifter', 16], ['eel', 16], ['archer', 8]] }],
+     { enemies: [['lionfish', 15], ['eel', 15], ['archer', 6]] }],
     [{ enemies: [['bulwark', 13], ['eel', 19], ['puffer', 5]] },
-     { enemies: [['archer', 10], ['eel', 27], ['darter', 6]] },
+     { enemies: [['archer', 9], ['eel', 26], ['lionfish', 11]] },
      { enemies: [['puffer', 7], ['eel', 19], ['archer', 14]] },
      { enemies: [['bulwark', 6], ['archer', 8], ['eel', 25]] },
-     { enemies: [['drifter', 22], ['eel', 23], ['puffer', 6]] }],
+     { enemies: [['lionfish', 19], ['eel', 22], ['puffer', 5]] }],
   ]),
 ];
 
@@ -493,6 +494,7 @@ const SCENARIOS = {
   'one-archer':  { spawn: false, enemies: [['archer', 1100, 400]] },
   'one-puffer':  { spawn: false, enemies: [['puffer', 1000, 400]] },
   'one-eel':     { spawn: false, enemies: [['eel', 1150, 400]] },
+  'one-lionfish': { spawn: false, weapon: 'Knife', enemies: [['lionfish', 1000, 400]] },
   'harpoon':     { weapon: 'Harpoon' },
   'knife':       { weapon: 'Knife' },
   'all-types':   { spawn: false,
@@ -551,6 +553,11 @@ const ENEMY_TYPES = [
     color: '#38f2c0', glow: '#00c896',
     weave: { width: 50, rate: 0.9 },
     touch: { damage: 1, knock: 240 } },
+  // The lionfish (D171, D174, D175, D176). Claude's picks.
+  { name: 'lionfish', r: 20, hp: 3, speed: 30, ramp: 0.8, value: 2, threat: [0.021, 0.033, 0.047], against: 'Knife',
+    desc: 'come into its ring and its spines fly out to it: strike from outside, or get out in time',
+    color: '#ffe9dc', glow: '#ff5a3c',
+    spines: { reach: 80, delay: 0.4, regrow: 1, count: 12, speed: 400, r: 2, damage: 1, knock: 300 } },
   // The boss, and the mini-boss that rehearses its lunge and its opening (D62,
   // D64, D65, D156): both shelled, open only in the rest after an attack.
   // Neither glows (D88). Claude's picks.
@@ -613,6 +620,7 @@ const DEBUG_BEHAVIOURS = {
   shell: 'shrugs hits off, but in the rest after each attack \u2014 hit it then',
   stages: 'grows fiercer as it is hurt: lunges, then a fan in turn, then two lunges to a fan',
   touch: 'hurts to touch',
+  spines: 'fires its spines out to its ring when you come in \u2014 get out in time, or slip between them',
 };
 // `of` marks a cap that is the game's own, shown beside the count.
 const DEBUG_COUNTS = [
@@ -671,12 +679,27 @@ const tierLabel = g => {
   return 'tier ' + t + (cost === undefined ? ', the top' : ' → ' + (t + 1) + '   ' +
     moves(g.tiers[t].apply, WEAPONS.find(w => w.name === meta.carried)) + '   ' + cost + ' gems');
 };
+// The end screens' Go home (D172).
+const END_HOME = {
+  get label() {
+    if (!this.dot) return GO_HOME.label;
+    const p = points();
+    return 'Go home   ' + [meta.bank && meta.bank + ' gems', p && p + (p === 1 ? ' point' : ' points')]
+      .filter(Boolean).join(', ');
+  },
+  // Equipping a weapon already owned is free, so it buys nothing.
+  get dot() {
+    return !debugSetup && (EQUIPMENT.some(canBuy) || ATTRIBUTES.some(canRaise) ||
+      WEAPONS.some(w => (meta.carried === w.name ? canBuy(w) : !meta.owned.includes(w.name) && canOwn(w))));
+  },
+  run: GO_HOME.run,
+};
 const END_MENU = {
   top: END_TOP,
   flows: true,
   back: GO_HOME.run,
   items: [{ get label() { return debugSetup ? 'Again' : 'Dive again'; },
-            run: () => (debugSetup ? debugDive() : reset()) }, GO_HOME],
+            run: () => (debugSetup ? debugDive() : reset()) }, END_HOME],
 };
 
 const MENUS = {
@@ -836,7 +859,7 @@ const MENUS = {
           return a.name + '   ' + n + ' → ' + (n + 1) + '   ' +
                  moves(a.apply, WEAPONS.find(w => w.name === meta.carried)) + '   ' + (n + 1) + (n ? ' points' : ' point');
         },
-        get dim() { const n = meta.raised[a.name] || 0; return n === a.max || points() < n + 1; },
+        get dim() { return !canRaise(a); },
         run: () => raise(a) })),
       BACK_HOME,
     ],

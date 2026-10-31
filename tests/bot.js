@@ -88,6 +88,11 @@ function dangers(e, p) {
       [near, A.damage, left, e.aimX * A.reach * k / 5, e.aimY * A.reach * k / 5]);
   }
   if (e.lunge) return [[near, e.lunge.damage, 0]];
+  // Spines (D174): coming in only cocks them, so a weapon that cannot reach
+  // past the ring may dart in.
+  if (e.spines && e.phase === 'cock') return [[near + e.spines.reach, e.spines.damage * 2, e.spines.delay - e.phaseTime]];
+  if (e.spines && e.phase === 'chase' && p.range + (p.swing ? p.shotRadius : 0) > p.r + e.spines.reach)
+    return [[near + e.spines.reach, e.spines.damage * 0.5, 0]];
   return [[near, 0.5, 0]];
 }
 

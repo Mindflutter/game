@@ -61,6 +61,11 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-10-30-layer2-dive3` — layer 2 with dive 3's kit
 - [x] `2026-10-30-career` — a whole career, after the puffer
 - [ ] `2026-10-30-suit-pairs` — layer 3 with the guard lasting two gates
+- [x] `2026-10-30-lionfish` — the short Knife among lionfish and eels
+- [x] `2026-10-30-lionfish` again, the ring redrawn, + `2026-10-30-lionfish-mask` — the same gate with the Mask
+- [x] `2026-10-31-new-player` — a session from New game, by someone new to the game
+- [x] `2026-10-31-lionfish-fires` — the lionfish drifting and firing its spines by itself, the short Knife
+- [ ] `2026-10-31-new-player-2` — a second newcomer, the death screen's dot in; waits, no newcomer planned soon
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -71,6 +76,18 @@ hearts, and some dives (Three weapons, one late batch, below). So the next
 play-tests ask what the bot says it is — the weapon — rather than climbing
 counts.
 Still to set up: boosts, once the debug mode can place one.
+
+**The lunge, over every play** (2026-10-30, the eleven plays a boss or a
+mini-boss lunged in, replayed): 165 lunges, 82 the bosses' and 83 the
+mini-bosses'; 2 landed, both bosses'. None was dashed through — the diver
+was off the line. Mostly without trying: the line is fixed as the wind-up
+starts (D64 (the boss lunges)), and a diver going on the way it swam as the
+wind-up began, the screen's edges aside, would have taken 30 of the 165;
+standing still, all 165. 158 began with the diver moving. A swim across the
+line leaves it in 0.4s from the boss's and 0.28s from the mini-boss's; their
+wind-ups are 0.8s and 1.2s. "When it swells, get out of its line" is done
+four times in five before the swell is read. What to change is open:
+`ideas.md` → The economy and the fights.
 
 ## The Suit pair — played
 
@@ -602,7 +619,8 @@ damage and not die".
   same as the first career (`ideas.md` → The first logged career).
 - **Bought by the win**: the Knife to 2, the Suit and the Mask to 3, the
   Weights to 1, Heart, Strength and Dash reach to 3; never the Harpoon, the
-  Gun not past 0. 1198 gems unspent.
+  Gun not past 0. 1198 gems unspent — 1070 of them the winning dive's own.
+  It began with 128, against 825 gems of gear still unbought.
 - **Mods**, dive 4: Reflex 3, Impact 3, Vitality 3, Fins 2, Nerve 2 — the
   dash's (84 dashes, 5 kills by them). Boosts: Rush, Frenzy and Bloom, the
   Knife's three.
@@ -632,3 +650,238 @@ taken, about 2:05 for the layer — it does not see this.
 
 **Measures**: hits by what, guarded or not, a gate; HP after each gate and
 the lowest; time; deaths.
+
+## The lionfish, against a short Knife
+
+`2026-10-30-lionfish` ·
+`L3,G3,S3013,Knife2,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1`
+· 1 gate: layer 3's third, 13 lionfish, 13 eels and 6 archers, with `late`
+less the Mask, 8 HP.
+
+D171 (the lionfish): a hit landing on it while the diver is within 40 px of
+its body stings. Less the Mask, the Knife cuts to 70 px, so a clean cut is
+taken from its last 30. The bot keeps to that exactly: eight runs, 24s, not
+a heart lost, no sting. Its cost to the Knife in the bot's careers is the cut
+held while a lionfish is near, and the eels coming in meanwhile
+(`roadmap.md` → Health); with the Mask the cut outreaches the spines, and
+the bot's 22s change nothing.
+
+**Hypothesis**: a player pays where the bot does not — some stings, or eels
+let in while waiting for a clean cut — and loses at least a heart. Igor can
+tell the stinging fish apart, and sees the ring before the sting.
+**Broken by**: no sting and no heart lost (the spines cost a player nothing
+here either), or a death (too much for a kit this strong); or stings Igor
+did not see coming.
+
+**Measures**: hits by what — lionfish, eels, archers; HP after the gate;
+time; lionfish killed by a cut and by the dash; dashes; deaths.
+
+**Outcome**, 2026-10-30, play 1 — **the stings held, the death broke it**:
+dead at 32.2s with 6 of 32 fish left, 8 HP in five hits — the lionfish
+twice, 1 each, the second the death; the eels twice, 2 and 3 (grades 2 and
+3); an archer once. Seven dashes, two kills by them. The bot: 24s, nothing
+lost, no sting. One sting followed a dash that stopped 11 px from a
+lionfish without touching it; the other was a cut from 37 px, 3 inside the
+reach. The ring showed only once the diver was inside, the tick before the
+sting (`replay&at=4065`): it could not warn, so it was redrawn the same day
+to fade in over the last 60 px and brighten inside — Claude's, placeholder
+graphics. Igor said "played", nothing more. One play cannot say whether the
+eels' 5 HP came from waiting for a clean cut or from the short blade:
+`knife-eels`, with the Mask, took one eel hit for twelve eels. Next: this
+gate again with the ring redrawn, and with the Mask.
+
+**Outcome**, 2026-10-31, play 2, the ring redrawn — **held**: cleared in
+33.2s with 3 of 8 HP, 5 lost in four hits — the lionfish twice, 1 each; a
+grade-3 eel once, 2; an archer once. The bot: 24s, nothing lost, no sting.
+14 cuts landed on lionfish, 13 of them kills: 9 clean, from 41 to 68 px, and
+5 from inside the 40 — at 24, at 35, and one cut through three at 0, 7 and
+39, whose stings fell in the blink after the second hit. No lionfish met the
+dash: 7 dashes, one kill, not a lionfish's. Before each sting the ring had
+shown 0.29–0.34s, and the diver stood inside the reach 0.09–0.15s. The
+trigger was held through two of them, 3.3s and 4.3s, a cut every third of a
+second whatever came near; the first followed a press as a lionfish crossed
+the ring's outer edge, 102 px off — the cut fired at once, short of the
+Knife's 70, and the next, a third of a second on, met it at 24. Over both
+plays, 27 cuts on lionfish, 7 inside the reach, 4 of them hits. Igor said
+"played", nothing of the ring: whether he saw the stings coming is his to
+say. Asked, Igor: "you need to keep rings and draw stings" — D173
+(the sting is drawn, the ring kept).
+
+**Outcome**, 2026-10-31, play 3, the sting drawn — dead at 19.9s, 8 HP in
+six hits: eels five times, the lionfish once. 4 cuts on lionfish, 2 clean
+(47 and 60 px), 2 from inside the reach (12 and 10 px), the second in the
+blink of the first. The one sting that landed was drawn — three spines,
+about 40 px, from a fish the cut had killed, under the cut's wedge, the
+death burst and the hurt sparks. Igor: "i dont see stings off the
+lionfish". Redrawn the same day as a star out to the ring of the reach.
+
+**Outcome**, 2026-10-31, play 4, the star — 16.8s, four hits, all eels, 7
+HP lost; an 87s pause. 3 cuts on lionfish, all inside the reach (23, 3 and 0
+px), each in the blink after an eel's bite: no sting landed, so the star,
+drawn only for one that did, never showed. Igor: "stings never come off the
+fish. they need to fly up to the red circle and the regrow". Redrawn: every
+hit flies the spines off to the ring, and they regrow (D173 (the sting is
+drawn, the ring kept)).
+
+## The lionfish, against a long Knife
+
+`2026-10-30-lionfish-mask` ·
+`L3,G3,S3013,Knife2,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1`
+· 1 gate: `lionfish`'s gate with `late` whole, the Mask's 90 px on the cut,
+8 HP.
+
+The bot: eight runs, 22s, an archer's hit in one, no sting. With the Mask
+the cut reaches about 160 px and the spines 40, so the bot reads the
+lionfish as costing the late Knife nothing — the lead D171 (the lionfish)
+leaves to something else (`roadmap.md` → Health).
+
+**Hypothesis**: no sting, and far less lost than in `lionfish` — about
+`knife-eels`' one hit. **Broken by**: stings, or HP lost near
+`lionfish`'s: then the lionfish costs a player the late Knife's lead too,
+which the bot cannot show.
+
+**Measures**: as `lionfish`'s; set beside its plays.
+
+**Outcome**, 2026-10-31 — **held**: cleared in 23.5s, no hit at all. 14 cuts
+on lionfish, all clean, from 58 to 141 px, 13 of them kills; 5 dashes, one
+kill, not a lionfish's. The bot: 22s, an archer's hit in one run of eight.
+Beside `lionfish`'s plays — dead, and 5 HP lost — the Mask's reach takes the
+whole cost away, for a player as for the bot: the late Knife's lead is
+untouched by the lionfish, and still needs something other than a fish
+(`roadmap.md` → Health). A 46s pause mid-gate. Igor said "played".
+
+## A new player's session
+
+`2026-10-31-new-player` · `{ "save": "fresh" }` · no limit: until they win
+or want to stop.
+
+Every play so far is Igor's, who now knows the game far better than on his
+first career (`career`: won on dive 4, 12.2 minutes diving, the Suit's
+guard carrying the last). The career bot wins on dive 2 or 3. Only a player
+new to the game can test the bars no bot holds: no mechanic needing more
+than a sentence (Funny, childish, straightforward — Igor's judgement); the
+first buy within three dives (Addictive, not grindy); the whole game in 15
+to 20 minutes (D162 (the whole game in fifteen to twenty minutes)). And the
+open question of every weapon tried and raised (`ideas.md`): does a
+newcomer leave the Gun, and for which?
+
+**Hypothesis**: they find shooting, the dash and buying at home unaided; buy
+within three dives; carry a second weapon before the session ends; and win
+in more dives than Igor's four, within about 30 minutes of diving — or,
+without a win, are still diving when the session ends.
+**Broken by**: a mechanic they could not find or needed explained (Igor's
+word, and the input: a dive with no Space pressed is checked against the
+others before it is read); no buy by dive 3; one weapon throughout; a stop
+before layer 3 that is not a choice to end; or a win in three dives or
+fewer.
+
+**Measures**: from the title to the first dive, and what was opened first;
+the first dive — the trigger held, the dash pressed, how it ended; where
+each dive ended and by what, minutes a dive and in all, the win; what was
+bought before each dive, and the first buy's dive; the weapon each dive,
+each bought or raised; hits by what, a layer; pauses and menus, and how
+long; lionfish stings in layer 3 (D171 (the lionfish)); where and when they
+stopped.
+
+**Outcome**, 2026-10-31 — **broken**: no win, 11 dives in 28 minutes, 14.7 of
+them diving, every one dead in layer 1 — at gate 1 once, gate 2 three times,
+3 once, 4 four times, 5 once, and the boss once (dive 10, 46s). Igor:
+"played".
+
+- **Found**: shooting on the first dive, 23 shots in its 10s; moving only on
+  the second — the first stood where it began, shooting, and moved only as
+  the bites knocked it (the timeline, a sample a second). The dash late:
+  Space first pressed on dive 3, used in earnest on dive 10 (7 dashes, a
+  kill); 13 in all, 4 more pressed too early. Home late: dives 2, 3, 4, 6
+  and 7 began from the death screen's Dive again; the first visit came after
+  dive 4, with 119 gems and 4 points banked. After dive 7, home every time.
+- **Bought**: after dive 4, the Knife and its first tier, 90 gems, then the
+  Gun carried again within a second; the Knife never dived. The Mask to 3;
+  the Gun to 3; with points, Dash reach to 3 and Strength 1 — dive 4's 4
+  points sat 12 minutes, after 68s on the attributes screen. Never Heart, so
+  3 HP all session; never the Harpoon, the Suit or the Weights.
+- **Hits**, 32: darters 17, archers 7, the mini-boss 4, drifters 3, the boss
+  1. The first dive ended at gate 1 in 10s, three darter bites. The bot rates
+  a grade-1 darter 0.004 hearts (`entities/enemies.md` → Threat), and the
+  balance suite finds layer 1 cleared standing.
+- **Time**: 2 minutes on the title before the first dive; 5 on the death
+  screens, 28s a death; 4 in home's screens.
+- **Against the others**: the career bot wins on dive 2 or 3; Igor's first
+  career won on dive 4 after 14 minutes of diving. At the same 14.7 minutes
+  this player had not left layer 1. One player, one session: it shows a
+  newcomer can be walled in layer 1, not how many are. What it opens is in
+  `ideas.md` → A new player's first session.
+- CapsLock, on for four minutes, showed as a held key; it is a toggle, and
+  Sonar no longer reports it. The tab stayed open on the title afterwards,
+  still recording.
+
+## A second newcomer, with the dot
+
+`2026-10-31-new-player-2` · `{ "save": "fresh" }` · no limit: until they win
+or want to stop. Needs someone who has not played.
+
+D172 (the end screen marks what home can buy): the death screen's Go home
+now carries a red dot, and the gems and points banked, when something at
+`home` can be bought. `new-player`'s newcomer dived again after five of the
+first seven deaths, and first went home with 119 gems and 4 points banked.
+
+**Hypothesis**: every death with the dot showing is followed by Go home, and
+a buy follows the first one. **Broken by**: Dive again taken with the dot
+showing; a visit home with the dot and nothing bought.
+
+**Measures**: each death — the dot or not, Go home or Dive again; the dive
+of the first buy, and what was bought before each; the first dive's moving,
+shooting and dashing; where each dive ended and by what; minutes a dive and
+in all; the weapon each dive; hits by what, a layer; where and when they
+stopped. Set beside `new-player`'s.
+
+Waits: Igor, 2026-10-31, has no new players planned any time soon.
+
+## The lionfish fires its spines
+
+`2026-10-31-lionfish-fires` · `lionfish`'s code and gate: layer 3's third,
+15 lionfish, 15 eels and 6 archers since D176 (the spines sting by touch),
+14 and 14 before, the short Knife (`late` less the Mask), 8 HP · 1 gate.
+
+D174 (the lionfish fires its spines), D175 (the lionfish drifts, its circle
+past the Knife's cut), D176 (the spines sting by touch): the lionfish
+drifts; a diver whose body touches its red circle cocks its spines,
+bristling, and 0.4s later twelve fly out to the circle, stinging only where
+one touches; bare, they regrow over 1s. A hit on it stings nothing. The
+circle reaches 80 px, the Knife's cut 70: the Knife darts in, cuts, and gets
+out within the 0.4s. The bot, darting in: all 8 seeds cleared, 33.4s, a
+quarter of a heart lost, to the lionfish.
+
+**Hypothesis**: Igor darts in, cuts, and is out as the spines bristle: fewer
+lionfish stings than `lionfish`'s plays, the gate cleared. **Broken by**:
+stings he did not see coming, or lionfish he could not get at — the dart
+too tight for a hand.
+
+**Measures**: hits by what, and lionfish stings; each time a lionfish cocked
+on the diver, fired with the diver inside or already out; cuts on lionfish;
+HP after the gate, time, deaths.
+
+**Play 1**, 2026-10-31, the D175 (the lionfish drifts, its circle past the
+Knife's cut) build: dead in the gate at 19s, 8 HP to 0 over 5 hits — 3
+lionfish stings, then 2 archer spits. 6 lionfish cocked on the diver: 3
+fired with him out, 3 with his body over the circle, two of those with his
+centre outside it, 109 and 115 px from the fish against the circle's 100 —
+5 and 11 px of overlap. 6 cuts on lionfish, all from inside the circle, 5
+kills. Igor: "it damages although i get off the range. fix", then "spikes
+should do the damage, not the fact that i'm in the circle". **Broke**: the
+stings he took for out were the circle's rule, not the spines; D176 (the
+spines sting by touch) makes each spine a shot. Play it again on the D176
+build. A second dive in the same tab, still that build: dead at 15.1s, 4
+hits — eels twice, the lionfish twice.
+
+**Play 2**, 2026-10-31, the D176 (the spines sting by touch) build — dead in
+the gate at 22.5s, 16 of 36 fish killed, 8 HP over 6 hits: eels three
+times for 5 HP (2, 2, 1), archers twice, the lionfish once. 5 lionfish
+cocked on the diver: 3 fired with him out, one with him on the rim (centre
+103 px against the circle's 100), untouched, and one with him deep in (51
+px), stung 0.06s after. 6 wounds on lionfish, 5 cuts and a dash, 4 kills.
+**Half held**: lionfish stings fell, 3 and 2 a dive before to 1, and the one
+that landed was earned; the gate was not cleared — the eels again, as in
+`lionfish` plays 1, 3 and 4. The bot clears it in 33.1s, nothing lost: a
+hand pays the short Knife's eels, the bot does not. Igor said nothing
+against the stings.

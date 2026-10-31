@@ -48,11 +48,12 @@ export function read(g, rec, play) {
       wall += f.ms;
       for (const e of f.e || []) at(tick, 'window', { what: e });
       // A key held ten seconds is a moment: a key-up the browser lost looks like this.
+      // CapsLock is a toggle, down until it is switched off.
       if (f.k) {
         for (const k of f.k) held[k] ??= wall;
         for (const k of Object.keys(held)) {
           if (f.k.includes(k)) continue;
-          if (!/^(Mouse|Meta)/.test(k) && wall - held[k] >= 10000) at(tick, 'held', { key: k, for: r1((wall - held[k]) / 1000) + 's' });
+          if (!/^(Mouse|Meta|CapsLock)/.test(k) && wall - held[k] >= 10000) at(tick, 'held', { key: k, for: r1((wall - held[k]) / 1000) + 's' });
           delete held[k];
         }
       }

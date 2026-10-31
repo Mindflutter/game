@@ -19,7 +19,9 @@ numbers)): past the first layer, grade 1 carries most of a batch's target, so
 the batches grow in fish down the dive (D137 (batches grow from seconds to a
 minute and a half)), at the flatter rise of D162 (the whole game in fifteen
 to twenty minutes). The fish arrive a type at a time, in order of their threat (D130
-(fish are revealed a type at a time)). No layer sets the grade its fish arrive
+(fish are revealed a type at a time)), but for a fish built against one weapon,
+which comes where it counters it — the lionfish, in layer 3's second stretch
+(D171 (the lionfish)). No layer sets the grade its fish arrive
 at (D119 (grades: the same fish, stronger)).
 
 ## Roster
@@ -111,14 +113,14 @@ The bosses' batches, one fish each, escorted from the pool before them (D116
 | 1 | 2.15 | eel 10, archer 7 | 1.38 | 4.45 |
 | 2 | 3.5 | bulwark 6, eel 14, archer 6 | 2.12 | 6.59 |
 | 2 | 3.5 | eel 13, puffer 5, darter 13 | 2.1 | 6.72 |
-| 2 | 3.5 | archer 8, eel 17 | 2.21 | 7.31 |
+| 2 | 3.5 | archer 6, eel 16, lionfish 8 | 2.2 | 7.16 |
 | 2 | 3.5 | bulwark 8, puffer 5, eel 11 | 2.24 | 6.5 |
-| 2 | 3.5 | drifter 16, eel 16, archer 8 | 2.16 | 7.33 |
+| 2 | 3.5 | lionfish 15, eel 15, archer 6 | 2.23 | 7.09 |
 | 3 | 5.64 | bulwark 13, eel 19, puffer 5 | 3.42 | 10.2 |
-| 3 | 5.64 | archer 10, eel 27, darter 6 | 3.44 | 11.55 |
+| 3 | 5.64 | archer 9, eel 26, lionfish 11 | 3.5 | 11.49 |
 | 3 | 5.64 | puffer 7, eel 19, archer 14 | 3.43 | 10.3 |
 | 3 | 5.64 | bulwark 6, archer 8, eel 25 | 3.44 | 11.12 |
-| 3 | 5.64 | drifter 22, eel 23, puffer 6 | 3.39 | 11.32 |
+| 3 | 5.64 | lionfish 19, eel 22, puffer 5 | 3.47 | 10.98 |
 <!-- /generated -->
 
 ## Adding one

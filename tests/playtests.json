@@ -424,5 +424,91 @@
       "time a gate and the layer",
       "deaths"
     ]
+  },
+  "2026-10-30-lionfish": {
+    "purpose": "The lionfish stings whatever hits it from close by. With a short Knife, do you get stung, and does waiting for a clean cut let the eels in? The bot is never stung here and loses nothing.",
+    "start": {
+      "debug": "L3,G3,S3013,Knife2,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive and fight the one gate: 13 lionfish (the pale, spiked ones), 13 eels, 6 archers, with the Knife and no Mask. Play it as you would; a ring shows round a lionfish while you are close enough to be stung. Stop when the tag says done or you die. Say whether you could tell which fish sting, and when you were too close.",
+    "measures": [
+      "hits by what: lionfish stings, eels, archers",
+      "HP after the gate",
+      "time",
+      "lionfish killed by a cut and by the dash",
+      "dashes",
+      "deaths"
+    ]
+  },
+  "2026-10-30-lionfish-mask": {
+    "purpose": "The same lionfish gate, now with the Mask: the Knife cuts to about 160 px, far past the spines. Does the lionfish still cost you, or only the short Knife? The bot is never stung with either.",
+    "start": {
+      "debug": "L3,G3,S3013,Knife2,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive and fight the one gate as you would: the same 13 lionfish, 13 eels and 6 archers, the Knife now with the Mask. The ring round a lionfish fades in as you near its reach and is bright inside it. Stop when the tag says done or you die.",
+    "measures": [
+      "hits by what: lionfish stings, eels, archers",
+      "HP after the gate",
+      "time",
+      "lionfish killed by a cut and by the dash",
+      "dashes",
+      "deaths"
+    ]
+  },
+  "2026-10-31-new-player": {
+    "purpose": "Someone who has never seen the game plays a session from New game. Do they find how it plays without being told, buy within three dives, try more than one weapon, and win in about 15 to 30 minutes of diving, or want to go on?",
+    "start": {
+      "save": "fresh"
+    },
+    "play": "Hand the new player the mouse and keyboard at the title and say only: it is a game, play as long as you like. Do not explain anything; if they are stuck for more than a minute, help, and remember what you had to say. A reload is fine; it carries on from the save. Stop when they win or want to stop.",
+    "measures": [
+      "from the title to the first dive, and what was opened first",
+      "the first dive: the trigger held, the dash pressed, how it ended",
+      "dives: where each ended and by what, minutes each and in all, the win",
+      "what was bought before each dive, and the dive of the first buy",
+      "the weapon carried each dive, and each one bought or raised",
+      "hits by what, a layer",
+      "pauses and menus, and how long",
+      "in layer 3, lionfish stings",
+      "where and when they stopped"
+    ]
+  },
+  "2026-10-31-new-player-2": {
+    "purpose": "A second newcomer, a session from New game. The death screen now marks Go home with a red dot and the gems and points to spend when something can be bought. Does that bring them home to buy, where the first newcomer dived again three times with 119 gems banked?",
+    "start": {
+      "save": "fresh"
+    },
+    "play": "As new-player: hand someone new the mouse and keyboard at the title and say only: it is a game, play as long as you like. Do not explain anything; if they are stuck for more than a minute, help, and remember what you had to say. Stop when they win or want to stop. Then say what they said, asked or got stuck on.",
+    "measures": [
+      "each death: whether the dot showed, and Go home or Dive again",
+      "the dive of the first buy, and what was bought before each dive",
+      "from the title to the first dive; the first dive moving, shooting and dashing",
+      "dives: where each ended and by what, minutes each and in all, the win",
+      "the weapon carried each dive",
+      "hits by what, a layer",
+      "where and when they stopped"
+    ]
+  },
+  "2026-10-31-lionfish-fires": {
+    "purpose": "The lionfish drifts and fires its spines by itself: come into its red circle and, 0.4s later, twelve spines fly out to it, stinging you only if one touches you; then they regrow. The short Knife cuts shorter than the circle. Among lionfish and eels, does the player dart in, cut and get out, or slip between the spines?",
+    "start": {
+      "debug": "L3,G3,S3013,Knife2,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Play the gate with the Knife. Lionfish drift; step into a red circle and its spines bristle: cut it and get out before they fly. Say whether you saw them coming.",
+    "measures": [
+      "hits by what, and lionfish stings",
+      "each time a lionfish cocked on the diver: fired with the diver inside or already out",
+      "cuts on lionfish",
+      "HP after the gate, time, deaths"
+    ]
   }
 }

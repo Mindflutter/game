@@ -33,8 +33,8 @@ function atGate(g, k) {
 }
 
 // One gate's fight alone, from full HP: `entry` is a plan entry, `{ layer,
-// batch, escorts }`. Returns how long the clear took, the hearts it cost, and
-// whether those were more than the diver had.
+// batch, escorts }`. Returns how long the clear took, the hearts it cost,
+// whether those were more than the diver had, and what dealt each hit.
 // `entry` may be a function of the game, for a batch graded with its draws.
 export function fight(seed, kit, entry, { stand = false, cap = 300 } = {}) {
   const g = dive(seed, kit);
@@ -56,7 +56,8 @@ export function fight(seed, kit, entry, { stand = false, cap = 300 } = {}) {
     if (from === null && g.batchIndex > k) from = t;
     if (from !== null && !g.batchLive()) break;
   }
-  return { cleared: from !== null && !g.batchLive(), time: from === null ? cap : t - from, lost, died: lost >= hp };
+  return { cleared: from !== null && !g.batchLive(), time: from === null ? cap : t - from, lost, died: lost >= hp,
+           hits: g.story.flatMap(r => r.hits || []) };
 }
 
 // The order a career spends in, Claude's pick: attribute points on the
@@ -231,7 +232,23 @@ export function seedReport(seed, weapon = 'Gun') {
     return kit && { run: fight(seed, kit, gateEntry(x, x.b)),
                     stand: fight(seed, kit, gateEntry(x, x.b), { stand: true, cap: 120 }) };
   });
-  return { career: c, gates, weapons: weapon === 'Gun' ? [1, 2].map(l => weaponRuns(g, l, seed, c.firstAt)) : null };
+  // At the kit the career first meets each layer with.
+  return { career: c, gates, weapons: weapon === 'Gun'
+    ? [1, 2].map(l => weaponRuns(g, l, seed, c.firstAt[gateBatches(g).find(x => x.l === l).first])) : null };
+}
+// A debug code's kit (`playtests.md` → The kits).
+export function kitOf(g, code) {
+  const s = g.parseSetup(code, 0), kit = { weapon: s.weapon, gear: {}, raised: {}, mods: [] };
+  for (const [name, n] of Object.entries(s.counts)) {
+    if (g.ATTRIBUTES.some(a => a.name === name)) kit.raised[name] = n;
+    else if (g.MODS.some(m => m.name === name)) kit.mods.push(...Array(n).fill(name));
+    else if ([...g.WEAPONS, ...g.EQUIPMENT].some(x => x.name === name)) kit.gear[name] = n;
+  }
+  return { kit, layer: s.layer };
+}
+export function kitRuns(seed, code) {
+  const g = loadGame(), { kit, layer } = kitOf(g, code);
+  return weaponRuns(g, layer, seed, kit);
 }
 function perSeed(task, args) {
   return Promise.all(SEEDS.map(seed => new Promise((resolve, reject) => {
@@ -266,16 +283,14 @@ async function pillars(weapon, only) {
     (await pillarRows(weapon, only)).map(r => [r.l + 1, r.i + 1, r.bi + 1, r.fish, r.kits, r.time, r.max, r.hearts, r.lost, r.stood]));
 }
 
-// Each weapon at a matched kit: the kit a Gun career first meets a layer with,
-// the weapon swapped in at the Gun's tier there, Strength raised if it needs it.
+// Each weapon at a matched kit `k`, swapped in at the tier of the weapon `k`
+// carries, Strength raised if it needs it.
 const WEAPON_CAP = 150;
-function weaponRuns(g, l, seed, firstAt) {
-  const first = g.LAYERS.slice(0, l).reduce((a, L) => a + L.stretches.reduce((x, st) => x + st.draw, 0), 0);
+function weaponRuns(g, l, seed, k) {
   const ordinary = stretchesOf(g).filter(x => x.l === l && !x.s.escorts);
-  const k = firstAt[first];
   return g.WEAPONS.map(w => {
     if (!k) return [];
-    const kit = { ...k, weapon: w.name, gear: { ...k.gear, Gun: 0, [w.name]: k.gear.Gun || 0 },
+    const kit = { ...k, weapon: w.name, gear: { ...k.gear, [k.weapon]: 0, [w.name]: k.gear[k.weapon] || 0 },
                   raised: { ...k.raised, ...Object.fromEntries(Object.entries(w.requires || {}).map(([a, v]) => [a, Math.max(v, k.raised[a] || 0)])) } };
     // A fight past WEAPON_CAP is lost, so one held up cannot outweigh the rest.
     return ordinary.flatMap(({ s, top, target }) => s.pool.map(b => fight(seed, kit, gm => ({ layer: l, batch: gm.graded(b, target, top) }), { cap: WEAPON_CAP })));
@@ -286,20 +301,27 @@ function weaponRuns(g, l, seed, firstAt) {
 export const dominates = (a, b) => a.time < b.time * 0.95 && a.hearts < b.hearts * 0.9 && a.clears >= b.clears;
 // Mid-to-late game is layers 2 and 3 together: a dive carries one weapon
 // through both, so one that cannot pass the second never meets the third.
+const weaponRows = (g, perSeedRuns) => g.WEAPONS.map((w, wi) => {
+  const runs = perSeedRuns.flatMap(r => r[wi]);
+  const by = {};
+  for (const h of runs.flatMap(r => r.hits)) by[h] = (by[h] || 0) + 1;
+  return { weapon: w.name, time: mean(runs.map(r => r.time)), hearts: mean(runs.map(r => r.lost)),
+           clears: runs.filter(r => r.cleared && !r.died).length / runs.length,
+           by: Object.entries(by).sort((a, b) => b[1] - a[1]).map(([n, c]) => n + ' ' + fmt(c / runs.length)).join(', ') || '—' };
+});
 export async function weaponLayers() {
   const g = loadGame(), seeds = await report();
-  const [two, three] = [0, 1].map(i => g.WEAPONS.map((w, wi) => {
-    const runs = seeds.flatMap(r => r.weapons[i][wi]);
-    return { weapon: w.name, time: mean(runs.map(r => r.time)), hearts: mean(runs.map(r => r.lost)),
-             clears: runs.filter(r => r.cleared && !r.died).length / runs.length };
-  }));
+  const [two, three] = [0, 1].map(i => weaponRows(g, seeds.map(r => r.weapons[i])));
   const both = two.map((r, i) => ({ weapon: r.weapon, time: (r.time + three[i].time) / 2,
                                     hearts: (r.hearts + three[i].hearts) / 2, clears: (r.clears + three[i].clears) / 2 }));
   return { 'layer 2': two, 'layer 3': three, 'layers 2 and 3': both };
 }
-async function weapons() {
-  return Object.entries(await weaponLayers()).map(([name, rows]) => table([name, 'clear s', 'hearts', 'clears', 'dominates'],
-    rows.map(r => [r.weapon, r.time, r.hearts, r.clears, rows.filter(x => x !== r && dominates(r, x)).map(x => x.weapon).join(', ') || '—'])))
+async function weapons(code) {
+  const g = loadGame();
+  const layers = code ? { ['layer ' + (kitOf(g, code).layer + 1)]: weaponRows(g, await perSeed('kitRuns', [code])) }
+                      : await weaponLayers();
+  return Object.entries(layers).map(([name, rows]) => table([name, 'clear s', 'hearts', 'clears', 'dominates', 'hits a fight, by'],
+    rows.map(r => [r.weapon, r.time, r.hearts, r.clears, rows.filter(x => x !== r && dominates(r, x)).map(x => x.weapon).join(', ') || '—', r.by])))
     .join('\n\n');
 }
 
@@ -313,23 +335,39 @@ async function weapons() {
 // carries in the first layer and deeper, and the margin grading must clear.
 // `npm test` holds the result.
 const FIT_FIRST = 0.92, FIT_DEEP = 0.6, FIT_REACH = 1.02;
-function fit() {
-  const g = loadGame(), most = n => Math.floor((1 - g.GRADE_KEEP) * n);
+// A batch already fitted is kept: rescaling from its own rounded counts would
+// move its mix every run.
+export function fitBatch(g, enemies, { l, top, target }) {
+  const most = n => Math.floor((1 - g.GRADE_KEEP) * n);
   const th = (name, grade) => g.ENEMY_TYPES.find(t => t.name === name).threat[grade - 1];
   const at1 = es => es.reduce((a, [n, c]) => a + c * th(n, 1), 0);
   const reach = (es, top) => es.reduce((a, [n, c]) => a + most(c) * th(n, top) + (c - most(c)) * th(n, 1), 0);
   const scaled = (es, f) => es.map(([n, c]) => [n, Math.max(1, Math.round(c * f))]);
-  const rows = [];
-  const fitted = stretchesOf(g).filter(x => !x.s.escorts).flatMap(({ l, top, target, s }) => s.pool.map(b => {
-    const enough = l > 0 ? es => at1(es) >= FIT_DEEP * target && reach(es, top) >= FIT_REACH * target
-      : es => at1(es) >= (target === g.THREAT_START ? 1 : FIT_FIRST) * target;
-    // At or under the target past the first stretch: where a step of rounding
-    // overshoots it, the last scale under it.
-    const under = es => target === g.THREAT_START || at1(es) <= target;
-    let f = 0.1 * target / at1(b.enemies), es = scaled(b.enemies, f), last = es;
-    for (; !enough(es); es = scaled(b.enemies, f *= 1.01)) last = es;
-    if (!under(es)) es = last;
-    rows.push([l + 1, target, es.map(e => e.join(' ')).join(', '), es.reduce((a, [, c]) => a + c, 0), at1(es) / target, reach(es, top) / target]);
+  const enough = l > 0 ? es => at1(es) >= FIT_DEEP * target && reach(es, top) >= FIT_REACH * target
+    : es => at1(es) >= (target === g.THREAT_START ? 1 : FIT_FIRST) * target;
+  // Where a step of rounding overshoots the target, the last scale under it.
+  const under = es => target === g.THREAT_START || at1(es) <= target;
+  const row = es => [l + 1, target, es.map(e => e.join(' ')).join(', '), es.reduce((a, [, c]) => a + c, 0), at1(es) / target, reach(es, top) / target];
+  // One cheap fish more or less closes a gap a scaling step jumps over, and
+  // keeps the ceiling-less first stretch from only ever growing.
+  const cheap = enemies.reduce((a, e) => (th(e[0], 1) < th(a[0], 1) ? e : a))[0];
+  const one = (es, d) => es.map(([n, c]) => [n, n === cheap ? c + d : c]);
+  const trims = es => target === g.THREAT_START && es.find(([n]) => n === cheap)[1] > 1 && enough(one(es, -1));
+  const fitted = es => under(es) && (enough(es) ? !trims(es) : !under(one(es, 1)));
+  if (fitted(enemies)) return { es: enemies, row: row(enemies) };
+  let f = 0.1 * target / at1(enemies), es = scaled(enemies, f), last = es;
+  for (; !enough(es); es = scaled(enemies, f *= 1.01)) last = es;
+  if (!under(es)) es = last;
+  while (!enough(es) && under(one(es, 1))) es = one(es, 1);
+  while (trims(es)) es = one(es, -1);
+  return { es, row: row(es) };
+}
+function fit(layer) {
+  const g = loadGame(), rows = [];
+  const fitted = stretchesOf(g).filter(x => !x.s.escorts).flatMap(x => x.s.pool.map(b => {
+    if (layer && x.l + 1 !== +layer) return b.enemies;
+    const { es, row } = fitBatch(g, b.enemies, x);
+    rows.push(row);
     return es;
   }));
   const file = new URL('../game/content.js', import.meta.url), src = readFileSync(file, 'utf8');
@@ -343,7 +381,7 @@ function fit() {
 }
 
 const COMMANDS = { bots, careers, threat, pillars, weapons, fit };
-const TASKS = { seedReport };
+const TASKS = { seedReport, kitRuns };
 if (!isMainThread && workerData?.measureTask) parentPort.postMessage(TASKS[workerData.measureTask](...workerData.args));
 if (isMainThread && process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [cmd = 'bots', ...args] = process.argv.slice(2);

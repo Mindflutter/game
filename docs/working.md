@@ -77,6 +77,24 @@ working doc.
   to answer, and a wall of simultaneous decisions is expensive for a human in a
   way it is not for a model. Ask the most load-bearing one, act on assumptions
   elsewhere, and say which assumptions.
+- **A task runs until only Igor's answers are left** (D169 (a task runs
+  until only Igor's answers are left)). Its plan and progress
+  log are kept in the scratch space from the first step, as for stage-sized
+  work, so a compacted context loses no item. Before a reply that asks or
+  stops, every item in reach is walked one by one — the task's own plan,
+  `roadmap.md` → Next, `bugs.md` → Open, what a spec proposed for now — and
+  split: what needs Igor waits; the rest is done in that turn — measured,
+  evaluated, recorded, and what was claimed earlier rechecked against what
+  was found since. A proposal of Claude's is evaluated before it is offered.
+  The reply lists every item, done or what it waits on. Igor, 2026-10-30,
+  after asking three times: "if i give you a task, finish the task. do the
+  necessary checks".
+  **The self-check, last before the reply: were Igor to send the same prompt
+  again, would the next turn find anything new to do or to say?** Asked of
+  every item in the list, and of every claim the reply makes. A yes is done
+  now, never left for the re-prompt; the reply goes out only when the answer
+  is no for all of them. Igor: "reprompt of the same thing doesnt yield new
+  info or results".
 - **Uncertainty is never resolved by documenting it.** Two rules, one each way:
   - **Claude is unsure → ask before writing it down.** Not after. A decision
     entry is a record of something settled; writing one to resolve your own

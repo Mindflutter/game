@@ -53,7 +53,8 @@ path a test drives.
 
 ```bash
 npm run measure careers   # or bots, threat, pillars, weapons: tables
-npm run measure fit       # resizes every pool batch to the threat curve
+npm run measure weapons L3,Knife2,Mask3   # each weapon at a kit written as a debug code
+npm run measure fit       # resizes every pool batch to the threat curve; `fit 3`, layer 3 alone
 npm run docs              # writes the entity docs' number tables from the code
 npm run balance           # the pillars as checks, ten seeds, under a minute
 ```
@@ -115,6 +116,7 @@ Named setups for looking at one thing at a time, on the same server:
 | `index.html?dev=one-archer&play` | One archer, nothing else arriving |
 | `index.html?dev=one-puffer&play` | One puffer, nothing else arriving |
 | `index.html?dev=one-eel&play` | One eel, nothing else arriving |
+| `index.html?dev=one-lionfish&play` | One lionfish, nothing else arriving, carrying the Knife |
 | `index.html?dev=harpoon&play` | A dive from the top, carrying the Harpoon |
 | `index.html?dev=knife&play` | A dive from the top, carrying the Knife |
 | `index.html?dev=all-types&play` | Every ordinary enemy type, in a row |

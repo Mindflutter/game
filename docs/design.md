@@ -135,7 +135,9 @@ The traps the screens have met:
   passing over a card marks nothing, since on its way down to Continue it
   crosses them.
 - **The end screens open on Go home** (D90), so a stray Enter or Space — Space
-  is the dash — does what any key did before.
+  is the dash — does what any key did before. Their Go home carries a red dot,
+  and the gems and points banked, when they can buy something at `home`
+  (D172 (the end screen marks what home can buy)).
 - **`home` exists only between dives** (D76): with a dive saved, Start reads
   Continue and goes back to it (`resumeTo`), so the shop never meets a dive in
   progress.
@@ -185,7 +187,8 @@ draws each stretch's batches without repeats into the flat `plan` and grades
 each up to its stretch's threat (D126 (threat), D129 (a gentle first layer)),
 never past the layer's top grade nor past `GRADE_KEEP` of a type left at
 grade 1. The pools reveal the fish a type at a time, in order of their threat
-(D130 (fish are revealed a type at a time)). The abyss is one tall strip
+(D130 (fish are revealed a type at a time)), but for a fish built against one
+weapon, which comes where it counters it (D171 (the lionfish)). The abyss is one tall strip
 (D72): depth adds up across layers, and the bottom is `plan.length`. The layer
 end heals, pays the boss's haul and opens the pick; the last layer's end
 carries you to the bottom, the win (D68).

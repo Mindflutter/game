@@ -177,8 +177,8 @@ function fanAims(e) {
 }
 
 function enemyShot(e, ux, uy, S) {
-  bullets.push({ evil: true, by: e.name, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
-                 speed: S.speed, travelled: 0, maxTravel: S.travel, damage: S.damage, knock: S.knock });
+  return bullets[bullets.push({ evil: true, by: e.name, x: e.x, y: e.y, r: S.r, vx: ux * S.speed, vy: uy * S.speed,
+                                speed: S.speed, travelled: 0, maxTravel: S.travel, damage: S.damage, knock: S.knock }) - 1];
 }
 
 // ---------- the spit ----------
@@ -226,6 +226,29 @@ function fuseStep(e, ux, uy, d, dt) {
     if (bx * bx + by * by < reach * reach) hurtPlayer(F, ux, uy, e.name);
     burst(e.x, e.y, e.color, e.glow, 24, 260, 0.45);
     sound('pop');
+  }
+}
+
+// ---------- the spines ----------
+// The lionfish's (D174). Coming in cocks them; only a spine that touches
+// stings (D176).
+function spinesStep(e, ux, uy, d, dt) {
+  const S = e.spines;
+  e.phaseTime += dt;
+  if (e.phase === 'chase' && d - e.r - player.r < S.reach) {
+    e.phase = 'cock';
+    e.phaseTime = 0;
+  } else if (e.phase === 'cock' && e.phaseTime >= S.delay) {
+    e.phase = 'bare';
+    e.phaseTime = 0;
+    const shot = { ...S, travel: e.r + S.reach };
+    for (let k = 0; k < S.count; k++) {
+      const a = k * 2 * Math.PI / S.count;
+      enemyShot(e, Math.cos(a), Math.sin(a), shot).spine = e.glow;
+    }
+  } else if (e.phase === 'bare' && e.phaseTime >= S.regrow) {
+    e.phase = 'chase';
+    e.phaseTime = 0;
   }
 }
 
@@ -681,6 +704,7 @@ const meets = g => Object.entries(g.requires || {}).every(([a, n]) => (meta.rais
 // A weapon's row at `home` (D97). Every write saves at once: a purchase is
 // never undone by a closed tab.
 const canOwn = w => meets(w) && meta.bank >= w.cost;
+const canRaise = a => (meta.raised[a.name] || 0) < a.max && points() > (meta.raised[a.name] || 0);
 function pickWeapon(w) {
   if (meta.carried === w.name) return buy(w);
   if (!meta.owned.includes(w.name)) {
@@ -703,8 +727,8 @@ function buy(g) {
 }
 
 function raise(a) {
+  if (!canRaise(a)) return;
   const step = (meta.raised[a.name] || 0) + 1;
-  if (step > a.max || points() < step) return;
   meta.raised[a.name] = step;
   meta.bought.push(a.name + ' ' + step + ' (' + step + (step === 1 ? ' point)' : ' points)'));
   saveNow();
@@ -726,7 +750,7 @@ function endDive() {
     meta.bought = [];
   }
   diveLive = false;
-  menuIndex = END_MENU.items.indexOf(GO_HOME);   // the end screen opens on Go home (D90)
+  menuIndex = END_MENU.items.indexOf(END_HOME);  // the end screen opens on Go home (D90)
   saveNow();
 }
 
@@ -1311,6 +1335,7 @@ function step(dt) {
       e.x += (e.vx + e.pushX) * dt;
       e.y += (e.vy + e.pushY) * dt;
     }
+    if (e.spines) spinesStep(e, ux, uy, d, dt);         // beside its swim, not instead of it
 
     e.pushX *= pd;
     e.pushY *= pd;

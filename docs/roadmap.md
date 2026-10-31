@@ -35,11 +35,29 @@ the puffer's burst stays (D166 (the puffer's burst stays; guide lines are no
 promise)), it counts more and gates carry half as many (D167 (the puffer
 counts more, and gates carry fewer)), and a second career, won on Suit 3
 again, made the guard last two gates (D168 (the guard lasts two gates)).
-Next: the guard's play-test (`suit-pairs`); the Harpoon, never bought and
-better than no weapon by the bot; the boss, whose lunge no longer lands; the
-unbought gear (1198 gems unspent at the second win); the stood bars of layer
-1 (Health); points from opt-in difficulty; and `npm run measure fit`'s drift
-(`bugs.md`).
+Next: the play-test of the guard (`suit-pairs`); a new player walled in
+layer 1 (`new-player`), the death screen now marking what home can buy (D172
+(the end screen marks what home can buy)), its play-test waiting for a
+newcomer, the opening left as it is for now (`ideas.md` → A new player's
+first session); every weapon tried and raised —
+the Harpoon never bought, the Knife carrying the late game, its lead to
+close by a layer-3 fish whose answer is distance (D170 (the Knife's lead closes by the fish it meets)) — the
+lionfish (D171 (the lionfish)), firing its spines by itself (D174 (the
+lionfish fires its spines)) and drifting, its circle past the short Knife's
+cut (D175 (the lionfish drifts, its circle past the Knife's cut)), its
+spines stinging by touch (D176 (the spines sting by touch)): the Knife darts
+in, and the bot's Knife now meets a sting in about one fight in seven and
+dominates layer 3 again (Health); the late kit's lead needs something other
+than a fish; its
+play-test, `lionfish-fires`;
+the boss, whose lunge misses a diver who only keeps swimming
+(`playtests.md` → The roadmap); the unbought gear — the gems
+left at a win are the winning dive's own; each career went into that dive
+with all but a few spent and over half the gear, by price, unbought
+(`playtests.md`, `ideas.md`); the stood bars, in all three layers since
+D162 (the whole game in fifteen to twenty minutes), which a refit does not
+clear (`bugs.md` → Nothing trivial fails across all three layers); and
+points from opt-in difficulty.
 The dash is held still — Igor: "leave dash for now, discussions needed".
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
@@ -126,17 +144,81 @@ older build is a regression signal for that build only.
     4, darter 2, and layer 2's archer 4, darter 8, puffer 11, bulwark 4.
     Standing, the opening cleared on every seed; past it, three gates on
     one seed, the rest on none.
-  - **Per weapon**, each at the kit a Gun career first meets layer 2 with,
-    the ordinary batches of layers 2 and 3, a fight capped at 150s:
+- **The weapons, the D168 (the guard lasts two gates) build, 2026-10-30**
+  (`reading.md` → Try out and upgrade each weapon):
+  - **At the kit a Gun career first meets each layer with**, the ordinary
+    batches, a fight capped at 150s, ten seeds — `npm run measure weapons`,
+    the D176 (the spines sting by touch) build, 2026-10-31:
 
     | | clear s | hearts | clears | layer 2 clear s / hearts | layer 3 clear s / hearts |
     |---|---|---|---|---|---|
-    | Gun | 43.5 | 5.67 | 0.73 | 26.39 / 1.84 | 60.62 / 9.51 |
-    | Harpoon | 42.48 | 4.45 | 0.73 | 23.02 / 2.14 | 61.94 / 6.76 |
-    | Knife | 45.26 | 3.5 | 0.74 | 44.4 / 3.81 | 46.12 / 3.19 |
+    | Gun | 28.61 | 1.87 | 0.87 | 18.38 / 0.48 | 38.84 / 3.27 |
+    | Harpoon | 29.18 | 1.42 | 0.87 | 18.31 / 0.4 | 40.04 / 2.44 |
+    | Knife | 28.94 | 0.97 | 0.89 | 28.48 / 1.01 | 29.4 / 0.92 |
 
-    None dominates over both layers; in layer 2 the Gun and the Harpoon do
-    the Knife, in layer 3 the Knife does both.
+    The bar holds over both layers (D127 (the tuned numbers)). In layer 3
+    the Knife dominates both, its lionfish stings 0.15 a fight; with them
+    stinging whatever was inside the circle, D175 (the lionfish drifts, its
+    circle past the Knife's cut)'s build, 33.3 / 2.65 and 0.45. With the
+    lionfish stinging a hit instead (D171 (the lionfish)) the Knife's layer 3
+    was 31.32 / 4.52; with no lionfish, 26.15 / 0.76. In layer 2 the Gun and
+    the Harpoon dominate the Knife. The careers' kits move with every
+    change to layer 3, layer 2's too.
+  - **At the `late` kit** (`playtests.md` → The kits), layer 3's ordinary
+    batches, ten seeds, each weapon at the tier of the kit's — `npm run
+    measure weapons L3,<the kit's tokens>`, clear s / hearts:
+
+    | the late kit | Knife | Gun | Harpoon |
+    |---|---|---|---|
+    | as it is, tier 2 | 21.42 / 0.09 | 30.38 / 2.43 | 34.1 / 2.79 |
+    | without the Mask | 23.21 / 0.19 | 28.52 / 2.03 | 34.14 / 2.5 |
+    | tier 0, no Weights | 22.47 / 0.13 | 46.14 / 7.86 | 39.38 / 4.66 |
+    | tier 3 | 21.25 / 0.07 | 28.77 / 1.71 | 33.96 / 2.69 |
+
+    The Knife clears every fight and dominates both in every row. **Neither
+    the Mask's reach nor its tiers or the Weights put it ahead**: at tier 0
+    with no Weights it loses less than the Gun and the Harpoon at tier 3.
+    Igor's one late batch puts the gap at about twice, not the bot's tenfold
+    and more (`playtests.md` → Three weapons, one late batch).
+  - **The lionfish firing its spines** (D174 (the lionfish fires its
+    spines)), its circle and its swim varied, layer 3, ten seeds — `npm run
+    measure weapons`, clear s / hearts, 2026-10-31:
+
+    | circle, swim | late kit, Knife | late kit, Gun | career kit, Knife | Gun | Harpoon |
+    |---|---|---|---|---|---|
+    | 80 px, drifting at 30, refitted, stinging by touch: built | 22.79 / 0.03 | 32.15 / 2.19 | 29.4 / 0.92 | 38.84 / 3.27 | 40.04 / 2.44 |
+    | the same, stinging all inside the circle | 22.55 / 0 | 31.77 / 2.27 | 33.3 / 2.65 | 45.45 / 5.79 | 42.37 / 4.08 |
+    | 40 px, chasing at 80 | 21 / 0.01 | 29.85 / 2.93 | 32.08 / 1.68 | 43.3 / 5.53 | 38.1 / 3.71 |
+    | 60 px, chasing | 21.1 / 0.01 | 29.75 / 3.24 | 39.4 / 2.15 | 44.33 / 5.07 | 39.1 / 3.19 |
+    | 80 px, chasing | 21.06 / 0.01 | 29.93 / 3.29 | 40.03 / 2.59 | 44.08 / 5.87 | 39.21 / 4.04 |
+    | 100 px, chasing | 21.17 / 0.01 | 29.16 / 3.44 | 37.19 / 3.23 | 43.27 / 6.04 | 38.87 / 4.11 |
+    | 40 px, drifting at 30 | — | — | 32.88 / 1.53 | 44.69 / 4.63 | 40.16 / 3.51 |
+    | 80 px, drifting at 30 | — | — | 49.97 / 2.53 | 44.26 / 5.04 | 40.12 / 3.51 |
+    | 80 px, drifting at 15 | — | — | 53.39 / 2.49 | 44.98 / 4.8 | 39.74 / 3.31 |
+
+    Below the first two rows every bot kept out of an armed circle, and the
+    Harpoon dominated the Gun over layers 2 and 3 in every one. A lionfish
+    that chases presses every weapon, the Gun most, and singles out none.
+    One that drifts, its circle past the short Knife's 70 px cut, is met by
+    the Knife alone; a bot kept out could not cut it, and cleared none of
+    `lionfish-fires`' gate in 150s. Darting in, as a player can, it clears
+    them all in 31.4s, and the Knife pays about a heart a layer-3 fight more
+    than against the chasing one; stinging only by touch, the spines miss
+    most of its darts, and that heart is gone. The late Knife, its cut about 160 px, pays
+    nothing in any. The stinging lionfish's figures went with it; Igor's
+    plays of it stay in `playtests.md` → The lionfish, against a short
+    Knife, and against a long Knife.
+  - **Where the hits come from** (the `hits a fight, by` column): in layer 3,
+    the eel — at the late kit 1.14 a fight on the Gun and 1.59 on the
+    Harpoon, none on the Knife, whose 0.04 are an archer's; at the kit a Gun
+    career first meets layer 3 with, 1.79 and 2.12 against 0.23; with the
+    lionfish stinging by touch, 2 and 1.99 against 0.2. The eel
+    sways, so a shot misses it and its touch lands; the Knife's arc needs no
+    aim. In layer 2 the Knife's hits are mostly the puffer's, 0.19 a fight.
+    **Not for a hand**: in Igor's short-Knife layer-3 gates, `lionfish` and
+    `lionfish-fires`, the eels dealt the most of his hearts in four dives of
+    seven and tied in two more, and he cleared one gate in seven
+    (`playtests.md`).
 - **Solid bodies** (D120 (bodies are solid)), every pair every tick: 500
   drifters cost 0.44ms a tick in Node, 2026-10-19 — two ticks a frame, about
   0.9ms of 16.7ms. With them, a batch of 34 crowding a standing diver left no
