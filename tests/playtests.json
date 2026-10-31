@@ -495,5 +495,53 @@
       "cuts on lionfish",
       "HP after the gate, time, deaths"
     ]
+  },
+  "2026-10-31-lion-knife": {
+    "purpose": "Does the Knife still lead layer 3 since the lionfish? Its deepest lionfish batch at the late kit: the Knife first, before the batch is known; lion-gun, then lion-harpoon after.",
+    "start": {
+      "debug": "L3,G5,S2002,Grade2,Knife2,lionfish19,eel22,puffer5,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Play it first, before the batch is known. Then play 2026-10-31-lion-gun.",
+    "measures": [
+      "time",
+      "hits by what, HP lost, lowest HP",
+      "shots, cuts and kills",
+      "lionfish stings, and dashes"
+    ]
+  },
+  "2026-10-31-lion-gun": {
+    "purpose": "The same lionfish batch with the Gun at tier 2: does it cost more than the Knife did? (Second of three; lion-harpoon after.)",
+    "start": {
+      "debug": "L3,G5,S2002,Grade2,Gun2,lionfish19,eel22,puffer5,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. Then play 2026-10-31-lion-harpoon.",
+    "measures": [
+      "time",
+      "hits by what, HP lost, lowest HP",
+      "shots, cuts and kills",
+      "lionfish stings, and dashes"
+    ]
+  },
+  "2026-10-31-lion-harpoon": {
+    "purpose": "The same lionfish batch with the Harpoon at tier 2: does it cost more than the Knife did? (Last of three.)",
+    "start": {
+      "debug": "L3,G5,S2002,Grade2,Harpoon2,lionfish19,eel22,puffer5,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R.",
+    "measures": [
+      "time",
+      "hits by what, HP lost, lowest HP",
+      "shots, cuts and kills",
+      "lionfish stings, and dashes"
+    ]
   }
 }

@@ -65,6 +65,7 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-10-30-lionfish` again, the ring redrawn, + `2026-10-30-lionfish-mask` — the same gate with the Mask
 - [x] `2026-10-31-new-player` — a session from New game, by someone new to the game
 - [x] `2026-10-31-lionfish-fires` — the lionfish drifting and firing its spines by itself, the short Knife
+- [ ] `2026-10-31-lion-knife` + `lion-gun` + `lion-harpoon` — three weapons, layer 3's deepest lionfish batch
 - [ ] `2026-10-31-new-player` again — the next newcomer, the death screen's dot in; set up when Igor says
 
 **Where it starts to hurt**, looked for with the diver bot first
@@ -910,3 +911,27 @@ that landed was earned; the gate was not cleared — the eels again, as in
 `lionfish` plays 1, 3 and 4. The bot clears it in 33.1s, nothing lost: a
 hand pays the short Knife's eels, the bot does not. Igor said nothing
 against the stings.
+
+## Three weapons among lionfish
+
+`2026-10-31-lion-knife` · `L3,G5,S2002,Grade2,Knife2,lionfish19,eel22,puffer5,`
++`late` less its Knife, then the same with `Gun2` (`lion-gun`) and
+`Harpoon2` (`lion-harpoon`) · 1 gate each, the Knife first.
+
+Igor, 2026-10-31, on the Knife leading layer 3: "dont know if it's even
+true". Three weapons, one late batch played the Knife at 2 HP against 4 and
+4, before the lionfish (D171 (the lionfish) to D176 (the spines sting by
+touch)); since, the bot's late-kit Knife still loses almost nothing in
+layer 3 where the Gun loses hearts (`roadmap.md` → Health, the lionfish
+firing its spines). This is layer 3's deepest batch with the most lionfish,
+the fish meant to answer the Knife (D170 (the Knife's lead closes by the
+fish it meets)).
+
+**Hypothesis**: the Knife still leads for Igor: it costs him half or less of
+what the Gun and the Harpoon each do. The Knife goes first, while the batch
+is unknown, so knowing it helps only the other two. **Broken by**: the
+Knife costing as much as either — the lionfish then evens it for a human,
+whatever the bot says.
+
+**Measures**: time; hits by what, HP lost, lowest HP; shots, cuts and
+kills; lionfish stings; dashes.
