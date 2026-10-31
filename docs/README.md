@@ -33,6 +33,8 @@ A change to them belongs in the same commit as the code it describes.
 | Igor's description of the whole game | `high level design.md` |
 | The open stages' designs, and their checks against `foundations.md` | `specs/`; a closed stage's, `git show` as `plan.md` → Closed stages gives it |
 | Setting up a play-test for Igor, and reading one back | the `sonar` skill (`.claude/skills/sonar/`) |
+| A cleanup of the whole tree: the docs, memory, skills and files | the `abyss-tidy` skill (`.claude/skills/abyss-tidy/`) |
+| What Igor said in past sessions, by subject | the `igor-said` skill (`.claude/skills/igor-said/`) |
 | Every play-test: its hypothesis, whether it was played, what it showed | `playtests.md` |
 
 `decisions.md` is long. Find an entry by its heading — `grep '^## D'

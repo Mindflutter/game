@@ -14,16 +14,6 @@ hard constraint, not a convenience.
 WASD or arrows to move, mouse to aim, **hold left mouse to shoot**, `Space` to
 dash, `Esc` for the menu.
 
-**A logged play-test** (D163 (the career log)): `npm run play`, then
-`http://localhost:8765/`. Every dive's end writes the career so far, a dive a
-line, to `logs/career.json` (ignored by git): seed, how it ended, time, gates
-cleared, gems, kills, mods, the kit and points it ended with, what `home`
-bought before it, in order and with its price, and its story —
-every gate met, with its fish, arrival, time, hits and what dealt them, the
-guard, HP, kills, shots, dashes, boosts and mod. `logs/clock.txt` has the wall
-clock each dive came in at. Its save is its own — the browser keeps one per
-address.
-
 **A Sonar play-test** (D164 (Sonar)): Claude writes one and gives its link;
 you run `npm run play` and open `http://localhost:8765/?sonar=<id>`. The
 corner tag says it is recording and when its limit is met. Every play is
@@ -148,7 +138,7 @@ platform/      input, audio, canvas. Rewritten on a port.
 main.js        frame loop and boot
 checks.js      the browser suite
 tests/         the Node suite, the bot, the play server, Sonar's reader and its play-tests
-logs/          the career log and Sonar's plays: ignored by git, safe to delete
+logs/          Sonar's plays: ignored by git, safe to delete
 docs/          design, decisions, plan, every enemy, mod, boost, weapon and piece
                of equipment -- start at foundations.md; docs/README.md
                says where everything else is

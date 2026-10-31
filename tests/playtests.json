@@ -462,36 +462,21 @@
     ]
   },
   "2026-10-31-new-player": {
-    "purpose": "Someone who has never seen the game plays a session from New game. Do they find how it plays without being told, buy within three dives, try more than one weapon, and win in about 15 to 30 minutes of diving, or want to go on?",
+    "purpose": "Someone who has never seen the game plays a session from New game; the same play-test for every newcomer, each a play of its own. Do they find how it plays without being told, buy within three dives, try more than one weapon, and win in about 15 to 30 minutes of diving, or want to go on?",
     "start": {
       "save": "fresh"
     },
-    "play": "Hand the new player the mouse and keyboard at the title and say only: it is a game, play as long as you like. Do not explain anything; if they are stuck for more than a minute, help, and remember what you had to say. A reload is fine; it carries on from the save. Stop when they win or want to stop.",
+    "play": "Hand the new player the mouse and keyboard at the title and say only: it is a game, play as long as you like. Do not explain anything; if they are stuck for more than a minute, help, and remember what you had to say. A reload is fine; it carries on from the save. Stop when they win or want to stop. Then say what they said, asked or got stuck on.",
     "measures": [
       "from the title to the first dive, and what was opened first",
       "the first dive: the trigger held, the dash pressed, how it ended",
       "dives: where each ended and by what, minutes each and in all, the win",
       "what was bought before each dive, and the dive of the first buy",
+      "each death: whether Go home's dot showed, and Go home or Dive again",
       "the weapon carried each dive, and each one bought or raised",
       "hits by what, a layer",
       "pauses and menus, and how long",
       "in layer 3, lionfish stings",
-      "where and when they stopped"
-    ]
-  },
-  "2026-10-31-new-player-2": {
-    "purpose": "A second newcomer, a session from New game. The death screen now marks Go home with a red dot and the gems and points to spend when something can be bought. Does that bring them home to buy, where the first newcomer dived again three times with 119 gems banked?",
-    "start": {
-      "save": "fresh"
-    },
-    "play": "As new-player: hand someone new the mouse and keyboard at the title and say only: it is a game, play as long as you like. Do not explain anything; if they are stuck for more than a minute, help, and remember what you had to say. Stop when they win or want to stop. Then say what they said, asked or got stuck on.",
-    "measures": [
-      "each death: whether the dot showed, and Go home or Dive again",
-      "the dive of the first buy, and what was bought before each dive",
-      "from the title to the first dive; the first dive moving, shooting and dashing",
-      "dives: where each ended and by what, minutes each and in all, the win",
-      "the weapon carried each dive",
-      "hits by what, a layer",
       "where and when they stopped"
     ]
   },

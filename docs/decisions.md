@@ -5705,3 +5705,43 @@ puffer damaging behavior".
 **Guarded by**: `tests/enemies.test.js` — a diver on a spine's line is
 stung once it arrives, one between two inside the circle is not; stinging
 whatever is inside the circle fails both.
+
+## D177 — The career log is retired · 2026-10-31
+
+Claude, 2026-10-28, in S10 (Sonar): a play-test from a save records all the
+career log does and more. Igor, 2026-10-31: "Retire the career log - do this
+now".
+
+- **The save keeps no career**: `meta.log` is gone, and with it a save that
+  grew a line a dive. Version 15; a v14 save loses its log on load.
+- **`npm run play` writes only Sonar's plays**: no `logs/career.json`, no
+  `logs/clock.txt`. A career to read is a play-test from New game.
+- What Sonar reads stays: the dive's `story`, a gate a record, and
+  `meta.bought`, what `home` bought since the last dive ended.
+
+**Supersedes** D163 (the career log).
+
+**Guarded by**: `tests/save.test.js` — a v14 save's log is dropped and none
+is written again; the version 15 fixture loads and plays on; `bought` lists
+each purchase until the next dive ends; the story tells each gate's fish,
+time, kills and hits.
+
+## D178 — A cleanup, and Igor's own words · 2026-10-31
+
+Igor: "the cleanup for all docs and keeping all files neat. what i want from
+you - a skill that does a cleanup, throws away unneded stuff that bloats
+context, checks contradictions, keeps docs organized", and "browse through
+certain project sessions, when you lack info on subject, get my messages
+from chat history and add it to context IF it fits".
+
+- **`abyss-tidy`**, a skill: the whole tree at once — history out of the
+  living docs, answered items out, one home per fact, contradictions raised,
+  memory, skills and files checked, the most-loaded context first. It
+  applies the rules `docs/README.md` and `working.md` already hold, and adds
+  none; what needs a judgement is raised, never done alone.
+- **`igor-said`**, a skill: a search of Igor's typed messages in this
+  project's past sessions, with the reply each answered. Used when a subject
+  needs his words and the docs lack them; only what fits comes in, quoted and
+  dated, and the docs still outrank it.
+
+**Guarded by**: nothing; neither changes the game.

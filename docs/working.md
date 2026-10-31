@@ -240,3 +240,11 @@ Subagents only when Igor picks them; work happens in place, in this checkout.
   consumer" against the single `// balance` block — these docs win.
 - **abyss-content** (`.claude/skills/abyss-content/`) is the procedure for
   adding any piece of content.
+- **abyss-tidy** (`.claude/skills/abyss-tidy/`) is the whole tree's cleanup
+  — history out of the living docs, one home per fact, contradictions
+  raised, memory and skills checked (D178 (a cleanup, and Igor's own
+  words)). The consistency sweep still ends every change.
+- **igor-said** (`.claude/skills/igor-said/`) searches Igor's own messages
+  in this project's past sessions, used whenever a subject needs what he
+  said and the docs do not hold it — before asking him again (D178 (a
+  cleanup, and Igor's own words)).

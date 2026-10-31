@@ -470,19 +470,32 @@ describe('a v13 save under depth points (D161)', () => {
   });
 });
 
-describe('the career log (D163)', () => {
-  it('keeps a record of every dive in the save, and New game starts it again', () => {
+describe('a dive as Sonar reads it (D164)', () => {
+  it('loads a save written by the first build of version 15, and plays it on', () => {
+    // Saved at the second gate, the first in the dive's story, a purchase not yet dived on.
+    const text = readFileSync(new URL('./fixtures/save-v15.json', import.meta.url), 'utf8');
     const g = loadGame();
-    g.reset(7);
+    expect(g.loadSave(text)).toBe('');
+    expect([g.story.map(r => r.gate), g.meta.bought]).toEqual([[1, 2], ['Gun 1 (20 gems)']]);
+    g.screen = g.resumeTo;
     die(g);
-    g.update(g.FIXED_DT);                        // the end screen banks the dive
-    expect(g.meta.log).toHaveLength(1);
-    expect(g.meta.log[0]).toMatchObject({ end: 'dead', seed: 7, gates: 0, carried: 'Gun' });
-    g.newGame();
-    expect(g.meta.log).toEqual([]);
+    g.update(g.FIXED_DT);
+    expect([g.story.at(-1).died, g.meta.bought]).toEqual([true, []]);
   });
 
-  it('lists what home bought before each dive, in order, with its price', () => {
+  it('keeps no career in the save: a v14 save drops its log (D177)', () => {
+    const g = loadGame();
+    const v14 = { version: 14, bank: 40, gear: {}, raised: {}, challenges: {}, deepest: 0, cleared: 0, seen: [],
+                  log: [{ end: 'dead', seed: 7 }], bought: [], owned: ['Gun'], carried: 'Gun' };
+    expect(g.loadSave(JSON.stringify(v14))).toBe('');
+    expect(['log' in g.meta, 'log' in JSON.parse(g.saveText()), g.meta.bank]).toEqual([false, false, 40]);
+    g.reset(7);
+    die(g);
+    g.update(g.FIXED_DT);
+    expect('log' in JSON.parse(g.saveText())).toBe(false);
+  });
+
+  it('lists what home bought, in order, with its price, until the next dive ends', () => {
     const g = loadGame();
     g.meta.bank = 1000;
     g.meta.challenges = { depth: 3 };
@@ -490,11 +503,11 @@ describe('the career log (D163)', () => {
     g.buy(gun);
     g.raise(heart);
     g.pickWeapon(knife);
+    expect(g.meta.bought).toEqual(['Gun 1 (' + gun.tiers[0].cost + ' gems)', 'Heart 1 (1 point)',
+                                   'Knife (' + knife.cost + ' gems)', 'carry Knife']);
     g.reset(7);
     die(g);
     g.update(g.FIXED_DT);
-    expect(g.meta.log[0].bought).toEqual(['Gun 1 (' + gun.tiers[0].cost + ' gems)', 'Heart 1 (1 point)',
-                                         'Knife (' + knife.cost + ' gems)', 'carry Knife']);
     expect(g.meta.bought).toEqual([]);
   });
 
@@ -508,7 +521,7 @@ describe('the career log (D163)', () => {
     g.immortal = false;
     die(g);
     g.update(g.FIXED_DT);
-    const [first, second] = g.meta.log[0].story;
+    const [first, second] = g.story;
     expect(first).toMatchObject({ gate: 1, layer: 1, hits: [] });
     expect(first.fish).toMatch(/^\w+ \d+/);
     expect([first.kills > 0, first.secs >= 0, first.hp > 0]).toEqual([true, true, true]);

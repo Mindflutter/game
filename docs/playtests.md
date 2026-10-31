@@ -65,7 +65,7 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-10-30-lionfish` again, the ring redrawn, + `2026-10-30-lionfish-mask` — the same gate with the Mask
 - [x] `2026-10-31-new-player` — a session from New game, by someone new to the game
 - [x] `2026-10-31-lionfish-fires` — the lionfish drifting and firing its spines by itself, the short Knife
-- [ ] `2026-10-31-new-player-2` — a second newcomer, the death screen's dot in; waits, no newcomer planned soon
+- [ ] `2026-10-31-new-player` again — the next newcomer, the death screen's dot in; set up when Igor says
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -584,6 +584,30 @@ care: another seed, and a day of play-tests behind his hands — the puffer
 cut is one of three things that moved. Within D162 (the whole game in
 fifteen to twenty minutes)'s two to four minutes a layer.
 
+## Igor's first career
+
+Read from the career log (D163 (the career log)), before Sonar, 2026-10-28,
+on the D161 (depth pays points) and D162 (the whole game in fifteen to
+twenty minutes) build: won on dive 4, 17 minutes by the wall clock (14
+diving, 3 at `home`) — on target.
+
+- **The winning dive was a stroll**: 5.5 minutes, no heart lost — all 11
+  hits taken by the guard. Suit 3 (210 gems, a guard of 3 a batch) took 18
+  of dive 3's 22 hits too. Answered by D168 (the guard lasts two gates).
+- **Not everything bought**: no Harpoon, Gun 1 of 3, Knife and Weights 2 of
+  3; 9 of 12 steps (26 points earned, 30 to buy all); 1039 gems unspent at
+  the end, 1017 of them the winning dive's own: it began with 22, against
+  750 gems of gear unbought. The skill ladders paid 8 of 20 — depth paid 18.
+- Killed by archers (dive 1) and puffers (dives 2, 3: most killing hits).
+  Gates 10–40s; the bosses 11–39s with his kit.
+- Before it, three fresh dives, 2026-10-28: 135s and 78 gems, 150s and 75
+  gems, then dead at the second mini-boss with 40 gems; points only on the
+  first — about a tenth of what the career bot earns, and the economy set on
+  it (D160 (a layer-1 dive buys a thing every two)). The mini-boss "good";
+  layer 1's boss 75s, layer 3's 60s "hard but good". Late game,
+  `?debug=L3,G4,S3351240973,Knife3,Mask3,Suit3`: "absolutely nailed it in
+  42s, gameplay felt really good".
+
 ## A whole career, after the puffer
 
 `2026-10-30-career` · `{ "save": "fresh" }` · to the win, or 30 minutes.
@@ -815,10 +839,11 @@ them diving, every one dead in layer 1 — at gate 1 once, gate 2 three times,
   Sonar no longer reports it. The tab stayed open on the title afterwards,
   still recording.
 
-## A second newcomer, with the dot
+## The next newcomer, with the dot
 
-`2026-10-31-new-player-2` · `{ "save": "fresh" }` · no limit: until they win
-or want to stop. Needs someone who has not played.
+`2026-10-31-new-player` again, a play of its own: one play-test for every
+newcomer — Igor, 2026-10-31: "it should be the same for all, just played
+multiple times". Needs someone who has not played.
 
 D172 (the end screen marks what home can buy): the death screen's Go home
 now carries a red dot, and the gems and points banked, when something at
@@ -833,9 +858,9 @@ showing; a visit home with the dot and nothing bought.
 of the first buy, and what was bought before each; the first dive's moving,
 shooting and dashing; where each dive ended and by what; minutes a dive and
 in all; the weapon each dive; hits by what, a layer; where and when they
-stopped. Set beside `new-player`'s.
+stopped. Set beside the first newcomer's.
 
-Waits: Igor, 2026-10-31, has no new players planned any time soon.
+Waits on Igor: "i'll simply tell you to set it up when needed".
 
 ## The lionfish fires its spines
 

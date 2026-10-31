@@ -31,7 +31,7 @@ let guardLeft = 0;
 // layer's start for `swift` -- null until each happens, or for a layer begun
 // partway.
 let tally = {};
-// The dive's gates as met, a record each, for the career log (D163).
+// The dive's gates as met, a record each, for Sonar and the bot to read (D164).
 let story = [];
 let killTimes = [];
 let firstKillAt = null;
@@ -245,11 +245,11 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 14;
+const SAVE_VERSION = 15;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
-           deepest: 0, cleared: 0, seen: [], log: [], bought: [],
+           deepest: 0, cleared: 0, seen: [], bought: [],
            owned: WEAPONS.filter(w => !w.cost).map(w => w.name), carried: WEAPONS[0].name };
 }
 let meta = freshMeta();
@@ -435,6 +435,11 @@ function migrate(s) {
     if (s.cleared) s.challenges.depth = s.cleared * 6;
     s.raised = {};
     s.version = 14;
+  }
+  if (s && s.version === 14) {
+    // The career log is retired (D177): Sonar records all it did.
+    delete s.log;
+    s.version = 15;
   }
   return s;
 }

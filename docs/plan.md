@@ -48,8 +48,3 @@ Their designs, where a stage had one, are kept in git, not the tree (D134
 (balance)'s is `git show 11ba1ad:docs/specs/2026-10-21-s6-balance-design.md`, S7 (alpha
 polish)'s `git show 6661b7c:docs/specs/2026-10-24-s7-alpha-polish-design.md`. Where one disagrees with a decision,
 the decision wins.
-
-## If scope has to be cut
-
-From S7. Never from S0. S0–S4 is the critical path to a game that exists; S5,
-the volume on top of it, is in.

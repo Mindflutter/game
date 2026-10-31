@@ -49,18 +49,10 @@ if (driven) volume = 0;
 // text. A driven game never writes, or a check would land on the real save.
 // A play-test keeps a slot of its own, so the player's save is never its.
 const SAVE_KEY = sonarTest ? 'abyss-sonar-' + sonarTest.id : 'abyss-save';
-// Served by `npm run play` (D163): the career goes back to it as it grows.
-const logging = location.port === '8765' && !sonarTest;
-let logged = -1;
 function persist(text) {
   if (driven) return;
   try { localStorage.setItem(SAVE_KEY, text); }
   catch (e) { console.error('the save could not be written', e); }
-  if (logging && meta.log.length !== logged) {
-    logged = meta.log.length;
-    fetch('/', { method: 'POST', body: '[\n' + meta.log.map(d => JSON.stringify(d)).join(',\n') + '\n]\n' })
-      .catch(() => console.error('the log was not sent'));
-  }
 }
 
 // A stepped scenario starts no frame loop: nothing moves until advance() moves

@@ -738,15 +738,10 @@ function raise(a) {
 function endDive() {
   meta.bank += currency;
   meta.deepest = Math.max(meta.deepest, cameraY);
-  // The career, a dive a line, for reading a play-test back (D163).
+  // The dive's last gate closes with it, for Sonar to read back (D164).
   if (!debugSetup) {
     const open = story.at(-1);
     if (open && !('secs' in open)) { closeGate(open); open.died = screen === 'dead'; }
-    meta.log.push({ end: screen === 'dead' || screen === 'won' ? screen : 'quit', seed: currentSeed,
-                    time: Math.round(elapsed), gates: tally.depth || 0, gems: currency, kills,
-                    mods: { ...modCounts }, carried: meta.carried, gear: { ...meta.gear },
-                    raised: { ...meta.raised }, challenges: { ...meta.challenges }, points: points(),
-                    bank: meta.bank, maxHp: player.maxHp, bought: meta.bought, story });
     meta.bought = [];
   }
   diveLive = false;

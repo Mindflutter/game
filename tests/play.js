@@ -1,12 +1,10 @@
-// `npm run play` (D163): the game at http://localhost:8765/, every dive's end
-// writing the career so far, a dive a line, to logs/career.json, and the wall
-// clock it came in at to logs/clock.txt -- the save holds no clock.
+// `npm run play`: the game at http://localhost:8765/.
 // `/?sonar=<id>` plays the play-test `<id>` of tests/playtests.json (S10): each
 // page load is a play of its own, logs/<id>/<n>/, its build copied beside what
 // it records, so it replays on the code it was played on. Nothing is cached:
 // across several script tags a stale one runs a mix of old and new files.
 import { createServer } from 'node:http';
-import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFile, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFile, readFileSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,12 +43,7 @@ createServer((req, res) => {
       if (id) {
         mkdirSync(join(LOGS, id, seg), { recursive: true });
         appendFileSync(join(LOGS, id, seg, 'input.jsonl'), body);
-        return res.end();
       }
-      const n = JSON.parse(body).length;
-      writeFileSync(join(root, 'logs', 'career.json'), body);
-      appendFileSync(join(root, 'logs', 'clock.txt'), new Date().toISOString() + ' ' + n + ' dives\n');
-      console.log('logged: ' + n + ' dives');
       res.end();
     });
     return;
@@ -61,5 +54,4 @@ createServer((req, res) => {
     res.writeHead(err ? 404 : 200, { 'Content-Type': TYPES[extname(path)] || 'text/html', 'Cache-Control': 'no-store' });
     res.end(err ? 'not found' : data);
   });
-}).listen(PORT, '127.0.0.1', () => console.log('play at http://localhost:' + PORT + '/ -- every dive goes to logs/career.json;' +
-                                              ' a play-test at /?sonar=<id>'));
+}).listen(PORT, '127.0.0.1', () => console.log('play at http://localhost:' + PORT + '/ -- a play-test at /?sonar=<id>'));

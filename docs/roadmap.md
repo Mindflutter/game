@@ -9,56 +9,28 @@ The stages themselves live in `plan.md`; the rules that outlive them live in
 
 ## Next
 
-S6 (balance) closed 2026-10-24 (D139 (S6 closes)): the threat system and the
-grades it chooses (D126 (threat)), the numbers against the pillars (D127 (the
-tuned numbers)), the bots and the balance suite that hold them (D128 (the
-balance suite)), and the dive reshaped on Igor's play (D129 (a gentle first
-layer), D130 (fish are revealed a type at a time), D137 (batches grow from
-seconds to a minute and a half)). S7 (alpha polish) closed 2026-10-26, the
-alpha on Igor's word (D150 (S7 closes)). S8 (the economy: gems and points)
-closed the same day, built as D152 (nine rungs a ladder, a point a rung), its
-balance verdict waiting on more play (D153 (the economy stage closes)). **Now**:
-S9 (the balance rework), opened 2026-10-28. Built: six gates a layer (D155
-(six gates a layer)), the boss's shell and stages (D156 (the boss's shell and
-stages)), the archer's threat (D157 (the archer counts twice what the bot
-measures)), prices and ladders (D158 (prices in reach, ladders a dive long)),
-then Igor's play: the archer holding its ground (D159 (the archer holds its
-ground; the mini-boss pays 10)), points from depth (D161 (depth pays points))
-and the whole game in about 15–20 minutes, everything bought (D162 (the whole
-game in fifteen to twenty minutes)), and the career log (D163 (the career
-log)). Igor's first logged career is read (`ideas.md` → The economy and the
-fights, reworked in S9): on time, but the Suit makes the last dive a stroll.
-**Sonar**, the play-test system, is built as S10 (Sonar) (D164 (Sonar));
-its play-tests and their outcomes are `playtests.md`, the setups in one file
-(D165 (play-tests in one file, the logs disposable)). Read through it since:
-the puffer's burst stays (D166 (the puffer's burst stays; guide lines are no
-promise)), it counts more and gates carry half as many (D167 (the puffer
-counts more, and gates carry fewer)), and a second career, won on Suit 3
-again, made the guard last two gates (D168 (the guard lasts two gates)).
-Next: the play-test of the guard (`suit-pairs`); a new player walled in
-layer 1 (`new-player`), the death screen now marking what home can buy (D172
-(the end screen marks what home can buy)), its play-test waiting for a
-newcomer, the opening left as it is for now (`ideas.md` → A new player's
-first session); every weapon tried and raised —
-the Harpoon never bought, the Knife carrying the late game, its lead to
-close by a layer-3 fish whose answer is distance (D170 (the Knife's lead closes by the fish it meets)) — the
-lionfish (D171 (the lionfish)), firing its spines by itself (D174 (the
-lionfish fires its spines)) and drifting, its circle past the short Knife's
-cut (D175 (the lionfish drifts, its circle past the Knife's cut)), its
-spines stinging by touch (D176 (the spines sting by touch)): the Knife darts
-in, and the bot's Knife now meets a sting in about one fight in seven and
-dominates layer 3 again (Health); the late kit's lead needs something other
-than a fish; its
-play-test, `lionfish-fires`;
-the boss, whose lunge misses a diver who only keeps swimming
-(`playtests.md` → The roadmap); the unbought gear — the gems
-left at a win are the winning dive's own; each career went into that dive
-with all but a few spent and over half the gear, by price, unbought
-(`playtests.md`, `ideas.md`); the stood bars, in all three layers since
-D162 (the whole game in fifteen to twenty minutes), which a refit does not
-clear (`bugs.md` → Nothing trivial fails across all three layers); and
-points from opt-in difficulty.
-The dash is held still — Igor: "leave dash for now, discussions needed".
+S9 (the balance rework) is active, S10 (Sonar) beside it (`plan.md`); what
+S9 has built is its decisions, from D155 (six gates a layer) on, and Sonar's
+play-tests and outcomes are `playtests.md`.
+
+- **The guard**, two gates since D168 (the guard lasts two gates): its
+  play-test, `suit-pairs`, not played yet.
+- **Every weapon tried and raised** (`ideas.md` → Every weapon tried and
+  raised, and the Weapon ideas): the Harpoon never bought, the Knife
+  carrying the late game. The lionfish, D171 (the lionfish) to D176 (the
+  spines sting by touch), evens it where a Gun career meets layer 3, not at
+  the late kit (Health); the lead needs something other than a fish. Igor,
+  2026-10-31, on the Knife leading: "dont know if it's even true".
+- **The boss's lunge** misses a diver who only keeps swimming
+  (`playtests.md` → The roadmap).
+- **The unbought gear**: each career went into its winning dive with all but
+  a few gems spent and over half the gear, by price, unbought
+  (`playtests.md`, `ideas.md`).
+- **The stood bars** (`bugs.md` → Nothing trivial fails across all three
+  layers), which Igor puts down to a bot too good (`ideas.md` → A bot that
+  plays like Igor).
+- **The dash** is held, now a question of abilities (`ideas.md` →
+  Abilities, the dash among them).
 
 Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
 `CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and

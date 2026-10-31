@@ -23,6 +23,11 @@ for this, even greater. not required now." A page beside the game to list
 the play-tests, read a report and scrub a play's replay tick by tick. What
 exists meanwhile: `report.md` and its replay links, one moment each.
 
+### Music
+Igor, 2026-10-31: "wont do now, after the graphics maybe". A generated loop
+or an audio file, and a file breaks the rule of no assets (`code.md`), as
+sprites would.
+
 ### Trade-off mods
 **Still parked, and now cheaper.** D31's `scope`/`apply(player, weapon)` shape
 makes a trade-off mod the same one-line record it always was.
@@ -143,6 +148,18 @@ the lookahead search is open.
 **Declined:** a learned/RL bot. Needs a training harness and compute, and would
 be a research project that teaches nothing about this game.
 
+**A bot that plays like Igor.** Igor, 2026-10-31, on the standing bot that
+clears batches (`bugs.md` → Nothing trivial fails across all three layers):
+"probably the bot being too good. i havent had that feeling when playing
+myself. … design a bot that plays like me based on all playtests data". The
+balance row's "roughly like the intended player", made measurable: Sonar
+holds every play's input, so a scripted bot's knobs — how late it reacts,
+how far its aim strays, how often it dashes, how long it stands — can be set
+to what Igor's plays show, without the learned bot declined above. Open: the
+knobs, and how many plays fit them. It would also answer the stood bars: a
+standing bot with Igor's aim either still clears a batch, or the bug was
+the bot's.
+
 **Found building S3, 2026-09-29: the kiting bot backs out of its own range.**
 Against a lone slow enemy it holds it inside its 250px range 1% to 18% of the
 time, so its shots never land — the mini-boss outlasts it for minutes, and the
@@ -228,6 +245,65 @@ exist are `entities/enemies.md`; an idea moves there when it is built.
 - **A fish in stages.** Claude, same: an ordinary tough fish that changes its
   attack as it is hurt — the boss's `stages` on a smaller body.
 
+## Every weapon tried and raised
+
+Igor, 2026-10-30: "for the future game expansion, we need to motivate the
+player to try out and upgrade each weapon". The reading is `reading.md` →
+Try out and upgrade each weapon, the figures `roadmap.md` → Health, the
+weapons. Where it stands:
+
+- **One weapon carries the late game.** At the kit of Igor's winning dive
+  the Knife loses a tenth of a heart a layer-3 batch, the Gun and the
+  Harpoon two to three; Igor's one late batch, 2 HP against 4 and 4. The
+  S6 (balance) bar, no weapon better at everything (D127 (the tuned
+  numbers)), is read at the kit a Gun career first meets a layer with,
+  and holds there only as an average of a layer each weapon wins. A reward
+  for trying a weapon cannot outweigh the one that is best. Most of the
+  gap is the eel, whose sway makes shots miss and whose touch lands on the
+  Gun and the Harpoon, not the Knife (`roadmap.md` → Health): layer 3
+  punishes fighting from afar and nothing in it punishes fighting up
+  close. Igor picked closing it so, D170 (the Knife's lead closes by the fish it meets), with the
+  lionfish, D171 (the lionfish). In four of layer 3's batches it evens
+  the Knife where a Gun career meets layer 3, and leaves the late kit's
+  lead: there the cut outreaches its spines (`roadmap.md` → Health).
+- **Not the Knife's tiers**: at the late kit it leads at its first tier
+  with no Weights, and without the Mask, above the Gun and the Harpoon at
+  their tops
+  (`roadmap.md` → Health). Its base shape does it — up to seven fish a
+  cut, nothing to miss — and the lead closes by the fish it meets, not by
+  the Knife (D170 (the Knife's lead closes by the fish it meets)).
+- **Their tiers**: the Gun's three add rate only, so no tier changes
+  how many hits a fish takes — a grade-2 drifter takes two at every tier
+  without the Weights. The Harpoon kills every fish but the bulwark in one
+  hit at nearly every tier, so its tiers past the first change almost
+  nothing a player sees. The Knife cuts up to seven at once, with no shot to miss.
+- **Nothing pays for trying.** The Harpoon was never bought in two
+  careers — Igor, 2026-10-30: "harpoon feels like a redundant weapon
+  now". Not for its Strength: both bought that step before dive 2. And
+  the thousand gems left at each win are the winning dive's own: each went
+  into it with all but 22 and 128 spent, on the Suit, the Mask and the
+  Knife's tiers. The Harpoon loses to buys that make the weapon already
+  carried safer; trying it costs its price, then a dive at its first tier
+  against a kit grown for another.
+- **Proposed**, Claude's: **(1)** the late lead closed — by a fish, as
+  picked above — and the bar read at the late kit too; **(2)** a challenge ladder of each
+  weapon's own, a feat only its nature allows (Weapon ideas, below), so
+  carrying a new weapon pays points and teaches it; **(3)** a top tier that
+  adds a way to play, not a number; **(4)** a mod and a boost of each
+  weapon's own, so a weapon brings its own drops into the dive. For
+  expansion, each new weapon then
+  comes with all four: a niche it wins, a ladder, a top tier, its own
+  drops. Others weighed: a weapon marked at `home` paying more gems, as
+  Hades does — gems are short until the winning dive, whose thousand no
+  one spends; a deepest gate shown per weapon on `home` — a record,
+  nothing earned; the Harpoon's Strength gate dropped — met before dive 2
+  in both careers, so not what keeps it unbought, and the one `requires`
+  there is.
+**Home**: open, Igor's pick.
+A new player (`playtests.md` → A new player's session) bought the Knife
+and its first tier, carried the Gun again within a second and never dived
+with the Knife; raised the Gun to 3; never bought the Harpoon.
+
 ## Weapon ideas — a running list
 
 Open collection, for the weapons to come and the three there are. Each new
@@ -280,9 +356,9 @@ challenge judges yet.
   the three D34 (mods) named, D35 (currency is auto-collected) left the
   currency magnet nothing to do and `Lull` is declined (below). Since D85 (the
   layer end's pick) it is one of the layer end's own, so no fish carries a
-  comfort mod at all. Not a design problem yet — S5 (content) designs the pool,
-  5–7 mods (D93 (the content stage's counts)) — but comfort is meant to carry
-  the pool's width.
+  comfort mod at all. S5 (content) filled the pool to seven (D93 (the
+  content stage's counts)) with none beside it, though comfort is meant to
+  carry the pool's width.
 
 - **The dash economy: two mods and an attribute feed one verb.** Igor, 2026-09-27,
   playing D54: "once the dash becomes long, it feels way easier" and "dash
@@ -337,9 +413,6 @@ challenge judges yet.
 - **RMB secondary attack.** Possible per the draft, not committed. If it
   comes, it needs numbers of its own: D83 (the weapon record) puts one
   weapon's on the player.
-- **Weapon-scoped mods** — the #3 half of D31. They attach as D83 (the weapon
-  record) says — a mod naming the weapons it fits, changing their numbers on
-  the player — and arrive at S5 or not at all.
 - **Timed fast clears of completed layers** rewarding the player, so easy
   layers do not go obsolete. In `foundations.md` as a pillar, unimplemented.
   Since D66 (the dive runs on through the layers) every dive passes through
@@ -385,10 +458,6 @@ necessarily within s5 or this session." Each note keeps his words. **Home** is
 where Claude proposes it be built: a proposal, unconfirmed until the note is
 discussed.
 
-**Tooling**
-
-- **Unity's tooling, assessed** — Port to a native executable, above.
-
 **Screens**
 
 - **`home` shows the character; gear and attributes stop being lists.** "gear
@@ -413,8 +482,23 @@ discussed.
   animation - for later on ideas". Waits until names and meta settle after
   alpha. **Home**: past alpha.
 
-**The dash**
+**Abilities, the dash among them**
 
+- **Abilities, a system beside weapons and equipment.** Igor, 2026-10-31,
+  asked what "the dash is held" was about: "probably about starting without
+  it. which brings me the idea of abilities - a separate system along with
+  weapons and equipment. need to think what abilities except dash there
+  could possibly be". For discussion; the two dash notes below go into it.
+  Open: what abilities there are besides the dash; how one is had (bought,
+  opened by a step, found); how many are carried at once, and on which key;
+  and whether the dash becomes the first of them. Claude's candidates, each
+  a verb no weapon or piece of equipment has: **a pulse** — a ring that
+  shoves every fish near the diver away, the crowd answer; **an ink
+  cloud** — fish inside lose the diver for a few seconds; **a lure** — a
+  bubble the fish chase instead of the diver; **a hook** — a line that pulls
+  a fish in, or the diver to a wall. Each would have to differ in kind
+  from the dash and the suit's guard (`foundations.md` → Diversity), and a
+  new kind needs its glossary word and `entities/` doc at once (D124).
 - **The shove, earned.** Igor, 2026-10-19, during knockback (D122
   (knockback)): "dash knockback - good idea, but should be earned. default
   without it is ok. goes for mechanics and attrs design". Today every dash
@@ -607,144 +691,40 @@ balanced for alpha".
 - **The economy and the fights, reworked in S9 (the balance rework) — to
   play.** Igor's 2026-10-27 report ("dives are long and useless and grindy
   … upgrades feel useless, points are near to impossible … bosses are too
-  easy … archer") is built as D155 (six gates a layer), D156 (the boss's
-  shell and stages), D157 (the archer counts twice what the bot measures)
-  and D158 (prices in reach, ladders a dive long). Not built from the
-  reading yet: points from opt-in difficulty (`reading.md` → Points).
-  Proposed, Claude's: hazards taken at `home` before a dive — the fish a
-  grade up, the guard off, the wind-ups shorter — each adding a share to the
-  points the dive's depth pays, as Bastion's idols do; a winning dive's
-  stroll is then the player's to refuse.
-  Igor's play, 2026-10-28 — the mini-boss "good"; layer 1's boss 75s, layer
-  3's 60s "hard but good"; three fresh dives: 135s and 78 gems, 150s and
-  75 gems, then dead at the second mini-boss with 40 gems; points only on the
-  first. He earns about a tenth of what the career bot does; the economy is
-  now set on his play (D160 (a layer-1 dive buys a thing every two)). Late
-  game, `?debug=L3,G4,S3351240973,Knife3,Mask3,Suit3`: "absolutely nailed it
-  in 42s, gameplay felt really good". Igor: "the whole game should be
-  finishable in 10-15 min and all upgrades need to be purchased … points are
-  still earned god knows how, so think about mechanics". Open:
+  easy … archer") is built as D155 (six gates a layer) to D162 (the whole
+  game in fifteen to twenty minutes); the plays since are `playtests.md`,
+  the first career among them. Igor: "the whole game should be finishable
+  in 10-15 min and all upgrades need to be purchased … points are still
+  earned god knows how, so think about mechanics". Open:
   - "still feel that threat grows fast. but maybe false feeling" — flatter
     since D162 (the whole game in fifteen to twenty minutes); to replay.
   - The boss's stage cue: "sound and burst didnt make a difference" — a
     stronger tell, or drop it. And "can hit unshielded max 3 times".
-    Played as `boss-cue` (`playtests.md`): two stage changes, "no changes
-    noticed in the boss", and no hit taken either.
+    `boss-cue` (`playtests.md`): "no changes noticed in the boss".
   - "boss burst hitting screen edge, think thru".
-  - The archer's counts past layer 1: played as `archer-deep`
-    (`playtests.md`), eight grade-3 archers for no hit with the late kit.
-  - **The first logged career** (D163 (the career log)), 2026-10-28, the
-    D161 (depth pays points) and D162 (the whole game in fifteen to twenty
-    minutes) build: won on dive 4, 17 minutes by the wall clock (14 diving,
-    3 at `home`) — on target. But:
-    - **The winning dive was a stroll**: 5.5 minutes, no heart lost — all 11
-      hits taken by the guard. Suit 3 (210 gems, a guard of 3 a batch) took
-      18 of dive 3's 22 hits too. The strongest buy by far; the last dive
-      should be the hardest, not the easiest. Built as D168 (the guard lasts two gates); proposed then: the guard
-      refilled per layer, not per batch, or fewer per tier.
-    - **The Suit pair** (`playtests.md`): the Suit is not what makes the
-      last dive easy — it lets a careless play off; the kit does, the Knife
-      most, and the boss's lunge (5, then 6 HP) is its one danger. Open:
-      what makes a late dive hard, and the lunge's place among the other
-      threats. The lunge misses on its own: over every play 2 of 165
-      landed, and a diver who only kept swimming would have taken 30
-      (`playtests.md` → The roadmap, the lunge over every play). Proposed,
-      Claude's: **aim ahead** — the line still fixed as the wind-up starts
-      (D64 (the boss lunges)), but drawn to where the diver will be if it
-      keeps its way, so only a change of course leaves it; or **follow, then
-      fix** — the line follows the diver through the swell and fixes a beat
-      before the charge.
-    - **The Knife, by the bot**, 2026-10-29 (`playtests.md` → Where it
-      starts to hurt): at the `late` kit the Knife clears layer 3's deepest
-      batch nearly untouched where the Gun and the Harpoon, at the same
-      tier, cost hearts. Not the Mask's doing: without it the Knife leads
-      the same (`roadmap.md` → Health, the weapons). Whether a swing the
-      Mask takes from 72px to 162px still "swings close" is open (the
-      diversity rule's fifth). The threat and the career bot are measured
-      with the Gun. Played, 2026-10-30 (`playtests.md` →
-      Three weapons, one late batch): Igor's Knife cost 2 HP of 6, the Gun
-      and the Harpoon 4 each — half, not near nothing as for the bot.
-    - **Not everything bought**: no Harpoon, Gun 1 of 3, Knife and Weights 2
-      of 3; 9 of 12 steps (26 points earned, 30 to buy all); 1039 gems
-      unspent at the end, 1017 of them the winning dive's own: it began with
-      22, against 750 gems of gear unbought. The skill ladders paid 8 of 20
-      — depth paid 18.
-    - Killed by archers (dive 1) and puffers (dives 2, 3: most killing
-      hits). Gates 10–40s; the bosses 11–39s with his kit.
-  - **The second career**, 2026-10-30 (`playtests.md` → A whole career,
-    after the puffer): won on dive 4, 15 minutes — and again the Suit: 16 of
-    the winning dive's 18 hits guarded, nothing healed. Igor: "overall feels
-    good, but i gained guard and hp bonuses which allowed me to take a lot
-    of damage and not die". Twice now: the guard lasts two gates since, D168 (the guard lasts two
-    gates).
-    - "harpoon feels like a redundant weapon now" — the bot agrees: over
-      layers 2 and 3 it is better than neither the Gun nor the Knife, and
-      it was never bought in either career. Open: a reason to carry it, or
-      drop it — with Every weapon tried and raised, below.
-    - "boss is hardly a challenge, just time-consuming sometimes. escort
-      enemies help to keep it dynamic though" — no lunge landed in the
-      winning dive; the escorts are what it brings. Open, with the lunge's
-      place above.
-    - "would i be able to complete the game as fast if i chose different
-      upgrades? i dont know" — the career bot wins on dive 2 or 3 with any
-      weapon, the Harpoon a minute slower in layer 3; it cannot say what a
-      build without the Suit costs a human.
+  - **What makes a late dive hard**, and the boss's lunge's place among the
+    threats. Both careers won on a Suit carrying a careless play, and the
+    Suit pair showed the kit, the Knife most, makes the last dive easy
+    (`playtests.md`). Igor, 2026-10-30: "boss is hardly a challenge, just
+    time-consuming sometimes. escort enemies help to keep it dynamic
+    though". The lunge misses on its own: over every play 2 of 165 landed,
+    and a diver who only kept swimming would have taken 30 (`playtests.md`
+    → The roadmap, the lunge over every play). Proposed, Claude's: **aim
+    ahead** — the line still fixed as the wind-up starts (D64 (the boss
+    lunges)), but drawn to where the diver will be if it keeps its way, so
+    only a change of course leaves it; or **follow, then fix** — the line
+    follows the diver through the swell and fixes a beat before the charge.
+  - **The unbought gear.** Each career went into its winning dive with all
+    but a few gems spent and over half the gear, by price, unbought; the
+    gems left at a win are the winning dive's own (`playtests.md` → Igor's
+    first career, A whole career, after the puffer).
+  - Whether a swing the Mask takes from 72px to 162px still "swings close"
+    (the diversity rule's fifth).
+  - "would i be able to complete the game as fast if i chose different
+    upgrades? i dont know" — the career bot wins on dive 2 or 3 with any
+    weapon, the Harpoon a minute slower in layer 3; it cannot say what a
+    build without the Suit costs a human.
   **Home**: S9.
-
-- **Every weapon tried and raised.** Igor, 2026-10-30: "for the future game
-  expansion, we need to motivate the player to try out and upgrade each
-  weapon". The reading is `reading.md` → Try out and upgrade each weapon, the
-  figures `roadmap.md` → Health, the weapons. Where it stands:
-  - **One weapon carries the late game.** At the kit of Igor's winning dive
-    the Knife loses a tenth of a heart a layer-3 batch, the Gun and the
-    Harpoon two to three; Igor's one late batch, 2 HP against 4 and 4. The
-    S6 (balance) bar, no weapon better at everything (D127 (the tuned
-    numbers)), is read at the kit a Gun career first meets a layer with,
-    and holds there only as an average of a layer each weapon wins. A reward
-    for trying a weapon cannot outweigh the one that is best. Most of the
-    gap is the eel, whose sway makes shots miss and whose touch lands on the
-    Gun and the Harpoon, not the Knife (`roadmap.md` → Health): layer 3
-    punishes fighting from afar and nothing in it punishes fighting up
-    close. Igor picked closing it so, D170 (the Knife's lead closes by the fish it meets), with the
-    lionfish, D171 (the lionfish). In four of layer 3's batches it evens
-    the Knife where a Gun career meets layer 3, and leaves the late kit's
-    lead: there the cut outreaches its spines (`roadmap.md` → Health).
-  - **Not the Knife's tiers**: at the late kit it leads at its first tier
-    with no Weights, and without the Mask, above the Gun and the Harpoon at
-    their tops
-    (`roadmap.md` → Health). Its base shape does it — up to seven fish a
-    cut, nothing to miss — and the lead closes by the fish it meets, not by
-    the Knife (D170 (the Knife's lead closes by the fish it meets)).
-  - **Their tiers**: the Gun's three add rate only, so no tier changes
-    how many hits a fish takes — a grade-2 drifter takes two at every tier
-    without the Weights. The Harpoon kills every fish but the bulwark in one
-    hit at nearly every tier, so its tiers past the first change almost
-    nothing a player sees. The Knife cuts up to seven at once, with no shot to miss.
-  - **Nothing pays for trying.** The Harpoon was never bought in two
-    careers. Not for its Strength: both bought that step before dive 2. And
-    the thousand gems left at each win are the winning dive's own: each went
-    into it with all but 22 and 128 spent, on the Suit, the Mask and the
-    Knife's tiers. The Harpoon loses to buys that make the weapon already
-    carried safer; trying it costs its price, then a dive at its first tier
-    against a kit grown for another.
-  - **Proposed**, Claude's: **(1)** the late lead closed — by a fish, as
-    picked above — and the bar read at the late kit too; **(2)** a challenge ladder of each
-    weapon's own, a feat only its nature allows (Weapon ideas, above), so
-    carrying a new weapon pays points and teaches it; **(3)** a top tier that
-    adds a way to play, not a number; **(4)** a mod and a boost of each
-    weapon's own, so a weapon brings its own drops into the dive. For
-    expansion, each new weapon then
-    comes with all four: a niche it wins, a ladder, a top tier, its own
-    drops. Others weighed: a weapon marked at `home` paying more gems, as
-    Hades does — gems are short until the winning dive, whose thousand no
-    one spends; a deepest gate shown per weapon on `home` — a record,
-    nothing earned; the Harpoon's Strength gate dropped — met before dive 2
-    in both careers, so not what keeps it unbought, and the one `requires`
-    there is.
-  **Home**: open, Igor's pick.
-  A new player (`playtests.md` → A new player's session) bought the Knife
-  and its first tier, carried the Gun again within a second and never dived
-  with the Knife; raised the Gun to 3; never bought the Harpoon.
 
 - **A new player's first session.** `2026-10-31-new-player`
   (`playtests.md` → A new player's session): eleven dives in 28 minutes,
@@ -771,17 +751,13 @@ balanced for alpha".
 - **Agent housekeeping.** Igor, 2026-10-28: "rename to agents.md required or
   not? is our agent built well? subagents, skills, context optimized?".
   Claude's findings: no rename needed for Claude Code; the global
-  `~/.claude/rules/` (Python-backend rules) load into every session here
-  and only collide; a balance pass re-measures by hand what one
+  `~/.claude/rules/` (Python-backend rules) and the global `CLAUDE.md`
+  load into every session here and only collide — about 21 KB, measured
+  2026-10-31 in the first `abyss-tidy` pass, against 35 KB for
+  `foundations.md` and `working.md` together; a balance pass re-measures by hand what one
   `npm run measure bars` could print. **Home**: open, Igor's pick.
 
 ## Suggested but not yet discussed
-
-- **Retire the career log once Sonar has carried a career.** Claude,
-  2026-10-28, in S10 (Sonar): a play-test from a save records everything the
-  career log does (D163 (the career log)) and more, so `meta.log`, the story
-  in the save and `logs/career.json` would go, and with them a save that
-  grows a line a dive.
 
 - **A rank only play can earn.** Claude, 2026-10-01, in the mods rework, when
   Igor asked whether rank "could be something more": a meter that climbs with
@@ -790,15 +766,6 @@ balanced for alpha".
   damage. Not taken with D87 (rank is retired): it is a system of its own, and
   it snowballs — good players get stronger still. If it comes, it is the place
   the "easy layers stay relevant" pillar's fast clears could pay into.
-
-- **Shake when enemies take damage** (currently only when *you* take damage).
-  Offered 2026-09-12 when Igor asked for "slight shake on damage received";
-  he meant the player. Never confirmed either way.
-- **Hitstop on death** — a few frames of freeze before the death shake. The
-  other classic ingredient of an "epic" death besides the shake itself.
-- **Music.** Would need either a generated loop or an audio file, and a file
-  would break the "no assets, ever" rule that has held so far.
-- **Mobile / touch input.** Not considered at all yet.
 
 ---
 
@@ -809,6 +776,21 @@ Claude's lean: the boss's and the mini-boss's bar across the top of the view,
 where 100 hp of progress reads, instead of the small bar over the body every
 hurt fish carries (D121 (only a hit blinks; a hurt fish carries a bar)). Igor,
 2026-10-26: "health bar stays".
+
+### Points from opt-in difficulty
+Claude's, from `reading.md` → Points: hazards taken at `home` before a dive —
+the fish a grade up, the guard off, the wind-ups shorter — each adding a
+share to the points the dive pays, as Bastion's idols do. Igor, 2026-10-31:
+"drop".
+
+### Hitstop on death
+Claude's, 2026-09-12, after Igor's "more epic shake on losing": a few frames
+of freeze on the killing hit before the death shake. Igor, 2026-10-31:
+"dont know what for, drop".
+
+### Shake when a fish is hurt
+Claude's, 2026-09-12, when Igor asked for "slight shake on damage received"
+— he meant the diver's. Igor, 2026-10-31: "wont do now, can drop".
 
 ### Difficulty option in the options menu
 Offered as one of four candidate options 2026-09-12; Igor chose Volume, Screen

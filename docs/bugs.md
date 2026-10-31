@@ -32,6 +32,9 @@ not change, so their move too is the careers'.
 What should happen: a batch past the opening is not cleared by standing
 still (`foundations.md` → the pillars, Nothing trivial). Not found yet:
 whether the guard's second gate or the fewer fish do it.
+Igor, 2026-10-31: "probably the bot being too good. i havent had that
+feeling when playing myself" — a lean; a bot that plays like him would tell
+(`ideas.md` → A bot that plays like Igor).
 
 ### A key stays held after it is let go
 Igor, 2026-10-28, in the first Sonar play-test: "something broke, i can't
