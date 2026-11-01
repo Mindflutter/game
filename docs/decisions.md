@@ -5745,3 +5745,140 @@ from chat history and add it to context IF it fits".
   dated, and the docs still outrank it.
 
 **Guarded by**: nothing; neither changes the game.
+
+## D179 — The guard lasts a layer · 2026-10-31
+
+The guard lasting two gates, D168 (the guard lasts two gates), played: layer
+3 whole, "broken: still a stroll" — hits by gate 0, 0, 2, 1, 2, 1, never
+more in two gates than the Suit's three (`playtests.md` → The guard, two
+gates long). Igor: "fix knife and guard with totally your approach".
+
+- **The guard comes back whole only at the layer end**, with the heal; a
+  dive starts with it whole. Suit 3 takes three hits a layer. Claude's pick,
+  after the shields of other action roguelites: a hit a room (The Binding
+  of Isaac's Holy Mantle), armor that never refills (Enter the Gungeon), a
+  shield back after seconds unhurt (Risk of Rain 2). A layer is the
+  longest stretch here that already ends in a refill, the heal's.
+- On that play's hits it would have let three through, all in the last two
+  gates: a careful layer keeps the guard for the boss, a careless one meets
+  the boss without it.
+- The tiers and prices stand.
+- The bot cannot see it: `measure weapons` fights one batch from a whole
+  guard, and the career bot is hit too seldom — it still wins on dive 2 or
+  3 (`roadmap.md` → Health).
+
+**Supersedes** D168 (the guard lasts two gates)'s refill at the first gate
+of each pair.
+
+**Guarded by** `tests/combat.test.js` — no gate along a layer refills it,
+the boss's included; the layer end does, with the heal.
+
+## D180 — The Mask lengthens a shot, not a cut · 2026-10-31
+
+Igor played the deepest lionfish batch with each weapon (`playtests.md` →
+Three weapons among lionfish), and the Knife led: "insane aoe damage in a
+huge arc, fast repeating swings, enemies die in batches easily. especially
+helpful against the annoying green ones that have hardly predictable
+trajectory (for a human player)". The arc was the Mask's: its +30 a tier
+lengthened a cut as much as a shot, and at Mask 3 took the Knife's past the
+lionfish's circle, which D175 (the lionfish drifts, its circle past the
+Knife's cut) set against the cut without it. Melee pays for its reward by
+coming close; a cut that reaches as far as the spines stopped paying.
+
+- **The Mask adds range to the Gun and the Harpoon only**; the Knife's
+  reach is its own and its tiers'. While the Knife is carried, the Mask's
+  row at `home` and its debug tip say "nothing for the Knife". Claude's
+  pick.
+- The prices and tiers stand: the Mask is bought for the other weapons.
+- The bot's gap does not close by it: at the lion batch's kit its Knife
+  loses a little, its Gun and Harpoon nothing (`roadmap.md` → Health). The
+  bot reads the rest as the eel's; a slower sway is proposed (`ideas.md` →
+  Every weapon tried and raised).
+
+**Guarded by** `tests/home.test.js` — Mask 3 adds 90 to the Gun's and the
+Harpoon's range and nothing to the Knife's, and the row says so;
+`tests/debug.test.js` — the tip.
+
+## D181 — The Mask widens the Knife's cut · 2026-11-01
+
+D180 (the Mask lengthens a shot, not a cut) left the Mask nothing for the
+Knife, and `home` said so. Igor: "nothing for the knife in upgrades - a big
+no-no. this fucks up game design fundamentally. make some small improvement
+at least". A longer cut cannot be it: the Knife cuts a lionfish from 110 px
+centre to centre and its spines sting from 122, so 13 px of reach more —
+under half a Mask tier's 30 — puts the cut past the ring again, which D175
+(the lionfish drifts, its circle past the Knife's cut) set it inside.
+`lion-knife-short` showed the short cut did no worse for Igor
+(`playtests.md` → The Knife's own reach).
+
+- **The Mask widens the Knife's arc, 10° a tier** — 60° bare, 90° at Mask
+  3: you see wider, so you cut wider. Its reach stays its own and its
+  tiers'. The Gun and the Harpoon still get 30 px of range a tier. Claude's
+  pick: a step that can be seen, at a third of the area the cut covered
+  when the Mask lengthened it.
+- The arc is the diver's own number, `arc`, beside `range`, as the shots'
+  numbers are: `home` shows it in the kit while the Knife is carried, and
+  the Mask's row says "arc +10". The kit's lines close up a pixel, so the
+  Knife's longer list still ends above the hint.
+- A dive saved before it takes its arc from its weapon (save version 16).
+- **Every buy does something for the weapon carried**, Igor's rule from
+  this: each tier of every weapon and piece of equipment, and each step of
+  every attribute, moves a number whichever weapon is carried.
+
+Supersedes D180's "nothing for the Knife".
+
+**Guarded by** `tests/home.test.js` — Mask 3 adds 30° to the Knife's arc
+and no range, and 90 px to the shots; a fish 35° past the bare arc's edge
+is cut only by the wider one; every tier and step moves something for each
+weapon; `tests/save.test.js` — a version-15 Knife dive loads with its arc.
+
+## D182 — The Harpoon a railgun · 2026-11-01
+
+Igor, having played it: "harpoon: hard to use in early game (aiming), gets a
+bit better later via crowd destroying. still couldnt beat the game at it max
+stats. not impossible, but hard. doesnt fit game dynamics now. probably
+increase fire rate x1.5, increase bullet speed like x3 (my feeling), like a
+true railgun".
+
+- **Its shot flies at 3300 px/s, not 950**: across its 420 px range before
+  an eel swimming straight across, 130 px/s, leaves the line — 17 px
+  between the shot's body and the eel's, so 3212 at least. A fish is hit
+  where it is aimed at, never ahead of it; only the eel's sway still moves
+  it off (`ideas.md` → Every weapon tried and raised). Claude's pick,
+  worked out from the eel: Igor's ×3, 2850, misses it at the range's end.
+  A shot draws as 0.035s of its flight, so the Harpoon's is a 115 px
+  streak.
+- **Its fire rate stands.** With the rate ×1.5 as well, the bot's Harpoon
+  is better than the Gun and the Knife at everything over layers 2 and 3,
+  and every career the bot plays with it wins on dive 2 (`roadmap.md` →
+  Health). The rate waits on Igor's play of the faster shot.
+- **It breaks a bar, knowingly.** The faster shot alone makes the bot's
+  Harpoon quicker and safer than its Gun over layers 2 and 3 together, so
+  no weapon dominating (D127 (the tuned numbers)) fails on "Harpoon over
+  Gun" (`bugs.md`); the Gun is still ahead in layer 1 and level in layer 2.
+  Kept, because the Gun's loss is the eel's — its slow shot misses the
+  sway most — and the slower eel proposed answers it (`ideas.md` → Every
+  weapon tried and raised); the bot aims ahead perfectly, and a human
+  aiming straight gains more from the faster shot than it does.
+- Its `desc`: "few heavy shots, fast, that go through fish".
+
+**Guarded by** `tests/home.test.js` — a shot aimed straight at an eel
+crossing 400 px off kills it.
+
+## D183 — The Harpoon's top fires faster · 2026-11-01
+
+Igor, having played D182 (the Harpoon a railgun)'s shot early and late:
+"feels much better. but at high tier i think its fire rate should be even
+faster".
+
+- **Its rate tier adds 0.4 a shot a second, not 0.2**, so the Harpoon
+  bought to the top fires 1.2 a second: Igor's ×1.5 of D182, kept to the
+  top, since the start "feels much better" as it is. Claude's pick.
+- **It breaks no new bar.** The bot's Harpoon already dominated the Gun
+  over layers 2 and 3 (`bugs.md` → The Harpoon over the Gun); it gains a
+  little there and does not pass the Knife — 7% under its hearts, the bar
+  being 10% — and its careers win on the same dives
+  (`roadmap.md` → Health).
+
+**Guarded by** `tests/docs.test.js` — `entities/weapons.md`'s tiers table
+against the code.

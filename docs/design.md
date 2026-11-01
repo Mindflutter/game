@@ -287,8 +287,8 @@ by the first build of its version, must load in every later build.
 
 **Damage** (D95, D118, D121, D122). Every hurt goes through `hurtPlayer()`:
 the i-frames and the dash's `safe`, `immortal`, the shake, death, and the
-suit's guard, which takes a whole hit instead of HP, refilled as every other
-batch arrives (D100, D168). Without the i-frames a touching eel drains 3 HP in 50ms.
+suit's guard, which takes a whole hit instead of HP, refilled at the layer
+end with the heal (D100, D179). Without the i-frames a touching eel drains 3 HP in 50ms.
 
 **Knockback** (D122). A hit pushes a fish by the weapon's `knock`, scaled by
 body size the way bodies push each other, onto the same `pushX`/`pushY` the

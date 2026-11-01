@@ -16,11 +16,11 @@ readout see them like any other stat, and everything adds, nothing multiplies
 ## Roster
 
 <!-- generated: weapons -->
-| name | desc | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | at top |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Gun | quick, light shots | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | fireRate 4 |
-| Harpoon | slow, heavy shots that go through fish | 0.8 | 4 | 420 | 950 | 3 | 2 | 200 | 90 | fireRate 1, damage 5, pierce 3 |
-| Knife | swings close, cutting several fish at once | 3 | 2 | 60 | — | 18 | 6 | 40 | 60 | fireRate 3.75, damage 3, range 72 |
+| name | desc | fireRate | damage | range | shotSpeed | shotRadius | pierce | knock | cost | arc | at top |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Gun | quick, light shots | 2.5 | 1 | 250 | 430 | 4 | 0 | 60 | 0 | — | fireRate 4 |
+| Harpoon | few heavy shots, fast, that go through fish | 0.8 | 4 | 420 | 3300 | 3 | 2 | 200 | 90 | — | fireRate 1.2, damage 5, pierce 3 |
+| Knife | swings close, cutting several fish at once | 3 | 2 | 60 | — | 18 | 6 | 40 | 60 | 60 | fireRate 3.75, damage 3, range 72 |
 <!-- /generated -->
 
 Each weapon's tiers, in the order they are bought:
@@ -32,7 +32,7 @@ Each weapon's tiers, in the order they are bought:
 | Gun | 2 | 50 | fireRate +0.5 |
 | Gun | 3 | 100 | fireRate +0.5 |
 | Harpoon | 1 | 35 | damage +1 |
-| Harpoon | 2 | 75 | fireRate +0.2 |
+| Harpoon | 2 | 75 | fireRate +0.4 |
 | Harpoon | 3 | 145 | pierce +1 |
 | Knife | 1 | 30 | range +12 |
 | Knife | 2 | 65 | damage +1 |
@@ -40,12 +40,12 @@ Each weapon's tiers, in the order they are bought:
 <!-- /generated -->
 
 The Knife swings rather than shoots (D105 (the Knife swings)): its `swing`,
-in degrees and seconds.
+in seconds; its `arc` is in the roster.
 
 <!-- generated: weapons:swing -->
-| name | arc | time |
-|---|---|---|
-| Knife | 60 | 0.15 |
+| name | time |
+|---|---|
+| Knife | 0.15 |
 <!-- /generated -->
 
 **at top** is the weapon with every tier bought; **adds** is what one tier
@@ -64,7 +64,8 @@ adds. Both are worked out from the tiers' `apply` by the check.
 | `shotRadius` | px | The shot's hitbox: a hit is the shot's radius plus the enemy's. A swing's blade is as wide, past `range` and past the arc's edges. |
 | `knock` | px/s | How hard a hit knocks a fish back, along the shot or the swing (D122 (knockback)): the speed it gives a body the diver's size, less to a heavier one by area — a fish of radius `r` gets `knock × (the diver's r / r)²`. A lunger out of its chase is not knocked. The push fades as the dash's shove does. |
 | `pierce` | enemies | Extra enemies a shot passes through. One shot hits any enemy at most once. A swing cuts `pierce` + 1 at most, nearest first. |
-| `swing` | — | Its presence is the behaviour: the weapon cuts instead of shooting (D105 (the Knife swings)). Each pull hits every fish whose body reaches into an arc toward the cursor, `arc` degrees wide, at once; the arc is drawn for `time` seconds. No shot, so nothing to miss with or to fly on. |
+| `arc` | degrees | How wide a swing cuts, toward the cursor; a shooting weapon has none. The Mask widens it (D181 (the Mask widens the Knife's cut)). |
+| `swing` | — | Its presence is the behaviour: the weapon cuts instead of shooting (D105 (the Knife swings)). Each pull hits every fish whose body reaches into its `arc` at once; the arc is drawn for `time` seconds. No shot, so nothing to miss with or to fly on. |
 | `tiers` | — | Three or four upgrades, each `{ cost, apply }`: the gems it costs, and what it adds to the player, `p => …`. Each tier may add something different (D83 (the weapon record)). |
 | `cost` | gems | What owning the weapon costs at `home`; 0 owns it from the start (D97 (weapons are owned, and one is carried)). Owned, it is carried for nothing, and the one carried raises its tiers. |
 | `requires` | — | `{ attribute: steps }`: the steps an attribute must be raised before the weapon can be owned (D36 (attributes), D98 (attributes, micro-tasks and what gear requires), D109 (micro-tasks are ladders; steps cost more as they rise)) — "heavy gun needs strength 5". Unmet, its row is dim and says what it needs. Scheduling, not scaling. |
@@ -92,11 +93,16 @@ game in fifteen to twenty minutes)); the base numbers predate the tiers.
 
 Slow, long and heavy, through what it hits (D97 (weapons are owned, and one is
 carried)): the draft's "extra fast railgun-like type". A shot every second and a
-bit, flying fast and far, that hits hard and passes through two fish into a
-third — so it wastes damage on the one-hit swarm and lines up the rest. It
+bit that hits hard and passes through two fish into a third — so it wastes
+damage on the one-hit swarm and lines up the rest. The shot crosses its whole
+range before a swimming eel leaves the line, so it is aimed straight at a
+fish, never ahead of it, and draws as a long streak (D182 (the Harpoon a
+railgun)): Igor's "like a true railgun", its speed worked out from the eel. It
 requires a step of Strength: heavy gear waits for a strong diver, D36
-(attributes)'s own example. Its tiers add damage, then rate, then pierce. Every
-number is Claude's pick, tuned to the pillars (D127 (the tuned numbers)).
+(attributes)'s own example. Its tiers add damage, then rate, then pierce; at
+the top it fires half again as fast as it starts, Igor's "even faster" (D183
+(the Harpoon's top fires faster)). Every number is Claude's pick, tuned to
+the pillars (D127 (the tuned numbers)).
 
 ## Knife
 

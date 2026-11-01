@@ -331,6 +331,9 @@ describe('the setup screen', () => {
     const tip = label => g.MENUS.debug.items[row(g, label)].tip;
     for (const item of g.MENUS.debug.items) expect(item.tip, item.label).toMatch(/\w/);
     expect(tip('Mask')).toMatch(/range \+30/);
+    g.debugSetup.weapon = 'Knife';
+    expect(tip('Mask')).toMatch(/arc \+10/);                 // a cut is not a shot (D181)
+    g.debugSetup.weapon = g.WEAPONS[0].name;
     expect(tip('Heart')).toMatch(/max HP \+1/);
     expect(tip('Fins')).toMatch(/speed \+45/);
     expect(tip('darter')).toMatch(/hp 1\b/);

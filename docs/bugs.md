@@ -36,6 +36,19 @@ Igor, 2026-10-31: "probably the bot being too good. i havent had that
 feeling when playing myself" — a lean; a bot that plays like him would tell
 (`ideas.md` → A bot that plays like Igor).
 
+### The Harpoon over the Gun in the mid-to-late game
+Known on purpose, D182 (the Harpoon a railgun): `npm run measure weapons`
+on its build and D183 (the Harpoon's top fires faster)'s, ten seeds, reads the Harpoon faster by more than 5% and
+cheaper by more than 10% in hearts than the Gun over layers 2 and 3, at no
+fewer clears (`roadmap.md` → Health), so `npm run balance`'s no weapon
+dominating (D127 (the tuned numbers)) fails on "Harpoon over Gun". Not run
+whole; on Igor's word (D132 (full runs on Igor's word)).
+
+What should happen: no weapon better than another at everything there.
+Why: the Gun's slow shot misses the eel's sway most — four of every five of its
+layer-3 hits are eels'. Proposed: the slower eel (`ideas.md` → Every
+weapon tried and raised), which nearly halves the Gun's late hearts.
+
 ### A key stays held after it is let go
 Igor, 2026-10-28, in the first Sonar play-test: "something broke, i can't
 swim up, probably browser window touched, and somehow affected", then "now

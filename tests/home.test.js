@@ -2,7 +2,7 @@
 // equipment, attributes and their points, a new game.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks, ride, clearAndWait } from './harness.js';
+import { loadGame, ticks, ride, clearAndWait, fishAt } from './harness.js';
 
 describe('home: gear, points, challenges (D31, D36)', () => {
   const gun = g => g.WEAPONS.find(x => x.name === 'Gun');
@@ -30,6 +30,9 @@ describe('home: gear, points, challenges (D31, D36)', () => {
     expect(row('weapons', 'Gun')).toContain('tier 0 → 1   fire rate +0.5   ');
     const mask = g.EQUIPMENT.find(x => x.name === 'Mask');
     expect(row('equipment', 'Mask')).toContain('tier 0 → 1   range +30   ');
+    g.meta.carried = 'Knife';
+    expect(row('equipment', 'Mask')).toContain('tier 0 → 1   arc +10   ');
+    g.meta.carried = 'Gun';
     g.meta.gear.Mask = mask.tiers.length;
     expect(row('equipment', 'Mask')).not.toContain('range');
     g.meta.owned = ['Gun', 'Harpoon'];
@@ -291,7 +294,7 @@ describe('the weapons (D97)', () => {
 
   it('the Knife swings: no shot, and every fish in its arc is cut at once', () => {
     const g = loadGame();
-    const half = knife(g).swing.arc / 2;
+    const half = knife(g).arc / 2;
     swingAt(g, [['drifter', 50, 0], ['drifter', 50, half - 5], ['drifter', 50, -(half - 5)],
                 ['drifter', 50, 180]]);                       // behind: untouched
     expect(g.bullets.filter(b => !b.evil)).toEqual([]);
@@ -306,8 +309,17 @@ describe('the weapons (D97)', () => {
     swingAt(g, [['drifter', reach - 1, 0], ['drifter', reach + 1, 40]]);
     expect(g.kills).toBe(1);
     const h = loadGame();
-    swingAt(h, [['drifter', 60, w.swing.arc / 2 + 10]]);       // its body overlaps the edge
+    swingAt(h, [['drifter', 60, w.arc / 2 + 10]]);       // its body overlaps the edge
     expect(h.kills).toBe(1);
+  });
+
+  it('cuts as wide as its arc, which the Mask widens (D181)', () => {
+    // At 80 px a drifter's body overlaps 27° past the edge; this one is 35° past.
+    const cuts = wider => {
+      const g = loadGame();
+      return swingAt(g, [['drifter', 80, knife(g).arc / 2 + 35]], p => p.arc += wider).kills;
+    };
+    expect([cuts(0), cuts(30)]).toEqual([0, 1]);
   });
 
   it('cuts pierce + 1 fish at most, nearest first', () => {
@@ -332,6 +344,28 @@ describe('the weapons (D97)', () => {
     expect(g.enemies[0].hp).toBe(hp);
     for (let i = 0; i < 4; i++) g.update(g.FIXED_DT);
     expect(g.enemies[0].hp).toBe(hp - g.player.damage);
+  });
+
+  it('the Harpoon hits a fish crossing its aim, aimed straight, out to its range (D182)', () => {
+    // An eel's swim straight across, 400 px off: the shot must land before
+    // it moves out of the line, with no aiming ahead.
+    const g = loadGame();
+    expect(g.applyScenario('harpoon', 1)).toBe(true);
+    g.queuePaused = true;
+    const eel = g.enemyType('eel');
+    const e = fishAt(g, 'eel', 400 - g.player.r - eel.r);
+    delete e.weave;
+    g.update(g.FIXED_DT);                        // the trigger arms, released
+    g.aim.x = e.x;
+    g.aim.y = e.y - g.cameraY;
+    g.keys.add('Mouse0');
+    g.update(g.FIXED_DT);
+    g.keys.clear();
+    for (let i = 0; i < ticks(g, 0.5) && g.kills === 0; i++) {
+      e.y += eel.speed * g.FIXED_DT;
+      g.update(g.FIXED_DT);
+    }
+    expect(g.kills).toBe(1);
   });
 
   it('the Harpoon waits for a step of Strength, and its row says so', () => {
@@ -407,14 +441,22 @@ describe('equipment (D100)', () => {
     expect(g.player.hp).toBe(g.player.maxHp - 2);
   });
 
-  it('refills the guard as each batch arrives', () => {
+  it('starts a dive with the guard whole', () => {
     const g = loadGame();
     g.meta.gear.Suit = 2;
     g.reset(1);
-    g.guardLeft = 0;
-    ride(g);                                     // the first batch arrives
-    expect(g.enemies.length).toBeGreaterThan(0);
     expect(g.guardLeft).toBe(2);
+  });
+
+  it('lengthens a shot, and widens the Knife\'s cut instead (D180, D181)', () => {
+    const added = weapon => {
+      const g = loadGame();
+      Object.assign(g.meta, { gear: { Mask: 3 }, owned: g.WEAPONS.map(w => w.name), carried: weapon });
+      g.reset(1);
+      const w = g.WEAPONS.find(x => x.name === weapon);
+      return [g.player.range - w.range, (g.player.arc ?? 0) - (w.arc ?? 0)];
+    };
+    expect([added('Gun'), added('Harpoon'), added('Knife')]).toEqual([[90, 0], [90, 0], [0, 30]]);
   });
 
   it('keeps the guard left with a saved dive', () => {
@@ -674,7 +716,8 @@ describe('home shows the kit (D147)', () => {
     expect([k.Suit.value, k.Suit.dim, k.Mask.dim]).toEqual(['tier 1', false, true]);
     expect([k.Heart.value, k.Heart.dim, k.Strength.dim]).toEqual(['2', false, true]);
     g.reset(1);
-    for (const [stat, unit] of g.KIT_STATS) {
+    expect(k.arc).toBeUndefined();                       // a shot has none
+    for (const [stat, unit] of g.KIT_STATS.filter(([stat]) => stat in g.player)) {
       expect(k[g.STAT_NAMES[stat]].value).toBe(+g.player[stat].toFixed(2) + unit);
     }
   });
@@ -686,7 +729,9 @@ describe('home shows the kit (D147)', () => {
     for (const w of g.WEAPONS) {
       const base = { ...g.PLAYER_START, ...g.shotOf(w) };
       for (const apply of steps) {
-        for (const c of g.modPreview({ apply }, 1, base)) if (c.stat !== 'hp') expect(shown).toContain(c.stat);
+        const moved = g.modPreview({ apply }, 1, base).filter(c => c.stat !== 'hp');
+        expect(moved.length, w.name).toBeGreaterThan(0);   // nothing bought is nothing for the weapon carried (D181)
+        for (const c of moved) expect(shown).toContain(c.stat);
       }
     }
   });

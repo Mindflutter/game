@@ -158,7 +158,11 @@ how far its aim strays, how often it dashes, how long it stands — can be set
 to what Igor's plays show, without the learned bot declined above. Open: the
 knobs, and how many plays fit them. It would also answer the stood bars: a
 standing bot with Igor's aim either still clears a batch, or the bug was
-the bot's.
+the bot's. The eel is where the two part most: Igor died in layer 3's
+deepest lionfish batch with every weapon, 11 of 12 hits eels, "hardly
+predictable trajectory (for a human player)", where the bot's late-kit
+Knife loses almost nothing there (`playtests.md` → Three weapons among
+lionfish).
 
 **Found building S3, 2026-09-29: the kiting bot backs out of its own range.**
 Against a lone slow enemy it holds it inside its 250px range 1% to 18% of the
@@ -264,8 +268,42 @@ weapons. Where it stands:
   punishes fighting from afar and nothing in it punishes fighting up
   close. Igor picked closing it so, D170 (the Knife's lead closes by the fish it meets), with the
   lionfish, D171 (the lionfish). In four of layer 3's batches it evens
-  the Knife where a Gun career meets layer 3, and leaves the late kit's
-  lead: there the cut outreaches its spines (`roadmap.md` → Health).
+  the Knife where a Gun career meets layer 3, not at the late kit
+  (`roadmap.md` → Health).
+  Igor's play of the deepest lionfish batch, 2026-10-31 (`playtests.md` →
+  Three weapons among lionfish): the Knife killed twice what the Gun or
+  the Harpoon did before all three died, 11 of 12 hits eels. Igor: "insane
+  aoe damage in a huge arc, fast repeating swings, enemies die in batches
+  easily. especially helpful against the annoying green ones that have
+  hardly predictable trajectory (for a human player) … gun & harpoon simply
+  suck at these batches". The reach was not it: cut short by D180 (the
+  Mask lengthens a shot, not a cut), the Knife killed more of the same
+  batch (`playtests.md` → The Knife's own reach), and the Mask widens it
+  instead, D181 (the Mask widens the Knife's cut). The lead is aim, which
+  the Knife needs none of against a fish a human cannot aim at; the bot
+  reads the gap as the eel's too (`roadmap.md` → Health). In a real layer,
+  not the lion batch, the Gun went a gate further than the Knife
+  (`playtests.md` → The guard, a layer long).
+  **Proposed**, Claude's: **the eel's sway slower**, `rate` 0.9 → 0.5 a
+  second — its side speed from 280 px/s, twice its swim, to 160, the same
+  wave over twice the time, so a shot can lead it. Tried unfitted at the
+  lion batch's kit, it nearly halves what the bot's Gun loses a fight, and
+  halves its hits by eels (`roadmap.md` → Health). Its threat falls with it, so
+  `npm run measure fit` puts more eels in every layer-2 and layer-3 batch
+  that holds them, and the balance suite runs on Igor's word (D132
+  (full runs on Igor's word)). Igor's late Harpoon: 12 of 14 hits eels',
+  touching, the dash ready (`playtests.md` → The Harpoon at the top, firing
+  faster).
+  **Built and taken back**, 2026-11-01, on Igor's word: at the kit a Gun
+  career meets layer 3 with, the slower eel costs the bot more, not less —
+  refitted (half again as many eels) or not (`roadmap.md` → Health); its
+  threat falls under the puffer's, which D130 (fish are revealed a type at
+  a time) forbids, and no two of a tougher body, a wider sway or a harder
+  touch lift it back. Refitted, a dive holds more gems than all the gear,
+  against D162 (the whole game in fifteen to twenty minutes). What the bot
+  cannot say is whether a human reads the slower sway. Igor, 2026-11-01:
+  "ok leave it".
+  **Home**: left.
 - **Not the Knife's tiers**: at the late kit it leads at its first tier
   with no Weights, and without the Mask, above the Gun and the Harpoon at
   their tops
@@ -279,7 +317,9 @@ weapons. Where it stands:
   nothing a player sees. The Knife cuts up to seven at once, with no shot to miss.
 - **Nothing pays for trying.** The Harpoon was never bought in two
   careers — Igor, 2026-10-30: "harpoon feels like a redundant weapon
-  now". Not for its Strength: both bought that step before dive 2. And
+  now"; 2026-11-01, having played it: "hard to use in early game
+  (aiming) … still couldnt beat the game at it max stats", answered by
+  D182 (the Harpoon a railgun), to play. Not for its Strength: both bought that step before dive 2. And
   the thousand gems left at each win are the winning dive's own: each went
   into it with all but 22 and 128 spent, on the Suit, the Mask and the
   Knife's tiers. The Harpoon loses to buys that make the weapon already
@@ -707,7 +747,11 @@ balanced for alpha".
     Suit pair showed the kit, the Knife most, makes the last dive easy
     (`playtests.md`). Igor, 2026-10-30: "boss is hardly a challenge, just
     time-consuming sometimes. escort enemies help to keep it dynamic
-    though". The lunge misses on its own: over every play 2 of 165 landed,
+    though". The guard lasting two gates, D168 (the guard lasts two
+    gates), did not change it: `suit-pairs`, layer 3 whole, every hit
+    guarded, no heart lost (`playtests.md` → The guard, two gates long);
+    the guard lasts a layer now, D179 (the guard lasts a layer), to play.
+    The lunge misses on its own: over every play 2 of 165 landed,
     and a diver who only kept swimming would have taken 30 (`playtests.md`
     → The roadmap, the lunge over every play). Proposed, Claude's: **aim
     ahead** — the line still fixed as the wind-up starts (D64 (the boss
@@ -718,8 +762,6 @@ balanced for alpha".
     but a few gems spent and over half the gear, by price, unbought; the
     gems left at a win are the winning dive's own (`playtests.md` → Igor's
     first career, A whole career, after the puffer).
-  - Whether a swing the Mask takes from 72px to 162px still "swings close"
-    (the diversity rule's fifth).
   - "would i be able to complete the game as fast if i chose different
     upgrades? i dont know" — the career bot wins on dive 2 or 3 with any
     weapon, the Harpoon a minute slower in layer 3; it cannot say what a
@@ -728,7 +770,9 @@ balanced for alpha".
 
 - **A new player's first session.** `2026-10-31-new-player`
   (`playtests.md` → A new player's session): eleven dives in 28 minutes,
-  none past layer 1. Three things stood in the way: the death screen said
+  none past layer 1; the second newcomer, 13 dives in 24 minutes of diving,
+  to layer 3, no win (The next newcomer, with the dot). Three things stood
+  in the first's way: the death screen said
   nothing of home — now it does, D172 (the end screen marks what home can
   buy) — and these two:
   - **The opening's darter.** 17 of 32 hits, and the first dive's death at
@@ -739,10 +783,21 @@ balanced for alpha".
     revealed a type at a time)); or its bite slower to read at grade 1.
     Either pulls against Nothing trivial's stood bars (`bugs.md`): the bot
     stands through the layer that walled this player. Igor, 2026-10-31:
-    "not needed now".
-  - **Heart never bought.** The points went to Dash reach, for a dash barely
-    pressed. Unread: the attributes screen's words or the player's choice;
-    the player's own words would tell.
+    "not needed now". The second newcomer's layer-1 hits were archers' most,
+    14 of 32, the darter's 7.
+  - **The top row is what is bought.** Both newcomers' first buys on each
+    screen were its top row, tier after tier within a second — Mask, Dash
+    reach, the Gun — where the cursor starts. So Heart, second among the
+    attributes, came late or never, and the points went to a dash barely
+    pressed; the Suit, second in equipment, came before dive 12.
+    Proposed, Claude's: each screen's rows in the order a newcomer needs
+    them — Heart above Dash reach, the Suit above the Mask. **Home**: open,
+    Igor's pick.
+  - **The dot is passed at first.** The second newcomer dived again at the
+    first four deaths with the dot showing, then went home at every one;
+    the first, at five of the first seven. Proposed, Claude's: while
+    nothing has been bought in a career, the death screen's cursor starts
+    on Go home when the dot shows. **Home**: open, Igor's pick.
 - **Studioigor's skills.** Igor, 2026-10-28: "check this repo and other
   repos from this guy: https://github.com/studioigor/studioigor-skill … we
   may adapt his skills & knowledge to our development, if they match our

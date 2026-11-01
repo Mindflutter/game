@@ -404,7 +404,7 @@ function burst(x, y, color, glow, count, speed, life = 0.45) {
 // The Knife's cut (D105). Runs once per pull, not every tick, so it need not
 // keep distances squared.
 function swing(ux, uy) {
-  const half = player.swing.arc * Math.PI / 360;
+  const half = player.arc * Math.PI / 360;
   const cut = [];
   for (const e of enemies) {
     if (e.gone) continue;
@@ -614,6 +614,7 @@ function clearBatch() {
     if (entry.end) {
       layerStart = null;
       player.hp = player.maxHp;
+      guardLeft = player.guard;               // the suit lasts a layer (D179)
       meta.cleared = Math.max(meta.cleared, entry.layer + 1);
     }
   }
@@ -1202,9 +1203,6 @@ function step(dt) {
         spawnBatch(batch, escorts);
         light();
         batchHit = false;
-        // The suit's guard lasts two gates, refilled at the first of each
-        // pair (D168): a layer's six gates are three pairs.
-        if (batchIndex % 2 === 0) guardLeft = player.guard;
         firstKillAt = null;
         glowAt = null;
         // A layer's first batch starts `swift`'s clock (D109).

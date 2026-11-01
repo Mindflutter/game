@@ -486,7 +486,8 @@ describe('the clear and the death, on the tick they land', () => {
   });
 });
 
-describe("the suit's guard (D168)", () => {
+describe("the suit's guard (D179)", () => {
+  const end = atGate(0).plan.findIndex(e => e.end);
   // The diver comes to gate k with one guard of three left.
   const arrive = k => {
     const g = atGate(k);
@@ -496,8 +497,18 @@ describe("the suit's guard (D168)", () => {
     return g.guardLeft;
   };
 
-  it('refills as every other gate arrives, the first of each pair', () => {
-    expect([arrive(1), arrive(2), arrive(3), arrive(4)]).toEqual([1, 3, 1, 3]);
+  it('lasts the layer: no gate along it, the boss\'s included, refills it', () => {
+    expect(Array.from({ length: end + 1 }, (_, k) => arrive(k))).toEqual(Array(end + 1).fill(1));
+  });
+
+  it('comes back whole at the layer end, with the heal', () => {
+    const g = atGate(end);
+    g.player.guard = 3;
+    ride(g);                                  // the boss arrives
+    g.guardLeft = 0;
+    g.player.hp = 1;
+    expect(clearAndWait(g)).toBe('mods');
+    expect([g.player.hp, g.guardLeft]).toEqual([g.player.maxHp, 3]);
   });
 });
 

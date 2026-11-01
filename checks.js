@@ -209,8 +209,9 @@ if (location.search === '?test') {
   check(lastRow.y + lastRow.h < HINT_Y - 10,
     'home: the rows must end above the hint, rows end at ' + (lastRow.y + lastRow.h) +
     ', hint at ' + HINT_Y);
-  // The kit beside the rows (D147), at its widest: every tier at the top.
-  meta = { ...freshMeta(), cleared: LAYERS.length, carried: 'Harpoon',
+  // The kit beside the rows (D147), at its widest and longest: every tier at
+  // the top, and the Knife, whose arc is a line more (D181).
+  meta = { ...freshMeta(), cleared: LAYERS.length, carried: 'Knife',
            gear: Object.fromEntries([...WEAPONS, ...EQUIPMENT].map(g => [g.name, g.tiers.length])),
            raised: Object.fromEntries(ATTRIBUTES.map(a => [a.name, 10])) };   // steps have no top; two digits
   openMenu('home');

@@ -60,13 +60,19 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-10-30-layer2-whole` — layer 2 whole, fewer puffers
 - [x] `2026-10-30-layer2-dive3` — layer 2 with dive 3's kit
 - [x] `2026-10-30-career` — a whole career, after the puffer
-- [ ] `2026-10-30-suit-pairs` — layer 3 with the guard lasting two gates
+- [x] `2026-10-30-suit-pairs` — layer 3 with the guard lasting two gates
 - [x] `2026-10-30-lionfish` — the short Knife among lionfish and eels
 - [x] `2026-10-30-lionfish` again, the ring redrawn, + `2026-10-30-lionfish-mask` — the same gate with the Mask
 - [x] `2026-10-31-new-player` — a session from New game, by someone new to the game
 - [x] `2026-10-31-lionfish-fires` — the lionfish drifting and firing its spines by itself, the short Knife
-- [ ] `2026-10-31-lion-knife` + `lion-gun` + `lion-harpoon` — three weapons, layer 3's deepest lionfish batch
-- [ ] `2026-10-31-new-player` again — the next newcomer, the death screen's dot in; set up when Igor says
+- [x] `2026-10-31-lion-knife` + `lion-gun` + `lion-harpoon` — three weapons, layer 3's deepest lionfish batch
+- [x] `2026-10-31-lion-knife-short` — the same batch, the Knife's cut its own
+- [x] `2026-10-31-suit-layer` + `suit-layer-gun` — layer 3 with the guard lasting a layer, the Knife then the Gun
+- [x] `2026-10-31-career` — a whole career, the guard a layer and the Knife short
+- [x] `2026-11-01-harpoon-early` + `gun-early` — layer 1's opening, the fast Harpoon then the Gun
+- [x] `2026-11-01-harpoon-late` — layer 3 with the Harpoon at its top
+- [x] `2026-11-01-harpoon-top` — the two gates that ended `harpoon-late`, the top firing faster
+- [x] `2026-10-31-new-player` again — the next newcomer, the death screen's dot in
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -676,6 +682,16 @@ taken, about 2:05 for the layer — it does not see this.
 **Measures**: hits by what, guarded or not, a gate; HP after each gate and
 the lowest; time; deaths.
 
+**Outcome**, 2026-10-31 — **broken: still a stroll**. Layer 3 whole in
+2:34 of play, the boss in 15.7s, no death: 6 hits — eel 2, archer 3,
+lionfish 1 — every one guarded, not a heart lost; 9 HP of 9 at the end
+(Vitality picked on the way). Hits by gate 0, 0, 2, 1, 2, 1: two gates
+never brought more than the guard's three, so lasting two gates took
+nothing a careful play let through. Gate 17 is `lion-knife`'s batch by its counts
+(19 lionfish, 22 eels, 5 puffers, its grades mixed as a dive draws them):
+cleared in 32s, 2 hits, both guarded — where `lion-knife`, the same Knife
+without the Suit, every fish at grade 2, died in 28s.
+
 ## The lionfish, against a short Knife
 
 `2026-10-30-lionfish` ·
@@ -861,7 +877,43 @@ shooting and dashing; where each dive ended and by what; minutes a dive and
 in all; the weapon each dive; hits by what, a layer; where and when they
 stopped. Set beside the first newcomer's.
 
-Waits on Igor: "i'll simply tell you to set it up when needed".
+Set up 2026-11-01 — Igor: "setup a new player career test". Since the
+first newcomer, besides the dot: the guard lasts a layer, D179 (the guard
+lasts a layer); the Mask widens the Knife's cut, D181 (the Mask widens the
+Knife's cut); the Harpoon shoots faster, D182 (the Harpoon a railgun). The
+record now reads guarded hits and the Harpoon's dives too.
+
+**Outcome**, 2026-11-01 — play 2, a newcomer's (Igor: "previous play was
+another person"). **The dot: broken, then held**. 32:48 on the clock, 24.1 minutes diving, 13 dives — the first left
+after 3s, back to the title and New game — and no win; the deepest, layer
+3's third gate (dive 12). Layer 1 walled eight dives: deaths at gates 2, 5,
+2, 2, 3, 1, 5, then twice at its boss; dive 11 was the first through it.
+- **The dot** showed at ten of the twelve deaths. The first four, it
+  showing, were Dive again; from the fifth on, every death went home, and
+  every visit with the dot showing bought something. The first newcomer
+  dived again after five of the first seven.
+- **The first buy** came after the fifth death, before dive 7 — not within
+  three dives, as with the first newcomer. On each screen the first buys
+  were its top row, tier after tier within a second: Mask 1 to 3, Dash reach
+  1 to 3, Gun 1 and 2. The first newcomer's were the same rows. Heart came
+  before dive 11, the Suit (1 to 3) before dive 12.
+- **Weapons**: the Gun through dive 12, raised to 3 by dive 10. Before dive
+  13, with 738 gems banked, the Knife and the Harpoon bought and raised to
+  the top in ten seconds; dive 13 carried the Knife and died at layer 2's
+  boss. The Harpoon never dived. Igor: "knife changes gameplay, which is
+  good. all good in general".
+- **Hits**: layer 1, 32 — archer 14, darter 7, drifter 6, bulwark 3, the
+  mini-boss and the boss one each; layer 2, 12, archers 5; layer 3, 6, eels
+  4. No lionfish sting. With the Suit: 6 of dive 12's 14 hits guarded, 6 of
+  dive 13's 11.
+- **The dash**: once in dive 2, then 4, 1, 1, 1, 0, 7, 3 and 4; 15 and 30 in
+  dives 11 and 12, where the run went deepest.
+
+Against the hypothesis every newcomer is read by (A new player's session):
+no buy by dive 3, broken; a second weapon carried, held, on the last dive;
+no win in 24 minutes of diving, layer 3 reached. Whether the stop after
+dive 13 was a choice, and what was found unaided, is Igor's to say. What it
+opens is `ideas.md` → A new player's first session.
 
 ## The lionfish fires its spines
 
@@ -935,3 +987,209 @@ whatever the bot says.
 
 **Measures**: time; hits by what, HP lost, lowest HP; shots, cuts and
 kills; lionfish stings; dashes.
+
+**Outcome**, 2026-10-31 — **the Knife leads, held; and the batch killed all
+three**. Every play died, 4 hits and 8 HP each: the Knife after 28.1s, 37
+kills of 46 fish, 51 cuts; the Gun after 19.4s, 18 kills, 64 shots, 7 of
+them the dash's; the Harpoon after 19.2s, 18 kills, 16 shots, 6 the dash's.
+Of the 12 hits, 11 were eels, 1 a lionfish's spine. HP cannot part them;
+kills and time can — the Knife killed twice what either did and lasted half
+as long again. Igor: "insane aoe damage in a huge arc, fast repeating
+swings, enemies die in batches easily. especially helpful against the
+annoying green ones that have hardly predictable trajectory (for a human
+player). that's your answer. gun & harpoon simply suck at these batches".
+Against the bot, whose late-kit Knife loses almost nothing in layer 3
+(`roadmap.md` → Health): every fish at grade 2 and no Suit make this
+harder than its real gate — `suit-pairs` cleared the same counts with the
+Suit — but the eel the bot reads, a human does not.
+
+## The Knife's own reach
+
+`2026-10-31-lion-knife-short` · `lion-knife`'s code (Three weapons among
+lionfish) · 1 gate.
+
+D180 (the Mask lengthens a shot, not a cut): the Knife's cut is 72 px at
+Mask 3, not 162 — inside the lionfish's ring, as D175 (the lionfish drifts,
+its circle past the Knife's cut) meant it. The Gun and the Harpoon are as
+they were, so `lion-gun` and `lion-harpoon` stand as the comparison. The bot
+reads the Knife barely changed (`roadmap.md` → Health); Igor's words named
+the arc first.
+
+**Hypothesis**: the Knife still leads, by less: it kills fewer than
+`lion-knife`'s 37 of 46 and more than the Gun's and the Harpoon's 18, and
+more of its hits are spines. **Broken by**: 18 kills or fewer — the arc was
+all of the lead, and D180 took it — or 37 or more: the arc was not the lead,
+and the eel is all of it. Igor knows the batch now, which helps this play.
+
+**Measures**: time; kills of the 46; hits by what, HP lost, lowest HP; cuts;
+lionfish stings; dashes.
+
+**Outcome**, 2026-11-01 — **broken: the arc was not the lead**. Dead after
+37.5s, 41 kills of 46 — more than `lion-knife`'s 37 in 28.1s, against the
+Gun's and the Harpoon's 18 — 4 hits, 8 HP: eel, eel, eel, a lionfish's
+spine. 64 cuts, 3 dashes. The batch known helped this play, so it cannot
+say the short cut does better; it can say the short cut does no worse.
+The bot agrees (`roadmap.md` → Health): the lead is the eel's. Igor, on
+the Mask giving the Knife nothing: "a big no-no. this fucks up game design
+fundamentally. make some small improvement at least" — answered by D181
+(the Mask widens the Knife's cut).
+
+## The guard, a layer long
+
+`2026-10-31-suit-layer` · `suit-pairs`' code (The guard, two gates long),
+then the same with `Gun2` (`suit-layer-gun`) · 6 gates each, the Knife
+first.
+
+D179 (the guard lasts a layer): the Suit's three come back only at the
+layer end. On `suit-pairs`' hits — by gate 0, 0, 2, 1, 2, 1 — three would
+have come through, all in the last two gates; the shorter cut, D180 (the
+Mask lengthens a shot, not a cut), adds to them. Driven in Node: a guard
+spent at gate 1 stays spent through all six gates and comes back whole at
+the layer end. The bot does not see it (`roadmap.md` → Health).
+
+**Hypothesis**: the Knife's layer is tense, not lost: alive at the end on 1
+to 5 HP, the guard spent before the boss. The Gun's costs about twice the
+Knife's HP, most of it to eels. **Broken by**: for the Knife, a death (too
+much) or 6 HP or more left (still a stroll); for the Gun, no more lost than
+the Knife — the gap is then the lion batch's, every fish at grade 2, not a
+real layer's. The Gun plays second, the layer known.
+
+**Measures**: hits by what, guarded or not, a gate; HP after each gate and
+the lowest; the gate the last guard went; time a gate and the layer; deaths.
+
+**Outcome**, 2026-11-01 — **broken: a death, both**. The Knife died at the
+layer's third gate after 73s: no hit at the first, two eels guarded at
+the second, then six at the third — the last guard on the first, and
+archers for 3 and 2, eels for 1 and 1, a lionfish's spine for 2: 9 HP. The
+Gun went further, dead at the fourth gate after 103s: 9 hits, 3 guarded,
+6 of the 9 eels'. On `suit-pairs`' rule the Knife's third gate would have
+refilled the guard and left it on about 5 HP. So the Gun lost no more than
+the Knife in a real layer: the gap is the lion batch's, every fish at
+grade 2. Igor, of all three: "otherwise - pretty solid gameplay". One play
+each; the careers say what the guard a layer does to a dive
+(A whole career, the guard a layer long).
+
+## A whole career, the guard a layer long
+
+`2026-10-31-career` · `{ "save": "fresh" }` · to the win, or 30 minutes.
+
+Both of Igor's careers won on the Suit (A whole career, after the puffer):
+dive 4, about 12 minutes of dives, 16 of the winning dive's 18 hits
+guarded. The guard now lasts a layer, D179 (the guard lasts a layer), and
+the Knife carried there cuts at its own reach, D180 (the Mask lengthens a
+shot, not a cut). The career bot still wins on dive 2 or 3 (`roadmap.md` →
+Health); Igor knows the game better each career, which this play cannot
+take apart from the change.
+
+**Hypothesis**: still a roguelite's shape — two deaths or more before the
+win, 15 to 20 minutes in all (D162 (the whole game in fifteen to twenty
+minutes)) — and the winning dive loses HP in layer 3. **Broken by**: a win
+on dive 1 or 2, or under 12 minutes; no win in 30 minutes; or a winning
+dive that loses no HP.
+
+**Measures**: dives to the win and where each ended; minutes a dive and in
+all; what was bought before each; hits by what, guarded or not, a layer; the
+winning dive's HP lost a layer, and the lowest.
+
+**Outcome**, 2026-10-31, on the D180 build — **broken: no win in 28
+minutes**. Played straight after `suit-layer-gun`, and stopped: 50 minutes
+on the clock, 28.1 diving, 7 dives, the sixth left at once. Igor: "didnt
+with the career", then "leave that, too time consuming". Each dive went
+deeper than the one before but one: dead at layer 2's third gate and fifth
+(the Gun), its boss (the Knife), layer 3's fifth (Knife 3), its fourth,
+and its fifth again (Harpoon 3, all its tiers bought for the dive).
+- **Bought**: Heart 1 to 3, Strength 1 and 2, Dash reach 1 and 2 and the
+  Suit 1 to 3 before dive 2; the Weights to 3 and the Knife before dive 3,
+  the Knife to 3 before dive 4; the Mask to 3 before dive 5; the Harpoon
+  to 3 before dive 7.
+- **The guard** took 4 of dive 2's 9 hits, 6 of 12, 9 of 16, 7 of 12 and 5
+  of 11. The layer-3 hits that cost HP: eels 7, archers 7, a bulwark and a
+  puffer.
+- **Layer 3's fifth gate** — the lion batch's counts — killed every run that
+  reached it: dives 4 and 7 here, and `harpoon-late` on the D182 (the
+  Harpoon a railgun) build. On the D168 (the guard lasts two gates) build,
+  `suit-pairs` cleared it in 32s, both hits guarded.
+
+Igor's careers before won on dive 4 in about 12 minutes of diving. With
+the guard lasting a layer and the Knife short, his ran past D162 (the whole
+game in fifteen to twenty minutes)'s bar with no win. The Knife's cut
+widened and the Harpoon's shot since, D181 (the Mask widens the Knife's
+cut) and D182, each ease it; neither has been played over a career. Igor,
+2026-11-01: a whole career only when absolutely necessary.
+
+## The Harpoon, aimed straight
+
+`2026-11-01-harpoon-early` · `L1,G1,S1001,Harpoon0`, then the same with
+`Gun0` (`gun-early`) · 3 gates each — `fresh-opening`'s, the Harpoon first.
+`2026-11-01-harpoon-late` · `suit-layer`'s code with `Harpoon3` · 6 gates.
+
+D182 (the Harpoon a railgun): its shot flies at 3300 px/s, not 950, so a
+fish is hit where it is aimed at. Igor: "hard to use in early game
+(aiming) … still couldnt beat the game at it max stats". The bot, which
+aims ahead perfectly, finds the Harpoon a little slower than the Gun in
+layer 1 and better than it in layer 3 (`roadmap.md` → Health); a human
+gains more from a shot that needs no aiming ahead. In `suit-layer` the Knife
+died at the layer's third gate, the Gun at its fourth (The guard, a layer
+long).
+
+**Hypothesis**: early, the Harpoon clears the three gates in no more than
+half again the Gun's time, at no more hits, and kills at least one fish a
+shot — it passes through. Late, it goes at least as far as the Gun did, the
+fourth gate, and fewer of its hits are eels'. **Broken by**: early, more
+than half again the Gun's time, or fewer kills than shots — aiming still
+fails; late, a death before the fourth gate — it still does not fit the
+late game.
+
+**Measures**: time a gate; shots and kills a gate; hits by what, guarded or
+not; HP after each gate and the lowest; deaths.
+
+**Outcome**, 2026-11-01 — **early held; late held on depth, broke on the
+eel**. Igor: "feels much better. but at high tier i think its fire rate
+should be even faster" — so D183 (the Harpoon's top fires faster).
+- **Early**: the Harpoon cleared the three gates in 53.5s — 16.2, 19.3 and
+  12.2 — not a hit taken, 36 kills for 33 shots. The Gun, played after it,
+  in 56.8s — 14.3, 25.4 and 11.3 — one darter's hit, 36 kills for 89
+  shots. Faster than the Gun, where the bot has it 27% slower (`roadmap.md`
+  → Health): the shot that needs no aiming ahead is worth more to a human.
+- **Late**: dead at the layer's fifth gate, the lion batch, after 157s —
+  a gate further than `suit-layer`'s Gun, which died at the fourth after
+  103s. Gates 31.7, 39, 29.1 and 35.7s; HP 8, 8, 9, 5, then 0 eleven
+  seconds into the fifth. Hits: 7, eels' 5 — half the Gun's 6 were eels' —
+  the first three guarded. The guard went at the fourth gate; an eel's
+  bite and an archer's shot there, 3 and 1 HP, and two eel bites at the
+  fifth, 3 and 2, ended it.
+- The lion batch — layer 3's fifth gate by its counts — has ended every
+  run on this kit that reached it since D179 (the guard lasts a layer)
+  (A whole career, the guard a layer long).
+
+## The Harpoon at the top, firing faster
+
+`2026-11-01-harpoon-top` · `harpoon-late`'s code from the fourth gate,
+`L3,G4,…` · 2 gates: the same two batches that ended it, the mini-boss's
+and the lion batch, with the guard whole (in `harpoon-late` one was left).
+
+D183 (the Harpoon's top fires faster): at the top it fires 1.2 a second,
+not 1. The bot's Harpoon at the `late` kit clears layer 3's gates 8%
+faster at about half the hearts (`roadmap.md` → Health).
+
+**Hypothesis**: both gates cleared, the fourth in less than
+`harpoon-late`'s 35.7s, and Igor finds the rate right. **Broken by**: a
+death in the lion batch again, or "still slow" — then the rate is not what
+the late Harpoon lacks.
+
+**Measures**: time a gate; shots and kills a gate; hits by what, guarded or
+not; HP after each gate and the lowest; deaths.
+
+**Outcome**, 2026-11-01 — **broken: dead in the lion batch again**. Igor:
+"played", nothing on the rate. The fourth gate in 37.9s, not faster than
+35.7; 31 kills for 33 shots; 4 hits, 3 guarded, HP 7 of 8. Dead 20.2s
+into the lion batch — 11.1 in `harpoon-late` — after three hits, 3, 3 and
+1 HP.
+- **Every hit was an eel's**, 7 of 7; in `harpoon-late` 5 of 7. Each bite
+  read came from an eel touching the diver, up to six on screen, with the
+  dash ready.
+- The bot's Harpoon is rarely bitten by an eel at the `late` kit
+  (`roadmap.md` → Health); Igor's lost all 8 HP to them in a gate and a
+  half. The rate does not close it: what the late Harpoon
+  lacks against a human is the eel's sway, as the Gun's does (`ideas.md` →
+  Every weapon tried and raised).

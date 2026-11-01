@@ -474,7 +474,8 @@
       "what was bought before each dive, and the dive of the first buy",
       "each death: whether Go home's dot showed, and Go home or Dive again",
       "the weapon carried each dive, and each one bought or raised",
-      "hits by what, a layer",
+      "the Harpoon: whether bought, and how its dives went",
+      "hits by what, guarded or not, a layer",
       "pauses and menus, and how long",
       "in layer 3, lionfish stings",
       "where and when they stopped"
@@ -542,6 +543,136 @@
       "hits by what, HP lost, lowest HP",
       "shots, cuts and kills",
       "lionfish stings, and dashes"
+    ]
+  },
+  "2026-10-31-lion-knife-short": {
+    "purpose": "The Mask no longer lengthens the Knife's cut: it keeps its own short reach, inside the lionfish's ring. The same lionfish batch as lion-knife: does the Knife still lead the Gun and the Harpoon there?",
+    "start": {
+      "debug": "L3,G5,S2002,Grade2,Knife2,lionfish19,eel22,puffer5,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, play the gate until it is cleared or you die; the tag says done. Don't press R. The cut is short now, so a lionfish's ring reaches past it: go in, cut, get out. Then say how the Knife felt against the last time.",
+    "measures": [
+      "time",
+      "kills of the 46 fish",
+      "hits by what, HP lost, lowest HP",
+      "cuts",
+      "lionfish stings, and dashes"
+    ]
+  },
+  "2026-10-31-suit-layer": {
+    "purpose": "The Suit's guard now lasts a whole layer, and the Knife's cut is its own short reach. Layer 3 with your winning dive's kit and mods: is it tense now, not a stroll and not a death?",
+    "start": {
+      "debug": "L3,G1,S2012,Knife2,Mask3,Suit3,Weights1,Dash_reach3,Heart3,Strength3,Reflex3,Impact3,Vitality2,Fins2,Nerve2"
+    },
+    "limit": {
+      "gates": 6
+    },
+    "play": "Press Dive and play layer 3 through, the boss too, until the tag says done (six gates) or you die. Watch GUARD in the corner: it comes back only at the layer end, so what you spend early is gone for the boss. Don't press R; if you die, stop. Then play 2026-10-31-suit-layer-gun.",
+    "measures": [
+      "hits by what, guarded or not, a gate",
+      "HP after each gate, and the lowest",
+      "which gate spent the last guard",
+      "time a gate and the layer",
+      "deaths"
+    ]
+  },
+  "2026-10-31-suit-layer-gun": {
+    "purpose": "The same layer 3 with the Gun at tier 2 in place of the Knife: how much more does it cost you, and is it the eels?",
+    "start": {
+      "debug": "L3,G1,S2012,Gun2,Mask3,Suit3,Weights1,Dash_reach3,Heart3,Strength3,Reflex3,Impact3,Vitality2,Fins2,Nerve2"
+    },
+    "limit": {
+      "gates": 6
+    },
+    "play": "Press Dive and play layer 3 through, the boss too, until the tag says done or you die. Don't press R; if you die, stop.",
+    "measures": [
+      "hits by what, guarded or not, a gate",
+      "HP after each gate, and the lowest",
+      "time a gate and the layer",
+      "deaths"
+    ]
+  },
+  "2026-10-31-career": {
+    "purpose": "A whole career from New game, with the guard lasting a layer and the Knife short. Your last two won on the Suit, in about 12 minutes of dives. Does it still take a few deaths and 15 to 20 minutes, and is the winning dive tense now?",
+    "start": {
+      "save": "fresh"
+    },
+    "play": "Press New game and play the career to the win: dive, buy what you like at home, dive again. Stop at the win, or at 30 minutes. A reload is fine; it carries on from the save. Play it last, when you have half an hour.",
+    "measures": [
+      "dives to the win, and where each died",
+      "minutes a dive and in all",
+      "what was bought before each dive",
+      "hits by what, guarded or not, a layer",
+      "the winning dive: HP lost in each layer, and the lowest"
+    ]
+  },
+  "2026-11-01-harpoon-early": {
+    "purpose": "The Harpoon's shot now flies over three times as fast, so you aim straight at a fish, not ahead of it. Layer 1's first three gates with the Harpoon at tier 0: is it easy to aim now, early on?",
+    "start": {
+      "debug": "L1,G1,S1001,Harpoon0"
+    },
+    "limit": {
+      "gates": 3
+    },
+    "play": "Press Dive and play the three gates, the mini-boss among them, until the tag says done or you die. Aim straight at the fish. Don't press R. Then play 2026-11-01-gun-early.",
+    "measures": [
+      "time a gate",
+      "shots and kills a gate",
+      "hits by what",
+      "deaths"
+    ]
+  },
+  "2026-11-01-gun-early": {
+    "purpose": "The same three gates with the Gun at tier 0, so the Harpoon has something to be set beside.",
+    "start": {
+      "debug": "L1,G1,S1001,Gun0"
+    },
+    "limit": {
+      "gates": 3
+    },
+    "play": "Press Dive and play the three gates until the tag says done or you die. Don't press R. Then say which felt better to aim, and why.",
+    "measures": [
+      "time a gate",
+      "shots and kills a gate",
+      "hits by what",
+      "deaths"
+    ]
+  },
+  "2026-11-01-harpoon-late": {
+    "purpose": "The Harpoon at its top tier, its shot now fast, through layer 3 with your winning dive's kit: the same layer the Knife died in at its third gate and the Gun at its fourth. Does it fit the late game now?",
+    "start": {
+      "debug": "L3,G1,S2012,Harpoon3,Mask3,Suit3,Weights1,Dash_reach3,Heart3,Strength3,Reflex3,Impact3,Vitality2,Fins2,Nerve2"
+    },
+    "limit": {
+      "gates": 6
+    },
+    "play": "Press Dive and play layer 3 through, the boss too, until the tag says done or you die. Don't press R; if you die, stop.",
+    "measures": [
+      "hits by what, guarded or not, a gate",
+      "HP after each gate, and the lowest",
+      "shots and kills a gate",
+      "time a gate and the layer",
+      "deaths"
+    ]
+  },
+  "2026-11-01-harpoon-top": {
+    "purpose": "The Harpoon at its top now fires 1.2 a second, not 1. The two layer-3 gates that ended your harpoon-late run: is the rate right now?",
+    "start": {
+      "debug": "L3,G4,S2012,Harpoon3,Mask3,Suit3,Weights1,Dash_reach3,Heart3,Strength3,Reflex3,Impact3,Vitality2,Fins2,Nerve2"
+    },
+    "limit": {
+      "gates": 2
+    },
+    "play": "Press Dive and play the two gates, the mini-boss's and the lionfish's, until the tag says done or you die. Don't press R; if you die, stop. Say whether the rate feels right.",
+    "measures": [
+      "time a gate",
+      "shots and kills a gate",
+      "hits by what, guarded or not",
+      "HP after each gate, and the lowest",
+      "deaths"
     ]
   }
 }

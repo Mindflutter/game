@@ -33,7 +33,7 @@ when the two disagree.
 | `dashSpeed` | px/s | While dashing: its own number, so swim speed never lengthens the dash (D56 (the dash is a fixed, committed lunge)). Its reach is `dashSpeed × DASH_TIME` (D111 (the dash a third shorter)). |
 | `mendOnClear` | HP | Healed per batch cleared; `Mend` grants it (`mods.md`). |
 | `dashDamage` | damage | What a dash does to each fish it passes: none until bought (D51 (the dash is bought)). It always shoves. |
-| `guard` | hits | Hits two gates can take without losing HP, refilled as the first of each pair arrives — the Suit's (D100 (equipment: the Mask, the Suit and the Weights), D168 (the guard lasts two gates)). |
+| `guard` | hits | Hits a layer can take without losing HP, refilled at the layer end with the heal — the Suit's (D100 (equipment: the Mask, the Suit and the Weights), D179 (the guard lasts a layer)). |
 | `splash` | px | How far from a struck fish's body its hit wounds the fish beside it too: none but while Bloom runs (D125 (boosts keep each weapon's nature)). |
 
 ## Adding a field

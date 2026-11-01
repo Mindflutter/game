@@ -234,9 +234,10 @@ touch)), the puffer's burst hurting by area instead; bare, they regrow over
 It swims on meanwhile. A hit on it costs nothing, and the dash's
 invulnerability takes the sting, so a dash that deals damage — bought, D51
 (the dash is bought, and the offer waits for the death) — kills it unhurt.
-It drifts, and its reach passes the Mask-less Knife's cut, so the Knife
-comes in, cuts, and gets out within the delay (D175 (the lionfish drifts,
-its circle past the Knife's cut)). It is drawn spiked, the spines bristling as they cock; the
+It drifts, and its reach passes the Knife's cut, which the Mask never
+lengthens, so the Knife comes in, cuts, and gets out within the delay (D175
+(the lionfish drifts, its circle past the Knife's cut), D180 (the Mask
+lengthens a shot, not a cut)). It is drawn spiked, the spines bristling as they cock; the
 ring of its reach fades in as the diver nears it and brightens inside, and
 the spines fly out to it, each drawn where it can sting, and regrow (D173
 (the sting is drawn, the ring kept)). In one sentence: strike it from

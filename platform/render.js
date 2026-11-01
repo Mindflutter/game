@@ -457,7 +457,7 @@ function drawField() {
   // The Knife's cut (D105). PLACEHOLDER GRAPHICS.
   if (player.swingLeft > 0) {
     const face = Math.atan2(player.swingY, player.swingX);
-    const half = player.swing.arc * Math.PI / 360;
+    const half = player.arc * Math.PI / 360;
     const t = player.swingLeft / player.swing.time;
     ctx.fillStyle = 'rgba(191, 252, 255, ' + (0.35 * t).toFixed(3) + ')';
     ctx.beginPath();
@@ -619,7 +619,7 @@ function drawEnd() {
 const HINT_Y = ARENA_H - 64;
 
 // The kit's column on `home` (D147), and where its last line ends, for the check.
-const KIT_LEFT = 930, KIT_RIGHT = 1160, KIT_LINE = 21;
+const KIT_LEFT = 930, KIT_RIGHT = 1160, KIT_LINE = 20;
 let kitBottom = 0;
 
 // Where help's or the catalogue's last line ends, for the check: either can

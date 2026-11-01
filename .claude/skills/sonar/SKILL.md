@@ -17,7 +17,10 @@ Proactively: a change that needs real play gets a play-test, not a bare
 results; there is no pass or fail — it carries the player's experience back.
 
 Short beats long: one or two gates that bear a claim out or break it are
-worth more than a whole dive, and Igor can play several in a sitting.
+worth more than a whole dive, and Igor can play several in a sitting. A
+whole career only when nothing shorter can answer — Igor, 2026-11-01: "only
+give me the whole career test when absolutely necessary. i prefer
+1-several gates tests".
 
 1. Pick an id: `<date>-<short-name>`, e.g. `2026-10-28-archer-hold`.
 2. Add it to `tests/playtests.json`, a record under its id:

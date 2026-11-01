@@ -54,17 +54,21 @@ The same shape as a weapon's tiers (`weapons.md`), without the shot.
 
 ## Mask
 
-You see further, so you shoot further: range, a tier at a time. Worn whatever
-weapon is carried, so it lengthens the Knife's slash as much as the Gun's shot.
+You see further, so you shoot further: range, a tier at a time, for the Gun
+and the Harpoon. A cut is not a shot: the Knife swings close, so the Mask
+widens its arc instead, 10° a tier, and leaves its reach inside the
+lionfish's ring (D180 (the Mask lengthens a shot, not a cut), D181 (the Mask
+widens the Knife's cut)). The table's steps are the Gun's.
 
 ## Suit
 
 Defence, which D36 (attributes) gives gear: the suit takes the first hit of
-every two gates, one more a tier (`guard`). A guarded hit costs no HP but
+every layer, one more a tier (`guard`). A guarded hit costs no HP but
 still gives the i-frames and still counts as a hit for `untouched`; a bite, a
-shot and a burst are guarded alike. The guard refills as the first gate of
-each pair arrives — a layer's six gates are three pairs (D168 (the guard
-lasts two gates)) — and a gold ring around the diver shows one left.
+shot and a burst are guarded alike. The guard comes back whole at the layer
+end, with the heal — a dive starts with it whole too — so a careful layer
+keeps it for the boss and a careless one meets the boss without it (D179
+(the guard lasts a layer)). A gold ring around the diver shows one left.
 
 ## Weights
 

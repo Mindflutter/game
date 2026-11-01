@@ -24,7 +24,7 @@ const PLAYER_START = {
                      // `speed`, so swim speed never lengthens the dash (D56)
   mendOnClear: 0,    // hp healed per batch cleared -- a comfort mod grants it
   dashDamage: 0,     // pure movement until bought (D51); it always shoves
-  guard: 0,          // hits two gates can take without losing HP -- the suit's (D100, D168)
+  guard: 0,          // hits a layer can take without losing HP -- the suit's (D100, D179)
   splash: 0,         // px from a struck fish's body that its hit wounds too -- Bloom's (D125)
 };
 
@@ -165,12 +165,13 @@ const MODS = [
 const STAT_NAMES = {
   speed: 'swim speed', maxHp: 'max HP', hp: 'HP', dashCooldown: 'dash cooldown',
   iframes: 'safe after a hit', dashDamage: 'dash damage', mendOnClear: 'HP back each batch',
-  pierce: 'pierce', range: 'range', damage: 'damage', fireRate: 'fire rate', guard: 'guard',
+  pierce: 'pierce', range: 'range', damage: 'damage', fireRate: 'fire rate', guard: 'guard', arc: 'arc',
   dashSpeed: 'dash speed',
 };
 // The numbers `home` shows the next dive starting with (D147), and their units.
 // A check holds every stat a tier or a step moves to being here.
-const KIT_STATS = [['maxHp', ''], ['guard', ''], ['damage', ''], ['fireRate', '/s'], ['range', ''],
+// The arc is only a swinging weapon's.
+const KIT_STATS = [['maxHp', ''], ['guard', ''], ['damage', ''], ['fireRate', '/s'], ['range', ''], ['arc', '°'],
                    ['pierce', ''], ['speed', ''], ['dashSpeed', ''], ['dashCooldown', 's'], ['dashDamage', '']];
 
 // ---------- boosts ----------
@@ -199,16 +200,18 @@ const WEAPONS = [
     tiers: [{ cost: 20,  apply: p => p.fireRate += 0.5 },
             { cost: 50, apply: p => p.fireRate += 0.5 },
             { cost: 100, apply: p => p.fireRate += 0.5 }] },
-  // The draft's railgun (D97), needing Strength (D98).
-  { name: 'Harpoon', fireRate: 0.8, damage: 4, range: 420, shotSpeed: 950, shotRadius: 3, pierce: 2, knock: 200,
-    desc: 'slow, heavy shots that go through fish', cost: 90, requires: { Strength: 1 },
+  // The draft's railgun (D97), needing Strength (D98). Its shot crosses its
+  // range before a swimming eel leaves the line, so it needs no aiming ahead (D182);
+  // its top fires half again as fast as it starts (D183).
+  { name: 'Harpoon', fireRate: 0.8, damage: 4, range: 420, shotSpeed: 3300, shotRadius: 3, pierce: 2, knock: 200,
+    desc: 'few heavy shots, fast, that go through fish', cost: 90, requires: { Strength: 1 },
     tiers: [{ cost: 35,  apply: p => p.damage += 1 },
-            { cost: 75,  apply: p => p.fireRate += 0.2 },
+            { cost: 75,  apply: p => p.fireRate += 0.4 },
             { cost: 145, apply: p => p.pierce += 1 }] },
   // Melee (D105): it reaches `range` plus `shotRadius`, and `pierce` caps a
   // swing at pierce + 1 fish, nearest first.
   { name: 'Knife', fireRate: 3, damage: 2, range: 60, shotRadius: 18, pierce: 6, knock: 40,
-    desc: 'swings close, cutting several fish at once', swing: { arc: 60, time: 0.15 }, cost: 60,
+    desc: 'swings close, cutting several fish at once', arc: 60, swing: { time: 0.15 }, cost: 60,
     tiers: [{ cost: 30,  apply: p => p.range += 12 },
             { cost: 65,  apply: p => p.damage += 1 },
             { cost: 135, apply: p => p.fireRate += 0.75 }] },
@@ -216,10 +219,13 @@ const WEAPONS = [
 
 // Combat numbers only; body stats are attributes' (D36). Documented in
 // docs/entities/equipment.md.
+// A shot flies further; a cut widens instead, so the Knife still swings
+// close (D180, D181).
+const sight = p => { if (p.swing) p.arc += 10; else p.range += 30; };
 const EQUIPMENT = [
-  { name: 'Mask',    tiers: [{ cost: 20,  apply: p => p.range += 30 },
-                             { cost: 50,  apply: p => p.range += 30 },
-                             { cost: 100,  apply: p => p.range += 30 }] },
+  { name: 'Mask',    tiers: [{ cost: 20,  apply: sight },
+                             { cost: 50,  apply: sight },
+                             { cost: 100, apply: sight }] },
   { name: 'Suit',    tiers: [{ cost: 20,  apply: p => p.guard += 1 },
                              { cost: 60,  apply: p => p.guard += 1 },
                              { cost: 130, apply: p => p.guard += 1 }] },
@@ -792,7 +798,7 @@ const MENUS = {
         ...EQUIPMENT.map(g => ({ name: g.name, value: tier(g), dim: !meta.gear[g.name] })),
         ...ATTRIBUTES.map(a => ({ name: a.name, value: String(meta.raised[a.name] || 0), dim: !meta.raised[a.name] })),
         null,
-        ...KIT_STATS.map(([stat, unit]) => ({ name: STAT_NAMES[stat], value: +p[stat].toFixed(2) + unit })),
+        ...KIT_STATS.filter(([stat]) => stat in p).map(([stat, unit]) => ({ name: STAT_NAMES[stat], value: +p[stat].toFixed(2) + unit })),
       ];
     },
     top: HOME_TOP,

@@ -245,7 +245,7 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 15;
+const SAVE_VERSION = 16;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
@@ -440,6 +440,11 @@ function migrate(s) {
     // The career log is retired (D177): Sonar records all it did.
     delete s.log;
     s.version = 15;
+  }
+  if (s && s.version === 15) {
+    // The cut's arc is the diver's own, where the Mask widens it (D181).
+    if (s.dive && s.dive.player.swing) s.dive.player.arc = s.dive.player.swing.arc;
+    s.version = 16;
   }
   return s;
 }

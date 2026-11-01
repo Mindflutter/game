@@ -13,14 +13,23 @@ S9 (the balance rework) is active, S10 (Sonar) beside it (`plan.md`); what
 S9 has built is its decisions, from D155 (six gates a layer) on, and Sonar's
 play-tests and outcomes are `playtests.md`.
 
-- **The guard**, two gates since D168 (the guard lasts two gates): its
-  play-test, `suit-pairs`, not played yet.
+- **The guard** lasts a layer, D179 (the guard lasts a layer): `suit-layer`
+  died in layer 3 with either weapon, and Igor called it "pretty solid";
+  the careers say what it does to a dive — his (`career`) and a newcomer's
+  (`new-player`) (`playtests.md`). What makes a late dive hard is open
+  (`ideas.md` → The economy and the fights).
 - **Every weapon tried and raised** (`ideas.md` → Every weapon tried and
   raised, and the Weapon ideas): the Harpoon never bought, the Knife
   carrying the late game. The lionfish, D171 (the lionfish) to D176 (the
   spines sting by touch), evens it where a Gun career meets layer 3, not at
-  the late kit (Health); the lead needs something other than a fish. Igor,
-  2026-10-31, on the Knife leading: "dont know if it's even true".
+  the late kit (Health). The lead is aim against the eel, not the cut's
+  reach (`playtests.md` → The Knife's own reach); the Mask widens the cut,
+  D181 (the Mask widens the Knife's cut). The Harpoon shoots faster, D182
+  (the Harpoon a railgun) — Igor: "feels much better" — and its top fires
+  faster, D183 (the Harpoon's top fires faster); late, the eels still end
+  it (`playtests.md` → The Harpoon at the top, firing faster). A
+  slower eel costs the bot more, and is left (`ideas.md` → Every weapon
+  tried and raised).
 - **The boss's lunge** misses a diver who only keeps swimming
   (`playtests.md` → The roadmap).
 - **The unbought gear**: each career went into its winning dive with all but
@@ -116,20 +125,37 @@ older build is a regression signal for that build only.
     4, darter 2, and layer 2's archer 4, darter 8, puffer 11, bulwark 4.
     Standing, the opening cleared on every seed; past it, three gates on
     one seed, the rest on none.
-- **The weapons, the D168 (the guard lasts two gates) build, 2026-10-30**
+- **The career bot, the D182 (the Harpoon a railgun) build, 2026-11-01**,
+  five seeds, `npm run measure careers <weapon>`: won at dive 2, 2, 2, 3, 3
+  with the Gun, 2, 2, 2, 3, 2 with the Harpoon — on the D183 (the
+  Harpoon's top fires faster) build too — 2 on every seed with the Knife;
+  layer 3 about 3 minutes. The Harpoon before D182: 2, 3, 3, 3, 8.
+  The Gun's on the D178 (a cleanup, and Igor's own words) build, the guard
+  lasting two gates: 2, 3, 2, 3, 2.
+- **The weapons, the D182 (the Harpoon a railgun) build, 2026-11-01**
   (`reading.md` → Try out and upgrade each weapon):
+  - **At the fresh kit, layer 1**, ten seeds — `npm run measure weapons
+    L1,Knife0`, clear s / hearts: the Gun 11.99 / 0, the Harpoon 15.27 /
+    0.05 (15 / 0.03 before D182), the Knife 12.2 / 0.02.
   - **At the kit a Gun career first meets each layer with**, the ordinary
-    batches, a fight capped at 150s, ten seeds — `npm run measure weapons`,
-    the D176 (the spines sting by touch) build, 2026-10-31:
+    batches, a fight capped at 150s, ten seeds — `npm run measure weapons`:
 
     | | clear s | hearts | clears | layer 2 clear s / hearts | layer 3 clear s / hearts |
     |---|---|---|---|---|---|
-    | Gun | 28.61 | 1.87 | 0.87 | 18.38 / 0.48 | 38.84 / 3.27 |
-    | Harpoon | 29.18 | 1.42 | 0.87 | 18.31 / 0.4 | 40.04 / 2.44 |
-    | Knife | 28.94 | 0.97 | 0.89 | 28.48 / 1.01 | 29.4 / 0.92 |
+    | Gun | 28.42 | 1.91 | 0.88 | 18.51 / 0.37 | 38.33 / 3.45 |
+    | Harpoon | 24.38 | 1 | 0.92 | 18.37 / 0.42 | 30.39 / 1.57 |
+    | Knife | 29.59 | 1.08 | 0.9 | 29.04 / 1.04 | 30.15 / 1.11 |
 
-    The bar holds over both layers (D127 (the tuned numbers)). In layer 3
-    the Knife dominates both, its lionfish stings 0.15 a fight; with them
+    The Harpoon dominates the Gun over both layers, breaking D127 (the
+    tuned numbers)'s bar (`bugs.md` → The Harpoon over the Gun). Its row is
+    the D183 (the Harpoon's top fires faster) build's; on D182's, 24.96 /
+    1.03, its layer 3 31.54 / 1.65; before D182, 29.02 / 1.3 and 39.73 /
+    2.21, and the bar held.
+    With its rate ×1.5 as well, not built: 19.96 / 0.27, over the Knife
+    too. The Gun is the D178 build's to the hundredth; the Knife's layer 3
+    there, its cut lengthened by the Mask, 28.62 / 1.08, and widened by it
+    (D181 (the Mask widens the Knife's cut)) it moves by hundredths. In layer 3
+    the Knife dominates both, its lionfish stings 0.16 a fight; with them
     stinging whatever was inside the circle, D175 (the lionfish drifts, its
     circle past the Knife's cut)'s build, 33.3 / 2.65 and 0.45. With the
     lionfish stinging a hit instead (D171 (the lionfish)) the Knife's layer 3
@@ -142,12 +168,22 @@ older build is a regression signal for that build only.
 
     | the late kit | Knife | Gun | Harpoon |
     |---|---|---|---|
-    | as it is, tier 2 | 21.42 / 0.09 | 30.38 / 2.43 | 34.1 / 2.79 |
+    | the D183 build, tier 2: built | 25.44 / 0.18 | 31.27 / 2.59 | 25.7 / 0.99 |
+    | the D182 build, tier 2 | 25.44 / 0.18 | 31.27 / 2.59 | 28.03 / 1.85 |
+    | the Knife's own cut, tier 2 | 25.45 / 0.18 | 31.27 / 2.59 | 33.88 / 3.08 |
+    | the cut lengthened by the Mask, tier 2 | 22.38 / 0.05 | 31.27 / 2.59 | 33.88 / 3.08 |
+    | the Knife's own cut, the eel's sway at 0.5, unfitted: not built | 26.17 / 0.35 | 28.02 / 1.42 | 32.67 / 2.47 |
+    | before the lionfish, tier 2 | 21.42 / 0.09 | 30.38 / 2.43 | 34.1 / 2.79 |
     | without the Mask | 23.21 / 0.19 | 28.52 / 2.03 | 34.14 / 2.5 |
     | tier 0, no Weights | 22.47 / 0.13 | 46.14 / 7.86 | 39.38 / 4.66 |
     | tier 3 | 21.25 / 0.07 | 28.77 / 1.71 | 33.96 / 2.69 |
 
-    The Knife clears every fight and dominates both in every row. **Neither
+    The first row is the D183 (the Harpoon's top fires faster) build's, the
+    second the D182 (the Harpoon a railgun) build's; the next
+    three the D180 (the Mask lengthens a shot, not a cut) build's, the second
+    of them as that build stood before it; the rest are
+    the D168 (the guard lasts two gates) build's. The Knife clears
+    every fight and dominates both in every row. **Neither
     the Mask's reach nor its tiers or the Weights put it ahead**: at tier 0
     with no Weights it loses less than the Gun and the Harpoon at tier 3.
     Igor's one late batch puts the gap at about twice, not the bot's tenfold
@@ -176,15 +212,20 @@ older build is a regression signal for that build only.
     `lionfish-fires`' gate in 150s. Darting in, as a player can, it clears
     them all in 31.4s, and the Knife pays about a heart a layer-3 fight more
     than against the chasing one; stinging only by touch, the spines miss
-    most of its darts, and that heart is gone. The late Knife, its cut about 160 px, pays
+    most of its darts, and that heart is gone. The late Knife, its cut then about 160 px by the Mask, pays
     nothing in any. The stinging lionfish's figures went with it; Igor's
     plays of it stay in `playtests.md` → The lionfish, against a short
     Knife, and against a long Knife.
   - **Where the hits come from** (the `hits a fight, by` column): in layer 3,
-    the eel — at the late kit 1.14 a fight on the Gun and 1.59 on the
-    Harpoon, none on the Knife, whose 0.04 are an archer's; at the kit a Gun
-    career first meets layer 3 with, 1.79 and 2.12 against 0.23; with the
-    lionfish stinging by touch, 2 and 1.99 against 0.2. The eel
+    the eel — the D183 (the Harpoon's top fires faster) build: at the late
+    kit 1.06 a fight on the Gun and 0.51 on the Harpoon against 0.02 on the
+    Knife; at the kit a Gun career first meets layer 3 with, 1.98 and 0.97
+    against 0.33. The Harpoon's were 0.97 and 1.04 before D183, 1.69 and 1.7
+    before D182. The eel's sway at 0.5,
+    unfitted, halves the late Gun's, to 0.52; at the kit a Gun career meets
+    layer 3 with, it raises the Gun's eel hits to 2.44 a fight and its
+    hearts to 7.81, and refitted — threat 0.064 / 0.112 / 0.147, layer 3's
+    eel batches half again as full — to 2.77 and 6.09; not built. The eel
     sways, so a shot misses it and its touch lands; the Knife's arc needs no
     aim. In layer 2 the Knife's hits are mostly the puffer's, 0.19 a fight.
     **Not for a hand**: in Igor's short-Knife layer-3 gates, `lionfish` and

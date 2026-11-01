@@ -483,6 +483,16 @@ describe('a dive as Sonar reads it (D164)', () => {
     expect([g.story.at(-1).died, g.meta.bought]).toEqual([true, []]);
   });
 
+  it('gives a Knife dive of version 15 its arc, where the Mask can widen it (D181)', () => {
+    const v15 = JSON.parse(readFileSync(new URL('./fixtures/save-v15.json', import.meta.url), 'utf8'));
+    Object.assign(v15.dive, { weaponName: 'Knife' });
+    Object.assign(v15.dive.player, { swing: { arc: 60, time: 0.15 }, range: 72, shotRadius: 18 });
+    delete v15.dive.player.arc;
+    const g = loadGame();
+    expect(g.loadSave(JSON.stringify(v15))).toBe('');
+    expect([g.player.arc, JSON.parse(g.saveText()).version]).toEqual([60, 16]);
+  });
+
   it('keeps no career in the save: a v14 save drops its log (D177)', () => {
     const g = loadGame();
     const v14 = { version: 14, bank: 40, gear: {}, raised: {}, challenges: {}, deepest: 0, cleared: 0, seen: [],

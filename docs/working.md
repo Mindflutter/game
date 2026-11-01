@@ -69,7 +69,9 @@ working doc.
   spec, a fix's shape checked against `foundations.md`), a root cause that
   resists a first look, and a review of a whole stage's diff; medium, work
   that is running and reading alone — a play-test read back, a doc sweep.
-  max only when xhigh has already fallen short.
+  max only when xhigh has already fallen short. The level running is read,
+  never assumed — `echo $CLAUDE_EFFORT` — before naming one. Igor,
+  2026-11-01: "current is xhigh, so check that when needed".
 
 ## Questions and uncertainty
 
