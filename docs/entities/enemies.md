@@ -79,7 +79,7 @@ Each behaviour's numbers, a table per behaviour field. `bite`:
 <!-- generated: enemies:weave -->
 | name | width | rate |
 |---|---|---|
-| eel | 50 | 0.9 |
+| eel | 50 | 0.5 |
 <!-- /generated -->
 
 `touch`:

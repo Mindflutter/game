@@ -395,6 +395,15 @@ describe('the weapons (D97)', () => {
   });
 });
 
+describe('the rows a newcomer needs first (D185)', () => {
+  it('lists the Suit above the Mask, and Heart above Dash reach', () => {
+    const g = loadGame();
+    const rows = name => g.MENUS[name].items.map(i => i.label.split('   ')[0]);
+    expect(rows('equipment').slice(0, 3)).toEqual(['Suit', 'Mask', 'Weights']);
+    expect(rows('attributes').slice(0, 3)).toEqual(['Heart', 'Dash reach', 'Strength']);
+  });
+});
+
 describe('equipment (D100)', () => {
   // A dive with `tiers` of each named piece bought, nothing arriving.
   const wearing = (pieces, seed = 1) => {

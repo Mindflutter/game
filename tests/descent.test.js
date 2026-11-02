@@ -135,7 +135,7 @@ describe('the descent', () => {
     expect(g.cameraY).toBe(g.gateDepth(n));
     // Reaching the bottom pays nothing of its own.
     expect(g.modCounts).toEqual({});
-    const again = g.rowRect(0, g.MENUS.won.top);  // the Dive again button (D90)
+    const again = g.rowRect(1, g.MENUS.won.top);  // the Dive again button (D90, D184)
     g.aim.x = again.x + again.w / 2;
     g.aim.y = again.y + again.h / 2;
     g.justPressed.add('Mouse0');

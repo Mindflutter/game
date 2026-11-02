@@ -363,7 +363,7 @@ describe('gems (D35, D67)', () => {
     expect(JSON.parse(g.saved).dive).toBeNull();
   });
 
-  it('offers Dive again and Go home after a death, with Go home marked', () => {
+  it('offers Go home and Dive again after a death, with Go home on top and marked', () => {
     // Dive again and Go home (D90). Go home is marked, so a stray Enter or
     // Space -- Space is the dash -- never starts a dive by accident.
     const dead = () => {
@@ -384,7 +384,9 @@ describe('gems (D35, D67)', () => {
       g.update(g.FIXED_DT);
       return g.screen;
     };
-    const again = g => g.rowRect(0, g.MENUS.dead.top);
+    // Go home is the top row: a newcomer clicks the first one (D184).
+    expect(enter.MENUS.dead.items.map(i => i.label)).toEqual(['Go home', 'Dive again']);
+    const again = g => g.rowRect(1, g.MENUS.dead.top);
     const g = dead();
     expect(click(g, 10, 10)).toBe('dead');       // a click off the buttons does nothing
     const r = again(g);

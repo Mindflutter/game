@@ -284,26 +284,11 @@ weapons. Where it stands:
   reads the gap as the eel's too (`roadmap.md` → Health). In a real layer,
   not the lion batch, the Gun went a gate further than the Knife
   (`playtests.md` → The guard, a layer long).
-  **Proposed**, Claude's: **the eel's sway slower**, `rate` 0.9 → 0.5 a
-  second — its side speed from 280 px/s, twice its swim, to 160, the same
-  wave over twice the time, so a shot can lead it. Tried unfitted at the
-  lion batch's kit, it nearly halves what the bot's Gun loses a fight, and
-  halves its hits by eels (`roadmap.md` → Health). Its threat falls with it, so
-  `npm run measure fit` puts more eels in every layer-2 and layer-3 batch
-  that holds them, and the balance suite runs on Igor's word (D132
-  (full runs on Igor's word)). Igor's late Harpoon: 12 of 14 hits eels',
-  touching, the dash ready (`playtests.md` → The Harpoon at the top, firing
-  faster).
-  **Built and taken back**, 2026-11-01, on Igor's word: at the kit a Gun
-  career meets layer 3 with, the slower eel costs the bot more, not less —
-  refitted (half again as many eels) or not (`roadmap.md` → Health); its
-  threat falls under the puffer's, which D130 (fish are revealed a type at
-  a time) forbids, and no two of a tougher body, a wider sway or a harder
-  touch lift it back. Refitted, a dive holds more gems than all the gear,
-  against D162 (the whole game in fifteen to twenty minutes). What the bot
-  cannot say is whether a human reads the slower sway. Igor, 2026-11-01:
-  "ok leave it".
-  **Home**: left.
+  **The eel's sway is slower**, D187 (the eel's sway slower; its path
+  taken back): its side speed 160 px/s, not 280, so a shot can lead it.
+  Unfitted, it halves the late Gun's eel hits but costs the bot's Gun more
+  where a career meets layer 3 (`roadmap.md` → Health). Igor, playing it:
+  "feels good, just about right" (`playtests.md` → The slower eel).
 - **Not the Knife's tiers**: at the late kit it leads at its first tier
   with no Weights, and without the Mask, above the Gun and the Harpoon at
   their tops
@@ -575,8 +560,6 @@ discussed.
 
 **The stage's content**
 
-- **The eel is hard to hit** — "a problem of schematic circles, not necessarily
-  a bad design." Its behaviour stands; it goes with the graphics, below.
 - **The puffer still feels clumsy.** Igor, 2026-10-15, playing the build with
   D106 (the puffer bursts and comes on again): "exploding guy still feels
   clumsy. maybe acceleration or making it faster would help." A lean, given
@@ -771,10 +754,14 @@ balanced for alpha".
 - **A new player's first session.** `2026-10-31-new-player`
   (`playtests.md` → A new player's session): eleven dives in 28 minutes,
   none past layer 1; the second newcomer, 13 dives in 24 minutes of diving,
-  to layer 3, no win (The next newcomer, with the dot). Three things stood
+  to layer 3, no win (The next newcomer, with the dot); the third, 10 dives
+  in 25 minutes, to layer 3's fifth gate, no win (The third newcomer).
+  Three things stood
   in the first's way: the death screen said
   nothing of home — now it does, D172 (the end screen marks what home can
-  buy) — and these two:
+  buy), with Go home its top row, D184 (Go home on top); each screen's top
+  row bought first — now the row a newcomer needs, D185 (the rows a newcomer
+  needs first); and this one:
   - **The opening's darter.** 17 of 32 hits, and the first dive's death at
     gate 1 in 10s, standing where it began: moving came only on the second
     dive. The bot reads its 0.15s wind-up, a newcomer does not.
@@ -784,20 +771,8 @@ balanced for alpha".
     Either pulls against Nothing trivial's stood bars (`bugs.md`): the bot
     stands through the layer that walled this player. Igor, 2026-10-31:
     "not needed now". The second newcomer's layer-1 hits were archers' most,
-    14 of 32, the darter's 7.
-  - **The top row is what is bought.** Both newcomers' first buys on each
-    screen were its top row, tier after tier within a second — Mask, Dash
-    reach, the Gun — where the cursor starts. So Heart, second among the
-    attributes, came late or never, and the points went to a dash barely
-    pressed; the Suit, second in equipment, came before dive 12.
-    Proposed, Claude's: each screen's rows in the order a newcomer needs
-    them — Heart above Dash reach, the Suit above the Mask. **Home**: open,
-    Igor's pick.
-  - **The dot is passed at first.** The second newcomer dived again at the
-    first four deaths with the dot showing, then went home at every one;
-    the first, at five of the first seven. Proposed, Claude's: while
-    nothing has been bought in a career, the death screen's cursor starts
-    on Go home when the dot shows. **Home**: open, Igor's pick.
+    14 of 32, the darter's 7; the third's, archers 18 of 29, the darter's
+    4, its first dive to layer 1's boss.
 - **Studioigor's skills.** Igor, 2026-10-28: "check this repo and other
   repos from this guy: https://github.com/studioigor/studioigor-skill … we
   may adapt his skills & knowledge to our development, if they match our

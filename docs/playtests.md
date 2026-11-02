@@ -73,6 +73,9 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-11-01-harpoon-late` — layer 3 with the Harpoon at its top
 - [x] `2026-11-01-harpoon-top` — the two gates that ended `harpoon-late`, the top firing faster
 - [x] `2026-10-31-new-player` again — the next newcomer, the death screen's dot in
+- [x] `2026-10-31-new-player` a third time — the third newcomer
+- [x] `2026-11-02-eel-path` — the Gun among 27 eels, their way drawn ahead
+- [x] `2026-11-02-eel-slow` — the same gate, the eels swaying slower
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -915,6 +918,51 @@ no win in 24 minutes of diving, layer 3 reached. Whether the stop after
 dive 13 was a choice, and what was found unaided, is Igor's to say. What it
 opens is `ideas.md` → A new player's first session.
 
+## The third newcomer
+
+`2026-10-31-new-player` a third time, play 3, 2026-11-02 — Igor: "a new
+player test, old link if it works". The same record, hypothesis and
+measures as The next newcomer, with the dot. A save start keeps one slot
+for every play, so the page opened on play 2's last save; New game at 0:07
+made the first dive fresh.
+
+**Outcome**, 2026-11-02. 25.2 minutes diving; the clock's 80:00 holds
+idle stretches, expected (Igor). 10 dives, two of them left from the pause menu
+(17s and 1.4s), and no win; the deepest, layer 3's fifth gate (dive 10),
+one gate short of the last boss. Layer 1 walled the first seven: deaths at
+its boss, then gates 3, 2, 5 and its boss again; dive 8 was the first
+through it. The newcomer, through Igor: "cool variety of enemies, disliked
+the eels :)".
+- **The first dive** reached layer 1's boss in 245s, 4 hits, 6 dashes, and
+  died to an archer. The darter walled nothing: 4 of layer 1's 29 hits.
+- **The dot: broken again, the same way.** It showed at the first four
+  deaths — 92 gems and 7 points banked at the first, nothing bought — and
+  each was Dive again. Home was first found from the pause menu, after
+  dive 2 and again after dive 6; from death 7 on, every death went home.
+- **The first buy** before dive 3, within three dives: the Knife carried,
+  Mask 1, Suit 1. The top row first again — Mask before the Suit, Dash reach
+  1 before Heart — but Heart 1 to 3 followed in two seconds, before dive 7.
+- **Weapons**: the Gun for dives 1 and 2, never raised; the Knife for dives
+  3 to 9; before dive 10 the Harpoon, bought and raised to 3 at once —
+  the first newcomer to dive with it, and that dive went deepest.
+- **Hits**: layer 1, 29 — archer 18, darter 4, drifter 3, bulwark 3, the
+  mini-boss 1; layer 2, 9 — archer 7, puffer 2; layer 3, 10 — eel 8, archer 2,
+  the killing one an eel's. No lionfish met. Guarded with the Suit: 2, 4, 6
+  and 8 in dives 7 to 10. Archers dealt five of the eight deaths.
+- **The dash**: 6 in the first dive, then 1, 0, 7, 5, and 17 to 19 in
+  dives 8 to 10, with 5 to 6 dash kills each.
+
+Against the hypothesis every newcomer is read by (A new player's session):
+a buy by dive 3, held; more than one weapon, held, all three; no win in 25
+minutes of diving, layer 3 reached on dive 10, as the second newcomer's.
+Three newcomers now agree on two things: the dot is passed at the first
+deaths, and the top row is bought first. Two of three were hurt most by the
+archer in layer 1, not the darter. In layer 3 the eel lands most of the
+hits, as in Igor's own plays. Built from it: Go home on the end screens'
+top row, D184 (Go home on top); the Suit and Heart on `home`'s, D185 (the
+rows a newcomer needs first); the eel's sway slower, D187 (the eel's sway
+slower; its path taken back). The next newcomer's play reads the first two.
+
 ## The lionfish fires its spines
 
 `2026-10-31-lionfish-fires` · `lionfish`'s code and gate: layer 3's third,
@@ -1193,3 +1241,48 @@ into the lion batch — 11.1 in `harpoon-late` — after three hits, 3, 3 and
   half. The rate does not close it: what the late Harpoon
   lacks against a human is the eel's sway, as the Gun's does (`ideas.md` →
   Every weapon tried and raised).
+
+## The eel's path
+
+`2026-11-02-eel-path` · `L3,G5,S2001,`+`late` with `Gun2`, the batch set to
+27 eels and 8 archers · one gate.
+
+D186 (the eel's path drawn ahead): each eel draws its way over the next
+`WEAVE_AHEAD 0.6` seconds. `eels-deep`, the same gate and kit with 27 eels
+and 5 puffers: 6 HP lost, three of the hits eels' (Fewer puffers).
+
+**Hypothesis**: aiming at the line's end, the Gun hits eels it missed, so
+they land fewer hits than in `eels-deep`, and Igor says the line helped.
+**Broken by**: as many eel hits or more, or "didn't notice it" or "too
+much".
+
+**Measures**: hits by eels against archers, HP lost, the lowest HP or the
+death; shots fired and eels killed, shots a kill; time; dashes.
+
+**Outcome**, 2026-11-02 — **broken**. Cleared in 24s, 3 HP lost — 2 eel
+hits, 1 archer's, against `eels-deep`'s 6 HP, 3 eels' — and 7 dashes. One
+play; the numbers say fewer hits, and Igor's feel says the opposite:
+"horrible idea, drawn path confuses even more. slowing them down is ok".
+Taken back, the sway slowed instead: D187 (the eel's sway slower; its path
+taken back).
+
+## The slower eel
+
+`2026-11-02-eel-slow` · the same setup as The eel's path, one gate, the
+eels swaying 0.5 times a second, not 0.9 (D187 (the eel's sway slower; its
+path taken back)).
+
+**Hypothesis**: a shot can lead the slower sway, so the eels land fewer
+hits than in `eels-deep`, and Igor says they read. **Broken by**: as many
+eel hits, or "still unpredictable"; or "too easy now".
+
+**Measures**: hits by eels against archers, HP lost, the lowest HP or the
+death; shots fired and eels killed; time; dashes. Set beside `eels-deep`
+and `eel-path`.
+
+**Outcome**, 2026-11-02 — **held on feel**. Igor: "feels good, just about
+right". Cleared in 27s, 4 HP lost, every hit an eel's — no fewer than
+`eels-deep`'s 3 or `eel-path`'s 2 — and 9 dashes with 8 dash kills. The
+hits did not fall; what changed is that the sway reads. One play; the
+sway stays as D187 (the eel's sway slower; its path taken back) built it.
+

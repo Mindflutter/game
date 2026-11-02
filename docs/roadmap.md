@@ -172,7 +172,7 @@ older build is a regression signal for that build only.
     | the D182 build, tier 2 | 25.44 / 0.18 | 31.27 / 2.59 | 28.03 / 1.85 |
     | the Knife's own cut, tier 2 | 25.45 / 0.18 | 31.27 / 2.59 | 33.88 / 3.08 |
     | the cut lengthened by the Mask, tier 2 | 22.38 / 0.05 | 31.27 / 2.59 | 33.88 / 3.08 |
-    | the Knife's own cut, the eel's sway at 0.5, unfitted: not built | 26.17 / 0.35 | 28.02 / 1.42 | 32.67 / 2.47 |
+    | the Knife's own cut, the eel's sway at 0.5, unfitted: built since D187 | 26.17 / 0.35 | 28.02 / 1.42 | 32.67 / 2.47 |
     | before the lionfish, tier 2 | 21.42 / 0.09 | 30.38 / 2.43 | 34.1 / 2.79 |
     | without the Mask | 23.21 / 0.19 | 28.52 / 2.03 | 34.14 / 2.5 |
     | tier 0, no Weights | 22.47 / 0.13 | 46.14 / 7.86 | 39.38 / 4.66 |
@@ -225,7 +225,8 @@ older build is a regression signal for that build only.
     unfitted, halves the late Gun's, to 0.52; at the kit a Gun career meets
     layer 3 with, it raises the Gun's eel hits to 2.44 a fight and its
     hearts to 7.81, and refitted — threat 0.064 / 0.112 / 0.147, layer 3's
-    eel batches half again as full — to 2.77 and 6.09; not built. The eel
+    eel batches half again as full — to 2.77 and 6.09. Built unfitted since
+    D187 (the eel's sway slower; its path taken back). The eel
     sways, so a shot misses it and its touch lands; the Knife's arc needs no
     aim. In layer 2 the Knife's hits are mostly the puffer's, 0.19 a fight.
     **Not for a hand**: in Igor's short-Knife layer-3 gates, `lionfish` and

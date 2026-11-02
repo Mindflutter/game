@@ -31,8 +31,8 @@ rungs a ladder and `depth` beside them, D161 (depth pays points).
 <!-- generated: attributes -->
 | name | a step adds |
 |---|---|
-| Dash reach | dashSpeed +150 |
 | Heart | hp +1, maxHp +1 |
+| Dash reach | dashSpeed +150 |
 | Strength | dashDamage +1 |
 <!-- /generated -->
 

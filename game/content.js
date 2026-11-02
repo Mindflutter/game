@@ -222,23 +222,24 @@ const WEAPONS = [
 // A shot flies further; a cut widens instead, so the Knife still swings
 // close (D180, D181).
 const sight = p => { if (p.swing) p.arc += 10; else p.range += 30; };
+// In the order a newcomer needs them, as the rows at home list them (D185).
 const EQUIPMENT = [
-  { name: 'Mask',    tiers: [{ cost: 20,  apply: sight },
-                             { cost: 50,  apply: sight },
-                             { cost: 100, apply: sight }] },
   { name: 'Suit',    tiers: [{ cost: 20,  apply: p => p.guard += 1 },
                              { cost: 60,  apply: p => p.guard += 1 },
                              { cost: 130, apply: p => p.guard += 1 }] },
+  { name: 'Mask',    tiers: [{ cost: 20,  apply: sight },
+                             { cost: 50,  apply: sight },
+                             { cost: 100, apply: sight }] },
   { name: 'Weights', tiers: [{ cost: 20,  apply: p => p.damage += 0.5 },
                              { cost: 55,  apply: p => p.damage += 0.5 },
                              { cost: 120, apply: p => p.damage += 0.5 }] },
 ];
 
 // Step n costs n points (D109); `max` steps each, whose cost is what the
-// ladders pay (D152).
+// ladders pay (D152). Heart first, as with the equipment (D185).
 const ATTRIBUTES = [
-  { name: 'Dash reach', max: 4, apply: p => p.dashSpeed += 150 },
   { name: 'Heart',      max: 4, apply: p => { p.maxHp += 1; p.hp += 1; } },
+  { name: 'Dash reach', max: 4, apply: p => p.dashSpeed += 150 },
   { name: 'Strength',   max: 4, apply: p => p.dashDamage += 1 },
 ];
 
@@ -557,7 +558,7 @@ const ENEMY_TYPES = [
   { name: 'eel',     r: 14, hp: 2, speed: 130, value: 2, threat: [0.114, 0.239, 0.400],
     desc: 'weaves as it swims, and touching it hurts',
     color: '#38f2c0', glow: '#00c896',
-    weave: { width: 50, rate: 0.9 },
+    weave: { width: 50, rate: 0.5 },
     touch: { damage: 1, knock: 240 } },
   // The lionfish (D171, D174, D175, D176). Claude's picks.
   { name: 'lionfish', r: 20, hp: 3, speed: 30, ramp: 0.8, value: 2, threat: [0.021, 0.033, 0.047], against: 'Knife',
@@ -704,8 +705,9 @@ const END_MENU = {
   top: END_TOP,
   flows: true,
   back: GO_HOME.run,
-  items: [{ get label() { return debugSetup ? 'Again' : 'Dive again'; },
-            run: () => (debugSetup ? debugDive() : reset()) }, END_HOME],
+  // Go home on top: a newcomer picks the first row by mouse (D184).
+  items: [END_HOME, { get label() { return debugSetup ? 'Again' : 'Dive again'; },
+                      run: () => (debugSetup ? debugDive() : reset()) }],
 };
 
 const MENUS = {

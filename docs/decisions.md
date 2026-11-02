@@ -5882,3 +5882,82 @@ faster".
 
 **Guarded by** `tests/docs.test.js` — `entities/weapons.md`'s tiers table
 against the code.
+
+## D184 — Go home on top · 2026-11-02
+
+Three newcomers' plays (`playtests.md` → The third newcomer): with the dot
+showing, the second and the third dived again at their first four deaths,
+the first at five of seven. The cursor already opened on Go home (D90);
+they clicked, and clicked the top row — Dive again, often within two
+seconds — as they buy each screen's top row at `home`.
+
+- **The end screens list Go home first, Dive again under it**, on a death
+  and on the win, in the debug mode too (Setup above Again). The cursor
+  still opens on Go home. Supersedes the order D90 gave, Claude's pick
+  there. A click left over from the fight lands on Go home, which starts
+  nothing.
+- Claude's call, on Igor's "do all 3 improvements now"; replaces the
+  proposal of the cursor on Go home, which was already the case.
+
+**Guarded by** `tests/dive.test.js` — the end screen's rows are Go home,
+then Dive again.
+
+## D185 — The rows a newcomer needs first · 2026-11-02
+
+All three newcomers' first buys on each `home` screen were its top row,
+tier after tier within a second: the Mask before the Suit, Dash reach
+before Heart — a dash barely pressed, and hearts that came late.
+
+- **Equipment lists the Suit, the Mask, the Weights; attributes Heart,
+  Dash reach, Strength.** The guard and a heart keep a newcomer alive
+  longest, so a top-row buy is the right one. Weapons are unchanged:
+  the Gun, carried at the start, is already first.
+- The career bot breaks a tie in price by this order too, so its careers
+  now buy the Suit and Heart first; its figures in `roadmap.md` → Health
+  name their builds.
+- Claude's pick, on Igor's "do all 3 improvements now".
+
+**Guarded by** `tests/home.test.js` — the rows a newcomer needs first.
+
+## D186 — The eel's path drawn ahead · 2026-11-02
+
+The third newcomer "disliked the eels": 8 of their 10 layer-3 hits, as 11
+of Igor's 12 in the deepest lionfish batch — "hardly predictable
+trajectory (for a human player)". The bot aims ahead perfectly, so the
+slower sway cost it more and was left (`ideas.md` → Every weapon tried and
+raised); what a human lacks is where the eel will be.
+
+- **Each eel draws its way over the next `WEAVE_AHEAD 0.6` seconds**, a
+  faint dotted line in its glow: where it swims if the diver holds still,
+  stepped as it swims. 0.6s is a Gun shot's flight across its range, so a
+  shot aimed at the line's end meets it. Claude's pick.
+- A guide line, no promise (D166 (the puffer's burst stays; guide lines
+  are no promise)): the diver moving bends it. No number moves, and the bot
+  sees nothing new, so no bar moves.
+
+**Guarded by** `tests/enemies.test.js` — the eel ends where its path ended,
+the diver holding still, and the path bends with the sway.
+
+## D187 — The eel's sway slower; its path taken back · 2026-11-02
+
+Igor, having played D186 (the eel's path drawn ahead) in `eel-path`:
+"horrible idea, drawn path confuses even more. slowing them down is ok".
+
+- **The drawn path is gone**, with its constant and its check. Supersedes
+  D186 (the eel's path drawn ahead).
+- **The eel sways 0.5 times a second, not 0.9**: the same 50 px either
+  side over nearly twice the time, its side speed 160 px/s, not 280 —
+  Claude's proposal of 2026-11-01 (`ideas.md` → Every weapon tried and
+  raised), left then, built now on Igor's word.
+- **Unfitted**: its threat numbers and the pools stand. Measured before it
+  was built (`roadmap.md` → Health): the late Gun's eel hits halve, and
+  where a career meets layer 3 the bot's Gun loses nearly twice the hearts
+  — the bot aims ahead perfectly, so a slower sway only keeps a touching eel
+  on it longer. Refitted, the batches hold half again as many eels and a
+  dive more gems than all the gear (D162 (the whole game in fifteen to
+  twenty minutes)), so not refitted. The bot is a floor, never a human's
+  experience (D50 (the bot is not a difficulty instrument)); the balance
+  suite runs on Igor's word (D132 (full runs on Igor's word)).
+
+**Guarded by** `tests/docs.test.js` — `entities/enemies.md`'s roster
+against the code.

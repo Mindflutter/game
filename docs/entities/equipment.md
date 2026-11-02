@@ -18,8 +18,8 @@ bought by the win (D162 (the whole game in fifteen to twenty minutes)).
 <!-- generated: equipment -->
 | name | at top |
 |---|---|
-| Mask | range 340 |
 | Suit | guard 3 |
+| Mask | range 340 |
 | Weights | damage 2.5 |
 <!-- /generated -->
 
@@ -28,12 +28,12 @@ Each piece's tiers, in the order they are bought:
 <!-- generated: equipment:tiers -->
 | name | tier | cost | adds |
 |---|---|---|---|
-| Mask | 1 | 20 | range +30 |
-| Mask | 2 | 50 | range +30 |
-| Mask | 3 | 100 | range +30 |
 | Suit | 1 | 20 | guard +1 |
 | Suit | 2 | 60 | guard +1 |
 | Suit | 3 | 130 | guard +1 |
+| Mask | 1 | 20 | range +30 |
+| Mask | 2 | 50 | range +30 |
+| Mask | 3 | 100 | range +30 |
 | Weights | 1 | 20 | damage +0.5 |
 | Weights | 2 | 55 | damage +0.5 |
 | Weights | 3 | 120 | damage +0.5 |

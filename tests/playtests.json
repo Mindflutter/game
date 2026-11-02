@@ -674,5 +674,37 @@
       "HP after each gate, and the lowest",
       "deaths"
     ]
+  },
+  "2026-11-02-eel-path": {
+    "purpose": "Each eel now draws a dotted line along the way it will sway. With the Gun among 27 eels in layer 3: can you aim at the line and hit them, and do they hurt you less than eels-deep did?",
+    "start": {
+      "debug": "L3,G5,S2001,Gun2,eel27,archer8,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive and play the gate until it is cleared or you die; the tag says done. Don't press R. Aim where the dotted line goes, not at the eel. Say whether the line helped, and whether it is too faint or too much.",
+    "measures": [
+      "hits by eels against archers, HP lost, lowest HP, or the death",
+      "Gun shots fired and eels killed, shots a kill",
+      "time",
+      "dashes"
+    ]
+  },
+  "2026-11-02-eel-slow": {
+    "purpose": "The eels now sway about half as fast, with no line drawn. With the Gun among 27 eels in layer 3: can you lead them now, and do they hurt you less than eels-deep did?",
+    "start": {
+      "debug": "L3,G5,S2001,Gun2,eel27,archer8,Mask3,Weights2,Dash_reach3,Heart3,Strength3,Fins1,Vitality2,Reflex3,Nerve1,Impact1,Mend1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive and play the gate until it is cleared or you die; the tag says done. Don't press R. Say whether the eels read now, or feel too easy.",
+    "measures": [
+      "hits by eels against archers, HP lost, lowest HP, or the death",
+      "Gun shots fired and eels killed, shots a kill",
+      "time",
+      "dashes"
+    ]
   }
 }

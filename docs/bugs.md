@@ -46,8 +46,11 @@ whole; on Igor's word (D132 (full runs on Igor's word)).
 
 What should happen: no weapon better than another at everything there.
 Why: the Gun's slow shot misses the eel's sway most — four of every five of its
-layer-3 hits are eels'. Proposed: the slower eel (`ideas.md` → Every
-weapon tried and raised), which nearly halves the Gun's late hearts.
+layer-3 hits are eels'. The eel's sway is slower since D187 (the eel's sway
+slower; its path taken back), measured unfitted before it was built: it
+halves the late Gun's eel hits and nearly doubles its hearts where a career
+meets layer 3 (`roadmap.md` → Health). Whether the bar holds now is not
+measured; on Igor's word (D132 (full runs on Igor's word)).
 
 ### A key stays held after it is let go
 Igor, 2026-10-28, in the first Sonar play-test: "something broke, i can't

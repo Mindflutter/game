@@ -256,7 +256,7 @@ describe('the keys and the ways out', () => {
     expect(g.screen).toBe('debug');
     g.debugDive();
     die(g);
-    const [again, back] = g.MENUS.dead.items;
+    const [back, again] = g.MENUS.dead.items;
     expect([again.label, back.label]).toEqual(['Again', 'Setup']);
     again.run();
     expect(g.screen).toBe('playing');

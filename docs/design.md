@@ -135,9 +135,13 @@ The traps the screens have met:
   passing over a card marks nothing, since on its way down to Continue it
   crosses them.
 - **The end screens open on Go home** (D90), so a stray Enter or Space — Space
-  is the dash — does what any key did before. Their Go home carries a red dot,
+  is the dash — does what any key did before; it is their top row, since a
+  newcomer clicks the first (D184 (Go home on top)). Their Go home carries a red dot,
   and the gems and points banked, when they can buy something at `home`
   (D172 (the end screen marks what home can buy)).
+- **`home`'s rows run in the order a newcomer needs them** — the Suit above
+  the Mask, Heart above Dash reach (D185 (the rows a newcomer needs first)):
+  a newcomer buys the top row first, tier after tier.
 - **`home` exists only between dives** (D76): with a dive saved, Start reads
   Continue and goes back to it (`resumeTo`), so the shop never meets a dive in
   progress.
