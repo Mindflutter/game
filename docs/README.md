@@ -15,7 +15,7 @@ A change to them belongs in the same commit as the code it describes.
 | Which stage we are in, and what each stage must deliver | `plan.md` |
 | How Igor and Claude work: the reply, questions, commits, the consistency sweep | `working.md` |
 | The rules for writing and checking code | `code.md` |
-| The next steps inside the stage, and the measured bot figures | `roadmap.md` |
+| The to-do list — concrete tasks, grouped and ordered — and the measured bot figures | `roadmap.md` |
 | How the code works — systems, screens, the save, the tests | `design.md` |
 | An enemy: its numbers, role and behaviour | `entities/enemies.md` |
 | A mod | `entities/mods.md` |
@@ -77,6 +77,7 @@ copy.
 | A rule for writing or checking code | `code.md` |
 | An entity's numbers, role and behaviour | its doc in `entities/` |
 | How a system works — the gate, the descent, the drops, the pick, the save | `design.md` |
+| A task to do | `roadmap.md` → Next |
 | Measured bot figures | `roadmap.md` → Health |
 | How many of each kind the alpha has | `foundations.md` → Alpha counts |
 | A decision's reasons | its entry in `decisions.md` |
@@ -135,7 +136,7 @@ They describe what is in the game. An idea for an enemy or a mod goes to
 ideas.md ──decided──> decisions.md ──┬─> foundations.md   (if it is a rule)
                                      └─> plan.md          (if it is work)
                                               │
-                                        roadmap.md        (next, inside the stage)
+                                        roadmap.md        (the to-do list)
                                               │
                                            built
                                               ▼

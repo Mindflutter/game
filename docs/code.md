@@ -18,22 +18,24 @@ It began as a survivors-like auto-shooter. It is not one any more — D28
 replaced auto-fire with manual LMB fire, and D27 replaced endless spawning with
 gated batches. Anything describing an auto-shooter is describing the prototype.
 
-**The browser build is a throwaway prototype.** The end goal is a native
-executable (Rust or C++) with real graphics; this version gets dropped after
-that port. What carries over is the gameplay logic, the tuned constants, the
-data tables and the checks in `tests/` — *not* the rendering. Do not invest in
-the canvas layer, a sprite pipeline, or browser-specific polish. The offscreen
-glow cache that used to be the sanctioned exception was cancelled by D43, so
-the rule stands unqualified.
+**The game is made in the browser until the browser stops it** (D154 (the
+port waits on the browser's limits), D195 (art in the browser)). The native
+port comes when the browser can no longer hold what is built — the frame
+rate first. What carries over then is the gameplay logic, the tuned
+constants, the data tables, the checks in `tests/` and the art's files —
+*not* the canvas code that draws them. So art is files, and the drawing
+stays thin; browser-specific polish is still not invested in.
 
 ## Constraints beyond the technical contract
 
 - No dependencies, even permitted ones: Igor permitted libraries and they are
   declined on measurement grounds (D30). Revisit only on a **measured**
   failure against the object budget, never on a hunch that it might be slow.
-- No asset files. Everything drawn or synthesised in code. Softened only by the
-  condition Igor set: if enemies or layers become indistinguishable, art moves
-  to S7 (alpha polish) and D4 is revisited.
+- **Art may be files** (D195 (art in the browser)), held to the frame rate.
+  Sound is still synthesised in code. A canvas that has drawn a local file
+  cannot be read back over `file://`, so pixel reads — Sonar's pictures,
+  `?test` — run over `http://localhost`; and `.gitignore` drops every
+  `*.png` until the first asset changes it.
 - Double-clicking `index.html` must keep working — so plain `<script>` tags,
   never ES modules (blocked over `file://`). Load order matters.
 - **The seam is the port.** `game/` reaches into `platform/` only for the names

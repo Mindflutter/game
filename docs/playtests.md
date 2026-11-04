@@ -96,8 +96,8 @@ wind-up began, the screen's edges aside, would have taken 30 of the 165;
 standing still, all 165. 158 began with the diver moving. A swim across the
 line leaves it in 0.4s from the boss's and 0.28s from the mini-boss's; their
 wind-ups are 0.8s and 1.2s. "When it swells, get out of its line" is done
-four times in five before the swell is read. What to change is open:
-`ideas.md` → The economy and the fights.
+four times in five before the swell is read. Left as it is, for now:
+D188 (the list's first five answered).
 
 ## The Suit pair — played
 
@@ -120,8 +120,8 @@ Not a heart lost before layer 3 in either, but for the layer-2 boss's lunge
 easy**: it lets a careless play off, 18 hits against 5. The kit does — Igor:
 "knife is a really cool weapon, many enemies get oneshot, all dangers easy
 to avoid, the one huge danger is multi-hp damage from boss". The boss's
-lunge is 4 and a point a grade (5, then 6), every other attack 1–3. What to
-change is open: `ideas.md` → The economy and the fights.
+lunge is 4 and a point a grade (5, then 6), every other attack 1–3. Left
+as it is: D188 (the list's first five answered).
 
 ## Fresh opening
 
@@ -650,7 +650,7 @@ damage and not die".
   took 16; HP 6 to 8 by Heart 3 and three Vitality, and nothing healed it —
   no Mend. Unguarded, those 18 hits are 18 HP or more. Only one gate of 18
   saw more than three hits (the deepest ordinary, five, all archers). The
-  same as the first career (`ideas.md` → The first logged career).
+  same as the first career (Igor's first career).
 - **Bought by the win**: the Knife to 2, the Suit and the Mask to 3, the
   Weights to 1, Heart, Strength and Dash reach to 3; never the Harpoon, the
   Gun not past 0. 1198 gems unspent — 1070 of them the winning dive's own.

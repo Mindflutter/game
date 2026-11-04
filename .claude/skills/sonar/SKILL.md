@@ -22,6 +22,10 @@ whole career only when nothing shorter can answer — Igor, 2026-11-01: "only
 give me the whole career test when absolutely necessary. i prefer
 1-several gates tests".
 
+Every play-test is for Igor's own hands. A newcomer's — the same
+`2026-10-31-new-player` record, played again — only when he asks for one:
+"assume playtests are for me unless i ask for newcomer setup (rare case)".
+
 1. Pick an id: `<date>-<short-name>`, e.g. `2026-10-28-archer-hold`.
 2. Add it to `tests/playtests.json`, a record under its id:
    - `purpose`: the one question the play answers, in plain words.

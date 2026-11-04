@@ -34,7 +34,8 @@ still (`foundations.md` → the pillars, Nothing trivial). Not found yet:
 whether the guard's second gate or the fewer fish do it.
 Igor, 2026-10-31: "probably the bot being too good. i havent had that
 feeling when playing myself" — a lean; a bot that plays like him would tell
-(`ideas.md` → A bot that plays like Igor).
+(`ideas.md` → A bot that plays like Igor), and this waits on it (D189 (the
+list's next five answered)).
 
 ### The Harpoon over the Gun in the mid-to-late game
 Known on purpose, D182 (the Harpoon a railgun): `npm run measure weapons`
@@ -64,7 +65,9 @@ let go at 148.8s, when Cmd and the window losing focus cleared every key, as
 What should happen: a key let go is let go. Why the browser sent no key-up is
 not found yet. A guess to check: a trackpad gesture or a click on the
 window's own frame, which can swallow a key-up without taking the focus. The
-next time, Sonar has it on record.
+next time, Sonar has it on record. To build, Igor's pick (D191 (the
+list's fourth five answered)): every key let go when the mouse leaves the
+window, as a blur already does.
 
 Once more since, harmless: `AltLeft`, held 57s in
 `logs/2026-10-29-layer-jump/1/`, pressed as the window took the focus after

@@ -5961,3 +5961,224 @@ Igor, having played D186 (the eel's path drawn ahead) in `eel-path`:
 
 **Guarded by** `tests/docs.test.js` — `entities/enemies.md`'s roster
 against the code.
+
+## D188 — The list's first five answered · 2026-11-04
+
+Igor, going through every open item in batches of five.
+
+- **The late dive**: "fixing the guard was quite enough, no work planned in
+  this direction now" — D179 (the guard lasts a layer) stands as the answer.
+- **The boss's lunge** stays: "for now, leave it. for newcomers it works
+  well". Recorded instead: a boss's higher grade lunging faster, or
+  following (`ideas.md` → Parked).
+- **A grade may change behaviour slightly**: "higher grade can mean a
+  slightly different behavior along with tougher stats, but not turn one
+  enemy into another kind". Amends D119 (grades: the same fish,
+  stronger)'s "never its behaviour", and `foundations.md` → the glossary's
+  **grade**. Nothing built does it yet.
+- **The gear left unbought at a win** is accepted: "i'm winning at almost
+  highest, others purchase a lot, so that'll do. but keep measuring this as
+  we expand furhter".
+- **Every weapon tried and raised**: the Knife's lead "is settled for now".
+  A ladder of each weapon's own, "even simple kill count", is to build; how
+  RPG-like development trees could take the points without moving the
+  balance is to analyse (`roadmap.md` → Next). A mod and a boost of each
+  weapon's own is declined: "i want mods and boosts to be uncoupled from
+  weapons".
+- **The Harpoon over the Gun**: the balance suite to run, "most likely
+  leave as is. i'm quite happy with balance at this point".
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D189 — The list's next five answered · 2026-11-04
+
+Igor, going through every open item in batches of five.
+
+- **Barbs and Lance** go weapon-free or go, Claude's choice when it is
+  built: "mods and boosts to be uncoupled from weapons" (D188 (the list's
+  first five answered)) holds for the two already there.
+- **The stood bars wait** on the bot that plays like Igor (`bugs.md`).
+- **The bot that plays like Igor** is to build: "design enough playtests
+  for you to gather data on how i play if you lack something now. then
+  build the bot."
+- **The boss's stage change may stay unreadable**: "when we go to proper
+  boss refinement and probably with graphics, we can think of visually
+  informing the player about it" (`ideas.md` → Parked).
+- **A lunge cut short by the screen's edge** is to fix: "make it so the
+  lunge time is the same" (`roadmap.md` → Next).
+- **The threat's climb** — "still feel that threat grows fast. but maybe
+  false feeling" — is dropped, answered by the careers since D162 (the
+  whole game in fifteen to twenty minutes).
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D190 — The list's third five answered · 2026-11-04
+
+Igor, going through every open item in batches of five.
+
+- **A lunge cut short by the screen's edge**: "analyze how other games deal
+  with this issue, implement the most suitable way" (`roadmap.md` → Next).
+  Replaces D189 (the list's next five answered)'s "the lunge time is the
+  same".
+- **Whether another build finishes as fast** is dropped.
+- **The bosses, for the layers past the third**: "boss - new boss - new
+  again - first boss which is way stronger (higher grade, slight behavior
+  change). evenly distributed challenge growth. same diversity for mini
+  bosses. as we have only 3 layers now, leave for further expanding"
+  (`ideas.md` → Parked).
+- **The opening's darter** stays parked: "leave it".
+- **Play-tests are Igor's**: "always on-demand testing. assume playtests
+  are for me unless i ask for newcomer setup (rare case)" (the `sonar`
+  skill).
+- **Boosts in the debug mode**, so a boost can be play-tested alone, is to
+  build (`roadmap.md` → Next).
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D191 — The list's fourth five answered · 2026-11-04
+
+Igor, going through every open item in batches of five.
+
+- **A key held after it is let go**: "releasing every key whenever the
+  mouse leaves the window seems like a proper fix" — to build (`bugs.md`).
+- **Double-clicking `index.html`**: "works".
+- **Abilities**: "connect to dev tree item. … analyze other games,
+  accomodate to us, suggest decisions. feels like finding an ability on
+  reaching certain depth (once per game), then developing it at home is a
+  good way to start. still, needs analysis and balance safety check."
+- **The dash's shove, earned**: "probably connect to abilities question".
+- **The dash locked at the start**: "yes, related to 19. thorough safety
+  check with mods". Both go into the abilities analysis (`roadmap.md` →
+  Next).
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D192 — The list's fifth five answered · 2026-11-04
+
+Igor, going through every open item in batches of five.
+
+- **The dash's economy** — `Reflex` the real multiplier, `Impact` past 1
+  nearly dead — folds into the abilities analysis with the other dash
+  questions (D191 (the list's fourth five answered)).
+- **Mod caps** are to remove and measure: "ideally in the future: there is
+  enough variety of mods, and they are awarded evenly, so that uncapped
+  system never causes and unbeatable player in late-game layers". The
+  glossary's "every mod has a cap" (D69 (every mod capped)) changes when
+  it is built and kept.
+- **Fish that pile up** get both the ring and the steering round a body:
+  "any movement enhancement is good, it resembles real world and feels
+  natural", read against real fish crowding a bait first.
+- **A charging boss** never hurts the fish it meets: "maybe a small overlap
+  is acceptable. faking 3d here".
+- **The diver's knock on a hit** stays: "small knockback as now works
+  well".
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D193 — The list's sixth five answered · 2026-11-04
+
+Igor, going through every open item in batches of five.
+
+- **The gems' flight to the diver and the puffer's pace** stay as they are,
+  "for now".
+- **Waves**: "all good here, no tweaks needed" — D115 (batches arrive in
+  waves) stands as built.
+- **A mark where a fish is about to come in** is to build: "short warning,
+  go with you choice. not coloured, but instead something like a fainted
+  arrow that becomes more visible as the fish approaches. it can be moving
+  too. no flashing" (`roadmap.md` → Next).
+- **Escorts**: "all good here" — D116 (bosses bring escorts) stands.
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D194 — The list's seventh five answered · 2026-11-04
+
+Igor, going through every open item in batches of five.
+
+- **More kinds of boost**: the diver's and the attribute's boosts are one
+  kind, the diver's own numbers ("you read me right"); "build 2-3 of your
+  own examples" (`roadmap.md` → Next).
+- **A boost touched again** adds to its own time: "cumulative effect. other
+  boosts unaffected. clock has no ceiling". Replaces his reading of
+  2026-10-23, a touch extending every boost, and, built, D86 (boosts)'s
+  restart.
+- **Bloom's splash without a hit**: "a missed shot splashes at the end of
+  its range, radius increased for all blooms about 1.5. knife's splash is
+  located right after its reach".
+- **Shapes hard to follow** and **references for each fish** wait for the
+  graphics: "separate work on graphics, coming soon with the diver image
+  and animation" (`ideas.md` → Parked).
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D195 — Art in the browser · 2026-11-04
+
+Igor, with the graphics coming — "separate work on graphics, coming soon
+with the diver image and animation": "D4 changes. i think that graphics
+work is needed in the browser, unless you object. as long as fps is
+sustained, we keep working here. the port is delayed, cant say until when.
+probably when we start hitting issues with the browser."
+
+- **Art is made in the browser build, and may be files.** Supersedes D4
+  (no assets, ever), and the parked "sprites after the port"; the
+  non-goal in `foundations.md` goes, and `code.md`'s throwaway rule with
+  it. Claude did not object: a file carries over to any engine, where
+  canvas code is rewritten.
+- **The port waits** on the browser's limits, the frame rate first — D154
+  (the port waits on the browser's limits) as it stood.
+- Two things to meet when the first asset lands, Claude's: a canvas that
+  drew a local file cannot be read back over `file://`, so pixel reads stay
+  on `http://localhost`; and `.gitignore` drops every `*.png`.
+
+The design draft's `(?)` markers, in the same batch: the lost item, the
+collectibles — they "feed the story" — and the currency's name wait for the
+story; the end-of-dive messages for the UX work; **weapons may be weird**,
+"staying within story lore and sea theme".
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D196 — The list's ninth five answered · 2026-11-04
+
+Igor, going through every open item in batches of five. (Batch eight is
+D195 (art in the browser).)
+
+- **Terrain is for the look only**: "purely decorative, giving fake 3d
+  feeling. so cliffs, caverns, whatever serve as visuals, not affecting
+  gameplay" (`ideas.md` → Parked, Graphics).
+- **Studioigor's skills**: "definitely a todo item. expected outcome: repos
+  analyzed, useful findings incorporated into our project".
+- **The backend rules**: "must stay for every backend project, but unneded
+  here … duplicating across backend projects wont work, as rules can
+  change"; scoped, if Claude Code can. The balance pass's hand
+  measuring: "optimize as you see it". Both `roadmap.md` → Next.
+- **A rank only play can earn** is parked: "dont do unless you have a
+  really cool way of dealing with this meter".
+- **Sonar's picks** — plays in `logs/`, pictures drawn on replay, a probe a
+  second, segments every two — confirmed. Claude's answer to "if more
+  frequent checks will help analysis": they would not; a probe only says
+  where a replay leaves its recording, and every play so far replays
+  exactly.
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D197 — The list's last items; the roadmap is the to-do list · 2026-11-04
+
+Igor, closing the walk through every open item: "roadmap is good. organize
+todo items in groups and order the how you feel. i named them todo because
+they are concrete tasks you can take"; and of the last items, Claude's
+suggestions taken: "okay, i'll leave them with no detailed analysis now".
+
+- **`roadmap.md` → Next is the to-do list**: concrete tasks Claude can take,
+  in groups, in Claude's order, which Igor may change. `ideas.md` holds
+  what waits on his answer.
+- **The numbers open to Igor's feel** — a paragraph of Claude's picks in
+  `roadmap.md` — are deleted: the entity docs mark Claude's picks, and Igor
+  names a number when it feels off.
+- **The kiting bot kept in its range** is declined (`ideas.md` → Declined).
+- **The catalogue grown, the diver's readout and a lively background** wait
+  for the graphics work (`ideas.md` → Parked).
+- **`Mend`, the last comfort mod**, goes with the mod caps task; **the right
+  mouse button** with the abilities analysis.
+- Every other parked item stays parked.
+
+**Guarded by** `tests/docs.test.js` — decisions numbered without gaps.

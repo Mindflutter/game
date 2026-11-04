@@ -1,9 +1,10 @@
 # Roadmap
 
-Near-term work **inside the active stage**, plus the health of the build.
+**The to-do list** — every concrete task Claude can take, grouped and
+ordered — plus the health of the build.
 
 The stages themselves live in `plan.md`; the rules that outlive them live in
-`foundations.md`. This doc owns *this week*, not the future.
+`foundations.md`; what waits on Igor's answer lives in `ideas.md`.
 
 ---
 
@@ -13,59 +14,128 @@ S9 (the balance rework) is active, S10 (Sonar) beside it (`plan.md`); what
 S9 has built is its decisions, from D155 (six gates a layer) on, and Sonar's
 play-tests and outcomes are `playtests.md`.
 
-- **The guard** lasts a layer, D179 (the guard lasts a layer): `suit-layer`
-  died in layer 3 with either weapon, and Igor called it "pretty solid";
-  the careers say what it does to a dive — his (`career`) and a newcomer's
-  (`new-player`) (`playtests.md`). What makes a late dive hard is open
-  (`ideas.md` → The economy and the fights).
-- **Every weapon tried and raised** (`ideas.md` → Every weapon tried and
-  raised, and the Weapon ideas): the Harpoon never bought, the Knife
-  carrying the late game. The lionfish, D171 (the lionfish) to D176 (the
-  spines sting by touch), evens it where a Gun career meets layer 3, not at
-  the late kit (Health). The lead is aim against the eel, not the cut's
-  reach (`playtests.md` → The Knife's own reach); the Mask widens the cut,
-  D181 (the Mask widens the Knife's cut). The Harpoon shoots faster, D182
-  (the Harpoon a railgun) — Igor: "feels much better" — and its top fires
-  faster, D183 (the Harpoon's top fires faster); late, the eels still end
-  it (`playtests.md` → The Harpoon at the top, firing faster). A
-  slower eel costs the bot more, and is left (`ideas.md` → Every weapon
-  tried and raised).
-- **The boss's lunge** misses a diver who only keeps swimming
-  (`playtests.md` → The roadmap).
-- **The unbought gear**: each career went into its winning dive with all but
-  a few gems spent and over half the gear, by price, unbought
-  (`playtests.md`, `ideas.md`).
-- **The stood bars** (`bugs.md` → Nothing trivial fails across all three
-  layers), which Igor puts down to a bot too good (`ideas.md` → A bot that
-  plays like Igor).
-- **The dash** is held, now a question of abilities (`ideas.md` →
-  Abilities, the dash among them).
+The to-do list: concrete tasks Claude can take, grouped and in the order
+Claude would take them (D197 (the list's last items; the roadmap is the
+to-do list)). Igor reorders. A task done leaves the list with its commit;
+what waits on Igor's answer is `ideas.md` → To discuss.
 
-Still open to Igor's feel: the four current numbers (`GATE_SPACING`,
-`CURRENT_SPEED`, `CURRENT_CRAWL`, `CURRENT_EASE`), the lunge's, the fan's and
-the boss's haul (`entities/enemies.md`), S4's — the Gun's prices and tier step
-(`entities/weapons.md`), `GEM_PULL` (`design.md`) — the
-mods rework's: the layer end's bigger step (`design.md`), `Mend` as the layer
-end's own (`entities/mods.md`), the boost chance, a boost's life on the floor
-and `Rush` (`entities/boosts.md`) — and S5 (content)'s: every number of the
-archer, the puffer and the eel (`entities/enemies.md`), of the Harpoon and the
-Knife (`entities/weapons.md`), of the three pieces of equipment
-(`entities/equipment.md`), of Barbs and the three boosts (`entities/mods.md`, `entities/boosts.md`), and
-the layers' pools — and this pass's: every challenge's rungs, what a rung pays,
-what a step costs and what each attribute's step adds
-(`entities/challenges.md`), and the dash's 99px (D111) — and S7 (alpha
-polish)'s: the bump's (`design.md`), the leap's and the bulwark's reach
-(`entities/enemies.md`), the splash's ring (`entities/boosts.md`), the `+N`'s hold,
-flight and bump (D142 (the +N)), every sound's voice (D144 (every moment of a
-dive has a sound)), each fish's catalogue line (D146 (the catalogue)), the numbers `home`'s kit
-shows (D147 (home shows the kit)) — all
-Claude's picks.
-The
-scenarios that start next to each — one fish of each kind, every ordinary type
-in a row, a weapon carried from the top, the second and third layers with a
-kit — are in the root `README.md` → Scenarios.
+### 1. Tools the rest is checked by
 
-Deliberately not yet: a lively background (post-alpha, in `ideas.md`).
+First, so every change after has its measure and its play-test.
+
+- [ ] **Boosts in the debug mode**: a setup that lays a boost on the
+  floor, so a boost can be play-tested alone (`playtests.md` → The roadmap,
+  "Still to set up: boosts").
+- [ ] **A balance pass that measures itself**: what a pass now re-measures
+  by hand, printed by one command, Claude's shape (D196 (the list's ninth
+  five answered)).
+- [ ] **Run `npm run balance`**, Igor's word given (D188 (the list's
+  first five answered)): the first since D184 (Go home on top) to D187 (the eel's
+  sway slower; its path taken back). What it finds goes to `bugs.md`; the
+  Harpoon over the Gun most likely stays (`bugs.md`).
+
+### 2. Fixes
+
+Small, concrete, each its own commit.
+
+- [ ] **Every key let go when the mouse leaves the window** (`bugs.md` →
+  A key stays held after it is let go).
+- [ ] **A lunge cut short by the screen's edge** (D189 (the list's next
+  five answered)): a boss near the screen's edge, lunging toward it, stops
+  dead as it touches the edge (`lungeStep()`). Igor: "it's lunge is then
+  short and unnatural". How other games handle a charge that meets the
+  arena's edge, read first; the way that suits best then built (D190 (the
+  list's third five answered)).
+- [ ] **Barbs and Lance**, made weapon-free or removed — Claude's choice —
+  since mods and boosts are not tied to weapons (D188 (the list's first
+  five answered)).
+
+### 3. Feel
+
+What a dive feels like, each to play.
+
+- [ ] **A mark where a fish is about to come in** (D193 (the list's sixth
+  five answered)): a short warning at the edge it enters by — a faint arrow,
+  no colour of its own, growing clearer as the fish nears, perhaps moving
+  with it, never flashing. Its timing Claude's pick.
+- [ ] **Bloom's splash without a hit**: a shot that misses splashes where
+  its range ends, a cut's splash sits just past its reach, and every
+  Bloom's ring is half again as wide (D194 (the list's seventh five
+  answered)).
+- [ ] **A boost touched again adds its time**: its clock grows by a whole
+  life, with no ceiling; other boosts running are untouched. Replaces D86
+  (boosts)'s clock that restarts (D194 (the list's seventh five
+  answered)).
+- [ ] **Crowds that move like fish**: each chaser steering for its own
+  place round the diver, and steering past a body in its way, both; a
+  charging boss passing a little over the fish it meets rather than
+  shoving them all, never hurting them. How real fish crowd a bait, read
+  first (`ideas.md` → Fish pile up, A charging boss shoves the crowd).
+
+### 4. Content
+
+New things to meet and to earn, each to measure.
+
+- [ ] **A ladder of each weapon's own** — kills while carrying it, at the
+  least, paying points (`ideas.md` → Every weapon tried and raised;
+  Running lists → Weapon ideas).
+- [ ] **Boosts of new kinds**, two or three of Claude's: the diver's own
+  numbers for a while, as Rush is, and effects of their own, an explosion
+  round the diver or shots every way — a field that switches on one branch,
+  where D86 (boosts) holds a boost to numbers (D194 (the list's seventh
+  five answered)).
+- [ ] **Mod caps removed, and measured** (`ideas.md` → Mod caps:
+  removed?) — the glossary's "every mod has a cap" goes with it, if kept;
+  `Mend` the last comfort mod, kin under the same "enough variety".
+
+### 5. Analyses, for Igor's decisions
+
+Read and written up, nothing built; each ends in decisions to suggest.
+
+- [ ] **Development trees, analysed**: how a small tree for the character —
+  the attributes as one, or a tree of its own — and one for each weapon,
+  a top tier that adds a way to play among them, could take the points
+  without moving the balance reached (`ideas.md` → Every weapon tried and
+  raised; `reading.md` → Nova Drift, a game like this one). An analysis for
+  Igor, not a build.
+- [ ] **Abilities, analysed** with the development trees: how other games
+  do it, fitted to Abyss, with decisions to suggest — Igor's start, an
+  ability found at a depth once a game and developed at `home`; the dash
+  among them, locked or not, its shove earned; and a thorough check of the
+  balance and the mods that feed the dash, `Reflex` and `Impact` among them
+  and the right mouse button as an ability's key (`ideas.md` → Abilities,
+  the dash among them; the dash economy).
+- [ ] **A bot that plays like Igor**: first the play-tests for what his
+  plays do not show yet, then the bot fitted to them (`ideas.md` → A bot
+  that plays like Igor). The stood bars wait on it (`bugs.md` → Nothing
+  trivial fails across all three layers).
+- [ ] **Studioigor's skills**, read — https://github.com/studioigor/studioigor-skill
+  and his other repos — and what fits the rules here brought in (D196 (the
+  list's ninth five answered)).
+
+### 6. Housekeeping
+
+Outside the game.
+
+- [ ] **The backend rules kept out of this project**: the global
+  `~/.claude/rules/` and `~/.claude/CLAUDE.md` load into every session here
+  and only collide. Loaded by every backend project and nowhere else, from
+  one copy, never duplicated — "rules can change" — through whatever Claude
+  Code offers for scoping them (D196 (the list's ninth five answered)).
+
+### Igor's to open
+
+When he says.
+
+- [ ] **Graphics**, Igor's to open: the diver's image and animation first,
+  in the browser, files allowed (D195 (art in the browser)).
+
+### Standing
+
+Not done once: kept up as the game grows.
+
+- [ ] **The gear left unbought at a win**, measured again as content grows
+  — accepted for now (D188 (the list's first five answered)).
 
 ## Health of the thing right now
 
@@ -288,6 +358,5 @@ older build is a regression signal for that build only.
   instrument on the same axis the bot is (D50). Analysis in `ideas.md` → the
   dash economy.
 - Open bugs are `bugs.md`'s.
-- `index.html` over `file://` is **unverified by Claude** — Playwright refuses
-  `file://` URLs, so everything has been tested over `http://localhost`. Igor
-  should confirm double-click still works. Low risk, never actually run.
+- `index.html` over `file://`: Igor, 2026-11-04, "works". Playwright refuses
+  `file://` URLs, so Claude tests over `http://localhost` only.

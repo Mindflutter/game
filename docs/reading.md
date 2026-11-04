@@ -124,7 +124,7 @@ since skill grows on its own, the game must keep getting harder in some way
 
 Igor, 2026-10-30: "for the future game expansion, we need to motivate the
 player to try out and upgrade each weapon". Two careers won without ever
-buying the Harpoon (`ideas.md` → The economy and the fights). Sources beyond
+buying the Harpoon (`playtests.md` → Igor's first career). Sources beyond
 the books are web pages, cited by link.
 
 - **A dominant option is no choice.** Two swords alike but for damage is a
@@ -187,6 +187,54 @@ the books are web pages, cited by link.
 - **A loop that spends income to raise income** (a dynamic engine) feels slow
   at first, then accelerates. It needs friction or escalation against it
   (GM B-4).
+
+## Nova Drift, a game like this one
+
+Igor, 2026-11-04: "analyze nova drift system, it seems like a similar game".
+An Asteroids-like roguelite shooter by Chimeric, one developer, out of early
+access in 2024: one ship, waves of enemies, a build grown through a run.
+Read from guides, wikis and the developer's notes, not played.
+
+What it does:
+- **A level-up offers a hand of mods.** "The first mod is always a weapon
+  mod, the second a shield, and the third a body type"; every mod after that
+  changes one of the three ([guide](https://yuyxxus.pages.dev/posts/nova-drift-s-asteroid-roguelike-elements-explained)).
+- **Mods sit in trees.** Taking one opens the next tier; a **super mod**
+  needs two mods held, mostly two basic ones, and is not offered until both
+  are ([JP wiki](https://seesaawiki.jp/novadrift-jp/d/%B6%AF%B2%BD%A5%E2%A5%B8%A5%E5%A1%BC%A5%EB%28MOD%29),
+  [super mods](https://www.mejoress.com/nova-drift-super-mods-unlock-stats/)).
+  The developer reshapes the trees between versions — three trees became
+  Kinetics, Efficiency and Movement
+  ([devlog](https://pixeljam.itch.io/nova-drift/devlog)).
+- **Wild mods**: "wildly different buffs and debuffs", stacking each time
+  taken, only ever offered at random, one of them able to bring more.
+- **Rerolls**, dropped by enemies, replace the hand on offer.
+- **Between runs**, every death pays experience to a level of the player's
+  own, which unlocks more mods; challenge modes, unlocked by score or by
+  missions, make a run harder for more experience — starting at wave 12,
+  enemies' weapons and moves shuffled — and stack
+  ([review](https://lordsofgaming.net/2025/05/nova-drift-review-a-unique-retro-rogue-lite)).
+
+For Abyss — every line inference:
+- **A tree that opens options, not numbers, barely moves the balance**, the
+  answer to Igor's "i'm afraid to tweak the whole system" (D188 (the list's
+  first five answered)). Nova Drift's level between runs makes no ship
+  stronger; it widens what a run can be offered. A development tree here
+  could spend points on a kind of thing — an ability, a weapon's top tier
+  that adds a way to play, a mod let into the pool — each an option the
+  balance already meets as content, rather than a number on the diver
+  (`roadmap.md` → Development trees, analysed).
+- **A super mod is the mod synergies' shape** (Parked): a combined mod in
+  the layer end's pick only once its two parents are held — the one place
+  Abyss offers a choice of mods, since fish carry theirs (D84 (mods are
+  dropped), D85 (the layer end's pick)).
+- **Wild mods are the trade-off mods** (Parked), offered where they can be
+  refused: the layer end's pick again, never a fish's drop.
+- **A reroll** could be a drop that redraws the layer end's pick.
+- **The run's first three picks** — weapon, shield, body — are what
+  Abyss settles at `home` with gear: nothing to take.
+- **Challenge modes** are points from opt-in difficulty, which Igor
+  dropped on 2026-10-31 (`ideas.md` → Declined): not proposed again.
 
 ## Not read, and why
 

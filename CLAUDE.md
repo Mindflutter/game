@@ -1,7 +1,7 @@
 # Abyss
 
-A 2D action roguelite, in the browser as a throwaway prototype of a native
-game. This file only points; the rules live in `docs/` (D131 (CLAUDE.md is an
+A 2D action roguelite, made in the browser until the browser stops it, then
+ported to a native game (D195 (art in the browser)). This file only points; the rules live in `docs/` (D131 (CLAUDE.md is an
 index)).
 
 ## Every session, before the first reply
