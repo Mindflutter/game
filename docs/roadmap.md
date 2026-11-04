@@ -32,8 +32,6 @@ First, so every change after has its measure and its play-test.
 
 Small, concrete, each its own commit.
 
-- [ ] **Every key let go when the mouse leaves the window** (`bugs.md` →
-  A key stays held after it is let go).
 - [ ] **A lunge cut short by the screen's edge** (D189 (the list's next
   five answered)): a boss near the screen's edge, lunging toward it, stops
   dead as it touches the edge (`lungeStep()`). Igor: "it's lunge is then

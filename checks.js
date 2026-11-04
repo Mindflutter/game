@@ -141,9 +141,12 @@ if (location.search === '?test') {
   window.dispatchEvent(new KeyboardEvent('keydown', { code: 'MetaLeft' }));
   window.dispatchEvent(new KeyboardEvent('keyup', { code: 'MetaLeft' }));
   check(!keys.has('KeyS'), 'a key let go under Cmd must not stay held');
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyS' }));
+  document.documentElement.dispatchEvent(new MouseEvent('mouseleave'));
+  check(!keys.has('KeyS'), 'a key held as the mouse leaves the window must not stay held');
 
-  // The death screen opens on Go home (D90); a Russian-layout W steps up to
-  // Dive again, and Enter takes it.
+  // The death screen opens on Go home, its top row (D90, D184); from Dive again
+  // under it, a Russian-layout W steps up to Go home, and Enter takes it.
   reset();
   screen = 'dead';
   menuIndex = 1;
@@ -153,7 +156,7 @@ if (location.search === '?test') {
   check(menuIndex === 0, 'a Russian-layout W must move the death screen\'s cursor, at ' + menuIndex);
   justPressed.add('Enter');
   update(1 / 60);
-  check(screen === 'playing', 'Dive again must begin a dive, got ' + screen);
+  check(screen === 'home', 'Go home must go home, got ' + screen);
 
   reset();
   screen = 'mods';

@@ -17,6 +17,9 @@ window.addEventListener('keyup', e => {
   else keys.delete(e.code);
 });
 window.addEventListener('blur', () => keys.clear());
+// A key-up can be lost with the focus kept -- a trackpad gesture, a click on
+// the window's frame -- so the mouse leaving the window lets go too.
+document.documentElement.addEventListener('mouseleave', () => keys.clear());
 
 // UP, DOWN, ... live in game/content.js: which key means what is content, and
 // keeping it there holds the seam at seven names.

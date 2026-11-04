@@ -6218,3 +6218,21 @@ list's ninth five answered)).
 - The bars themselves are unchanged.
 
 **Guarded by** `npm run balance` — the same bars, checked.
+
+## D200 — Every key let go as the mouse leaves · 2026-11-04
+
+`bugs.md`'s held key: in the first Sonar play-test `KeyS` stayed held 29s
+with no key-up, the focus kept — "something broke, i can't swim up". Igor:
+"releasing every key whenever the mouse leaves the window seems like a
+proper fix" (D191 (the list's fourth five answered)).
+
+- **The mouse leaving the page lets go of every key and button**, as the
+  window losing focus and Cmd already did (`platform/input.js`). Why the
+  key-up was lost is not found; this lets a lost one cost no more than a
+  move of the mouse.
+- In the same change: the browser check of the death screen's keys, left
+  on the order D184 (Go home on top) changed, starts from Dive again now
+  and ends at home.
+
+**Guarded by** `checks.js` — a key held as the mouse leaves is let go; run
+by hand in the page, as the whole `?test` waits on Igor's word.

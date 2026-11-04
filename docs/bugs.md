@@ -52,23 +52,3 @@ slower; its path taken back), measured unfitted before it was built: it
 halves the late Gun's eel hits and nearly doubles its hearts where a career
 meets layer 3 (`roadmap.md` → Health). Whether the bar holds now is not
 measured; on Igor's word (D132 (full runs on Igor's word)).
-
-### A key stays held after it is let go
-Igor, 2026-10-28, in the first Sonar play-test: "something broke, i can't
-swim up, probably browser window touched, and somehow affected", then "now
-i can, it fixed somehow". The recording (`logs/2026-10-28-suit-on/1/`)
-shows `KeyS` held from 119.9s to 148.8s with no key-up ever arriving, and no
-blur and no Cmd at the moment it stuck: W against a held S cancels out. It
-let go at 148.8s, when Cmd and the window losing focus cleared every key, as
-`platform/input.js` does on purpose.
-
-What should happen: a key let go is let go. Why the browser sent no key-up is
-not found yet. A guess to check: a trackpad gesture or a click on the
-window's own frame, which can swallow a key-up without taking the focus. The
-next time, Sonar has it on record. To build, Igor's pick (D191 (the
-list's fourth five answered)): every key let go when the mouse leaves the
-window, as a blur already does.
-
-Once more since, harmless: `AltLeft`, held 57s in
-`logs/2026-10-29-layer-jump/1/`, pressed as the window took the focus after
-the play was done, and let go at the next blur.
