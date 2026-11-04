@@ -80,7 +80,8 @@ keyboard events through the input layer, including non-Latin layouts.
 
 For playtesting by hand: **`index.html?debug`** opens a setup screen in place
 of the title — the layer and gate, which fish and how many, the grade every fish of the dive arrives at, the weapon and its
-tier, equipment, attributes and mods, immortal, one-shot and the seed. Pick
+tier, equipment, attributes, mods and boosts — a boost set is laid on the floor
+beside you at the start — immortal, one-shot and the seed. Pick
 with the arrows or the mouse (Shift moves a value by five, and past either end
 a value comes round to the other), then Dive.
 
@@ -94,7 +95,7 @@ The address bar keeps the setup as a code — `index.html?debug=L2,G7,S4471,Harp
 replace the chosen gate's batch; the dive then runs on as drawn. The bright line
 under the columns is the marked row's tip: what it is and what it changes —
 a fish's behaviour and numbers, what a tier, point or pick adds, and why a row
-is dim (Barbs goes only with the Harpoon).
+is dim (Barbs goes only with the Harpoon, Lance with the Gun).
 
 ## Scenarios
 

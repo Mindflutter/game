@@ -353,7 +353,10 @@ survive Dive again; no URL sets them.
 The debug mode (D102) is a menu of value rows built from the tables. Its setup
 is text, `setupCode()` and `parseSetup()`, kept in the address bar, so a URL
 replays it exactly. `debugDive()` plays it through a stand-in `meta`, so
-`reset()` applies the setup as a dive from `home` would. Every tip is worked
+`reset()` applies the setup as a dive from `home` would; the boosts it sets
+lie in a row beside the diver at the start, up to `DEBUG_BOOST_MAX 3` of
+each, as a fish's drop would with `BOOST_LIFE 6` seconds to touch them (D198
+(boosts in the debug mode)). Every tip is worked
 out by `modPreview()` on the diver a dive starts with, so a tip cannot state a
 number the game does not deliver.
 

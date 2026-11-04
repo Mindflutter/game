@@ -72,6 +72,17 @@ describe('the setup reaches the dive', () => {
     expect(g.modCounts).toEqual({ Fins: 2, Barbs: 3 });
   });
 
+  it('the boosts: each laid on the floor beside the diver as many times as set, one only with the weapon it fits', () => {
+    const g = setup('L1,G1,S7,Knife0,Rush2,Bloom1,Lance1');
+    g.debugDive();
+    const laid = g.drops.filter(d => d.boost).map(d => d.boost).sort();
+    expect(laid).toEqual(['Bloom', 'Rush', 'Rush']);   // Lance is the Gun's (D125)
+    for (const d of g.drops) {
+      expect(Math.hypot(d.x - g.player.x, d.y - g.player.y)).toBeLessThan(250);
+      expect(d.life).toBe(g.BOOST_LIFE);
+    }
+  });
+
   it('the place: the chosen layer and gate, the camera at its depth', () => {
     const g = setup('L2,G5,S7,Gun0');
     g.debugDive();
@@ -272,10 +283,10 @@ describe('the keys and the ways out', () => {
 });
 
 describe('the setup screen', () => {
-  it('has a row for every fish, piece of equipment, attribute and mod', () => {
+  it('has a row for every fish, piece of equipment, attribute, mod and boost', () => {
     const g = setup();
     const labels = g.MENUS.debug.items.map(r => r.label);
-    for (const t of [...g.ENEMY_TYPES, ...g.EQUIPMENT, ...g.ATTRIBUTES, ...g.MODS]) expect(labels).toContain(t.name);
+    for (const t of [...g.ENEMY_TYPES, ...g.EQUIPMENT, ...g.ATTRIBUTES, ...g.MODS, ...g.BOOSTS]) expect(labels).toContain(t.name);
   });
 
   it('moves a value with the arrows, five at a time with Shift, and by a click either side of it', () => {

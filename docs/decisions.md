@@ -6182,3 +6182,21 @@ suggestions taken: "okay, i'll leave them with no detailed analysis now".
 - Every other parked item stays parked.
 
 **Guarded by** `tests/docs.test.js` — decisions numbered without gaps.
+
+## D198 — Boosts in the debug mode · 2026-11-04
+
+`roadmap.md` → Next, the first tool: a boost play-tested alone, which the
+play-tests asked for since the short ten (`playtests.md` → The roadmap).
+
+- **The setup has a row for each boost**, in the MODS column, up to
+  `DEBUG_BOOST_MAX 3` of it; its code token is the boost's name and count,
+  `Rush2`. Claude's pick.
+- **Debug dives lay them on the floor** in a row beside the diver, each with
+  a fish's drop's life, to be touched when wanted. Two of one test a boost
+  touched again.
+- A boost that fits one weapon only — Lance, the Gun's — is dim, and laid
+  only with that weapon, as a weapon mod is (D99 (weapon mods, and more
+  boosts)).
+
+**Guarded by** `tests/debug.test.js` — the boosts set are laid beside the
+diver, Lance not with the Knife; the setup has a row for every boost.

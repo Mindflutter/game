@@ -615,6 +615,7 @@ const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 // with nothing to write.
 const ONE_SHOT         = 100;   // damage that kills anything here in one shot
 const DEBUG_FISH_MAX   = 50;    // of one type in the setup's batch: Claude's pick
+const DEBUG_BOOST_MAX  = 3;     // of one boost laid by the diver at the start (D198): Claude's pick
 // A fish's tip: one line per behaviour field, which `npm test` asks for.
 const DEBUG_BEHAVIOURS = {
   chase: 'swims straight at you',
@@ -635,21 +636,25 @@ const DEBUG_COUNTS = [
   ...EQUIPMENT.map(g => ({ name: g.name, col: 2, max: g.tiers.length, of: true, tip: () => gearTip(g) })),
   ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: a.max, tip: () => stepTip(a) })),
   ...MODS.map(m => ({ name: m.name, col: 3, max: m.max, of: true, tip: () => modTip(m) })),
+  ...BOOSTS.map(b => ({ name: b.name, col: 3, max: DEBUG_BOOST_MAX, tip: () => boostTip(b) })),
   ...WEAPONS.map(w => ({ name: w.name, max: w.tiers.length, of: true })),
 ];
-// A weapon mod enters a dive only with a weapon it fits (D99); otherwise dim.
+// A weapon mod or boost enters a dive only with a weapon it fits (D99); otherwise dim.
 const countRow = c => ({
   label: c.name,
   col: c.col,
   get value() { const n = debugSetup.counts[c.name] || 0; return c.of ? n + ' / ' + c.max : n; },
-  get dim() { const m = MODS.find(x => x.name === c.name); return !!m?.weapons && !m.weapons.includes(debugSetup.weapon); },
+  get dim() {
+    const m = [...MODS, ...BOOSTS].find(x => x.name === c.name);
+    return !!m?.weapons && !m.weapons.includes(debugSetup.weapon);
+  },
   get tip() { return c.tip(); },
   change: d => { debugSetup.counts[c.name] = wrapStep(debugSetup.counts[c.name] || 0, d, c.max); },
 });
 
 // Dive sits under the tallest column, so new content pushes it down; the
 // browser suite holds it above the hint.
-const DEBUG_COLS = ['WHERE', 'FISH', 'DIVER', 'MODS'];
+const DEBUG_COLS = ['WHERE', 'FISH', 'DIVER', 'MODS AND BOOSTS'];
 const DEBUG_TOP = 236, DEBUG_STEP = 32, DEBUG_COL_W = 280;
 const debugColX = c => ARENA_W * (2 * c + 1) / (2 * DEBUG_COLS.length);
 function debugBottom() {

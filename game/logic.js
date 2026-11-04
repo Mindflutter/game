@@ -905,6 +905,10 @@ function modTip(m) {
          (!only ? '' : m.weapons.includes(debugSetup.weapon) ? '   with' + only + ' only' : '   carry' + only + ' to take it') +
          (m.end ? "   a layer end's own" : '');
 }
+function boostTip(b) {
+  return b.name + ': ' + b.desc + ' for ' + b.time + 's, laid on the floor beside you at the start' +
+         (b.weapons ? '   with the ' + b.weapons.join(' or the ') + ' only' : '');
+}
 function weaponTip(w) {
   return w.name + ': ' + Object.entries(shotOf(w)).map(([k, v]) => k + ' ' + v).join(' \u00b7 ') + needsLine(w);
 }
@@ -935,6 +939,10 @@ function debugDive() {
   // Every fish of the dive at the setup's grade (D119), drawn or chosen.
   const graded = b => b && { ...b, enemies: b.enemies.map(([name, count]) => [name, count, s.grade]) };
   if (s.grade > 1) plan = plan.map(p => ({ ...p, batch: graded(p.batch), escorts: graded(p.escorts) }));
+  // The boosts on the floor in a row beside the diver, to be touched when
+  // wanted (D198): a boost alone, play-tested.
+  BOOSTS.filter(fits).flatMap(b => Array(n(b.name)).fill(b.name)).forEach((name, i) =>
+    drops.push({ x: player.x + 80 + 36 * i, y: player.y - 60, r: 6, boost: name, life: BOOST_LIFE }));
 }
 
 // ---------- the clock ----------

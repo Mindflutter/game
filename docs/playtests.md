@@ -85,7 +85,6 @@ knee. The same batch and kit with the Gun or the Harpoon instead costs it
 hearts, and some dives (Three weapons, one late batch, below). So the next
 play-tests ask what the bot says it is — the weapon — rather than climbing
 counts.
-Still to set up: boosts, once the debug mode can place one.
 
 **The lunge, over every play** (2026-10-30, the eleven plays a boss or a
 mini-boss lunged in, replayed): 165 lunges, 82 the bosses' and 83 the

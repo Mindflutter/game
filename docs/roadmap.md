@@ -23,9 +23,6 @@ what waits on Igor's answer is `ideas.md` → To discuss.
 
 First, so every change after has its measure and its play-test.
 
-- [ ] **Boosts in the debug mode**: a setup that lays a boost on the
-  floor, so a boost can be play-tested alone (`playtests.md` → The roadmap,
-  "Still to set up: boosts").
 - [ ] **A balance pass that measures itself**: what a pass now re-measures
   by hand, printed by one command, Claude's shape (D196 (the list's ninth
   five answered)).
