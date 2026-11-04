@@ -288,7 +288,9 @@ as `PLAYER_START` carrying the weapon, plus each tier, equipment and attribute
 step; mods then add on top. All sums. A weapon is owned, then carried (D97);
 `requires` on gear schedules it behind attribute steps, it never scales (D36,
 D98). A challenge's streak lives in `tally` for the dive and is judged on a
-clear, a kill, a dash's shove or a layer end (D109, D110, D152); a fish placed by hand belongs to no
+clear, a kill, a dash's shove, one shot's or cut's kills (`struck()`) or a
+layer end (D109, D110, D152); a weapon's own ladder only while it is carried
+(D206 (a ladder of each weapon's own)); a fish placed by hand belongs to no
 batch and counts for nothing. Buying and raising write the save at once.
 
 **The save** (D70, D77). `saveText()` is `meta`, the settings beside it — so
@@ -336,7 +338,8 @@ and "it broke sometimes" becomes "it broke on seed 4471". The one
 `statusLines()` in `content.js` builds the status bar, so its text ports and a
 check reads it — hp, guard, gems less the `+N` still on its way to them
 (D142 (the +N)), the weapon, the layer and gate, fish left,
-mods and boosts, each challenge's count against its next rung — then, in the
+mods and boosts, each challenge's count against its next rung, of the weapons'
+own only the carried one's — then, in the
 debug mode only (D148 (the readout only in the debug mode)), the
 **development readout**, `PLAYER_STATS` (D52); last, for `NOTICE_TIME`, what
 was just added to the catalogue (D146 (the catalogue)). Each readout entry

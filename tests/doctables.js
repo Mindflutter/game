@@ -63,7 +63,7 @@ export function docTables(g = loadGame()) {
   // `add` and `percent` are numbers, so they are read straight off the record (D86, D125).
   const adds = b => [...Object.entries(b.add || {}).map(([k, v]) => k + ' ' + (v < 0 ? '-' : '+') + r3(Math.abs(v))),
                      ...Object.entries(b.percent || {}).map(([k, v]) => k + ' +' + v + '%')].join(', ');
-  const judged = c => ['clear', 'kill', 'end'].find(k => c[k]);
+  const judged = c => ['clear', 'kill', 'dash', 'end', 'strike'].find(k => c[k]);
   const diverCols = Object.keys(g.PLAYER_START);
 
   const fish = b => b.enemies.map(([n, c]) => n + ' ' + c).join(', ');

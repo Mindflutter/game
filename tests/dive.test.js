@@ -429,7 +429,7 @@ describe('the content stage\'s counts (D93)', () => {
     for (const x of [...g.WEAPONS, ...g.EQUIPMENT]) within(x.name + ' tiers', x.tiers.length, 3, 4);
     within('mods', g.MODS.length, 5, 7);
     within('boosts', g.BOOSTS.length, 4, 6);     // Rush and 3-5 new
-    within('challenges', g.CHALLENGES.length, 6, 6);   // five since D109, depth since D161
+    within('challenges', g.CHALLENGES.length, 9, 9);   // five since D109, depth since D161, a weapon's own each since D206
     within('attributes', g.ATTRIBUTES.length, 3, 3);
   });
 });

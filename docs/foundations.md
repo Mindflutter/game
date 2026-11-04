@@ -131,7 +131,7 @@ count changes here, in one line, and nowhere else.
 | mod | 5–7 | D93 |
 | boost | 4–6 | D93 |
 | attribute | 3 | D93 |
-| challenge | 6 | D109, D161 |
+| challenge | 9 | D109, D161, D206 |
 | batch | not set | — |
 
 "Igor's draft" is `high level design.md` → its definition of done.

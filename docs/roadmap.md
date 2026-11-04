@@ -35,9 +35,6 @@ What a dive feels like, each to play.
 
 New things to meet and to earn, each to measure.
 
-- [ ] **A ladder of each weapon's own** — kills while carrying it, at the
-  least, paying points (`ideas.md` → Every weapon tried and raised;
-  Running lists → Weapon ideas).
 - [ ] **Boosts of new kinds**, two or three of Claude's: the diver's own
   numbers for a while, as Rush is, and effects of their own, an explosion
   round the diver or shots every way — a field that switches on one branch,

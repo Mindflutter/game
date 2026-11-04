@@ -22,10 +22,13 @@ rungs a ladder and `depth` beside them, D161 (depth pays points).
 |---|---|---|---|---|---|
 | depth | clear | — | 1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 / 10 / 11 / 12 / 13 / 14 / 15 / 16 / 17 / 18 | clear 1 gate in one dive | clear 18 gates in one dive |
 | untouched | clear | — | 3 / 6 / 9 / 12 | clear 3 batches in a row without a hit | clear 12 batches in a row without a hit |
-| bowling | — | — | 3 / 5 / 7 / 9 | dash through 3 fish at once | dash through 9 fish at once |
+| bowling | dash | — | 3 / 5 / 7 / 9 | dash through 3 fish at once | dash through 9 fish at once |
 | beeline | clear | — | 1 / 3 / 5 / 7 | kill the glowing fish first, 1 batches in a row | kill the glowing fish first, 7 batches in a row |
 | flurry | kill | — | 5 / 9 / 14 / 20 | kill 5 fish within 2 seconds | kill 20 fish within 2 seconds |
 | swift | end | true | 150 / 120 / 100 / 80 | clear a layer within 2:30 | clear a layer within 1:20 |
+| marksman | kill | — | 8 / 14 / 20 / 30 | kill 8 fish in a row, no shot missing | kill 30 fish in a row, no shot missing |
+| skewer | strike | — | 2 / 3 / 4 / 5 | kill 2 fish with one harpoon | kill 5 fish with one harpoon |
+| sweep | strike | — | 3 / 4 / 5 / 7 | kill 3 fish with one cut | kill 7 fish with one cut |
 <!-- /generated -->
 
 <!-- generated: attributes -->
@@ -36,7 +39,7 @@ rungs a ladder and `depth` beside them, D161 (depth pays points).
 | Strength | dashDamage +1 |
 <!-- /generated -->
 
-**judged** is which of `clear`, `kill`, `dash` and `end` the record has.
+**judged** is which of `clear`, `kill`, `dash`, `end` and `strike` the record has.
 Every number is Claude's pick, set on Igor's play (D160 (a layer-1 dive buys
 a thing every two)): the first rung of each skill ladder is met in a dive
 that dies in layer 1, the fourth asks for a good dive (D161 (depth pays
@@ -54,6 +57,8 @@ discussion (`ideas.md`).
 | `kill` | — | Its presence judges it after each kill in a batch of the plan: it returns the count. |
 | `dash` | — | Its presence judges it as a dash shoves a fish of the plan: it returns the count. |
 | `end` | — | Its presence judges it at a layer's end: it returns the count — `swift`'s, the layer's time. |
+| `strike` | — | Its presence judges it as one shot or one cut kills a fish of the plan: it returns the fish that shot or cut has killed. |
+| `weapon` | — | The weapon whose own ladder it is (D206 (a ladder of each weapon's own)): judged only while that weapon is carried, shown in the dive only then, and listed on one `weapons` line with the other weapons' own. |
 | `within` | — | A rung is a time to beat, not a count to reach. |
 | `max` | steps | An attribute's: the steps it stops at. |
 | `apply` | — | An attribute's: what one step adds to the diver, applied once for each step raised as a dive starts. |
@@ -101,10 +106,32 @@ boss's clear. A dive begun partway into a layer is not judged on it. Its rungs
 are seconds: the bot fights layer 1 through in about 2:07 (D162 (the whole
 game in fifteen to twenty minutes)).
 
+## marksman
+
+The Gun's own (D206 (a ladder of each weapon's own)): fish killed in a row
+with no shot missing — a shot that ends its range having struck nothing
+starts it again. Every kill counts, the dash's and a splash's too; only a
+miss breaks it. Judged only while the Gun is carried. Over 24 bot dives at
+its first tier the best a dive made was 6 to 20.
+
+## skewer
+
+The Harpoon's own (D206 (a ladder of each weapon's own)): fish one harpoon
+kills, through all it goes through and what it splashes. Judged only while
+the Harpoon is carried. The bot's best a dive, 2 to 5.
+
+## sweep
+
+The Knife's own (D206 (a ladder of each weapon's own)): fish one cut kills,
+its splash's too. Judged only while the Knife is carried. The bot, which
+keeps its distance, made 2 or 3 at best a dive; a cut into a crowd reaches
+seven.
+
 ## Points
 
 - **Every rung pays one point** (D152 (nine rungs a ladder, a point a
-  rung)): `depth` 18, the five others 4 each — 38 in all (D161 (depth pays
+  rung)): `depth` 18, the eight others 4 each — 50 in all, 42 to a career
+  that never changes weapon (D206 (a ladder of each weapon's own); D161 (depth pays
   points)).
 - **Step n of an attribute costs n points**: 1, 2, 3, 4, and an attribute
   stops at four. Every step of all three costs 30: more than depth pays, so
@@ -136,7 +163,7 @@ what gear requires)). The Harpoon requires the first.
 A challenge:
 
 1. A line in `CHALLENGES`: `name`, nine `rungs` easiest first, an `ask` that
-   reads any of them in one sentence, and one of `clear`, `kill`, `dash` or `end` —
+   reads any of them in one sentence, and one of `clear`, `kill`, `dash`, `end` or `strike` —
    with `within` if a rung is a time to beat. Mastery, never a quota: a streak
    or one dive's feat, never a running total (D36 (attributes)). It asks
    something no other challenge does.

@@ -6341,3 +6341,34 @@ not hurt them, but maybe a small overlap is acceptable. faking 3d here"
 **Guarded by** `tests/movement.test.js` — a queue of eight closes more than
 halfway round the diver; a fish behind a body that holds gets past it to the
 diver; a charge passes over a fish, never carries or hurts it.
+
+## D206 — A ladder of each weapon's own · 2026-11-04
+
+Igor: "even simple kill count for each weapon earning points is good"
+(D188 (the list's first five answered)); the to-do, "a ladder of each
+weapon's own — kills while carrying it, at the least, paying points".
+
+- **Mastery, not a count**: the glossary's challenge rewards "mastery not
+  quotas — never 'kill 50 darters'", so each weapon's ladder asks what only
+  its nature does — still kills, paid as points:
+  - `marksman`, the Gun: fish killed in a row, no shot missing;
+  - `skewer`, the Harpoon: fish one harpoon kills;
+  - `sweep`, the Knife: fish one cut kills.
+- **Judged only while its weapon is carried**; a miss is a player's shot that
+  ends its range having struck nothing. Four rungs each, a point a rung:
+  50 points in all, 12 of them only for trying every weapon. Rungs sized on
+  the bot, 24 dives a weapon at its first tier, Claude's picks.
+- **Shown so they fit**: the dive's bar shows only the carried weapon's; the
+  Attributes and pause lists put all three on one `weapons` line, each one's
+  badges and the carried one's next rung, so trying another weapon shows
+  what it would pay.
+  The list's lines are 20 px apart, not 24, and start 6 px under the rows,
+  not 10: even six lines had ended under `checks.js`'s hint clearance, 718
+  against 712, unseen since `?test` is not run routinely; eight end at 710.
+- **The alpha count of challenges is 9, not 6** (`foundations.md` → Alpha
+  counts), changed by this decision.
+
+**Guarded by** `tests/challenges.test.js` — a cut's kills pay the Knife's,
+a harpoon's the Harpoon's and not the Gun's, a miss starts the Gun's again,
+the one line and the carried weapon's alone in the bar; `tests/docs.test.js`
+— the rows and the count.

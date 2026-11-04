@@ -285,6 +285,17 @@ const CHALLENGES = [
   { name: 'swift',     rungs: [150, 120, 100, 80], within: true,
     ask: s => 'clear a layer within ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'),
     end: () => (layerStart === null ? Infinity : elapsed - layerStart) },
+  // Each weapon's own (D206): what only its nature can do, judged only while
+  // it is carried. `strike` is the kills one shot or one cut made.
+  { name: 'marksman',  weapon: 'Gun',     rungs: [8, 14, 20, 30],
+    ask: n => 'kill ' + n + ' fish in a row, no shot missing',
+    kill: () => tally.marksman },
+  { name: 'skewer',    weapon: 'Harpoon', rungs: [2, 3, 4, 5],
+    ask: n => 'kill ' + n + ' fish with one harpoon',
+    strike: () => tally.strike },
+  { name: 'sweep',     weapon: 'Knife',   rungs: [3, 4, 5, 7],
+    ask: n => 'kill ' + n + ' fish with one cut',
+    strike: () => tally.strike },
 ];
 
 // ---------- the development readout ----------
@@ -332,7 +343,8 @@ function statusLines() {
     { color: '#ffe9a8',
       text: 'mods ' + (mods.join('  ') || 'none') +
             boosts.map(b => '   ' + b.name + ' ' + b.left.toFixed(1) + 's').join('') },
-    { color: '#a8ffd8', text: 'challenges ' + CHALLENGES.map(challengeStatus).join('   ') },
+    { color: '#a8ffd8', text: 'challenges ' + CHALLENGES.filter(c => !c.weapon || c.weapon === weaponName)
+                                               .map(challengeStatus).join('   ') },
     // The development readout (D52), only in the debug mode (D148).
     ...(debugSetup ? [{ color: '#4d7a8a', small: true,
                         text: PLAYER_STATS.map(s => s.label + ' ' + s.read(player)).join('   ') }] : []),
@@ -345,18 +357,20 @@ const clock = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStar
 function challengeStatus(c) {
   const k = meta.challenges[c.name] || 0;
   if (k === c.rungs.length) return c.name + ' ' + '●'.repeat(k);
-  const now = c.clear ? (tally[c.name] || 0) : (c.kill || c.dash || c.end)(), rung = c.rungs[k];
+  const now = c.clear ? (tally[c.name] || 0) : (c.kill || c.dash || c.end || c.strike)() || 0, rung = c.rungs[k];
   return c.name + ' ' + (c.within ? (now === Infinity ? '–' : clock(now)) + '/' + clock(rung) : now + '/' + rung);
 }
 
-const CHALLENGE_LINE = 24;
-const challengesTop = menu => menu.top + menu.items.length * ROW_STEP + 10;
+const CHALLENGE_LINE = 20;
+const challengesTop = menu => menu.top + menu.items.length * ROW_STEP + 6;
+const badges = c => '●'.repeat(meta.challenges[c.name] || 0) + '○'.repeat(c.rungs.length - (meta.challenges[c.name] || 0));
+const nextAsk = c => ((meta.challenges[c.name] || 0) < c.rungs.length ? c.ask(c.rungs[meta.challenges[c.name] || 0]) : 'every rung earned');
+// The weapons' own share a line, so every weapon's shows and the list fits (D206).
 function challengeLines() {
-  return ['Challenges pay the points, a point a rung, once, in any layer', ...CHALLENGES.map(c => {
-    const k = meta.challenges[c.name] || 0;
-    return c.name + '   ' + '●'.repeat(k) + '○'.repeat(c.rungs.length - k) + '   ' +
-           (k < c.rungs.length ? c.ask(c.rungs[k]) : 'every rung earned');
-  })];
+  const own = CHALLENGES.filter(c => c.weapon), mine = own.find(c => c.weapon === meta.carried) || own[0];
+  return ['Challenges pay the points, a point a rung, once, in any layer',
+          ...CHALLENGES.filter(c => !c.weapon).map(c => c.name + '   ' + badges(c) + '   ' + nextAsk(c)),
+          'weapons   ' + own.map(c => c.weapon + ' ' + badges(c)).join('   ') + '   with the ' + mine.weapon + ': ' + nextAsk(mine)];
 }
 
 // Full-width bands on the text baseline, so the mouse hits a row anywhere.

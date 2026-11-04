@@ -1,7 +1,7 @@
 // Challenge ladders (D109, D110).
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks, ride, clearAndWait, atGate } from './harness.js';
+import { loadGame, ticks, play, ride, clearAndWait, atGate } from './harness.js';
 
 describe('challenge ladders (D109, D110)', () => {
   const mini = g => g.plan.findIndex(e => e.batch.enemies.some(([n]) => n === 'mini-boss'));
@@ -86,10 +86,79 @@ describe('challenge ladders (D109, D110)', () => {
     kill(1);
     expect(g.meta.challenges.flurry).toBe(1);
     const at = fighting(0);
+    at.meta.challenges.marksman = at.CHALLENGES.find(c => c.name === 'marksman').rungs.length;   // the Gun's own topped: flurry pays alone
     while (at.enemies.length < second) at.placeEnemy('drifter', at.player.x + 300, at.player.y);
     for (const e of [...at.enemies]) at.killEnemy(e);
     expect(at.meta.challenges.flurry).toBe(2);        // two rungs at once: a point each
     expect(at.notice).toBe('flurry: kill ' + second + ' fish within 2 seconds \u2014 2 points');
+  });
+
+  // A dive at its first batch carrying `weapon`, the batch's own fish out of the way.
+  const armed = weapon => {
+    const g = loadGame();
+    g.meta.carried = weapon;
+    g.reset(1);
+    g.immortal = true;
+    ride(g);
+    for (const e of g.enemies) e.x += 3000;
+    g.queuePaused = true;
+    return g;
+  };
+  const line = (g, n, gap) => Array.from({ length: n }, (_, i) =>
+    (g.placeEnemy('drifter', g.player.x + 60 + i * gap, g.player.y), Object.assign(g.enemies.at(-1), { hp: 1, maxHp: 1 })));
+  const fire = (g, over = {}) => {
+    const p = g.player;
+    g.bullets.push(Object.assign({ id: ++g.bulletId, x: p.x, y: p.y, r: p.shotRadius, vx: p.shotSpeed, vy: 0,
+                                   speed: p.shotSpeed, pierce: p.pierce, travelled: 0, maxTravel: p.range }, over));
+    play(g, 1);
+  };
+
+  it('pays the Knife for the fish one cut kills, and no other weapon (D206)', () => {
+    const g = armed('Knife');
+    const n = rung(g, 'sweep', 2);
+    const fish = Array.from({ length: n }, (_, i) =>
+      (g.placeEnemy('drifter', g.player.x + g.player.r + 19, g.player.y + (i - (n - 1) / 2) * 6), g.enemies.at(-1)));
+    for (const e of fish) Object.assign(e, { hp: 1, maxHp: 1, speed: 0 });
+    g.player.splash = 0;
+    g.player.pierce = n;
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    g.fireArmed = true;
+    g.keys.add('Mouse0');
+    g.update(g.FIXED_DT);
+    g.keys.delete('Mouse0');
+    expect(fish.every(e => e.gone)).toBe(true);
+    expect([g.meta.challenges.sweep, g.meta.challenges.skewer, g.meta.challenges.marksman]).toEqual([2, undefined, undefined]);
+  });
+
+  it('pays the Harpoon for the fish one harpoon kills, and not the Gun for the same shot (D206)', () => {
+    const paid = weapon => {
+      const g = armed(weapon);
+      line(g, rung(g, 'skewer', 2), 40);
+      fire(g, { pierce: 9, maxTravel: 400 });
+      return g.meta.challenges.skewer;
+    };
+    expect([paid('Harpoon'), paid('Gun')]).toEqual([2, undefined]);
+  });
+
+  it('pays the Gun for kills in a row, and a shot that strikes nothing starts it again (D206)', () => {
+    const g = armed('Gun');
+    g.tally.marksman = rung(g, 'marksman', 1) - 1;
+    line(g, 1, 0);
+    fire(g);
+    expect([g.tally.marksman, g.meta.challenges.marksman]).toEqual([rung(g, 'marksman', 1), 1]);
+    fire(g, { vx: 0, vy: -g.player.shotSpeed });   // into the open water
+    expect(g.tally.marksman).toBe(0);
+  });
+
+  it('shows each weapon\'s ladder on one line, and only the carried one\'s in the dive (D206)', () => {
+    const g = armed('Harpoon');
+    g.meta.challenges = { sweep: 1 };
+    const own = g.challengeLines().filter(l => l.startsWith('weapons'));
+    expect(own).toEqual(['weapons   Gun ○○○○   Harpoon ○○○○   Knife ●○○○   with the Harpoon: ' +
+                         g.CHALLENGES.find(c => c.name === 'skewer').ask(rung(g, 'skewer', 1))]);
+    const status = g.statusLines().find(l => l.text.startsWith('challenges')).text;
+    expect([status.includes('skewer'), status.includes('sweep'), status.includes('marksman')]).toEqual([true, false, false]);
   });
 
   it('lets challenges paying on one tick share the notice', () => {
@@ -153,7 +222,7 @@ describe('challenge ladders (D109, D110)', () => {
     const g = loadGame();
     g.meta.challenges = { untouched: 4, beeline: 1 };
     const lines = g.challengeLines();
-    expect(lines).toHaveLength(g.CHALLENGES.length + 1);
+    expect(lines).toHaveLength(g.CHALLENGES.filter(c => !c.weapon).length + 2);
     expect(lines).toContain('untouched   ●●●●   every rung earned');
     expect(lines).toContain('beeline   ●○○○   kill the glowing fish first, ' + rung(g, 'beeline', 2) + ' batches in a row');
     expect(lines).toContain('bowling   ○○○○   dash through ' + rung(g, 'bowling', 1) + ' fish at once');

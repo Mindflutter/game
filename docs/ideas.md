@@ -102,7 +102,7 @@ weapons. Where it stands:
 - **Answered**, Igor, 2026-11-04 (D188 (the list's first five answered)):
   the Knife's lead "is settled for now". A ladder of each weapon's own is
   to build — "even simple kill count for each weapon earning points is
-  good" — and points need somewhere to go: "turn attributes into a
+  good" — built as mastery, D206 (a ladder of each weapon's own); and points need somewhere to go: "turn attributes into a
   development tree for the character, or even introduce a tree on its own
   … weapons can have a tree of its own too. all trees small enough, so
   that player is motivated to upgrade those", a top tier that adds a way to
@@ -589,16 +589,6 @@ weapon asks the player for a different play, not a different number
 (`reading.md` → Try out and upgrade each weapon). The weapons that exist are
 `entities/weapons.md`; an idea moves there when it is built. All Claude's,
 2026-10-30, nothing committed.
-
-**A ladder of each weapon's own** — a challenge only its nature can meet,
-paid while it is carried, as `bowling` is the dash's:
-- the Gun: kills in a row without a shot missing;
-- the Harpoon: fish killed by one harpoon;
-- the Knife: fish cut by one swing.
-
-The Harpoon's and the Knife's are judged on a kill, as `bowling` is on a
-dash: kills that share one shot. The Gun's needs a miss to be seen, which no
-challenge judges yet.
 
 **A top tier that adds a way to play**, as the Knife's `swing` is a field:
 - the Gun: a burst of three on the click after a pause;

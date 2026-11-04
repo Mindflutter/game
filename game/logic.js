@@ -525,7 +525,7 @@ function swing(ux, uy) {
     if (d <= body || off <= half + Math.asin(Math.min(1, body / d))) cut.push([d, e]);
   }
   cut.sort((a, b) => a[0] - b[0]);
-  const reach = player.range + player.shotRadius;
+  const before = kills, reach = player.range + player.shotRadius;
   if (!cut.length && player.splash) splash(player.x + ux * reach, player.y + uy * reach, 0);
   for (const [, e] of cut.slice(0, player.pierce + 1)) {
     if (e.gone) continue;                    // the splash of a nearer cut killed it
@@ -533,6 +533,7 @@ function swing(ux, uy) {
     hitSparks(e, { vx: ux, vy: uy });
     hit(e);
   }
+  if (kills > before) struck(kills - before);
   player.swingLeft = player.swing.time;      // what the renderer draws
   player.swingX = ux;
   player.swingY = uy;
@@ -620,6 +621,7 @@ function killEnemy(e) {
     if (firstKillAt === null) firstKillAt = elapsed;
     if (e.carrier) glowAt = elapsed;
     killTimes = [...killTimes.filter(t => elapsed - t <= FLURRY_TIME), elapsed];
+    tally.marksman = (tally.marksman || 0) + 1;
     for (const c of CHALLENGES) if (c.kill) climb(c, c.kill());
   }
   // The last lead takes its crowd with it (D116), and every shot: none may land
@@ -789,8 +791,16 @@ function closeGate(r) {
   Object.assign(r, { secs: Math.round((elapsed - r.at) * 10) / 10, hp: player.hp, kills: kills - r.kills });
 }
 
+// The fish one shot or one cut killed, judged on the carried weapon's own
+// ladder (D206). A fish placed by hand pays no challenge (D109).
+function struck(n) {
+  tally.strike = n;
+  if (plan[batchIndex - 1]) for (const c of CHALLENGES) if (c.strike) climb(c, n);
+}
+
 // Every rung `v` now meets pays, once ever, a point each (D109, D152).
 function climb(c, v) {
+  if (c.weapon && c.weapon !== weaponName) return;   // only the carried weapon's own pays
   const was = meta.challenges[c.name] || 0;
   let k = was;
   while (k < c.rungs.length && (c.within ? v <= c.rungs[k] : v >= c.rungs[k])) k += 1;
@@ -1492,8 +1502,12 @@ function step(dt) {
     b.travelled += b.speed * dt;
     if (b.travelled >= b.maxTravel) {
       b.gone = true;
-      // A shot that struck nothing splashes where its range ends (D203).
-      if (!b.evil && !b.struck && player.splash) splash(b.x, b.y, 0);
+      // A shot that struck nothing splashes where its range ends (D203), and
+      // is a miss (D206).
+      if (!b.evil && !b.struck) {
+        tally.marksman = 0;
+        if (player.splash) splash(b.x, b.y, 0);
+      }
     }
   }
 
@@ -1514,7 +1528,9 @@ function step(dt) {
         b.struck = true;
         knock(e, b.vx / b.speed, b.vy / b.speed);
         hitSparks(e, b);
+        const before = kills;
         hit(e);
+        if (kills > before) struck(b.kills = (b.kills || 0) + kills - before);
         if (b.pierce > 0) { b.pierce -= 1; }
         else { b.gone = true; break; }
       }
