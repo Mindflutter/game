@@ -200,37 +200,6 @@ with the Knife; raised the Gun to 3; never bought the Harpoon.
   mod standing, and no fish carries a comfort mod — comfort is meant to
   carry the pool's width (D34 (mods), D35 (currency is auto-collected)).
 
-### Fights and crowds
-
-- **Fish pile up.** Igor, 2026-10-19, after playing solid bodies (D120
-  (bodies are solid)): "many fish awkwardly pile up because of new physics -
-  honestly dont know how to deal. maybe leave for now. they should try to
-  surround". Every fish steers for the diver's own centre, so now that bodies
-  keep apart, the ones behind queue behind the front ones in a clump or a
-  chain. Part of the look was the shrinking — a hurt fish drawn smaller than
-  the body holding the others off — gone with D121 (only a hit blinks; a hurt
-  fish carries a bar). A lean, not a decision: they should surround. The usual
-  way is for each chaser to steer for its own spot on a ring round the diver,
-  spread by angle, rather than for the diver itself, so a crowd closes as a
-  circle instead of a queue. Igor, 2026-10-22, for todo and discussion: "to
-  resolve enemies stacking problem they need to be smart enough to swim
-  around each other" — local avoidance: a fish that finds another in its way
-  steers past it rather than pushing into it. It and the ring are not the same
-  fix — one routes a fish round a body, the other gives each fish its own
-  place to go — and could be used alone or together. Igor, 2026-11-04: "try
-  implementing both. any movement enhancement is good, it resembles real
-  world and feels natural. try looking into how fish crowds pile up for
-  treat in real life for reference" (`roadmap.md` → Next).
-- **A charging boss shoves the crowd.** Igor, 2026-10-20: "bosses dash pushes
-  away other enemies (related to other solid-body problems)". From its wind-up
-  to the end of its rest a lunger is pushed by nothing, so it keeps its lane
-  (D120 (bodies are solid)) — and every fish it meets takes the whole push
-  instead, its own escorts included. Even chasing, the boss outweighs a drifter
-  by area twenty-two times. Igor, 2026-11-04: "related to 23. definitely
-  not hurt them, but maybe a small overlap is acceptable. faking 3d here" —
-  the boss may pass a little over the fish it meets, as if at another
-  depth, rather than shove them all (`roadmap.md` → Next).
-
 ---
 
 ## Parked — agreed direction, deliberately not now

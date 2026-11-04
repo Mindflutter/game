@@ -31,12 +31,6 @@ Small, concrete, each its own commit.
 
 What a dive feels like, each to play.
 
-- [ ] **Crowds that move like fish**: each chaser steering for its own
-  place round the diver, and steering past a body in its way, both; a
-  charging boss passing a little over the fish it meets rather than
-  shoving them all, never hurting them. How real fish crowd a bait, read
-  first (`ideas.md` → Fish pile up, A charging boss shoves the crowd).
-
 ### 4. Content
 
 New things to meet and to earn, each to measure.

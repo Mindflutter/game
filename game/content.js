@@ -45,6 +45,16 @@ const SPLASH_SHOW    = 0.3;   // seconds Bloom's ring shows a splash's reach: Cl
 const ARRIVE_GAP     = 40;    // px outside the view a fish arrives, its body clear of it
 const MARK_INSET     = 18;    // px inside the edge an arriving fish's mark stands (D202): Claude's pick
 const BODY_PUSH      = 600;   // px/s at most that overlapping bodies part (D120): Claude's pick
+// Crowds (D205), all Claude's picks: within CROWD_NEAR px of the diver a
+// chaser makes for its own place round it, CROWD_GAP px from the next fish,
+// turning at most CROWD_TURN radians off its way in; it looks CROWD_LOOK px
+// ahead for a body to swim round. A charging lunger passes over a fish by up
+// to CHARGE_OVER of its radius before it nudges it aside.
+const CROWD_NEAR     = 240;
+const CROWD_GAP      = 8;
+const CROWD_TURN     = 1.2;
+const CROWD_LOOK     = 100;
+const CHARGE_OVER    = 1;
 // Water (D107): the share of a change of speed still to go after a body's
 // `ramp` seconds -- so `ramp` is its time to full speed, near enough.
 const RAMP_LEFT      = 0.05;

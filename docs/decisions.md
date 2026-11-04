@@ -6311,3 +6311,33 @@ five answered)).
 **Guarded by** `tests/drops.test.js` — a second touch at half a life runs
 to twice it; four touches add four lives to its own clock and none to
 another's.
+
+## D205 — Crowds that move like fish · 2026-11-04
+
+Igor: "try implementing both. any movement enhancement is good, it
+resembles real world and feels natural. try looking into how fish crowds
+pile up for treat in real life for reference"; of a charging boss, "definitely
+not hurt them, but maybe a small overlap is acceptable. faking 3d here"
+(D192 (the list's fifth five answered)).
+
+- **Read first**: fish crowding a feeder or a floating object gather by two
+  pulls, attraction to it and keeping their space from each other
+  ([FAD school](https://www.arxiv.org/pdf/1111.5120)), and come at food
+  head-on, in a narrow zone before the eyes ([red sea bream](https://www.miyagi.kopas.co.jp/JSFS/jsfs-english/E-PUB/65-4/p728.html)).
+  Every fish here had only the first.
+- **A chaser and a biter swim by `heading()`**: straight at the diver from
+  afar; within `CROWD_NEAR` for a place of their own round it, turned by
+  angle from their neighbours, the room weighed at their own distance, so a
+  crowd spreads as it closes; and round a body ahead within `CROWD_LOOK`,
+  to the side it is not on. A shooter, a puffer, an eel, a lionfish and a
+  lunger keep their own ways. Numbers Claude's picks.
+- **A charging lunger passes over a fish** by up to `CHARGE_OVER` of its
+  radius and nudges it out of the line only, never carrying it: a drifter
+  in a boss's way moved 189 px before, 164 of it ahead of the charge.
+- No draw changes. The bars, ten seeds: the same six of eight hold; a
+  batch stood through on more than one seed in ten, 30, from 37
+  (`bugs.md`). A 60-fish batch's tick 0.21 ms, from 0.17.
+
+**Guarded by** `tests/movement.test.js` — a queue of eight closes more than
+halfway round the diver; a fish behind a body that holds gets past it to the
+diver; a charge passes over a fish, never carries or hurts it.

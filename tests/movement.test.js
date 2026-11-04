@@ -245,3 +245,57 @@ describe('bodies (D120)', () => {
     expect(until(g, 3, () => e.phase === 'fuse')).toBe(true);
   });
 });
+
+describe('crowds (D205)', () => {
+  const crowd = () => {
+    const g = still();
+    g.immortal = true;
+    return g;
+  };
+  // How far round the diver a crowd stands: the circle less its widest gap.
+  const round = (g, fish) => {
+    const a = fish.map(e => Math.atan2(e.y - g.player.y, e.x - g.player.x)).sort((x, y) => x - y);
+    const gaps = a.map((x, i) => (i ? x - a[i - 1] : x + 2 * Math.PI - a.at(-1)));
+    return 2 * Math.PI - Math.max(...gaps);
+  };
+
+  it('closes round the diver, each fish to a place of its own, rather than in a queue', () => {
+    const g = crowd();
+    for (let i = 0; i < 8; i++) g.placeEnemy('drifter', g.player.x + 150 + 40 * i, g.player.y);
+    const fish = [...g.enemies];
+    hold(g, [], 4);
+    expect(round(g, fish)).toBeGreaterThan(Math.PI);
+  });
+
+  it('swims round a body in its way', () => {
+    const g = crowd();
+    g.placeEnemy('bulwark', g.player.x + 120, g.player.y);
+    const wall = g.enemies[0];
+    g.placeEnemy('drifter', g.player.x + 260, g.player.y + 2);
+    const e = g.enemies[1];
+    for (let i = 0, n = ticks(g, 3); i < n; i++) {
+      g.update(g.FIXED_DT);
+      [wall.x, wall.y, wall.vx, wall.vy] = [g.player.x + 120, g.player.y, 0, 0];   // a wall that holds
+    }
+    expect(Math.hypot(e.x - g.player.x, e.y - g.player.y)).toBeLessThan(100);   // past it, at the diver
+  });
+
+  it('lets a charging lunger pass a little over a fish in its way, nudging it aside, never carrying or hurting it', () => {
+    const g = crowd();
+    g.spawnBatch({ enemies: [['boss', 1]] });
+    const boss = g.enemies[0], L = boss.lunge;
+    Object.assign(boss, { x: 300, y: g.cameraY + 400, phase: 'windup', phaseTime: L.windup, aimX: 1, aimY: 0 });
+    g.player.x = 1100;
+    g.placeEnemy('drifter', 300 + boss.r + 60, g.cameraY + 400 + 6);
+    const f = g.enemies[1], x0 = f.x;
+    f.speed = 0;
+    let deepest = 0;
+    for (let i = 0, n = ticks(g, L.reach / L.speed + 0.1); i < n; i++) {
+      g.update(g.FIXED_DT);
+      deepest = Math.max(deepest, boss.r + f.r - Math.hypot(boss.x - f.x, boss.y - f.y));
+    }
+    expect(deepest).toBeGreaterThan(f.r / 2);       // over it a little, as at another depth
+    expect(Math.abs(f.x - x0)).toBeLessThan(f.r);   // never carried along the charge
+    expect(f.hp).toBe(f.maxHp);
+  });
+});

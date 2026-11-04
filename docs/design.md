@@ -209,10 +209,17 @@ view. The gate block runs before the player moves, so the clamp sees this
 tick's camera. Difficulty is authored per batch, not ramped by the clock.
 
 **Enemies.** Each tick a fish chases, or steps by its behaviour field — the
-fields and what they do are `entities/enemies.md`. Then `separate()` makes
+fields and what they do are `entities/enemies.md`. A chaser and a biter swim
+by `heading()`, a crowd's way as real fish crowd food (D205 (crowds that move
+like fish)): straight in from afar; within `CROWD_NEAR` for a place of their
+own round the diver, `crowdTurns()` turning each by angle from its
+neighbours, the room weighed at its own distance, so a crowd spreads as it
+closes; and round a body ahead within `CROWD_LOOK`. Then `separate()` makes
 bodies solid (D120): overlapping pairs pushed apart by area, at most
 `BODY_PUSH` a second; a dashing diver is not pushed, nor a lunger out of its
-chase, so it keeps its lane. A fish that attacks only wholly in view chases
+chase, so it keeps its lane. A charging lunger passes over a fish by up to
+`CHARGE_OVER` of its radius and only nudges it out of the line, never along
+it. A fish that attacks only wholly in view chases
 `towardInView()`, or one pinning the diver at an edge would never attack. A
 grade (D119) is a `GRADES` step on copies of the type's records — `hp`,
 `speed`, `value` multiplied, each attack's `damage` raised; it rides with each

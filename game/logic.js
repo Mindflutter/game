@@ -284,7 +284,75 @@ function spinesStep(e, ux, uy, d, dt) {
 
 // ---------- the bite ----------
 // The plain fish's (D108). The jaws ease it to a halt, so a heavy fish slides.
-function biteStep(e, ux, uy, d, dt) {
+// Real fish crowding food come in head-on and keep their space (D205): far
+// off, a chaser makes straight for the diver; within CROWD_NEAR, for its own
+// place round it, turned from the fish beside it by angle, and it swims round a
+// body in its way rather than into it. Returns the way to swim.
+const crowds = e => !e.lunge && !e.spit && !e.fuse && !e.weave && !e.spines;
+// The angle round the diver each crowding fish heads for, once a tick: the
+// crowd sorted by angle, each fish weighed against its neighbours only.
+function crowdTurns() {
+  const near = [];
+  let widest = 0;
+  for (const e of enemies) {
+    if (e.gone || !crowds(e)) continue;
+    const dx = e.x - player.x, dy = e.y - player.y;
+    const dd = dx * dx + dy * dy;
+    if (dd >= CROWD_NEAR * CROWD_NEAR) continue;
+    near.push({ e, a: Math.atan2(dy, dx), d: Math.sqrt(dd), turn: 0 });
+    widest = Math.max(widest, e.r);
+  }
+  near.sort((p, q) => p.a - q.a);
+  const n = near.length;
+  for (let i = 0; i < n; i++) {
+    // Room by angle at the fish's own distance: a crowd spreads as it closes.
+    const p = near[i], at = Math.max(p.d, player.r + p.e.r), reach = (p.e.r + widest + CROWD_GAP) / at;
+    for (const dir of [1, -1]) {
+      for (let k = 1; k < n; k++) {
+        const q = near[(i + dir * k + n * k) % n];
+        if (q === p) break;
+        let apart = p.a - q.a;
+        apart -= Math.round(apart / (2 * Math.PI)) * 2 * Math.PI;
+        if (Math.abs(apart) >= reach) break;   // sorted: none further round is nearer
+        const room = (p.e.r + q.e.r + CROWD_GAP) / at;
+        if (Math.abs(apart) < room) p.turn += (apart < 0 ? -1 : 1) * (room - Math.abs(apart));
+      }
+    }
+  }
+  return new Map(near.map(p => [p.e, p.a + Math.max(-CROWD_TURN, Math.min(CROWD_TURN, p.turn))]));
+}
+function heading(e, ux, uy, turns) {
+  let hx = ux, hy = uy;
+  const a = turns.get(e);
+  if (a !== undefined) {
+    const ring = player.r + e.r;
+    const gx = player.x + Math.cos(a) * ring - e.x, gy = player.y + Math.sin(a) * ring - e.y;
+    const g = Math.sqrt(gx * gx + gy * gy);
+    if (g > 1) [hx, hy] = [gx / g, gy / g];
+  }
+  // A body ahead, across the way: steer to the side it is not on.
+  // ponytail: every fish against every other, 0.2ms a tick for a 60-fish batch
+  // and 4ms for 500 crowding at once; bucket by a grid if a batch ever nears that.
+  let sx = 0, sy = 0;
+  for (const f of enemies) {
+    if (f === e || f.gone) continue;
+    const vx = f.x - e.x, vy = f.y - e.y, look = CROWD_LOOK + f.r;
+    if (vx > look || vx < -look || vy > look || vy < -look) continue;
+    const along = vx * hx + vy * hy;
+    if (along <= 0 || along > look) continue;
+    const across = vx * -hy + vy * hx, clear = e.r + f.r;
+    if (Math.abs(across) >= clear) continue;
+    const s = across < 0 ? 1 : -1, w = (1 - along / look) * (1 - Math.abs(across) / clear);
+    sx += -hy * s * w;
+    sy += hx * s * w;
+  }
+  hx += sx * 2;
+  hy += sy * 2;
+  const h = Math.sqrt(hx * hx + hy * hy) || 1;
+  return [hx / h, hy / h];
+}
+
+function biteStep(e, ux, uy, d, dt, turns) {
   const B = e.bite;
   e.phaseTime += dt;
   if (e.phase === 'jaws') {
@@ -295,7 +363,8 @@ function biteStep(e, ux, uy, d, dt) {
       e.phaseTime = 0;
     }
   } else {
-    ease(e, ux * e.speed, uy * e.speed, e.ramp, dt);
+    const [hx, hy] = heading(e, ux, uy, turns);
+    ease(e, hx * e.speed, hy * e.speed, e.ramp, dt);
     if (e.phase === 'rest' && e.phaseTime >= B.rest) { e.phase = 'chase'; e.phaseTime = 0; }
     if (e.phase === 'chase' && d - e.r - player.r <= B.reach) { e.phase = 'jaws'; e.phaseTime = 0; }
   }
@@ -372,8 +441,19 @@ function separate(dt) {
   const live = enemies.filter(e => !e.gone);
   for (let i = 0; i < live.length; i++) {
     for (let j = i + 1; j < live.length; j++) {
-      const a = live[i], b = live[j], dx = b.x - a.x, dy = b.y - a.y, min = a.r + b.r, dd = dx * dx + dy * dy;
+      const a = live[i], b = live[j], dx = b.x - a.x, dy = b.y - a.y;
+      // A charge passes over what it meets, as at another depth, and only
+      // nudges it out of the line, never along it (D205).
+      const charging = a.phase === 'charge' ? a : b.phase === 'charge' ? b : null;
+      const min = a.r + b.r - (charging ? CHARGE_OVER * Math.min(a.r, b.r) : 0), dd = dx * dx + dy * dy;
       if (dd >= min * min) continue;
+      if (charging) {
+        const f = charging === a ? b : a, side = (f.x - charging.x) * -charging.aimY + (f.y - charging.y) * charging.aimX;
+        const s = side < 0 ? -1 : 1, k = Math.min(min - Math.sqrt(dd), most);
+        f.x += -charging.aimY * s * k;
+        f.y += charging.aimX * s * k;
+        continue;
+      }
       const d = Math.sqrt(dd), nx = d ? dx / d : 1, ny = d ? dy / d : 0;
       const wa = weight(a), wb = weight(b), k = (d ? Math.min(min - d, most) : most) / (wa + wb);
       a.x -= nx * k * wb;
@@ -1355,7 +1435,7 @@ function step(dt) {
   }
 
   // --- move enemies toward the diver, and let them attack ---
-  const pd = Math.pow(PUSH_DRAG, dt);
+  const pd = Math.pow(PUSH_DRAG, dt), turns = crowdTurns();
   for (const e of enemies) {
     if (e.gone) continue;                  // cut down by a swing this tick: no step, no bite
     const ex = player.x - e.x;
@@ -1367,9 +1447,10 @@ function step(dt) {
     else if (e.spit) spitStep(e, ux, uy, d, dt);
     else if (e.fuse) fuseStep(e, ux, uy, d, dt);
     else if (e.weave) weaveStep(e, ux, uy, d, dt);
-    else if (e.bite) biteStep(e, ux, uy, d, dt);
+    else if (e.bite) biteStep(e, ux, uy, d, dt, turns);
     else {
-      ease(e, ux * e.speed, uy * e.speed, e.ramp, dt);   // D107
+      const [hx, hy] = heading(e, ux, uy, turns);
+      ease(e, hx * e.speed, hy * e.speed, e.ramp, dt);   // D107, D205
       e.x += (e.vx + e.pushX) * dt;
       e.y += (e.vy + e.pushY) * dt;
     }
