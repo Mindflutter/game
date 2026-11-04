@@ -1050,7 +1050,7 @@ function stepTip(a) {
          by.map(g => '   owning the ' + g.name + ' needs ' + g.requires[a.name]).join('');
 }
 function modTip(m) {
-  return m.name + ': ' + m.desc + ' \u2014 ' + moves(m.apply) + ' a pick, up to ' + m.max +
+  return m.name + ': ' + m.desc + ' \u2014 ' + moves(m.apply) + ' a pick' + (m.max ? ', up to ' + m.max : '') +
          (m.end ? "   a layer end's own" : '');
 }
 function boostTip(b) {
@@ -1401,7 +1401,8 @@ function step(dt) {
   }
   if (tapped(DASH) && player.dashCd <= 0) {
     player.dashTime = DASH_TIME;
-    player.dashCd = player.dashCooldown;
+    // Counted from the dash's start, so no Reflex starts one inside another (D209).
+    player.dashCd = Math.max(DASH_TIME, player.dashCooldown);
     player.dashId = ++bulletId;          // one dash hits each enemy once
     player.dashHits = 0;                 // `bowling`'s count (D152)
     player.dashDx = Math.cos(player.facing);

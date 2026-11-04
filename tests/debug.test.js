@@ -200,7 +200,7 @@ describe('the code', () => {
     const s = g.parseSetup('L9,G99,Gun7,Fins9,darter999,Lull3,nonsense', 5);
     expect(s.layer).toBe(g.LAYERS.length - 1);
     expect(s.gate).toBe(g.gatesIn(s.layer) - 1);
-    expect(s.counts).toEqual({ Gun: 3, Fins: g.MODS.find(m => m.name === 'Fins').max, darter: g.DEBUG_FISH_MAX });
+    expect(s.counts).toEqual({ Gun: 3, Fins: 9, darter: g.DEBUG_FISH_MAX });
     expect(s.ignored).toEqual(['Lull3', 'nonsense']);
     expect(s.seed).toBe(5);
   });
@@ -324,7 +324,7 @@ describe('the setup screen', () => {
     at('Tier').change(-1);
     expect(g.debugSetup.counts.Gun).toBe(g.WEAPONS[0].tiers.length);
     at('Fins').change(-1);
-    expect(g.debugSetup.counts.Fins).toBe(g.MODS.find(m => m.name === 'Fins').max);
+    expect(g.debugSetup.counts.Fins).toBe(g.DEBUG_MOD_MAX);
     at('Weapon').change(-1);
     expect(g.debugSetup.weapon).toBe(g.WEAPONS.at(-1).name);
   });

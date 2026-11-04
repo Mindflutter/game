@@ -156,15 +156,15 @@ const SOUNDS = {
 // Documented in docs/entities/mods.md, held to it by `npm test`. A `desc`
 // reads as a sentence, not a stat line: a pickup must be recognised mid-fight.
 const MODS = [
-  { name: 'Fins',     scope: 'body',    desc: 'you swim faster', max: 6,
+  { name: 'Fins',     scope: 'body',    desc: 'you swim faster',
     apply: p => p.speed += 45 },
-  { name: 'Vitality', scope: 'body',    desc: '1 more max HP, it comes full', max: 6,
+  { name: 'Vitality', scope: 'body',    desc: '1 more max HP, it comes full',
     apply: p => { p.maxHp += 1; p.hp += 1; } },
-  { name: 'Reflex',   scope: 'body',    desc: 'the dash comes back sooner', max: 3,
+  { name: 'Reflex',   scope: 'body',    desc: 'the dash comes back sooner',
     apply: p => p.dashCooldown -= 0.4 },
-  { name: 'Nerve',    scope: 'body',    desc: 'hits leave you safe longer', max: 3,
+  { name: 'Nerve',    scope: 'body',    desc: 'hits leave you safe longer',
     apply: p => p.iframes += 0.3 },
-  { name: 'Impact',   scope: 'body',    desc: 'the dash wounds what it throws', max: 3,
+  { name: 'Impact',   scope: 'body',    desc: 'the dash wounds what it throws',
     apply: p => p.dashDamage += 1 },
   { name: 'Mend',     scope: 'comfort', desc: '1 HP back each batch', max: 1,
     end: true, apply: p => p.mendOnClear = 1 },
@@ -412,7 +412,7 @@ function held(m) {
 }
 
 function carriable() {
-  return MODS.filter(m => !m.end && held(m) < m.max);
+  return MODS.filter(m => !m.end && held(m) < (m.max ?? Infinity));
 }
 
 // Every ordinary mod once before any comes again. `null` once all are capped,
@@ -433,7 +433,7 @@ function drawCarried() {
 const cardStep = m => (m.end ? 1 : END_STEP);
 
 function rollValuable() {
-  return drawDistinct(MODS.filter(m => held(m) + cardStep(m) <= m.max), 3);
+  return drawDistinct(MODS.filter(m => held(m) + cardStep(m) <= (m.max ?? Infinity)), 3);
 }
 
 // ---------- key bindings ----------
@@ -645,6 +645,7 @@ const HOME_TOP = HOME_LAYERS_TOP + LAYERS.length * HOME_LINE + 40;
 const ONE_SHOT         = 100;   // damage that kills anything here in one shot
 const DEBUG_FISH_MAX   = 50;    // of one type in the setup's batch: Claude's pick
 const DEBUG_BOOST_MAX  = 3;     // of one boost laid by the diver at the start (D198): Claude's pick
+const DEBUG_MOD_MAX    = 9;     // of one uncapped mod (D209): Claude's pick
 // A fish's tip: one line per behaviour field, which `npm test` asks for.
 const DEBUG_BEHAVIOURS = {
   chase: 'swims straight at you',
@@ -664,7 +665,7 @@ const DEBUG_COUNTS = [
   ...ENEMY_TYPES.map(e => ({ name: e.name, col: 1, max: DEBUG_FISH_MAX, tip: () => fishTip(e, debugSetup.grade) })),
   ...EQUIPMENT.map(g => ({ name: g.name, col: 2, max: g.tiers.length, of: true, tip: () => gearTip(g) })),
   ...ATTRIBUTES.map(a => ({ name: a.name, col: 2, max: a.max, tip: () => stepTip(a) })),
-  ...MODS.map(m => ({ name: m.name, col: 3, max: m.max, of: true, tip: () => modTip(m) })),
+  ...MODS.map(m => ({ name: m.name, col: 3, max: m.max ?? DEBUG_MOD_MAX, of: !!m.max, tip: () => modTip(m) })),
   ...BOOSTS.map(b => ({ name: b.name, col: 3, max: DEBUG_BOOST_MAX, tip: () => boostTip(b) })),
   ...WEAPONS.map(w => ({ name: w.name, max: w.tiers.length, of: true })),
 ];

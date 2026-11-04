@@ -118,7 +118,7 @@ function drawModCards() {
     });
 
     ctx.fillStyle = on ? '#4d7a8a' : '#3d6270';
-    ctx.fillText('held ' + (modCounts[u.name] || 0) + ' of ' + u.max, x + w / 2, y + 132);
+    ctx.fillText('held ' + (modCounts[u.name] || 0) + (u.max ? ' of ' + u.max : ''), x + w / 2, y + 132);
 
     ctx.fillStyle = on ? '#4ff0ff' : '#2b6b7d';
     ctx.font = '16px system-ui, sans-serif';

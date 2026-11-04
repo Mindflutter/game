@@ -14,7 +14,8 @@ fix (`code.md` → Verification).
 ## Open
 
 ### Nothing trivial fails across all three layers
-With D207 (boosts of new kinds) and D208 (Barbs and Lance removed): 25
+Mods uncapped, D209 (mods uncapped): 28 batches stood through. With D207
+(boosts of new kinds) and D208 (Barbs and Lance removed): 25
 batches stood through, `npm run measure bars`, ten seeds. Crowds that close
 round the diver, D205 (crowds that move like fish): 30. Before them,
 `npm run balance`, 2026-11-04, ten seeds, the D199 (the bars, printed)
@@ -46,6 +47,8 @@ feeling when playing myself" — a lean; a bot that plays like him would tell
 list's next five answered)).
 
 ### The Harpoon over the Knife in the mid-to-late game
+With mods uncapped, D209 (mods uncapped), `npm run measure bars`, ten
+seeds: "Harpoon over Gun" is back beside "Harpoon over Knife". Before them,
 `npm run balance`, 2026-11-04, ten seeds, the D199 (the bars, printed)
 build: no weapon dominating (D127 (the tuned numbers)) fails on "Harpoon over
 Knife" — faster by more than 5% and cheaper by more than 10% in hearts over

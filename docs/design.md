@@ -253,13 +253,13 @@ segment crossed this tick, not the end point, so nothing tunnels at any speed
 There is no rank and no XP. As a batch arrives `light()` marks one fish
 `carrier`, never in a batch a `carries: false` type leads; its mod drops into
 `drops` — apart from `gems` — and flies to you. `drawCarried()` deals every
-ordinary mod still under its cap once before any comes again, and caps count a
-mod still flying (`held()`): nothing stops it landing. With every ordinary mod
-capped, no fish lights. Clearing a layer end waits `MOD_OFFER_DELAY` before
+ordinary mod once before any comes again; no ordinary mod has a cap (D209
+(mods uncapped)), and Mend's counts one still flying (`held()`). Clearing a layer end waits `MOD_OFFER_DELAY` before
 the cards, because cards on the kill's frame read as a jump cut (D51); a
 pending offer holds the descent until Continue. If one tick kills the boss and
 the diver, death wins. No mod or boost is a weapon's own (D208 (Barbs and
-Lance removed)), every mod is capped (D69), and `takeMod()` is the one
+Lance removed)), only Mend is capped (D209 (mods uncapped)), a dash is never
+started inside another however short Reflex makes its cooldown, and `takeMod()` is the one
 place a mod is applied. Mods add on top of gear and attributes, never
 multiplying (D74); anything a mod raises is a field on `player`, not a
 `const`.

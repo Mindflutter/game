@@ -6424,3 +6424,29 @@ answered), D189 (the list's second five answered)).
 **Guarded by** `tests/save.test.js` — a v16 dive's Barbs and Lance taken
 back and gone; `tests/drops.test.js` — every mod body or comfort, every
 boost for every weapon.
+
+## D209 — Mods uncapped · 2026-11-04
+
+Igor: "remove them and measure. ideally in the future: there is enough
+variety of mods, and they are awarded evenly, so that uncapped system never
+causes and unbeatable player in late-game layers" (D192 (the list's fifth
+five answered)).
+
+- **No ordinary mod has a cap.** Dealt evenly as before — each once before
+  any again — they come about four times each in a whole dive, where Fins
+  and Vitality stopped at 6 and Reflex, Nerve and Impact at 3. Supersedes
+  D69 (every mod capped) for them; `foundations.md`'s glossary changes with
+  it.
+- **Mend keeps its 1**: a second adds nothing, its `apply` a switch.
+- **A dash never starts inside another**: the cooldown counts from the
+  dash's start and is at least the dash's own time, however far Reflex
+  takes it below.
+- **Measured, ten seeds**: the same six of eight bars hold; 28 batches
+  stood through, from 25; and the Harpoon again over the Gun as well as the
+  Knife, where the caps had left only the Knife (`bugs.md`). Kept as Igor
+  asked, **his to keep or take back** (`roadmap.md` → Next); taking it
+  back is each mod's `max` again.
+
+**Guarded by** `tests/drops.test.js` — forty mods dealt evenly with no cap
+to stop them, the cards full with Mend taken; `tests/dive.test.js` — only
+Mend capped, and a cooldown below the dash's own starts no dash inside one.

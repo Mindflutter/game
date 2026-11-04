@@ -87,7 +87,7 @@ export function docTables(g = loadGame()) {
       g.ENEMY_TYPES.map(t => [t.name, ...t.threat])) },
     { doc: 'enemies.md', id: 'grades', text: table(['grade', ...gradeCols], g.GRADES.map((G, i) => [i + 1, ...gradeCols.map(c => G[c])])) },
     { doc: 'mods.md', id: 'mods', text: table([...modCols, 'per pick', 'at max'],
-      g.MODS.map(m => [...modCols.map(c => m[c]), moved([m.apply], true), moved(Array(m.max).fill(m.apply), false, START)])) },
+      g.MODS.map(m => [...modCols.map(c => m[c]), moved([m.apply], true), (m.max ? moved(Array(m.max).fill(m.apply), false, START) : '—')])) },
     { doc: 'boosts.md', id: 'boosts', text: table([...boostCols, 'adds'],
       g.BOOSTS.map(b => [...boostCols.map(c => b[c]), adds(b)])) },
     { doc: 'challenges.md', id: 'challenges', text: table(['name', 'judged', 'within', 'rungs', 'the first asks', 'the top asks'],

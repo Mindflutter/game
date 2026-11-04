@@ -24,7 +24,7 @@ These terms are used in docs **and** in code identifiers. Nothing else.
 |---|---|---|
 | **layer** | One section of the abyss you dive into; how many at alpha is in Alpha counts. Unlocked by completing the previous one. | never "level" |
 | **dive** | One attempt, start to death or completion. It starts at the top of the first layer and runs on through the layers; completion is clearing the last one — the win (D66, D68). | "run" is its synonym; prefer **dive** |
-| **mod** | A dive-scoped power, gone at the end of the dive. A glowing fish carries one in every batch but a boss's or a mini-boss's — kill it and the mod flies to you (D84, D88) — and a layer end offers a pick of **valuable** mods: its own, or an ordinary one at a bigger step (D85). Every mod has a cap (D69). Momentum, not strategy. | never "upgrade" |
+| **mod** | A dive-scoped power, gone at the end of the dive. A glowing fish carries one in every batch but a boss's or a mini-boss's — kill it and the mod flies to you (D84, D88) — and a layer end offers a pick of **valuable** mods: its own, or an ordinary one at a bigger step (D85). No mod has a cap but one a second of which adds nothing (D69, D209). Momentum, not strategy. | never "upgrade" |
 | **boost** | A short power a kill drops (D86): switched on by touching it, gone after a few seconds, and gone from the floor if left lying. Not a mod — not counted, no cap, nothing kept. Igor's word. | not a "mod" |
 | **gear** | A persistent item bought with currency on the home screen. Weapons, suit, mask, flippers, trinkets. | never "upgrade" |
 | **equipment** | Gear that is not a weapon: the suit, mask, flippers and trinkets (D81). Igor's word, and the draft's. | not a weapon — **gear** is both |

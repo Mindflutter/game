@@ -186,16 +186,10 @@ with the Knife; raised the Gun to 3; never bought the Harpoon.
   **A balance pass owns the tuning**, once the dash is discussed. Folded
   into the abilities analysis (D192 (the list's fifth five answered)).
 
-- **Mod caps: removed?** Igor, 2026-10-13: "i dont feel like limiting mods
-  is a problem now. we can remove the limit entirely and see how it affects
-  balance. or bigger caps, yes. dont really matter at this point". Bigger caps
-  are built — `Fins` and `Vitality` at 6 (D127 (the tuned numbers)); the dash's,
-  `Reflex` and `Impact`, wait on its discussion. Igor, 2026-11-04 (D192
-  (the list's fifth five answered)): "remove them and measure. ideally in
+- **Mod caps** removed, D209 (mods uncapped). Igor, 2026-11-04: "ideally in
   the future: there is enough variety of mods, and they are awarded evenly,
   so that uncapped system never causes and unbeatable player in late-game
-  layers" (`roadmap.md` → Next). Built, it changes the glossary's "every
-  mod has a cap" in `foundations.md`.
+  layers" — the variety is still to come.
   Kin, under the same "enough variety of mods": `Mend` is the last comfort
   mod standing, and no fish carries a comfort mod — comfort is meant to
   carry the pool's width (D34 (mods), D35 (currency is auto-collected)).

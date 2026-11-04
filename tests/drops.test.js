@@ -141,18 +141,6 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
     expect(g.banner).toContain(Object.keys(g.modCounts)[0]);
   });
 
-  it('lights no fish once every ordinary mod is at its cap', () => {
-    const g = loadGame();
-    g.reset(1);
-    g.immortal = true;
-    for (const m of ordinary(g)) g.modCounts[m.name] = m.max;
-    const before = held(g);
-    ride(g);
-    expect(g.enemies.some(e => e.carrier)).toBe(false);
-    while (g.enemies.length) { g.killEnemy(g.enemies[0]); g.update(g.FIXED_DT); }
-    expect(paid(g)).toBe(before);
-  });
-
   it('carries nothing on a fish placed by hand', () => {
     // A scenario's lone drifter belongs to no batch (D37).
     const g = loadGame();
@@ -163,29 +151,31 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
 });
 
 describe('which mod a fish carries (D84)', () => {
-  // Every mod a dive's fish would carry, drawn and taken until none is left.
+  // The first mods a dive's fish would carry, drawn and taken: more than a
+  // whole dive's, and past every cap there was before D209.
+  const DEALT = 40;
   const deal = s => {
     const g = loadGame();
     g.reset(s);
     const out = [];
-    for (let m = g.drawCarried(); m; m = g.drawCarried()) {
+    for (let m = g.drawCarried(); m && out.length < DEALT; m = g.drawCarried()) {
       out.push(m.name);
       g.takeMod(m);
     }
     return out;
   };
 
-  it('deals every ordinary mod once before any comes again, up to the caps', () => {
+  it('deals every ordinary mod once before any comes again, with no cap to stop it (D209)', () => {
     const g = loadGame();
     const ord = ordinary(g);
     fc.assert(fc.property(seed, s => {
       const names = deal(s);
-      expect(names).toHaveLength(ord.reduce((n, m) => n + m.max, 0));
+      expect(names).toHaveLength(DEALT);
       // A round is spent once every mod still under its cap has come in it.
       const counts = {};
       let round = new Set();
       for (const n of names) {
-        const open = ord.filter(m => (counts[m.name] || 0) < m.max).map(m => m.name);
+        const open = ord.filter(m => (counts[m.name] || 0) < (m.max ?? Infinity)).map(m => m.name);
         if (open.every(x => round.has(x))) round = new Set();
         expect(round.has(n)).toBe(false);
         round.add(n);
@@ -199,58 +189,6 @@ describe('which mod a fish carries (D84)', () => {
     fc.assert(fc.property(seed, s => { expect(deal(s)).toEqual(deal(s)); }), { numRuns: 10 });
   });
 
-  // One slot left in the whole pool: every ordinary mod at its cap but the
-  // last, one short. A batch is killed at once, so its fish's mod drops.
-  const lastSlot = () => {
-    const g = loadGame();
-    g.reset(1);
-    g.immortal = true;
-    for (const m of ordinary(g)) g.modCounts[m.name] = m.max;
-    const last = ordinary(g).at(-1);
-    g.modCounts[last.name] = last.max - 1;
-    return g;
-  };
-  const killAll = g => { for (const e of [...g.enemies]) g.killEnemy(e); g.update(g.FIXED_DT); };
-
-  it('counts a mod still in the air as held: no fish lights for a slot it has taken', () => {
-    // Lit, that fish would die with nothing left to draw.
-    const g = lastSlot();
-    ride(g);
-    killAll(g);
-    const inAir = g.drops.find(d => d.mod);
-    inAir.x = -5000;                             // a long flight: still in the air
-    ride(g);                                     // when the next batch arrives
-    expect(g.drops).toContain(inAir);
-    expect(g.enemies.some(e => e.carrier)).toBe(false);
-    inAir.x = g.player.x;
-    inAir.y = g.player.y;
-    g.update(g.FIXED_DT);                        // it lands
-    expect(() => killAll(g)).not.toThrow();
-  });
-
-  it('never hands the last slot of a mod out twice', () => {
-    const g = lastSlot();
-    ride(g);
-    killAll(g);
-    const inAir = g.drops.find(d => d.mod);
-    inAir.x = -5000;                             // still in the air...
-    ride(g);
-    expect(g.drops).toContain(inAir);
-    killAll(g);                                  // ...as the next batch dies
-    for (const d of g.drops) { d.x = g.player.x; d.y = g.player.y; }
-    g.update(g.FIXED_DT);
-    for (const m of g.MODS) expect(g.modCounts[m.name] || 0).toBeLessThanOrEqual(m.max);
-  });
-
-  it('counts a mod still in the air when the layer end deals its cards', () => {
-    const g = loadGame();
-    g.reset(1);
-    const x = ordinary(g)[0];
-    for (const m of g.MODS) g.modCounts[m.name] = m.max;
-    g.modCounts[x.name] = x.max - g.END_STEP;    // room for one card of it...
-    g.drops.push({ x: 0, y: 0, r: 7, mod: x.name });   // ...but one is on its way
-    expect(g.rollValuable().map(c => c.name)).not.toContain(x.name);
-  });
 });
 
 describe('the layer end\'s pick (D85)', () => {
@@ -276,19 +214,12 @@ describe('the layer end\'s pick (D85)', () => {
     expect([...pool].some(n => !g.MODS.find(m => m.name === n).end)).toBe(true);
   });
 
-  it('never offers an ordinary mod without room for the bigger step', () => {
-    const cards = cardsWith(g => {
-      for (const m of ordinary(g)) g.modCounts[m.name] = m.max - 1;   // one short of the cap
-    });
-    expect(cards.every(c => c.end)).toBe(true);
-  });
-
-  it('never offers one of its own past its cap, and offers nothing with everything capped', () => {
+  it('never offers one of its own past its cap', () => {
     const own = cardsWith(g => {
       for (const m of g.MODS.filter(m => m.end)) g.modCounts[m.name] = m.max;
     });
     expect(own.some(c => c.end)).toBe(false);
-    expect(cardsWith(g => { for (const m of g.MODS) g.modCounts[m.name] = m.max; })).toEqual([]);
+    expect(own).toHaveLength(3);                 // the uncapped ones fill the cards (D209)
   });
 
   it('marks a card on a click or a number, and takes the marked one on Continue', () => {
@@ -317,7 +248,7 @@ describe('the layer end\'s pick (D85)', () => {
     expect(g.modCounts[chosen.name]).toBe(had + (chosen.end ? 1 : g.END_STEP));
   });
 
-  it('takes the marked card on Enter, and Continue alone when nothing is left', () => {
+  it('takes the marked card on Enter', () => {
     const g = atLayerEnd();
     expect(clearAndWait(g)).toBe('mods');
     const chosen = g.choices[1];
@@ -325,13 +256,6 @@ describe('the layer end\'s pick (D85)', () => {
     g.update(g.FIXED_DT);
     expect(g.screen).toBe('playing');
     expect(g.modCounts[chosen.name]).toBe(chosen.end ? 1 : g.END_STEP);
-    const h = atLayerEnd();
-    for (const m of h.MODS) h.modCounts[m.name] = m.max;
-    expect(clearAndWait(h)).toBe('mods');
-    expect(h.choices).toEqual([]);
-    h.justPressed.add('Enter');
-    h.update(h.FIXED_DT);
-    expect(h.screen).toBe('playing');
   });
 });
 

@@ -317,13 +317,25 @@ describe('mods across a whole dive (D69)', () => {
           const m = g.drawCarried();
           if (m) g.takeMod(m);
         }
-        for (const m of g.MODS) expect(g.modCounts[m.name] || 0).toBeLessThanOrEqual(m.max);
+        for (const m of g.MODS) expect(g.modCounts[m.name] || 0).toBeLessThanOrEqual(m.max ?? Infinity);
       }
     }), { numRuns: 20 });
   });
 
-  it('caps every mod', () => {
-    expect(loadGame().MODS.every(m => Number.isInteger(m.max) && m.max >= 1)).toBe(true);
+  it('caps only a mod a second of which adds nothing, and never lets a dash start inside one (D209)', () => {
+    const g = loadGame();
+    expect(g.MODS.filter(m => m.max !== undefined).map(m => [m.name, m.max])).toEqual([['Mend', 1]]);
+    g.reset(1);
+    g.queuePaused = true;
+    const reflex = g.MODS.find(m => m.name === 'Reflex');
+    for (let i = 0; i < 12; i++) g.takeMod(reflex);
+    expect(g.player.dashCooldown).toBeLessThan(0);
+    g.justPressed.add('Space');
+    g.update(g.FIXED_DT);
+    expect(g.player.dashTime).toBeGreaterThan(0);
+    g.justPressed.add('Space');
+    g.update(g.FIXED_DT);
+    expect(g.player.dashTime).toBeLessThan(g.DASH_TIME - g.FIXED_DT / 2);   // the same dash, not a new one
   });
 
 });

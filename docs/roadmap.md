@@ -31,9 +31,9 @@ What a dive feels like, each to play.
 
 New things to meet and to earn, each to measure.
 
-- [ ] **Mod caps removed, and measured** (`ideas.md` → Mod caps:
-  removed?) — the glossary's "every mod has a cap" goes with it, if kept;
-  `Mend` the last comfort mod, kin under the same "enough variety".
+- [ ] **Mods uncapped: kept or taken back?** Igor's call on D209 (mods
+  uncapped)'s measure: the Harpoon over the Gun again, 28 batches stood
+  through from 25.
 
 ### 5. Analyses, for Igor's decisions
 

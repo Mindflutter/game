@@ -15,11 +15,11 @@ fish and the layer end's pick.
 <!-- generated: mods -->
 | name | scope | desc | max | end | per pick | at max |
 |---|---|---|---|---|---|---|
-| Fins | body | you swim faster | 6 | — | speed +45 | speed 530 |
-| Vitality | body | 1 more max HP, it comes full | 6 | — | hp +1, maxHp +1 | hp 9, maxHp 9 |
-| Reflex | body | the dash comes back sooner | 3 | — | dashCooldown -0.4 | dashCooldown 1 |
-| Nerve | body | hits leave you safe longer | 3 | — | iframes +0.3 | iframes 1.9 |
-| Impact | body | the dash wounds what it throws | 3 | — | dashDamage +1 | dashDamage 3 |
+| Fins | body | you swim faster | — | — | speed +45 | — |
+| Vitality | body | 1 more max HP, it comes full | — | — | hp +1, maxHp +1 | — |
+| Reflex | body | the dash comes back sooner | — | — | dashCooldown -0.4 | — |
+| Nerve | body | hits leave you safe longer | — | — | iframes +0.3 | — |
+| Impact | body | the dash wounds what it throws | — | — | dashDamage +1 | — |
 | Mend | comfort | 1 HP back each batch | 1 | true | mendOnClear +1 | mendOnClear 1 |
 <!-- /generated -->
 
@@ -27,9 +27,9 @@ fish and the layer end's pick.
 `max` of them, from the starting kit — the diver carrying the Gun, before any
 tier or attribute. Both are worked out from `apply` by the check, so they
 cannot advertise a number the mod does not deliver. A layer end's card gives an
-ordinary mod `END_STEP 2` picks at once. Every number is Claude's pick; the
-caps of `Fins` and `Vitality` are tuned to the pillars (D127 (the tuned numbers)),
-and the dash's, `Reflex` and `Impact`, wait on its discussion (`ideas.md`).
+ordinary mod `END_STEP 2` picks at once. Every number is Claude's pick. No
+ordinary mod has a cap (D209 (mods uncapped)): dealt evenly, each comes about
+four times in a whole dive, so **at max** is `—` but for Mend.
 
 ## Fields
 
@@ -38,7 +38,7 @@ and the dash's, `Reflex` and `Impact`, wait on its discussion (`ideas.md`).
 | `name` | — | The key and the card's title. A saved dive keeps its mods, the cards on offer and the round of fish-carried mods by name, and a scenario's kit names them, so renaming one breaks all three. |
 | `scope` | — | `body`: a stat of the diver, worth the same whatever weapon is carried. `comfort`: feel and friction, near-zero balance risk. No mod is a weapon's own: mods stay apart from the weapons (D208 (Barbs and Lance removed)). A check holds every mod to these two. |
 | `desc` | — | The card's one line, and the pickup line's. A kind, not a degree: a pickup has to be felt and recognised mid-fight (D34 (mods), D84 (mods are dropped)). A check holds it inside the card's width. |
-| `max` | picks | How many times one dive can take it (D69 (every mod capped)): a switch caps at 1, anything that stacks at 3 or 6. No fish carries a mod at its max, and no layer end offers one without room for what its card gives. Where the caps sit is a balance pass's, last set by S6 (balance) (D127 (the tuned numbers)); whether they go is open (`ideas.md`). |
+| `max` | picks | Only for a mod a second of which adds nothing — Mend's 1: how many times one dive can take it, none carried or offered past it (D69 (every mod capped), D209 (mods uncapped)). Left out, the mod has no cap. |
 | `end` | — | `true` marks one of the layer end's own mods (D85 (the layer end's pick)): offered only on its cards, once a card, and never carried by a fish. Without it the mod is ordinary — carried by fish, and on a layer end's card at the bigger step, `END_STEP` picks at once. |
 | `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The "from → to" rows on a card and on the pickup line are worked out from it, at most `MOD_ROWS 2` of them, each stat named in words from `STAT_NAMES`. |
 
