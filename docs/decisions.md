@@ -6200,3 +6200,21 @@ play-tests asked for since the short ten (`playtests.md` → The roadmap).
 
 **Guarded by** `tests/debug.test.js` — the boosts set are laid beside the
 diver, Lance not with the Knife; the setup has a row for every boost.
+
+## D199 — The bars, printed · 2026-11-04
+
+`roadmap.md` → Next, the second tool: "a balance pass re-measures by hand
+what one command could print" — Igor: "optimize as you see it" (D196 (the
+list's ninth five answered)).
+
+- **Every bar the balance suite holds lives once**, in `BARS`
+  (`tests/measure.js`): its name and what breaks it, worked out from one
+  measured run. The three suite files become one, `tests/bars.balance.js`,
+  a check a bar.
+- **`npm run measure bars` prints them all** — each bar, whether it holds,
+  and the first few batches, weapons or careers that break it — so a pass
+  reads where it stands without re-measuring by hand. `SEEDS=10` matches
+  the suite. Claude's shape.
+- The bars themselves are unchanged.
+
+**Guarded by** `npm run balance` — the same bars, checked.

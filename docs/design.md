@@ -410,8 +410,10 @@ Which suite covers what, and how to run each, is the root `README.md` and
   plays from what the screen shows with a player's limits and its own random
   generator, so it never moves the game's draws; and the standing bot.
   `tests/measure.js` holds the runners, one worker thread a seed, and
-  `npm run measure fit` writes the pools' counts to the threat curve. The
-  figures live in `roadmap.md` → Health and only there.
+  `npm run measure fit` writes the pools' counts to the threat curve.
+  `BARS` there is every bar `npm run balance` holds, each naming what breaks
+  it; `npm run measure bars` prints them, the suite checks them (D199 (the
+  bars, printed)). The figures live in `roadmap.md` → Health and only there.
 
 ## Balance constants
 

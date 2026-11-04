@@ -325,6 +325,70 @@ async function weapons(code) {
     .join('\n\n');
 }
 
+// ---------- the bars ----------
+// Every bar `npm run balance` holds (foundations.md -> Pillars, D127), in one
+// place (D199 (the bars, printed)): `barData()` measures once, each bar names
+// what breaks it, the suite fails on any that names something, and
+// `npm run measure bars` prints them all. Ten seeds, as the suite runs:
+// `SEEDS=10 npm run measure bars`.
+export async function barData() {
+  return { g: loadGame(), rows: await pillarRows(), careers: (await report()).map(r => r.career),
+           weapons: (await weaponLayers())['layers 2 and 3'] };
+}
+const named = r => `layer ${r.l + 1}, stretch ${r.i + 1}, #${r.bi + 1}: ${r.fish}`;
+const ordinaryAt = (rows, l, i) => mean(rows.filter(r => r.i % 2 === 0 && r.l === l && r.i === i).map(r => r.time));
+const layerHearts = rows => Object.values(Object.groupBy(rows, r => r.l)).map(rs => rs.reduce((a, r) => a + r.hearts, 0) / rs.length);
+export const BARS = [
+  // The pillars a batch is held to (foundations.md -> Pillars), measured by the
+  // diver bot at the kit each gate is first met with (D127).
+  { bar: 'measures every gate on every seed',
+    failing: ({ rows }) => rows.filter(r => r.kits < SEEDS.length).map(named) },
+  { bar: 'every batch is cleared on most seeds (Nothing unbeatable)',
+    failing: ({ rows }) => rows.filter(r => r.lost > r.kits / 2).map(named) },
+  { bar: 'every batch past the opening is cleared standing on no more than one seed in ten (Nothing trivial)',
+    // One in ten is Claude's pick: the standing bot that clears one comes out
+    // with a sliver of HP, luck rather than a way to play. The opening is the
+    // stretches holding only the types the dive opens with.
+    failing: ({ g, rows }) => {
+      const types = s => s.pool.flatMap(b => b.enemies.map(([n]) => n));
+      const first = new Set(types(g.LAYERS[0].stretches[0]));
+      const opening = r => types(g.LAYERS[r.l].stretches[r.i]).every(n => first.has(n));
+      return rows.filter(r => !opening(r) && r.stood > r.kits / 10).map(r => named(r) + ', stood ' + r.stood);
+    } },
+  { bar: 'a batch takes seconds at the start of a dive and over a minute at its deepest (D137)',
+    // The bot's clock, which runs ahead of a player's: 15s and 60s are
+    // Claude's picks for its share of the 10-15s start and the ~90s end.
+    failing: ({ rows }) => {
+      const last = rows.filter(r => r.i % 2 === 0).at(-1), start = ordinaryAt(rows, 0, 0), end = ordinaryAt(rows, last.l, last.i);
+      return [...(start < 15 ? [] : ['the first ' + fmt(start) + 's, not under 15']),
+              ...(end > 30 ? [] : ['the deepest ' + fmt(end) + 's, not over 30'])];   // about 45s (D162)
+    } },
+  { bar: 'a batch costs more hearts deeper, overall rather than every step (D79)',
+    // A dip is allowed, not a fall: each layer costs at least 0.9 of the one above.
+    failing: ({ rows }) => {
+      const layers = layerHearts(rows);
+      return [...(layers.at(-1) > layers[0] ? [] : ['the last layer ' + fmt(layers.at(-1)) + ', not over the first ' + fmt(layers[0])]),
+              ...layers.flatMap((h, l) => (h >= 0.9 * (layers[l - 1] ?? 0) ? [] : ['layer ' + (l + 1) + ' ' + fmt(h) + ', under 0.9 of ' + fmt(layers[l - 1])]))];
+    } },
+  // No weapon strictly dominating another in the mid-to-late game: S6
+  // (balance)'s exit (D127 (the tuned numbers)), each weapon at matched kits.
+  { bar: 'no weapon is better than another at everything over layers 2 and 3',
+    failing: ({ weapons }) => weapons.flatMap(a => weapons.filter(b => b !== a && dominates(a, b)).map(b => a.weapon + ' over ' + b.weapon)) },
+  // The pillars a career is held to (foundations.md -> Pillars): a fresh save
+  // diving and spending until the win, one a seed (D127).
+  { bar: 'a career wins',
+    failing: ({ careers }) => careers.flatMap((c, n) => (c.log.at(-1).end === 'won' ? [] : ['seed ' + SEEDS[n] + ': ' + c.log.at(-1).end])) },
+  { bar: 'a career makes its first purchase within three dives (Addictive, not grindy)',
+    failing: ({ careers }) => careers.flatMap((c, n) => (c.firstBuy !== null && c.firstBuy <= 3 ? [] : ['seed ' + SEEDS[n] + ': ' + (c.firstBuy ?? 'never')])) },
+];
+async function bars() {
+  const data = await barData();
+  return table(['bar', 'holds', 'what breaks it'], BARS.map(b => {
+    const f = b.failing(data);
+    return [b.bar, f.length ? 'no' : 'yes', f.length ? f.slice(0, 3).join('; ') + (f.length > 3 ? '; and ' + (f.length - 3) + ' more' : '') : '—'];
+  }));
+}
+
 // ---------- fitting the pools ----------
 // Every pool batch rescaled to its stretch's target, its mix of fish kept, and
 // written back into game/content.js: in the first layer, grade 1 carries the
@@ -380,7 +444,7 @@ function fit(layer) {
   return table(['layer', 'target', 'fish', 'count', 'grade 1 / target', 'reach / target'], rows);
 }
 
-const COMMANDS = { bots, careers, threat, pillars, weapons, fit };
+const COMMANDS = { bots, careers, threat, pillars, weapons, fit, bars };
 const TASKS = { seedReport, kitRuns };
 if (!isMainThread && workerData?.measureTask) parentPort.postMessage(TASKS[workerData.measureTask](...workerData.args));
 if (isMainThread && process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

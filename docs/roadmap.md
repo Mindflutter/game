@@ -23,9 +23,6 @@ what waits on Igor's answer is `ideas.md` → To discuss.
 
 First, so every change after has its measure and its play-test.
 
-- [ ] **A balance pass that measures itself**: what a pass now re-measures
-  by hand, printed by one command, Claude's shape (D196 (the list's ninth
-  five answered)).
 - [ ] **Run `npm run balance`**, Igor's word given (D188 (the list's
   first five answered)): the first since D184 (Go home on top) to D187 (the eel's
   sway slower; its path taken back). What it finds goes to `bugs.md`; the

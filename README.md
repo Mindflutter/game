@@ -45,6 +45,7 @@ path a test drives.
 npm run measure careers   # or bots, threat, pillars, weapons: tables
 npm run measure weapons L3,Knife2,Mask3   # each weapon at a kit written as a debug code
 npm run measure fit       # resizes every pool batch to the threat curve; `fit 3`, layer 3 alone
+SEEDS=10 npm run measure bars   # every bar the balance suite holds, and what breaks it
 npm run docs              # writes the entity docs' number tables from the code
 npm run balance           # the pillars as checks, ten seeds, under a minute
 ```
