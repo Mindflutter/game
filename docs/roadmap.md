@@ -23,19 +23,18 @@ what waits on Igor's answer is `ideas.md` → To discuss.
 
 What the run of 2026-11-04 left for his word.
 
-- [ ] **Mods uncapped, kept?** Reflex and Nerve shrink a pick at a time,
-  D214 (Reflex and Nerve shrink), so no pile leaves the diver unhit; the
-  Harpoon is over the Gun again since D209 (mods uncapped), 26 batches
-  stood through.
 - [ ] **The trees and abilities, decided**: the decisions the two analyses
   suggest (`ideas.md` → Development trees, analysed; Abilities, analysed).
+  A session of its own.
 
 ### 2. Next to build
 
 - [ ] **A bot that plays like Igor**: played (`playtests.md` → Like the
   bot) — fit its fire, aim spread and dash rate to it (`ideas.md` → A bot that plays like
   Igor). The stood bars wait on it (`bugs.md` → Nothing
-  trivial fails across all three layers).
+  trivial fails across all three layers). A session of its own, which
+  first makes sure his plays hold enough to fit it on — Igor: "need to be
+  sure you have enough data".
 
 ### Igor's to open
 

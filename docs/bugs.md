@@ -13,6 +13,15 @@ fix (`code.md` → Verification).
 
 ## Open
 
+### The boss's debug tip runs off the view
+`?test`, 2026-11-04: "debug: every tip must fit the view, the widest is
+2244px" — the boss's row. A debug tip is drawn on one line
+(`platform/render.js`, the debug menu's `fillText`), and the boss's has a
+line per behaviour since its stages and shell, 8a03d48 (2026-10-28), so it
+reads past both edges of the 1280 px view. What should happen: every tip
+readable in the view — shorter lines, or wrapped. Seen with `?debug`, the
+cursor on the boss's row.
+
 ### Nothing trivial fails across all three layers
 Reflex and Nerve shrinking, D214 (Reflex and Nerve shrink): 26. Mods uncapped, D209 (mods uncapped): 28 batches stood through. With D207
 (boosts of new kinds) and D208 (Barbs and Lance removed): 25

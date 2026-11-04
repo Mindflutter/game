@@ -6456,9 +6456,9 @@ five answered)).
   Knife, where the caps had left only the Knife (`bugs.md`). And the late
   Gun kit with eight `Reflex` takes no hit in layer 3 — out of reach of an
   even deal, about four a dive, but the ceiling the caps held (`ideas.md`
-  → Abilities, analysed). Kept as Igor
-  asked, **his to keep or take back** (`roadmap.md` → Next); taking it
-  back is each mod's `max` again.
+  → Abilities, analysed). **Kept**: Igor, asked once D214 (Reflex and
+  Nerve shrink) had taken that ceiling's place, "cant say why not". Taking
+  it back is each mod's `max` again.
 
 **Guarded by** `tests/drops.test.js` — forty mods dealt evenly with no cap
 to stop them, the cards full with Mend taken; `tests/dive.test.js` — only
