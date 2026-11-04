@@ -31,10 +31,6 @@ Small, concrete, each its own commit.
 
 What a dive feels like, each to play.
 
-- [ ] **A mark where a fish is about to come in** (D193 (the list's sixth
-  five answered)): a short warning at the edge it enters by — a faint arrow,
-  no colour of its own, growing clearer as the fish nears, perhaps moving
-  with it, never flashing. Its timing Claude's pick.
 - [ ] **Bloom's splash without a hit**: a shot that misses splashes where
   its range ends, a cut's splash sits just past its reach, and every
   Bloom's ring is half again as wide (D194 (the list's seventh five

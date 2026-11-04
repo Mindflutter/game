@@ -6258,3 +6258,22 @@ answered)).
 
 **Guarded by** `tests/boss.test.js` — a lunge a third of its reach from the
 edge takes its whole time and ends at the edge.
+
+## D202 — A mark where a fish comes in · 2026-11-04
+
+Igor: "short warning, go with you choice. not coloured, but instead
+something like a fainted arrow that becomes more visible as the fish
+approaches. it can be moving too. no flashing" (D193 (the list's sixth
+five answered)).
+
+- **A fish out of view carries a mark**: a pale chevron on the edge
+  nearest it, `MARK_INSET 18` px in, pointing into the view — the same
+  colour for every fish — fading in from where it arrives, `ARRIVE_GAP 40`
+  px out, to clearest as its body meets the edge, sliding along the edge
+  with it, gone as it enters. A fish knocked out of view is marked too.
+- **The warning is the arrival's own time**: about half a second for a
+  darter, 0.7 for a drifter, measured. Nothing arrives sooner or later than
+  before, so no figure moves. The shape and the inset are Claude's.
+
+**Guarded by** `tests/enemies.test.js` — the mark stands on the edge beside
+the fish, pointing in, clearer as it nears, gone once it is in view.

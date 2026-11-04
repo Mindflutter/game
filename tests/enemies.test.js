@@ -18,6 +18,27 @@ const shots = g => g.bullets.filter(b => b.evil);
 const inView = (g, e) => e.x - e.r >= 0 && e.x + e.r <= g.ARENA_W &&
                          e.y - e.r >= g.cameraY && e.y + e.r <= g.cameraY + g.ARENA_H;
 
+describe('a mark where a fish is about to come in (D202)', () => {
+  it('stands on the edge nearest a fish not yet in view, pointing in, clearer as it nears, and goes as it enters', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;
+    g.enemies.length = 0;
+    g.placeEnemy('drifter', g.ARENA_W + 40 + 18, g.cameraY + 300);   // where an arrival starts
+    const e = g.enemies[0];
+    const [far] = g.arrivalMarks();
+    expect(far.x).toBeLessThan(g.ARENA_W);                          // on the edge, inside the view
+    expect(far.x).toBeGreaterThan(g.ARENA_W - 40);
+    expect(far.y).toBeCloseTo(e.y, 6);                               // beside the fish
+    expect([far.ux, far.uy]).toEqual([-1, 0]);                       // pointing in
+    e.x -= 30;
+    const [near] = g.arrivalMarks();
+    expect(near.k).toBeGreaterThan(far.k);
+    e.x = g.ARENA_W - 10;                                            // its body in view
+    expect(g.arrivalMarks()).toEqual([]);
+  });
+});
+
 describe('the archer (spit)', () => {
   const spit = () => loadGame().enemyType('archer').spit;
 

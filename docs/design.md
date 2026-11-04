@@ -172,8 +172,11 @@ waiting in `incoming` on a schedule; an empty arena brings the next wave at
 once. The batch lives while `batchLive()` — fish in the arena or still to
 come — so the gate waits for the last wave. Batch `k` waits at
 `gateDepth(k)`; past the last, the same arithmetic points at the bottom.
-Fish enter just outside the view, past its edge by the whole body (D104), so
-they fade in from the dark.
+Fish enter just outside the view, `ARRIVE_GAP 40` px past its edge by the
+whole body (D104), so they fade in from the dark. While a fish is out of view,
+`arrivalMarks()` puts a pale chevron on the edge nearest it, pointing in,
+clearer as it nears and sliding with it — about half a second to a second's
+warning (D202 (a mark where a fish comes in)).
 
 **Escorts** (D116). A mini-boss's or the boss's plan entry also holds
 `escorts`, drawn from the pool before it. A mini-boss's are dealt into the

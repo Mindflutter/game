@@ -42,6 +42,8 @@ const BUMP_SIZE      = 0.15;  // ...by this share of its radius, flattened along
 const SPINE          = 10;    // px a lionfish's spine stands off its body (D173): Claude's pick
 const LEAP_TIME      = 0.08;  // seconds a biter's drawn leap takes out, and as long back: Claude's pick
 const SPLASH_SHOW    = 0.3;   // seconds Bloom's ring shows a splash's reach: Claude's pick
+const ARRIVE_GAP     = 40;    // px outside the view a fish arrives, its body clear of it
+const MARK_INSET     = 18;    // px inside the edge an arriving fish's mark stands (D202): Claude's pick
 const BODY_PUSH      = 600;   // px/s at most that overlapping bodies part (D120): Claude's pick
 // Water (D107): the share of a change of speed still to go after a body's
 // `ramp` seconds -- so `ramp` is its time to full speed, near enough.

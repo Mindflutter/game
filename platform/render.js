@@ -501,6 +501,20 @@ function drawField() {
 
   if (gemPop.n) gemText(gemPop.n, player.x, player.y - player.r - 14);
 
+  // Where a fish is about to come in (D202): a pale chevron, no colour of the
+  // fish's, clearer as it nears and sliding with it. PLACEHOLDER GRAPHICS.
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  for (const m of arrivalMarks()) {
+    const tx = m.x + m.ux * 7, ty = m.y + m.uy * 7;
+    ctx.strokeStyle = `rgba(214, 236, 242, ${0.12 + 0.5 * m.k})`;
+    ctx.beginPath();
+    ctx.moveTo(tx - m.ux * 11 - m.uy * 9, ty - m.uy * 11 + m.ux * 9);
+    ctx.lineTo(tx, ty);
+    ctx.lineTo(tx - m.ux * 11 + m.uy * 9, ty - m.uy * 11 - m.ux * 9);
+    ctx.stroke();
+  }
+
   ctx.restore();
 
   // --- HUD ---

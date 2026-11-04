@@ -25,13 +25,30 @@ function makeEnemy(t, x, y, speed, grade = 1) {
 // Just outside the view, in view coordinates: the caller adds the camera. The
 // boss's place draws nothing from the seed, so it moves no other arrival.
 function edgeSpawnPoint(t) {
-  const m = 40 + t.r;
+  const m = ARRIVE_GAP + t.r;
   if (t.enters === 'bottom') return { x: ARENA_W / 2, y: ARENA_H + m };
   const edge = Math.floor(rng() * 4);
   if (edge === 0) return { x: rng() * ARENA_W, y: -m };
   if (edge === 1) return { x: ARENA_W + m,     y: rng() * ARENA_H };
   if (edge === 2) return { x: rng() * ARENA_W, y: ARENA_H + m };
   return              { x: -m,                 y: rng() * ARENA_H };
+}
+
+// Where a fish not yet in view will come in (D202): a mark on the edge
+// nearest it, `ux, uy` pointing in, `k` from 0 where an arrival starts to 1
+// as its body meets the view. A fish knocked out of view is marked too.
+function arrivalMarks() {
+  const marks = [];
+  for (const e of enemies) {
+    if (e.gone) continue;
+    const [cx, cy] = viewClamp({ x: e.x, y: e.y, r: 0 });
+    const gap = Math.sqrt((cx - e.x) ** 2 + (cy - e.y) ** 2) - e.r;
+    if (gap <= 0) continue;
+    const [x, y] = viewClamp({ x: e.x, y: e.y, r: MARK_INSET });
+    const d = Math.sqrt((x - e.x) ** 2 + (y - e.y) ** 2);
+    marks.push({ x, y, ux: (x - e.x) / d, uy: (y - e.y) / d, k: Math.max(0, 1 - gap / ARRIVE_GAP) });
+  }
+  return marks;
 }
 
 // One batch, dealt into waves (D115). With escorts (D116) its own fish lead:
