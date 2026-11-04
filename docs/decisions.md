@@ -6295,3 +6295,19 @@ after its reach" (D194 (the list's seventh five answered)).
 **Guarded by** `tests/combat.test.js` — a miss wounds a fish by its range's
 end, a shot that hit does not splash there, an empty cut wounds a fish just
 past its reach; `tests/docs.test.js` — Bloom's numbers.
+
+## D204 — A boost touched again adds its time · 2026-11-04
+
+Igor: "touching the same boost again adds to its time - cumulative effect.
+other boosts unaffected. clock has no ceiling" (D194 (the list's seventh
+five answered)).
+
+- **A boost touched while it runs gains a whole `time` on its own clock**,
+  however many times, with no ceiling. Supersedes D86 (boosts)'s "touched
+  again while it runs, its clock restarts".
+- **Its numbers go on once**: a second touch adds time, never strength.
+  Every other boost's clock runs on untouched.
+
+**Guarded by** `tests/drops.test.js` — a second touch at half a life runs
+to twice it; four touches add four lives to its own clock and none to
+another's.

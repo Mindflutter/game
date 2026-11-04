@@ -39,7 +39,7 @@ is Claude's pick, held by `npm run balance` (D127 (the tuned numbers)).
 | `desc` | — | Its one line, shown as it is touched. A kind, not a degree, like a mod's. |
 | `swingDesc` | — | Its line instead while the weapon carried swings rather than shoots — the Knife (D105 (the Knife swings)) — for a `desc` that speaks of shots. Left out, `desc` serves every weapon. |
 | `weapons` | — | The weapons it is dropped for, as a weapon mod's are dealt; left out, every weapon. |
-| `time` | s | How long it runs once touched. Touched again while it runs, the clock restarts; nothing stacks. |
+| `time` | s | How long it runs once touched. Touched again while it runs, its clock grows by `time` again, with no ceiling; its numbers are not added twice, and no other boost's clock moves (D204 (a boost touched again adds its time)). |
 | `add` | — | What it adds to the player while it runs, `{ stat: amount }` — numbers, not a function, so the same amounts come off when `time` runs out. It adds on top of everything else (D74 (mods on top of gear and attributes)). Never `hp`, which could not be taken back cleanly, and — for a boost every weapon gets — never a weapon's number. |
 | `percent` | % | What it raises by a share while it runs, `{ stat: percent }` of the player's own number as it is touched — a weapon's number every weapon has above zero, since a share of nothing is nothing. What it added runs with it and is what comes off. |
 

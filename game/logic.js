@@ -592,13 +592,14 @@ function collectMod(name) {
   sound('modB');
 }
 
-// Touched again while it runs, its clock restarts and nothing more is added.
-// What it added runs with it, so exactly that comes back off (D125).
+// Touched again while it runs, a whole life more goes on its own clock, with
+// no ceiling, and nothing more is added (D204). What it added runs with it,
+// so exactly that comes back off (D125).
 function startBoost(name) {
   meet(name);
   const b = BOOSTS.find(x => x.name === name);
   const on = boosts.find(x => x.name === name);
-  if (on) on.left = b.time;
+  if (on) on.left += b.time;
   else {
     const add = { ...b.add };
     for (const k in b.percent) add[k] = player[k] * b.percent[k] / 100;

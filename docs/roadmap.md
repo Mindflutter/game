@@ -31,10 +31,6 @@ Small, concrete, each its own commit.
 
 What a dive feels like, each to play.
 
-- [ ] **A boost touched again adds its time**: its clock grows by a whole
-  life, with no ceiling; other boosts running are untouched. Replaces D86
-  (boosts)'s clock that restarts (D194 (the list's seventh five
-  answered)).
 - [ ] **Crowds that move like fish**: each chaser steering for its own
   place round the diver, and steering past a body in its way, both; a
   charging boss passing a little over the fish it meets rather than

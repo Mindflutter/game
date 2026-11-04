@@ -417,7 +417,7 @@ describe('boosts (D86)', () => {
     expect(stats(g.player)).toEqual(base);
   });
 
-  it('adds its numbers on a touch, takes them back after its time, and restarts on a second', () => {
+  it('adds its numbers on a touch, takes them back after its time, and adds its time on a second (D204)', () => {
     const g = loadGame();
     g.reset(1);
     const base = { ...g.player };
@@ -432,10 +432,28 @@ describe('boosts (D86)', () => {
     boostAt(g, g.player.x, g.player.y, name);                // the same boost again
     g.update(g.FIXED_DT);
     expect(on()).toEqual(Object.values(want));               // added once, not twice
-    for (let i = 0, n = ticks(g, b.time * 0.75); i < n; i++) g.update(g.FIXED_DT);
-    expect(on()).toEqual(Object.values(want));               // past the first's end: restarted
-    for (let i = 0, n = ticks(g, b.time * 0.5); i < n; i++) g.update(g.FIXED_DT);
+    for (let i = 0, n = ticks(g, b.time * 1.3); i < n; i++) g.update(g.FIXED_DT);
+    expect(on()).toEqual(Object.values(want));               // half its life left, and a whole one more
+    for (let i = 0, n = ticks(g, b.time * 0.3); i < n; i++) g.update(g.FIXED_DT);
     expect(on().every(v => Math.abs(v) < 1e-9)).toBe(true); // and gone
+  });
+
+  it('adds a boost\'s time to its own clock only, with no ceiling (D204)', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;
+    const [a, c] = g.BOOSTS.filter(x => !x.weapons);
+    const touch = name => {
+      g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: name, life: g.BOOST_LIFE });
+      g.update(g.FIXED_DT);
+    };
+    touch(a.name);
+    touch(c.name);
+    const left = name => g.boosts.find(x => x.name === name).left;
+    const [mine, other] = [left(a.name), left(c.name)];
+    for (let k = 0; k < 4; k++) touch(a.name);
+    expect(left(a.name)).toBeCloseTo(mine + 4 * a.time - 4 * g.FIXED_DT, 6);
+    expect(left(c.name)).toBeCloseTo(other - 4 * g.FIXED_DT, 6);
   });
 
   it('puts every boost\'s numbers on with a touch, with every weapon it fits, and takes them back after its time', () => {

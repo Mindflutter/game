@@ -262,7 +262,9 @@ last boost, and the kill that empties the arena never drops one — it would
 fade behind you as the current carried you on. Which boost is a seeded draw
 from those that fit the weapon (D125). Touched, a boost puts its `add` and its
 `percent` of the diver's numbers on, and remembers what it added, to take back
-exactly that when it ends; touched again it restarts its clock. Its clock runs
+exactly that when it ends; touched again it adds a whole `time` to its own
+clock, with no ceiling, and nothing else (D204 (a boost touched again adds its
+time)). Its clock runs
 only in play, and it never moves `hp`, which could not be taken back cleanly.
 
 **Currency.** Every kill drops its `value` in gems, times its grade's, and
