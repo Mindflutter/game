@@ -56,10 +56,6 @@ Read and written up, nothing built; each ends in decisions to suggest.
   plays do not show yet, then the bot fitted to them (`ideas.md` → A bot
   that plays like Igor). The stood bars wait on it (`bugs.md` → Nothing
   trivial fails across all three layers).
-- [ ] **Studioigor's skills**, read — https://github.com/studioigor/studioigor-skill
-  and his other repos — and what fits the rules here brought in (D196 (the
-  list's ninth five answered)).
-
 ### 6. Housekeeping
 
 Outside the game.

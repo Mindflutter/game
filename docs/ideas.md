@@ -196,6 +196,20 @@ with the Knife; raised the Gun to 3; never bought the Harpoon.
 
 ---
 
+### From Studioigor's skills
+Claude's, 2026-11-04, from `reading.md` → Studioigor's skills; nothing built.
+- **The game comes first.** A line at the end of each session's work: how
+  much of it went to the game and how much to docs, checks and tooling, and
+  a warning when the game's share falls — measured off the diff, `game/` and
+  `platform/` against the rest.
+- **Feel numbers tuned live.** In the debug mode, a key to step a chosen
+  feel number while playing — a crowd's reach, an arrival's warning, a
+  boost's time — shown in the corner, written into the debug code, so a
+  number Igor likes is one he found.
+- **A blind A/B play-test.** One Sonar play-test, two variants of one
+  change, given as A and B in a drawn order; Igor plays both and says which
+  felt better before he is told which is which.
+
 ## Parked — agreed direction, deliberately not now
 
 ### A UI for Sonar
@@ -233,6 +247,11 @@ lever if the roguelite phase happens.
 
 ### Graphics, for its own work
 
+- **Art as Studioigor makes it** (`reading.md` → Studioigor's skills):
+  effects stay in code, never baked into an image; the diver and each fish a
+  cut-out rig of a few parts, not a sliding picture; a rigged model rendered
+  to a sprite sheet by a browser tool beside the game. For the diver's image
+  and animation, Igor's to open. Claude's, 2026-11-04.
 - **Shapes hard to follow.** "start thinking towards graphics. not saying we
   must go to assets now, but: 1 schematically circles and squares are ok, but
   hard to follow". Not the condition D4 (no assets, ever) waits on: "not saying

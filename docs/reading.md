@@ -236,6 +236,53 @@ For Abyss — every line inference:
 - **Challenge modes** are points from opt-in difficulty, which Igor
   dropped on 2026-10-31 (`ideas.md` → Declined): not proposed again.
 
+## Studioigor's skills, a studio like this one
+
+Igor, 2026-11-04: "expected outcome: repos analyzed, useful findings
+incorporated into our project". Read 2026-11-04: [studioigor-skill](https://github.com/studioigor/studioigor-skill)
+(its `SKILL.md`), [game-exp-skills](https://github.com/studioigor/game-exp-skills),
+[ref2game](https://github.com/studioigor/ref2game), [3d-to-2d](https://github.com/studioigor/3d-to-2d)
+and [studioigor-pipeline](https://github.com/studioigor/studioigor-pipeline),
+from their pages; the other twenty-one are games, tutorials and model
+comparisons. Ideas only; what to take is Igor's.
+
+What Abyss already does the same way:
+- **The human decides taste, the agent finds facts**; every play-tested
+  mechanic gets "3–5 things to try" and the player's words verbatim — Sonar
+  (D164 (Sonar)) and `playtests.md`.
+- **A zero metric is no pass**, and **every defect becomes a check** —
+  `code.md` → Verification, and the sonar skill's "a zero is checked before
+  it is read".
+- **A mechanic in its own test scene** — their *gym*, our debug mode and
+  scenarios (D102 (the debug mode)).
+- **Never push or publish unasked; the plan on disk** — `working.md`.
+
+What it does that Abyss does not:
+- **"The game comes first"**: its status warns when several steps in a row
+  went to tests, docs or tooling rather than the game. Inference: Abyss's
+  docs outweigh its code, and Igor has called its files "screwed again";
+  a counter of the same kind would show the drift as it starts
+  (`ideas.md` → The game comes first).
+- **A gym has live sliders**: the mechanic's numbers tuned while playing.
+  The debug mode sets a place and a kit, never a feel number (`ideas.md` →
+  Feel numbers tuned live).
+- **A blind A/B round** for what matters most — core feel, the first sixty
+  seconds: two builds, unnamed, the player picks one before the key is
+  shown. A Sonar play-test of two variants could be played so
+  (`ideas.md` → A blind A/B play-test).
+- **Agents never grade their own work**: one critic a round against a
+  reference bar, not the builder judging. Abyss's bars are the bot's, and
+  only Igor's play judges feel (`code.md` → "Game feel is Igor's call").
+- **For art** (ref2game, 3d-to-2d): the image is painted, the code moves it —
+  "glow, shadows, particles, text and water are never baked into an image";
+  an actor is a cut-out rig with two-bone limbs, since "moving a whole
+  sprite never counts as animation", its motion measured by a script; and a
+  rigged 3D model can be rendered to a sprite sheet in the browser, a tool
+  beside the game, not in it. All of it meets D195 (art in the browser)
+  (`ideas.md` → Graphics, for its own work).
+- **Polish waits on a slice**: "polish applied to a product 40% ready gives
+  a beautifully polished 40%" — S9 (the balance rework)'s order already.
+
 ## Not read, and why
 
 - **GB ch. 6 (economic systems):** mostly player-driven markets and inflation;
