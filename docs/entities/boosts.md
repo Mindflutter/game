@@ -24,8 +24,8 @@ weapon: none is a weapon's own (D208 (Barbs and Lance removed)).
 | Frenzy | you fire much faster | 5 | you swing much faster | fireRate +100% |
 | Bloom | your shots splash | 6 | your cuts splash | splash +36 |
 | Surge | you dash again sooner | 6 | — | dashCooldown -60% |
-| Jolt | the water round you jolts | 5 | — | every 1s, 2 to each fish within 90 px |
-| Urchin | spines fly from you every way | 5 | — | every 0.6s, 12 spines of 1 over 240 px |
+| Jolt | the water round you jolts | 2.5 | — | every 1s, 2 to each fish within 90 px |
+| Urchin | spines fly from you every way | 1.5 | — | every 0.6s, 12 spines of 1 over 240 px |
 <!-- /generated -->
 
 **for** is read off `weapons`, **adds** off `add` and `percent`. Every number
@@ -40,8 +40,8 @@ is Claude's pick, held by `npm run balance` (D127 (the tuned numbers)).
 | `swingDesc` | — | Its line instead while the weapon carried swings rather than shoots — the Knife (D105 (the Knife swings)) — for a `desc` that speaks of shots. Left out, `desc` serves every weapon. |
 | `time` | s | How long it runs once touched. Touched again while it runs, its clock grows by `time` again, with no ceiling; its numbers are not added twice, and no other boost's clock moves (D204 (a boost touched again adds its time)). |
 | `add` | — | What it adds to the player while it runs, `{ stat: amount }` — numbers, not a function, so the same amounts come off when `time` runs out. It adds on top of everything else (D74 (mods on top of gear and attributes)). Never `hp`, which could not be taken back cleanly, and — for a boost every weapon gets — never a weapon's number. |
-| `pulse` | — | An effect of its own (D207 (boosts of new kinds)): every `every` seconds while it runs, each fish within `reach` px of the diver's body takes `damage` and is knocked away; a ring shows the reach. |
-| `spines` | — | An effect of its own (D207 (boosts of new kinds)): every `every` seconds while it runs, `count` spines fly evenly round the diver from a seeded turn — each a shot of its own, `r` px, at `speed` px/s for `range` px, dealing `damage`. They are not the weapon's: a spine that misses breaks no `marksman` streak and splashes nothing at its end, and its kills pay no `skewer` or `sweep`. |
+| `pulse` | — | An effect of its own (D207 (boosts of new kinds)): at the touch and each `every` seconds while it runs — three times in its `time` — each fish within `reach` px of the diver's body takes `damage` and is knocked away; a ring shows the reach. |
+| `spines` | — | An effect of its own (D207 (boosts of new kinds)): at the touch and each `every` seconds while it runs — three times in its `time` — `count` spines fly evenly round the diver from a seeded turn — each a shot of its own, `r` px, at `speed` px/s for `range` px, dealing `damage`. They are not the weapon's: a spine that misses breaks no `marksman` streak and splashes nothing at its end, and its kills pay no `skewer` or `sweep`. |
 | `percent` | % | What it raises by a share while it runs, `{ stat: percent }` of the player's own number as it is touched — the diver's own, or a weapon's number every weapon has above zero, since a share of nothing is nothing. What it added runs with it and is what comes off. |
 
 ## Rush
@@ -70,8 +70,9 @@ hit directly"; its `splash` half again as wide since, his "about 1.5". It
 replaced a bigger shot, which only decided whether a
 shot hit, when nearly every shot hits. Each splash shows its reach: a ring
 grows from the struck fish's body out `splash` past it and fades in
-`SPLASH_SHOW`, so whatever it touches is what it wounds. Claude's shape and
-number.
+`SPLASH_SHOW`, and whatever it touches while it shows it wounds, a fish
+swimming in after it landed too, each once (D212 (a ring wounds while it
+shows)). Claude's shape and number.
 
 ## Surge
 
@@ -81,15 +82,19 @@ new kinds)). Claude's.
 
 ## Jolt
 
-The water round the diver jolts once a second for five: every fish within
+The water round the diver jolts three times — at the touch, then once a
+second: every fish within
 90 px of its body takes 2 and is knocked away, a ring showing how far. Not a
 number but an effect (D207 (boosts of new kinds)) — Igor's "an explosion
 round the diver". A crowd pressing in is thrown off; a fish that keeps its
-distance is untouched. Claude's numbers.
+distance is untouched. Its ring wounds what swims into it while it shows,
+as Bloom's does (D212 (a ring wounds while it shows)). Igor, played: "make
+them both attack 3 times". Claude's numbers.
 
 ## Urchin
 
-Twelve spines fly from the diver every way, every 0.6 s for five seconds,
+Twelve spines fly from the diver every way three times — at the touch, then
+every 0.6 s —
 each dealing 1 at 240 px — Igor's "shots every way". Its own shots, not the
 weapon's, so the Knife throws them too and the Harpoon's gain nothing of its
 reach or its damage (D207 (boosts of new kinds)). It hits behind the diver

@@ -166,7 +166,8 @@ function lungeStep(e, ux, uy, d, dt) {
     }
   } else if (e.phase === 'charge') {
     // A dive saved mid-charge before D201 has no length: the whole reach.
-    const v = A.speed * (e.chargeLen ?? A.reach) / A.reach;
+    // Right by the edge it keeps LUNGE_SLOWEST, reaching the edge sooner (D213).
+    const v = A.speed * Math.max(LUNGE_SLOWEST, (e.chargeLen ?? A.reach) / A.reach);
     vx = e.aimX * v;
     vy = e.aimY * v;
   } else if (e.phaseTime >= A.rest) {        // resting: the opening
@@ -550,27 +551,38 @@ function hit(e, n = player.damage) {
 // where a shot or a cut met none (D203). Its reach, seen: whatever the ring
 // touches, the splash wounds. `ring` is the radius it grows from.
 function splash(x, y, r, struck) {
-  particles.push({ x, y, vx: 0, vy: 0, life: SPLASH_SHOW, maxLife: SPLASH_SHOW,
-                   r: r + player.splash, ring: r, color: '#eaffff', glow: '#9ef7ff' });
-  for (const f of enemies) {
-    if (f === struck || f.gone) continue;
-    const dx = f.x - x, dy = f.y - y, reach = r + f.r + player.splash;
-    if (dx * dx + dy * dy < reach * reach) wound(f);
+  growRing(x, y, r, r + player.splash, player.damage, struck ? [struck.id ??= ++bulletId] : []);
+}
+
+// A ring from radius `from` out to `r`, fading in SPLASH_SHOW; `hit` the ids
+// it has wounded.
+function growRing(x, y, from, r, damage, hit, knock) {
+  const p = { x, y, vx: 0, vy: 0, life: SPLASH_SHOW, maxLife: SPLASH_SHOW, r, ring: from,
+              color: '#eaffff', glow: '#9ef7ff', hit, damage, knock };
+  particles.push(p);
+  ringWounds(p);
+}
+
+// A ring wounds every fish its reach meets while it shows, each once (D212):
+// one swimming in after it lands too, or the ring would pass over it harmless.
+function ringWounds(p) {
+  for (const e of enemies) {
+    if (e.gone) continue;
+    const dx = e.x - p.x, dy = e.y - p.y, reach = p.r + e.r;
+    if (dx * dx + dy * dy >= reach * reach || p.hit.includes(e.id ??= ++bulletId)) continue;
+    p.hit.push(e.id);
+    if (p.knock) {
+      const d = Math.sqrt(dx * dx + dy * dy);
+      knock(e, d ? dx / d : 1, d ? dy / d : 0);
+    }
+    wound(e, p.damage);
   }
 }
 
 // Jolt's (D207): every fish within its reach of the diver's body, hurt and
 // knocked away, the ring showing how far.
 function jolt(P) {
-  particles.push({ x: player.x, y: player.y, vx: 0, vy: 0, life: SPLASH_SHOW, maxLife: SPLASH_SHOW,
-                   r: player.r + P.reach, ring: player.r, color: '#eaffff', glow: '#9ef7ff' });
-  for (const e of enemies) {
-    if (e.gone) continue;
-    const dx = e.x - player.x, dy = e.y - player.y, d = Math.sqrt(dx * dx + dy * dy), reach = player.r + e.r + P.reach;
-    if (d >= reach) continue;
-    knock(e, d ? dx / d : 1, d ? dy / d : 0);
-    wound(e, P.damage);
-  }
+  growRing(player.x, player.y, player.r, player.r + P.reach, P.damage, [], true);
 }
 
 // Urchin's (D207): spines evenly round the diver, from a seeded turn.
@@ -711,7 +723,9 @@ function startBoost(name) {
     const add = { ...b.add };
     for (const k in b.percent) add[k] = player[k] * b.percent[k] / 100;
     for (const k in add) player[k] += add[k];
-    boosts.push({ name, left: b.time, add });
+    boosts.push({ name, left: b.time, add, since: 0 });
+    if (b.pulse) jolt(b.pulse);                // its first, at the touch
+    if (b.spines) throwSpines(b.spines);
   }
   banner = b.name + ' \u2014 ' + ((player.swing && b.swingDesc) || b.desc);
   bannerTime = NOTICE_TIME;
@@ -924,8 +938,9 @@ function newGame() {
 
 // ---------- the debug mode ----------
 // `?debug` (D102): main.js reads no save for it, and `saveNow()` writes none.
-function openDebug(code, seed) {
+function openDebug(code, seed, locked = false) {
   debugSetup = parseSetup(code, seed);
+  debugLocked = locked;
   meta = freshMeta();
   diveLive = false;
   muted = true;
@@ -1225,13 +1240,14 @@ function step(dt) {
     menuIndex = moveCursor(menuIndex, items.length);
 
     const item = items[menuIndex], by = FAST.some(k => keys.has(k)) ? 5 : 1;
-    if (item.change && tapped(LEFT)) item.change(-by);
-    else if (item.change && tapped(RIGHT)) item.change(by);
-    else if (tapped(GO)) item.run ? item.run() : item.change(by);
+    const fixed = menu.fixed;
+    if (item.change && tapped(LEFT)) { if (!fixed) item.change(-by); }
+    else if (item.change && tapped(RIGHT)) { if (!fixed) item.change(by); }
+    else if (tapped(GO)) item.run ? item.run() : fixed || item.change(by);
     else if (tapped(CLICK) && hovered >= 0) {
       const h = items[hovered], d = h.change && clickStep(rectOf(menu, hovered), aim.x);
       if (!h.change) h.run();
-      else if (d) h.change(d * by);
+      else if (d && !fixed) h.change(d * by);
     }
     else if (justPressed.has('Escape') && menu.back) menu.back();
     return;
@@ -1624,6 +1640,7 @@ function step(dt) {
     p.vx *= drag;
     p.vy *= drag;
     p.life -= dt;
+    if (p.hit && p.life > 0) ringWounds(p);
   }
 
   for (const e of enemies) {

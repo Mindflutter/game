@@ -42,7 +42,8 @@ const BUMP_SIZE      = 0.15;  // ...by this share of its radius, flattened along
 const SPINE          = 10;    // px a lionfish's spine stands off its body (D173): Claude's pick
 const LEAP_TIME      = 0.08;  // seconds a biter's drawn leap takes out, and as long back: Claude's pick
 const SPLASH_SHOW    = 0.3;   // seconds Bloom's ring shows a splash's reach: Claude's pick
-const ARRIVE_GAP     = 40;    // px outside the view a fish arrives, its body clear of it
+const LUNGE_SLOWEST  = 0.5;   // of its speed, the least a lunge toward the edge keeps (D213): Claude's pick
+const ARRIVE_GAP     = 80;    // px outside the view a fish arrives, its body clear of it
 const MARK_INSET     = 18;    // px inside the edge an arriving fish's mark stands (D202): Claude's pick
 const BODY_PUSH      = 600;   // px/s at most that overlapping bodies part (D120): Claude's pick
 // Crowds (D205), all Claude's picks: within CROWD_NEAR px of the diver a
@@ -196,13 +197,13 @@ const BOOSTS = [
   { name: 'Bloom',  desc: 'your shots splash',     swingDesc: 'your cuts splash',
     time: 6, add: { splash: 36 } },
   // Of the diver's own, and two of effects their own (D207): `pulse` hurts
-  // every fish within `reach` px of the diver's body each `every` seconds;
-  // `spines` throws `count` of them evenly round it each `every` seconds,
-  // each its own shot, not the weapon's. Claude's picks.
+  // every fish within `reach` px of the diver's body, `spines` throws `count`
+  // of them evenly round it, each its own shot, not the weapon's -- at the
+  // touch, then each `every` seconds: three times in its `time`. Claude's picks.
   { name: 'Surge',  desc: 'you dash again sooner', time: 6, percent: { dashCooldown: -60 } },
-  { name: 'Jolt',   desc: 'the water round you jolts', time: 5,
+  { name: 'Jolt',   desc: 'the water round you jolts', time: 2.5,
     pulse: { every: 1, reach: 90, damage: 2 } },
-  { name: 'Urchin', desc: 'spines fly from you every way', time: 5,
+  { name: 'Urchin', desc: 'spines fly from you every way', time: 1.5,
     spines: { every: 0.6, count: 12, damage: 1, speed: 420, range: 240, r: 4 } },
 ];
 
@@ -905,6 +906,7 @@ const MENUS = {
   // No `back`: the title is not part of the debug mode's flow.
   debug: {
     heading: 'DEBUG',
+    get fixed() { return debugLocked; },   // a play-test's setup is its own (D211)
     get sub() {
       return setupCode() + (debugSetup.ignored.length ? '      ignored: ' + debugSetup.ignored.join(', ') : '');
     },

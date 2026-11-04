@@ -2,7 +2,7 @@
 // save, the kit, the place, the fish, the code, the keys and every way out.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { loadGame, ticks, play, die, until } from './harness.js';
+import { loadGame, loadReplay, ticks, play, die, until } from './harness.js';
 
 // A game in the debug mode, on its setup screen.
 function setup(code = '', seed = 7) {
@@ -372,3 +372,26 @@ describe('the setup screen', () => {
     expect(g.screen).toBe('playing');
   });
 });
+
+describe('a play-test\'s setup (D211)', () => {
+  // The mouse resting on a fish row, as Igor's did, then A and a click on it.
+  const nudge = g => {
+    const r = g.MENUS.debug.items[row(g, 'puffer')], at = g.rowRect(row(g, 'puffer'), g.MENUS.debug.top);
+    g.menuIndex = row(g, 'puffer');
+    press(g, 'KeyA');
+    [g.aim.x, g.aim.y] = [at.x + at.w - 4, at.y + at.h / 2];
+    press(g, 'Mouse0');
+    return r.value;
+  };
+
+  it('is the play-test\'s own: a key or a click on a row changes nothing, where a plain setup steps round', () => {
+    const plain = loadReplay();
+    plain.openDebug('L1,G1,S1,Gun0', 1);
+    expect(nudge(plain)).not.toBe(0);
+    const g = loadReplay();
+    expect(g.sonarBegin({ debug: 'L1,G1,S1,Gun0' })).toBe('');
+    expect(nudge(g)).toBe(0);
+    expect(g.setupCode()).toBe('L1,G1,S1,Gun0');
+  });
+});
+

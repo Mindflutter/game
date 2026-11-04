@@ -76,10 +76,10 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-10-31-new-player` a third time — the third newcomer
 - [x] `2026-11-02-eel-path` — the Gun among 27 eels, their way drawn ahead
 - [x] `2026-11-02-eel-slow` — the same gate, the eels swaying slower
-- [ ] `2026-11-04-crowds-marks` — a crowd closing round you, the arrows at the edge
-- [ ] `2026-11-04-bloom` — a miss that splashes, and two Blooms stacked
-- [ ] `2026-11-04-new-boosts` — Jolt, Urchin and Surge
-- [ ] `2026-11-04-edge-lunge` — the boss lunging toward the edge
+- [x] `2026-11-04-crowds-marks` — a crowd closing round you, the arrows at the edge
+- [x] `2026-11-04-bloom` — a miss that splashes, and two Blooms stacked
+- [x] `2026-11-04-new-boosts` — Jolt, Urchin and Surge
+- [x] `2026-11-04-edge-lunge` — the boss lunging toward the edge
 - [ ] `2026-11-04-like-the-bot` — three gates at the bot's own start, for a bot like Igor
 
 **Where it starts to hurt**, looked for with the diver bot first
@@ -1304,6 +1304,11 @@ that nag or go unseen.
 **Measures**: hits and by what; time; how far round the diver the crowd
 stood when it closed; dashes.
 
+**Outcome**, 2026-11-04 — **held, the marks too short**. Two plays; the
+second went on four gates: the set gate cleared in 19s, no hit, 22 kills,
+4 dashes; no word on the crowds. Igor: "make arrows show 1.5 - 2 times as
+long" — `ARRIVE_GAP` 80, D202 (a mark where a fish comes in).
+
 ## Bloom, missed and stacked
 
 `2026-11-04-bloom` · layer 1, gate 3, sixteen drifters, the Gun, two Blooms
@@ -1317,6 +1322,12 @@ from a hit.
 
 **Measures**: Bloom's seconds after the second touch; kills by splash and
 misses that splashed; time; hits.
+
+**Outcome**, 2026-11-04 — **broken**. Four plays, the gate left at 11 to
+19s, 0 or 1 hit. Igor: "bloom is bugged, sometimes explosion ring goes over
+an enemy and doesnt harm" — replayed, 10 fish of 86 rings swam into a ring
+after its one wounding tick; fixed, D212 (a ring wounds while it shows).
+Nothing said of the stacking.
 
 ## The new boosts
 
@@ -1332,6 +1343,12 @@ one that does nothing felt.
 **Measures**: which boosts were touched and when; kills while each ran;
 dashes while Surge ran; hits; time.
 
+**Outcome**, 2026-11-04 — **held for Surge, Jolt and Urchin too weak**.
+Four plays, 8 to 14s, one hit in all; Jolt taken in every play, Urchin in
+three, Surge in two. Igor: "surge ok, jolt & urchin - make them both attack
+3 times" — three attacks a touch, the first at once, D207 (boosts of new
+kinds).
+
 ## The lunge toward the edge
 
 `2026-11-04-edge-lunge` · layer 1's boss, the Gun at tier 2, two Heart
@@ -1343,6 +1360,11 @@ lunges toward the edge outnumbering the others, or "still too fast".
 
 **Measures**: lunges toward the edge and how many landed; lunges elsewhere
 and how many landed; time; HP lost or the death.
+
+**Outcome**, 2026-11-04 — **held, with a floor**. One play, died at 52s,
+2 of 4 hits the boss's. Igor: "boss lunge ok, but leave a minimal speed. if
+it's too close to screen edge, it just drifts too slow" — D213 (a lunge's
+least speed).
 
 ## Like the bot
 
@@ -1365,4 +1387,10 @@ near the bot's here, which would put the gap in the deep setups instead.
 
 **Measures**: shots fired and that struck; dashes a minute; standing share;
 hits a minute and by what; time a gate.
+
+**Outcome**, 2026-11-04 — **void, play again**. Four dives, every one dead
+within 20s to fifty puffers: an A pressed on the setup screen, the mouse on
+the puffer row, wrapped puffers to 50. Igor: "played several times,
+overwhelmed by puffers". The setup of a play-test is locked since, D211 (a
+play-test's setup is its own); the same link plays the real test.
 

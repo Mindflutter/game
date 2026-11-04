@@ -131,7 +131,7 @@ describe('a lunge toward the edge (D201)', () => {
       g.queuePaused = true;
       g.spawnBatch({ enemies: [[name, 1]] });
       const e = g.enemies[0], L = e.lunge;
-      const room = L.reach / 3;                       // the edge a third of its reach away
+      const room = L.reach * 0.75;                    // the edge three quarters of its reach away
       Object.assign(e, { x: g.ARENA_W - e.r - room, y: g.cameraY + g.ARENA_H / 2,
                          phase: 'windup', phaseTime: L.windup, aimX: 1, aimY: 0 });
       g.player.x = 200;                               // out of its way
@@ -141,6 +141,24 @@ describe('a lunge toward the edge (D201)', () => {
       while (e.phase === 'charge' && t < 10) { g.update(g.FIXED_DT); t += g.FIXED_DT; }
       expect([name, t]).toEqual([name, expect.closeTo(L.reach / L.speed, 1)]);
       expect(e.x).toBeCloseTo(g.ARENA_W - e.r, 0);
+    }
+  });
+
+  it('never crawls: right by the edge it keeps half its speed and reaches the edge sooner (D213)', () => {
+    for (const name of ['boss', 'mini-boss']) {
+      const g = loadGame();
+      g.immortal = true;
+      g.reset(1);
+      g.queuePaused = true;
+      g.spawnBatch({ enemies: [[name, 1]] });
+      const e = g.enemies[0], L = e.lunge, room = 20;
+      Object.assign(e, { x: g.ARENA_W - e.r - room, y: g.cameraY + g.ARENA_H / 2,
+                         phase: 'windup', phaseTime: L.windup, aimX: 1, aimY: 0 });
+      g.player.x = 200;
+      g.update(g.FIXED_DT);
+      const x = e.x;
+      g.update(g.FIXED_DT);
+      expect([name, (e.x - x) / g.FIXED_DT]).toEqual([name, expect.closeTo(L.speed / 2, 0)]);
     }
   });
 });

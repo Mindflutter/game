@@ -748,6 +748,25 @@ describe('the splash (D125)', () => {
     expect(9 - past.hp).toBe(g.player.damage);
   });
 
+  it('wounds a fish that swims into the ring while it shows, and none twice (D212)', () => {
+    const g = quiet();
+    g.immortal = true;
+    bloom(g);
+    g.player.fireTimer = 999;
+    const struck = mob(g.player.x + 100, g.player.y, { hp: 9, maxHp: 9 });
+    const late = mob(struck.x, struck.y + 200, { hp: 9, maxHp: 9 });     // out of reach as it lands
+    const stays = mob(struck.x, struck.y + 9 + 9 + g.player.splash - 4, { hp: 9, maxHp: 9 });
+    g.enemies.push(struck, late, stays);
+    shot(g);
+    expect(until(g, 1, () => struck.hp < 9)).toBe(true);
+    expect(late.hp).toBe(9);
+    late.y = stays.y;                                                       // in, the ring still showing
+    late.x = struck.x + 4;
+    g.update(g.FIXED_DT);
+    run(g, 60);
+    expect([9 - late.hp, 9 - stays.hp]).toEqual([1, 1]);
+  });
+
   it('kills through the one path: a fish its splash killed is not cut again, and pays once', () => {
     const g = loadGame();
     expect(g.applyScenario('knife', 1)).toBe(true);

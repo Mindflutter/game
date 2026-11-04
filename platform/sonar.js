@@ -21,7 +21,7 @@ const sonarProbe = () => [rngState, Math.round(player?.x * 256), Math.round(play
 
 function sonarBegin(start) {
   if (!('debug' in start)) return loadSave(start.save);
-  openDebug(start.debug, start.seed);
+  openDebug(start.debug, start.seed, true);
   return '';
 }
 

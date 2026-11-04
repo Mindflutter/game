@@ -408,7 +408,7 @@ describe('boosts (D86)', () => {
     return [g, g.BOOSTS.find(b => b.name === name)];
   };
 
-  it('jolts the water round the diver while Jolt runs: fish in its reach are hurt, none beyond (D207)', () => {
+  it('jolts the water round the diver three times a touch, the first at once: fish in its reach are hurt, none beyond (D207)', () => {
     const [g, b] = touched('Jolt');
     const P = b.pulse;
     g.player.fireTimer = 999;
@@ -416,33 +416,28 @@ describe('boosts (D86)', () => {
     g.placeEnemy('drifter', g.player.x - g.player.r - 18 - P.reach - 30, g.player.y);
     const [near, far] = g.enemies;
     for (const e of [near, far]) Object.assign(e, { hp: 99, maxHp: 99, speed: 0 });
-    for (let i = 0, n = ticks(g, P.every + 0.02); i < n; i++) g.update(g.FIXED_DT);
-    expect([99 - near.hp, 99 - far.hp]).toEqual([P.damage, 0]);
-    expect(g.particles.some(p => p.ring !== undefined && p.r >= P.reach)).toBe(true);   // seen
-    const pinned = s => {
-      const at = [near.x, near.y];
-      for (let i = 0, n = ticks(g, s); i < n; i++) { g.update(g.FIXED_DT); [near.x, near.y] = at; }
-    };
-    pinned(b.time);
-    const hurt = 99 - near.hp;
-    expect(hurt).toBeGreaterThan(P.damage);                               // again each `every`
-    pinned(1);
-    expect(99 - near.hp).toBe(hurt);                                      // and not after its time
+    const at = [near.x, near.y];
+    for (let i = 0, n = ticks(g, b.time + 1); i < n; i++) { g.update(g.FIXED_DT); [near.x, near.y] = at; }
+    expect([99 - near.hp, 99 - far.hp]).toEqual([3 * P.damage, 0]);
+    expect(g.particles.some(p => p.ring !== undefined)).toBe(false);   // and done
   });
 
-  it('throws spines every way while Urchin runs, none of them the weapon\'s shot (D207)', () => {
+  it('throws spines every way three times a touch, the first at once, none of them the weapon\'s shot (D207)', () => {
     const [g, b] = touched('Urchin');
-    const S = b.spines;
+    const S = b.spines, thrown = new Set();
     g.player.fireTimer = 999;
     g.tally.marksman = 5;
-    for (let i = 0, n = ticks(g, S.every + 0.01); i < n; i++) g.update(g.FIXED_DT);
-    const spines = g.bullets.filter(x => !x.weapon);
-    expect(spines).toHaveLength(S.count);
-    const a = spines.map(x => Math.atan2(x.vy, x.vx)).sort((p, q) => p - q);
+    const first = g.bullets.filter(x => !x.weapon);
+    expect(first).toHaveLength(S.count);                                     // at once
+    const a = first.map(x => Math.atan2(x.vy, x.vx)).sort((p, q) => p - q);
     const gaps = a.map((x, i) => (i ? x - a[i - 1] : x + 2 * Math.PI - a.at(-1)));
-    expect(Math.max(...gaps)).toBeCloseTo(2 * Math.PI / S.count, 6);          // all the way round, evenly
-    for (let i = 0, n = ticks(g, S.range / S.speed + 0.1); i < n; i++) g.update(g.FIXED_DT);
-    expect(g.tally.marksman).toBe(5);                                          // a spine that misses is no miss
+    expect(Math.max(...gaps)).toBeCloseTo(2 * Math.PI / S.count, 6);         // all the way round, evenly
+    for (let i = 0, n = ticks(g, 5); i < n; i++) {
+      g.update(g.FIXED_DT);
+      for (const x of g.bullets) if (!x.weapon) thrown.add(x.id);
+    }
+    expect(thrown.size + first.length - first.filter(x => thrown.has(x.id)).length).toBe(3 * S.count);
+    expect(g.tally.marksman).toBe(5);                                        // a spine that misses is no miss
   });
 
   it('holds a boost\'s time while the game is paused', () => {

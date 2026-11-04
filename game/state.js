@@ -497,6 +497,8 @@ let damageOverride = 0;     // above 0, every shot does this much
 
 // Set by `?debug` at boot and never unset; while set, nothing is saved.
 let debugSetup = null;
+// A play-test's setup is the play-test's: no row of it changes (D211).
+let debugLocked = false;
 
 function openScreen(name) {
   returnTo = screen;

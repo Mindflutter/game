@@ -6274,6 +6274,11 @@ five answered)).
 - **The warning is the arrival's own time**: about half a second for a
   darter, 0.7 for a drifter, measured. Nothing arrives sooner or later than
   before, so no figure moves. The shape and the inset are Claude's.
+- **Played** (`playtests.md` → Crowds and arrival marks), Igor: "make arrows
+  show 1.5 - 2 times as long". `ARRIVE_GAP` is 80 px, not 40: 0.71 s for a
+  darter from 0.46, 1.18 for a drifter from 0.69, 1.12 for an archer from
+  0.56, 0.68 for a puffer from 0.35 — 1.5 to 2 times. Every fish arrives
+  that much later.
 
 **Guarded by** `tests/enemies.test.js` — the mark stands on the edge beside
 the fish, pointing in, clearer as it nears, gone once it is in view.
@@ -6385,7 +6390,12 @@ in every direction" (D194 (the list's seventh five answered)); the to-do,
 - **Jolt**: once a second for five, every fish within 90 px of the diver's
   body takes 2 and is knocked away, a ring showing the reach — a `pulse`.
 - **Urchin**: every 0.6 s for five, twelve spines evenly round the diver,
-  each 1 damage over 240 px — `spines`. Its own shots: no weapon's number,
+  each 1 damage over 240 px — `spines`.
+- **Played** (`playtests.md` → The new boosts), Igor: "surge ok, jolt &
+  urchin - make them both attack 3 times". Each now attacks three times a
+  touch, the first at once: Jolt's time 2.5 s, Urchin's 1.5 s. A second
+  touch adds a whole time again (D204 (a boost touched again adds its
+  time)), and so three more. Its own shots: no weapon's number,
   no miss, no weapon's ladder.
 - **A boost may be an effect, not only numbers**: a `pulse` or `spines`
   field switches on its branch in the boost clock. D86 (boosts) held a boost
@@ -6473,3 +6483,47 @@ here … duplicating across backend projects wont work, as rules can change"
 
 **Guarded by** nothing in the suites: it is Claude Code's settings, not the
 game's.
+
+## D211 — A play-test's setup is its own · 2026-11-04
+
+Igor, of `2026-11-04-like-the-bot`: "played several times, overwhelmed by
+puffers". The play-test's code has no puffers: on the setup screen, the
+mouse resting on the puffer row, one press of A stepped puffers below 0,
+and the count came round to 50 (D102 (the debug mode)'s steps that wrap).
+Every dive of the play was fifty puffers, not the test.
+
+- **A Sonar play-test's setup screen changes nothing**: no key, Enter or
+  click moves a row; Dive, R and Backspace work as ever. `sonarBegin()`
+  locks it, `openDebug()` unlocks it, so `?debug` alone is as before.
+
+**Guarded by** `tests/debug.test.js` — A and a click on a fish row step
+a plain setup round, and leave a play-test's untouched.
+
+## D212 — A ring wounds while it shows · 2026-11-04
+
+Igor, playing `2026-11-04-bloom`: "bloom is bugged, sometimes explosion ring
+goes over an enemy and doesnt harm". A splash wounded only on its first
+tick, while its ring showed for `SPLASH_SHOW`: replayed, 10 fish over 86
+rings swam into a ring after that tick and took nothing.
+
+- **A splash's ring, and Jolt's, wounds every fish its reach meets while it
+  shows, each once**: the ring keeps the fish it has wounded, by an id each
+  fish is given as first met. A wound still never splashes on.
+
+**Guarded by** `tests/combat.test.js` — a fish swimming into a ring after it
+landed is wounded, one inside it all along only once.
+
+## D213 — A lunge's least speed · 2026-11-04
+
+Igor, playing `2026-11-04-edge-lunge`: "boss lunge ok, but leave a minimal
+speed. if it's too close to screen edge, it just drifts too slow".
+
+- **A lunge toward the edge keeps at least `LUNGE_SLOWEST`, half its
+  speed**: past that, it reaches the edge sooner than its whole time, rather
+  than crawl there. Amends D201 (a lunge toward the edge takes its whole
+  time). Claude's number.
+
+**Guarded by** `tests/boss.test.js` — a lunge 20 px from the edge moves at
+half its speed; one three quarters of its reach away still takes its whole
+time.
+
