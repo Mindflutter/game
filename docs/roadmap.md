@@ -33,25 +33,15 @@ New things to meet and to earn, each to measure.
 
 - [ ] **Mods uncapped: kept or taken back?** Igor's call on D209 (mods
   uncapped)'s measure: the Harpoon over the Gun again, 28 batches stood
-  through from 25.
+  through from 25; and `Reflex` at 8 makes the late diver
+  unhit (`ideas.md` → Abilities, analysed).
+- [ ] **The trees and abilities, decided**: the decisions the two analyses
+  suggest (`ideas.md` → Development trees, analysed; Abilities, analysed).
 
 ### 5. Analyses, for Igor's decisions
 
 Read and written up, nothing built; each ends in decisions to suggest.
 
-- [ ] **Development trees, analysed**: how a small tree for the character —
-  the attributes as one, or a tree of its own — and one for each weapon,
-  a top tier that adds a way to play among them, could take the points
-  without moving the balance reached (`ideas.md` → Every weapon tried and
-  raised; `reading.md` → Nova Drift, a game like this one). An analysis for
-  Igor, not a build.
-- [ ] **Abilities, analysed** with the development trees: how other games
-  do it, fitted to Abyss, with decisions to suggest — Igor's start, an
-  ability found at a depth once a game and developed at `home`; the dash
-  among them, locked or not, its shove earned; and a thorough check of the
-  balance and the mods that feed the dash, `Reflex` and `Impact` among them
-  and the right mouse button as an ability's key (`ideas.md` → Abilities,
-  the dash among them; the dash economy).
 - [ ] **A bot that plays like Igor**: first the play-tests for what his
   plays do not show yet, then the bot fitted to them (`ideas.md` → A bot
   that plays like Igor). The stood bars wait on it (`bugs.md` → Nothing

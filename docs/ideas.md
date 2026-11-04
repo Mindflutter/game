@@ -107,11 +107,54 @@ weapons. Where it stands:
   … weapons can have a tree of its own too. all trees small enough, so
   that player is motivated to upgrade those", a top tier that adds a way to
   play among them; "but i'm afraid to tweak the whole system, because it
-  affects balance". Both are `roadmap.md` → Next. A mod and a boost of each
+  affects balance". Both are `roadmap.md` → Next; the trees analysed below. A mod and a boost of each
   weapon's own: declined (Declined).
 A new player (`playtests.md` → A new player's session) bought the Knife
 and its first tier, carried the Gun again within a second and never dived
 with the Knife; raised the Gun to 3; never bought the Harpoon.
+
+- **Development trees, analysed** (Claude, 2026-11-04, the to-do; nothing
+  built). How others grow a character between runs, from what is known of
+  them, not replayed:
+  - *Hades*' Mirror of Night: a short row of talents, each with an
+    alternative swappable at home for free — the cost buys a slot, the
+    choice is an option. Its weapon **Aspects** change how a weapon plays,
+    raised in a few levels: the closest thing to "a top tier that adds a
+    way to play".
+  - *Dead Cells*: unlocks widen the pool of what a run can find — breadth,
+    not power; a few flasks are the only raw numbers.
+  - *Rogue Legacy 2*'s manor: a wide tree of stat bumps — the grind Igor
+    named in "dives are long, useless and grindy" (`reading.md`).
+  - *Nova Drift* (`reading.md`): a mod changes how the ship plays, not by
+    how much.
+
+  What carries to Abyss, and keeps the balance reached: **a node is an
+  option, not a number**. A tree that adds power moves every bar the bot
+  holds; one that swaps a way of playing for another moves only diversity.
+  Shaped so:
+  - **The character's tree is the attributes**, reshaped, not added to:
+    Heart, Dash reach and Strength keep their four steps and their costs —
+    30 points for all — and steps 2 and 4 of each are a fork of two, both
+    worth the step, swappable at `home`. The bars see the same numbers.
+  - **Each weapon's tree is three nodes**: two forks, then its top, a way
+    to play (Every weapon tried and raised → Running lists, Weapon ideas:
+    the Gun's burst, the Harpoon's drag, the Knife's cut from behind),
+    costing 1, 2 and 3 points — 6 a weapon, what its own ladder
+    pays and a little more (D206 (a ladder of each weapon's own)). 30 and
+    18 is 48 of the 50 a career that tries every weapon can earn; one that
+    never does earns 42 and buys its own weapon's tree and every step.
+  - **Opened by owning the weapon**, its top by its tier 3, so the tree
+    asks the weapon to be carried — the motivation Igor asked for.
+  - **The safety check**: the career bot buys a node at random where it
+    buys a step now; the bars run with every node on and off. A node that
+    moves a bar past the noise between seeds (`roadmap.md` → Health) is a
+    number in disguise and is reshaped.
+
+  **Decisions to suggest**: (1) a tree's node is an option, swappable at
+  home, never a raw number; (2) the attributes become the character's
+  tree, their steps and costs kept, forks at steps 2 and 4; (3) a weapon's
+  tree of three, 1 + 2 + 3 points, opened by owning it, its top by its
+  third tier; (4) every node measured on the bars before it ships.
 
 ### Abilities, the dash among them
 
@@ -159,12 +202,64 @@ with the Knife; raised the Gun to 3; never bought the Harpoon.
   check with mods" — the abilities analysis, with what a locked dash does to
   the mods that feed it.
 
+- **Abilities, analysed** (Claude, 2026-11-04, the to-do; nothing built).
+  How others give them, from what is known of them:
+  - *Hollow Knight*: each ability found once, at a fixed place, and
+    raised later by a second find — the dash, then the shadow dash.
+  - *Risk of Rain 2*: four skills a character — primary, secondary on the
+    right button, utility (the dash), special — each with alternatives
+    opened by challenges and chosen before a run.
+  - *Hades*: the dash and the cast are always had; boons change them in a
+    run, the Mirror for good.
+  - *Enter the Gungeon*: an active item charged by damage dealt, not a
+    timer — it rewards fighting.
+
+  Fitted to Abyss, Igor's start kept — "finding an ability on reaching
+  certain depth (once per game), then developing it at home":
+  - **The dash stays had from the start, the first ability.** Locked, it
+    would leave the Dash reach and Strength steps, `Reflex`, `Impact` and
+    `bowling` buying nothing until it opened — five things to hold back
+    for a lock no play-test asked for (Locked at the start?, below).
+  - **One more is found once a career**, at the top of layer 2: a
+    glowing shell offers two, one taken, kept for good; a second at the
+    top of layer 3 the first time it is reached. One carried a dive, on
+    the **right mouse button**, chosen at `home` like a weapon.
+  - **Developed at home** by a tree of its own, the trees' rule: options,
+    not numbers.
+  - **Charged by fighting**, as Gungeon's: a meter filled by kills, not a
+    clock, so it never fires from a corner.
+  - **The candidates**, each a verb no weapon has: an ink cloud — fish
+    inside lose the diver; a lure — a bubble the fish chase instead; a
+    hook — a line pulling a fish in or the diver to it. The pulse is
+    dropped: Jolt (D207 (boosts of new kinds)) is that verb now, for a
+    while.
+  - **The shove earned**: a small push stays free; the full throw, a node
+    of the dash's own tree.
+
+  **The balance and the mods that feed the dash**, measured 2026-11-04,
+  the late Gun kit at layer 3, mods uncapped (D209 (mods uncapped)), five
+  seeds: four of each mod, 0.31 hearts a batch for the Gun; `Nerve` at 8,
+  0.31, no change; **`Reflex` at 8, 0 for the Gun and the Harpoon** — the
+  cooldown at its floor, the dash's own length, the diver all but never
+  out of a dash's safety. Dealt evenly a dive brings about four, so it is
+  not met in play, but uncapped it is the one mod that can make the diver
+  unbeatable: it needs a floor of its own above the dash's length or its
+  cap back. `Impact` beyond one still kills nothing more against 1-HP fish.
+
+  **Decisions to suggest**: (1) the dash is the first ability, had from
+  the start; (2) an ability is found once a career at the top of layers
+  2 and 3, one of two, carried one a dive on the right mouse button;
+  (3) charged by kills; (4) developed by a tree of options; (5) `Reflex`
+  gets a cooldown floor, Claude's pick about 0.8 s, or its cap back,
+  whichever Igor keeps of D209.
+
 - **The dash economy: two mods and an attribute feed one verb.** Igor, 2026-09-27,
   playing D54: "once the dash becomes long, it feels way easier" and "dash
   length + dash damage is the cool build, might want to rebalance". Measured
   numbers live in `roadmap.md` -> Health. `Fins` does not feed the dash
   (D56 (the dash is a fixed, committed lunge)), so what points at it is
-  `Reflex` (cooldown) and `Impact` (damage), both capped at 3, and the Dash
+  `Reflex` (cooldown) and `Impact` (damage), uncapped since D209 (mods
+  uncapped), and the Dash
   reach and Strength attributes at `home` (D75 (the gun's tiers, dash reach, a
   clean batch), D98 (attributes, micro-tasks and what gear requires)).
 

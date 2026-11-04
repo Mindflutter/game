@@ -6443,7 +6443,10 @@ five answered)).
   takes it below.
 - **Measured, ten seeds**: the same six of eight bars hold; 28 batches
   stood through, from 25; and the Harpoon again over the Gun as well as the
-  Knife, where the caps had left only the Knife (`bugs.md`). Kept as Igor
+  Knife, where the caps had left only the Knife (`bugs.md`). And the late
+  Gun kit with eight `Reflex` takes no hit in layer 3 — out of reach of an
+  even deal, about four a dive, but the ceiling the caps held (`ideas.md`
+  → Abilities, analysed). Kept as Igor
   asked, **his to keep or take back** (`roadmap.md` → Next); taking it
   back is each mod's `max` again.
 
