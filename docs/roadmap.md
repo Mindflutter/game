@@ -19,15 +19,6 @@ Claude would take them (D197 (the list's last items; the roadmap is the
 to-do list)). Igor reorders. A task done leaves the list with its commit;
 what waits on Igor's answer is `ideas.md` → To discuss.
 
-### 1. Tools the rest is checked by
-
-First, so every change after has its measure and its play-test.
-
-- [ ] **Run `npm run balance`**, Igor's word given (D188 (the list's
-  first five answered)): the first since D184 (Go home on top) to D187 (the eel's
-  sway slower; its path taken back). What it finds goes to `bugs.md`; the
-  Harpoon over the Gun most likely stays (`bugs.md`).
-
 ### 2. Fixes
 
 Small, concrete, each its own commit.
@@ -194,6 +185,17 @@ older build is a regression signal for that build only.
   layer 3 about 3 minutes. The Harpoon before D182: 2, 3, 3, 3, 8.
   The Gun's on the D178 (a cleanup, and Igor's own words) build, the guard
   lasting two gates: 2, 3, 2, 3, 2.
+- **The bars, the D199 (the bars, printed) build, 2026-11-04**, ten seeds,
+  `npm run balance`: six of eight hold. Nothing trivial fails on 37 batches
+  stood through (6 / 7 / 24 by layer), no weapon dominating on "Harpoon over
+  Knife" (`bugs.md`).
+- **The weapons, the D187 (the eel's sway slower; its path taken back)
+  build, 2026-11-04**, at the kit a Gun career first meets each layer with,
+  ten seeds, `npm run measure weapons`, clear s / hearts / clears: layer 2
+  — the Gun 18.51 / 0.37 / 0.97, the Harpoon 18.37 / 0.42 / 0.94, the Knife
+  29.04 / 1.04 / 0.87; layer 3 — the Gun 34.91 / 2.04 / 0.86, the Harpoon
+  30.02 / 1.19 / 0.89, the Knife 33.18 / 1.46 / 0.87; the eel 1.21, 0.83 and
+  0.33 hits a fight. Over both, the Harpoon dominates the Knife only.
 - **The weapons, the D182 (the Harpoon a railgun) build, 2026-11-01**
   (`reading.md` → Try out and upgrade each weapon):
   - **At the fresh kit, layer 1**, ten seeds — `npm run measure weapons
@@ -209,7 +211,8 @@ older build is a regression signal for that build only.
     | Knife | 29.59 | 1.08 | 0.9 | 29.04 / 1.04 | 30.15 / 1.11 |
 
     The Harpoon dominates the Gun over both layers, breaking D127 (the
-    tuned numbers)'s bar (`bugs.md` → The Harpoon over the Gun). Its row is
+    tuned numbers)'s bar, on that build (`bugs.md` → The Harpoon over the
+    Knife, for this one). Its row is
     the D183 (the Harpoon's top fires faster) build's; on D182's, 24.96 /
     1.03, its layer 3 31.54 / 1.65; before D182, 29.02 / 1.3 and 39.73 /
     2.21, and the bar held.
