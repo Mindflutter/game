@@ -36,7 +36,10 @@ built: the decision, or the commit, is its record from then on.
   lionfish).
   **Answered**, Igor, 2026-11-04 (D189 (the list's next five answered)):
   play-tests first, for what Igor's play does not yet show, then the bot
-  (`roadmap.md` → Next).
+  (`roadmap.md` → Next). The plays on disk read and the play-test set up,
+  2026-11-04 (`playtests.md` → Like the bot): Igor's shots strike 38% to
+  the bot's 84%, he dashes six times as often; the bot is fitted once he
+  has played it.
 
 ### Every weapon tried and raised
 

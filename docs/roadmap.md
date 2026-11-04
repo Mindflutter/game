@@ -42,9 +42,10 @@ New things to meet and to earn, each to measure.
 
 Read and written up, nothing built; each ends in decisions to suggest.
 
-- [ ] **A bot that plays like Igor**: first the play-tests for what his
-  plays do not show yet, then the bot fitted to them (`ideas.md` → A bot
-  that plays like Igor). The stood bars wait on it (`bugs.md` → Nothing
+- [ ] **A bot that plays like Igor**: the play-test is set up
+  (`playtests.md` → Like the bot), and what his plays show is read; the bot
+  is fitted once he has played it (`ideas.md` → A bot that plays like
+  Igor). The stood bars wait on it (`bugs.md` → Nothing
   trivial fails across all three layers).
 ### 6. Housekeeping
 

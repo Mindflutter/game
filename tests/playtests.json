@@ -706,5 +706,87 @@
       "time",
       "dashes"
     ]
+  },
+  "2026-11-04-crowds-marks": {
+    "purpose": "Fish now close round you, each to a place of its own, and swim round each other; a pale arrow on the edge shows where one is about to come in. Do the crowds move like fish, and do the arrows warn without nagging?",
+    "start": {
+      "debug": "L1,G2,S7,Gun0,drifter14,darter8"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive and fight the gate through; the tag says done. Watch how the crowd closes round you, and the arrows at the edges before fish come in. Say how both feel.",
+    "measures": [
+      "hits and by what",
+      "time",
+      "how far round the diver the crowd stood when it closed",
+      "dashes"
+    ]
+  },
+  "2026-11-04-bloom": {
+    "purpose": "Bloom now splashes where a missed shot ends, half again as wide; and a second Bloom adds its time rather than restarting it. Does a splash without a hit feel right, and does the stacking read?",
+    "start": {
+      "debug": "L1,G3,S7,Gun0,drifter16,Bloom2"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive, grab both Blooms beside you one after the other (the bar shows its seconds: about 12), then fight the gate through, shooting into the crowd. Say how the splash and the stacked time feel.",
+    "measures": [
+      "Bloom's seconds after the second touch",
+      "kills by splash, misses that splashed",
+      "time",
+      "hits"
+    ]
+  },
+  "2026-11-04-new-boosts": {
+    "purpose": "Three new boosts: Jolt (the water round you jolts), Urchin (spines fly every way), Surge (the dash comes back sooner). Is each worth grabbing, and does any feel too strong or pointless?",
+    "start": {
+      "debug": "L1,G3,S7,Gun0,drifter12,darter8,Jolt1,Urchin1,Surge1"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive; the three boosts lie beside you and fade in six seconds. Grab them when you like, all or some, and fight the gate through. Say what each did for you.",
+    "measures": [
+      "which boosts were touched and when",
+      "kills while each ran",
+      "dashes while Surge ran",
+      "hits",
+      "time"
+    ]
+  },
+  "2026-11-04-edge-lunge": {
+    "purpose": "A boss lunging toward the edge used to arrive too fast; now its lunge takes its whole time, slower over the shorter way. Does a lunge near the edge read as dodgeable now?",
+    "start": {
+      "debug": "L1,G6,S7,Gun2,Heart2"
+    },
+    "limit": {
+      "gates": 1
+    },
+    "play": "Press Dive and fight the boss near an edge of the screen on purpose, so it lunges toward it. Say whether those lunges feel as dodgeable as the others.",
+    "measures": [
+      "lunges toward the edge and how many landed",
+      "lunges elsewhere and how many landed",
+      "time",
+      "HP lost or the death"
+    ]
+  },
+  "2026-11-04-like-the-bot": {
+    "purpose": "Data for a bot that plays like you: the first three gates of a dive at the start, the same seed and kit the bot plays, so your aim, dashes and reactions can be set beside its.",
+    "start": {
+      "debug": "L1,G1,S1,Gun0"
+    },
+    "limit": {
+      "gates": 3
+    },
+    "play": "Press Dive and play the three gates the way you always do; nothing special to watch. The tag says done.",
+    "measures": [
+      "shots fired and shots that struck",
+      "dashes a minute",
+      "share of fighting time standing still",
+      "hits a minute and by what",
+      "time a gate"
+    ]
   }
 }

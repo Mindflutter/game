@@ -76,6 +76,11 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-10-31-new-player` a third time — the third newcomer
 - [x] `2026-11-02-eel-path` — the Gun among 27 eels, their way drawn ahead
 - [x] `2026-11-02-eel-slow` — the same gate, the eels swaying slower
+- [ ] `2026-11-04-crowds-marks` — a crowd closing round you, the arrows at the edge
+- [ ] `2026-11-04-bloom` — a miss that splashes, and two Blooms stacked
+- [ ] `2026-11-04-new-boosts` — Jolt, Urchin and Surge
+- [ ] `2026-11-04-edge-lunge` — the boss lunging toward the edge
+- [ ] `2026-11-04-like-the-bot` — three gates at the bot's own start, for a bot like Igor
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -1284,4 +1289,80 @@ right". Cleared in 27s, 4 HP lost, every hit an eel's — no fewer than
 `eels-deep`'s 3 or `eel-path`'s 2 — and 9 dashes with 8 dash kills. The
 hits did not fall; what changed is that the sway reads. One play; the
 sway stays as D187 (the eel's sway slower; its path taken back) built it.
+
+## Crowds and arrival marks
+
+`2026-11-04-crowds-marks` · layer 1, gate 2, fourteen drifters and eight
+darters, the Gun at its first tier; one gate. D205 (crowds that move like
+fish), D202 (a mark where a fish comes in).
+
+**Hypothesis**: the crowd closes round the diver rather than queueing, and
+the edge arrows give a fair warning without drawing the eye all the time.
+**Broken by**: "they look robotic", a crowd that still stacks, or arrows
+that nag or go unseen.
+
+**Measures**: hits and by what; time; how far round the diver the crowd
+stood when it closed; dashes.
+
+## Bloom, missed and stacked
+
+`2026-11-04-bloom` · layer 1, gate 3, sixteen drifters, the Gun, two Blooms
+laid beside the diver; one gate. D203 (a miss splashes too), D204 (a boost
+touched again adds its time).
+
+**Hypothesis**: a shot into a crowd that misses still pays, so Bloom feels
+like a crowd's answer; the second touch shows about 12 seconds. **Broken
+by**: splashes that feel like free kills, or a splash that cannot be told
+from a hit.
+
+**Measures**: Bloom's seconds after the second touch; kills by splash and
+misses that splashed; time; hits.
+
+## The new boosts
+
+`2026-11-04-new-boosts` · layer 1, gate 3, twelve drifters and eight
+darters, the Gun, Jolt, Urchin and Surge laid beside the diver; one gate.
+D207 (boosts of new kinds).
+
+**Hypothesis**: each is worth grabbing in its own way — Jolt against a crowd
+pressing in, Urchin against fish behind, Surge for dashing — and none
+clears the gate on its own. **Broken by**: one boost that wins the gate, or
+one that does nothing felt.
+
+**Measures**: which boosts were touched and when; kills while each ran;
+dashes while Surge ran; hits; time.
+
+## The lunge toward the edge
+
+`2026-11-04-edge-lunge` · layer 1's boss, the Gun at tier 2, two Heart
+steps; one gate. D201 (a lunge toward the edge takes its whole time).
+
+**Hypothesis**: a lunge toward the edge now reads as dodgeable as one
+across the open water, being no shorter in time. **Broken by**: landed
+lunges toward the edge outnumbering the others, or "still too fast".
+
+**Measures**: lunges toward the edge and how many landed; lunges elsewhere
+and how many landed; time; HP lost or the death.
+
+## Like the bot
+
+`2026-11-04-like-the-bot` · a dive's first three gates, seed 1, the Gun at
+its first tier — the bot's own start in `npm run measure`; three gates.
+For a bot that plays like Igor (`ideas.md` → A bot that plays like Igor).
+
+**What his plays show already**, every play on disk read 2026-11-04 but the
+newcomers', 76 minutes of fighting, against the bot's 20 over five dives
+from the top: shots that strike 38% against 84%; 0.56 shots a second
+against 0.76; dashes 10.8 a minute against 1.7; standing 14% of the time
+against 12%; hits 2.7 a minute against 0.3 — Igor's plays lean deep and
+hard, so the hits are high, the reason for this one. And from the lunge
+reading above: a swim across a lunge's line leaves it in 0.3–0.4 s.
+
+**Hypothesis**: at the bot's own start Igor still misses about half his
+shots and dashes several times as often, so the bot's aim spread, lapse
+and dash rate are what part them. **Broken by**: an aim and a dash rate
+near the bot's here, which would put the gap in the deep setups instead.
+
+**Measures**: shots fired and that struck; dashes a minute; standing share;
+hits a minute and by what; time a gate.
 
