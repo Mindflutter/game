@@ -327,9 +327,7 @@ describe('mods across a whole dive (D69)', () => {
     expect(g.MODS.filter(m => m.max !== undefined).map(m => [m.name, m.max])).toEqual([['Mend', 1]]);
     g.reset(1);
     g.queuePaused = true;
-    const reflex = g.MODS.find(m => m.name === 'Reflex');
-    for (let i = 0; i < 12; i++) g.takeMod(reflex);
-    expect(g.player.dashCooldown).toBeLessThan(0);
+    g.player.dashCooldown = -1;                  // past anything a kit reaches (D214)
     g.justPressed.add('Space');
     g.update(g.FIXED_DT);
     expect(g.player.dashTime).toBeGreaterThan(0);
@@ -516,4 +514,33 @@ describe('the status bar', () => {
     expect(t).toContain('untouched 2/' + next('untouched'));   // the streak against its next rung
     expect(t).toContain('flurry 0/' + next('flurry'));
   });
+
+  it('shrinks each Reflex and Nerve to MOD_SHRINK of the one before, so no pile passes its limit; the rest add alike (D214)', () => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;
+    const step = (name, stat) => {
+      const m = g.MODS.find(x => x.name === name), out = [];
+      for (let i = 0; i < 20; i++) {
+        const was = g.player[stat];
+        g.takeMod(m);
+        out.push(Math.abs(g.player[stat] - was));
+      }
+      return out;
+    };
+    const base = { ...g.player };
+    for (const [name, stat] of [['Reflex', 'dashCooldown'], ['Nerve', 'iframes']]) {
+      const s = step(name, stat);
+      for (let i = 1; i < s.length; i++) expect(s[i] / s[i - 1]).toBeCloseTo(g.MOD_SHRINK, 9);
+      expect(Math.abs(g.player[stat] - base[stat])).toBeLessThan(s[0] / (1 - g.MOD_SHRINK));
+    }
+    expect(g.player.dashCooldown).toBeGreaterThan(g.DASH_TIME);
+    const fins = step('Fins', 'speed');
+    expect(new Set(fins.map(v => v.toFixed(9))).size).toBe(1);
+    // The card says the next pick's own step, not the first's.
+    const reflex = g.MODS.find(x => x.name === 'Reflex');
+    const [c] = g.modPreview(reflex);
+    expect(c.from - c.to).toBeCloseTo(0.4 * g.MOD_SHRINK ** 20, 9);
+  });
 });
+

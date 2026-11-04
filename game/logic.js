@@ -788,10 +788,11 @@ function clearBatch() {
 }
 
 // Derived from `apply` itself (D52), so a card can never advertise a number
-// the mod does not deliver. A layer end's card gives `n` picks at once (D85).
+// the mod does not deliver. A layer end's card gives `n` picks at once (D85),
+// each after those already held (D214).
 function modPreview(mod, n = 1, base = player) {
-  const after = { ...base };
-  for (let i = 0; i < n; i++) mod.apply(after);
+  const after = { ...base }, held = modCounts?.[mod.name] || 0;   // none before a dive
+  for (let i = 0; i < n; i++) mod.apply(after, held + i);
   return Object.keys(after)
     .filter(k => typeof after[k] === 'number' && after[k] !== base[k])
     .map(k => ({ stat: k, from: base[k], to: after[k] }));
@@ -810,7 +811,7 @@ function openModOffer() {
 }
 
 function takeMod(mod) {
-  mod.apply(player);
+  mod.apply(player, modCounts[mod.name] || 0);
   modCounts[mod.name] = (modCounts[mod.name] || 0) + 1;
   note('mods', mod.name);
 }

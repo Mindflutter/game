@@ -156,15 +156,19 @@ const SOUNDS = {
 // ---------- mods ----------
 // Documented in docs/entities/mods.md, held to it by `npm test`. A `desc`
 // reads as a sentence, not a stat line: a pickup must be recognised mid-fight.
+// A pick of Reflex or Nerve adds this share of the one before (D214): uncapped,
+// a pile of them still stops short of a limit -- the step over 1 - MOD_SHRINK.
+// `apply(p, k)` is given `k`, how many are held already. Claude's pick.
+const MOD_SHRINK = 0.7;
 const MODS = [
   { name: 'Fins',     scope: 'body',    desc: 'you swim faster',
     apply: p => p.speed += 45 },
   { name: 'Vitality', scope: 'body',    desc: '1 more max HP, it comes full',
     apply: p => { p.maxHp += 1; p.hp += 1; } },
   { name: 'Reflex',   scope: 'body',    desc: 'the dash comes back sooner',
-    apply: p => p.dashCooldown -= 0.4 },
+    apply: (p, k = 0) => p.dashCooldown -= 0.4 * MOD_SHRINK ** k },
   { name: 'Nerve',    scope: 'body',    desc: 'hits leave you safe longer',
-    apply: p => p.iframes += 0.3 },
+    apply: (p, k = 0) => p.iframes += 0.3 * MOD_SHRINK ** k },
   { name: 'Impact',   scope: 'body',    desc: 'the dash wounds what it throws',
     apply: p => p.dashDamage += 1 },
   { name: 'Mend',     scope: 'comfort', desc: '1 HP back each batch', max: 1,

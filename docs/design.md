@@ -258,7 +258,7 @@ ordinary mod once before any comes again; no ordinary mod has a cap (D209
 the cards, because cards on the kill's frame read as a jump cut (D51); a
 pending offer holds the descent until Continue. If one tick kills the boss and
 the diver, death wins. No mod or boost is a weapon's own (D208 (Barbs and
-Lance removed)), only Mend is capped (D209 (mods uncapped)), a dash is never
+Lance removed)), only Mend is capped (D209 (mods uncapped)) and Reflex and Nerve shrink a pick at a time, `apply(p, k)` given the picks held (D214 (Reflex and Nerve shrink)), a dash is never
 started inside another however short Reflex makes its cooldown, and `takeMod()` is the one
 place a mod is applied. Mods add on top of gear and attributes, never
 multiplying (D74); anything a mod raises is a field on `player`, not a

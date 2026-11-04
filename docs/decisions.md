@@ -6527,3 +6527,30 @@ speed. if it's too close to screen edge, it just drifts too slow".
 half its speed; one three quarters of its reach away still takes its whole
 time.
 
+
+## D214 — Reflex and Nerve shrink · 2026-11-04
+
+Igor, of mods uncapped: "is the problem going to persist on introducing many
+mods? would reducing incremental value gradually help?"; told that more mods
+dilute the deal but not the layer end's picks: "do the shrinking".
+
+- **Each pick of Reflex or Nerve adds `MOD_SHRINK` (0.7) of the one before**:
+  Reflex 0.4 s off the cooldown, then 0.28, 0.196…, never past 1.33 in all,
+  the cooldown above 0.87 s; Nerve 0.3 s, 0.21…, under a second in all. Still
+  an add, so D74 (mods on top of gear and attributes) holds. Uncapped, a pile
+  has a limit — the danger D209 (mods uncapped) measured, eight Reflex
+  leaving the late diver unhit.
+- **The others add alike**: Fins, Vitality, Impact make the diver stronger,
+  never untouchable. `apply(p, k)` is given `k`, the picks held; a card
+  shows the next pick's own step.
+- **The save is version 18**: a saved dive's Reflex and Nerve piles add what
+  they would now.
+- **Measured**, the late Gun kit at layer 3, five seeds: four of each mod,
+  0.68 hearts a batch; eight Reflex, 0.60; eight Nerve, 0.72 — no pile
+  makes it unhit. The bars, ten seeds: the same six of eight hold, the
+  Harpoon over the Gun and the Knife as uncapped; 26 batches stood through,
+  from 28. Claude's number.
+
+**Guarded by** `tests/dive.test.js` — twenty of each shrink by `MOD_SHRINK`
+a pick and stay inside the limit, Fins adds alike, the card shows the next
+step; `tests/save.test.js` — a v17 dive's piles shrunk, nothing else moved.

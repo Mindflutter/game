@@ -246,15 +246,14 @@ with the Knife; raised the Gun to 3; never bought the Harpoon.
   cooldown at its floor, the dash's own length, the diver all but never
   out of a dash's safety. Dealt evenly a dive brings about four, so it is
   not met in play, but uncapped it is the one mod that can make the diver
-  unbeatable: it needs a floor of its own above the dash's length or its
-  cap back. `Impact` beyond one still kills nothing more against 1-HP fish.
+  unbeatable — answered by D214 (Reflex and Nerve shrink): each pick adds
+  less, the cooldown never under 0.87 s, eight Reflex 0.60 hearts a batch.
+  `Impact` beyond one still kills nothing more against 1-HP fish.
 
   **Decisions to suggest**: (1) the dash is the first ability, had from
   the start; (2) an ability is found once a career at the top of layers
   2 and 3, one of two, carried one a dive on the right mouse button;
-  (3) charged by kills; (4) developed by a tree of options; (5) `Reflex`
-  gets a cooldown floor, Claude's pick about 0.8 s, or its cap back,
-  whichever Igor keeps of D209.
+  (3) charged by kills; (4) developed by a tree of options.
 
 - **The dash economy: two mods and an attribute feed one verb.** Igor, 2026-09-27,
   playing D54: "once the dash becomes long, it feels way easier" and "dash

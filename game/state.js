@@ -245,7 +245,7 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 17;
+const SAVE_VERSION = 18;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
@@ -460,6 +460,17 @@ function migrate(s) {
       d.choiceIndex = Math.max(0, Math.min(d.choiceIndex, d.choices.length - 1));
     }
     s.version = 17;
+  }
+  if (s && s.version === 17) {
+    // Reflex and Nerve shrink a pick at a time (D214): a saved dive's piles
+    // add what they would now.
+    const d = s.dive;
+    if (d) {
+      const shrunk = (step, n) => step * (1 - MOD_SHRINK ** n) / (1 - MOD_SHRINK) - step * n;
+      d.player.dashCooldown -= shrunk(0.4, d.modCounts.Reflex || 0);
+      d.player.iframes += shrunk(0.3, d.modCounts.Nerve || 0);
+    }
+    s.version = 18;
   }
   return s;
 }

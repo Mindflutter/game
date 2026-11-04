@@ -29,7 +29,9 @@ tier or attribute. Both are worked out from `apply` by the check, so they
 cannot advertise a number the mod does not deliver. A layer end's card gives an
 ordinary mod `END_STEP 2` picks at once. Every number is Claude's pick. No
 ordinary mod has a cap (D209 (mods uncapped)): dealt evenly, each comes about
-four times in a whole dive, so **at max** is `—` but for Mend.
+four times in a whole dive, so **at max** is `—` but for Mend. **per pick**
+is the first pick's; Reflex's and Nerve's later picks shrink (D214 (Reflex
+and Nerve shrink)).
 
 ## Fields
 
@@ -40,7 +42,7 @@ four times in a whole dive, so **at max** is `—` but for Mend.
 | `desc` | — | The card's one line, and the pickup line's. A kind, not a degree: a pickup has to be felt and recognised mid-fight (D34 (mods), D84 (mods are dropped)). A check holds it inside the card's width. |
 | `max` | picks | Only for a mod a second of which adds nothing — Mend's 1: how many times one dive can take it, none carried or offered past it (D69 (every mod capped), D209 (mods uncapped)). Left out, the mod has no cap. |
 | `end` | — | `true` marks one of the layer end's own mods (D85 (the layer end's pick)): offered only on its cards, once a card, and never carried by a fish. Without it the mod is ordinary — carried by fish, and on a layer end's card at the bigger step, `END_STEP` picks at once. |
-| `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The "from → to" rows on a card and on the pickup line are worked out from it, at most `MOD_ROWS 2` of them, each stat named in words from `STAT_NAMES`. |
+| `apply` | — | What one pick does to the player, `(p, k) => …`, `k` the picks of it already held — Reflex and Nerve shrink by it (D214 (Reflex and Nerve shrink)), the rest ignore it. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The "from → to" rows on a card and on the pickup line are worked out from it, at most `MOD_ROWS 2` of them, each stat named in words from `STAT_NAMES`. |
 
 ## Fins
 
@@ -55,11 +57,16 @@ since D56 (the dash is a fixed, committed lunge).
 
 The dash comes back sooner. The real multiplier on the dash — both its kills
 and its invulnerable uptime grow with it (measured in `roadmap.md` → Health,
-the dash build; the analysis is `ideas.md` → the dash economy).
+the dash build; the analysis is `ideas.md` → the dash economy). Each pick
+takes `MOD_SHRINK` of the one before off the cooldown — 0.4 s, 0.28, 0.196 —
+so however many are piled up, the cooldown stays above 2.2 − 1.33 = 0.87 s
+(D214 (Reflex and Nerve shrink)).
 
 ## Nerve
 
-Longer invulnerability after a hit.
+Longer invulnerability after a hit. Each pick adds `MOD_SHRINK` of the one
+before — 0.3 s, 0.21, 0.147 — so a pile adds under a second in all (D214
+(Reflex and Nerve shrink)).
 
 ## Impact
 

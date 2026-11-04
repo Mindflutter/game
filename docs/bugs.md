@@ -14,7 +14,7 @@ fix (`code.md` → Verification).
 ## Open
 
 ### Nothing trivial fails across all three layers
-Mods uncapped, D209 (mods uncapped): 28 batches stood through. With D207
+Reflex and Nerve shrinking, D214 (Reflex and Nerve shrink): 26. Mods uncapped, D209 (mods uncapped): 28 batches stood through. With D207
 (boosts of new kinds) and D208 (Barbs and Lance removed): 25
 batches stood through, `npm run measure bars`, ten seeds. Crowds that close
 round the diver, D205 (crowds that move like fish): 30. Before them,

@@ -509,6 +509,20 @@ describe('a dive as Sonar reads it (D164)', () => {
     expect([g.boosts.map(a => a.name), g.drops.map(x => x.boost || x.mod)]).toEqual([['Rush'], ['Rush']]);
   });
 
+  it('gives a v17 dive\'s Reflex and Nerve what they add shrunk, and nothing else moves (D214)', () => {
+    const v17 = JSON.parse(readFileSync(new URL('./fixtures/save-v15.json', import.meta.url), 'utf8'));
+    const d = v17.dive, cd = d.player.dashCooldown, ifr = d.player.iframes, speed = d.player.speed;
+    v17.version = 17;
+    Object.assign(d.player, { dashCooldown: cd - 3 * 0.4, iframes: ifr + 2 * 0.3, speed: speed + 45 });
+    d.modCounts = { ...d.modCounts, Reflex: 3, Nerve: 2, Fins: 1 };
+    const g = loadGame();
+    expect(g.loadSave(JSON.stringify(v17))).toBe('');
+    const S = g.MOD_SHRINK;
+    expect(g.player.dashCooldown).toBeCloseTo(cd - 0.4 * (1 + S + S * S), 9);
+    expect(g.player.iframes).toBeCloseTo(ifr + 0.3 * (1 + S), 9);
+    expect(g.player.speed).toBe(speed + 45);
+  });
+
   it('keeps no career in the save: a v14 save drops its log (D177)', () => {
     const g = loadGame();
     const v14 = { version: 14, bank: 40, gear: {}, raised: {}, challenges: {}, deepest: 0, cleared: 0, seen: [],

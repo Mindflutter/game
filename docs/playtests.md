@@ -80,7 +80,7 @@ to tell what hurts: the next play-tests have to find where it starts to.
 - [x] `2026-11-04-bloom` — a miss that splashes, and two Blooms stacked
 - [x] `2026-11-04-new-boosts` — Jolt, Urchin and Surge
 - [x] `2026-11-04-edge-lunge` — the boss lunging toward the edge
-- [ ] `2026-11-04-like-the-bot` — three gates at the bot's own start, for a bot like Igor
+- [x] `2026-11-04-like-the-bot` — three gates at the bot's own start, for a bot like Igor
 
 **Where it starts to hurt**, looked for with the diver bot first
 (2026-10-29, eight seeds a setup): with the `late` kit, layer 3's deepest
@@ -1393,4 +1393,13 @@ within 20s to fifty puffers: an A pressed on the setup screen, the mouse on
 the puffer row, wrapped puffers to 50. Igor: "played several times,
 overwhelmed by puffers". The setup of a play-test is locked since, D211 (a
 play-test's setup is its own); the same link plays the real test.
+
+**Outcome**, played again 2026-11-04 — **held: the gap is in the aim and
+the dash, not the setting**. Three gates cleared in 59s of fighting, no
+hit, 37 kills. Against the bot on the same start, five seeds: shots that
+strike 19% against 51%; 1.72 shots a second against 0.46 — the trigger
+held most of the time, sprayed; 14.2 dashes a minute against none;
+standing 10% against 11%. The bot aims and waits; Igor sprays and keeps
+moving. Its knobs to fit: fire held, aim spread, dash rate (`ideas.md` →
+A bot that plays like Igor).
 
