@@ -237,9 +237,11 @@ Subagents only when Igor picks them; work happens in place, in this checkout.
 - **disciplines** (`game-ai`, `game-feel`). The concept, not the shape: a state
   machine is a `behavior` field plus a branch, never state classes (D26 —
   disciplines installed); juice is S7 (alpha polish) work.
-- **Global rules** in `~/.claude/rules/` are written for a Python backend.
-  Where one collides with these docs — "a constant lives next to its one
-  consumer" against the single `// balance` block — these docs win.
+- **Global rules** in `~/.claude/rules/` are written for a Python backend
+  and do not load here: `.claude/settings.local.json` excludes them with
+  `claudeMdExcludes`, so every backend project keeps the one copy (D210
+  (the backend rules kept out)). `~/.claude/CLAUDE.md` still loads; where it
+  collides with these docs, these docs win.
 - **abyss-content** (`.claude/skills/abyss-content/`) is the procedure for
   adding any piece of content.
 - **abyss-tidy** (`.claude/skills/abyss-tidy/`) is the whole tree's cleanup

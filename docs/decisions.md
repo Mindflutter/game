@@ -6453,3 +6453,23 @@ five answered)).
 **Guarded by** `tests/drops.test.js` — forty mods dealt evenly with no cap
 to stop them, the cards full with Mend taken; `tests/dive.test.js` — only
 Mend capped, and a cooldown below the dash's own starts no dash inside one.
+
+## D210 — The backend rules kept out · 2026-11-04
+
+Igor: "backend rules must stay for every backend project, but unneded
+here … duplicating across backend projects wont work, as rules can change"
+(D196 (the list's ninth five answered)).
+
+- **`claudeMdExcludes` in `.claude/settings.local.json`** skips
+  `~/.claude/rules/**` in this project only — Claude Code's own setting for
+  instruction files a project should not load. The rules stay one copy in
+  `~/.claude/rules/`, untouched, and load in every other project. The file
+  is ignored by git (Igor's global ignore), and holds his home's path.
+- **`~/.claude/CLAUDE.md` still loads**: beside its backend rows it holds
+  ways of working that hold here too — verify before claiming done,
+  propose removals. Its collisions are `working.md` → Skills and plugins'.
+  Excluding it too is one more line, Igor's to ask for.
+- Takes effect from the next session.
+
+**Guarded by** nothing in the suites: it is Claude Code's settings, not the
+game's.

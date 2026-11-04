@@ -19,17 +19,9 @@ Claude would take them (D197 (the list's last items; the roadmap is the
 to-do list)). Igor reorders. A task done leaves the list with its commit;
 what waits on Igor's answer is `ideas.md` → To discuss.
 
-### 2. Fixes
+### 1. Igor's answers
 
-Small, concrete, each its own commit.
-
-### 3. Feel
-
-What a dive feels like, each to play.
-
-### 4. Content
-
-New things to meet and to earn, each to measure.
+What the run of 2026-11-04 left for his word.
 
 - [ ] **Mods uncapped: kept or taken back?** Igor's call on D209 (mods
   uncapped)'s measure: the Harpoon over the Gun again, 28 batches stood
@@ -38,24 +30,13 @@ New things to meet and to earn, each to measure.
 - [ ] **The trees and abilities, decided**: the decisions the two analyses
   suggest (`ideas.md` → Development trees, analysed; Abilities, analysed).
 
-### 5. Analyses, for Igor's decisions
-
-Read and written up, nothing built; each ends in decisions to suggest.
+### 2. Waiting on a play
 
 - [ ] **A bot that plays like Igor**: the play-test is set up
   (`playtests.md` → Like the bot), and what his plays show is read; the bot
   is fitted once he has played it (`ideas.md` → A bot that plays like
   Igor). The stood bars wait on it (`bugs.md` → Nothing
   trivial fails across all three layers).
-### 6. Housekeeping
-
-Outside the game.
-
-- [ ] **The backend rules kept out of this project**: the global
-  `~/.claude/rules/` and `~/.claude/CLAUDE.md` load into every session here
-  and only collide. Loaded by every backend project and nowhere else, from
-  one copy, never duplicated — "rules can change" — through whatever Claude
-  Code offers for scoping them (D196 (the list's ninth five answered)).
 
 ### Igor's to open
 
