@@ -250,8 +250,9 @@ player at an edge cannot keep it half out (D120 (bodies are solid)). After
 it stops and winds up for `windup` seconds with its line locked at where the
 player was. That is the tell: it swells, glows harder and lays a lane as wide
 as its radius along the line. Then it charges along the line at `speed`, for
-`reach` px or to the edge of the view, and rests for `rest` seconds — the
-opening. The charge is its attack: contact costs its `damage` while it
+`reach` px — or, where the edge of the view comes first, to the edge in the
+same time, slower, never cut short (D201 (a lunge toward the edge takes its
+whole time)) — and rests for `rest` seconds — the opening. The charge is its attack: contact costs its `damage` while it
 charges, and only then (D108 (fish bite)). From the wind-up to the end of its
 rest no body pushes it, so its lane holds (D120 (bodies are solid)). From the wind-up on, the view holds it, so a charge never takes the
 fight off screen. In one sentence, per the pillar: when it swells, get out of

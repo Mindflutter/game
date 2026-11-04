@@ -122,6 +122,29 @@ describe('the lunge (D64) and the fan (D117)', () => {
   });
 });
 
+describe('a lunge toward the edge (D201)', () => {
+  it('takes its whole time over the shorter way and ends at the edge, never cut short', () => {
+    for (const name of ['boss', 'mini-boss']) {
+      const g = loadGame();
+      g.immortal = true;
+      g.reset(1);
+      g.queuePaused = true;
+      g.spawnBatch({ enemies: [[name, 1]] });
+      const e = g.enemies[0], L = e.lunge;
+      const room = L.reach / 3;                       // the edge a third of its reach away
+      Object.assign(e, { x: g.ARENA_W - e.r - room, y: g.cameraY + g.ARENA_H / 2,
+                         phase: 'windup', phaseTime: L.windup, aimX: 1, aimY: 0 });
+      g.player.x = 200;                               // out of its way
+      let t = 0;
+      g.update(g.FIXED_DT);
+      expect(e.phase).toBe('charge');
+      while (e.phase === 'charge' && t < 10) { g.update(g.FIXED_DT); t += g.FIXED_DT; }
+      expect([name, t]).toEqual([name, expect.closeTo(L.reach / L.speed, 1)]);
+      expect(e.x).toBeCloseTo(g.ARENA_W - e.r, 0);
+    }
+  });
+});
+
 describe('the shell and the stages (D156)', () => {
   // One lunger alone, posed in a phase, the diver out of its way.
   const posed = (name, phase) => {

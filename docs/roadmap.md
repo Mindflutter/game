@@ -23,12 +23,6 @@ what waits on Igor's answer is `ideas.md` → To discuss.
 
 Small, concrete, each its own commit.
 
-- [ ] **A lunge cut short by the screen's edge** (D189 (the list's next
-  five answered)): a boss near the screen's edge, lunging toward it, stops
-  dead as it touches the edge (`lungeStep()`). Igor: "it's lunge is then
-  short and unnatural". How other games handle a charge that meets the
-  arena's edge, read first; the way that suits best then built (D190 (the
-  list's third five answered)).
 - [ ] **Barbs and Lance**, made weapon-free or removed — Claude's choice —
   since mods and boosts are not tied to weapons (D188 (the list's first
   five answered)).

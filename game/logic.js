@@ -87,6 +87,13 @@ function viewClamp(o) {
           Math.max(cameraY + o.r, Math.min(cameraY + ARENA_H - o.r, o.y))];
 }
 
+// How far `o` can go along `ux, uy` and stay wholly in view.
+function toEdge(o, ux, uy) {
+  const along = (u, p, lo, hi) => (u > 0 ? (hi - p) / u : u < 0 ? (lo - p) / u : Infinity);
+  return Math.max(0, Math.min(along(ux, o.x, o.r, ARENA_W - o.r),
+                              along(uy, o.y, cameraY + o.r, cameraY + ARENA_H - o.r)));
+}
+
 // For a fish that attacks only wholly in view: the way to the diver, as near
 // as its body fits in view. Bodies are solid (D120), so one pressed half out of
 // view against a diver at an edge would never attack again.
@@ -134,11 +141,17 @@ function lungeStep(e, ux, uy, d, dt) {
       if (fanning) {
         for (const a of fanAims(e)) enemyShot(e, Math.cos(a), Math.sin(a), A);
         sound('spit');
+      } else {
+        // A line that leaves the view is covered to its edge in the lunge's
+        // whole time, slower, never cut short (D201).
+        e.chargeLen = Math.min(A.reach, toEdge(e, e.aimX, e.aimY));
       }
     }
   } else if (e.phase === 'charge') {
-    vx = e.aimX * A.speed;
-    vy = e.aimY * A.speed;
+    // A dive saved mid-charge before D201 has no length: the whole reach.
+    const v = A.speed * (e.chargeLen ?? A.reach) / A.reach;
+    vx = e.aimX * v;
+    vy = e.aimY * v;
   } else if (e.phaseTime >= A.rest) {        // resting: the opening
     e.phase = 'chase';
     e.phaseTime = 0;

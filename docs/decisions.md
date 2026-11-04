@@ -6236,3 +6236,25 @@ proper fix" (D191 (the list's fourth five answered)).
 
 **Guarded by** `checks.js` — a key held as the mouse leaves is let go; run
 by hand in the page, as the whole `?test` waits on Igor's word.
+
+## D201 — A lunge toward the edge takes its whole time · 2026-11-04
+
+Igor: "boss being close to screen edge, then bursting towards it. it's
+lunge is then short and unnatural … analyze how other games deal with this
+issue, implement the most suitable way" (D190 (the list's third five
+answered)).
+
+- **Read first**: other games mostly make the wall a payoff — a charging
+  boss that meets it is stunned, an opening, as Lords of the Fallen's
+  Champion is against a shield wall; and a stun easy to lure becomes the
+  exploit ([TV Tropes, Bullfight Boss](https://tvtropes.org/pmwiki/pmwiki.php/Main/BullfightBoss),
+  [the Champion](https://gamerguides.com/lords-of-the-fallen/guide/walkthrough/campaign/boss-the-champion)).
+  Abyss's edge is the screen, no wall a player sees or can use, so not that.
+- **Taken, Igor's first shape**: where the line meets the edge of the view
+  before its `reach`, the charge covers the way to the edge in the lunge's
+  whole time, `reach / speed`, slower, and ends there; it is never cut
+  short. A lunge with room is unchanged, so no figure moves. Claude's pick.
+- A dive saved mid-charge before this charges its whole reach.
+
+**Guarded by** `tests/boss.test.js` — a lunge a third of its reach from the
+edge takes its whole time and ends at the edge.
