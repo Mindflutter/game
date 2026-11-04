@@ -714,6 +714,40 @@ describe('the splash (D125)', () => {
     expect(ring[3]).toBe(0);                                 // ...out to the splash's reach
   });
 
+  it('splashes a shot that hits nothing where its range ends, and one that hit, never again there (D203)', () => {
+    const ends = struckFirst => {
+      const g = quiet();
+      g.immortal = true;
+      bloom(g);
+      g.player.fireTimer = 999;
+      const b = shot(g, { maxTravel: 300 });
+      const end = mob(b.x + 300, b.y + 9 + g.player.splash - 2, { hp: 9, maxHp: 9 });   // by the range's end
+      g.enemies.push(end);
+      if (struckFirst) g.enemies.push(mob(b.x + 100, b.y, { hp: 9, maxHp: 9 }));
+      run(g, 60);
+      return 9 - end.hp;
+    };
+    expect(ends(false)).toBe(1);
+    expect(ends(true)).toBe(0);
+  });
+
+  it('splashes a cut that meets nothing just past its reach (D203)', () => {
+    const g = loadGame();
+    expect(g.applyScenario('knife', 1)).toBe(true);
+    g.queuePaused = true;
+    g.immortal = true;
+    bloom(g);
+    const reach = g.player.range + g.player.shotRadius;
+    const past = mob(g.player.x + reach + 9 + g.player.splash - 2, g.player.y, { hp: 9, maxHp: 9 });
+    g.enemies.push(past);
+    g.aim.x = g.player.x + 400;
+    g.aim.y = g.player.y - g.cameraY;
+    holdFire(g);
+    g.update(g.FIXED_DT);
+    g.keys.delete('Mouse0');
+    expect(9 - past.hp).toBe(g.player.damage);
+  });
+
   it('kills through the one path: a fish its splash killed is not cut again, and pays once', () => {
     const g = loadGame();
     expect(g.applyScenario('knife', 1)).toBe(true);

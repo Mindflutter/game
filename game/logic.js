@@ -445,6 +445,8 @@ function swing(ux, uy) {
     if (d <= body || off <= half + Math.asin(Math.min(1, body / d))) cut.push([d, e]);
   }
   cut.sort((a, b) => a[0] - b[0]);
+  const reach = player.range + player.shotRadius;
+  if (!cut.length && player.splash) splash(player.x + ux * reach, player.y + uy * reach, 0);
   for (const [, e] of cut.slice(0, player.pierce + 1)) {
     if (e.gone) continue;                    // the splash of a nearer cut killed it
     knock(e, ux, uy);
@@ -460,15 +462,19 @@ function swing(ux, uy) {
 // the struck one too (D125); a wound never splashes on, so a crowd cannot chain.
 function hit(e) {
   if (wound(e) && e.hp > 0) sound('hit');
-  if (!player.splash) return;
-  // Its reach, seen: whatever the ring touches, the splash wounds. `ring` is
-  // the radius it grows from.
-  particles.push({ x: e.x, y: e.y, vx: 0, vy: 0, life: SPLASH_SHOW, maxLife: SPLASH_SHOW,
-                   r: e.r + player.splash, ring: e.r, color: '#eaffff', glow: '#9ef7ff' });
-  for (const x of enemies) {
-    if (x === e || x.gone) continue;
-    const dx = x.x - e.x, dy = x.y - e.y, reach = e.r + x.r + player.splash;
-    if (dx * dx + dy * dy < reach * reach) wound(x);
+  if (player.splash) splash(e.x, e.y, e.r, e);
+}
+
+// Bloom's splash, from a body of radius `r` -- the struck fish, or nothing
+// where a shot or a cut met none (D203). Its reach, seen: whatever the ring
+// touches, the splash wounds. `ring` is the radius it grows from.
+function splash(x, y, r, struck) {
+  particles.push({ x, y, vx: 0, vy: 0, life: SPLASH_SHOW, maxLife: SPLASH_SHOW,
+                   r: r + player.splash, ring: r, color: '#eaffff', glow: '#9ef7ff' });
+  for (const f of enemies) {
+    if (f === struck || f.gone) continue;
+    const dx = f.x - x, dy = f.y - y, reach = r + f.r + player.splash;
+    if (dx * dx + dy * dy < reach * reach) wound(f);
   }
 }
 
@@ -1402,7 +1408,11 @@ function step(dt) {
     b.y += b.vy * dt;
     // The bullet's own speed (D83): counted at another, its range would be wrong.
     b.travelled += b.speed * dt;
-    if (b.travelled >= b.maxTravel) b.gone = true;
+    if (b.travelled >= b.maxTravel) {
+      b.gone = true;
+      // A shot that struck nothing splashes where its range ends (D203).
+      if (!b.evil && !b.struck && player.splash) splash(b.x, b.y, 0);
+    }
   }
 
   // --- bullets vs enemies ---
@@ -1419,6 +1429,7 @@ function step(dt) {
       if (segDistanceSq(e.x, e.y, ax, ay, b.x, b.y) < reach * reach) {
         if (e.lastHitBy === b.id) continue;   // a shot hits each enemy at most once
         e.lastHitBy = b.id;
+        b.struck = true;
         knock(e, b.vx / b.speed, b.vy / b.speed);
         hitSparks(e, b);
         hit(e);

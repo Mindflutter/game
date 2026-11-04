@@ -31,10 +31,6 @@ Small, concrete, each its own commit.
 
 What a dive feels like, each to play.
 
-- [ ] **Bloom's splash without a hit**: a shot that misses splashes where
-  its range ends, a cut's splash sits just past its reach, and every
-  Bloom's ring is half again as wide (D194 (the list's seventh five
-  answered)).
 - [ ] **A boost touched again adds its time**: its clock grows by a whole
   life, with no ceiling; other boosts running are untouched. Replaces D86
   (boosts)'s clock that restarts (D194 (the list's seventh five

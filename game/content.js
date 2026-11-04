@@ -188,7 +188,7 @@ const BOOSTS = [
   { name: 'Lance',  desc: 'your shots go through', weapons: ['Gun'],
     time: 5, add: { pierce: 4 } },
   { name: 'Bloom',  desc: 'your shots splash',     swingDesc: 'your cuts splash',
-    time: 6, add: { splash: 24 } },
+    time: 6, add: { splash: 36 } },
 ];
 
 // ---------- gear, attributes, challenges ----------

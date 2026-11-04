@@ -25,7 +25,7 @@ boosts)).
 | Rush | you swim much faster | 5 | — | any | speed +200 |
 | Frenzy | you fire much faster | 5 | you swing much faster | any | fireRate +100% |
 | Lance | your shots go through | 5 | — | Gun | pierce +4 |
-| Bloom | your shots splash | 6 | your cuts splash | any | splash +24 |
+| Bloom | your shots splash | 6 | your cuts splash | any | splash +36 |
 <!-- /generated -->
 
 **for** is read off `weapons`, **adds** off `add` and `percent`. Every number
@@ -69,7 +69,11 @@ within `splash` of the struck one's, for the shot's damage — a crowd most of
 all (D125 (boosts keep each weapon's nature)). The splash does not knock, and a
 fish it wounds splashes nothing on, so a crowd cannot chain. With the Knife each
 cut splashes, and a Harpoon shot splashes at every fish it goes through — a
-balance pass's to watch. It replaced a bigger shot, which only decided whether a
+balance pass's to watch. A shot that strikes nothing splashes where its range
+ends, and a cut that meets nothing just past its reach (D203 (a miss
+splashes too)) — Igor: "i feel like shot splash should happen even if you dont
+hit directly"; its `splash` half again as wide since, his "about 1.5". It
+replaced a bigger shot, which only decided whether a
 shot hit, when nearly every shot hits. Each splash shows its reach: a ring
 grows from the struck fish's body out `splash` past it and fades in
 `SPLASH_SHOW`, so whatever it touches is what it wounds. Claude's shape and

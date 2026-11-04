@@ -6277,3 +6277,21 @@ five answered)).
 
 **Guarded by** `tests/enemies.test.js` — the mark stands on the edge beside
 the fish, pointing in, clearer as it nears, gone once it is in view.
+
+## D203 — A miss splashes too · 2026-11-04
+
+Igor, 2026-10-26: "i feel like shot splash should happen even if you dont
+hit directly"; 2026-11-04: "a missed shot splashes at the end of its range,
+radius increased for all blooms about 1.5. knife's splash is located right
+after its reach" (D194 (the list's seventh five answered)).
+
+- **A shot that strikes nothing splashes where its range ends**, as wide as
+  a hit's, the ring growing from a point. A shot that struck a fish, the
+  Harpoon going through more, splashes at each fish and not again there.
+- **A cut that meets nothing splashes just past its reach**, along the cut.
+- **Bloom's `splash` is 36 px, not 24.**
+- The wounds are the splash's own: no knock, none splashes on.
+
+**Guarded by** `tests/combat.test.js` — a miss wounds a fish by its range's
+end, a shot that hit does not splash there, an empty cut wounds a fish just
+past its reach; `tests/docs.test.js` — Bloom's numbers.
