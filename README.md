@@ -95,8 +95,7 @@ The address bar keeps the setup as a code — `index.html?debug=L2,G7,S4471,Harp
 — so a URL pasted into an issue replays it exactly, seed and all. The fish set
 replace the chosen gate's batch; the dive then runs on as drawn. The bright line
 under the columns is the marked row's tip: what it is and what it changes —
-a fish's behaviour and numbers, what a tier, point or pick adds, and why a row
-is dim (Barbs goes only with the Harpoon, Lance with the Gun).
+a fish's behaviour and numbers, and what a tier, point or pick adds.
 
 ## Scenarios
 

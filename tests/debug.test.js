@@ -60,23 +60,23 @@ describe('the sound', () => {
 
 describe('the setup reaches the dive', () => {
   it('the kit: the weapon at its tier, equipment, attributes and mods, as a dive from home gives them', () => {
-    const g = setup('L1,G1,S7,Harpoon2,Mask1,Suit2,Heart2,Strength1,Fins2,Barbs3');
+    const g = setup('L1,G1,S7,Harpoon2,Mask1,Suit2,Heart2,Strength1,Fins2,Nerve3');
     g.debugDive();
     const h = loadGame();
     h.meta = { ...h.freshMeta(), carried: 'Harpoon', owned: ['Gun', 'Harpoon', 'Knife'],
                gear: { Harpoon: 2, Mask: 1, Suit: 2 }, raised: { Heart: 2, Strength: 1 } };
     h.reset(7);
-    for (const n of ['Fins', 'Fins', 'Barbs', 'Barbs', 'Barbs']) h.takeMod(h.MODS.find(m => m.name === n));
+    for (const n of ['Fins', 'Fins', 'Nerve', 'Nerve', 'Nerve']) h.takeMod(h.MODS.find(m => m.name === n));
     expect(g.weaponName).toBe('Harpoon');
     expect(g.player).toEqual(h.player);
-    expect(g.modCounts).toEqual({ Fins: 2, Barbs: 3 });
+    expect(g.modCounts).toEqual({ Fins: 2, Nerve: 3 });
   });
 
-  it('the boosts: each laid on the floor beside the diver as many times as set, one only with the weapon it fits', () => {
-    const g = setup('L1,G1,S7,Knife0,Rush2,Bloom1,Lance1');
+  it('the boosts: each laid on the floor beside the diver as many times as set', () => {
+    const g = setup('L1,G1,S7,Knife0,Rush2,Bloom1');
     g.debugDive();
     const laid = g.drops.filter(d => d.boost).map(d => d.boost).sort();
-    expect(laid).toEqual(['Bloom', 'Rush', 'Rush']);   // Lance is the Gun's (D125)
+    expect(laid).toEqual(['Bloom', 'Rush', 'Rush']);
     for (const d of g.drops) {
       expect(Math.hypot(d.x - g.player.x, d.y - g.player.y)).toBeLessThan(250);
       expect(d.life).toBe(g.BOOST_LIFE);
@@ -128,14 +128,6 @@ describe('the setup reaches the dive', () => {
     expect(g.plan).toEqual(drawn.plan);
   });
 
-  it('a weapon mod that does not fit the weapon carried is not taken, and its row says so', () => {
-    const g = setup('L1,G1,S7,Gun0,Barbs3');
-    expect(g.MENUS.debug.items[row(g, 'Barbs')].dim).toBe(true);
-    g.debugDive();
-    expect(g.modCounts.Barbs).toBeUndefined();
-    expect(g.player.pierce).toBe(g.WEAPONS[0].pierce);
-  });
-
   it("immortal and one-shot are the setup's, and a setup without them switches them off", () => {
     const g = setup('L1,G1,S7,Gun0,immortal,oneshot');
     g.debugDive();
@@ -152,7 +144,7 @@ describe('the setup reaches the dive', () => {
 describe('the code', () => {
   it('round-trips, and writes the place, the seed and the weapon always', () => {
     const g = setup();
-    const code = 'L2,G5,S4471,Harpoon2,puffer4,mini-boss1,Mask1,Dash_reach3,Barbs3,immortal,oneshot';
+    const code = 'L2,G5,S4471,Harpoon2,puffer4,mini-boss1,Mask1,Dash_reach3,Nerve3,immortal,oneshot';
     expect(g.setupCode(g.parseSetup(code))).toBe(code);
     expect(g.setupCode(g.parseSetup('', 9))).toBe('L1,G1,S9,Gun0');
   });
@@ -358,14 +350,6 @@ describe('the setup screen', () => {
     }
     expect(tip('Strength')).toMatch(/Harpoon/);          // what needs it
     expect(tip('Tier')).toMatch(/fire rate \+0\.5/);      // the carried weapon's tiers
-  });
-
-  it("says why a weapon mod is dim: it goes only with another weapon", () => {
-    const g = setup('L1,G1,S7,Gun0');
-    const barbs = () => g.MENUS.debug.items[row(g, 'Barbs')].tip;
-    expect(barbs()).toMatch(/carry the Harpoon/);
-    g.debugSetup.weapon = 'Harpoon';
-    expect(barbs()).not.toMatch(/carry the Harpoon/);
   });
 
   it('has a line for every behaviour a fish can have', () => {

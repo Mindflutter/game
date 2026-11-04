@@ -21,12 +21,11 @@ fish and the layer end's pick.
 | Nerve | body | hits leave you safe longer | 3 | — | iframes +0.3 | iframes 1.9 |
 | Impact | body | the dash wounds what it throws | 3 | — | dashDamage +1 | dashDamage 3 |
 | Mend | comfort | 1 HP back each batch | 1 | true | mendOnClear +1 | mendOnClear 1 |
-| Barbs | weapon | harpoons go through one more | 3 | — | pierce +1 | pierce 5 |
 <!-- /generated -->
 
 **per pick** is what taking it once changes; **at max** is the stat after
-`max` of them, from the starting kit — the diver carrying the Gun, or for a
-weapon mod the first weapon it fits, before any tier or attribute. Both are worked out from `apply` by the check, so they
+`max` of them, from the starting kit — the diver carrying the Gun, before any
+tier or attribute. Both are worked out from `apply` by the check, so they
 cannot advertise a number the mod does not deliver. A layer end's card gives an
 ordinary mod `END_STEP 2` picks at once. Every number is Claude's pick; the
 caps of `Fins` and `Vitality` are tuned to the pillars (D127 (the tuned numbers)),
@@ -37,11 +36,10 @@ and the dash's, `Reflex` and `Impact`, wait on its discussion (`ideas.md`).
 | Field | Unit | Meaning |
 |---|---|---|
 | `name` | — | The key and the card's title. A saved dive keeps its mods, the cards on offer and the round of fish-carried mods by name, and a scenario's kit names them, so renaming one breaks all three. |
-| `scope` | — | `body`: a stat of the diver, worth the same whatever weapon is carried. `comfort`: feel and friction, near-zero balance risk. `weapon`: a mod that fits only some weapons, named in `weapons` (D31 (two-tier progression), D99 (weapon mods, and more boosts)). It changes the carried weapon's numbers on the player like any mod. A check holds every mod to these three, and a weapon mod to naming real weapons. |
+| `scope` | — | `body`: a stat of the diver, worth the same whatever weapon is carried. `comfort`: feel and friction, near-zero balance risk. No mod is a weapon's own: mods stay apart from the weapons (D208 (Barbs and Lance removed)). A check holds every mod to these two. |
 | `desc` | — | The card's one line, and the pickup line's. A kind, not a degree: a pickup has to be felt and recognised mid-fight (D34 (mods), D84 (mods are dropped)). A check holds it inside the card's width. |
 | `max` | picks | How many times one dive can take it (D69 (every mod capped)): a switch caps at 1, anything that stacks at 3 or 6. No fish carries a mod at its max, and no layer end offers one without room for what its card gives. Where the caps sit is a balance pass's, last set by S6 (balance) (D127 (the tuned numbers)); whether they go is open (`ideas.md`). |
 | `end` | — | `true` marks one of the layer end's own mods (D85 (the layer end's pick)): offered only on its cards, once a card, and never carried by a fish. Without it the mod is ordinary — carried by fish, and on a layer end's card at the bigger step, `END_STEP` picks at once. |
-| `weapons` | — | The weapons a `weapon`-scoped mod fits, by name (D83 (the weapon record)): it is dealt — by a glowing fish or on a layer end's card — only while one of them is carried (D99 (weapon mods, and more boosts)). |
 | `apply` | — | What one pick does to the player, `p => …`. It adds on top of gear and attributes and never multiplies (D74 (mods on top of gear and attributes)). The "from → to" rows on a card and on the pickup line are worked out from it, at most `MOD_ROWS 2` of them, each stat named in words from `STAT_NAMES`. |
 
 ## Fins
@@ -79,14 +77,6 @@ each batch" reads as worth a double step. A standing effect rather than a stat
 — `clearBatch()` reads `mendOnClear`. The last layer's end pays nothing, Mend
 included (D68 (the layer end is a milestone)).
 
-## Barbs
-
-The first weapon mod (D99 (weapon mods, and more boosts)): the Harpoon's shot
-goes through one more fish a pick. A mod of the Harpoon's own kind — it
-already passes through two — so it is dealt only while the Harpoon is carried;
-with the Gun or the Knife no fish carries it and no card offers it. Its
-numbers are Claude's picks, held by `npm run balance` (D127 (the tuned numbers)).
-
 ## Adding one
 
 1. A line in `MODS`: `name`, `scope`, `desc`, `max`, `apply` — and `end: true`
@@ -97,8 +87,7 @@ numbers are Claude's picks, held by `npm run balance` (D127 (the tuned numbers))
    (D34 (mods)).
 2. A section here under its `name`; `npm run docs` writes its rows from the code (D133 (the doc tables write themselves)); `npm test`
    fails until both match the code.
-3. The checks that then hold it: a unique name, `scope` body or comfort — or
-   weapon, naming real weapons in `weapons` — `max`
+3. The checks that then hold it: a unique name, `scope` body or comfort, `max`
    an integer of at least 1, the card text inside the card, at most `MOD_ROWS`
    stats moved — and every stat it moves shown on the development readout
    (`PLAYER_STATS`) and named in words in `STAT_NAMES`, for its card and its

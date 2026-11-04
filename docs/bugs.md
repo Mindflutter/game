@@ -14,8 +14,9 @@ fix (`code.md` → Verification).
 ## Open
 
 ### Nothing trivial fails across all three layers
-Crowds that close round the diver, D205 (crowds that move like fish): 30
-batches stood through, `npm run measure bars`, ten seeds. Before them,
+With D207 (boosts of new kinds) and D208 (Barbs and Lance removed): 25
+batches stood through, `npm run measure bars`, ten seeds. Crowds that close
+round the diver, D205 (crowds that move like fish): 30. Before them,
 `npm run balance`, 2026-11-04, ten seeds, the D199 (the bars, printed)
 build: 37 batches past the opening stood through on more than one seed in
 ten — 6 in layer 1, 7 in layer 2, 24 in layer 3, up from 12 there; the eel's

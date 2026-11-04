@@ -13,7 +13,7 @@ const mob = (x, y, over) => Object.assign(
 // literal that misses a field -- a bullet without `speed` would fly forever,
 // since `NaN >= maxTravel` is false.
 const shot = (g, over = {}) => {
-  const b = Object.assign({ id: ++g.bulletId, x: g.player.x, y: g.player.y, r: g.player.shotRadius,
+  const b = Object.assign({ id: ++g.bulletId, weapon: true, x: g.player.x, y: g.player.y, r: g.player.shotRadius,
                             vx: g.player.shotSpeed, vy: 0, pierce: 0,
                             travelled: 0, maxTravel: 300 }, over);
   b.speed = Math.hypot(b.vx, b.vy);

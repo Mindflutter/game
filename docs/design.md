@@ -258,8 +258,8 @@ mod still flying (`held()`): nothing stops it landing. With every ordinary mod
 capped, no fish lights. Clearing a layer end waits `MOD_OFFER_DELAY` before
 the cards, because cards on the kill's frame read as a jump cut (D51); a
 pending offer holds the descent until Continue. If one tick kills the boss and
-the diver, death wins. Weapon mods are dealt only while a weapon they fit is
-carried (`fits()`, D99), every mod is capped (D69), and `takeMod()` is the one
+the diver, death wins. No mod or boost is a weapon's own (D208 (Barbs and
+Lance removed)), every mod is capped (D69), and `takeMod()` is the one
 place a mod is applied. Mods add on top of gear and attributes, never
 multiplying (D74); anything a mod raises is a field on `player`, not a
 `const`.

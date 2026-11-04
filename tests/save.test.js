@@ -275,7 +275,7 @@ describe('the save (D70)', () => {
     expect(shots.every(finite)).toBe(true);
   });
 
-  it("takes back what a v10 dive's boosts added, gives its diver no splash, and drops a Lance its weapon cannot use (D125)", () => {
+  it("takes back what a v10 dive's boosts added, gives its diver no splash, and drops every Lance (D125, D208)", () => {
     const load = weaponName => {
       const saved = JSON.parse(readFileSync(new URL('./fixtures/save-v10.json', import.meta.url), 'utf8'));
       const d = saved.dive;
@@ -290,7 +290,7 @@ describe('the save (D70)', () => {
     };
     expect(load('Harpoon').drops).toEqual([]);
     const g = load('Gun');
-    expect(g.drops.map(x => x.boost)).toEqual(['Lance']);
+    expect(g.drops).toEqual([]);
     expect(g.player.splash).toBe(0);
     g.screen = g.resumeTo;
     g.immortal = true;
@@ -490,7 +490,23 @@ describe('a dive as Sonar reads it (D164)', () => {
     delete v15.dive.player.arc;
     const g = loadGame();
     expect(g.loadSave(JSON.stringify(v15))).toBe('');
-    expect([g.player.arc, JSON.parse(g.saveText()).version]).toEqual([60, 16]);
+    expect([g.player.arc, JSON.parse(g.saveText()).version]).toEqual([60, JSON.parse(loadGame().saveText()).version]);
+  });
+
+  it('takes back what a v16 dive had of Barbs and Lance, and leaves none of either to find (D208)', () => {
+    const v16 = JSON.parse(readFileSync(new URL('./fixtures/save-v15.json', import.meta.url), 'utf8'));
+    const d = v16.dive, pierce = d.player.pierce;
+    v16.version = 16;
+    d.player.pierce += 2 + 4;                    // two Barbs taken, a Lance running
+    Object.assign(d, { modCounts: { ...d.modCounts, Barbs: 2 }, choices: ['Fins', 'Barbs', 'Nerve'], choiceIndex: 2,
+                       boosts: [{ name: 'Lance', left: 2, add: { pierce: 4 } }, { name: 'Rush', left: 2, add: { speed: 0 } }],
+                       drops: [{ x: 0, y: d.cameraY, r: 6, boost: 'Lance', life: 3 }, { x: 0, y: d.cameraY, r: 7, mod: 'Barbs' },
+                               { x: 0, y: d.cameraY, r: 6, boost: 'Rush', life: 3 }] });
+    const g = loadGame();
+    expect(g.loadSave(JSON.stringify(v16))).toBe('');
+    expect([g.player.pierce, g.modCounts.Barbs, g.choices.map(m => m.name), g.choiceIndex])
+      .toEqual([pierce, undefined, ['Fins', 'Nerve'], 1]);
+    expect([g.boosts.map(a => a.name), g.drops.map(x => x.boost || x.mod)]).toEqual([['Rush'], ['Rush']]);
   });
 
   it('keeps no career in the save: a v14 save drops its log (D177)', () => {

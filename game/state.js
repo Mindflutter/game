@@ -245,7 +245,7 @@ function startScenario(s, seed) {
 // Everything that outlives a dive (D31, D36, D67). Points available are
 // derived (`points()`), never stored, so they cannot disagree with the rungs.
 // An unknown `version` is rejected loudly, never guessed at.
-const SAVE_VERSION = 16;
+const SAVE_VERSION = 17;
 // Weapons cost nothing to own from the start, and the first is carried (D97).
 function freshMeta() {
   return { version: SAVE_VERSION, bank: 0, gear: {}, raised: {}, challenges: {},
@@ -445,6 +445,21 @@ function migrate(s) {
     // The cut's arc is the diver's own, where the Mask widens it (D181).
     if (s.dive && s.dive.player.swing) s.dive.player.arc = s.dive.player.swing.arc;
     s.version = 16;
+  }
+  if (s && s.version === 16) {
+    // Barbs and Lance are gone (D208): what they added comes off, and none
+    // is left to find or pick.
+    const d = s.dive;
+    if (d) {
+      d.player.pierce -= d.modCounts.Barbs || 0;
+      delete d.modCounts.Barbs;
+      for (const a of d.boosts) if (a.name === 'Lance') for (const k in a.add) d.player[k] -= a.add[k];
+      d.boosts = d.boosts.filter(a => a.name !== 'Lance');
+      d.drops = d.drops.filter(x => x.boost !== 'Lance' && x.mod !== 'Barbs');
+      d.choices = d.choices.filter(n => n !== 'Barbs');
+      d.choiceIndex = Math.max(0, Math.min(d.choiceIndex, d.choices.length - 1));
+    }
+    s.version = 17;
   }
   return s;
 }

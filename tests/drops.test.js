@@ -9,9 +9,8 @@ const seed = fc.integer({ min: 0, max: 2 ** 32 - 1 });
 const held = g => Object.values(g.modCounts).reduce((a, b) => a + b, 0);
 // Every mod a batch has paid so far: taken, or still flying in.
 const paid = g => held(g) + g.drops.filter(d => d.mod).length;
-// The ordinary mods a fish can carry: not a layer end's own, and fitting the
-// weapon carried (D99).
-const ordinary = g => g.MODS.filter(m => !m.end && g.fits(m));
+// The ordinary mods a fish can carry: not a layer end's own.
+const ordinary = g => g.MODS.filter(m => !m.end);
 // Every number a mod or boost moves: the readout's and HP, as
 // dive.test.js holds them to be.
 const STATS = [...loadGame().PLAYER_STATS.map(s => s.stat), 'hp', 'maxHp'];
@@ -160,32 +159,6 @@ describe('a glowing fish carries the batch\'s mod (D84)', () => {
     expect(g.applyScenario('one-drifter', 1)).toBe(true);
     expect(clearAndWait(g, 1)).toBe('playing');
     expect(paid(g)).toBe(0);
-  });
-});
-
-describe('weapon mods (D99)', () => {
-  const barbs = g => g.MODS.find(m => m.name === 'Barbs');
-
-  it('never deals one for a weapon not carried, by a fish or on a card', () => {
-    const g = loadGame();
-    g.reset(1);                                  // carrying the Gun
-    for (let m; (m = g.drawCarried()); ) {
-      expect(m.name).not.toBe('Barbs');
-      g.takeMod(m);
-    }
-    for (let s = 0; s < 30; s++) {
-      g.reset(s);
-      expect(g.rollValuable().map(m => m.name)).not.toContain('Barbs');
-    }
-  });
-
-  it('deals one like any mod, up to its cap, while a weapon it fits is carried', () => {
-    const g = loadGame();
-    g.applyScenario('harpoon', 1);
-    const names = [];
-    for (let m; (m = g.drawCarried()); ) { names.push(m.name); g.takeMod(m); }
-    expect(names.filter(n => n === 'Barbs')).toHaveLength(barbs(g).max);
-    expect(g.player.pierce).toBe(g.WEAPONS.find(w => w.name === 'Harpoon').pierce + barbs(g).max);
   });
 });
 
@@ -442,7 +415,7 @@ describe('boosts (D86)', () => {
     const g = loadGame();
     g.reset(1);
     g.queuePaused = true;
-    const [a, c] = g.BOOSTS.filter(x => !x.weapons);
+    const [a, c] = g.BOOSTS;
     const touch = name => {
       g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: name, life: g.BOOST_LIFE });
       g.update(g.FIXED_DT);
@@ -460,7 +433,7 @@ describe('boosts (D86)', () => {
     // A share of the weapon's own number, so each keeps its pace (D125).
     const g = loadGame();
     for (const w of g.WEAPONS) {
-      for (const b of g.BOOSTS.filter(x => !x.weapons || x.weapons.includes(w.name))) {
+      for (const b of g.BOOSTS) {
         g.reset(1, w);
         g.queuePaused = true;
         const base = { ...g.player }, want = adds(b, base);
@@ -473,26 +446,15 @@ describe('boosts (D86)', () => {
     }
   });
 
-  it('keeps the weapons in their order: a boost any weapon can get adds to no weapon\'s number, only raises one by a share (D125)', () => {
+  it('keeps the weapons in their order: a boost adds to no weapon\'s number, only raises one by a share (D125)', () => {
     const g = loadGame();
     const numbers = [...new Set(g.WEAPONS.flatMap(w => Object.keys(w)
       .filter(k => typeof w[k] === 'number' && k !== 'cost')))];
-    for (const b of g.BOOSTS.filter(x => !x.weapons)) {
+    for (const b of g.BOOSTS) {
       expect(Object.keys(b.add || {}).filter(k => numbers.includes(k))).toEqual([]);
-      // A share of nothing is nothing: only of a number every weapon has.
-      for (const k in b.percent) expect(g.WEAPONS.filter(w => !(w[k] > 0)).map(w => w.name)).toEqual([]);
-    }
-  });
-
-  it('drops a weapon\'s own boost only while that weapon is carried (D125)', () => {
-    const g = loadGame();
-    const own = g.BOOSTS.filter(b => b.weapons);
-    expect(own.length).toBeGreaterThan(0);
-    for (const w of g.WEAPONS) {
-      g.reset(1, w);
-      const names = new Set();
-      for (let i = 0; i < 200; i++) names.add(boostAt(g, 100, g.cameraY + 100).boost);
-      for (const b of own) expect([w.name, b.name, names.has(b.name)]).toEqual([w.name, b.name, b.weapons.includes(w.name)]);
+      // A share of nothing is nothing: only of a number every weapon has --
+      // or of the diver's own, which no weapon carries.
+      for (const k in b.percent) if (numbers.includes(k)) expect(g.WEAPONS.filter(w => !(w[k] > 0)).map(w => w.name)).toEqual([]);
     }
   });
 
@@ -507,9 +469,56 @@ describe('boosts (D86)', () => {
     };
     for (const b of g.BOOSTS) {
       expect(touch(b, () => g.reset(1))).toContain(b.desc);              // the Gun shoots
-      if (b.weapons && !b.weapons.includes('Knife')) continue;          // never dropped for it (D125)
       expect(touch(b, () => g.applyScenario('knife', 1))).not.toMatch(/shot|fire/);
     }
+  });
+
+  // Touched where the diver stands, nothing arriving.
+  const touched = name => {
+    const g = loadGame();
+    g.reset(1);
+    g.queuePaused = true;
+    g.immortal = true;
+    g.drops.push({ x: g.player.x, y: g.player.y, r: 6, boost: name, life: g.BOOST_LIFE });
+    g.update(g.FIXED_DT);
+    return [g, g.BOOSTS.find(b => b.name === name)];
+  };
+
+  it('jolts the water round the diver while Jolt runs: fish in its reach are hurt, none beyond (D207)', () => {
+    const [g, b] = touched('Jolt');
+    const P = b.pulse;
+    g.player.fireTimer = 999;
+    g.placeEnemy('drifter', g.player.x + g.player.r + 18 + P.reach - 4, g.player.y);
+    g.placeEnemy('drifter', g.player.x - g.player.r - 18 - P.reach - 30, g.player.y);
+    const [near, far] = g.enemies;
+    for (const e of [near, far]) Object.assign(e, { hp: 99, maxHp: 99, speed: 0 });
+    for (let i = 0, n = ticks(g, P.every + 0.02); i < n; i++) g.update(g.FIXED_DT);
+    expect([99 - near.hp, 99 - far.hp]).toEqual([P.damage, 0]);
+    expect(g.particles.some(p => p.ring !== undefined && p.r >= P.reach)).toBe(true);   // seen
+    const pinned = s => {
+      const at = [near.x, near.y];
+      for (let i = 0, n = ticks(g, s); i < n; i++) { g.update(g.FIXED_DT); [near.x, near.y] = at; }
+    };
+    pinned(b.time);
+    const hurt = 99 - near.hp;
+    expect(hurt).toBeGreaterThan(P.damage);                               // again each `every`
+    pinned(1);
+    expect(99 - near.hp).toBe(hurt);                                      // and not after its time
+  });
+
+  it('throws spines every way while Urchin runs, none of them the weapon\'s shot (D207)', () => {
+    const [g, b] = touched('Urchin');
+    const S = b.spines;
+    g.player.fireTimer = 999;
+    g.tally.marksman = 5;
+    for (let i = 0, n = ticks(g, S.every + 0.01); i < n; i++) g.update(g.FIXED_DT);
+    const spines = g.bullets.filter(x => !x.weapon);
+    expect(spines).toHaveLength(S.count);
+    const a = spines.map(x => Math.atan2(x.vy, x.vx)).sort((p, q) => p - q);
+    const gaps = a.map((x, i) => (i ? x - a[i - 1] : x + 2 * Math.PI - a.at(-1)));
+    expect(Math.max(...gaps)).toBeCloseTo(2 * Math.PI / S.count, 6);          // all the way round, evenly
+    for (let i = 0, n = ticks(g, S.range / S.speed + 0.1); i < n; i++) g.update(g.FIXED_DT);
+    expect(g.tally.marksman).toBe(5);                                          // a spine that misses is no miss
   });
 
   it('holds a boost\'s time while the game is paused', () => {
@@ -535,10 +544,9 @@ describe('boosts (D86)', () => {
 });
 
 describe('the mods themselves', () => {
-  it('are each body, comfort, or a weapon mod naming real weapons, under names of their own (D99)', () => {
+  it('are each body or comfort, none a weapon\'s own, under names of their own (D99, D208)', () => {
     const g = loadGame();
-    const scoped = m => m.scope === 'body' || m.scope === 'comfort' ||
-      m.scope === 'weapon' && m.weapons?.length > 0 && m.weapons.every(n => g.WEAPONS.some(w => w.name === n));
+    const scoped = m => m.scope === 'body' || m.scope === 'comfort';
     expect(g.MODS.filter(m => !scoped(m)).map(m => m.name)).toEqual([]);
     expect(new Set(g.MODS.map(m => m.name)).size).toBe(g.MODS.length);
   });

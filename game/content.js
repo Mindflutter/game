@@ -168,8 +168,6 @@ const MODS = [
     apply: p => p.dashDamage += 1 },
   { name: 'Mend',     scope: 'comfort', desc: '1 HP back each batch', max: 1,
     end: true, apply: p => p.mendOnClear = 1 },
-  { name: 'Barbs',    scope: 'weapon',  desc: 'harpoons go through one more', max: 3,
-    weapons: ['Harpoon'], apply: p => p.pierce += 1 },
 ];
 
 // Words a player reads, never the code's key. A check holds every stat a mod
@@ -195,10 +193,17 @@ const BOOSTS = [
   { name: 'Rush',   desc: 'you swim much faster',  time: 5, add: { speed: 200 } },
   { name: 'Frenzy', desc: 'you fire much faster',  swingDesc: 'you swing much faster',
     time: 5, percent: { fireRate: 100 } },
-  { name: 'Lance',  desc: 'your shots go through', weapons: ['Gun'],
-    time: 5, add: { pierce: 4 } },
   { name: 'Bloom',  desc: 'your shots splash',     swingDesc: 'your cuts splash',
     time: 6, add: { splash: 36 } },
+  // Of the diver's own, and two of effects their own (D207): `pulse` hurts
+  // every fish within `reach` px of the diver's body each `every` seconds;
+  // `spines` throws `count` of them evenly round it each `every` seconds,
+  // each its own shot, not the weapon's. Claude's picks.
+  { name: 'Surge',  desc: 'you dash again sooner', time: 6, percent: { dashCooldown: -60 } },
+  { name: 'Jolt',   desc: 'the water round you jolts', time: 5,
+    pulse: { every: 1, reach: 90, damage: 2 } },
+  { name: 'Urchin', desc: 'spines fly from you every way', time: 5,
+    spines: { every: 0.6, count: 12, damage: 1, speed: 420, range: 240, r: 4 } },
 ];
 
 // ---------- gear, attributes, challenges ----------
@@ -406,10 +411,8 @@ function held(m) {
   return (modCounts[m.name] || 0) + drops.filter(d => d.mod === m.name).length;
 }
 
-function fits(m) { return !m.weapons || m.weapons.includes(weaponName); }
-
 function carriable() {
-  return MODS.filter(m => !m.end && fits(m) && held(m) < m.max);
+  return MODS.filter(m => !m.end && held(m) < m.max);
 }
 
 // Every ordinary mod once before any comes again. `null` once all are capped,
@@ -430,7 +433,7 @@ function drawCarried() {
 const cardStep = m => (m.end ? 1 : END_STEP);
 
 function rollValuable() {
-  return drawDistinct(MODS.filter(m => fits(m) && held(m) + cardStep(m) <= m.max), 3);
+  return drawDistinct(MODS.filter(m => held(m) + cardStep(m) <= m.max), 3);
 }
 
 // ---------- key bindings ----------
@@ -665,15 +668,10 @@ const DEBUG_COUNTS = [
   ...BOOSTS.map(b => ({ name: b.name, col: 3, max: DEBUG_BOOST_MAX, tip: () => boostTip(b) })),
   ...WEAPONS.map(w => ({ name: w.name, max: w.tiers.length, of: true })),
 ];
-// A weapon mod or boost enters a dive only with a weapon it fits (D99); otherwise dim.
 const countRow = c => ({
   label: c.name,
   col: c.col,
   get value() { const n = debugSetup.counts[c.name] || 0; return c.of ? n + ' / ' + c.max : n; },
-  get dim() {
-    const m = [...MODS, ...BOOSTS].find(x => x.name === c.name);
-    return !!m?.weapons && !m.weapons.includes(debugSetup.weapon);
-  },
   get tip() { return c.tip(); },
   change: d => { debugSetup.counts[c.name] = wrapStep(debugSetup.counts[c.name] || 0, d, c.max); },
 });

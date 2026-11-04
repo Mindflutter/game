@@ -108,7 +108,7 @@ describe('challenge ladders (D109, D110)', () => {
     (g.placeEnemy('drifter', g.player.x + 60 + i * gap, g.player.y), Object.assign(g.enemies.at(-1), { hp: 1, maxHp: 1 })));
   const fire = (g, over = {}) => {
     const p = g.player;
-    g.bullets.push(Object.assign({ id: ++g.bulletId, x: p.x, y: p.y, r: p.shotRadius, vx: p.shotSpeed, vy: 0,
+    g.bullets.push(Object.assign({ id: ++g.bulletId, weapon: true, x: p.x, y: p.y, r: p.shotRadius, vx: p.shotSpeed, vy: 0,
                                    speed: p.shotSpeed, pierce: p.pierce, travelled: 0, maxTravel: p.range }, over));
     play(g, 1);
   };

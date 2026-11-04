@@ -6372,3 +6372,55 @@ weapon's own — kills while carrying it, at the least, paying points".
 a harpoon's the Harpoon's and not the Gun's, a miss starts the Gun's again,
 the one line and the carried weapon's alone in the bar; `tests/docs.test.js`
 — the rows and the count.
+
+## D207 — Boosts of new kinds · 2026-11-04
+
+Igor, of the boosts: "boosts can be generic, like a speed boost or a fire
+rate. or even environmental, like an explosion around the diver, or shots
+in every direction" (D194 (the list's seventh five answered)); the to-do,
+"two or three of Claude's".
+
+- **Surge**: the dash's cooldown 60% shorter for six seconds — the diver's
+  own number, a `percent`, as Rush is a number.
+- **Jolt**: once a second for five, every fish within 90 px of the diver's
+  body takes 2 and is knocked away, a ring showing the reach — a `pulse`.
+- **Urchin**: every 0.6 s for five, twelve spines evenly round the diver,
+  each 1 damage over 240 px — `spines`. Its own shots: no weapon's number,
+  no miss, no weapon's ladder.
+- **A boost may be an effect, not only numbers**: a `pulse` or `spines`
+  field switches on its branch in the boost clock. D86 (boosts) held a boost
+  to numbers added and taken back; an effect adds nothing, so nothing comes
+  back off. A `percent` may be of the diver's own number as well as of one
+  every weapon has (D125 (boosts keep each weapon's nature)).
+- Every number Claude's, a balance pass's to weigh; the draw is uniform, as
+  before. The bars, ten seeds, with D208 (Barbs and Lance removed) beside
+  it: the same six of eight hold; 25 batches stood through, from 30.
+
+**Guarded by** `tests/drops.test.js` — Jolt hurts what is in its reach and
+nothing beyond, again each second, never after its time; Urchin's spines go
+evenly all the way round and a miss of theirs breaks no streak; every
+boost's numbers on and off; `tests/docs.test.js` — the rows.
+
+## D208 — Barbs and Lance removed · 2026-11-04
+
+Igor: "Barbs and Lance are made generic or go away, your choice"; "i want
+mods and boosts to be uncoupled from weapons" (D188 (the list's first five
+answered), D189 (the list's second five answered)).
+
+- **Both go, not made weapon-free.** A weapon-free Lance — every shot
+  through more fish — would add to a weapon's own number, which D125
+  (boosts keep each weapon's nature) forbids an any-weapon boost, and would
+  hand every weapon the Harpoon's niche (`foundations.md` → the diversity
+  rule). Barbs is the Harpoon's number in the same way.
+- **The mechanism goes with them**: no mod or boost names `weapons`; `fits()`,
+  the debug mode's dim rows and the "only with" tips are gone; a mod's
+  `scope` is `body` or `comfort`. Supersedes D99 (weapon mods, and more
+  boosts)'s weapon mods and its weapon-own boosts.
+- The counts hold: six mods, six boosts once D207 (boosts of new kinds)'s
+  three came in first.
+- **The save is version 17**: a saved dive's Barbs and running Lance come off
+  the diver, and no Lance or Barbs is left on the floor or on a card.
+
+**Guarded by** `tests/save.test.js` — a v16 dive's Barbs and Lance taken
+back and gone; `tests/drops.test.js` — every mod body or comfort, every
+boost for every weapon.

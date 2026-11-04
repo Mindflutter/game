@@ -670,7 +670,7 @@ describe('the catalogue (D146)', () => {
   });
 
   it('takes a boost as it is first taken, not as it drops, and starts its line afresh once the last one faded', () => {
-    const g = diving('Rush', 'Frenzy', 'Bloom', 'Lance');
+    const g = diving(...loadGame().BOOSTS.map(b => b.name));
     g.metTime = 0;
     g.met = ['eel'];                           // an old line, gone
     g.arrive('drifter');

@@ -57,12 +57,13 @@ export function docTables(g = loadGame()) {
   const enemyCols = plain(g.ENEMY_TYPES);
   const gradeCols = Object.keys(g.GRADES[0]);
   const modCols = plain(g.MODS);
-  // A weapon mod is counted on the first weapon it fits (D99), the rest on the Gun.
-  const modBase = m => (m.weapons ? kit(g.WEAPONS.find(w => w.name === m.weapons[0])) : START);
   const boostCols = plain(g.BOOSTS);
   // `add` and `percent` are numbers, so they are read straight off the record (D86, D125).
-  const adds = b => [...Object.entries(b.add || {}).map(([k, v]) => k + ' ' + (v < 0 ? '-' : '+') + r3(Math.abs(v))),
-                     ...Object.entries(b.percent || {}).map(([k, v]) => k + ' +' + v + '%')].join(', ');
+  const sign = v => (v < 0 ? '-' : '+') + r3(Math.abs(v));
+  const adds = b => [...Object.entries(b.add || {}).map(([k, v]) => k + ' ' + sign(v)),
+                     ...Object.entries(b.percent || {}).map(([k, v]) => k + ' ' + sign(v) + '%'),
+                     ...(b.pulse ? ['every ' + b.pulse.every + 's, ' + b.pulse.damage + ' to each fish within ' + b.pulse.reach + ' px'] : []),
+                     ...(b.spines ? ['every ' + b.spines.every + 's, ' + b.spines.count + ' spines of ' + b.spines.damage + ' over ' + b.spines.range + ' px'] : [])].join(', ');
   const judged = c => ['clear', 'kill', 'dash', 'end', 'strike'].find(k => c[k]);
   const diverCols = Object.keys(g.PLAYER_START);
 
@@ -86,9 +87,9 @@ export function docTables(g = loadGame()) {
       g.ENEMY_TYPES.map(t => [t.name, ...t.threat])) },
     { doc: 'enemies.md', id: 'grades', text: table(['grade', ...gradeCols], g.GRADES.map((G, i) => [i + 1, ...gradeCols.map(c => G[c])])) },
     { doc: 'mods.md', id: 'mods', text: table([...modCols, 'per pick', 'at max'],
-      g.MODS.map(m => [...modCols.map(c => m[c]), moved([m.apply], true), moved(Array(m.max).fill(m.apply), false, modBase(m))])) },
-    { doc: 'boosts.md', id: 'boosts', text: table([...boostCols, 'for', 'adds'],
-      g.BOOSTS.map(b => [...boostCols.map(c => b[c]), (b.weapons || ['any']).join(', '), adds(b)])) },
+      g.MODS.map(m => [...modCols.map(c => m[c]), moved([m.apply], true), moved(Array(m.max).fill(m.apply), false, START)])) },
+    { doc: 'boosts.md', id: 'boosts', text: table([...boostCols, 'adds'],
+      g.BOOSTS.map(b => [...boostCols.map(c => b[c]), adds(b)])) },
     { doc: 'challenges.md', id: 'challenges', text: table(['name', 'judged', 'within', 'rungs', 'the first asks', 'the top asks'],
       g.CHALLENGES.map(c => [c.name, judged(c), c.within, c.rungs, c.ask(c.rungs[0]), c.ask(c.rungs.at(-1))])) },
     { doc: 'challenges.md', id: 'attributes', text: table(['name', 'a step adds'], g.ATTRIBUTES.map(a => [a.name, moved([a.apply], true)])) },

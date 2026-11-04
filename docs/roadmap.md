@@ -23,10 +23,6 @@ what waits on Igor's answer is `ideas.md` → To discuss.
 
 Small, concrete, each its own commit.
 
-- [ ] **Barbs and Lance**, made weapon-free or removed — Claude's choice —
-  since mods and boosts are not tied to weapons (D188 (the list's first
-  five answered)).
-
 ### 3. Feel
 
 What a dive feels like, each to play.
@@ -35,11 +31,6 @@ What a dive feels like, each to play.
 
 New things to meet and to earn, each to measure.
 
-- [ ] **Boosts of new kinds**, two or three of Claude's: the diver's own
-  numbers for a while, as Rush is, and effects of their own, an explosion
-  round the diver or shots every way — a field that switches on one branch,
-  where D86 (boosts) holds a boost to numbers (D194 (the list's seventh
-  five answered)).
 - [ ] **Mod caps removed, and measured** (`ideas.md` → Mod caps:
   removed?) — the glossary's "every mod has a cap" goes with it, if kept;
   `Mend` the last comfort mod, kin under the same "enough variety".

@@ -541,8 +541,8 @@ function swing(ux, uy) {
 
 // A shot's or a swing's damage. With Bloom running it wounds the fish beside
 // the struck one too (D125); a wound never splashes on, so a crowd cannot chain.
-function hit(e) {
-  if (wound(e) && e.hp > 0) sound('hit');
+function hit(e, n = player.damage) {
+  if (wound(e, n) && e.hp > 0) sound('hit');
   if (player.splash) splash(e.x, e.y, e.r, e);
 }
 
@@ -556,6 +556,31 @@ function splash(x, y, r, struck) {
     if (f === struck || f.gone) continue;
     const dx = f.x - x, dy = f.y - y, reach = r + f.r + player.splash;
     if (dx * dx + dy * dy < reach * reach) wound(f);
+  }
+}
+
+// Jolt's (D207): every fish within its reach of the diver's body, hurt and
+// knocked away, the ring showing how far.
+function jolt(P) {
+  particles.push({ x: player.x, y: player.y, vx: 0, vy: 0, life: SPLASH_SHOW, maxLife: SPLASH_SHOW,
+                   r: player.r + P.reach, ring: player.r, color: '#eaffff', glow: '#9ef7ff' });
+  for (const e of enemies) {
+    if (e.gone) continue;
+    const dx = e.x - player.x, dy = e.y - player.y, d = Math.sqrt(dx * dx + dy * dy), reach = player.r + e.r + P.reach;
+    if (d >= reach) continue;
+    knock(e, d ? dx / d : 1, d ? dy / d : 0);
+    wound(e, P.damage);
+  }
+}
+
+// Urchin's (D207): spines evenly round the diver, from a seeded turn.
+function throwSpines(S) {
+  const from = rng() * Math.PI * 2;
+  for (let i = 0; i < S.count; i++) {
+    const a = from + i * 2 * Math.PI / S.count;
+    bullets.push({ id: ++bulletId, x: player.x, y: player.y, r: S.r,
+                   vx: Math.cos(a) * S.speed, vy: Math.sin(a) * S.speed, speed: S.speed,
+                   pierce: 0, damage: S.damage, travelled: 0, maxTravel: S.range });
   }
 }
 
@@ -644,7 +669,7 @@ function killEnemy(e) {
   // you as the current carried you on. Between waves the fight goes on (D115).
   sinceBoost += 1;
   if ((enemies.some(x => !x.gone) || incoming.length) && rng() < BOOST_C * sinceBoost) {
-    drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS.filter(fits), 1)[0].name, life: BOOST_LIFE });
+    drops.push({ x: e.x, y: e.y, r: 6, boost: drawDistinct(BOOSTS, 1)[0].name, life: BOOST_LIFE });
     sinceBoost = 0;
   }
   burst(e.x, e.y, e.color, e.glow, 12 + e.maxHp * 2, 170 + e.maxHp * 14, 0.5);
@@ -1025,16 +1050,11 @@ function stepTip(a) {
          by.map(g => '   owning the ' + g.name + ' needs ' + g.requires[a.name]).join('');
 }
 function modTip(m) {
-  const only = m.weapons && ' the ' + m.weapons.join(' or the ');
-  return m.name + ': ' + m.desc + ' \u2014 ' +
-         moves(m.apply, m.weapons ? WEAPONS.find(w => w.name === m.weapons[0]) : undefined) +
-         ' a pick, up to ' + m.max +
-         (!only ? '' : m.weapons.includes(debugSetup.weapon) ? '   with' + only + ' only' : '   carry' + only + ' to take it') +
+  return m.name + ': ' + m.desc + ' \u2014 ' + moves(m.apply) + ' a pick, up to ' + m.max +
          (m.end ? "   a layer end's own" : '');
 }
 function boostTip(b) {
-  return b.name + ': ' + b.desc + ' for ' + b.time + 's, laid on the floor beside you at the start' +
-         (b.weapons ? '   with the ' + b.weapons.join(' or the ') + ' only' : '');
+  return b.name + ': ' + b.desc + ' for ' + b.time + 's, laid on the floor beside you at the start';
 }
 function weaponTip(w) {
   return w.name + ': ' + Object.entries(shotOf(w)).map(([k, v]) => k + ' ' + v).join(' \u00b7 ') + needsLine(w);
@@ -1056,9 +1076,7 @@ function debugDive() {
   damageOverride = s.oneShot ? ONE_SHOT : 0;
   startScenario({
     batch: drawn => drawn.findIndex(e => e.layer === s.layer) + s.gate,
-    // A weapon mod only with a weapon it fits (D99).
-    kit: MODS.filter(m => !m.weapons || m.weapons.includes(weapon.name))
-             .flatMap(m => Array(n(m.name)).fill(m.name)),
+    kit: MODS.flatMap(m => Array(n(m.name)).fill(m.name)),
   }, s.seed);
   // The gate's whole place, escorts included (D116).
   const fish = setupFish(s);
@@ -1068,7 +1086,7 @@ function debugDive() {
   if (s.grade > 1) plan = plan.map(p => ({ ...p, batch: graded(p.batch), escorts: graded(p.escorts) }));
   // The boosts on the floor in a row beside the diver, to be touched when
   // wanted (D198): a boost alone, play-tested.
-  BOOSTS.filter(fits).flatMap(b => Array(n(b.name)).fill(b.name)).forEach((name, i) =>
+  BOOSTS.flatMap(b => Array(n(b.name)).fill(b.name)).forEach((name, i) =>
     drops.push({ x: player.x + 80 + 36 * i, y: player.y - 60, r: 6, boost: name, life: BOOST_LIFE }));
 }
 
@@ -1281,6 +1299,11 @@ function step(dt) {
   if (metTime > 0) metTime -= dt;
   // Boosts run on play's clock: every other screen returns above (D86).
   for (const a of boosts) {
+    const b = BOOSTS.find(x => x.name === a.name), E = b.pulse || b.spines;
+    if (E && (a.since = (a.since || 0) + dt) >= E.every) {
+      a.since -= E.every;
+      (b.pulse ? jolt : throwSpines)(E);
+    }
     a.left -= dt;
     if (a.left > 0) continue;
     for (const k in a.add) player[k] -= a.add[k];
@@ -1430,7 +1453,7 @@ function step(dt) {
     const d = Math.hypot(tx, ty) || 1;   // || 1: cursor exactly on the player
     if (player.swing) swing(tx / d, ty / d);
     else bullets.push({
-      id: ++bulletId,
+      id: ++bulletId, weapon: true,
       x: player.x, y: player.y, r: player.shotRadius,
       vx: (tx / d) * player.shotSpeed,
       vy: (ty / d) * player.shotSpeed,
@@ -1504,7 +1527,7 @@ function step(dt) {
       b.gone = true;
       // A shot that struck nothing splashes where its range ends (D203), and
       // is a miss (D206).
-      if (!b.evil && !b.struck) {
+      if (b.weapon && !b.struck) {
         tally.marksman = 0;
         if (player.splash) splash(b.x, b.y, 0);
       }
@@ -1529,8 +1552,8 @@ function step(dt) {
         knock(e, b.vx / b.speed, b.vy / b.speed);
         hitSparks(e, b);
         const before = kills;
-        hit(e);
-        if (kills > before) struck(b.kills = (b.kills || 0) + kills - before);
+        hit(e, b.damage);
+        if (kills > before && b.weapon) struck(b.kills = (b.kills || 0) + kills - before);
         if (b.pierce > 0) { b.pierce -= 1; }
         else { b.gone = true; break; }
       }
